@@ -36,6 +36,13 @@ Jacobians/
 │   ├── ComplexTorus.lean        (AbelianVariety τ, all 7 instances)
 │   └── Theta.lean               (Riemann theta series, convergence, quasi-periodicity)
 │
+├── ProjectiveCurve/             ─── Track 2: concrete projective-curve models
+│   ├── Charts.lean              (implicit-function-theorem utilities for zero loci)
+│   ├── Line.lean                (ProjectiveLine = ℙ¹(ℂ), genus 0)
+│   ├── Elliptic.lean            (curves in Weierstrass form; genus 1)
+│   ├── Hyperelliptic.lean       (y² = f(x), explicit atlas, explicit 1-forms, explicit periods)
+│   └── PlaneCurve.lean          (smooth homogeneous F ∈ ℂ[x,y,z]_d; Plücker genus)
+│
 ├── RiemannSurface/              ─── Part B: Riemann-surface-specific constructions
 │   ├── OneForm.lean             (HolomorphicOneForm X, ℂ-vector-space)
 │   ├── PathIntegral.lean        (line integration of holo 1-forms along smooth paths)
@@ -61,8 +68,10 @@ Jacobians/
 
 Design principles:
 - Part A has **zero Riemann-surface dependence**. It's a reusable abelian-varieties-via-theta library, independently Mathlib-contributable.
-- Part B depends on Mathlib (no differential forms on manifolds, per Phase B) plus `Axioms/`.
+- **Track 2** (`ProjectiveCurve/`) populates the space of concrete examples. Every type here satisfies Buzzard's typeclass constraints by construction (no appeal to Riemann existence). Track 2 depends on Part A (to use `AbelianVariety` for the Jacobian side), not on Part B.
+- Part B depends on Mathlib (no differential forms on manifolds, per Phase B) plus `Axioms/`. Part B is what handles the *abstract* `X` side of Buzzard's challenge.
 - `Jacobian/` is pure glue: take `τ(X)` from Part B, feed to Part A, get all instances for free.
+- Track 2 closes Buzzard's sorries for every `X` that happens to be one of the explicit projective-curve types. It does not close them for an arbitrary abstract `X` — that's Part B's job.
 
 ---
 
@@ -146,6 +155,99 @@ Key lemmas (all standard in Mumford Vol I §I.1 for g=1, §II.1 for general g):
 **Note.** Strictly, the 22 sorries in Challenge.lean don't require the theta series itself — the quotient `ℂ^g / Λ` already gives all 7 instances. Theta enters only if we want to prove the existence of sections of line bundles on the Jacobian (projective embedding), which is outside the challenge. So `Theta.lean` is optional from the perspective of the 22 sorries, but it is what unlocks the algebraic-geometric bridges and the broader Mumford programme, so we formalize it.
 
 Difficulty: **Medium** (straightforward but detail-heavy series manipulations). **~2 weeks** for the core four lemmas above.
+
+---
+
+## 3.5 Track 2 — Concrete projective-curve constructions
+
+Track 1 (Parts A + B) constructs `Jacobian X` for an arbitrary `X` satisfying Buzzard's typeclass constraints. **Track 2** runs in parallel: it populates the space of examples with explicit projective curves for which every instance is discharged by construction and every axiom in §7 is provable directly. Track 2 is not logically necessary for closing the 22 sorries on abstract `X`, but it gives us:
+
+- a rich concrete population of `X`'s against which to test the abstract machinery,
+- **proofs** (not axioms) of the §7 axioms for every `X` in that population,
+- tractable, bounded targets for math-market / autonomous agents,
+- a v0.1 showcase artifact independent of any deferred Riemann-existence bridge.
+
+What Track 2 does *not* do: prove that every abstract `X` satisfying Buzzard's constraints is biholomorphic to one of these explicit models. That is Riemann's existence theorem / Chow's theorem, deferred as `AX_RiemannExistence` if/when formalized. Without that bridge, Track 2 closes Buzzard's sorries only for `X` that are of one of the explicit types below; Part B remains the path that closes them for arbitrary `X`.
+
+### 3.5.1 `ProjectiveCurve/Line.lean`
+
+```
+def ProjectiveLine : Type := ℙ¹(ℂ)
+```
+
+Two standard charts `U₀ = {[z : 1]}` and `U₁ = {[1 : w]}`, transition `w = 1/z` on the overlap. Discharges all seven Buzzard instances explicitly.
+
+Key facts:
+- `HolomorphicOneForm ProjectiveLine` is the zero module (`ω_{ℙ¹} ≅ 𝒪(-2)` has no global sections). ⇒ `genus ProjectiveLine = 0`.
+- `Jacobian ProjectiveLine` is a point (`g = 0` ⇒ lattice of rank 0 ⇒ ℂ^0 / 0 = pt).
+- Explicit biholomorphism `ProjectiveLine ≃ Metric.sphere 1 ⊂ ℝ³` via stereographic projection. Closes the `⇐` direction of `genus_eq_zero_iff_homeo` concretely.
+
+Difficulty: **Easy**. ~3 days.
+
+### 3.5.2 `ProjectiveCurve/Elliptic.lean`
+
+Built on Mathlib's `EllipticCurve` (Weierstrass form `y² = x³ + ax + b`). Charts: the affine open `z ≠ 0` in `ℙ²` plus a chart near the point at infinity via the standard change of variable.
+
+Key facts:
+- Genus 1.
+- `HolomorphicOneForm` is 1-dim, spanned by `dx / y` on the affine chart (extended across infinity by the usual change-of-variable check).
+- Period lattice `Λ ⊂ ℂ` via `ω_i = ∫_{γ_i} dx/y` for two generators `γ_1, γ_2` of `H_1(E, ℤ)`.
+- Self-duality: `Jacobian E ≃ E` (as complex manifolds). Identifies the Abel-Jacobi map with the identity up to translation.
+
+Difficulty: **Medium** — mostly reuses Mathlib's elliptic-curve infrastructure. ~2 weeks.
+
+### 3.5.3 `ProjectiveCurve/Hyperelliptic.lean`
+
+The workhorse. For `g ≥ 1` and squarefree `f : Polynomial ℂ` of degree `2g+1` or `2g+2`, define `HyperellipticCurve g f` as the smooth projective model of `y² = f(x)`.
+
+Atlas: two affine patches glued along their common open. Patch A: `{(x, y) ∈ ℂ² : y² = f(x)}`. Patch B: `{(u, v) ∈ ℂ² : v² = u^{2g+2} · f(1/u)}` (or `u^{2g+1}·u·f(1/u)` in the odd-degree case, i.e., one branch point at infinity). Transition `(x, y) ↔ (1/u, v/u^{g+1})` on the overlap. Smoothness follows from squarefreeness of `f`.
+
+Key facts:
+- Genus = `g` (explicit basis of `HolomorphicOneForm`).
+- **Explicit basis of `HolomorphicOneForm`:** `ω_k := x^k dx / y` for `k = 0, …, g-1`. The check of regularity at infinity uses the change of coordinates on the overlap.
+- **Explicit period matrix:** with appropriate cycles `α_i, β_i` surrounding pairs of branch points, `τ[i, j] = (∫_{β_j} ω_i)/(∫_{α_j} ω_i)` after normalization. Each integral is a real one-variable improper integral of a rational function times `1/√f`, computable in Mathlib via `intervalIntegral` + residues.
+- **Riemann bilinear relations** become residue calculus on the explicit model — this is `AX_RiemannBilinear` discharged, not axiomatized, in the hyperelliptic case.
+- **`AX_FiniteDimOneForms` discharged** similarly: the `g` forms above span, and any holomorphic `ω` is written as `p(x, y) dx/y` with `p` polynomial bounded by adjunction; reduces to a polynomial-degree argument.
+- **`AX_DegreeIndependence`** for maps between hyperelliptic curves follows from an explicit computation on coordinates.
+
+This is where most of the Mumford Vol II §IIIa.1–5 material lives.
+
+Difficulty: **Medium-hard** (real content, but concrete at every step). ~4 weeks.
+
+### 3.5.4 `ProjectiveCurve/PlaneCurve.lean`
+
+For homogeneous `F : HomogeneousPoly ℂ[x, y, z] d` with `d ≥ 3` and non-vanishing gradient on `{F = 0}`, define `SmoothPlaneCurve F := { [x:y:z] ∈ ℙ²(ℂ) : F(x, y, z) = 0 }`.
+
+Three standard affine charts from `ℙ² = U_x ∪ U_y ∪ U_z`. On each `U_i`, the zero locus is an affine curve; by the implicit function theorem applied at any point where `∂F/∂x_j ≠ 0` for some `j ≠ i`, the curve is locally parametrized by the remaining coordinate. Holomorphicity of transitions is automatic from the algebraic defining data.
+
+Key facts:
+- **Genus by Plücker**: `g = (d-1)(d-2)/2`. Initially axiomatize (`AX_PluckerFormula`); prove later via adjunction.
+- **Explicit `HolomorphicOneForm` basis by Poincaré residue**: for degree-`d` plane curves, a basis is `(polynomial in x, y of degree ≤ d-3) · (dx / ∂F/∂y)` restricted to the curve. Spanning is the adjunction formula.
+- Covers many practically important cases: quartic plane curves (genus 3), quintics (genus 6), etc.
+
+Difficulty: **Hard** (the implicit-function-theorem chart construction is fiddly; initial axiomatization of Plücker; explicit period-matrix computation nontrivial beyond hyperelliptic). ~6 weeks.
+
+### 3.5.5 `ProjectiveCurve/Charts.lean`
+
+Shared machinery:
+- `implicitFunctionChart (f : analytic) (hrank : ...)` returns a `PartialHomeomorph` between a neighborhood in the zero locus of `f` and an open in `ℂ`.
+- `PartialHomeomorph` constructors for zero-locus atlases on open subsets of `ℙ^n`.
+- Proofs that compositions of projective and affine-chart changes restricted to the curve are holomorphic.
+
+Most is wrappers around Mathlib's `Mathlib.Analysis.Calculus.ImplicitFunction` specialized to the 1-dim case. Difficulty: **Medium**. ~1–2 weeks.
+
+### Track 2 payoff: which axioms become proofs
+
+| Axiom | On abstract `X` | On `HyperellipticCurve g f` |
+|-------|-----------------|-----------------------------|
+| `AX_FiniteDimOneForms` | Hard (needs compactness + normal families) | **Proved** — explicit basis |
+| `AX_RiemannBilinear` | Medium (integration by parts) | **Proved** — residue calculus on model |
+| `AX_DegreeIndependence` | Medium | **Proved** — explicit coordinate computation |
+| `AX_H1FreeRank2g` | Medium (CW topology) | **Proved** — standard `α_i, β_i` basis explicit |
+| `AX_AbelTheorem` | Very hard (needs Riemann theta divisor) | **Likely provable directly** via residue calculus + principal-divisor argument, in hyperelliptic case |
+| `AX_Uniformization0` | Hard (complex analysis) | **Proved** — `ProjectiveLine` is the explicit genus-0 case |
+
+**Recommended ordering: Track 2 *before* finishing Part B.** After Part A (§§3.1–3.3) is done, do §3.5.1 (ProjectiveLine) and §3.5.3 (Hyperelliptic) *immediately*. On a hyperelliptic curve every Buzzard-side quantity — genus, 1-forms, period matrix, Abel-Jacobi map, pushforward/pullback under a covering `HyperellipticCurve g f → ProjectiveLine` — is computable in closed form. Use these computations as **sanity-check targets** when writing the abstract `HolomorphicOneForm` and `pathIntegral` in Part B: when the abstract machinery reproduces the concrete hyperelliptic answers, you've validated it.
 
 ---
 
@@ -406,6 +508,8 @@ We tag certain deep facts as named axioms initially — this lets downstream dev
 ## 8. Dependency graph (critical path to closing 22 sorries)
 
 ```
+Track 1 (abstract X):
+
 Lattice → Siegel → ComplexTorus ─────────┐
                                           ├─→ Construction ─→ AbelJacobi ─→ Abel* ──┐
 OneForm → PathIntegral ─→ Homology ──┐   │                                          │
@@ -417,12 +521,24 @@ Genus (via dim of OneForm) ───────────┤   │           
                                                                                     │
 Axioms/Uniformization0 ─→ Genus0 ──────────────────────────────────────────────────┘
                                                                                     
-                                                                                    └→ all 22 sorries closed
+                                                                                    └→ all 22 sorries closed for abstract X
+
+
+Track 2 (concrete X from projective embedding; depends on Part A only):
+
+Lattice → Siegel → ComplexTorus ──────────────┐
+                                                ├─→ 22 sorries closed for these concrete X:
+ProjectiveCurve/Charts.lean ─┬─→ Line.lean ─────┤       ProjectiveLine, EllipticCurve-from-Weierstrass,
+                             ├─→ Elliptic.lean ──┤      HyperellipticCurve g f, SmoothPlaneCurve F
+                             ├─→ Hyperelliptic ──┤
+                             └─→ PlaneCurve ─────┘   (AX_* discharged explicitly on these types)
 ```
 
 Asterisks = axiomatizable without breaking downstream work.
 
-Minimum viable build: Parts A.1–A.3 + B.1–B.5 + Jacobian/Construction.lean — closes the 7 instance sorries + `genus`.
+**Track 1 minimum viable build**: Parts A.1–A.3 + B.1–B.5 + Jacobian/Construction.lean — closes the 7 instance sorries + `genus` on abstract `X`.
+
+**Track 2 minimum viable build**: Parts A.1–A.3 + ProjectiveCurve/{Charts, Line, Hyperelliptic} — closes **all** 22 sorries concretely on those types, with axioms discharged. Shippable independent of Part B.
 
 After that, sorries fall in rough order of increasing difficulty:
 1. `genus_eq_zero_iff_homeo` (⇐ direction), `ofCurve_self`
@@ -438,6 +554,8 @@ After that, sorries fall in rough order of increasing difficulty:
 
 Assumes a mix of Claude Code + human steering; costs multiplied by ~2 for full AI-autonomous.
 
+Track 1 and Track 2 run largely in parallel after Part A is done.
+
 | Phase | Content | Est |
 |-------|---------|-----|
 | A0 | Scaffold already done | — |
@@ -446,19 +564,24 @@ Assumes a mix of Claude Code + human steering; costs multiplied by ~2 for full A
 | A3 | `ComplexTorus.lean` — all 7 instances | 2–3 weeks |
 | A4 | `Theta.lean` — convergence + quasi-periodicity (optional for sorries) | 2 weeks |
 | **A milestone** | **Part A standalone build, PR-able as Mathlib contribution** | **~5 weeks** |
+| T1 | `ProjectiveCurve/Charts.lean` + `Line.lean` | 1–2 weeks |
+| T2 | `ProjectiveCurve/Elliptic.lean` (leverages Mathlib) | 2 weeks |
+| T3 | `ProjectiveCurve/Hyperelliptic.lean` — explicit atlas, 1-forms, period matrix, AX-discharges | 4 weeks |
+| T4 | `ProjectiveCurve/PlaneCurve.lean` — implicit-function atlas, Poincaré residue basis | 6 weeks |
+| **T milestone** | **22 sorries closed concretely on ProjectiveLine, Elliptic, Hyperelliptic; AX_\* proved on these** | **~8–10 weeks, concurrent with B** |
 | B1 | `OneForm.lean` | 1–2 weeks |
 | B2 | `PathIntegral.lean` — this is the hard one | 3–6 weeks |
 | B3 | `Homology.lean` | 1 week |
 | B4 | `Periods.lean` (axiomatize bilinear relations) | 1–2 weeks |
 | B5 | `Genus.lean` | 3 days |
-| **B milestone** | **`Jacobian X` defined and 7 instances close automatically** | **~9 weeks after A done** |
+| **B milestone** | **`Jacobian X` defined and 7 instances close automatically on abstract X** | **~9 weeks after A done** |
 | C1 | `AbelJacobi.lean`, `Functoriality.lean` | 3–4 weeks |
 | C2 | `PushPull.lean` | 2 weeks |
 | C3 | `Genus0/Uniformization.lean` (⇐ direction) | 2 weeks |
 | C4 | `Abel.lean` (axiomatize first) | 1 week to set up, months to discharge |
-| **C milestone (challenge v0.2 closed modulo axioms)** | **~7 weeks after B done** |
+| **C milestone (Track 1 challenge v0.2 closed modulo axioms)** | **~7 weeks after B done** |
 
-Total to "closed modulo axioms": **~5 months**, conservatively. To "zero axioms": significantly longer (12+ months), dominated by Abel's theorem via theta divisor + uniformization for genus 0.
+Total to "Track 1 closed modulo axioms": **~5 months**. Track 2 comes out in **~3 months** (A + T in parallel) and has fewer axioms (most are discharged directly on the explicit curves). To "zero axioms on abstract X": significantly longer (12+ months), dominated by Abel's theorem via theta divisor + uniformization for genus 0.
 
 ---
 
@@ -485,12 +608,27 @@ These are not on the critical path but raise the confidence / impact of the proj
 
 ## 12. What we ship at v0.1
 
-First milestone, aimed at publication / community signal:
-1. Parts A.1–A.4 — complete standalone `AbelianVarieties` library, no sorries (except optional Theta.lean lemmas).
-2. Definitions in Part B, signatures in place, `Axioms/` set up.
-3. `Jacobian X` defined; 7 instance sorries closed.
-4. `ofCurve` defined; `ofCurve_self` proved.
-5. Genus-1 special case worked out explicitly as an example file.
-6. CI green.
+First milestone, aimed at publication / community signal. Shipped as **Track 2 + Part A + stubs for Track 1**:
 
-This is a legitimate artifact to announce back on Lean Zulip, with honest caveats about what's axiomatized.
+1. Parts A.1–A.4 — complete standalone `AbelianVarieties` library (no sorries except optional `Theta.lean` lemmas).
+2. `ProjectiveCurve/Line.lean`, `Elliptic.lean`, `Hyperelliptic.lean` — concrete projective curves satisfying all of Buzzard's typeclass constraints.
+3. **All 22 sorries closed on `ProjectiveLine`, on genus-1 `EllipticCurve` examples, and on `HyperellipticCurve g f` for every squarefree `f`.**
+4. Explicit period-matrix computations on those curves, with `AX_RiemannBilinear`, `AX_FiniteDimOneForms`, `AX_DegreeIndependence` **proved**, not axiomatized, on these models.
+5. Definitions in Part B (`HolomorphicOneForm`, `pathIntegral`, `H_1`, `Jacobian X`) with signatures in place and explicit stubs; `Axioms/` directory populated with the seven named axioms.
+6. Worked example: explicit `pushforward_pullback` identity verified on a genus-2 hyperelliptic curve mapping to `ℙ¹`.
+7. CI green.
+
+This is a substantive, defensible artifact to announce back on `#Autoformalization` with honest caveats: the 22 sorries are closed on *a rich concrete population of compact Riemann surfaces*, not on every abstract `X`; closing the abstract case is Part B + discharging the named axioms on abstract `X`, which is work in progress. Track 2 is what most practitioners will actually want to use.
+
+## v0.2 target
+
+1. Part B complete — `Jacobian X` for abstract `X` works, 7 instance sorries closed on abstract `X`.
+2. Axioms `AX_FiniteDimOneForms`, `AX_RiemannBilinear`, `AX_H1FreeRank2g` documented and their *statements* match Track 2 proofs exactly (a "these are the same theorem" cross-check).
+3. Functoriality (`pushforward`, `pullback`, `pushforward_pullback`) closed on abstract `X` modulo `AX_DegreeIndependence`.
+4. `genus_eq_zero_iff_homeo` (⇐ direction) closed; (⇒) depends on `AX_Uniformization0`.
+
+## v0.3 target
+
+1. `AX_AbelTheorem` discharged via Riemann theta divisor on abstract `X` (needs `Theta.lean` fully in place).
+2. `AX_Uniformization0` discharged.
+3. `AX_RiemannExistence` — the bridge from abstract `X` to a projective model — attempted as a separate effort; if successful, Track 2 results transfer to abstract `X` automatically.
