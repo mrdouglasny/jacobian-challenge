@@ -1,4 +1,6 @@
-# Plan
+# Plan (high-level)
+
+> **Note.** For the detailed module-level formalization plan (architecture, per-module declarations, dependency graph, phase time-budget, axiomatization strategy), see [`formalization-plan.md`](formalization-plan.md). The roadmap below is the original exploratory Phase A–E outline, preserved for continuity.
 
 ## Phase A — Get it building
 
