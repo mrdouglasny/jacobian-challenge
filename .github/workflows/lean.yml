@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o elan-init.sh
+          chmod +x elan-init.sh
+          ./elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Cache Mathlib build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .lake/packages
+            .lake/build
+          key: lake-${{ hashFiles('lake-manifest.json', 'lakefile.toml', 'lean-toolchain') }}
+          restore-keys: |
+            lake-
+
+      - name: lake update
+        run: lake update
+
+      - name: Fetch Mathlib oleans
+        run: lake exe cache get || true
+
+      - name: lake build
+        run: lake build
+
+      - name: Report sorry inventory
+        if: always()
+        run: |
+          echo "### Sorry inventory" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -rn "sorry" Jacobians/ || echo "(no sorries found)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
