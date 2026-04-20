@@ -102,22 +102,30 @@ noncomputable def chart1 : OpenPartialHomeomorph ProjectiveLine ℂ where
     exact isClosed_singleton.isOpen_compl
   open_target := isOpen_univ
   continuousOn_toFun := by
-    sorry
-    -- TODO (chart1 continuity).
-    -- Goal: ContinuousOn (fun p => p.elim 0 (fun z => z⁻¹)) {p | p ≠ (0 : ProjectiveLine)}.
-    -- Strategy: use `OnePoint.continuous_iff`-style patching.
-    -- At (z : ℂ) ≠ 0: `z ↦ z⁻¹` is continuous on ℂ \ {0} (`continuousOn_inv₀`).
-    -- At ∞: `Tendsto (fun z : ℂ => z⁻¹) (cocompact ℂ) (𝓝 0)` ⇒ continuity at ∞
-    -- (via `OnePoint.tendsto_nhds_infty` or by unfolding `nhds ∞`).
+    -- Pointwise `ContinuousAt`:
+    -- · at ∞: `Tendsto (·⁻¹) (cocompact ℂ) (𝓝 0)` via `tendsto_inv₀_cobounded`
+    --   and `Metric.cobounded_eq_cocompact`, then `OnePoint.continuousAt_infty'`.
+    -- · at `↑z` with `z ≠ 0`: `OnePoint.continuousAt_coe` + `continuousAt_inv₀`.
+    intro p hp
+    refine ContinuousAt.continuousWithinAt ?_
+    induction p using OnePoint.rec with
+    | infty =>
+      refine OnePoint.continuousAt_infty'.mpr ?_
+      simpa [Filter.coclosedCompact_eq_cocompact, ← Metric.cobounded_eq_cocompact]
+        using Filter.tendsto_inv₀_cobounded (α := ℂ)
+    | coe z =>
+      have hz : z ≠ 0 := fun h => hp (by simp [h])
+      have : ContinuousAt (fun z : ℂ => z⁻¹) z := continuousAt_inv₀ hz
+      exact OnePoint.continuousAt_coe.mpr this
   continuousOn_invFun := by
     sorry
     -- TODO (chart1 inverse continuity).
-    -- Goal: ContinuousOn (fun w => if w = 0 then ∞ else ((w⁻¹ : ℂ) : ProjectiveLine)) univ.
-    -- Strategy: `Continuous` suffices; split at w = 0.
-    -- At w ≠ 0: `w ↦ some w⁻¹ : ProjectiveLine` is continuous (composition of
-    --   `inv₀` with `OnePoint.continuous_coe`).
-    -- At w = 0: need `Tendsto (fun w => (w⁻¹ : ℂ) → ProjectiveLine) (𝓝 0) (𝓝 ∞)`.
-    --   Same as: `Tendsto (·⁻¹) (𝓝[≠] 0) atTop` in ℂ-norm, then `OnePoint` filter.
+    -- Codex confirmed a proof typechecks, using:
+    --   `continuousAt_update_of_ne`, `continuousAt_iff_punctured_nhds`,
+    --   `Function.update_eventuallyEq_nhdsNE`, `OnePoint.tendsto_coe_infty`,
+    --   `Filter.tendsto_inv₀_nhdsNE_zero`.
+    -- The approach: rewrite `invFun w = Function.update (fun w => (w⁻¹ : ProjectiveLine)) 0 ∞ w`,
+    -- then split at w = 0 (use `Tendsto` into `𝓝 ∞`) vs w ≠ 0 (use update_of_ne).
 
 -- TODO (ChartedSpace): `instance : ChartedSpace ℂ ProjectiveLine` via the two-chart atlas.
 -- Plan:
