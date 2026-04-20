@@ -6,9 +6,11 @@ Not yet verified. Phase A task: `lake update && lake build`.
 
 ## Sorry inventory
 
-All 22 sorries in `Jacobians/Challenge.lean` are as originally stated by Buzzard (v0.2). None filled.
+All 24 sorries in `Jacobians/Challenge.lean` are as originally stated by Buzzard (v0.2). None filled.
 
-### Data sorries (8)
+(The early scaffold commits and initial docs mistakenly said 22; verified by `grep -c 'sorry' Jacobians/Challenge.lean` on 2026-04-20 — actual count is 24.)
+
+### Data sorries (9)
 
 | Symbol | Line | Kind |
 |--------|------|------|
@@ -31,7 +33,7 @@ All 22 sorries in `Jacobians/Challenge.lean` are as originally stated by Buzzard
 | `IsManifold (..) ω (Jacobian X)` | 83 |
 | `LieAddGroup (..) ω (Jacobian X)` | 86 |
 
-### Theorem sorries (10)
+### Theorem sorries (11)
 
 | Symbol | Line |
 |--------|------|

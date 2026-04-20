@@ -1,6 +1,6 @@
 # Detailed formalization plan
 
-**Target.** Close all 22 sorries in `Jacobians/Challenge.lean` (Buzzard's Jacobian Challenge v0.2), pinned to Mathlib commit `8e3c989104daaa052921bf43de9eef0e1ac9fbf5`.
+**Target.** Close all 24 sorries in `Jacobians/Challenge.lean` (Buzzard's Jacobian Challenge v0.2), pinned to Mathlib commit `8e3c989104daaa052921bf43de9eef0e1ac9fbf5`.
 
 **Chosen strategy.** Period-lattice construction, **basis-free at the type level**. The Jacobian is defined as `(HolomorphicOneForm X →ₗ[ℂ] ℂ) ⧸ periodImage(X)` — a quotient of the dual of holomorphic 1-forms by the image of `H_1(X, ℤ)` under integration. The Siegel period matrix `τ(X) ∈ 𝔥_g` is a *theorem* about this Jacobian (after choosing a basis), not its definitional foundation. Everything Buzzard asks of `Jacobian X` (`AddCommGroup`, `TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace (Fin (genus X) → ℂ)`, `IsManifold 𝓘(ℂ) ω`, `LieAddGroup`) reduces to one general lemma: *any full-rank discrete additive subgroup of a finite-dimensional ℂ-vector space gives a compact complex Lie group as its quotient*.
 
@@ -18,7 +18,7 @@ What each reference contributes to the plan:
 - **Mumford Vol I, Ch. II §1**: several-variables theta `ϑ(z, Ω)` on `ℂ^g × 𝔥_g`. Convergence and quasi-periodicity generalize I §1 essentially line-by-line.
 - **Mumford Vol I, Ch. II §2**: the Jacobian of a compact Riemann surface via period integrals of a normalized basis of holomorphic 1-forms. **Primary blueprint for Part B.**
 - **Mumford Vol I, Ch. II §3**: `ϑ` and function theory on a compact Riemann surface — Abel-Jacobi, Abel's theorem (`ofCurve_inj`), Riemann's theorem on the theta divisor. Closes the payload theorems.
-- **Mumford Vol I, Ch. II §4 + Appendix**: Siegel symplectic geometry — `Sp(2g, ℤ)`-action, generators, fundamental domain. Needed for dual / polarization; not on critical path for the 22 sorries.
+- **Mumford Vol I, Ch. II §4 + Appendix**: Siegel symplectic geometry — `Sp(2g, ℤ)`-action, generators, fundamental domain. Needed for dual / polarization; not on critical path for the 24 sorries.
 - **Mumford Vol II, Ch. IIIa §5**: explicit hyperelliptic bridge between the analytic and algebraic Jacobians. Not needed to close the sorries, but the right optional cross-check (see §9 below).
 - **Milne JV §§1–2**: functorial characterization of `J(C)` via `Pic⁰`; Abel-Jacobi as the "canonical map". Algebraic perspective; we don't formalize this definition but the theorems are the same, and it's the right sanity check.
 - **Milne AV**: `Pic⁰`, dual abelian variety, Rosati involution, pairings. Structural vocabulary for `pushforward` / `pullback` functoriality.
@@ -171,7 +171,7 @@ Key lemmas (all standard in Mumford Vol I §I.1 for g=1, §II.1 for general g):
 - `RiemannTheta.quasi_periodic`: `ϑ(z + m + τ·n, τ) = exp(-π i n^T τ n - 2π i n^T z) · ϑ(z, τ)` for `m, n ∈ ℤ^g`.
 - `RiemannTheta.heat_equation` (Vol I §I.2): the PDE satisfied by `ϑ`.
 
-**Note.** Strictly, the 22 sorries in Challenge.lean don't require the theta series itself — the quotient `ℂ^g / Λ` already gives all 7 instances. Theta enters only if we want to prove the existence of sections of line bundles on the Jacobian (projective embedding), which is outside the challenge. So `Theta.lean` is optional from the perspective of the 22 sorries, but it is what unlocks the algebraic-geometric bridges and the broader Mumford programme, so we formalize it.
+**Note.** Strictly, the 24 sorries in Challenge.lean don't require the theta series itself — the quotient `ℂ^g / Λ` already gives all 7 instances. Theta enters only if we want to prove the existence of sections of line bundles on the Jacobian (projective embedding), which is outside the challenge. So `Theta.lean` is optional from the perspective of the 24 sorries, but it is what unlocks the algebraic-geometric bridges and the broader Mumford programme, so we formalize it.
 
 Difficulty: **Medium** (straightforward but detail-heavy series manipulations). **~2 weeks** for the core four lemmas above.
 
@@ -179,7 +179,7 @@ Difficulty: **Medium** (straightforward but detail-heavy series manipulations). 
 
 ## 3.5 Track 2 — Concrete projective-curve constructions
 
-Track 1 (Parts A + B) constructs `Jacobian X` for an arbitrary `X` satisfying Buzzard's typeclass constraints. **Track 2** runs in parallel: it populates the space of examples with explicit projective curves for which every instance is discharged by construction and every axiom in §7 is provable directly. Track 2 is not logically necessary for closing the 22 sorries on abstract `X`, but it gives us:
+Track 1 (Parts A + B) constructs `Jacobian X` for an arbitrary `X` satisfying Buzzard's typeclass constraints. **Track 2** runs in parallel: it populates the space of examples with explicit projective curves for which every instance is discharged by construction and every axiom in §7 is provable directly. Track 2 is not logically necessary for closing the 24 sorries on abstract `X`, but it gives us:
 
 - a rich concrete population of `X`'s against which to test the abstract machinery,
 - **proofs** (not axioms) of the §7 axioms for every `X` in that population,
@@ -227,7 +227,7 @@ Key facts:
 - **Explicit period matrix:** with appropriate cycles `α_i, β_i` surrounding pairs of branch points, `τ[i, j] = (∫_{β_j} ω_i)/(∫_{α_j} ω_i)` after normalization. **Cycles are parameterized explicitly as lifted paths in the two-sheet atlas**: each `α_i, β_i` is given as a concrete map `[0, 1] → HyperellipticCurve g f` that takes an arc in the upper or lower half plane (avoiding branch points) and lifts it to the correct sheet. The integral is then a real one-variable integral along the parameterization — no `Complex.cpow` branch cuts are invoked, and the sheet choice on `α` vs `β` is explicit in the parameterization. (This corrects the earlier plan draft which suggested `intervalIntegral` + residues could absorb the sheet choice; Codex review correctly flagged that this hides the branch-choice problem rather than solving it.)
 - **Riemann bilinear relations** become residue calculus on the explicit model — this is `AX_RiemannBilinear` discharged, not axiomatized, in the hyperelliptic case.
 - **`AX_FiniteDimOneForms` discharged** similarly: the `g` forms above span, and any holomorphic `ω` is written as `p(x, y) dx/y` with `p` polynomial bounded by adjunction; reduces to a polynomial-degree argument.
-- **`AX_DegreeIndependence`** for maps between hyperelliptic curves follows from an explicit computation on coordinates.
+- **`AX_BranchLocus`** for maps between hyperelliptic curves follows from explicit coordinate computation: branch locus is where `f'(x) = 0`, i.e. a finite set of polynomial roots; fiber cardinality away from branches is exactly the degree of the covering polynomial.
 
 This is where most of the Mumford Vol II §IIIa.1–5 material lives.
 
@@ -261,10 +261,10 @@ Most is wrappers around Mathlib's `Mathlib.Analysis.Calculus.ImplicitFunction` s
 |-------|-----------------|-----------------------------|
 | `AX_FiniteDimOneForms` | Hard (needs compactness + normal families) | **Proved** — explicit basis |
 | `AX_RiemannBilinear` | Medium (integration by parts) | **Proved** — residue calculus on model |
-| `AX_DegreeIndependence` | Medium | **Proved** — explicit coordinate computation |
+| `AX_BranchLocus` | Medium | **Proved** — finite branch points are roots of `f'`, fiber cardinality 2 on regular values |
 | `AX_H1FreeRank2g` | Medium (CW topology) | **Proved** — standard `α_i, β_i` basis explicit |
 | `AX_AbelTheorem` | Very hard (needs Riemann theta divisor) | **Likely provable directly** via residue calculus + principal-divisor argument, in hyperelliptic case |
-| `AX_Uniformization0` | Hard (complex analysis) | **Proved** — `ProjectiveLine` is the explicit genus-0 case |
+| `genus_eq_zero_iff_homeo` (⇐) | Medium — needs explicit biholomorphism `X ≃ ℙ¹` first | **Proved** — `ProjectiveLine` explicitly has `H⁰(Ω¹) = 0` and is homeo to `S²` via stereographic projection |
 
 **Recommended ordering: Track 2 *before* finishing Part B.** After Part A (§§3.1–3.3) is done, do §3.5.1 (ProjectiveLine) and §3.5.3 (Hyperelliptic) *immediately*. On a hyperelliptic curve every Buzzard-side quantity — genus, 1-forms, period matrix, Abel-Jacobi map, pushforward/pullback under a covering `HyperellipticCurve g f → ProjectiveLine` — is computable in closed form. Use these computations as **sanity-check targets** when writing the abstract `HolomorphicOneForm` and `pathIntegral` in Part B: when the abstract machinery reproduces the concrete hyperelliptic answers, you've validated it.
 
@@ -430,7 +430,7 @@ instance : FiniteDimensional ℂ (HolomorphicOneForm X) :=
 
 With this in place, `Module.finrank ℂ (HolomorphicOneForm X)` is the actual dimension, and the `ChartedSpace` instance gets a sensible model space `Fin g → ℂ`.
 
-**No alternative "topological genus" here.** The original plan mentioned `genusTopological X := rank (H_1 X x₀) / 2` and the Hodge identity `2g = b_1`. That equivalence is Hodge theory (`dim H¹_dR = 2 dim H⁰(Ω¹)` for compact Kähler) and is not needed for the 22 sorries. Drop from this module. If the identity is needed later, it becomes a derived theorem, not an axiom.
+**No alternative "topological genus" here.** The original plan mentioned `genusTopological X := rank (H_1 X x₀) / 2` and the Hodge identity `2g = b_1`. That equivalence is Hodge theory (`dim H¹_dR = 2 dim H⁰(Ω¹)` for compact Kähler) and is not needed for the 24 sorries. Drop from this module. If the identity is needed later, it becomes a derived theorem, not an axiom.
 
 Difficulty: **Easy** given the instance hygiene above. **~3 days.**
 
@@ -456,15 +456,27 @@ noncomputable def Jacobian (X : Type*) [...] (x₀ : X) : Type :=
 
 **Why basis-free.** Gemini 3 Pro correctly flagged that `Jacobian X := AbelianVariety (τ X)` makes the *type* of the Jacobian depend on an unspecified basis of `H_1` (required to construct `τ`). That leads to incoherent equivalence-class gymnastics in `pushforward`/`pullback`. The fix: the Jacobian is defined as an explicit quotient of a canonical ℂ-vector space by a canonical subgroup, no basis choice needed.
 
-**Removing the `x₀` dependence.** The definition depends on a choice of basepoint `x₀` (because `H_1 X x₀` does). For `X` path-connected (which holds from `ConnectedSpace X` + chart structure ⇒ `LocallyPathConnectedSpace X`), different basepoints give canonically isomorphic `H_1`s via path conjugation, and the period images coincide. So `Jacobian X` is *canonically* independent of `x₀`. Encode this either by:
-- quotienting by the image of every choice (an `iSup`), or
-- proving a `Jacobian_iso_of_basepoint` lemma and discarding the dependence via `Quotient.lift`.
+**Removing the `x₀` dependence.** The definition above depends on a choice of basepoint `x₀` through `H_1 X x₀`. Claim: `periodLattice X x₀` is **equal** (not merely isomorphic) as an `AddSubgroup` to `periodLattice X x₁` for any two basepoints `x₀, x₁`.
 
-**Matching Buzzard's signature.** Buzzard's `Jacobian X` takes no basepoint. Two options:
-- `Jacobian X := JacobianAmbient X ⧸ (⨆ x₀, periodLattice X x₀)`; the sup is constant because of canonical iso.
-- `Jacobian X := Nonempty.choose (h : Nonempty X) |> Jacobian_base`, with a compatibility lemma.
+**Proof sketch.** `X` is path-connected (from `ConnectedSpace X` + `LocallyPathConnectedSpace X` ⇐ `ChartedSpace ℂ X`). Let `p : x₀ ⇝ x₁` be a path. For any loop `γ : [0,1] → X` based at `x₁`, the conjugated loop `p · γ · p⁻¹` is based at `x₀`. By additivity of `pathIntegral` and `pathIntegral.reverse`, `∫_{p·γ·p⁻¹} ω = ∫_p ω + ∫_γ ω - ∫_p ω = ∫_γ ω` for every `ω ∈ HolomorphicOneForm X`. So the image functional `periodMap_{x₀}(p·γ·p⁻¹) = periodMap_{x₁}(γ)` in `JacobianAmbient X`. Path-conjugation `π_1(X, x₁) → π_1(X, x₀)` is a bijection (its inverse is conjugation by `p⁻¹`), so the two period-lattice images coincide as *sets*.
 
-The first is cleaner.
+**Consequence.** Define
+
+```
+-- Canonical basepoint picked via Classical choice from Nonempty X
+noncomputable def Jacobian.basepoint (X : Type*) [Nonempty X] [...] : X :=
+  Classical.arbitrary X
+
+noncomputable def Jacobian (X : Type*) [Nonempty X] [...] : Type :=
+  JacobianAmbient X ⧸ periodLattice X (Jacobian.basepoint X)
+
+theorem Jacobian.periodLattice_eq_of_basepoint (x₀ x₁ : X) :
+    periodLattice X x₀ = periodLattice X x₁ := ...  -- from proof sketch above
+```
+
+The lemma ensures results are independent of the specific basepoint Classical picks, even though the type `Jacobian X` is defined via one specific choice. No `iSup` gymnastics.
+
+**Matching Buzzard's signature.** Buzzard's `Jacobian (X : Type u) [Nonempty X] [...] : Type u` takes `Nonempty X` as an instance argument. This is exactly what we need to call `Classical.arbitrary X` inside `Jacobian.basepoint`. The `Nonempty` requirement in Buzzard's signature was not accidental — it's load-bearing here.
 
 **Instances.** The 7 instances Buzzard demands still come from Part A, but now applied to `V := JacobianAmbient X` (a finite-dim ℂ-space because `HolomorphicOneForm X` is finite-dim — which is `AX_FiniteDimOneForms`) and `Λ := periodLattice X`.
 
@@ -509,20 +521,23 @@ Difficulty: **Very hard** if proved directly (requires Riemann's theorem on the 
 
 ### 5.4 `Jacobian/Functoriality.lean`
 
-For a holomorphic `f : X → Y` between compact Riemann surfaces:
-- `f^* : HolomorphicOneForm Y → HolomorphicOneForm X` by precomposition: `(f^* ω).coeff c := ω.coeff (chart of Y on image of c's domain) ∘ f`, checking cocycle.
-- `pushforward : Jacobian X → Jacobian Y` induced by integration of `f^* ω`.
-- `pullback : Jacobian Y → Jacobian X` induced by integration along `f_*(γ)` for `γ ∈ H_1(X, ℤ)`.
+For holomorphic `f : X → Y` between compact Riemann surfaces, two operations on 1-forms:
 
-Wait — the natural direction is:
-- `f^* ω` (pulling back 1-forms) induces a map on `H⁰(X, Ω¹)^∨ → H⁰(Y, Ω¹)^∨` by **transpose**, which after quotienting by lattices gives `Jacobian X → Jacobian Y` — this is what Buzzard calls `pushforward`.
-- `f_* γ` (pushing forward cycles) induces a map on `H_1(X, ℤ) → H_1(Y, ℤ)`, which in composition with period pairing gives `Jacobian X → Jacobian Y` — this matches.
+1. **Pullback on forms** `f^* : HolomorphicOneForm Y → HolomorphicOneForm X`. Pointwise: `(f^* ω)_p := ω_{f(p)} ∘ df_p`. In charts, if `ω` on `Y` is locally `g(w) dw`, then `f^* ω` on `X` is locally `g(f(z)) · f'(z) dz`. No branch-locus hypothesis needed — `f^*` is unconditionally well-defined because charts pull back under composition. Linear in `ω`.
 
-So actually `pushforward` and the pullback-on-forms-transposed both point `X → Y`; that's consistent with naming.
+2. **Pushforward / trace on forms** `f_* : HolomorphicOneForm X → HolomorphicOneForm Y`. This requires a proper holomorphic map with finite fibers, i.e. `AX_BranchLocus`. On a regular value `q ∈ Y`, `(f_* η)_q := ∑_{p ∈ f⁻¹(q)} (η_p ∘ (df_p)⁻¹)`. At branch points, local multiplicities enter via `meromorphicOrderAt`. **`f_*` is defined only under `AX_BranchLocus`.**
 
-For `pullback : Jacobian Y → Jacobian X`: the relevant input is `f^*` on H¹(Y, ℤ) → H¹(X, ℤ), dually `H_1(X, ℤ) → H_1(Y, ℤ)` ... no wait. Let me think again using Buzzard's actual signatures in the Challenge file: `pullback` goes `Jacobian Y → Jacobian X`, so it's induced by `f_*` on `H⁰(Y, Ω¹)^∨` (dual of `f^*` on forms gives this direction), modulo lattices. Matches.
+**Buzzard's `pushforward` and `pullback` on Jacobians, in terms of these:**
 
-**Contractions for the formalization**: factor through `H⁰(Ω¹)^∨` and `H_1` explicitly.
+- `pushforward f hf : Jacobian X →ₜ+ Jacobian Y`. The functoriality pattern matches **cycles**: a cycle `γ ∈ H_1(X, ℤ)` pushes forward to `f∘γ ∈ H_1(Y, ℤ)`. Dually, the period map factors through:
+  `Jacobian X = (H⁰(X, Ω¹))^∨ / Λ_X → (H⁰(Y, Ω¹))^∨ / Λ_Y = Jacobian Y`
+  induced by the **transpose** of `f^*` on forms: `((f^*)^T φ)(ω) := φ(f^* ω)` for `φ ∈ (H⁰(X, Ω¹))^∨`. Sends `Λ_X` into `Λ_Y` because `(f^*)^T(periodMap_X γ) = periodMap_Y (f ∘ γ)`. **Does not require `AX_BranchLocus`**.
+
+- `pullback f hf : Jacobian Y →ₜ+ Jacobian X`. The functoriality pattern matches **forms**: a form `ω ∈ H⁰(Y, Ω¹)` pulls back to `f^* ω ∈ H⁰(X, Ω¹)`. Dually, via `f_*` on forms:
+  `Jacobian Y = (H⁰(Y, Ω¹))^∨ / Λ_Y → (H⁰(X, Ω¹))^∨ / Λ_X = Jacobian X`
+  induced by the **transpose** of `f_*`: `((f_*)^T φ)(ω) := φ(f_* ω)` for `φ ∈ (H⁰(Y, Ω¹))^∨`. **Requires `AX_BranchLocus`** through the definition of `f_*`.
+
+So: `pushforward` is the easy direction (forms-pullback transposed), `pullback` is the hard direction (forms-pushforward / trace, transposed).
 
 `ContMDiff.degree`: for `f : X → Y` non-constant holomorphic.
 
@@ -541,11 +556,12 @@ def ContMDiff.degree (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) : ℕ :=
       localOrder (f, p, q)   -- defined via meromorphicOrderAt in charts
 ```
 
-For this to yield the expected value:
-- **`AX_BranchLocus`** (new named axiom): for non-constant holomorphic `f` between compact Riemann surfaces, `f` is proper with discrete fibers; the set of `p` where `localOrder (f, p, q) > 1` is finite ("branch locus"), and outside a finite set of critical values in `Y`, every fiber has constant cardinality equal to `deg f`.
-- **Independence of `q`**: follows from connectedness of `Y` and the local constancy of the fiber sum, which is the content of `AX_BranchLocus`.
+For this to yield a well-defined natural number:
+- **`AX_BranchLocus`** (new named axiom, stated without reference to `deg f`, see §7): asserts (a) properness, (b) discrete/finite fibers, (c) **the fiber sum `∑_{p ∈ f⁻¹(q)} localOrder(f, p, q)` is constant in `q`**, and (d) finiteness of branch locus. `ContMDiff.degree f` is then defined as that common fiber-sum value (computed at any convenient `q`, e.g. `f (Classical.arbitrary X)`).
 
-This matches the standard Riemann-surface treatment (see e.g. Forster Ch. I, Farkas–Kra). The axiom `AX_BranchLocus` is a promissory note for the discharge priority.
+By (c), `ContMDiff.degree f` is well-defined — it doesn't matter which `q` we pick to evaluate the sum, including critical values, because at a critical value the `localOrder`s are larger but the sum matches.
+
+This matches the standard Riemann-surface treatment (see e.g. Forster Ch. I, Farkas–Kra).
 
 Difficulty: **Hard** for the definitional infrastructure; **medium** once `AX_BranchLocus` is in place. **~4–6 weeks** assuming `meromorphicOrderAt` lifts cleanly to manifold-local use via charts.
 
@@ -611,7 +627,7 @@ We tag certain deep facts as named axioms initially — this lets downstream dev
 | `AX_H1FreeRank2g` | `H_1(X, ℤ)` free abelian of rank `2 · genus X` | CW / simplicial topology on compact orientable surfaces | Medium | No |
 | `AX_PeriodInjective` | `periodMap : H_1(X, ℤ) → (H⁰(X, Ω¹))^∨` is injective | Consequence of `AX_RiemannBilinear` | Medium | No |
 | `AX_AbelTheorem` | `0 < genus X → Function.Injective (ofCurve P₀)` | Riemann's theorem on the theta divisor, or Forster-style residue argument | Very hard | No |
-| `AX_BranchLocus` | For non-constant holomorphic `f : X → Y`: proper, discrete fibers; critical values form a finite set; away from critical values, fiber cardinality is constant `= deg f` | Classical; uses open-map + compact-codomain | Hard | No |
+| `AX_BranchLocus` | For non-constant holomorphic `f : X → Y` between compact Riemann surfaces: (a) `f` is proper, (b) every fiber `f⁻¹(q)` is discrete hence finite, (c) the sum `∑_{p ∈ f⁻¹(q)} localOrder(f, p, q)` is **independent of `q`**, (d) the set of `q` where `localOrder(f, p, q) > 1` for some `p ∈ f⁻¹(q)` is finite | Classical; uses open-map + compact-codomain | Hard | No |
 | `AX_PluckerFormula` | `SmoothPlaneCurve F` with `deg F = d ≥ 3` has genus `(d-1)(d-2)/2` | Adjunction formula | Medium | No |
 
 **Derived results (not axioms).**
@@ -634,7 +650,7 @@ We tag certain deep facts as named axioms initially — this lets downstream dev
 
 ---
 
-## 8. Dependency graph (critical path to closing 22 sorries)
+## 8. Dependency graph (critical path to closing 24 sorries)
 
 ```
 Track 1 (abstract X), basis-free Jacobian:
@@ -661,13 +677,13 @@ PathIntegral ──→ Homology ──→ IntersectionForm ─┘               
   AX_RiemannRoch + AX_SerreDuality ──→ Genus0 (both directions) ──────┘
                                                                        │
                                                                        ↓
-                                                        all 22 sorries closed on abstract X
+                                                        all 24 sorries closed on abstract X
 
 
 Track 2 (concrete X from projective embedding; depends on Part A only):
 
 Lattice → Siegel → ComplexTorus ──────────────┐
-                                                ├─→ 22 sorries closed for these concrete X:
+                                                ├─→ 24 sorries closed for these concrete X:
 ProjectiveCurve/Charts.lean ─┬─→ Line.lean ─────┤       ProjectiveLine, EllipticCurve-from-Weierstrass,
                              ├─→ Elliptic.lean ──┤      HyperellipticCurve g f, SmoothPlaneCurve F
                              ├─→ Hyperelliptic ──┤
@@ -678,7 +694,7 @@ Asterisks = axiomatizable without breaking downstream work.
 
 **Track 1 minimum viable build**: Parts A.1–A.3 + B.1–B.5 + Jacobian/Construction.lean — closes the 7 instance sorries + `genus` on abstract `X`.
 
-**Track 2 minimum viable build**: Parts A.1–A.3 + ProjectiveCurve/{Charts, Line, Hyperelliptic} — closes **all** 22 sorries concretely on those types, with axioms discharged. Shippable independent of Part B.
+**Track 2 minimum viable build**: Parts A.1–A.3 + ProjectiveCurve/{Charts, Line, Hyperelliptic} — closes **all** 24 sorries concretely on those types, with axioms discharged. Shippable independent of Part B.
 
 After that, sorries fall in rough order of increasing difficulty:
 1. `genus_eq_zero_iff_homeo` (⇐ direction), `ofCurve_self`
@@ -703,14 +719,14 @@ Track 1 and Track 2 run largely in parallel after Part A is done.
 | A0 | Scaffold already done | — | — |
 | A1 | `Basic.lean`, notation, test build | 1 day | 2 days |
 | A2 | `Lattice.lean` + `Siegel.lean` (prefer `IsZLattice`) | 1–2 weeks | 3–4 weeks |
-| A3 | `ComplexTorus.lean` — 7 instances via `AddCircle` transport | 2–3 weeks | 5–8 weeks |
+| A3 | `ComplexTorus.lean` — 7 instances via direct local-chart construction | 3–4 weeks | 6–10 weeks |
 | A4 | `Theta.lean` — convergence, analyticity, quasi-periodicity | 4–6 weeks | 2–3 months |
 | **A milestone** | **Part A standalone build, PR-able to Mathlib** | **~2 months** | **~4 months** |
 | T1 | `ProjectiveCurve/Charts.lean` + `Line.lean` | 1–2 weeks | 3–4 weeks |
 | T2 | `ProjectiveCurve/Elliptic.lean` (leverages Mathlib) | 2–3 weeks | 1–2 months |
 | T3 | `ProjectiveCurve/Hyperelliptic.lean` — explicit atlas, 1-forms, period matrix | 8–10 weeks (+ `Complex.cpow` branch-cut pain) | 4–5 months |
 | T4 | `ProjectiveCurve/PlaneCurve.lean` — implicit-function atlas, Poincaré residue basis | 8–10 weeks | 4–5 months |
-| **T milestone** | **22 sorries closed concretely on ProjectiveLine + Elliptic + Hyperelliptic** | **~5 months, concurrent with B** | **~10 months** |
+| **T milestone** | **24 sorries closed concretely on ProjectiveLine + Elliptic + Hyperelliptic** | **~5 months, concurrent with B** | **~10 months** |
 | B1 | `OneForm.lean` (bundle path if available; cocycle fallback) | 2–4 weeks | 2 months |
 | B2 | `PathIntegral.lean` — **the big one**: chart-partition integration + homotopy invariance via Stokes on singular 2-simplices | **3 months** | **8+ months** |
 | B3 | `Homology.lean` | 1–2 weeks | 1 month |
@@ -752,8 +768,9 @@ These are not on the critical path but raise the confidence / impact of the proj
 - **Mathlib cotangent-bundle API turns out to be unusable** for complex manifolds at the pin. Fallback: chart-cocycle `HolomorphicOneForm`, but budget an extra month vs. the bundle path for coordinate-independence lemmas the bundle path gets for free.
 - **`PathIntegral` homotopy invariance drags.** Fallback: first prove `PathIntegral (closed loop bounding a disk in a single chart) = 0` (Cauchy on ℂ), then patch together chart-local disks via Stokes on a CW structure. Axiomatize the patch-argument if it resists.
 - **`Complex.cpow` branch-cut pain in `HyperellipticCurve`.** Defining explicit `α_i, β_i` cycles and integrating `x^k / √f(x)` between branch points runs into Mathlib's known difficulties around branch cuts (half-open intervals; limits across cuts not definitionally equal). Fallback: do the genus-2 case by hand first with explicit real-analytic parameterization of cycles as arcs in the upper half plane avoiding branch points; prove everything for `y² = x(x-1)(x-2)(x-3)(x-4)` as a calibration; generalize after.
-- **Mumford `Sp(2g, ℤ)` action is surprisingly heavy.** We don't need this for the 22 sorries — skip for the main line.
-- **Upstream Mathlib lands quotient-manifold-by-discrete-group before we do**: good for us. Re-align `ComplexTorus.lean` to use the upstream API rather than the `AddCircle`-transport shortcut.
+- **Mumford `Sp(2g, ℤ)` action is surprisingly heavy.** We don't need this for the 24 sorries — skip for the main line.
+- **Upstream Mathlib lands quotient-manifold-by-discrete-group before we do**: good for us. Re-align `ComplexTorus.lean` to use the upstream API, which will be cleaner than our direct local-chart construction.
+- **Upstream lands `AddCircle` Lie-group structure (currently `TODO` at the pin)**: would give us the real-Lie-group half of the torus structure essentially for free via transport from `(AddCircle)^{2g}`. The complex structure still needs our direct construction, but the transport saves work.
 - **`IsZLattice` API at the pin is incompatible with our needs.** Fallback to `FullRankLattice V` defined ad-hoc (+1 week budget).
 - **Fails to build at all** on pinned Mathlib commit: fallback to a fresh Mathlib pin after `lake update`; Buzzard's file may need minor notation tweaks that he's happy to incorporate.
 - **`Complex.cpow`, `Polynomial.roots`, and branch-locus theory** all turn out to be blockers beyond Hyperelliptic. Fallback: restrict Track 2 to Hyperelliptic + ProjectiveLine + Elliptic, ship the v0.1 without `PlaneCurve.lean`.
@@ -766,7 +783,7 @@ First milestone, aimed at publication / community signal. Shipped as **Track 2 +
 
 1. Parts A.1–A.4 — complete standalone `AbelianVarieties` library (no sorries except optional `Theta.lean` lemmas).
 2. `ProjectiveCurve/Line.lean`, `Elliptic.lean`, `Hyperelliptic.lean` — concrete projective curves satisfying all of Buzzard's typeclass constraints.
-3. **All 22 instance/data sorries closed on `ProjectiveLine`, on genus-1 `EllipticCurve` examples, and on `HyperellipticCurve g f` for every squarefree `f`.** Theorem sorries (`ofCurve_inj`, `pushforward_pullback`) axiomatized with per-curve named axioms where we can't yet discharge them.
+3. **All 13 data-and-instance sorries closed** (the 6 defs `genus`, `Jacobian`, `ofCurve`, `pushforward`, `pullback`, `ContMDiff.degree`, plus 7 typeclass instances) on `ProjectiveLine`, on genus-1 `EllipticCurve` examples, and on `HyperellipticCurve g f` for every squarefree `f`. Of the 11 theorem sorries, the easy ones (`ofCurve_self`, functoriality `id`/`comp` for both `pushforward` and `pullback`) are discharged on these models; the hard ones (`ofCurve_inj`, `pushforward_pullback`, holomorphicity of `ofCurve` and `push`/`pull`) are axiomatized per-curve pending `AX_BranchLocus` / `AX_AbelTheorem` / `pathIntegral` infrastructure.
 4. Explicit period-matrix computations on those curves (using explicit lifted-path parameterizations, not `Complex.cpow`), with `AX_RiemannBilinear` **proved** on these models.
 5. Definitions in Part B (`HolomorphicOneForm`, `pathIntegral`, `H_1`, `Jacobian X`) with signatures in place and explicit stubs; `Axioms/` populated with all nine named axioms (including `AX_SerreDuality` and `AX_BranchLocus`, both new in round 2).
 6. `AX_FiniteDimOneForms` installed as a global instance, so that `genus`/`ChartedSpace` are semantically live.
@@ -780,11 +797,11 @@ This is a substantive, defensible artifact to announce on `#Autoformalization` w
 
 1. Part B complete — `Jacobian X` for abstract `X` works, 7 instance sorries closed on abstract `X`.
 2. Axioms `AX_FiniteDimOneForms`, `AX_RiemannBilinear`, `AX_H1FreeRank2g` documented and their *statements* match Track 2 proofs exactly (a "these are the same theorem" cross-check).
-3. Functoriality (`pushforward`, `pullback`, `pushforward_pullback`) closed on abstract `X` modulo `AX_DegreeIndependence`.
-4. `genus_eq_zero_iff_homeo` (⇐ direction) closed; (⇒) depends on `AX_Uniformization0`.
+3. Functoriality (`pushforward`, `pullback`, `pushforward_pullback`) closed on abstract `X` modulo `AX_BranchLocus`.
+4. `genus_eq_zero_iff_homeo` (⇐ direction) closed; (⇒) depends on `AX_RiemannRoch + AX_SerreDuality + AX_FiniteDimOneForms`.
 
 ## v0.3 target
 
 1. `AX_AbelTheorem` discharged via Riemann theta divisor on abstract `X` (needs `Theta.lean` fully in place).
-2. `AX_Uniformization0` discharged.
+2. `AX_RiemannRoch` and `AX_SerreDuality` discharged ⇒ `genus_eq_zero_iff_homeo` (⇒ direction) closed on abstract `X`.
 3. `AX_RiemannExistence` — the bridge from abstract `X` to a projective model — attempted as a separate effort; if successful, Track 2 results transfer to abstract `X` automatically.
