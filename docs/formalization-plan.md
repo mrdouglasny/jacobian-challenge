@@ -4,7 +4,9 @@
 
 **Chosen strategy.** Period-lattice construction, **basis-free at the type level**. The Jacobian is defined as `(HolomorphicOneForm X →ₗ[ℂ] ℂ) ⧸ periodImage(X)` — a quotient of the dual of holomorphic 1-forms by the image of `H_1(X, ℤ)` under integration. The Siegel period matrix `τ(X) ∈ 𝔥_g` is a *theorem* about this Jacobian (after choosing a basis), not its definitional foundation. Everything Buzzard asks of `Jacobian X` (`AddCommGroup`, `TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace (Fin (genus X) → ℂ)`, `IsManifold 𝓘(ℂ) ω`, `LieAddGroup`) reduces to one general lemma: *any full-rank discrete additive subgroup of a finite-dimensional ℂ-vector space gives a compact complex Lie group as its quotient*.
 
-> **Amendment log (2026-04-20).** This plan was reviewed by Gemini 3 Pro; see [`gemini-review.md`](gemini-review.md) for the full review + triage. Key amendments incorporated below: (1) Jacobian redefined basis-free above; (2) `HolomorphicOneForm` Mathlib cotangent-bundle check precedes chart-cocycle commitment; (3) new `RiemannSurface/IntersectionForm.lean` module for intersection pairing + Hurewicz + period injectivity; (4) `AX_Uniformization0` replaced by `AX_RiemannRoch` with uniformization-for-genus-0 as a derived theorem; (5) time budget revised upward across the board; (6) `IsZLattice` preferred over our own `FullRankLattice` if available; (7) `Complex.cpow` branch cuts in Track 2 called out as a first-class risk; (8) Lie-group instance uses `AddCircle` transport rather than covering-map theory from scratch.
+> **Amendment log (2026-04-20, round 1).** Reviewed by Gemini 3 Pro; see [`gemini-review.md`](gemini-review.md) for the full review + triage. Key amendments: (1) Jacobian redefined basis-free above; (2) `HolomorphicOneForm` Mathlib cotangent-bundle check precedes chart-cocycle commitment; (3) new `RiemannSurface/IntersectionForm.lean` module for intersection pairing + Hurewicz + period injectivity; (4) `AX_Uniformization0` replaced by `AX_RiemannRoch`; (5) time budget revised upward; (6) `IsZLattice` preferred; (7) `Complex.cpow` branch cuts flagged as first-class risk; (8) Lie-group instance proposed via `AddCircle` transport.
+>
+> **Amendment log (2026-04-20, round 2).** Subsequently reviewed by GPT-5 via Codex; see [`codex-review.md`](codex-review.md). Codex checked the pinned Mathlib tree and found several concrete gaps Gemini missed. Round-2 amendments: (A) `AddCircle` transport retracted — `AddCircle`'s Lie group structure is still `TODO` at the pin, so we build the complex-Lie-group structure on `V/Λ` directly from local charts. (B) `τ`-based references in §2 and §8 swept out; basis-free `Jacobian X := JacobianAmbient X ⧸ periodLattice X` is the only architecture. (C) `genus` normalized to `Module.finrank ℂ (HolomorphicOneForm X)` everywhere; `FiniteDimensional ℂ (HolomorphicOneForm X)` required as a global *instance* before any `finrank` or `ChartedSpace` declaration. (D) Chart-cocycle fallback reformulated against Mathlib's `extendCoordChange` + `mfderiv` API. (E) `ContMDiff.degree` redefined via `meromorphicOrderAt` (order of `f - q` at local points), not via regular-value preimages (Sard is `TODO` at the pin). (F) `AX_SerreDuality` added as a named axiom (was implicit in the genus-0 proof). (G) Track 2 `HyperellipticCurve` commits to explicit lifted path parameterizations on slit domains; `Complex.cpow` is out of scope for the first implementation pass. (H) v0.1 ship target no longer promises a fully worked `pushforward_pullback` genus-2 example — only the definitional skeleton + axiomatized fiber theory.
 
 ---
 
@@ -53,32 +55,33 @@ Jacobians/
 │   ├── Periods.lean             (period map, period matrix in 𝔥_g, Riemann bilinear)
 │   └── Genus.lean               (genus := dim_ℂ H⁰(X, Ω¹); genus = topological genus)
 │
-├── Jacobian/                    ─── bridge: plug Part B into Part A
-│   ├── Construction.lean        (Jacobian X := AbelianVariety (τ X))
+├── Jacobian/                    ─── bridge: plug Part B into Part A (basis-free)
+│   ├── Construction.lean        (Jacobian X := JacobianAmbient X ⧸ periodLattice X)
 │   ├── AbelJacobi.lean          (ofCurve = period integral from P₀)
 │   ├── Abel.lean                (ofCurve_inj — Abel's theorem)
-│   ├── Functoriality.lean       (pushforward, pullback, ContMDiff.degree)
+│   ├── Functoriality.lean       (pushforward, pullback, ContMDiff.degree via order)
 │   └── PushPull.lean            (pushforward_pullback = deg • id)
 │
 ├── Genus0/                      ─── the one genuinely non-theta piece
 │   └── Uniformization.lean      (genus_eq_zero_iff_homeo)
 │
 └── Axioms/                      ─── named deep facts, to be discharged later
-    ├── FiniteDimOneForms.lean   (dim_ℂ H⁰(X, Ω¹) < ∞)
+    ├── FiniteDimOneForms.lean   (FiniteDimensional ℂ (HolomorphicOneForm X); installed as instance)
     ├── RiemannBilinear.lean     (period matrix is symmetric with pos-def imaginary part)
     ├── RiemannRoch.lean         (Riemann–Roch; implies AX_Uniformization0 as a theorem)
+    ├── SerreDuality.lean        (Serre duality for compact Riemann surfaces; needed in genus-0 proof)
     ├── PeriodInjective.lean     (H_1(X, ℤ) → (H⁰(X, Ω¹))^∨ is injective)
     ├── H1FreeRank2g.lean        (H_1(X, ℤ) free abelian of rank 2·genus)
     ├── AbelTheorem.lean         (0 < genus ⇒ ofCurve injective)
-    ├── DegreeIndependence.lean  (preimage-counting definition of degree independent of regular value)
+    ├── BranchLocus.lean         (branch locus of f : X→Y is finite; fiber cardinality = deg)
     └── PluckerFormula.lean      (smooth plane curve of degree d has genus (d-1)(d-2)/2)
 ```
 
 Design principles:
 - Part A has **zero Riemann-surface dependence**. It's a reusable abelian-varieties-via-theta library, independently Mathlib-contributable.
-- **Track 2** (`ProjectiveCurve/`) populates the space of concrete examples. Every type here satisfies Buzzard's typeclass constraints by construction (no appeal to Riemann existence). Track 2 depends on Part A (to use `AbelianVariety` for the Jacobian side), not on Part B.
+- **Track 2** (`ProjectiveCurve/`) populates the space of concrete examples. Every type here satisfies Buzzard's typeclass constraints by construction (no appeal to Riemann existence). Track 2 depends on Part A, not on Part B.
 - Part B depends on Mathlib (no differential forms on manifolds, per Phase B) plus `Axioms/`. Part B is what handles the *abstract* `X` side of Buzzard's challenge.
-- `Jacobian/` is pure glue: take `τ(X)` from Part B, feed to Part A, get all instances for free.
+- **`Jacobian/` bridges basis-free**: `Jacobian X := JacobianAmbient X ⧸ periodLattice X`, where `JacobianAmbient X := HolomorphicOneForm X →ₗ[ℂ] ℂ` and `periodLattice X := range periodMap`. No `τ`-matrix is baked into the *definition*; the Siegel period matrix is a derived theorem after choosing a basis. The seven Buzzard instances transfer from Part A's `AbelianVariety` applied to `V := JacobianAmbient X` and `Λ := periodLattice X`.
 - Track 2 closes Buzzard's sorries for every `X` that happens to be one of the explicit projective-curve types. It does not close them for an arbitrary abstract `X` — that's Part B's job.
 
 ---
@@ -144,11 +147,15 @@ Strategy for each instance:
 3. `CompactSpace`: the quotient `V/Λ` is compact iff Λ has full real rank (⇒ image of fundamental parallelotope covers, which is compact in `V`). Standard.
 4. `ChartedSpace V (AbelianVariety V Λ)`: the quotient map `π : V → V/Λ` is a covering map (by discreteness). For each `p ∈ V/Λ`, a sufficiently small neighborhood of any lift `v ∈ π⁻¹(p)` is homeomorphic to a neighborhood of `p` under `π`. Each such local section gives a `PartialHomeomorph`.
 5. `IsManifold 𝓘(ℂ, V) ω`: transition maps between overlapping local sections differ by translation by a lattice vector, which is holomorphic. ⇒ transitions are `AnalyticOn ℂ`.
-6. `LieAddGroup 𝓘(ℂ, V) ω`: **Transport shortcut** — by picking an `ℝ`-basis from the lattice, we get an `ℝ`-diffeomorphism `V/Λ ≃ (ℝ/ℤ)^{2g}`, i.e. `AbelianVariety V Λ ≃ (AddCircle)^{2 · finrank_ℂ V}`. Mathlib has `AddCircle` as a real Lie group; transport the group-operation smoothness via the diffeomorphism. **Caveat**: this gives the *real* `LieAddGroup` structure automatically; for *holomorphic* smoothness of group ops (addition + negation) we need the separate observation that these lifts are holomorphic on `V`. Both facts together give `LieAddGroup 𝓘(ℂ, V) ω`.
+6. `LieAddGroup 𝓘(ℂ, V) ω`: **Direct construction from local charts.** Codex review flagged that `AddCircle`'s Lie group structure is still `TODO` in Mathlib at the pin (`Mathlib/Topology/Instances/AddCircle/Defs.lean:48-50`), so the "transport from `(AddCircle)^{2g}`" shortcut the plan previously proposed is not available yet. Instead, prove `LieAddGroup` directly: lift addition on `V/Λ` to addition on `V` via the covering map; addition on `V` is a polynomial (hence analytic) map `V × V → V`; it descends to `V/Λ × V/Λ → V/Λ` smoothly because translations by lattice vectors preserve the quotient and are themselves holomorphic. Negation is analogous. Use `ContMDiff.comp_contMDiff` and the covering-map structure from (4) to bundle.
 
-**Why not just covering-map theory?** Gemini 3 Pro flagged building general "manifold quotient by a discrete group" from scratch as a ~2000-line yak shave. Rothgang's in-flight Mathlib work handles the general case. Our specific case (translation by a lattice) is simpler because the action is free, proper, and by holomorphic automorphisms; we get almost all the structure by transporting from `AddCircle^{2g}` and then adding the holomorphy of translations.
+**Upstream dependency note.** If Mathlib lands either:
+- `AddCircle` Lie-group structure (the `TODO`), or
+- A generic "complex manifold quotient by a discrete group" API (Rothgang's in-flight work),
 
-Difficulty: **Medium**; **~2 weeks** if the `AddCircle` transport works cleanly, **~4 weeks** if we need to hand-roll the covering-map infrastructure.
+then re-align `ComplexTorus.lean` to use the upstream API. But don't wait for either — the direct-from-local-charts proof above is straightforward given §3.3 items 4–5.
+
+Difficulty: **Medium**; **~3–4 weeks** for the direct construction. The covering-map structure in step (4) is where most of the work lives; the Lie-group smoothness in (6) reduces mechanically once (4) and (5) are in place.
 
 ### 3.4 `AbelianVariety/Theta.lean`
 
@@ -217,7 +224,7 @@ Atlas: two affine patches glued along their common open. Patch A: `{(x, y) ∈ �
 Key facts:
 - Genus = `g` (explicit basis of `HolomorphicOneForm`).
 - **Explicit basis of `HolomorphicOneForm`:** `ω_k := x^k dx / y` for `k = 0, …, g-1`. The check of regularity at infinity uses the change of coordinates on the overlap.
-- **Explicit period matrix:** with appropriate cycles `α_i, β_i` surrounding pairs of branch points, `τ[i, j] = (∫_{β_j} ω_i)/(∫_{α_j} ω_i)` after normalization. Each integral is a real one-variable improper integral of a rational function times `1/√f`, computable in Mathlib via `intervalIntegral` + residues.
+- **Explicit period matrix:** with appropriate cycles `α_i, β_i` surrounding pairs of branch points, `τ[i, j] = (∫_{β_j} ω_i)/(∫_{α_j} ω_i)` after normalization. **Cycles are parameterized explicitly as lifted paths in the two-sheet atlas**: each `α_i, β_i` is given as a concrete map `[0, 1] → HyperellipticCurve g f` that takes an arc in the upper or lower half plane (avoiding branch points) and lifts it to the correct sheet. The integral is then a real one-variable integral along the parameterization — no `Complex.cpow` branch cuts are invoked, and the sheet choice on `α` vs `β` is explicit in the parameterization. (This corrects the earlier plan draft which suggested `intervalIntegral` + residues could absorb the sheet choice; Codex review correctly flagged that this hides the branch-choice problem rather than solving it.)
 - **Riemann bilinear relations** become residue calculus on the explicit model — this is `AX_RiemannBilinear` discharged, not axiomatized, in the hyperelliptic case.
 - **`AX_FiniteDimOneForms` discharged** similarly: the `g` forms above span, and any holomorphic `ω` is written as `p(x, y) dx/y` with `p` polynomial bounded by adjunction; reduces to a polynomial-degree argument.
 - **`AX_DegreeIndependence`** for maps between hyperelliptic curves follows from an explicit computation on coordinates.
@@ -281,21 +288,31 @@ def HolomorphicOneForm (X : Type*) [...] : Type :=
   { ω : SomeCotangentSection X // IsHolomorphic ω }
 ```
 
-If not, fall back to the chart-cocycle approach:
+If not, fall back to the chart-cocycle approach. Codex review flagged that writing the cocycle with raw `c₂ ∘ c₁.symm` derivatives is not aligned with Mathlib's actual API. The idiomatic formulation uses `extendChartAt` (extended charts returning a `PartialEquiv` into the model vector space) and `fderivWithin` on the chart overlap `range I`:
 
 ```
 structure HolomorphicOneFormCocycle (X : Type*) [...] where
-  coeff   : ∀ (c : atlas ℂ X), c.target → ℂ
-  holo    : ∀ c, AnalyticOn ℂ (coeff c) c.target
-  cocycle : ∀ c₁ c₂, ∀ z ∈ c₁.target ∩ c₂.target,
-              coeff c₂ ((c₂ ∘ c₁.symm) z) * D (c₂ ∘ c₁.symm) z = coeff c₁ z
+  /-- local coefficient for each chart in the atlas -/
+  coeff    : ∀ (x : X), (extChartAt 𝓘(ℂ) x).target → ℂ
+  holo     : ∀ x, AnalyticOn ℂ (coeff x) (extChartAt 𝓘(ℂ) x).target
+  /-- compatibility, phrased via extendCoordChange -/
+  cocycle  : ∀ x y, ∀ z ∈ ((extChartAt 𝓘(ℂ) x).target ∩ (extChartAt 𝓘(ℂ) y).source.image ...),
+               coeff y ((extendCoordChange 𝓘(ℂ) x y) z)
+                 * fderivWithin ℂ (extendCoordChange 𝓘(ℂ) x y) (range 𝓘(ℂ)) z 1
+               = coeff x z
 ```
 
-**Decision criterion**: chart-cocycle will force every integration / evaluation to destruct the chart, partition, prove coordinate independence. If the bundle approach works and Mathlib's bundle API supports it, that's much less typeclass friction.
+Key Mathlib API to use:
+- `extChartAt 𝓘(ℂ) x : PartialEquiv X ℂ` (`Mathlib/Geometry/Manifold/IsManifold/ExtChartAt.lean`).
+- `contDiffWithinAt_extendCoordChange` (holomorphicity of chart transitions).
+- `isInvertible_fderivWithin_extendCoordChange` (the transition derivatives are invertible).
+- `mfderiv = fderiv` on model spaces (`Mathlib/Geometry/Manifold/MFDeriv/FDeriv.lean:103-117`), for the bridge back to manifold derivatives when needed.
+
+**Decision criterion**: if the bundle approach is available at the pin, it wins clearly — coordinate-independence is automatic. If we have to chart-cocycle, budget extra time for the `extendCoordChange` plumbing.
 
 Either way, pointwise `AddCommGroup` and `Module ℂ` structure on `HolomorphicOneForm X`.
 
-Difficulty: **Medium-hard** if bundle path works (1–2 weeks). **Hard** if we have to do chart-cocycle (3–4 weeks including the coordinate-independence lemmas that the bundle path would get for free).
+Difficulty: **Medium-hard** if bundle path works (2–3 weeks). **Hard** if we have to do chart-cocycle with `extendCoordChange` (4–6 weeks including the coordinate-independence plumbing).
 
 ### 4.2 `RiemannSurface/PathIntegral.lean`
 
@@ -390,18 +407,32 @@ Difficulty: **Medium-hard** (intersection pairing needs topology of compact orie
 
 ### 4.6 `RiemannSurface/Genus.lean`
 
-Two candidate genus definitions — need to prove equivalent:
+**Canonical definition.**
 
-- **Analytic genus**: `genusAnalytic X := Module.rank ℂ (HolomorphicOneForm X)` (cast to ℕ via `Module.rank.toNat`, once finite-dim is known).
-- **Topological genus**: `genusTopological X := rank (H1 X x₀) / 2` (requires `H₁(X, ℤ)` free of even rank).
+```
+noncomputable def genus (X : Type*) [...] : ℕ :=
+  Module.finrank ℂ (HolomorphicOneForm X)
+```
 
-For closing Buzzard's `genus X : ℕ`: define `genus X := genusAnalytic X`. This makes `dim_ℂ (HolomorphicOneForm X) = genus X` a definitional equation, so the `ChartedSpace (Fin (genus X) → ℂ)` match is tautological once we choose a basis of `HolomorphicOneForm X`.
+**Crucial design constraint.** `Module.finrank` returns `0` when its module is infinite-dimensional. If `FiniteDimensional ℂ (HolomorphicOneForm X)` is only a *theorem* (not a global instance), every downstream use of `Module.finrank` can silently collapse to `0`, and the `ChartedSpace (Fin (genus X) → ℂ) (Jacobian X)` instance becomes a charted space over `Fin 0 → ℂ = Unit` — type-correct but semantically dead.
 
-We need **Axiom (FiniteDimOneForms)**: `FiniteDimensional ℂ (HolomorphicOneForm X)`. Axiomatize.
+**Fix.** Install `AX_FiniteDimOneForms` as a **global instance**, not just a theorem:
 
-Equivalence `genusAnalytic = genusTopological` is Hodge theory (the "`2g = b₁`" identity, equivalently `dim H¹_dR = 2 · dim H⁰(Ω¹)` for compact Kähler manifolds specialized to complex curves). Prove later; not needed for the 22 sorries.
+```
+-- In Axioms/FiniteDimOneForms.lean
+axiom HolomorphicOneForm.finiteDimensional {X : Type*} [...] :
+    FiniteDimensional ℂ (HolomorphicOneForm X)
 
-Difficulty: **Easy** (definition only, deep facts axiomatized). **~3 days.**
+-- ...then install as instance
+instance : FiniteDimensional ℂ (HolomorphicOneForm X) :=
+  HolomorphicOneForm.finiteDimensional
+```
+
+With this in place, `Module.finrank ℂ (HolomorphicOneForm X)` is the actual dimension, and the `ChartedSpace` instance gets a sensible model space `Fin g → ℂ`.
+
+**No alternative "topological genus" here.** The original plan mentioned `genusTopological X := rank (H_1 X x₀) / 2` and the Hodge identity `2g = b_1`. That equivalence is Hodge theory (`dim H¹_dR = 2 dim H⁰(Ω¹)` for compact Kähler) and is not needed for the 22 sorries. Drop from this module. If the identity is needed later, it becomes a derived theorem, not an axiom.
+
+Difficulty: **Easy** given the instance hygiene above. **~3 days.**
 
 ---
 
@@ -493,22 +524,30 @@ For `pullback : Jacobian Y → Jacobian X`: the relevant input is `f^*` on H¹(Y
 
 **Contractions for the formalization**: factor through `H⁰(Ω¹)^∨` and `H_1` explicitly.
 
-`ContMDiff.degree`: for `f : X → Y` non-constant holomorphic,
+`ContMDiff.degree`: for `f : X → Y` non-constant holomorphic.
+
+**Codex review correction.** The original plan led with "pick a regular value and count preimages." At the pinned commit, Sard's theorem is not in Mathlib (`Mathlib/Geometry/Manifold/WhitneyEmbedding.lean:19-24` still lists Sard as `TODO`), so the regular-value route has no foundation. The available foothold is the local meromorphic-order machinery (`Mathlib/Analysis/Meromorphic/Order.lean:39-50`, `Mathlib/Analysis/Meromorphic/Divisor.lean:36-69`).
+
+**Revised definition via order of `f − q`**: for a non-constant holomorphic `f : X → Y` between compact Riemann surfaces and any `q : Y`, define the local degree at a point `p ∈ f⁻¹(q)` as `meromorphicOrderAt` of the difference `f − q` expressed in local charts around `p` and `q`. The global degree is the sum over `p ∈ f⁻¹(q)`:
 
 ```
 def ContMDiff.degree (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) : ℕ :=
-  if hconst : (range f).Subsingleton then 0  
+  if hconst : ∀ x y, f x = f y then 0
   else
-    -- pick any regular value q ∈ Y; return the cardinality of f⁻¹(q) counted with multiplicity
-    -- equivalently, for any point q ∈ Y, the divisor (f⁻¹(q), mult.) has the same total = deg f
-    sorry
+    -- pick any q : Y (`X.Nonempty` + connected ⇒ range is nonempty)
+    let q := f (Classical.arbitrary X)
+    -- sum over the (finite) preimage of q
+    ∑ p ∈ (f ⁻¹' {q}).toFinset,
+      localOrder (f, p, q)   -- defined via meromorphicOrderAt in charts
 ```
 
-The standard approach on a Riemann surface is the residue/divisor formulation: for a non-constant holomorphic `f`, `deg f = #(f⁻¹ q)` at a regular value `q`, well-defined independent of `q` since `div(f-q₁) - div(f-q₂)` is principal. Mathlib has `Mathlib.Analysis.Meromorphic.Order.order` for the local order at a point; globalizing requires:
-- Discreteness + finiteness of `f⁻¹ q` for `q` generic: follows from properness of `f` (compact `X`) + `f` being an open map (non-constant holo on Riemann surfaces).
-- Independence of regular value: via connectedness of `Y` + local constancy of the counting function.
+For this to yield the expected value:
+- **`AX_BranchLocus`** (new named axiom): for non-constant holomorphic `f` between compact Riemann surfaces, `f` is proper with discrete fibers; the set of `p` where `localOrder (f, p, q) > 1` is finite ("branch locus"), and outside a finite set of critical values in `Y`, every fiber has constant cardinality equal to `deg f`.
+- **Independence of `q`**: follows from connectedness of `Y` and the local constancy of the fiber sum, which is the content of `AX_BranchLocus`.
 
-Difficulty: **Hard** for the full construction of `degree`; **medium** for the specialized lemmas. **~3–4 weeks.**
+This matches the standard Riemann-surface treatment (see e.g. Forster Ch. I, Farkas–Kra). The axiom `AX_BranchLocus` is a promissory note for the discharge priority.
+
+Difficulty: **Hard** for the definitional infrastructure; **medium** once `AX_BranchLocus` is in place. **~4–6 weeks** assuming `meromorphicOrderAt` lifts cleanly to manifold-local use via charts.
 
 ### 5.5 `Jacobian/PushPull.lean`
 
@@ -543,13 +582,19 @@ theorem genus_eq_zero_iff_homeo
 
 **`⇒` direction**: genus 0 ⇒ `X ≃_biholo ℂP¹` (hence homeomorphic to `S²`). Gemini 3 Pro's correction to our original plan: a **Riemann-Roch-free proof is not easier**, it requires the full Uniformization theorem (Beltrami / Dirichlet). Instead, derive genus-0 uniformization from Riemann-Roch, which is the axiom to introduce at this level.
 
-**Proof from Riemann-Roch.** Let `X` compact Riemann surface, `genus X = 0`. By Riemann-Roch applied to a point divisor `D = [P]` of degree 1:
+**Proof from Riemann-Roch + Serre duality.** Let `X` compact Riemann surface, `genus X = 0`. By Riemann-Roch applied to a point divisor `D = [P]` of degree 1:
 `dim H⁰(𝒪(D)) - dim H¹(𝒪(D)) = deg D + 1 - g = 1 + 1 - 0 = 2`.
-Serre duality gives `dim H¹(𝒪(D)) = dim H⁰(Ω¹ ⊗ 𝒪(-D)) ≤ dim H⁰(Ω¹) = 0`. So `dim H⁰(𝒪(D)) = 2`. There exist two linearly independent meromorphic functions on `X` with at worst a simple pole at `P`; their ratio is a non-constant meromorphic function with exactly one simple pole, hence a biholomorphism `X → ℂP¹`.
+Serre duality gives `dim H¹(𝒪(D)) = dim H⁰(Ω¹ ⊗ 𝒪(-D))`. For `g = 0`, `H⁰(Ω¹) = 0` (by definition of `genus`), so `H⁰(Ω¹ ⊗ 𝒪(-D)) ⊆ H⁰(Ω¹) = 0`. Hence `dim H⁰(𝒪(D)) = 2`. There exist two linearly independent meromorphic functions on `X` with at worst a simple pole at `P`; their ratio is a non-constant meromorphic function with exactly one simple pole, hence a biholomorphism `X → ℂP¹`.
 
-**What to axiomatize.** Introduce `AX_RiemannRoch` as the named axiom; the genus-0 uniformization becomes a *theorem* using it plus `AX_FiniteDimOneForms` (Serre duality gives `H¹(𝒪(D)) ≅ H⁰(Ω¹ ⊗ 𝒪(-D))^*` but we can bypass the full Serre duality for this specific degree argument).
+**What to axiomatize.** Codex review called out that the original plan quietly used Serre duality in this proof without listing it as an axiom. Both axioms are needed:
+- `AX_RiemannRoch`: `dim H⁰(𝒪(D)) - dim H¹(𝒪(D)) = deg D + 1 - g`.
+- `AX_SerreDuality`: `dim H¹(𝒪(D)) = dim H⁰(Ω¹ ⊗ 𝒪(-D))` (or equivalently `H¹(𝒪(D)) ≅ H⁰(Ω¹ ⊗ 𝒪(-D))^*`).
 
-Difficulty: **Medium** for `⇐`; **Medium** for `⇒` *given* `AX_RiemannRoch`; **Hard** if we want to additionally discharge `AX_RiemannRoch` itself. **~2 weeks** for both directions given the axiom.
+Once both are available, the genus-0 uniformization becomes a *theorem*.
+
+**Caveat.** Fully formalizing `H⁰` / `H¹` / line bundles on compact Riemann surfaces is significant work. For v0.1 we may further axiomatize the specific corollary "genus 0 ⇒ biholomorphic to ℙ¹" as `AX_Uniformization0`, delaying the decomposition into RR + Serre. Trade-off: cleaner v0.1 story vs. more axioms to discharge later.
+
+Difficulty: **Medium** for `⇐`; **Medium** for `⇒` *given both axioms*; **Hard** if we want to additionally discharge both. **~3 weeks** for both directions once axioms are in place.
 
 ---
 
@@ -557,32 +602,35 @@ Difficulty: **Medium** for `⇐`; **Medium** for `⇒` *given* `AX_RiemannRoch`;
 
 We tag certain deep facts as named axioms initially — this lets downstream development proceed while we stage the hard proofs.
 
-| Axiom | Statement | True proof path | Difficulty |
-|-------|-----------|-----------------|------------|
-| `AX_FiniteDimOneForms` | `FiniteDimensional ℂ (HolomorphicOneForm X)` for `X` compact Riemann surface | Compactness + normal families, or Serre duality | Hard |
-| `AX_RiemannRoch` | Riemann–Roch for line bundles on compact Riemann surfaces (or for divisors) | Classical; implies `AX_Uniformization0` for genus 0 | Very hard; unifies several previous axioms |
-| `AX_RiemannBilinear` | Period matrix is symmetric with positive-definite imaginary part | Integration by parts + Hodge star + positivity | Medium |
-| `AX_H1FreeRank2g` | `H_1(X, ℤ)` free abelian of rank `2 · genus X` | CW / simplicial topology on compact orientable surfaces | Medium |
-| `AX_PeriodInjective` | `periodMap : H_1(X, ℤ) → (H⁰(X, Ω¹))^∨` is injective | One of the Riemann bilinear relations | Medium (follows from `AX_RiemannBilinear`) |
-| `AX_AbelTheorem` | `0 < genus X → Function.Injective (ofCurve P₀)` | Riemann's theorem on the theta divisor, or direct residue argument | Very hard |
-| `AX_DegreeIndependence` | Preimage-counting definition of degree independent of regular value | Principal divisors on Riemann surfaces | Medium |
-| `AX_PluckerFormula` | `SmoothPlaneCurve F` with `deg F = d ≥ 3` has genus `(d-1)(d-2)/2` | Adjunction formula | Medium |
+| Axiom | Statement | True proof path | Difficulty | Instance? |
+|-------|-----------|-----------------|------------|-----------|
+| `AX_FiniteDimOneForms` | `FiniteDimensional ℂ (HolomorphicOneForm X)` for `X` compact Riemann surface | Compactness + normal families, or Serre duality | Hard | **Yes** (required to make `genus` well-behaved) |
+| `AX_RiemannRoch` | `dim H⁰(𝒪(D)) - dim H¹(𝒪(D)) = deg D + 1 - g` | Classical | Very hard | No |
+| `AX_SerreDuality` | `H¹(𝒪(D)) ≅ H⁰(Ω¹ ⊗ 𝒪(-D))^*` | Classical | Very hard | No |
+| `AX_RiemannBilinear` | Period matrix is symmetric with positive-definite imaginary part | Integration by parts + Hodge star + positivity | Medium | No |
+| `AX_H1FreeRank2g` | `H_1(X, ℤ)` free abelian of rank `2 · genus X` | CW / simplicial topology on compact orientable surfaces | Medium | No |
+| `AX_PeriodInjective` | `periodMap : H_1(X, ℤ) → (H⁰(X, Ω¹))^∨` is injective | Consequence of `AX_RiemannBilinear` | Medium | No |
+| `AX_AbelTheorem` | `0 < genus X → Function.Injective (ofCurve P₀)` | Riemann's theorem on the theta divisor, or Forster-style residue argument | Very hard | No |
+| `AX_BranchLocus` | For non-constant holomorphic `f : X → Y`: proper, discrete fibers; critical values form a finite set; away from critical values, fiber cardinality is constant `= deg f` | Classical; uses open-map + compact-codomain | Hard | No |
+| `AX_PluckerFormula` | `SmoothPlaneCurve F` with `deg F = d ≥ 3` has genus `(d-1)(d-2)/2` | Adjunction formula | Medium | No |
 
 **Derived results (not axioms).**
-- `AX_Uniformization0` from Gemini's pushback is now a **theorem** from `AX_RiemannRoch + AX_FiniteDimOneForms`, per §6.1.
-- `AX_DimOneFormsEqGenus` is dropped: we *define* `genus X := Module.finrank ℂ (HolomorphicOneForm X)`, so the equation is tautological.
+- `genus_eq_zero_iff_homeo` is a *theorem* from `AX_RiemannRoch + AX_SerreDuality + AX_FiniteDimOneForms` (per §6.1). May be further axiomatized as `AX_Uniformization0` for v0.1 hygiene.
+- `AX_DimOneFormsEqGenus` dropped: by defining `genus X := Module.finrank ℂ (HolomorphicOneForm X)` the equation is tautological (requires `AX_FiniteDimOneForms` as instance, per §4.6).
+- The "degree is independent of regular value" statement (formerly `AX_DegreeIndependence`) is subsumed by `AX_BranchLocus`.
 
-**Rule**: every axiom gets its own file in `Axioms/`, with a docstring stating the math, the reference (Mumford / Milne / Debarre), and why it's axiomatized rather than proved. Each is a promissory note; we commit to discharging them eventually.
+**Rule**: every axiom gets its own file in `Axioms/`, with a docstring stating the math, the reference (Mumford / Milne / Debarre / Forster), and why it's axiomatized. Each is a promissory note.
 
 **Discharge priority** (order we aim to remove axioms):
-1. `AX_PeriodInjective` — follows from `AX_RiemannBilinear` once we have that.
-2. `AX_DegreeIndependence` — specialized argument using `Mathlib.Analysis.Meromorphic.Order`.
+1. `AX_PeriodInjective` — follows from `AX_RiemannBilinear`.
+2. `AX_BranchLocus` — local `meromorphicOrderAt` + properness + connectedness; most Mathlib-ready.
 3. `AX_H1FreeRank2g` — CW topology; may benefit from a future Mathlib PR on surface classification.
-4. `AX_RiemannBilinear` — the main Hodge-theoretic identity; directly discharges `AX_PeriodInjective` and makes the Jacobian target `SiegelUpperHalfSpace`.
-5. `AX_FiniteDimOneForms` — needs compactness + mean-value / Serre duality.
-6. `AX_PluckerFormula` — adjunction; relevant only to Track 2 `SmoothPlaneCurve`.
-7. `AX_RiemannRoch` — the deepest axiom; unlocks uniformization, Serre duality, and `AX_AbelTheorem`.
-8. `AX_AbelTheorem` — discharged via `AX_RiemannRoch` + theta-divisor argument, or via a direct residue-calculus proof (Forster Ch. III style) if we grow the Mathlib infrastructure for meromorphic differentials along the way.
+4. `AX_RiemannBilinear` — Hodge-theoretic identity; directly discharges `AX_PeriodInjective` and gives Jacobian ↪ `SiegelUpperHalfSpace`.
+5. `AX_FiniteDimOneForms` — compactness + normal families.
+6. `AX_PluckerFormula` — adjunction; Track 2 `SmoothPlaneCurve` only.
+7. `AX_SerreDuality` — classical pairing; unlocks `AX_Uniformization0` with `AX_RiemannRoch`.
+8. `AX_RiemannRoch` — deepest of the algebraic axioms.
+9. `AX_AbelTheorem` — via `AX_RiemannRoch` + theta divisor, or Forster-style residue argument.
 
 ---
 
@@ -591,22 +639,29 @@ We tag certain deep facts as named axioms initially — this lets downstream dev
 ```
 Track 1 (abstract X), basis-free Jacobian:
 
-Lattice (IsZLattice) → Siegel → ComplexTorus ─────────────────┐
-                                                                │
-OneForm → PathIntegral ─┬─→ Homology ─→ IntersectionForm ─┐    │
-                        │                                   │   │
-Genus (:= finrank OneForm) ──────────────────────────────→ ┤   │
-                                                             │  │
-                            Periods (+ AX_RiemannBilinear) ─┤  │
-                                                             │  │
-                                                             └──┴─→ Construction (basis-free) ──→ 7 instances ─┐
-                                                                                                                │
-                                                                         AbelJacobi ──────────────────────────→ ├─→ 22 sorries closed
-                                                                         (ofCurve, ofCurve_self, ofCurve_inj*)  │    on abstract X
-                                                                                                                │
-                                                                         Functoriality ──→ PushPull ──────────→ ┤
-                                                                                                                │
-                                                       AX_RiemannRoch ─→ Genus0 (both directions) ─────────────┘
+Lattice (IsZLattice) ─────────────────────────────────────────────┐
+                                                                    │
+[FiniteDimensional ℂ HolomorphicOneForm] (AX_FiniteDimOneForms)    │
+  ↓                                                                 │
+OneForm ──→ Genus := finrank OneForm ──→ periodLattice ────────── AbelianVariety
+  │                                            ↑                     │
+  ↓                                            │                     ↓
+PathIntegral ──→ Homology ──→ IntersectionForm ─┘                Construction ──→ 7 instances
+  │                              │   │                          (basis-free: JacobianAmbient ⧸ Λ)
+  │                              │   └─→ AX_PeriodInjective          │
+  │                              │                                    │
+  │                              └─→ (inter. pairing on H_1)          │
+  │                                                                    ↓
+  └────────────────────────────────────────────────────────→ AbelJacobi ──→ ofCurve, ofCurve_self
+                                                                       │
+                                                    AX_AbelTheorem ──→ ofCurve_inj
+                                                                       │
+                          AX_BranchLocus ──→ Functoriality ──→ PushPull (uses AX_BranchLocus)
+                                                                       │
+  AX_RiemannRoch + AX_SerreDuality ──→ Genus0 (both directions) ──────┘
+                                                                       │
+                                                                       ↓
+                                                        all 22 sorries closed on abstract X
 
 
 Track 2 (concrete X from projective embedding; depends on Part A only):
@@ -674,7 +729,9 @@ Track 1 and Track 2 run largely in parallel after Part A is done.
 - Track 1 closed modulo axioms: **~9–12 months** (A + B + C sequentially critical-path).
 - Zero axioms on abstract X: **~24+ months**, dominated by `AX_RiemannRoch` and `AX_AbelTheorem`.
 
-**Dominant costs.** `PathIntegral.lean` alone is roughly 3 months of dedicated Lean work — Gemini's analogy to Bochner integration is apt: that took multi-person-years in Mathlib. `PushPull.lean` needs branch-locus theory for holomorphic maps between compact Riemann surfaces (branch points, fiber degrees, local multiplicities) which is essentially greenfield in Mathlib. `HyperellipticCurve` period integrals bleed into `Complex.cpow` branch-cut handling, which is known to be painful in current Mathlib.
+**Dominant costs.** `PathIntegral.lean` alone is roughly 3 months of dedicated Lean work — Gemini's analogy to Bochner integration is apt: that took multi-person-years in Mathlib. `PushPull.lean` needs branch-locus theory for holomorphic maps between compact Riemann surfaces (branch points, fiber degrees, local multiplicities), now named `AX_BranchLocus` rather than axiomatized piecemeal. `HyperellipticCurve` period integrals bleed into `Complex.cpow` branch-cut handling — the planned workaround is to parameterize cycles explicitly as arcs in the upper half plane avoiding branch points, rather than rely on `Complex.cpow`.
+
+**v0.1 de-promise (per Codex review).** The earlier plan promised a fully worked `pushforward_pullback` genus-2 hyperelliptic example in v0.1. That requires `AX_BranchLocus` plus the fiber-sum theory that doesn't yet exist. Revised v0.1 target: the *definitional skeleton* of `pushforward`/`pullback`/`ContMDiff.degree` on `HyperellipticCurve g f`, plus explicit period-matrix computations, but `pushforward_pullback` itself left axiomatized-per-curve or deferred to v0.2.
 
 ---
 
@@ -709,13 +766,15 @@ First milestone, aimed at publication / community signal. Shipped as **Track 2 +
 
 1. Parts A.1–A.4 — complete standalone `AbelianVarieties` library (no sorries except optional `Theta.lean` lemmas).
 2. `ProjectiveCurve/Line.lean`, `Elliptic.lean`, `Hyperelliptic.lean` — concrete projective curves satisfying all of Buzzard's typeclass constraints.
-3. **All 22 sorries closed on `ProjectiveLine`, on genus-1 `EllipticCurve` examples, and on `HyperellipticCurve g f` for every squarefree `f`.**
-4. Explicit period-matrix computations on those curves, with `AX_RiemannBilinear`, `AX_FiniteDimOneForms`, `AX_DegreeIndependence` **proved**, not axiomatized, on these models.
-5. Definitions in Part B (`HolomorphicOneForm`, `pathIntegral`, `H_1`, `Jacobian X`) with signatures in place and explicit stubs; `Axioms/` directory populated with the seven named axioms.
-6. Worked example: explicit `pushforward_pullback` identity verified on a genus-2 hyperelliptic curve mapping to `ℙ¹`.
+3. **All 22 instance/data sorries closed on `ProjectiveLine`, on genus-1 `EllipticCurve` examples, and on `HyperellipticCurve g f` for every squarefree `f`.** Theorem sorries (`ofCurve_inj`, `pushforward_pullback`) axiomatized with per-curve named axioms where we can't yet discharge them.
+4. Explicit period-matrix computations on those curves (using explicit lifted-path parameterizations, not `Complex.cpow`), with `AX_RiemannBilinear` **proved** on these models.
+5. Definitions in Part B (`HolomorphicOneForm`, `pathIntegral`, `H_1`, `Jacobian X`) with signatures in place and explicit stubs; `Axioms/` populated with all nine named axioms (including `AX_SerreDuality` and `AX_BranchLocus`, both new in round 2).
+6. `AX_FiniteDimOneForms` installed as a global instance, so that `genus`/`ChartedSpace` are semantically live.
 7. CI green.
 
-This is a substantive, defensible artifact to announce back on `#Autoformalization` with honest caveats: the 22 sorries are closed on *a rich concrete population of compact Riemann surfaces*, not on every abstract `X`; closing the abstract case is Part B + discharging the named axioms on abstract `X`, which is work in progress. Track 2 is what most practitioners will actually want to use.
+**Codex-review de-promise:** the earlier draft promised a *fully worked* `pushforward_pullback = deg • id` genus-2 example. That needs branch-locus infrastructure (`AX_BranchLocus` unpacked into concrete lemmas) plus fiber-sum theory that's essentially greenfield. v0.1 ships the definitional skeleton on hyperelliptic curves and per-curve axioms; the identity itself becomes a v0.2 target.
+
+This is a substantive, defensible artifact to announce on `#Autoformalization` with honest caveats: instance sorries closed on *a rich concrete population of compact Riemann surfaces*, not on every abstract `X`; functoriality and `pushforward_pullback` axiomatized pending branch-locus infrastructure; closing the abstract case is Part B + discharging the named axioms, work in progress.
 
 ## v0.2 target
 
