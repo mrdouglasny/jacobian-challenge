@@ -34,7 +34,7 @@ Appendix by H. Umemura: solving algebraic equations of arbitrary degree using hy
 
 **Largely beyond Buzzard's scope:**
 
-§§6–11 of IIIa (theta vanishing, Thomae, KdV) and most of IIIb (PDE applications) are about Jacobian theta functions as mathematical objects in their own right, not about the abstract `Jacobian X`-as-a-type construction that Buzzard's challenge is after. These sections are **of substantial independent interest for your physics work** (KdV hierarchy, integrable systems, generalized Jacobians of singular curves, tau functions) but do not feed into the 22 sorries directly.
+§§6–11 of IIIa (theta vanishing, Thomae, KdV) and most of IIIb (PDE applications) are about Jacobian theta functions as mathematical objects in their own right, not about the abstract `Jacobian X`-as-a-type construction that Buzzard's challenge is after. These sections are **of substantial independent interest for your physics work** (KdV hierarchy, integrable systems, generalized Jacobians of singular curves, tau functions) but do not feed into Buzzard's 24 sorries directly.
 
 ## Recommended triage for our project
 
