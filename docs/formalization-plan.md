@@ -843,6 +843,21 @@ Mathlib at the pin has renamed `PartialHomeomorph` → `OpenPartialHomeomorph`. 
 - **Mathlib has more than Phase B caught.** The sphere homeomorphism, the `OnePoint` continuity criterion, and `IsOpenEmbedding.toOpenPartialHomeomorph` all had the exact shape we needed. Before assuming a Mathlib gap, grep aggressively.
 - **`abbrev` over `def`** for the carrier type propagates all typeclass instances transparently; `def` would have required manual instance transfers for every coercion and typeclass.
 
-### Next: Part A (A1–A3)
+### 2026-04-21: Part A start (commits `ae26485`, `4d84402`)
 
-Next task is A1 (`Basic.lean`) and A2 (`Lattice.lean` + `Siegel.lean`).
+- `Jacobians/AbelianVariety/Lattice.lean`: convention-fixing stub. Uses Mathlib's `IsZLattice` directly rather than reinventing `FullRankLattice`. The variable bundle documented here is the common interface for all Part A consumers.
+- `Jacobians/AbelianVariety/ComplexTorus.lean`: `ComplexTorus V L := V ⧸ L.toAddSubgroup` for `[NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]`, `(L : Submodule ℤ V) [DiscreteTopology L] [IsZLattice ℝ L]`. **5 of the 7 Buzzard instances land** automatically or via tight Mathlib calls:
+  - `AddCommGroup`, `TopologicalSpace`, `IsTopologicalAddGroup` — automatic via the `V ⧸ L.toAddSubgroup` quotient.
+  - `T2Space` — `AddSubgroup.isClosed_of_discrete` + `T1Space` bridge.
+  - `CompactSpace` — `IsZLattice.isCompact_range_of_periodic` applied to the quotient map.
+  
+  **ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup** remain as TODO with a four-step route documented in-file (small neighborhood of 0 avoiding `L \ {0}` ⇒ local sections of π ⇒ atlas ⇒ translations-are-affine-hence-analytic).
+
+**Deviations from plan.** The plan estimated 2–3 weeks for `ComplexTorus.lean` total. 5/7 instances fell out in hours via Mathlib lemmas. The remaining 3 (covering-map heavy-lifting) are still the 2–3 week block. Plan estimate holds, but the split is sharper than expected.
+
+**Typeclass-bundle correction.** Plan had `[AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V] [TopologicalSpace V] [IsTopologicalAddGroup V]`. Actual requirement (from `IsZLattice`): `[NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]`. Stronger but more concise. Siegel / Theta consumers will use the same bundle.
+
+### Next
+
+- `ComplexTorus.lean` remaining instances (ChartedSpace + IsManifold + LieAddGroup). ~2–3 weeks of covering-map infrastructure, likely Codex-assisted.
+- Alternative / parallel: start Track 2 module 2 (`Elliptic.lean` using Mathlib's `EllipticCurve`) or Track 2 module 3 (`Hyperelliptic.lean`, the workhorse).
