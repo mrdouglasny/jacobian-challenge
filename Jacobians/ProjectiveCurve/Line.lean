@@ -118,14 +118,34 @@ noncomputable def chart1 : OpenPartialHomeomorph ProjectiveLine ℂ where
       have : ContinuousAt (fun z : ℂ => z⁻¹) z := continuousAt_inv₀ hz
       exact OnePoint.continuousAt_coe.mpr this
   continuousOn_invFun := by
-    sorry
-    -- TODO (chart1 inverse continuity).
-    -- Codex confirmed a proof typechecks, using:
-    --   `continuousAt_update_of_ne`, `continuousAt_iff_punctured_nhds`,
-    --   `Function.update_eventuallyEq_nhdsNE`, `OnePoint.tendsto_coe_infty`,
-    --   `Filter.tendsto_inv₀_nhdsNE_zero`.
-    -- The approach: rewrite `invFun w = Function.update (fun w => (w⁻¹ : ProjectiveLine)) 0 ∞ w`,
-    -- then split at w = 0 (use `Tendsto` into `𝓝 ∞`) vs w ≠ 0 (use update_of_ne).
+    -- Rewrite the `if` as `Function.update` of the naive inversion map at `0 ↦ ∞`.
+    -- Then `continuousOn_update_iff` splits into continuity on the complement
+    -- of `{0}` (coe ∘ inv, smooth away from 0) and the tendsto condition at `0`
+    -- (inv → cocompact, then coe → 𝓝 ∞).
+    let f : ℂ → ProjectiveLine := fun w => (((w⁻¹ : ℂ) : ProjectiveLine))
+    have hupdate :
+        (fun w : ℂ => if w = 0 then ((∞ : ProjectiveLine)) else (((w⁻¹ : ℂ) : ProjectiveLine))) =
+          Function.update f 0 (∞ : ProjectiveLine) := by
+      funext w
+      by_cases hw : w = 0
+      · subst hw
+        simp [Function.update]
+      · simp [f, Function.update, hw]
+    rw [hupdate, continuousOn_update_iff]
+    constructor
+    · intro z hz
+      have hz0 : z ≠ 0 := by simpa using hz.2
+      exact (OnePoint.continuous_coe.continuousAt.comp (continuousAt_inv₀ hz0)).continuousWithinAt
+    · intro _
+      have hset : (univ \ {(0 : ℂ)} : Set ℂ) = ({(0 : ℂ)}ᶜ : Set ℂ) := by
+        ext z
+        simp
+      have hinv :
+          Filter.Tendsto Inv.inv (𝓝[univ \ {(0 : ℂ)}] (0 : ℂ)) (Filter.coclosedCompact ℂ) := by
+        simpa [hset, Filter.coclosedCompact_eq_cocompact, ← Metric.cobounded_eq_cocompact] using
+          (Filter.tendsto_inv₀_nhdsNE_zero (α := ℂ))
+      simpa [f] using
+        (OnePoint.tendsto_coe_infty.comp hinv)
 
 -- TODO (ChartedSpace): `instance : ChartedSpace ℂ ProjectiveLine` via the two-chart atlas.
 -- Plan:
