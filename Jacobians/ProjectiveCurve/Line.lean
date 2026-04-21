@@ -19,7 +19,7 @@ to `OpenPartialHomeomorph` (with the same fields + open-source/open-target).
 -/
 import Mathlib
 
-open scoped Manifold Topology
+open scoped Manifold Topology Classical
 open scoped ContDiff -- for `ω` notation
 open Complex Set OnePoint Topology
 
@@ -147,12 +147,33 @@ noncomputable def chart1 : OpenPartialHomeomorph ProjectiveLine ℂ where
       simpa [f] using
         (OnePoint.tendsto_coe_infty.comp hinv)
 
--- TODO (ChartedSpace): `instance : ChartedSpace ℂ ProjectiveLine` via the two-chart atlas.
--- Plan:
---   atlas := {chart0, chart1}
---   chartAt p := if p = (0 : ℂ) then chart1 else chart0   -- chart0 covers everything except ∞
---   ...or use chart0 when p ≠ ∞, chart1 when p = ∞ (cleaner: chart0 fails only at ∞).
---
+/-- The preferred chart at `p ∈ ProjectiveLine`: `chart1` if `p = ∞`, `chart0` otherwise. -/
+noncomputable def chartAt (p : ProjectiveLine) : OpenPartialHomeomorph ProjectiveLine ℂ :=
+  if p = (∞ : ProjectiveLine) then chart1 else chart0
+
+noncomputable instance : ChartedSpace ℂ ProjectiveLine where
+  atlas := {chart0, chart1}
+  chartAt := chartAt
+  mem_chart_source := by
+    intro p
+    by_cases hp : p = (∞ : ProjectiveLine)
+    · -- p = ∞: chartAt = chart1, source = {q | q ≠ (0 : ℂ)}, and ∞ ≠ some 0.
+      simp only [chartAt, chart1, hp]
+      exact OnePoint.infty_ne_coe 0
+    · -- p ≠ ∞: chartAt = chart0, source = range coe; p is in range coe.
+      simp only [chartAt, if_neg hp]
+      have : p ∈ range ((↑) : ℂ → ProjectiveLine) := by
+        rcases (OnePoint.ne_infty_iff_exists.mp hp) with ⟨z, rfl⟩
+        exact ⟨z, rfl⟩
+      simpa [chart0] using this
+  chart_mem_atlas := by
+    intro p
+    by_cases hp : p = (∞ : ProjectiveLine)
+    · show chartAt p ∈ ({chart0, chart1} : Set _)
+      simp [chartAt, if_pos hp]
+    · show chartAt p ∈ ({chart0, chart1} : Set _)
+      simp [chartAt, if_neg hp]
+
 -- TODO (IsManifold): `instance : IsManifold 𝓘(ℂ) ω ProjectiveLine` via analytic `w = 1/z`
 -- on the transition domain `chart0.source ∩ chart1.source = {z : ℂ | z ≠ 0}`.
 
