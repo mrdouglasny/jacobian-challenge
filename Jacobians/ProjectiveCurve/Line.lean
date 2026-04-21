@@ -19,6 +19,10 @@ to `OpenPartialHomeomorph` (with the same fields + open-source/open-target).
 -/
 import Mathlib
 
+-- `set_option linter.style.openClassical false` to allow `open scoped Classical` below.
+-- We need `Classical.propDecidable` at the definition site of `chartAt` for its `if`.
+set_option linter.style.openClassical false in
+section
 open scoped Manifold Topology Classical
 open scoped ContDiff -- for `ω` notation
 open Complex Set OnePoint Topology
@@ -174,8 +178,93 @@ noncomputable instance : ChartedSpace ℂ ProjectiveLine where
     · show chartAt p ∈ ({chart0, chart1} : Set _)
       simp [chartAt, if_neg hp]
 
--- TODO (IsManifold): `instance : IsManifold 𝓘(ℂ) ω ProjectiveLine` via analytic `w = 1/z`
--- on the transition domain `chart0.source ∩ chart1.source = {z : ℂ | z ≠ 0}`.
+/-- `ProjectiveLine` is an analytic (`ω`-smooth) complex 1-manifold.
+
+Proof strategy via `isManifold_of_contDiffOn`: check every transition
+`chart ≫ chart'` is `ContDiffOn ℂ ω`. Four cases from the two-chart atlas,
+all reducing to either `contDiffOn_id` (identity) or `contDiffOn_inv`
+(for `z ↦ z⁻¹` on `{0}ᶜ`). -/
+noncomputable instance : IsManifold 𝓘(ℂ) ω ProjectiveLine := by
+  apply isManifold_of_contDiffOn
+  have chart0_coe_apply : ∀ w : ℂ, chart0 ((w : ℂ) : ProjectiveLine) = w := by
+    intro w
+    simpa [chart0] using
+      (Topology.IsOpenEmbedding.toOpenPartialHomeomorph_left_inv
+        (f := ((↑) : ℂ → OnePoint ℂ)) (h := OnePoint.isOpenEmbedding_coe (X := ℂ)) (x := w))
+  intro e e' he he'
+  rcases (by
+    simpa [Set.mem_insert_iff, Set.mem_singleton_iff] using he :
+      e = chart0 ∨ e = chart1) with rfl | rfl
+  · rcases (by
+      simpa [Set.mem_insert_iff, Set.mem_singleton_iff] using he' :
+        e' = chart0 ∨ e' = chart1) with rfl | rfl
+    · simpa [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.range_id,
+        Set.inter_univ, Set.univ_inter, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm] using
+        (show ContDiffOn ℂ ω (chart0 ∘ chart0.symm)
+            (chart0.target ∩ chart0.symm ⁻¹' chart0.source) from by
+          have hs : chart0.target ∩ chart0.symm ⁻¹' chart0.source = (univ : Set ℂ) := by
+            ext w
+            simp [chart0]
+          rw [hs]
+          refine (contDiffOn_id : ContDiffOn ℂ ω (id : ℂ → ℂ) univ).congr ?_
+          intro w hw
+          simpa [Function.comp_apply] using chart0_coe_apply w)
+    · simpa [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.range_id,
+        Set.inter_univ, Set.univ_inter, Set.preimage_setOf_eq, Set.compl_singleton_eq,
+        OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm] using
+        (show ContDiffOn ℂ ω (chart1 ∘ chart0.symm)
+            (chart0.target ∩ chart0.symm ⁻¹' chart1.source) from by
+          have hs : chart0.target ∩ chart0.symm ⁻¹' chart1.source = ({0}ᶜ : Set ℂ) := by
+            ext w
+            by_cases hw : w = 0
+            · simp [chart0, chart1, hw]
+            · simp [chart0, chart1, hw]
+          rw [hs]
+          refine (contDiffOn_inv (𝕜 := ℂ) (𝕜' := ℂ) (n := ω)).congr ?_
+          intro w hw
+          simp [chart0, chart1, Function.comp_apply, OnePoint.elim_some])
+  · rcases (by
+      simpa [Set.mem_insert_iff, Set.mem_singleton_iff] using he' :
+        e' = chart0 ∨ e' = chart1) with rfl | rfl
+    · simpa [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.range_id,
+        Set.inter_univ, Set.univ_inter, Set.preimage_setOf_eq, Set.compl_singleton_eq,
+        OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm] using
+        (show ContDiffOn ℂ ω (chart0 ∘ chart1.symm)
+            (chart1.target ∩ chart1.symm ⁻¹' chart0.source) from by
+          have hs : chart1.target ∩ chart1.symm ⁻¹' chart0.source = ({0}ᶜ : Set ℂ) := by
+            ext w
+            by_cases hw : w = 0
+            · simp [chart0, chart1, hw]
+            · simp [chart0, chart1, hw]
+          rw [hs]
+          refine (contDiffOn_inv (𝕜 := ℂ) (𝕜' := ℂ) (n := ω)).congr ?_
+          intro w hw
+          by_cases hw0 : w = 0
+          · simp [hw0] at hw
+          · simpa [Function.comp_apply, chart1, hw0] using chart0_coe_apply (w⁻¹))
+    · simpa [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.range_id,
+        Set.inter_univ, Set.univ_inter, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm] using
+        (show ContDiffOn ℂ ω (chart1 ∘ chart1.symm)
+            (chart1.target ∩ chart1.symm ⁻¹' chart1.source) from by
+          have hs : chart1.target ∩ chart1.symm ⁻¹' chart1.source = (univ : Set ℂ) := by
+            ext w
+            by_cases hw : w = 0
+            · simp [chart1, hw]
+            · simp [chart1, hw]
+          rw [hs]
+          refine (contDiffOn_id : ContDiffOn ℂ ω (id : ℂ → ℂ) univ).congr ?_
+          intro w hw
+          by_cases hw0 : w = 0
+          · simp [chart1, Function.comp_apply, hw0]
+          · simp [chart1, Function.comp_apply, hw0, OnePoint.elim_some])
 
 -- TODO (stereographic): `ProjectiveLine ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1`
 -- for the `⇐` direction of `genus_eq_zero_iff_homeo`.
@@ -183,3 +272,5 @@ noncomputable instance : ChartedSpace ℂ ProjectiveLine where
 end ProjectiveLine
 
 end Jacobians.ProjectiveCurve
+
+end  -- close the `section` opened around `open scoped Classical`
