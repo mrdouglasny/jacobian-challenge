@@ -1,14 +1,42 @@
 # Status
 
+_Last updated: 2026-04-21_
+
 ## Build status
 
-Not yet verified. Phase A task: `lake update && lake build`.
+✅ Green. `lake build` completes 8307 jobs.
 
 ## Sorry inventory
 
-All 24 sorries in `Jacobians/Challenge.lean` are as originally stated by Buzzard (v0.2). None filled.
+All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzzard (v0.2). None have been filled yet at the abstract-`X` level; work on closing them is in progress through Part A + Track 2 modules. **Zero sorries** in any non-Challenge file.
 
 (The early scaffold commits and initial docs mistakenly said 22; verified by `grep -c 'sorry' Jacobians/Challenge.lean` on 2026-04-20 — actual count is 24.)
+
+## Module progress
+
+### ✅ Complete
+
+- `Jacobians/ProjectiveCurve/Line.lean` — `ProjectiveLine := OnePoint ℂ` with all seven X-side Buzzard instances (TopologicalSpace, T2Space, CompactSpace, ConnectedSpace, Nonempty, ChartedSpace ℂ, IsManifold 𝓘(ℂ) ω). Plus `chart0`, `chart1`, `chartAt`, and `stereographic : ProjectiveLine ≃ₜ S² ⊂ ℝ³`. Zero sorries.
+
+### 🔄 In progress
+
+- `Jacobians/AbelianVariety/ComplexTorus.lean` — `ComplexTorus V L := V ⧸ L.toAddSubgroup` for a full-rank ℤ-lattice. **5/7** Buzzard instances land (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace). **ChartedSpace V, IsManifold, LieAddGroup** remain as TODO; detailed route in file-level comments.
+
+### ✅ Scaffolding only
+
+- `Jacobians/AbelianVariety/Lattice.lean` — convention-fixing wrapper around Mathlib's `IsZLattice` class.
+- `Jacobians/AbelianVariety.lean` — top-level Part A aggregator.
+- `Jacobians/ProjectiveCurve.lean` — top-level Track 2 aggregator.
+- `Jacobians/ProjectiveCurve/Charts.lean` — shared-machinery stub for implicit-function-theorem chart constructions.
+
+### ⬜ Not started
+
+Part A: `Siegel.lean`, `Theta.lean`.
+Part B (abstract `X`): `OneForm.lean`, `PathIntegral.lean`, `Homology.lean`, `IntersectionForm.lean`, `Periods.lean`, `Genus.lean`.
+Track 2: `Elliptic.lean`, `Hyperelliptic.lean`, `PlaneCurve.lean`.
+Bridge: `Jacobian/Construction.lean`, `AbelJacobi.lean`, `Abel.lean`, `Functoriality.lean`, `PushPull.lean`.
+Genus 0: `Uniformization.lean`.
+Axioms: all 9 named axioms (stubs not yet generated; see [formalization-plan.md §7](formalization-plan.md)).
 
 ### Data sorries (9)
 
@@ -51,7 +79,7 @@ All 24 sorries in `Jacobians/Challenge.lean` are as originally stated by Buzzard
 
 ## Axiom inventory
 
-None introduced by this project. Challenge file uses only sorries, no axioms.
+None introduced by this project yet. The [formalization plan](formalization-plan.md) defines nine named axioms (`AX_FiniteDimOneForms`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`) that will be introduced as `Axioms/*.lean` files once the consuming modules need them.
 
 ## Dependencies pinned
 
