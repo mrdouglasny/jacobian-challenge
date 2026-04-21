@@ -266,8 +266,19 @@ noncomputable instance : IsManifold 𝓘(ℂ) ω ProjectiveLine := by
           · simp [chart1, Function.comp_apply, hw0]
           · simp [chart1, Function.comp_apply, hw0, OnePoint.elim_some])
 
--- TODO (stereographic): `ProjectiveLine ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1`
--- for the `⇐` direction of `genus_eq_zero_iff_homeo`.
+/-- Stereographic projection `ProjectiveLine ≃ₜ S² ⊂ ℝ³`.
+
+Derived from Mathlib's `onePointEquivSphereOfFinrankEq`, which gives a
+homeomorphism between the one-point compactification of any finite-dimensional
+real vector space `V` and the unit sphere in `EuclideanSpace ℝ ι` whenever
+`finrank ℝ V + 1 = Fintype.card ι`. For `V := ℂ` (with `finrank ℝ ℂ = 2`) and
+`ι := Fin 3`, the condition `2 + 1 = 3` holds.
+
+This will give the `⇐` direction of `genus_eq_zero_iff_homeo` on
+`ProjectiveLine` via transport of `Nonempty (ProjectiveLine ≃ₜ sphere …)`. -/
+noncomputable def stereographic :
+    ProjectiveLine ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 :=
+  onePointEquivSphereOfFinrankEq (ι := Fin 3) (V := ℂ) (by simp [Complex.finrank_real_complex])
 
 end ProjectiveLine
 
