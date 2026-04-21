@@ -57,6 +57,68 @@ The likely route is:
 With that atlas in place, the `IsManifold 𝓘(ℂ, V) ω` and `LieAddGroup 𝓘(ℂ, V) ω` instances should
 follow from the standard smoothness of affine translations on `V`. -/
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
+private theorem lattice_isDiscrete :
+    IsDiscrete (L.toAddSubgroup : Set V) := by
+  rw [SetLike.isDiscrete_iff_discreteTopology]
+  infer_instance
+
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
+private noncomputable def quotientMapIsLocalHomeomorph :
+    IsLocalHomeomorph (QuotientAddGroup.mk' L.toAddSubgroup : V → ComplexTorus V L) := by
+  let hq : IsAddQuotientCoveringMap (QuotientAddGroup.mk' L.toAddSubgroup) L.toAddSubgroup :=
+    AddSubgroup.isAddQuotientCoveringMap_of_comm L.toAddSubgroup lattice_isDiscrete
+  exact hq.isCoveringMap.isLocalHomeomorph
+
+private noncomputable def liftPoint (p : ComplexTorus V L) : V :=
+  Classical.choose (QuotientAddGroup.mk'_surjective L.toAddSubgroup p)
+
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [DiscreteTopology L] [IsZLattice ℝ L] in
+private lemma liftPoint_spec (p : ComplexTorus V L) :
+    QuotientAddGroup.mk' L.toAddSubgroup (liftPoint (L := L) p) = p :=
+  Classical.choose_spec (QuotientAddGroup.mk'_surjective L.toAddSubgroup p)
+
+private noncomputable def quotientBranch (p : ComplexTorus V L) :
+    OpenPartialHomeomorph V (ComplexTorus V L) :=
+  Classical.choose (quotientMapIsLocalHomeomorph (L := L) (liftPoint (L := L) p))
+
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
+private lemma mem_quotientBranch_source (p : ComplexTorus V L) :
+    liftPoint (L := L) p ∈ (quotientBranch (L := L) p).source :=
+  (Classical.choose_spec (quotientMapIsLocalHomeomorph (L := L) (liftPoint (L := L) p))).1
+
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
+private lemma quotientBranch_eq (p : ComplexTorus V L) :
+    ((quotientBranch (L := L) p : OpenPartialHomeomorph V (ComplexTorus V L)) : V →
+      ComplexTorus V L) = QuotientAddGroup.mk' L.toAddSubgroup :=
+  (Classical.choose_spec (quotientMapIsLocalHomeomorph (L := L) (liftPoint (L := L) p))).2.symm
+
+noncomputable instance : ChartedSpace V (ComplexTorus V L) where
+  atlas := Set.range fun p => (quotientBranch (L := L) p).symm
+  chartAt p := (quotientBranch (L := L) p).symm
+  mem_chart_source p := by
+    have hp : quotientBranch (L := L) p (liftPoint (L := L) p) = p := by
+      rw [quotientBranch_eq (L := L) p]
+      exact liftPoint_spec (L := L) p
+    simpa [hp] using
+      (quotientBranch (L := L) p).map_source (mem_quotientBranch_source (L := L) p)
+  chart_mem_atlas p := ⟨p, rfl⟩
+
+noncomputable instance : IsManifold 𝓘(ℂ, V) ω (ComplexTorus V L) := by
+  -- TODO: To use `isManifold_of_contDiffOn`, we still need an explicit overlap formula for the
+  -- charts built from `quotientMapIsLocalHomeomorph`: on each nonempty overlap, prove
+  -- `(chartAt V p).symm ≫ₕ chartAt V q` agrees with translation by a specific lattice vector.
+  -- The present blocker is that `IsLocalHomeomorph` only gives existential local branches, and we
+  -- have not yet proved the lemma identifying two chosen branches on an overlap by a translation.
+  sorry
+
+noncomputable instance : LieAddGroup 𝓘(ℂ, V) ω (ComplexTorus V L) := by
+  -- TODO: After the `IsManifold` instance is upgraded from the existential atlas above to charts
+  -- with explicit translation transition maps, addition and negation should be shown smooth by
+  -- rewriting them locally to the corresponding affine maps on `V`. Right now this is blocked on
+  -- the missing overlap/translation lemma used in the preceding `IsManifold` TODO.
+  sorry
+
 end ComplexTorus
 
 end Jacobians.AbelianVariety
