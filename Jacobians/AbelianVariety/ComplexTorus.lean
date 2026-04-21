@@ -252,6 +252,35 @@ private lemma liftPoint_neg_const_mem (p : ComplexTorus V L) :
     QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hq.symm)
   simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
 
+private lemma mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
+    z ∈ (extChartAt 𝓘(ℂ, V) p).target ↔ z ∈ chartTarget (L := L) p := by
+  rw [extChartAt_target]
+  simpa [modelWithCornersSelf_coe_symm] using
+    (show z ∈ (chartAt V p).target ↔ z ∈ chartTarget (L := L) p from Iff.rfl)
+
+private lemma extChartAt_apply_quotient_mk (p : ComplexTorus V L) {z : V}
+    (hz : z ∈ chartTarget (L := L) p) :
+    extChartAt 𝓘(ℂ, V) p (QuotientAddGroup.mk' L.toAddSubgroup z) = z := by
+  simpa [extChartAt, modelWithCornersSelf_coe] using chart_apply_mk (L := L) p hz
+
+private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × V} :
+    z ∈ (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ↔
+      z.1 ∈ chartTarget (L := L) p ∧ z.2 ∈ chartTarget (L := L) q := by
+  rw [extChartAt_prod]
+  constructor <;> intro hz <;>
+    simpa [PartialEquiv.prod_target, mem_extChartAt_target_iff] using hz
+
+private lemma extChartAt_prod_symm_eq_pair_quotient_mk
+    (p q : ComplexTorus V L) {z : V × V}
+    (hz₁ : z.1 ∈ chartTarget (L := L) p) (hz₂ : z.2 ∈ chartTarget (L := L) q) :
+    (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm z =
+      (QuotientAddGroup.mk' L.toAddSubgroup z.1,
+        QuotientAddGroup.mk' L.toAddSubgroup z.2) := by
+  rw [extChartAt_prod, PartialEquiv.prod_coe_symm]
+  change ((quotientBranch (L := L) p) z.1, (quotientBranch (L := L) q) z.2) =
+    (QuotientAddGroup.mk' L.toAddSubgroup z.1, QuotientAddGroup.mk' L.toAddSubgroup z.2)
+  rfl
+
 
 -- TODO (LieAddGroup): Codex had the addition/negation charts set up but the
 -- simp/simpa rewrites for product-chart `extChartAt` and negation-chart `symm`
@@ -261,7 +290,199 @@ private lemma liftPoint_neg_const_mem (p : ComplexTorus V L) :
 --   product version: `((chartAt V p).prod (chartAt V q)).symm`
 -- Route: prove these first, then contMDiff_add / contMDiff_neg fall out.
 noncomputable instance : LieAddGroup 𝓘(ℂ, V) ω (ComplexTorus V L) := by
-  sorry
+  refine { contMDiff_add := ?_, contMDiff_neg := ?_ }
+  · rw [contMDiff_iff]
+    constructor
+    · simpa using (continuous_add :
+        Continuous fun p : ComplexTorus V L × ComplexTorus V L ↦ p.1 + p.2)
+    · rintro ⟨p, q⟩ r
+      apply contDiffOn_of_locally_contDiffOn
+      intro z hz
+      have hz₁ : z.1 ∈ chartTarget (L := L) p :=
+        (mem_extChartAt_prod_target_iff (L := L) p q).1 hz.1 |>.1
+      have hz₂ : z.2 ∈ chartTarget (L := L) q :=
+        (mem_extChartAt_prod_target_iff (L := L) p q).1 hz.1 |>.2
+      let a : ComplexTorus V L × ComplexTorus V L :=
+        (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm z
+      let w : V := extChartAt 𝓘(ℂ, V) r (a.1 + a.2)
+      let c : V := w - (z.1 + z.2)
+      refine ⟨(chartTarget (L := L) p ×ˢ chartTarget (L := L) q) ∩
+          (fun t : V × V ↦ t.1 + t.2 + c) ⁻¹' chartTarget (L := L) r, ?_, ?_, ?_⟩
+      · exact ((isOpen_chartTarget (L := L) p).prod (isOpen_chartTarget (L := L) q)).inter
+          ((isOpen_chartTarget (L := L) r).preimage
+            ((continuous_fst.add continuous_snd).add continuous_const))
+      · have hza : a = (QuotientAddGroup.mk' L.toAddSubgroup z.1,
+            QuotientAddGroup.mk' L.toAddSubgroup z.2) :=
+          extChartAt_prod_symm_eq_pair_quotient_mk (L := L) p q hz₁ hz₂
+        have hw : w ∈ chartTarget (L := L) r := by
+          have : w ∈ (extChartAt 𝓘(ℂ, V) r).target :=
+            (extChartAt 𝓘(ℂ, V) r).map_source hz.2
+          exact (mem_extChartAt_target_iff (L := L) r).1 this
+        refine ⟨?_, ?_⟩
+        · exact ⟨hz₁, hz₂⟩
+        · simpa [c, w]
+      · refine
+          (show ContDiffOn ℂ ω (fun t : V × V ↦ t.1 + t.2 + c)
+              (((extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ∩
+                (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm ⁻¹'
+                  ((fun s : ComplexTorus V L × ComplexTorus V L ↦ s.1 + s.2) ⁻¹'
+                    (extChartAt 𝓘(ℂ, V) r).source)) ∩
+                ((chartTarget (L := L) p ×ˢ chartTarget (L := L) q) ∩
+                  (fun t : V × V ↦ t.1 + t.2 + c) ⁻¹' chartTarget (L := L) r)) from
+            ((contDiff_fst.add contDiff_snd).add
+              (contDiff_const : ContDiff ℂ ω (fun _ : V × V ↦ c))).contDiffOn).congr ?_
+        intro t ht
+        have ht₁ : t.1 ∈ chartTarget (L := L) p := ht.2.1.1
+        have ht₂ : t.2 ∈ chartTarget (L := L) q := ht.2.1.2
+        have htr : t.1 + t.2 + c ∈ chartTarget (L := L) r := ht.2.2
+        have hta :
+            (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm t =
+              (QuotientAddGroup.mk' L.toAddSubgroup t.1,
+                QuotientAddGroup.mk' L.toAddSubgroup t.2) :=
+          extChartAt_prod_symm_eq_pair_quotient_mk (L := L) p q ht₁ ht₂
+        have hza :
+            a = (QuotientAddGroup.mk' L.toAddSubgroup z.1,
+              QuotientAddGroup.mk' L.toAddSubgroup z.2) :=
+          extChartAt_prod_symm_eq_pair_quotient_mk (L := L) p q hz₁ hz₂
+        have hw : w ∈ chartTarget (L := L) r := by
+          have : w ∈ (extChartAt 𝓘(ℂ, V) r).target :=
+            (extChartAt 𝓘(ℂ, V) r).map_source hz.2
+          exact (mem_extChartAt_target_iff (L := L) r).1 this
+        have hwq :
+            QuotientAddGroup.mk' L.toAddSubgroup w =
+              QuotientAddGroup.mk' L.toAddSubgroup (z.1 + z.2) := by
+          have hleft : (extChartAt 𝓘(ℂ, V) r).symm w = a.1 + a.2 := by
+            change (extChartAt 𝓘(ℂ, V) r).symm
+                ((extChartAt 𝓘(ℂ, V) r) (a.1 + a.2)) = a.1 + a.2
+            exact (extChartAt 𝓘(ℂ, V) r).left_inv hz.2
+          have hsumz : a.1 + a.2 = QuotientAddGroup.mk' L.toAddSubgroup (z.1 + z.2) := by
+            rw [hza]
+            rfl
+          exact (extChartAt_symm_eq_quotient_mk (L := L) r hw).symm.trans (hleft.trans hsumz)
+        have hc_mem : c ∈ (L.toAddSubgroup : Set V) := by
+          have :
+              -(z.1 + z.2) + w ∈ (L.toAddSubgroup : Set V) :=
+            QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hwq.symm)
+          simpa [c, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
+        have htq :
+            QuotientAddGroup.mk' L.toAddSubgroup (t.1 + t.2 + c) =
+              QuotientAddGroup.mk' L.toAddSubgroup (t.1 + t.2) := by
+          have hnegc : -c ∈ (L.toAddSubgroup : Set V) :=
+            AddSubgroup.neg_mem L.toAddSubgroup hc_mem
+          have hrel : -(t.1 + t.2 + c) + (t.1 + t.2) = -c := by
+            abel
+          apply Quotient.sound'
+          rw [QuotientAddGroup.leftRel_apply]
+          rw [hrel]
+          exact hnegc
+        have hsumm :
+            ((extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm t).1 +
+                ((extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm t).2 =
+              QuotientAddGroup.mk' L.toAddSubgroup (t.1 + t.2) := by
+          rw [hta]
+          rfl
+        calc
+          (extChartAt 𝓘(ℂ, V) r ∘
+              (fun s : ComplexTorus V L × ComplexTorus V L ↦ s.1 + s.2) ∘
+              (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm) t
+              = extChartAt 𝓘(ℂ, V) r
+                  ((((extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm t).1) +
+                    (((extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm t).2)) := by
+                    rfl
+          _ = extChartAt 𝓘(ℂ, V) r
+                  (QuotientAddGroup.mk' L.toAddSubgroup (t.1 + t.2)) := by
+                    rw [hsumm]
+          _ = extChartAt 𝓘(ℂ, V) r
+                  (QuotientAddGroup.mk' L.toAddSubgroup (t.1 + t.2 + c)) := by
+                    rw [htq.symm]
+          _ = t.1 + t.2 + c := extChartAt_apply_quotient_mk (L := L) r htr
+  · rw [contMDiff_iff]
+    constructor
+    · simpa using (continuous_neg : Continuous fun a : ComplexTorus V L ↦ -a)
+    · intro p q
+      apply contDiffOn_of_locally_contDiffOn
+      intro z hz
+      have hz₁ : z ∈ chartTarget (L := L) p := (mem_extChartAt_target_iff (L := L) p).1 hz.1
+      let a : ComplexTorus V L := (extChartAt 𝓘(ℂ, V) p).symm z
+      let w : V := extChartAt 𝓘(ℂ, V) q (-a)
+      let c : V := w + z
+      refine ⟨chartTarget (L := L) p ∩ (fun t : V ↦ -t + c) ⁻¹' chartTarget (L := L) q, ?_, ?_, ?_⟩
+      · exact (isOpen_chartTarget (L := L) p).inter
+          ((isOpen_chartTarget (L := L) q).preimage (continuous_neg.add continuous_const))
+      · have ha : a = QuotientAddGroup.mk' L.toAddSubgroup z :=
+          extChartAt_symm_eq_quotient_mk (L := L) p hz₁
+        have hw : w ∈ chartTarget (L := L) q := by
+          have : w ∈ (extChartAt 𝓘(ℂ, V) q).target :=
+            (extChartAt 𝓘(ℂ, V) q).map_source hz.2
+          exact (mem_extChartAt_target_iff (L := L) q).1 this
+        constructor
+        · exact hz₁
+        · simpa [c, w]
+      · refine
+          (show ContDiffOn ℂ ω (fun t : V ↦ -t + c)
+              (((extChartAt 𝓘(ℂ, V) p).target ∩
+                (extChartAt 𝓘(ℂ, V) p).symm ⁻¹'
+                  ((fun s : ComplexTorus V L ↦ -s) ⁻¹' (extChartAt 𝓘(ℂ, V) q).source)) ∩
+                (chartTarget (L := L) p ∩
+                  (fun t : V ↦ -t + c) ⁻¹' chartTarget (L := L) q)) from
+            (contDiff_neg.add
+              (contDiff_const : ContDiff ℂ ω (fun _ : V ↦ c))).contDiffOn).congr ?_
+        intro t ht
+        have htp : t ∈ chartTarget (L := L) p := ht.2.1
+        have htq : -t + c ∈ chartTarget (L := L) q := ht.2.2
+        have hwa : a = QuotientAddGroup.mk' L.toAddSubgroup z :=
+          extChartAt_symm_eq_quotient_mk (L := L) p hz₁
+        have hta : (extChartAt 𝓘(ℂ, V) p).symm t =
+            QuotientAddGroup.mk' L.toAddSubgroup t :=
+          extChartAt_symm_eq_quotient_mk (L := L) p htp
+        have hw : w ∈ chartTarget (L := L) q := by
+          have : w ∈ (extChartAt 𝓘(ℂ, V) q).target :=
+            (extChartAt 𝓘(ℂ, V) q).map_source hz.2
+          exact (mem_extChartAt_target_iff (L := L) q).1 this
+        have hwq :
+            QuotientAddGroup.mk' L.toAddSubgroup w =
+              QuotientAddGroup.mk' L.toAddSubgroup (-z) := by
+          have hleft : (extChartAt 𝓘(ℂ, V) q).symm w = -a := by
+            change (extChartAt 𝓘(ℂ, V) q).symm ((extChartAt 𝓘(ℂ, V) q) (-a)) = -a
+            exact (extChartAt 𝓘(ℂ, V) q).left_inv hz.2
+          have hnegz : -a = QuotientAddGroup.mk' L.toAddSubgroup (-z) := by
+            rw [hwa]
+            rfl
+          exact (extChartAt_symm_eq_quotient_mk (L := L) q hw).symm.trans (hleft.trans hnegz)
+        have hc_mem : c ∈ (L.toAddSubgroup : Set V) := by
+          have :
+              -(-z) + w ∈ (L.toAddSubgroup : Set V) :=
+            QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hwq.symm)
+          simpa [c, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
+        have htq' :
+            QuotientAddGroup.mk' L.toAddSubgroup (-t + c) =
+              QuotientAddGroup.mk' L.toAddSubgroup (-t) := by
+          have hnegc : -c ∈ (L.toAddSubgroup : Set V) :=
+            AddSubgroup.neg_mem L.toAddSubgroup hc_mem
+          have hrel : -(-t + c) + -t = -c := by
+            abel
+          apply Quotient.sound'
+          rw [QuotientAddGroup.leftRel_apply]
+          rw [hrel]
+          exact hnegc
+        have hnegt :
+            -((extChartAt 𝓘(ℂ, V) p).symm t) =
+              QuotientAddGroup.mk' L.toAddSubgroup (-t) := by
+          rw [hta]
+          rfl
+        calc
+          (extChartAt 𝓘(ℂ, V) q ∘ (fun s : ComplexTorus V L ↦ -s) ∘
+              (extChartAt 𝓘(ℂ, V) p).symm) t
+              = extChartAt 𝓘(ℂ, V) q
+                  (-((extChartAt 𝓘(ℂ, V) p).symm t)) := by
+                    rfl
+          _ = extChartAt 𝓘(ℂ, V) q
+                  (QuotientAddGroup.mk' L.toAddSubgroup (-t)) := by
+                    rw [hnegt]
+          _ = extChartAt 𝓘(ℂ, V) q
+                  (QuotientAddGroup.mk' L.toAddSubgroup (-t + c)) := by
+                    rw [htq'.symm]
+          _ = -t + c := extChartAt_apply_quotient_mk (L := L) q htq
 
 end ComplexTorus
 
