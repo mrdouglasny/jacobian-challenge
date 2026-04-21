@@ -190,18 +190,25 @@ What Track 2 does *not* do: prove that every abstract `X` satisfying Buzzard's c
 
 ### 3.5.1 `ProjectiveCurve/Line.lean`
 
+**Status: complete as of 2026-04-20.** See `Jacobians/ProjectiveCurve/Line.lean` (0 sorries) and commits `adeec56` → `5456eb2`.
+
 ```
-def ProjectiveLine : Type := ℙ¹(ℂ)
+abbrev ProjectiveLine : Type := OnePoint ℂ
 ```
 
-Two standard charts `U₀ = {[z : 1]}` and `U₁ = {[1 : w]}`, transition `w = 1/z` on the overlap. Discharges all seven Buzzard instances explicitly.
+Using `OnePoint ℂ` (Mathlib's one-point compactification) as the carrier gives `TopologicalSpace`, `T2Space`, `CompactSpace`, `ConnectedSpace`, `Nonempty` automatically. Added locally:
 
-Key facts:
-- `HolomorphicOneForm ProjectiveLine` is the zero module (`ω_{ℙ¹} ≅ 𝒪(-2)` has no global sections). ⇒ `genus ProjectiveLine = 0`.
-- `Jacobian ProjectiveLine` is a point (`g = 0` ⇒ lattice of rank 0 ⇒ ℂ^0 / 0 = pt).
-- Explicit biholomorphism `ProjectiveLine ≃ Metric.sphere 1 ⊂ ℝ³` via stereographic projection. Closes the `⇐` direction of `genus_eq_zero_iff_homeo` concretely.
+- `chart0 : OpenPartialHomeomorph ProjectiveLine ℂ` — the identity on the copy of ℂ, built as `OnePoint.isOpenEmbedding_coe.toOpenPartialHomeomorph ((↑) : ℂ → OnePoint ℂ) |>.symm`.
+- `chart1 : OpenPartialHomeomorph ProjectiveLine ℂ` — `toFun p := p.elim 0 (·⁻¹)`, `invFun w := if w = 0 then ∞ else ((w⁻¹ : ℂ) : ProjectiveLine)`. Continuity of both via `OnePoint.continuousAt_infty'`, `Filter.tendsto_inv₀_cobounded`, `OnePoint.tendsto_coe_infty`, and `continuousOn_update_iff`.
+- `instance : ChartedSpace ℂ ProjectiveLine` with `atlas := {chart0, chart1}` and `chartAt p := if p = ∞ then chart1 else chart0`.
+- `instance : IsManifold 𝓘(ℂ) ω ProjectiveLine` via `isManifold_of_contDiffOn`: four transition pairs reduce to `contDiffOn_id` (identities) or `contDiffOn_inv` (for `z ↦ z⁻¹` on `{0}ᶜ`).
+- `stereographic : ProjectiveLine ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1` — **one-liner** via Mathlib's generic `onePointEquivSphereOfFinrankEq` (plus `Complex.finrank_real_complex : finrank ℝ ℂ = 2`). Plan originally estimated 2–3 weeks for this; the Mathlib helper compressed it to hours.
 
-Difficulty: **Easy**. ~3 days.
+Still outstanding on `ProjectiveLine`:
+- `HolomorphicOneForm ProjectiveLine = 0` and `genus ProjectiveLine = 0` depend on Part B. Once `HolomorphicOneForm` is defined, this becomes a computation.
+- `Jacobian ProjectiveLine` as a point depends on Part A + the Jacobian bridge.
+
+Difficulty (original estimate): Easy, ~3 days. **Actual: ~1 session (human + Claude Code + Codex) on 2026-04-20.**
 
 ### 3.5.2 `ProjectiveCurve/Elliptic.lean`
 
@@ -805,3 +812,37 @@ This is a substantive, defensible artifact to announce on `#Autoformalization` w
 1. `AX_AbelTheorem` discharged via Riemann theta divisor on abstract `X` (needs `Theta.lean` fully in place).
 2. `AX_RiemannRoch` and `AX_SerreDuality` discharged ⇒ `genus_eq_zero_iff_homeo` (⇒ direction) closed on abstract `X`.
 3. `AX_RiemannExistence` — the bridge from abstract `X` to a projective model — attempted as a separate effort; if successful, Track 2 results transfer to abstract `X` automatically.
+
+---
+
+## 13. Progress log
+
+Milestones and deviations-from-plan in the actual implementation.
+
+### 2026-04-19: scaffold (commit `873828d`)
+
+Repo created. `Jacobians/Challenge.lean` verbatim from Buzzard, `lake build` green on pinned Mathlib.
+
+### 2026-04-20: T1 = ProjectiveLine complete (commits `adeec56`..`5456eb2`)
+
+`Jacobians/ProjectiveCurve/Line.lean` closed all planned structure for genus-0 Track 2:
+
+- Basic instances transferred from `OnePoint ℂ`.
+- `chart0` via `IsOpenEmbedding.toOpenPartialHomeomorph.symm` (2 lines).
+- `chart1` with explicit continuity proofs. The `invFun` side used a `Function.update` reformulation + `continuousOn_update_iff`, suggested by GPT-5 via `codex-rescue` (via a `/tmp` handoff for the proof text).
+- `ChartedSpace ℂ ProjectiveLine` and `IsManifold 𝓘(ℂ) ω ProjectiveLine` as `noncomputable instance`s.
+- `stereographic : ProjectiveLine ≃ₜ S²` via Mathlib's `onePointEquivSphereOfFinrankEq` — unexpected one-liner.
+
+**Deviations from plan.** Budget was ~3 days; actual was ~1 session. The stereographic shortcut (plan said 2–3 weeks at the ⇐ side) compressed to minutes once Mathlib's generic `OnePoint`/sphere helper was discovered. This is the first concrete evidence that some Mathlib gaps identified in Phase B are not as wide as the survey feared.
+
+Mathlib at the pin has renamed `PartialHomeomorph` → `OpenPartialHomeomorph`. Plan already updated for this (rounds 1–3); implementation conforms.
+
+### Lessons learned so far
+
+- **Codex via `/tmp` handoff** is a reliable pattern when its sandbox lacks write permission to the target repo. Costs one extra copy-paste step per hand-off.
+- **Mathlib has more than Phase B caught.** The sphere homeomorphism, the `OnePoint` continuity criterion, and `IsOpenEmbedding.toOpenPartialHomeomorph` all had the exact shape we needed. Before assuming a Mathlib gap, grep aggressively.
+- **`abbrev` over `def`** for the carrier type propagates all typeclass instances transparently; `def` would have required manual instance transfers for every coercion and typeclass.
+
+### Next: Part A (A1–A3)
+
+Next task is A1 (`Basic.lean`) and A2 (`Lattice.lean` + `Siegel.lean`).
