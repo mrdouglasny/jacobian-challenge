@@ -35,19 +35,19 @@ open scoped BigOperators
 
 variable {g : ℕ}
 
-/-- Cast a ℤ-vector to a ℂ-vector componentwise. Auxiliary for the theta series. -/
-@[simp] noncomputable def intVecToC (n : Fin g → ℤ) : Fin g → ℂ :=
-  fun i => (n i : ℂ)
-
 /-- The summand of the Riemann theta series at lattice index `n`:
 
     exp( π i · nᵀ τ n + 2π i · nᵀ z ).
--/
+
+Implemented with an inline componentwise cast `(n · : ℂ)` rather than a
+named helper — `let`-bound aliases and `@[simp]`-tagged casting defs
+block `simp` / `rw` rewrites in downstream proofs. -/
 noncomputable def thetaSummand (z : Fin g → ℂ) (τ : SiegelUpperHalfSpace g)
     (n : Fin g → ℤ) : ℂ :=
-  let nC := intVecToC n
-  Complex.exp ((Real.pi : ℂ) * I * dotProduct nC (τ.val *ᵥ nC) +
-               2 * (Real.pi : ℂ) * I * dotProduct nC z)
+  Complex.exp ((Real.pi : ℂ) * I *
+                dotProduct (fun i => (n i : ℂ)) (τ.val *ᵥ fun i => (n i : ℂ)) +
+               2 * (Real.pi : ℂ) * I *
+                dotProduct (fun i => (n i : ℂ)) z)
 
 /-- The Riemann theta function `ϑ(z, τ)`. -/
 noncomputable def RiemannTheta (z : Fin g → ℂ) (τ : SiegelUpperHalfSpace g) : ℂ :=
@@ -101,10 +101,10 @@ produces.
 -/
 
 -- TODO (periodic_integer_shift): for `m : Fin g → ℤ`,
---   `RiemannTheta (z + intVecToC m) τ = RiemannTheta z τ`.
+--   `RiemannTheta (z + fun i => (m i : ℂ)) τ = RiemannTheta z τ`.
 
 -- TODO (quasi_tau_shift): for `n : Fin g → ℤ`,
---   let `nC := intVecToC n`; then
+--   let `nC i := (n i : ℂ)`; then
 --   `RiemannTheta (z + τ.val *ᵥ nC) τ
 --     = Complex.exp (- (Real.pi : ℂ) * I * dotProduct nC (τ.val *ᵥ nC)
 --                    - 2 * (Real.pi : ℂ) * I * dotProduct nC z)
