@@ -12,3 +12,5 @@ Content is split across four submodules:
 See `docs/formalization-plan.md` §3 for the design.
 -/
 import Jacobians.AbelianVariety.Lattice
+import Jacobians.AbelianVariety.ComplexTorus
+import Jacobians.AbelianVariety.Siegel
