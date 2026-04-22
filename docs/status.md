@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-04-21_
+_Last updated: 2026-04-21 (evening)_
 
 ## Build status
 
@@ -17,10 +17,7 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 ### ✅ Complete
 
 - `Jacobians/ProjectiveCurve/Line.lean` — `ProjectiveLine := OnePoint ℂ` with all seven X-side Buzzard instances (TopologicalSpace, T2Space, CompactSpace, ConnectedSpace, Nonempty, ChartedSpace ℂ, IsManifold 𝓘(ℂ) ω). Plus `chart0`, `chart1`, `chartAt`, and `stereographic : ProjectiveLine ≃ₜ S² ⊂ ℝ³`. Zero sorries.
-
-### 🔄 In progress
-
-- `Jacobians/AbelianVariety/ComplexTorus.lean` — `ComplexTorus V L := V ⧸ L.toAddSubgroup` for a full-rank ℤ-lattice. **5/7** Buzzard instances land (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace). **ChartedSpace V, IsManifold, LieAddGroup** remain as TODO; detailed route in file-level comments.
+- `Jacobians/AbelianVariety/ComplexTorus.lean` — `ComplexTorus V L := V ⧸ L.toAddSubgroup` for a full-rank ℤ-lattice in a finite-dim ℂ-vector space. **All 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Explicit chart atlas via fixed injectivity-ball around `0` + fixed lifts per point; chart transitions are translations by lattice vectors. Axiom-free, zero sorries.
 
 ### ✅ Scaffolding only
 

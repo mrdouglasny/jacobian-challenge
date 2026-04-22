@@ -857,7 +857,26 @@ Mathlib at the pin has renamed `PartialHomeomorph` → `OpenPartialHomeomorph`. 
 
 **Typeclass-bundle correction.** Plan had `[AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V] [TopologicalSpace V] [IsTopologicalAddGroup V]`. Actual requirement (from `IsZLattice`): `[NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]`. Stronger but more concise. Siegel / Theta consumers will use the same bundle.
 
+### 2026-04-21 (evening): ComplexTorus 7/7 complete (commits `9fef5f4`..`44a395a`)
+
+`Jacobians/AbelianVariety/ComplexTorus.lean` closed all seven instances, axiom-free, zero-sorry. Summary of how each landed:
+
+- **AddCommGroup, TopologicalSpace, IsTopologicalAddGroup**: automatic from `V ⧸ L.toAddSubgroup` quotient structure.
+- **T2Space**: `AddSubgroup.isClosed_of_discrete` bridged through a `T1Space` intermediate — the obvious `inferInstance` didn't fire cleanly but the bridged version did.
+- **CompactSpace**: Mathlib already has `IsZLattice.isCompact_range_of_periodic`, so this reduced to showing `QuotientAddGroup.mk'` is periodic with respect to the lattice.
+- **ChartedSpace V**: two attempts. Attempt 1 used Mathlib's existential covering-map API (`AddSubgroup.isAddQuotientCoveringMap_of_comm` + `IsCoveringMap.isLocalHomeomorph`) but didn't yield explicit chart formulas. Attempt 2 rebuilt with: a globally-fixed injectivity ball `U ⊂ V` around `0` (satisfying `(U - U) ∩ (L \ {0}) = ∅`), globally-fixed lifts via `Classical.choose` on surjectivity of `QuotientAddGroup.mk'`, and explicit charts `(source = π '' (liftOf p + U))`.
+- **IsManifold 𝓘(ℂ, V) ω**: with explicit charts in place, transitions are translations by lattice vectors (connected-component-locally constant). `isManifold_of_contDiffOn` closes it via `contDiff_id.add contDiff_const`.
+- **LieAddGroup 𝓘(ℂ, V) ω**: needed dedicated atlas-specific rewrite lemmas (`extChartAt_symm_eq_quotient_mk` on chart targets, and a product-chart variant for `((chartAt V p).prod (chartAt V q)).symm`). These reduce chart symms and product-chart inverses to the quotient map restricted to specific `liftOf` translates. Once in place, `contMDiff_add` reduces to `z ↦ z.1 + z.2 + d` being analytic (lattice correction `d` locally constant, `contDiff_fst.add contDiff_snd + contDiff_const` discharges). `contMDiff_neg` is the analogous one-variable argument.
+
+**Deviation from plan.** Original plan estimated 2–3 weeks for ComplexTorus total. Actual: two focused Codex pair-programming sessions totaling ~1 hour wallclock. The existential-vs-explicit split was the key design decision — Mathlib's covering-map API gets you ChartedSpace cheaply but not IsManifold or LieAddGroup; reformulating with global-fixed data unlocks everything else.
+
+**Typeclass pitfalls recorded.**
+- `IsDiscrete (L.toAddSubgroup : Set V)` does NOT infer from `[DiscreteTopology L]`. Bridge: `SetLike.isDiscrete_iff_discreteTopology`.
+- `Quotient.out'` is not available at this pin; use `Classical.choose (QuotientAddGroup.mk'_surjective _)` for lifts.
+- The variable bundle that `IsZLattice` forces is `[NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]`, stronger than the `AddCommGroup V + Module ℂ V + TopologicalSpace V + IsTopologicalAddGroup V` the plan originally had.
+
 ### Next
 
-- `ComplexTorus.lean` remaining instances (ChartedSpace + IsManifold + LieAddGroup). ~2–3 weeks of covering-map infrastructure, likely Codex-assisted.
-- Alternative / parallel: start Track 2 module 2 (`Elliptic.lean` using Mathlib's `EllipticCurve`) or Track 2 module 3 (`Hyperelliptic.lean`, the workhorse).
+- **Siegel.lean**: `SiegelUpperHalfSpace g`, needed as Theta's domain and for the period-matrix staging ground.
+- **Theta.lean**: `RiemannTheta (z, τ)` on `ℂ^g × 𝔥_g`, convergence / analyticity / quasi-periodicity. Optional for the 24 sorries but load-bearing for Track 1's eventual `ofCurve_inj` discharge (Mumford's theta divisor route).
+- **Alternative / parallel**: start Track 2 module 2 (`Elliptic.lean` leveraging Mathlib's `EllipticCurve`) or module 3 (`Hyperelliptic.lean`, the workhorse). Both are good Codex targets.
