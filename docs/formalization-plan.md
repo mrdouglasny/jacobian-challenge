@@ -644,16 +644,22 @@ We tag certain deep facts as named axioms initially — this lets downstream dev
 
 **Rule**: every axiom gets its own file in `Axioms/`, with a docstring stating the math, the reference (Mumford / Milne / Debarre / Forster), and why it's axiomatized. Each is a promissory note.
 
-**Discharge priority** (order we aim to remove axioms):
-1. `AX_PeriodInjective` — follows from `AX_RiemannBilinear`.
-2. `AX_BranchLocus` — local `meromorphicOrderAt` + properness + connectedness; most Mathlib-ready.
-3. `AX_H1FreeRank2g` — CW topology; may benefit from a future Mathlib PR on surface classification.
-4. `AX_RiemannBilinear` — Hodge-theoretic identity; directly discharges `AX_PeriodInjective` and gives Jacobian ↪ `SiegelUpperHalfSpace`.
-5. `AX_FiniteDimOneForms` — compactness + normal families.
-6. `AX_PluckerFormula` — adjunction; Track 2 `SmoothPlaneCurve` only.
-7. `AX_SerreDuality` — classical pairing; unlocks `AX_Uniformization0` with `AX_RiemannRoch`.
-8. `AX_RiemannRoch` — deepest of the algebraic axioms.
-9. `AX_AbelTheorem` — via `AX_RiemannRoch` + theta divisor, or Forster-style residue argument.
+**Discharge priority** (revised 2026-04-22 after Gemini axiom review; original ordering kept in comments):
+
+Infrastructure first — the priority is no longer "easiest proof first" but "closest-to-Jacobian-construction first" so the bridge can be built with the axioms as inputs:
+
+1. **`AX_FiniteDimOneForms`** — without it, `genus X` collapses to 0 and every downstream `ChartedSpace (Fin (genus X) → ℂ) ...` becomes `ChartedSpace Unit ...`. Foundation of the whole tower.
+2. **`AX_H1FreeRank2g`** — needed to pick a ℤ-basis of `H_1`, which is a prerequisite for stating `AX_RiemannBilinear`. Gemini's suggestion: split into (a) `Module.Free ℤ (H1 X x₀)` and (b) `Module.finrank ℤ (H1 X x₀) = 2 * genus X`, the latter being the Hodge identity.
+3. **`AX_IntersectionForm`** (missing, flagged by Gemini) — non-degenerate alternating ℤ-bilinear pairing on `H_1`. Needed to give "symplectic basis" a formal meaning.
+4. **`AX_PeriodLattice`** (upgrade of `AX_PeriodInjective`) — `IsZLattice ℝ (LinearMap.range (periodMap X x₀))`. Needed to define `Jacobian X` as a complex torus; mere injectivity is too weak (image could be dense).
+5. **`AX_RiemannBilinear`** — Hodge-theoretic identity; discharges `AX_PeriodLattice` (hence `AX_PeriodInjective`) and gives Jacobian ↪ `SiegelUpperHalfSpace`. Existentials must cover the basis choice (current target signature is mathematically false as stated).
+6. **`AX_BranchLocus`** — local `meromorphicOrderAt` + properness + connectedness; most Mathlib-ready. Target signature needs `tsum` instead of `toFinset`.
+7. **`AX_SerreDuality`** — classical pairing; unlocks `AX_Uniformization0` with `AX_RiemannRoch`. Strongly prefer isomorphism statement over dim-equality (avoids the `finrank = 0` silent-vacuity trap).
+8. **`AX_RiemannRoch`** — deepest algebraic axiom. Needs `FiniteDimensional` hypotheses + ℤ-subtraction in the target signature.
+9. **`AX_PluckerFormula`** — adjunction; Track 2 `SmoothPlaneCurve` only.
+10. **`AX_AbelTheorem`** — Track 1 only needs injectivity of `ofCurve`. Full Abel-Jacobi (kernel on `Div(X)`) postponed to Track 2.
+
+(Previous ordering: PeriodInjective, BranchLocus, H1FreeRank2g, RiemannBilinear, FiniteDimOneForms, PluckerFormula, SerreDuality, RiemannRoch, AbelTheorem. Gemini review flagged it as inverted — infrastructure axioms should precede analytical ones since everything builds on `genus X` being nonzero.)
 
 ---
 
@@ -905,10 +911,21 @@ Five new modules land, all zero-sorry at the Lean level (axiom-backed):
 - `ω` as a variable name conflicts with `ContDiff.Manifold`'s `ω` smoothness-level notation. Use `form` or another name for 1-form arguments.
 - `Abelianization` produces a `CommGroup` (multiplicative); need `Additive` wrapper to get `AddCommGroup`. But `abbrev` + `Additive` still hits `Type` vs `Type _` issues; use `: Type _`.
 
+### 2026-04-22 (afternoon): axiom-suite landing + Gemini soundness review + critical fix
+
+- **Seven axiom files added** (`Jacobians/Axioms/{H1FreeRank2g, RiemannBilinear, RiemannRoch, SerreDuality, AbelTheorem, BranchLocus, PluckerFormula}.lean`). Two get Lean signatures at this pin (`AX_H1FreeRank2g` via `Module.Basis`; the others need consumer-module types and stay doc-only).
+- **`Jacobians/RiemannSurface/Periods.lean` + `IntersectionForm.lean`**: `periodMap : H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)` declared as an axiom-stub (to be retired by a `def` when `PathIntegral` lands); `AX_PeriodInjective` as a separate axiom that will become a theorem derived from `AX_RiemannBilinear`.
+
+- **Gemini axiom review** (`docs/gemini-review-axioms.md`) — solicited adversarial review of the complete axiom suite on 2026-04-22. **Critical finding: `AX_FiniteDimOneForms` + the `True ∧ True` submodule stub + the global instance `instFiniteDimOneForms` together injected `False` into the environment.** Verified exploit: the stub carrier was provably `⊤` in `Submodule ℂ (X → ℂ → ℂ)`, so `HolomorphicOneForm X ≃ₗ[ℂ] (X → ℂ → ℂ)` (via `Submodule.topEquiv`); `FiniteDimensional` transfers along the equivalence; evaluation at any `x₀ : X` (obtainable from `ConnectedSpace X ⟶ Nonempty X`) gives a surjective `(X → ℂ → ℂ) →ₗ[ℂ] (ℂ → ℂ)`; `rank_fun_infinite` + `Cardinal.aleph0_le_mk ℂ` contradict `FiniteDimensional ℂ (ℂ → ℂ)`. `lean_run_code` confirmed the exploit closes on the prior scaffold and fails on the current fix.
+
+- **Fix applied.** `holomorphicOneFormSubmodule X := (⊥ : Submodule ℂ (X → ℂ → ℂ))` (noncomputable). `instFiniteDimOneForms` now elaborates via `unfold; infer_instance` from `Submodule.finiteDimensional_bot`, no axiom invocation. Consequence: `genus X = 0` at the stub, provably. The `AX_FiniteDimOneForms` axiom remains declared for the refinement phase (when predicates become non-trivial, submodule widens, axiom becomes load-bearing). Build green; prior exploit no longer type-checks.
+
+- **Other Gemini findings recorded** (`docs/gemini-review-axioms.md` §action items): `AX_RiemannBilinear` needs existentials shifted over basis choice; `AX_RiemannRoch`/`AX_SerreDuality` need `FiniteDimensional` hypotheses + ℤ-subtraction; `AX_PeriodInjective` should be upgraded to `AX_PeriodLattice` (IsZLattice); missing `AX_IntersectionForm`; `AX_BranchLocus` should use `tsum` instead of `toFinset`.
+
 ### Next
 
 Options:
-- `IntersectionForm.lean` + `Periods.lean` — set up the period map signature with `AX_PeriodInjective`.
+- Implement Gemini round-2 findings: upgrade `AX_PeriodInjective` to `AX_PeriodLattice`, add `AX_IntersectionForm`, revise `AX_RiemannBilinear` existentials.
 - Jacobian bridge attempt — `def Jacobian X := ComplexTorus ...`; see where the `NormedAddCommGroup` trap actually bites.
-- Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something).
+- Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something; makes `AX_FiniteDimOneForms` load-bearing).
 - Track 2 next concrete curve (`Elliptic.lean` or `Hyperelliptic.lean`).

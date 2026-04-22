@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-04-21 (late evening)_
+_Last updated: 2026-04-22 (Gemini axiom review + soundness fix)_
 
 ## Build status
 
-✅ Green. `lake build` completes 8307 jobs.
+✅ Green. `lake build` completes 8324 jobs. No sorries outside `Challenge.lean`.
 
 ## Sorry inventory
 
@@ -19,12 +19,12 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 - `Jacobians/ProjectiveCurve/Line.lean` — `ProjectiveLine := OnePoint ℂ` with all seven X-side Buzzard instances (TopologicalSpace, T2Space, CompactSpace, ConnectedSpace, Nonempty, ChartedSpace ℂ, IsManifold 𝓘(ℂ) ω). Plus `chart0`, `chart1`, `chartAt`, and `stereographic : ProjectiveLine ≃ₜ S² ⊂ ℝ³`. Zero sorries.
 - `Jacobians/AbelianVariety/ComplexTorus.lean` — `ComplexTorus V L := V ⧸ L.toAddSubgroup` for a full-rank ℤ-lattice in a finite-dim ℂ-vector space. **All 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Explicit chart atlas via fixed injectivity-ball around `0` + fixed lifts per point; chart transitions are translations by lattice vectors. Axiom-free, zero sorries.
 - `Jacobians/RiemannSurface/Homology.lean` — `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))`. `AddCommGroup` automatic.
-- `Jacobians/RiemannSurface/Genus.lean` — `genus X := Module.finrank ℂ (HolomorphicOneForm X)`. Well-behaved thanks to the global `FiniteDimensional` instance.
-- `Jacobians/Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms` axiom declared + installed as a global instance (`instFiniteDimOneForms`). Load-bearing: without it `Module.finrank` collapses to 0 on the conceptual-stub `HolomorphicOneForm`.
+- `Jacobians/RiemannSurface/Genus.lean` — `genus X := Module.finrank ℂ (HolomorphicOneForm X)`. At the stub this provably returns `0` (since `HolomorphicOneForm X = ⊥`); refinement of the `OneForm.lean` predicates will widen the submodule and the axiom will become load-bearing.
+- `Jacobians/Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms` axiom declared; `instFiniteDimOneForms` derived from the `⊥`-submodule stub (no axiom invocation at the stub). After 2026-04-22 Gemini review: installing the instance by `:= AX_FiniteDimOneForms` on top of the previous `True ∧ True` carrier injected `False` into the environment (verified exploit in `docs/gemini-review-axioms.md`); fix lands in this same commit.
 
 ### ✅ Scaffold only
 
-- `Jacobians/RiemannSurface/OneForm.lean` — `HolomorphicOneForm X` as a `Submodule ℂ (X → ℂ → ℂ)` with two predicates (`IsHolomorphicOneFormCoeff`, `SatisfiesCotangentCocycle`), both currently stub-`True`. `AddCommGroup` + `Module ℂ` live via `abbrev` + `↥`-coercion. Refinement of the predicates to their real content is a TODO with concrete formulas in-file.
+- `Jacobians/RiemannSurface/OneForm.lean` — `HolomorphicOneForm X` as `↥(⊥ : Submodule ℂ (X → ℂ → ℂ))` at the stub. The two predicates (`IsHolomorphicOneFormCoeff`, `SatisfiesCotangentCocycle`) remain `True`-stubs but are not currently used in the carrier; this keeps the submodule genuinely finite-dim (0-dim) until refinement. `AddCommGroup` + `Module ℂ` live via `abbrev` + `↥`-coercion.
 - `Jacobians/AbelianVariety/Siegel.lean` — `SiegelUpperHalfSpace g` as a `Subtype` of `Matrix (Fin g) (Fin g) ℂ` with `isSymm` + `(map Complex.im).PosDef`. Four TODOs for g=1 ↔ `UpperHalfPlane`, concrete lattice from columns of `[I | τ]`, manifold structure, `Sp(2g, ℤ)`-action.
 - `Jacobians/AbelianVariety/Theta.lean` — `RiemannTheta (z, τ)` defined via `tsum`. Summability, analyticity, quasi-periodicity, heat equation all TODOs.
 
@@ -37,11 +37,14 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 
 ### ⬜ Not started
 
-Part B (abstract `X`): `PathIntegral.lean`, `IntersectionForm.lean`, `Periods.lean`.
+Part B (abstract `X`): `PathIntegral.lean`. `IntersectionForm.lean` + `Periods.lean` are scaffold-only.
 Track 2: `Elliptic.lean`, `Hyperelliptic.lean`, `PlaneCurve.lean`.
 Bridge: `Jacobian/Construction.lean`, `AbelJacobi.lean`, `Abel.lean`, `Functoriality.lean`, `PushPull.lean`.
 Genus 0: `Uniformization.lean`.
-Axioms: `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — stubs not yet generated (see [formalization-plan.md §7](formalization-plan.md)).
+Axioms landing tracker (2026-04-22 post-review):
+* Declared and live: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `periodMap` (stub-axiom).
+* Declared doc-only (concrete signature pending consumer): `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`.
+* Missing (flagged by Gemini): `AX_PeriodLattice` (upgrade of `AX_PeriodInjective` to `IsZLattice`), `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear form on `H_1`).
 
 ### Data sorries (9)
 
@@ -84,9 +87,20 @@ Axioms: `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRan
 
 ## Axiom inventory
 
-**1 axiom declared so far:** `AX_FiniteDimOneForms` in `Jacobians/Axioms/FiniteDimOneForms.lean`, installed as a global `instance` because `Module.finrank` returns 0 on infinite-dim modules — the instance shield prevents `Fin (genus X) → ℂ` from silently becoming `Unit`.
+**Declared, with Lean signatures (4):**
+* `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean`
+* `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean`
+* `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
+* `periodMap` (stub-axiom, to be retired by `def` once `PathIntegral` lands) — `Jacobians/RiemannSurface/Periods.lean`
 
-The [formalization plan §7](formalization-plan.md) lists eight more to come: `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`. They'll land as `Axioms/*.lean` files when the consuming modules need them.
+**Declared doc-only (5):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.).
+
+**Gemini axiom review (2026-04-22):** see [`docs/gemini-review-axioms.md`](gemini-review-axioms.md). Top findings:
+* Critical: `AX_FiniteDimOneForms`-as-instance + `True ∧ True` submodule stub injected `False` (verified exploit via `rank_fun_infinite`). Fix applied this commit — submodule now `⊥`, instance derived without axiom invocation.
+* `AX_RiemannBilinear` target signature needs existentials shifted to cover basis choice.
+* `AX_RiemannRoch` and `AX_SerreDuality` need `FiniteDimensional` hypotheses and ℤ-valued subtraction.
+* `AX_PeriodInjective` is too weak — should be upgraded to `IsZLattice (LinearMap.range (periodMap X x₀))` to support the Jacobian complex-torus construction.
+* Missing `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear pairing on `H_1`) — "symplectic" has no formal meaning without it.
 
 ## Dependencies pinned
 
