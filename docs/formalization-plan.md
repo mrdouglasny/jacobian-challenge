@@ -935,9 +935,33 @@ Follow-up commit to the soundness fix, applying the remaining Gemini findings wh
 
 Build: 8325 jobs green. Axioms declared and live now: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `intersectionForm` + `AX_IntersectionForm_{alternating, nondeg}`, `periodMap`. Doc-only targets: `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`.
 
+### 2026-04-22 (evening): Jacobian bridge + `AX_PeriodLattice`
+
+Codex delivered the bridge (`Jacobians/Jacobian/Construction.lean` + `Jacobians/Axioms/PeriodLattice.lean`). Landed in one commit:
+
+- **`Jacobians/Axioms/PeriodLattice.lean`.** Defines `periodMapInBasis` (composes `periodMap` with basis coordinates via `b.dualBasis.equivFun` + `AddMonoidHom.toIntLinearMap`) and `periodLatticeInBasis := LinearMap.range (periodMapInBasis ...)`. Declares `AX_PeriodLattice` asserting `IsZLattice ℝ (periodLatticeInBasis X x₀ b)` + helper `instPeriodLatticeDiscrete`, both as `attribute [instance]`. Retires once `AX_RiemannBilinear` lands.
+- **`Jacobians/Jacobian/Construction.lean`.** `jacobianBasis X := Module.finBasis ℂ (HolomorphicOneForm X)` (basis extracted from the global `FiniteDimensional` instance). `Jacobian X := ComplexTorus (Fin (genus X) → ℂ) (periodLatticeInBasis ...)` with basepoint `Classical.choice ‹Nonempty X›`. All seven Buzzard instances (`AddCommGroup`, `TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace (Fin (genus X) → ℂ) _`, `IsManifold _ ω _`, `LieAddGroup _ ω _`) elaborate via `change + infer_instance` off `ComplexTorus`.
+- **`Jacobians/Jacobian.lean`.** Top-level Part-C aggregator.
+- **`Jacobians/Axioms.lean`** updated to include `Axioms.PeriodLattice` in the discharge priority docstring.
+- **`Jacobians.lean`** imports the new `Jacobians.Jacobian` aggregator.
+
+**Architectural wins:**
+* Basis baked in → single `ChartedSpace (Fin (genus X) → ℂ) (Jacobian X)` instance, matching Buzzard's signature exactly.
+* No `NormedAddCommGroup` trap — we work in the ambient `Fin (genus X) → ℂ` which has the full normed structure from Mathlib's `Pi` instance.
+* At the current stub `genus X = 0`, `Jacobian X` is a 0-dimensional complex torus (a singleton up to iso); all instances still elaborate correctly. When `OneForm.lean` predicates are refined, `Jacobian` gets real content without changing the architecture.
+
+**Deferred (next pieces of the bridge):**
+* **Universe lift.** `ComplexTorus (Fin (genus X) → ℂ)` lives in `Type`; Buzzard's `Jacobian : Type u` needs a `ULift` wrapper or equivalent. Not done yet — the bridge does not drop-in replace `Challenge.lean:59`'s sorry.
+* **Basepoint-independence.** The current `Classical.choice ‹Nonempty X›` makes the lattice depend on a non-canonical choice. Classical theorem: `periodLattice` is basepoint-free via path-conjugation. Needs `AX_RiemannBilinear` for the full argument.
+* **Abel-Jacobi map.** `ofCurve P : X → Jacobian X` defined via integrating ω along a path from `P₀` to `P`. Requires `PathIntegral.lean`.
+* **Pushforward / pullback.** Holomorphic map `f : X → Y` induces `f_* : Jacobian X → Jacobian Y` and `f^* : Jacobian Y → Jacobian X`. `pushforward_pullback = deg • id` reduces to fiber-counting via `AX_BranchLocus`.
+
+Build: 8328 jobs green. 24 sorries all still in `Challenge.lean`; zero elsewhere. Axiom count: 10 declared with Lean signatures, 6 doc-only.
+
 ### Next
 
 Options:
-- Jacobian bridge attempt — `def Jacobian X := ComplexTorus ...`; forces the `NormedAddCommGroup`-on-ambient decision. Would also give us the right place to upgrade `AX_PeriodInjective` → `AX_PeriodLattice`.
+- Universe-lift wrapper to drop-in replace `Challenge.lean:59`'s `Jacobian` sorry (and by extension the 7 instance sorries).
 - Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something; makes `AX_FiniteDimOneForms` load-bearing).
+- `ofCurve` + `PathIntegral.lean` — highest-leverage next piece of the bridge; also a stepping stone to closing Buzzard's `ofCurve`-family sorries.
 - Track 2 next concrete curve (`Elliptic.lean` or `Hyperelliptic.lean`).

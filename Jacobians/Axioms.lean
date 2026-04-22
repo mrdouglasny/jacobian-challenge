@@ -13,10 +13,10 @@ silently when `genus X` is 0):
 
 1. `AX_FiniteDimOneForms` (compactness + normal families; foundation)
 2. `AX_H1FreeRank2g` (CW topology of compact oriented surfaces)
-3. `AX_IntersectionForm` (missing — non-degenerate alternating ℤ-bilinear
-   pairing on `H_1`; prerequisite for "symplectic basis")
-4. `AX_PeriodLattice` (upgrade of `AX_PeriodInjective`: IsZLattice, not
-   just injective — needed for Jacobian as a complex torus)
+3. `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear pairing
+   on `H_1`; prerequisite for "symplectic basis")
+4. `AX_PeriodLattice` (period image is a ℤ-lattice in `Fin g → ℂ`;
+   needed for Jacobian as a complex torus)
 5. `AX_RiemannBilinear` (Hodge / symplectic positivity; discharges
    `AX_PeriodLattice`)
 6. `AX_BranchLocus` (local `meromorphicOrderAt` + properness)
@@ -26,6 +26,7 @@ silently when `genus X` is 0):
 10. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
 -/
 import Jacobians.Axioms.FiniteDimOneForms
+import Jacobians.Axioms.PeriodLattice
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.H1FreeRank2g
 import Jacobians.Axioms.IntersectionForm
