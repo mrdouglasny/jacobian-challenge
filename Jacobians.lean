@@ -1,3 +1,4 @@
 import Jacobians.Challenge
 import Jacobians.AbelianVariety
 import Jacobians.ProjectiveCurve
+import Jacobians.RiemannSurface
