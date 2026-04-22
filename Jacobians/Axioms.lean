@@ -20,3 +20,10 @@ order. Discharge priority (rough):
 9. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
 -/
 import Jacobians.Axioms.FiniteDimOneForms
+import Jacobians.Axioms.RiemannBilinear
+import Jacobians.Axioms.H1FreeRank2g
+import Jacobians.Axioms.RiemannRoch
+import Jacobians.Axioms.SerreDuality
+import Jacobians.Axioms.AbelTheorem
+import Jacobians.Axioms.BranchLocus
+import Jacobians.Axioms.PluckerFormula
