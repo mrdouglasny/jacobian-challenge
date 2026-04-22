@@ -37,20 +37,33 @@ open scoped Manifold Topology
 open scoped ContDiff
 
 -- TODO (AX_BranchLocus): precise Lean statement requires
--- `localOrder (f, p, q)` defined in a consumer module
--- (probably `Jacobian/Functoriality.lean`). Declare axiom here once
--- consumed.
+-- `localOrder (f, p, q)` defined in a consumer module (probably
+-- `Jacobian/Functoriality.lean`). Declare axiom here once consumed.
 --
--- Target signature (sketch):
+-- Convention: `localOrder f p q = 0` when `f p ≠ q`. This lets the fiber
+-- sum `∑' p : X, localOrder f p q` range over all of `X` (finitely many
+-- nonzero terms since each fiber is finite), avoiding the `toFinset`
+-- dependent-type mess of the earlier draft.
+--
+-- Target signature (revised 2026-04-22 post-Gemini review):
 --
 --   axiom AX_BranchLocus {X Y : Type*} [...]
 --       (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
---       (hnc : ¬ ∀ x y, f x = f y) :
---       -- (c): independence of q
---       ∀ q₁ q₂ : Y,
---         (∑ p ∈ (f ⁻¹' {q₁}).toFinset, localOrder f p q₁) =
---         (∑ p ∈ (f ⁻¹' {q₂}).toFinset, localOrder f p q₂)
---       -- (d): finite critical values
---       ∧ { q : Y | ∃ p ∈ f ⁻¹' {q}, localOrder f p q > 1 }.Finite
+--       (hnc : ¬ ∃ c : Y, ∀ x : X, f x = c) :  -- non-constant
+--       -- (c): common degree d — independence of q via tsum.
+--       ∃ d : ℕ, 0 < d ∧
+--         (∀ q : Y, (∑' p : X, localOrder f p q) = d) ∧
+--       -- (d): finite critical values.
+--         { q : Y | ∃ p : X, f p = q ∧ localOrder f p q > 1 }.Finite
+--
+-- Commentary.
+-- * `¬ ∃ c, ∀ x, f x = c` is the standard "non-constant" predicate
+--   (previous draft used `¬ ∀ x y, f x = f y`, which is the double-∀
+--   formulation — confusing even if equivalent).
+-- * `∑'` (`tsum`) on a function with finite support returns the sum over
+--   the support when the rest is `0`. No `Fintype`/`Decidable`
+--   instance needed on preimages.
+-- * The degree `d` is extracted as part of the conclusion; consumers
+--   that want `ContMDiff.degree f` unpack it via `Classical.choose`.
 
 end Jacobians.Axioms

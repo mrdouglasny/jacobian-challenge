@@ -87,20 +87,22 @@ Axioms landing tracker (2026-04-22 post-review):
 
 ## Axiom inventory
 
-**Declared, with Lean signatures (4):**
+**Declared, with Lean signatures (7):**
 * `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean`
 * `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean`
+* `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean`
 * `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
 * `periodMap` (stub-axiom, to be retired by `def` once `PathIntegral` lands) — `Jacobians/RiemannSurface/Periods.lean`
 
-**Declared doc-only (5):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.).
+**Declared doc-only (6):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.). Target signatures revised 2026-04-22 per Gemini review (existentials, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
 
-**Gemini axiom review (2026-04-22):** see [`docs/gemini-review-axioms.md`](gemini-review-axioms.md). Top findings:
-* Critical: `AX_FiniteDimOneForms`-as-instance + `True ∧ True` submodule stub injected `False` (verified exploit via `rank_fun_infinite`). Fix applied this commit — submodule now `⊥`, instance derived without axiom invocation.
-* `AX_RiemannBilinear` target signature needs existentials shifted to cover basis choice.
-* `AX_RiemannRoch` and `AX_SerreDuality` need `FiniteDimensional` hypotheses and ℤ-valued subtraction.
-* `AX_PeriodInjective` is too weak — should be upgraded to `IsZLattice (LinearMap.range (periodMap X x₀))` to support the Jacobian complex-torus construction.
-* Missing `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear pairing on `H_1`) — "symplectic" has no formal meaning without it.
+**Gemini axiom review (2026-04-22):** see [`docs/gemini-review-axioms.md`](gemini-review-axioms.md).
+* ✅ Critical: `AX_FiniteDimOneForms`-as-instance + `True ∧ True` submodule stub injected `False` (verified exploit via `rank_fun_infinite`). Fix applied — submodule now `⊥`, instance derived without axiom invocation.
+* ✅ Missing `AX_IntersectionForm` added as a new axiom file (intersection pairing + alternating + non-degenerate).
+* ✅ `AX_RiemannBilinear` target signature revised: existentials shifted over basis choice.
+* ✅ `AX_RiemannRoch` and `AX_SerreDuality` target signatures revised with `FiniteDimensional` hypotheses and ℤ-subtraction (Serre-duality now stated as an isomorphism).
+* ✅ `AX_BranchLocus` target signature revised to use `tsum` + `¬ ∃ c, ∀ x, f = c` non-constant predicate.
+* ⏸ `AX_PeriodInjective` → `AX_PeriodLattice` (`IsZLattice`) upgrade: deferred to the Jacobian bridge, where the `NormedAddCommGroup`-on-ambient architectural decision gets settled.
 
 ## Dependencies pinned
 

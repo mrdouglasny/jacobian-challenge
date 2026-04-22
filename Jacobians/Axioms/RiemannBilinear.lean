@@ -33,19 +33,35 @@ open scoped Manifold Topology
 open scoped ContDiff
 
 -- TODO (AX_RiemannBilinear): precise statement requires the period
--- matrix construction in `RiemannSurface/Periods.lean` which in turn
--- needs `pathIntegral` + choice of a symplectic basis of H1 and a
--- normalized basis of HolomorphicOneForm. Declare the axiom here
--- once those dependencies materialize.
+-- matrix construction in `RiemannSurface/Periods.lean`, which in turn
+-- needs `pathIntegral` + the `intersectionForm` axiom (to give
+-- "symplectic basis" a formal meaning). Declare the axiom here once
+-- those dependencies materialize.
 --
--- Target signature (sketch):
+-- Target signature (revised 2026-04-22 post-Gemini review): the
+-- existentials need to cover basis choice. Universally quantifying over
+-- arbitrary bases is mathematically false; the `[I | τ]` normal form
+-- holds only for the symplectic-normalized pair.
 --
 --   axiom AX_RiemannBilinear
---       {X : Type*} [...] (x₀ : X)
---       (α : Basis (Fin (2 * genus X)) ℤ (H1 X x₀))  -- symplectic
---       (ω : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
---       -- "periodMatrix in the AB normalization is in SiegelUpperHalfSpace"
+--       {X : Type*} [...] (x₀ : X) :
+--       -- "∃ a symplectic basis of H1 and a normalized basis of Ω¹
+--       --  such that the period matrix is in Siegel normal form"
+--       ∃ α : Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀),
+--       ∃ ω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X),
 --       ∃ τ : SiegelUpperHalfSpace (genus X),
---         periodMatrix X x₀ α ω = [I | τ]   -- normalized form
+--         -- α is symplectic w.r.t. the intersection form (first `genus X`
+--         -- are A-cycles, last `genus X` are B-cycles with
+--         -- `⟨αᵢ, βⱼ⟩ = δᵢⱼ`).
+--         IsSymplecticBasis (intersectionForm x₀) α ∧
+--         -- ω is the dual basis normalized by the A-periods.
+--         (∀ i j, periodMap X x₀ (α (Sum.inl i)) (ω j) = if i = j then 1 else 0) ∧
+--         -- B-periods give τ.
+--         periodMatrix_B x₀ α ω = τ.val
+--
+-- Prerequisites: `IsSymplecticBasis` predicate (Mathlib has
+-- `LinearMap.BilinForm.IsSymplectic`-style lemmas over PID — port the
+-- statement), `periodMatrix_B` (the ⟨βⱼ, ωᵢ⟩ matrix), `Module.Basis`
+-- normalization lemmas.
 
 end Jacobians.Axioms
