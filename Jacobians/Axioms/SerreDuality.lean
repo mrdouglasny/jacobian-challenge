@@ -31,10 +31,27 @@ namespace Jacobians.Axioms
 -- TODO (AX_SerreDuality): precise Lean statement requires the same
 -- sheaf-cohomology scaffolding as AX_RiemannRoch. Declare when ready.
 --
--- Target signature (sketch):
+-- Target signature (revised 2026-04-22 post-Gemini review): state the
+-- axiom as an isomorphism, not merely a dimension equality. Equality
+-- of `finrank` is silently vacuous when both modules are infinite-dim
+-- (both sides are 0). The isomorphism form:
+--   (a) gives dimension equality as a derived corollary,
+--   (b) transfers `FiniteDimensional` across the iso in one direction,
+--   (c) is the classical statement ("perfect pairing") anyway.
 --
 --   axiom AX_SerreDuality {X : Type*} [...] (D : Divisor X) :
---     Module.finrank ℂ (H1 X (Divisor.LineBundle D)) =
---     Module.finrank ℂ (H0 X (Divisor.Omega1Twist X (-D)))
+--     Nonempty
+--       (H1 X (Divisor.LineBundle D) ≃ₗ[ℂ]
+--        Module.Dual ℂ (H0 X (Divisor.Omega1Twist X (-D))))
+--
+-- Or, if we want to expose the pairing itself:
+--
+--   axiom serrePairing {X : Type*} [...] (D : Divisor X) :
+--     H1 X (Divisor.LineBundle D) →ₗ[ℂ]
+--       Module.Dual ℂ (H0 X (Divisor.Omega1Twist X (-D)))
+--   axiom AX_SerrePairing_bijective {X : Type*} [...] (D : Divisor X) :
+--     Function.Bijective (serrePairing X D)
+--
+-- Either form works; pick based on how consumers use it.
 
 end Jacobians.Axioms

@@ -922,10 +922,22 @@ Five new modules land, all zero-sorry at the Lean level (axiom-backed):
 
 - **Other Gemini findings recorded** (`docs/gemini-review-axioms.md` §action items): `AX_RiemannBilinear` needs existentials shifted over basis choice; `AX_RiemannRoch`/`AX_SerreDuality` need `FiniteDimensional` hypotheses + ℤ-subtraction; `AX_PeriodInjective` should be upgraded to `AX_PeriodLattice` (IsZLattice); missing `AX_IntersectionForm`; `AX_BranchLocus` should use `tsum` instead of `toFinset`.
 
+### 2026-04-22 (late afternoon): Gemini-review-driven axiom revisions
+
+Follow-up commit to the soundness fix, applying the remaining Gemini findings where they can land without an architectural decision:
+
+- **New: `Jacobians/Axioms/IntersectionForm.lean`.** Declares `intersectionForm x₀ : H1 X x₀ →+ (H1 X x₀ →+ ℤ)` (axiom-stub for the eventual CW-homology definition) plus `AX_IntersectionForm_{alternating, nondeg}` as its characterizing property axioms. This gives "symplectic basis" a formal meaning and is a prerequisite for stating `AX_RiemannBilinear` in `[I | τ]` normal form. Priority #3 in the revised discharge ordering.
+- **`Jacobians/Axioms/RiemannBilinear.lean`** target signature revised: existentials now quantify over both the ℤ-basis of `H1` and the ℂ-basis of `HolomorphicOneForm`, plus predicates tying the basis choice to the intersection form. The original universal-quantification draft was mathematically false (the `[I|τ]` normal form holds only for specific bases).
+- **`Jacobians/Axioms/RiemannRoch.lean`** target signature revised: `FiniteDimensional` hypotheses for `H0, H1` (or bundled-in conclusion) plus both sides cast to `ℤ` (Nat subtraction truncates, destroying the formula when `deg D + 1 - g < 0`).
+- **`Jacobians/Axioms/SerreDuality.lean`** target signature revised: prefer the isomorphism form `H1 X (O(D)) ≃ₗ[ℂ] Dual (H0 X (Ω¹ ⊗ O(-D)))` over mere dimension equality (the latter is silently vacuous when both sides are infinite-dim).
+- **`Jacobians/Axioms/BranchLocus.lean`** target signature revised: `tsum` with `localOrder f p q = 0` convention for `f p ≠ q`, avoiding the `toFinset` dependent-type mess. Non-constant predicate in standard `¬ ∃ c, ∀ x, f x = c` form.
+- **`Jacobians/RiemannSurface/IntersectionForm.lean`** docstring updated to reference the new `AX_IntersectionForm` axioms and record the `AX_PeriodLattice` upgrade path (deferred to the Jacobian bridge, where the `NormedAddCommGroup` architecture gets settled).
+
+Build: 8325 jobs green. Axioms declared and live now: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `intersectionForm` + `AX_IntersectionForm_{alternating, nondeg}`, `periodMap`. Doc-only targets: `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`.
+
 ### Next
 
 Options:
-- Implement Gemini round-2 findings: upgrade `AX_PeriodInjective` to `AX_PeriodLattice`, add `AX_IntersectionForm`, revise `AX_RiemannBilinear` existentials.
-- Jacobian bridge attempt — `def Jacobian X := ComplexTorus ...`; see where the `NormedAddCommGroup` trap actually bites.
+- Jacobian bridge attempt — `def Jacobian X := ComplexTorus ...`; forces the `NormedAddCommGroup`-on-ambient decision. Would also give us the right place to upgrade `AX_PeriodInjective` → `AX_PeriodLattice`.
 - Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something; makes `AX_FiniteDimOneForms` load-bearing).
 - Track 2 next concrete curve (`Elliptic.lean` or `Hyperelliptic.lean`).

@@ -28,6 +28,7 @@ silently when `genus X` is 0):
 import Jacobians.Axioms.FiniteDimOneForms
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.H1FreeRank2g
+import Jacobians.Axioms.IntersectionForm
 import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 import Jacobians.Axioms.AbelTheorem
