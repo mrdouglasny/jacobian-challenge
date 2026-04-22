@@ -26,6 +26,12 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/Basic.lean](Jacobians/Basic.lean) | Shared imports / notation |
 | [Jacobians/AbelianVariety/Lattice.lean](Jacobians/AbelianVariety/Lattice.lean) | Conventions around Mathlib's `IsZLattice` |
 | [Jacobians/AbelianVariety/ComplexTorus.lean](Jacobians/AbelianVariety/ComplexTorus.lean) | `ComplexTorus V L` — **all 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Axiom-free, zero-sorry. |
+| [Jacobians/AbelianVariety/Siegel.lean](Jacobians/AbelianVariety/Siegel.lean) | `SiegelUpperHalfSpace g` as `Subtype` + `CoeFun` + `ext` |
+| [Jacobians/AbelianVariety/Theta.lean](Jacobians/AbelianVariety/Theta.lean) | `RiemannTheta (z, τ)` definition; summability / analyticity / quasi-periodicity TODOs |
+| [Jacobians/RiemannSurface/OneForm.lean](Jacobians/RiemannSurface/OneForm.lean) | `HolomorphicOneForm X` as `Submodule ℂ (X → ℂ → ℂ)` with stub predicates (cocycle TODO) |
+| [Jacobians/RiemannSurface/Homology.lean](Jacobians/RiemannSurface/Homology.lean) | `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` |
+| [Jacobians/RiemannSurface/Genus.lean](Jacobians/RiemannSurface/Genus.lean) | `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
+| [Jacobians/Axioms/FiniteDimOneForms.lean](Jacobians/Axioms/FiniteDimOneForms.lean) | `AX_FiniteDimOneForms` axiom declared + installed as global instance |
 | [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
 | [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with three rounds of adversarial review (Gemini, Codex, Claude) |
 | [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 |
@@ -70,16 +76,28 @@ Currently 8307 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Bu
 
 | Module | Status |
 |--------|--------|
-| `AbelianVariety/Lattice.lean` | ✅ conventions in place |
-| `AbelianVariety/ComplexTorus.lean` | ✅ **complete** — 7/7 Buzzard instances on abstract `(V, L)`, axiom-free, zero-sorry |
-| `AbelianVariety/Siegel.lean` | — not started |
-| `AbelianVariety/Theta.lean` | — not started |
-| `ProjectiveCurve/Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
-| `ProjectiveCurve/Elliptic.lean` | — not started |
-| `ProjectiveCurve/Hyperelliptic.lean` | — not started |
-| `ProjectiveCurve/PlaneCurve.lean` | — not started |
-| `RiemannSurface/*` (Part B) | — not started |
-| `Jacobian/*` (bridge) | — not started |
+| **Part A — `AbelianVariety/`** | |
+| `Lattice.lean` | ✅ conventions in place |
+| `ComplexTorus.lean` | ✅ **complete** — 7/7 Buzzard instances on abstract `(V, L)`, axiom-free, zero-sorry |
+| `Siegel.lean` | ✅ scaffold — definition + `CoeFun` + `ext`; Sp(2g, ℤ)-action and concrete-lattice helpers TODO |
+| `Theta.lean` | ✅ scaffold — `RiemannTheta` defined; summability / analyticity / quasi-periodicity TODO |
+| **Part B — `RiemannSurface/`** | |
+| `OneForm.lean` | 🔄 scaffold — type + `AddCommGroup` + `Module ℂ` in place; holomorphicity + cocycle predicates stub-`True` (TODO) |
+| `Homology.lean` | ✅ scaffold — `H1 X x₀ := Additive (Abelianization (π₁ X x₀))` |
+| `Genus.lean` | ✅ `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
+| `IntersectionForm.lean` | — not started |
+| `Periods.lean` | — not started |
+| `PathIntegral.lean` | — not started |
+| **Axioms — `Axioms/`** | |
+| `FiniteDimOneForms.lean` | ✅ declared + installed as global instance |
+| other axioms | — not started |
+| **Track 2 — `ProjectiveCurve/`** | |
+| `Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
+| `Elliptic.lean` | — not started |
+| `Hyperelliptic.lean` | — not started |
+| `PlaneCurve.lean` | — not started |
+| **Bridge — `Jacobian/`** | |
+| all | — not started |
 
 ## License
 

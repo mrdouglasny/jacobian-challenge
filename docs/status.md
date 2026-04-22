@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-04-21 (evening)_
+_Last updated: 2026-04-21 (late evening)_
 
 ## Build status
 
@@ -18,6 +18,15 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 
 - `Jacobians/ProjectiveCurve/Line.lean` — `ProjectiveLine := OnePoint ℂ` with all seven X-side Buzzard instances (TopologicalSpace, T2Space, CompactSpace, ConnectedSpace, Nonempty, ChartedSpace ℂ, IsManifold 𝓘(ℂ) ω). Plus `chart0`, `chart1`, `chartAt`, and `stereographic : ProjectiveLine ≃ₜ S² ⊂ ℝ³`. Zero sorries.
 - `Jacobians/AbelianVariety/ComplexTorus.lean` — `ComplexTorus V L := V ⧸ L.toAddSubgroup` for a full-rank ℤ-lattice in a finite-dim ℂ-vector space. **All 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Explicit chart atlas via fixed injectivity-ball around `0` + fixed lifts per point; chart transitions are translations by lattice vectors. Axiom-free, zero sorries.
+- `Jacobians/RiemannSurface/Homology.lean` — `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))`. `AddCommGroup` automatic.
+- `Jacobians/RiemannSurface/Genus.lean` — `genus X := Module.finrank ℂ (HolomorphicOneForm X)`. Well-behaved thanks to the global `FiniteDimensional` instance.
+- `Jacobians/Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms` axiom declared + installed as a global instance (`instFiniteDimOneForms`). Load-bearing: without it `Module.finrank` collapses to 0 on the conceptual-stub `HolomorphicOneForm`.
+
+### ✅ Scaffold only
+
+- `Jacobians/RiemannSurface/OneForm.lean` — `HolomorphicOneForm X` as a `Submodule ℂ (X → ℂ → ℂ)` with two predicates (`IsHolomorphicOneFormCoeff`, `SatisfiesCotangentCocycle`), both currently stub-`True`. `AddCommGroup` + `Module ℂ` live via `abbrev` + `↥`-coercion. Refinement of the predicates to their real content is a TODO with concrete formulas in-file.
+- `Jacobians/AbelianVariety/Siegel.lean` — `SiegelUpperHalfSpace g` as a `Subtype` of `Matrix (Fin g) (Fin g) ℂ` with `isSymm` + `(map Complex.im).PosDef`. Four TODOs for g=1 ↔ `UpperHalfPlane`, concrete lattice from columns of `[I | τ]`, manifold structure, `Sp(2g, ℤ)`-action.
+- `Jacobians/AbelianVariety/Theta.lean` — `RiemannTheta (z, τ)` defined via `tsum`. Summability, analyticity, quasi-periodicity, heat equation all TODOs.
 
 ### ✅ Scaffolding only
 
@@ -28,12 +37,11 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 
 ### ⬜ Not started
 
-Part A: `Siegel.lean`, `Theta.lean`.
-Part B (abstract `X`): `OneForm.lean`, `PathIntegral.lean`, `Homology.lean`, `IntersectionForm.lean`, `Periods.lean`, `Genus.lean`.
+Part B (abstract `X`): `PathIntegral.lean`, `IntersectionForm.lean`, `Periods.lean`.
 Track 2: `Elliptic.lean`, `Hyperelliptic.lean`, `PlaneCurve.lean`.
 Bridge: `Jacobian/Construction.lean`, `AbelJacobi.lean`, `Abel.lean`, `Functoriality.lean`, `PushPull.lean`.
 Genus 0: `Uniformization.lean`.
-Axioms: all 9 named axioms (stubs not yet generated; see [formalization-plan.md §7](formalization-plan.md)).
+Axioms: `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — stubs not yet generated (see [formalization-plan.md §7](formalization-plan.md)).
 
 ### Data sorries (9)
 
@@ -76,7 +84,9 @@ Axioms: all 9 named axioms (stubs not yet generated; see [formalization-plan.md 
 
 ## Axiom inventory
 
-None introduced by this project yet. The [formalization plan](formalization-plan.md) defines nine named axioms (`AX_FiniteDimOneForms`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`) that will be introduced as `Axioms/*.lean` files once the consuming modules need them.
+**1 axiom declared so far:** `AX_FiniteDimOneForms` in `Jacobians/Axioms/FiniteDimOneForms.lean`, installed as a global `instance` because `Module.finrank` returns 0 on infinite-dim modules — the instance shield prevents `Fin (genus X) → ℂ` from silently becoming `Unit`.
+
+The [formalization plan §7](formalization-plan.md) lists eight more to come: `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`. They'll land as `Axioms/*.lean` files when the consuming modules need them.
 
 ## Dependencies pinned
 
