@@ -7,6 +7,12 @@ dimension `g`, and the domain of the Riemann theta function. For `g = 1`
 it is the usual upper half plane (canonical identification with Mathlib's
 `UpperHalfPlane` via the `(· 0 0)` projection).
 
+**Implementation choice (per Gemini-3-Pro review of 2026-04-21):** defined
+as a `Subtype` of `Matrix (Fin g) (Fin g) ℂ`, NOT as a `structure`. Subtype
+inherits `TopologicalSpace`, `MetricSpace`, `NormedAddCommGroup` structure
+from the ambient matrix space automatically; a `structure` would require
+manual instantiation of each.
+
 **Role in this project.**
 * Theta domain: `Theta.lean` defines `RiemannTheta (z, τ)` for
   `z : Fin g → ℂ`, `τ : SiegelUpperHalfSpace g`.
@@ -27,25 +33,32 @@ namespace Jacobians.AbelianVariety
 open Matrix
 
 /-- The Siegel upper half space `𝔥_g`: complex symmetric `g × g` matrices
-whose imaginary part (entrywise) is positive definite. -/
-structure SiegelUpperHalfSpace (g : ℕ) where
-  /-- Underlying matrix. -/
-  val : Matrix (Fin g) (Fin g) ℂ
-  /-- The matrix is symmetric: `val = valᵀ`. -/
-  isSymm : val.IsSymm
-  /-- The imaginary part of `val` (entrywise) is positive definite as a real matrix. -/
-  imPosDef : (val.map Complex.im).PosDef
+whose imaginary part (entrywise) is positive definite.
+
+Defined as a subtype so that `TopologicalSpace`, `MetricSpace`, and
+`NormedAddCommGroup` transfer automatically from the ambient matrix space. -/
+def SiegelUpperHalfSpace (g : ℕ) : Type :=
+  { τ : Matrix (Fin g) (Fin g) ℂ // τ.IsSymm ∧ (τ.map Complex.im).PosDef }
 
 namespace SiegelUpperHalfSpace
 
 variable {g : ℕ}
 
+/-- Access the underlying matrix of a Siegel upper-half-space point. -/
+def val (τ : SiegelUpperHalfSpace g) : Matrix (Fin g) (Fin g) ℂ := τ.1
+
+/-- The symmetry condition `τ = τᵀ`. -/
+theorem isSymm (τ : SiegelUpperHalfSpace g) : τ.val.IsSymm := τ.2.1
+
+/-- The imaginary part (entrywise) is positive definite. -/
+theorem imPosDef (τ : SiegelUpperHalfSpace g) : (τ.val.map Complex.im).PosDef := τ.2.2
+
 instance : CoeFun (SiegelUpperHalfSpace g) (fun _ => Matrix (Fin g) (Fin g) ℂ) :=
   ⟨fun τ => τ.val⟩
 
 @[ext]
-theorem ext {τ σ : SiegelUpperHalfSpace g} (h : τ.val = σ.val) : τ = σ := by
-  cases τ; cases σ; simp_all
+theorem ext {τ σ : SiegelUpperHalfSpace g} (h : τ.val = σ.val) : τ = σ :=
+  Subtype.ext h
 
 -- TODO (g = 1 compatibility): canonical bijection
 --   `SiegelUpperHalfSpace 1 ≃ UpperHalfPlane` via `τ ↦ τ 0 0`.
