@@ -875,8 +875,40 @@ Mathlib at the pin has renamed `PartialHomeomorph` → `OpenPartialHomeomorph`. 
 - `Quotient.out'` is not available at this pin; use `Classical.choose (QuotientAddGroup.mk'_surjective _)` for lifts.
 - The variable bundle that `IsZLattice` forces is `[NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]`, stronger than the `AddCommGroup V + Module ℂ V + TopologicalSpace V + IsTopologicalAddGroup V` the plan originally had.
 
+### 2026-04-21 (late evening): Siegel + Theta scaffolds + Gemini round-2 review
+
+- **`Jacobians/AbelianVariety/Siegel.lean`**: `SiegelUpperHalfSpace g` defined as a `Subtype` (per Gemini: `structure` loses auto-inherited `TopologicalSpace`, `MetricSpace`, `NormedAddCommGroup` from the ambient `Matrix` space; `Subtype` picks them up for free). `isSymm` + `imPosDef` theorem interface + `CoeFun` + `ext`.
+- **`Jacobians/AbelianVariety/Theta.lean`**: `RiemannTheta (z, τ)` defined via `tsum`. Per Gemini cleanup: `intVecToC` helper deleted (ad-hoc casting aliases fight the scalar tower), `let nC := …` removed from `thetaSummand` body (blocks simp/rw in downstream proofs). Summability / analyticity / quasi-periodicity / heat-equation as scaffolded TODOs.
+
+**Math verification (Gemini 3 Pro round-2 review, see `docs/gemini-review-2.md`):** all three Theta correctness questions cleared:
+- `dotProduct nC (τ.val *ᵥ nC)` is the Mathlib idiom for `nᵀ τ n`.
+- Sign bound `|thetaSummand| ≤ exp(-πc‖n‖² + 2π‖n‖‖Im z‖)` confirmed from `Im τ` positive-definite.
+- Quasi-periodicity sign convention self-consistent and matches Mumford Vol I §II.1 via the reindex `n ↦ n - m`.
+
+**Three Part B architectural concerns recorded** for when we reach the Jacobian bridge:
+1. `NormedAddCommGroup` trap on `ComplexTorus V L`: `IsZLattice` demands norm structure, but `HolomorphicOneForm X` has no canonical norm (Hodge inner product is downstream of the period matrix itself).
+2. `Classical.choose`-based charts risk simp-opacity for downstream proofs unless we maintain strong rewrite lemmas.
+3. Dual `ChartedSpace` instance risk (`V` vs `Fin g → ℂ` targets): bake the basis into the `ComplexTorus` definition at the bridge to get exactly one instance.
+
+### 2026-04-22: Part B scaffold — OneForm, Homology, Genus + first axiom
+
+Five new modules land, all zero-sorry at the Lean level (axiom-backed):
+
+- **`Jacobians/RiemannSurface.lean`** — top-level Part B aggregator.
+- **`Jacobians/RiemannSurface/OneForm.lean`** — `HolomorphicOneForm X` as a `Submodule ℂ (X → ℂ → ℂ)` with `AddCommGroup` + `Module ℂ` automatic via `abbrev` + `↥`-coercion. Two predicates — `IsHolomorphicOneFormCoeff` and `SatisfiesCotangentCocycle` — stub-`True` with their concrete formulations recorded as TODOs. This is scaffolding: literally every function qualifies at the moment, so `genus X` would be infinite without further refinement. But: the module interface is stable under refinement, so consumers can typecheck against it.
+- **`Jacobians/RiemannSurface/Homology.lean`** — `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))`. The `Additive` wrapping is load-bearing to match the period map's eventual additive target.
+- **`Jacobians/Axioms.lean` + `Jacobians/Axioms/FiniteDimOneForms.lean`** — axioms infrastructure with the first axiom: `AX_FiniteDimOneForms` states `FiniteDimensional ℂ (HolomorphicOneForm X)` for compact connected T2 complex 1-manifolds. Installed as a global `instance`, per the Codex and Claude reviews — without it, `Module.finrank ℂ (HolomorphicOneForm X)` returns 0 on the conceptual-stub `HolomorphicOneForm`, making every downstream `genus`-parameterized instance silently degenerate.
+- **`Jacobians/RiemannSurface/Genus.lean`** — `genus X := Module.finrank ℂ (HolomorphicOneForm X)`. Well-behaved thanks to the global `FiniteDimensional` instance.
+
+**Lean wrinkles learned:**
+- `abbrev F (X : Type*) : Type :=` followed by `↥(submodule X)` fails with "Type 1 / Type _ mismatch"; must use `Type _` for universe polymorphism.
+- `ω` as a variable name conflicts with `ContDiff.Manifold`'s `ω` smoothness-level notation. Use `form` or another name for 1-form arguments.
+- `Abelianization` produces a `CommGroup` (multiplicative); need `Additive` wrapper to get `AddCommGroup`. But `abbrev` + `Additive` still hits `Type` vs `Type _` issues; use `: Type _`.
+
 ### Next
 
-- **Siegel.lean**: `SiegelUpperHalfSpace g`, needed as Theta's domain and for the period-matrix staging ground.
-- **Theta.lean**: `RiemannTheta (z, τ)` on `ℂ^g × 𝔥_g`, convergence / analyticity / quasi-periodicity. Optional for the 24 sorries but load-bearing for Track 1's eventual `ofCurve_inj` discharge (Mumford's theta divisor route).
-- **Alternative / parallel**: start Track 2 module 2 (`Elliptic.lean` leveraging Mathlib's `EllipticCurve`) or module 3 (`Hyperelliptic.lean`, the workhorse). Both are good Codex targets.
+Options:
+- `IntersectionForm.lean` + `Periods.lean` — set up the period map signature with `AX_PeriodInjective`.
+- Jacobian bridge attempt — `def Jacobian X := ComplexTorus ...`; see where the `NormedAddCommGroup` trap actually bites.
+- Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something).
+- Track 2 next concrete curve (`Elliptic.lean` or `Hyperelliptic.lean`).
