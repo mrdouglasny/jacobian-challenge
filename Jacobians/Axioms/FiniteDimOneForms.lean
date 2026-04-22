@@ -47,14 +47,28 @@ axiom AX_FiniteDimOneForms {X : Type*} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] :
     FiniteDimensional ℂ (HolomorphicOneForm X)
 
-/-- Install `AX_FiniteDimOneForms` as a global instance. Without this,
-`Module.finrank ℂ (HolomorphicOneForm X)` returns 0 on spaces where the
-axiom is not directly invoked, silently collapsing downstream `genus`
-and `ChartedSpace` constructions. -/
+/-- Install finite-dimensionality of `HolomorphicOneForm X` as a global
+instance. At the current `⊥`-submodule stub this follows from
+`Submodule.finiteDimensional_bot` *without* invoking the axiom. When the
+predicates `IsHolomorphicOneFormCoeff` / `SatisfiesCotangentCocycle` are
+refined, the instance will delegate to `AX_FiniteDimOneForms`.
+
+**Soundness note.** A previous iteration defined this instance as
+`instFiniteDimOneForms := AX_FiniteDimOneForms` on top of the
+`{ f | True ∧ True }` stub carrier (≅ full function space `X → ℂ → ℂ`).
+Combined with `rank_fun_infinite` + surjection onto `ℂ → ℂ`, that scaffold
+let us derive `False` — any `exfalso` could have discharged the 24
+Challenge sorries. The fix: `HolomorphicOneForm X = ⊥.restrict` at the
+stub, which is trivially 0-dim, and the axiom only bites after the
+predicates land. -/
 instance instFiniteDimOneForms {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    FiniteDimensional ℂ (HolomorphicOneForm X) :=
-  AX_FiniteDimOneForms
+    FiniteDimensional ℂ (HolomorphicOneForm X) := by
+  -- HolomorphicOneForm X = ↥(⊥ : Submodule ℂ (X → ℂ → ℂ)) at the stub.
+  -- The zero submodule is trivially finite-dimensional.
+  change FiniteDimensional ℂ ↥(holomorphicOneFormSubmodule X)
+  unfold holomorphicOneFormSubmodule
+  infer_instance
 
 end Jacobians.Axioms

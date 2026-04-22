@@ -14,15 +14,21 @@ transformation law on chart overlaps:
 
 for `φ_x` the preferred chart at `x`.
 
-**Status (2026-04-21): stub.** The two `Prop` predicates — holomorphicity
-per chart and the cotangent cocycle — are currently placeholders (`True`).
-With these stubs in place, `HolomorphicOneForm X` is an ambient ℂ-submodule
-of `X → ℂ → ℂ`; everything downstream (ℂ-module, `genus X`, `periodMap`)
-type-checks. Refining the predicates to their true content is a TODO that
-will land before any concrete theorem about specific forms.
+**Status (2026-04-22): safe stub.** The submodule is fixed to `⊥` (the
+zero submodule) while the true predicates `IsHolomorphicOneFormCoeff` and
+`SatisfiesCotangentCocycle` are unavailable. A previous scaffold used
+the carrier `{f | True ∧ True}`, which is the top submodule — ℂ-linearly
+equivalent to the ambient `X → ℂ → ℂ`. Combined with `AX_FiniteDimOneForms`
+installed as a global instance, that scaffold let us derive `False` (via
+`rank_fun_infinite` + surjection onto `ℂ → ℂ`), so the scaffolding was
+unsound. Replacing the carrier with `⊥` makes `HolomorphicOneForm X`
+a zero-dimensional ℂ-module at the stub — trivially finite-dim, no axiom
+needed. Everything downstream (ℂ-module, `genus X = 0`, `periodMap`) still
+type-checks; refining the predicates will widen the submodule to its
+correct content and `AX_FiniteDimOneForms` will become load-bearing.
 
-See `docs/formalization-plan.md` §4.1 and `docs/gemini-review-2.md` for
-context on the chart-cocycle choice.
+See `docs/formalization-plan.md` §4.1 and `docs/gemini-review-axioms.md`
+for context.
 -/
 import Mathlib
 
@@ -47,16 +53,18 @@ def SatisfiesCotangentCocycle (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ
 /-- The ℂ-submodule of `X → ℂ → ℂ` consisting of chart-local coefficient
 families representing holomorphic 1-forms on `X`.
 
-Because both predicates are currently `True`, this submodule is literally
-all of `X → ℂ → ℂ` at the moment. Refining the predicates gets this to the
-correct submodule; downstream API (coefficient access, `AddCommGroup`,
-`Module ℂ`) is stable under the refinement. -/
-def holomorphicOneFormSubmodule (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Submodule ℂ (X → ℂ → ℂ) where
-  carrier := { f | IsHolomorphicOneFormCoeff X f ∧ SatisfiesCotangentCocycle X f }
-  zero_mem' := ⟨trivial, trivial⟩
-  add_mem' _ _ := ⟨trivial, trivial⟩
-  smul_mem' _ _ _ := ⟨trivial, trivial⟩
+**Safe stub.** Defined as `⊥` (the zero submodule) while the true content
+of `IsHolomorphicOneFormCoeff` / `SatisfiesCotangentCocycle` is `True`.
+Using `⊥` here makes `HolomorphicOneForm X` a zero ℂ-module — avoiding
+the `HolomorphicOneForm X ≃ X → ℂ → ℂ` trap which made
+`AX_FiniteDimOneForms` unsound when the carrier was the full function
+space. Downstream API (coefficient access, `AddCommGroup`, `Module ℂ`) is
+stable under later refinement of the predicates, at which point the
+carrier becomes `{ f | IsHolomorphicOneFormCoeff X f ∧
+SatisfiesCotangentCocycle X f }`. -/
+noncomputable def holomorphicOneFormSubmodule (X : Type*) [TopologicalSpace X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Submodule ℂ (X → ℂ → ℂ) :=
+  (⊥ : Submodule ℂ (X → ℂ → ℂ))
 
 /-- The ℂ-vector space of holomorphic 1-forms on `X`.
 

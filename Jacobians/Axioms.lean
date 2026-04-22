@@ -7,17 +7,23 @@ Each axiom lives in its own submodule, with a docstring stating:
 * Why it's axiomatized rather than proved at this stage.
 
 See `docs/formalization-plan.md` §7 for the full axiom-discharge priority
-order. Discharge priority (rough):
+order. Discharge priority (revised 2026-04-22 after Gemini review —
+infrastructure axioms first, since downstream constructions collapse
+silently when `genus X` is 0):
 
-1. `AX_PeriodInjective` (follows from `AX_RiemannBilinear`)
-2. `AX_BranchLocus` (local `meromorphicOrderAt` + properness)
-3. `AX_H1FreeRank2g` (CW topology of compact oriented surfaces)
-4. `AX_RiemannBilinear` (Hodge / symplectic positivity)
-5. `AX_FiniteDimOneForms` (compactness + normal families, or Serre duality)
-6. `AX_PluckerFormula` (adjunction; Track 2 `SmoothPlaneCurve` only)
+1. `AX_FiniteDimOneForms` (compactness + normal families; foundation)
+2. `AX_H1FreeRank2g` (CW topology of compact oriented surfaces)
+3. `AX_IntersectionForm` (missing — non-degenerate alternating ℤ-bilinear
+   pairing on `H_1`; prerequisite for "symplectic basis")
+4. `AX_PeriodLattice` (upgrade of `AX_PeriodInjective`: IsZLattice, not
+   just injective — needed for Jacobian as a complex torus)
+5. `AX_RiemannBilinear` (Hodge / symplectic positivity; discharges
+   `AX_PeriodLattice`)
+6. `AX_BranchLocus` (local `meromorphicOrderAt` + properness)
 7. `AX_SerreDuality` (classical pairing)
 8. `AX_RiemannRoch` (deepest algebraic axiom)
-9. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
+9. `AX_PluckerFormula` (adjunction; Track 2 `SmoothPlaneCurve` only)
+10. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
 -/
 import Jacobians.Axioms.FiniteDimOneForms
 import Jacobians.Axioms.RiemannBilinear
