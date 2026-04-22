@@ -44,6 +44,7 @@ Two parallel tracks, both building on a shared Part A:
 | [docs/gemini-review-axioms.md](docs/gemini-review-axioms.md) | Gemini round-3 review of the axiom suite (caught `AX_FiniteDimOneForms` unsoundness) |
 | [docs/challenge-summary.md](docs/challenge-summary.md) | Summary of the challenge and Zulip discussion |
 | [docs/status.md](docs/status.md) | Sorry inventory, axiom inventory, progress tracker |
+| [docs/history.md](docs/history.md) | Chronological work log — the *why* behind each session |
 
 ## Construction strategy
 
