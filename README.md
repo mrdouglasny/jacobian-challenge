@@ -25,7 +25,7 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/Challenge.lean](Jacobians/Challenge.lean) | Buzzard's v0.2 file verbatim (24 sorries) — pinned, tracks upstream |
 | [Jacobians/Basic.lean](Jacobians/Basic.lean) | Shared imports / notation |
 | [Jacobians/AbelianVariety/Lattice.lean](Jacobians/AbelianVariety/Lattice.lean) | Conventions around Mathlib's `IsZLattice` |
-| [Jacobians/AbelianVariety/ComplexTorus.lean](Jacobians/AbelianVariety/ComplexTorus.lean) | `ComplexTorus V L` — 5/7 Buzzard instances (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace). `ChartedSpace / IsManifold / LieAddGroup` TODO |
+| [Jacobians/AbelianVariety/ComplexTorus.lean](Jacobians/AbelianVariety/ComplexTorus.lean) | `ComplexTorus V L` — **all 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Axiom-free, zero-sorry. |
 | [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
 | [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with three rounds of adversarial review (Gemini, Codex, Claude) |
 | [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 |
@@ -71,7 +71,7 @@ Currently 8307 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Bu
 | Module | Status |
 |--------|--------|
 | `AbelianVariety/Lattice.lean` | ✅ conventions in place |
-| `AbelianVariety/ComplexTorus.lean` | 🔄 5/7 instances; ChartedSpace + IsManifold + LieAddGroup pending |
+| `AbelianVariety/ComplexTorus.lean` | ✅ **complete** — 7/7 Buzzard instances on abstract `(V, L)`, axiom-free, zero-sorry |
 | `AbelianVariety/Siegel.lean` | — not started |
 | `AbelianVariety/Theta.lean` | — not started |
 | `ProjectiveCurve/Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
