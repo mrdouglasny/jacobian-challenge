@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-04-22 (Gemini axiom review + soundness fix)_
+_Last updated: 2026-04-22 (Jacobian bridge landed)_
 
 ## Build status
 
-✅ Green. `lake build` completes 8324 jobs. No sorries outside `Challenge.lean`.
+✅ Green. `lake build` completes 8328 jobs. No sorries outside `Challenge.lean`.
 
 ## Sorry inventory
 
@@ -39,12 +39,13 @@ All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzz
 
 Part B (abstract `X`): `PathIntegral.lean`. `IntersectionForm.lean` + `Periods.lean` are scaffold-only.
 Track 2: `Elliptic.lean`, `Hyperelliptic.lean`, `PlaneCurve.lean`.
-Bridge: `Jacobian/Construction.lean`, `AbelJacobi.lean`, `Abel.lean`, `Functoriality.lean`, `PushPull.lean`.
+Bridge: `AbelJacobi.lean`, `Abel.lean`, `Functoriality.lean`, `PushPull.lean`. `Jacobian/Construction.lean` is live (7 instances); `ofCurve`, `pushforward`, `pullback` definitions still pending.
 Genus 0: `Uniformization.lean`.
-Axioms landing tracker (2026-04-22 post-review):
-* Declared and live: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `periodMap` (stub-axiom).
+Universe lift to match Buzzard's `Jacobian : Type u` signature (current bridge lands in `Type`).
+
+Axioms landing tracker (2026-04-22 post-bridge):
+* Declared and live: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `intersectionForm` + `AX_IntersectionForm_{alternating, nondeg}`, `periodMap` (stub-axiom), `AX_PeriodLattice` + `instPeriodLatticeDiscrete`.
 * Declared doc-only (concrete signature pending consumer): `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`.
-* Missing (flagged by Gemini): `AX_PeriodLattice` (upgrade of `AX_PeriodInjective` to `IsZLattice`), `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear form on `H_1`).
 
 ### Data sorries (9)
 
@@ -87,10 +88,11 @@ Axioms landing tracker (2026-04-22 post-review):
 
 ## Axiom inventory
 
-**Declared, with Lean signatures (7):**
+**Declared, with Lean signatures (10 axioms across 6 files):**
 * `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean`
 * `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean`
 * `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean`
+* `AX_PeriodLattice` + `instPeriodLatticeDiscrete` — `Jacobians/Axioms/PeriodLattice.lean`
 * `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
 * `periodMap` (stub-axiom, to be retired by `def` once `PathIntegral` lands) — `Jacobians/RiemannSurface/Periods.lean`
 
@@ -102,7 +104,18 @@ Axioms landing tracker (2026-04-22 post-review):
 * ✅ `AX_RiemannBilinear` target signature revised: existentials shifted over basis choice.
 * ✅ `AX_RiemannRoch` and `AX_SerreDuality` target signatures revised with `FiniteDimensional` hypotheses and ℤ-subtraction (Serre-duality now stated as an isomorphism).
 * ✅ `AX_BranchLocus` target signature revised to use `tsum` + `¬ ∃ c, ∀ x, f = c` non-constant predicate.
-* ⏸ `AX_PeriodInjective` → `AX_PeriodLattice` (`IsZLattice`) upgrade: deferred to the Jacobian bridge, where the `NormedAddCommGroup`-on-ambient architectural decision gets settled.
+* ✅ `AX_PeriodLattice` landed in `Jacobians/Axioms/PeriodLattice.lean`: `IsZLattice ℝ (periodLatticeInBasis X x₀ b)` in the basis-transported ambient `Fin (genus X) → ℂ`. Consumed by the Jacobian bridge.
+
+## Jacobian bridge
+
+`Jacobians/Jacobian/Construction.lean` lands the bridge from the abstract Riemann surface to the complex torus:
+
+* `jacobianBasis X := Module.finBasis ℂ (HolomorphicOneForm X)` — a ℂ-basis of size `Fin (genus X)`, baked into the construction to avoid a dual `ChartedSpace` (one over `HolomorphicOneForm X →ₗ[ℂ] ℂ`, one over `Fin (genus X) → ℂ`).
+* `periodLatticeInBasis X x₀ b : Submodule ℤ (Fin (genus X) → ℂ)` via `AddMonoidHom.toIntLinearMap (periodMap X x₀)` then coordinate transfer through `b.dualBasis.equivFun`.
+* `Jacobian X := ComplexTorus (Fin (genus X) → ℂ) (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X))`.
+* Seven Buzzard instances inherited via `change + infer_instance` off `ComplexTorus`.
+
+**Deferred.** (a) Universe-lift wrapper: `ComplexTorus (Fin (genus X) → ℂ)` lives in `Type` but Buzzard's `Jacobian : Type u`. (b) Basepoint-independence of the lattice (needs `AX_RiemannBilinear`). (c) The Abel-Jacobi map `ofCurve P : X → Jacobian X` and its theorems. (d) Pushforward / pullback functoriality. These are the next bridge pieces.
 
 ## Dependencies pinned
 

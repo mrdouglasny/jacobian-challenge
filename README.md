@@ -15,7 +15,7 @@ All underlying mathematics is classical (Abel 1829, Jacobi 1851). The challenge 
 Two parallel tracks, both building on a shared Part A:
 
 - **Part A (`Jacobians/AbelianVariety/`)** — abelian-variety machinery, axiom-free. `ComplexTorus V L := V ⧸ L` for `L : Submodule ℤ V` with `[IsZLattice ℝ L]`. Supplies all seven typeclass instances Buzzard demands on `Jacobian X`.
-- **Track 1 (`Jacobians/RiemannSurface/` + `Jacobians/Jacobian/`)** — abstract `X` from Buzzard's typeclasses → period lattice → `Jacobian X := ComplexTorus (HolomorphicOneForm X →ₗ[ℂ] ℂ) (periodLattice X)`. Closes the challenge on arbitrary `X`.
+- **Track 1 (`Jacobians/RiemannSurface/` + `Jacobians/Jacobian/`)** — abstract `X` from Buzzard's typeclasses → period lattice → `Jacobian X := ComplexTorus (Fin (genus X) → ℂ) (periodLatticeInBasis X x₀ (Module.finBasis ℂ (HolomorphicOneForm X)))`. A ℂ-basis of `HolomorphicOneForm X` is baked into the definition (via `Module.finBasis` from the global `FiniteDimensional` instance), giving a *single* `ChartedSpace (Fin (genus X) → ℂ) (Jacobian X)` instance — matching Buzzard's signature exactly. Basepoint extracted via `Classical.choice` from `[Nonempty X]`; basepoint-independence via `AX_RiemannBilinear` postponed.
 - **Track 2 (`Jacobians/ProjectiveCurve/`)** — concrete projective curves (`ProjectiveLine`, elliptic, hyperelliptic, smooth plane curves) each satisfying Buzzard's typeclasses by construction. Closes the challenge on these specific types.
 
 ## File structure
@@ -28,15 +28,20 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/AbelianVariety/ComplexTorus.lean](Jacobians/AbelianVariety/ComplexTorus.lean) | `ComplexTorus V L` — **all 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Axiom-free, zero-sorry. |
 | [Jacobians/AbelianVariety/Siegel.lean](Jacobians/AbelianVariety/Siegel.lean) | `SiegelUpperHalfSpace g` as `Subtype` + `CoeFun` + `ext` |
 | [Jacobians/AbelianVariety/Theta.lean](Jacobians/AbelianVariety/Theta.lean) | `RiemannTheta (z, τ)` definition; summability / analyticity / quasi-periodicity TODOs |
-| [Jacobians/RiemannSurface/OneForm.lean](Jacobians/RiemannSurface/OneForm.lean) | `HolomorphicOneForm X` as `Submodule ℂ (X → ℂ → ℂ)` with stub predicates (cocycle TODO) |
+| [Jacobians/RiemannSurface/OneForm.lean](Jacobians/RiemannSurface/OneForm.lean) | `HolomorphicOneForm X` as `↥(⊥ : Submodule ℂ (X → ℂ → ℂ))` safe stub; predicates + real carrier TODO |
 | [Jacobians/RiemannSurface/Homology.lean](Jacobians/RiemannSurface/Homology.lean) | `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` |
-| [Jacobians/RiemannSurface/Genus.lean](Jacobians/RiemannSurface/Genus.lean) | `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
-| [Jacobians/Axioms/FiniteDimOneForms.lean](Jacobians/Axioms/FiniteDimOneForms.lean) | `AX_FiniteDimOneForms` axiom declared + installed as global instance |
+| [Jacobians/RiemannSurface/Genus.lean](Jacobians/RiemannSurface/Genus.lean) | `genus X := Module.finrank ℂ (HolomorphicOneForm X)` (= 0 at the stub, provably) |
+| [Jacobians/RiemannSurface/Periods.lean](Jacobians/RiemannSurface/Periods.lean) | `periodMap X x₀ : H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)` — axiom-stub for a `def` landing with `PathIntegral.lean` |
+| [Jacobians/RiemannSurface/IntersectionForm.lean](Jacobians/RiemannSurface/IntersectionForm.lean) | `AX_PeriodInjective` axiom + Hurewicz-bridge + symplectic-basis TODOs |
+| [Jacobians/Jacobian/Construction.lean](Jacobians/Jacobian/Construction.lean) | `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge |
+| [Jacobians/Axioms/](Jacobians/Axioms/) | 10 named-axiom files (see §Named axioms below) |
 | [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
-| [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with three rounds of adversarial review (Gemini, Codex, Claude) |
-| [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 |
-| [docs/codex-review.md](docs/codex-review.md) | Codex (GPT-5) review, round 2 |
-| [docs/claude-review.md](docs/claude-review.md) | Claude self-review, round 3 |
+| [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with four rounds of adversarial review (Gemini ×2, Codex, Claude) |
+| [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 (plan) |
+| [docs/codex-review.md](docs/codex-review.md) | Codex (GPT-5) review, round 2 (plan) |
+| [docs/claude-review.md](docs/claude-review.md) | Claude self-review, round 3 (plan) |
+| [docs/gemini-review-2.md](docs/gemini-review-2.md) | Gemini round-2 review of Theta + Part B architecture |
+| [docs/gemini-review-axioms.md](docs/gemini-review-axioms.md) | Gemini round-3 review of the axiom suite (caught `AX_FiniteDimOneForms` unsoundness) |
 | [docs/challenge-summary.md](docs/challenge-summary.md) | Summary of the challenge and Zulip discussion |
 | [docs/status.md](docs/status.md) | Sorry inventory, axiom inventory, progress tracker |
 
@@ -56,7 +61,17 @@ See [docs/survey.md](docs/survey.md) for the Phase B audit. Key gaps blocking Tr
 
 ## Named axioms (to be discharged later)
 
-See [docs/formalization-plan.md](docs/formalization-plan.md) §7. Nine named axioms, led by `AX_RiemannBilinear`, `AX_FiniteDimOneForms`, `AX_BranchLocus`, `AX_RiemannRoch`, `AX_AbelTheorem`.
+See [docs/formalization-plan.md](docs/formalization-plan.md) §7 for discharge priority; see [docs/gemini-review-axioms.md](docs/gemini-review-axioms.md) for the Gemini round-3 axiom audit.
+
+**Declared with Lean signatures (8 axioms across 4 files):**
+- `Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms` (+ global `FiniteDimensional` instance, currently routed through `⊥`-stub without invoking the axiom).
+- `Axioms/H1FreeRank2g.lean` — `AX_H1FreeRank2g` via `Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀)`.
+- `Axioms/IntersectionForm.lean` — `intersectionForm x₀` (axiom-stub for a `def`) + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg`.
+- `Axioms/PeriodLattice.lean` — `instPeriodLatticeDiscrete` + `AX_PeriodLattice` (the period image is an `IsZLattice` in `Fin (genus X) → ℂ`; needed for the Jacobian bridge).
+- `RiemannSurface/IntersectionForm.lean` — `AX_PeriodInjective`.
+- `RiemannSurface/Periods.lean` — `periodMap` (axiom-stub for a `def` landing with `PathIntegral`).
+
+**Declared doc-only targets (signatures sketched in comments, pending consumer-module types):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`. All six target signatures were revised 2026-04-22 per Gemini review (existentials shifted over basis choice, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
 
 ## Dependencies
 
@@ -70,7 +85,7 @@ lake update
 lake build
 ```
 
-Currently 8307 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Buzzard's verbatim file). Zero sorries anywhere else.
+Currently 8328 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Buzzard's verbatim file). Zero sorries anywhere else.
 
 ## Status
 
@@ -82,22 +97,25 @@ Currently 8307 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Bu
 | `Siegel.lean` | ✅ scaffold — definition + `CoeFun` + `ext`; Sp(2g, ℤ)-action and concrete-lattice helpers TODO |
 | `Theta.lean` | ✅ scaffold — `RiemannTheta` defined; summability / analyticity / quasi-periodicity TODO |
 | **Part B — `RiemannSurface/`** | |
-| `OneForm.lean` | 🔄 scaffold — type + `AddCommGroup` + `Module ℂ` in place; holomorphicity + cocycle predicates stub-`True` (TODO) |
+| `OneForm.lean` | 🔄 safe stub — `HolomorphicOneForm X = ↥⊥`; predicates-and-real-carrier TODO |
 | `Homology.lean` | ✅ scaffold — `H1 X x₀ := Additive (Abelianization (π₁ X x₀))` |
-| `Genus.lean` | ✅ `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
-| `IntersectionForm.lean` | — not started |
-| `Periods.lean` | — not started |
+| `Genus.lean` | ✅ `genus X := Module.finrank ℂ (HolomorphicOneForm X)` (= 0 at stub) |
+| `Periods.lean` | ✅ scaffold — `periodMap` axiom-stub |
+| `IntersectionForm.lean` | ✅ scaffold — `AX_PeriodInjective` |
 | `PathIntegral.lean` | — not started |
 | **Axioms — `Axioms/`** | |
-| `FiniteDimOneForms.lean` | ✅ declared + installed as global instance |
-| other axioms | — not started |
+| `FiniteDimOneForms.lean` | ✅ declared; instance via `⊥`-stub (unsoundness fixed 2026-04-22) |
+| `H1FreeRank2g.lean` | ✅ declared (typed) |
+| `IntersectionForm.lean` | ✅ declared (map axiom-stub + 2 property axioms) |
+| `PeriodLattice.lean` | ✅ declared (`AX_PeriodLattice` + `instPeriodLatticeDiscrete`) |
+| `RiemannBilinear` / `RiemannRoch` / `SerreDuality` / `AbelTheorem` / `BranchLocus` / `PluckerFormula` | ✅ doc-only (signatures sketched, pending consumer modules) |
+| **Bridge — `Jacobian/`** | |
+| `Construction.lean` | ✅ `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge (basis baked in). Universe-lift wrapper to match Buzzard's `: Type u` signature TODO |
 | **Track 2 — `ProjectiveCurve/`** | |
 | `Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
 | `Elliptic.lean` | — not started |
 | `Hyperelliptic.lean` | — not started |
 | `PlaneCurve.lean` | — not started |
-| **Bridge — `Jacobian/`** | |
-| all | — not started |
 
 ## License
 
