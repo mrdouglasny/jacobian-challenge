@@ -12,3 +12,4 @@ import Jacobians.ProjectiveCurve.Charts
 import Jacobians.ProjectiveCurve.Line
 import Jacobians.ProjectiveCurve.Elliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.PlaneCurve
