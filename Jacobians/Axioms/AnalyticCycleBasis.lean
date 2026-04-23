@@ -193,25 +193,30 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-/-- The data of a piecewise-real-analytic ℤ-basis of `H_1(X, ℤ)` with
-each basis class represented by a specific piecewise-analytic loop.
+/-- The `α`-cycle embedding: `Fin (genus X)` → `Fin (2 * genus X)` mapping
+`i ↦ i` (the first `g` indices). -/
+noncomputable def αEmbed {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (i : Fin (genus X)) : Fin (2 * genus X) :=
+  ⟨i.val, by have := i.isLt; omega⟩
 
-At this pin the structure carries:
-  - the 2g loops;
-  - the claim that their `H_1`-classes form a ℤ-basis.
+/-- The `β`-cycle embedding: `Fin (genus X)` → `Fin (2 * genus X)` mapping
+`i ↦ g + i` (the last `g` indices). -/
+noncomputable def βEmbed {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (i : Fin (genus X)) : Fin (2 * genus X) :=
+  ⟨genus X + i.val, by have := i.isLt; omega⟩
 
-The **symplectic condition** on the intersection form — that in the
-split `Fin (2g) ≃ Fin g ⊕ Fin g` (α-cycles + β-cycles) the pairing
-has matrix `[[0, I], [-I, 0]]` — is intentionally *not* baked in at
-this pin. Reason: stating it requires plumbing `Fin.castAdd g` /
-`Fin.natAdd g` through the basis, and the type arithmetic
-`g + g = 2 * g` forces `Fin.cast`-chained rewriting in every consumer.
-A cleaner approach is to add the symplectic property as a *separate*
-predicate on `AnalyticCycleBasis` once it's needed by
-`AX_RiemannBilinear` — at which point the α/β split can be made
-concrete via a helper `AnalyticCycleBasis.toSymplecticBasis`.
+/-- The data of a piecewise-real-analytic **symplectic** ℤ-basis of
+`H_1(X, ℤ)` with each basis class represented by a specific
+piecewise-analytic loop.
 
-The basis is indexed by `Fin (2 * genus X)` directly. -/
+The basis is indexed by `Fin (2 * genus X)` directly, with the split
+into α-cycles and β-cycles handled by `αEmbed` / `βEmbed`. The
+symplectic condition asserts the intersection form has matrix
+`[[0, I], [-I, 0]]` in this basis.
+
+(Added 2026-04-23 per completion plan A1.) -/
 structure AnalyticCycleBasis (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) where
@@ -223,12 +228,18 @@ structure AnalyticCycleBasis (X : Type*) [TopologicalSpace X] [T2Space X]
   construction that will live in `Jacobians/RiemannSurface/IntersectionForm.lean`)
   is a downstream theorem, not part of this axiom. -/
   isBasis : Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀)
-
--- TODO (symplectic property): add a predicate
---   `AnalyticCycleBasis.IsSymplectic (b : AnalyticCycleBasis X x₀) : Prop`
--- together with an axiom `AX_AnalyticCycleBasis_isSymplectic` witnessing
--- it, once `AX_RiemannBilinear`'s real (non-doc-only) statement lands
--- and needs it.
+  /-- **Symplectic condition.** The basis decomposes into `α`-cycles
+  (indices `0 .. genus X - 1`) and `β`-cycles (indices `genus X ..
+  2 * genus X - 1`) via `αEmbed` / `βEmbed`. The intersection form has
+  matrix `[[0, I], [-I, 0]]` in this basis:
+    - `⟨α_i, α_j⟩ = 0`
+    - `⟨β_i, β_j⟩ = 0`
+    - `⟨α_i, β_j⟩ = δ_{i, j}` -/
+  symplectic : ∀ i j : Fin (genus X),
+    ((intersectionForm x₀ (isBasis (αEmbed i))) (isBasis (αEmbed j)) = 0) ∧
+    ((intersectionForm x₀ (isBasis (βEmbed i))) (isBasis (βEmbed j)) = 0) ∧
+    ((intersectionForm x₀ (isBasis (αEmbed i))) (isBasis (βEmbed j)) =
+      (if i = j then (1 : ℤ) else 0))
 
 -- TODO (loops_to_basis): a theorem
 --   `loops_to_basis_eq (b : AnalyticCycleBasis X x₀) (i : Fin (2 * genus X)) :
