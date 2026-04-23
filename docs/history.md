@@ -308,11 +308,65 @@ Without it, `lake update` would drift from the challenge's fixed pin.
 
 ---
 
+### Universe lift + 8 Buzzard sorries closed (same day, late)
+
+With the bridge committed but stuck in `Type` while Buzzard asks for
+`Type u`, the path forward was a ULift wrapper. Approach:
+
+1. **Generic `chartedSpaceULift` transfer.** `ChartedSpace H M ⟹
+   ChartedSpace H (ULift M)` by composing each chart with
+   `Homeomorph.ulift.toOpenPartialHomeomorph`.
+2. **`ulift_charts_eqOnSource` key lemma.** The transition between two
+   ULift-composed charts is `EqOnSource`-equivalent to the downstairs
+   transition. Proof chain: `trans_symm_eq_symm_trans_symm`,
+   `trans_assoc`, `OpenPartialHomeomorph.symm_trans_self`,
+   `ofSet_univ_eq_refl`, `refl_trans`.
+3. **`uliftHasGroupoid`.** Any `HasGroupoid M (contDiffGroupoid n I)`
+   transfers to `ULift M` because `StructureGroupoid.mem_of_eqOnSource`
+   closes the gap.
+4. **`IsManifold.mk'`** lifts `HasGroupoid` to `IsManifold`.
+
+After that: `Jacobian (X : Type u) := ULift.{u, 0} (JacobianAmbient X)`
+where `JacobianAmbient X` is the concrete `ComplexTorus` (made `abbrev`
+so Mathlib's ULift-ABG/TS/T2/CompactSpace instances fire via
+transparent unfolding).
+
+**Six instances auto-derive via ULift**: `AddCommGroup`,
+`TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace`,
+`IsManifold`.
+
+`LieAddGroup` transfer needs `IsTopologicalAddGroup (ULift _)` +
+`ContMDiff` of add/neg through ULift — significant additional work.
+Punted.
+
+**Edited `Challenge.lean`** to fill:
+- `genus` → `Jacobians.RiemannSurface.genus X` (line 47).
+- `Jacobian` → `Jacobians.Jacobian X` (line 61).
+- 6 instance sorries via `inferInstanceAs` / `change + infer_instance`.
+- `noncomputable` added to `def genus`, `def Jacobian`, and the data
+  instances (forced by Mathlib's `Module.finrank` being noncomputable
+  and `Classical.choice` on the basepoint).
+- `LieAddGroup` sorry at line 101 left unchanged.
+
+Delegated initial attempt to Codex (agent `a93ef786914eecbc9`) which
+timed out without producing output — finished manually via iterative
+`lean_build` / `lean_run_code` using the lean-lsp MCP server to verify
+each transfer lemma before committing.
+
+**Result: 8 Buzzard sorries closed, 16 remain** (all in
+`Challenge.lean`: `LieAddGroup` instance, 5 data defs, 10 theorems).
+
 ## Status snapshot (end of 2026-04-22)
 
 - **Build:** green, 8328 jobs.
-- **Sorries:** 24, all in `Jacobians/Challenge.lean` (Buzzard's
-  verbatim file). Zero elsewhere.
+- **Sorries:** 16 in `Jacobians/Challenge.lean` (down from 24). Zero
+  elsewhere.
+- **Buzzard bridge:** `genus`, `Jacobian`, 6 of 7 typeclass instances
+  filled via `Jacobians.Jacobian` (ULift-lifted complex torus).
+  Remaining: `LieAddGroup`, Abel-Jacobi family (`ofCurve` + 3
+  theorems), pushforward family (def + 3 theorems), pullback family
+  (def + 3 theorems), `ContMDiff.degree`, `pushforward_pullback`,
+  `genus_eq_zero_iff_homeo`.
 - **Axioms declared with Lean signatures (10):** `AX_FiniteDimOneForms`,
   `AX_H1FreeRank2g`, `intersectionForm` +
   `AX_IntersectionForm_{alternating, nondeg}`, `AX_PeriodLattice` +

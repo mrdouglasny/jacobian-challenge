@@ -1,4 +1,8 @@
 import Mathlib -- compiles with commit 8e3c989104daaa052921bf43de9eef0e1ac9fbf5 (15th April 2026)
+import Jacobians.Jacobian
+-- ^ Our bridge. Fills `genus`, `Jacobian`, and 6 of 7 typeclass-instance
+-- sorries below. `LieAddGroup` remains a sorry pending the ULift
+-- ContMDiff-of-add/neg transfer.
 
 /-
 
@@ -40,8 +44,9 @@ open scoped ContDiff -- for ω notation
 open scoped Manifold -- for 𝓘 notation
 
 /-- The genus of a compact Riemann surface. -/
-def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
-  [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ := sorry
+noncomputable def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
+  Jacobians.RiemannSurface.genus X
 
 -- let X be a compact Riemann surface
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
@@ -55,32 +60,42 @@ lemma genus_eq_zero_iff_homeo :
 universe u in
 -- data
 /-- The Jacobian of a compact Riemann surface. -/
-def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
-  [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type u := sorry
+noncomputable def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type u :=
+  Jacobians.Jacobian X
 
 namespace Jacobian
 
 -- data
 /-- The Jacobian of a compact Riemann surface is naturally an additive commutative group. -/
-instance : AddCommGroup (Jacobian X) := sorry
+noncomputable instance : AddCommGroup (Jacobian X) :=
+  inferInstanceAs (AddCommGroup (Jacobians.Jacobian X))
 
 -- data
 /-- The Jacobian of a compact Riemann surface is naturally a topological space. -/
-instance : TopologicalSpace (Jacobian X) := sorry
+noncomputable instance : TopologicalSpace (Jacobian X) :=
+  inferInstanceAs (TopologicalSpace (Jacobians.Jacobian X))
 
 -- Prop
-instance : T2Space (Jacobian X) := sorry
+instance : T2Space (Jacobian X) :=
+  inferInstanceAs (T2Space (Jacobians.Jacobian X))
 
 -- Prop
-instance : CompactSpace (Jacobian X) := sorry
+instance : CompactSpace (Jacobian X) :=
+  inferInstanceAs (CompactSpace (Jacobians.Jacobian X))
 
 -- data
 /-- The Jacobian of a compact Riemann surface is a complex manifold, of dimension
 equal to the genus of the surface. -/
-instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) := sorry
+noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) := by
+  change ChartedSpace (Fin (Jacobians.RiemannSurface.genus X) → ℂ) (Jacobians.Jacobian X)
+  infer_instance
 
 -- Prop
-instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := sorry
+instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
+  change IsManifold (modelWithCornersSelf ℂ (Fin (Jacobians.RiemannSurface.genus X) → ℂ))
+    ω (Jacobians.Jacobian X)
+  infer_instance
 
 -- Prop
 instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := sorry
