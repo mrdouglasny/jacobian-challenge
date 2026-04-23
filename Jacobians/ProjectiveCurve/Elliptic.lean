@@ -136,10 +136,6 @@ instance : LieAddGroup 𝓘(ℂ, ℂ) ω (Elliptic ω₁ ω₂ h) :=
 instance : Nonempty (Elliptic ω₁ ω₂ h) :=
   inferInstanceAs (Nonempty (ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)))
 
--- TODO (ofUpperHalfPlane): `Elliptic.ofUpperHalfPlane (τ : ℂ) (hτ : 0 < τ.im)`
--- specialising to `ω₁ = 1`, `ω₂ = τ`. The ℝ-linear independence is a
--- one-line proof from `hτ`.
-
 -- TODO (genus_eq_one): `genus (Elliptic ω₁ ω₂ h) = 1`. Awaits
 -- `OneForm.lean` predicate refinement.
 
@@ -148,5 +144,34 @@ instance : Nonempty (Elliptic ω₁ ω₂ h) :=
 -- that `AX_AnalyticCycleBasis` is non-vacuous.
 
 end Elliptic
+
+/-- For `τ ∈ ℂ` with positive imaginary part, `{1, τ}` is an ℝ-basis of `ℂ`.
+Proof: the imaginary part of `a • 1 + b • τ = 0` is `b • τ.im`, which vanishes
+iff `b = 0`; the real part is then `a = 0`. -/
+theorem linearIndependent_one_of_pos_im {τ : ℂ} (hτ : 0 < τ.im) :
+    LinearIndependent ℝ ![(1 : ℂ), τ] := by
+  rw [LinearIndependent.pair_iff]
+  intro a b hab
+  have h_im : (a • (1 : ℂ) + b • τ).im = (0 : ℂ).im := congrArg Complex.im hab
+  simp at h_im
+  have hb : b = 0 := h_im.resolve_right (ne_of_gt hτ)
+  refine ⟨?_, hb⟩
+  subst hb
+  have h_re : (a • (1 : ℂ) + (0 : ℝ) • τ).re = (0 : ℂ).re := congrArg Complex.re hab
+  simpa using h_re
+
+/-- The **elliptic curve in normalized form** `ℂ / (ℤ + ℤτ)` for
+`τ ∈ ℂ` with positive imaginary part. Takes `ω₁ = 1`, `ω₂ = τ`.
+
+`abbrev` for transparent instance inheritance. -/
+noncomputable abbrev Elliptic.ofUpperHalfPlane (τ : ℂ) (hτ : 0 < τ.im) : Type :=
+  Elliptic 1 τ (linearIndependent_one_of_pos_im hτ)
+
+-- All 8 Buzzard typeclass instances on `Elliptic.ofUpperHalfPlane τ hτ`
+-- are inherited automatically via the `Elliptic` definition.
+example (τ : ℂ) (hτ : 0 < τ.im) :
+    LieAddGroup 𝓘(ℂ, ℂ) ω (Elliptic.ofUpperHalfPlane τ hτ) :=
+  inferInstanceAs (LieAddGroup 𝓘(ℂ, ℂ) ω
+    (Elliptic 1 τ (linearIndependent_one_of_pos_im hτ)))
 
 end Jacobians.ProjectiveCurve
