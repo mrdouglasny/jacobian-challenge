@@ -12,6 +12,7 @@ import Jacobians.ProjectiveCurve.Charts
 import Jacobians.ProjectiveCurve.Line
 import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.Witnesses
+import Jacobians.ProjectiveCurve.Line.OneForm
 import Jacobians.ProjectiveCurve.Elliptic
 import Jacobians.ProjectiveCurve.Elliptic.Genus
 import Jacobians.ProjectiveCurve.Elliptic.Witnesses

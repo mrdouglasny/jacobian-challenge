@@ -10,6 +10,21 @@ Buzzard's challenge is a single Lean file containing `sorry`-ed definitions and 
 
 All underlying mathematics is classical (Abel 1829, Jacobi 1851). The challenge is to formalize it in Lean 4 / Mathlib without extending Mathlib itself, i.e. living entirely downstream.
 
+## What we claim
+
+Buzzard's challenge identifies Mathlib's real bottleneck: the differential-geometric API for *stating* modern theorems about Jacobians is missing. Jack McCarthy captured this sharply — "even stating the definitions requires lots of machinery in differential geometry which is not currently in Mathlib." Rado Kirov's 3-day Claude Code baseline ([rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)) — ~5K LOC, 10 named classical theorems still stubbed, self-rated ~10–15% toward a full end-to-end solution — bounds what a human with zero math background plus off-the-shelf AI tooling produces.
+
+With math+Lean expert steering — the configuration Kirov and Riccardo Brasca named as the realistic path — AI-written code produces an **API-complete, non-vacuous Lean 4 foundation** for Buzzard's file in days rather than months:
+
+- **All six Buzzard-exposed definitions are real `def`s, not `axiom`s**: `genus`, `Jacobian`, `Jacobian.ofCurve`, `Jacobian.pushforward`, `Jacobian.pullback`, `ContMDiff.degree`. Plus `periodMap`, `H1`, `HolomorphicOneForm` at the supporting layer.
+- The axiomatization lives strictly *below* the Buzzard API: path-integral-as-functional, ambient linear maps on `Fin (genus X) → ℂ` with their lattice-preservation property, and the common-fiber existential (`AX_BranchLocus`). The top-level data maps are real quotient / ULift constructions over those primitives.
+- Buzzard's own hack-blockers — `ofCurve_self = 0` and `genus_eq_zero_iff_homeo` — discharge against concrete witnesses: `ProjectiveLine` (genus 0, via stereographic sphere homeomorphism) and `Elliptic ω₁ ω₂` (genus 1, torus with honest symplectic cycle basis) — not trivial groups. `ofCurve_self` is now a **derived theorem**, not an axiom, because the basepoint-subtraction is built into `ofCurveImpl`.
+- The residual 19th–20th century mathematics — Riemann-Roch, Serre duality, Riemann bilinear relations, period-lattice integration, Abel's theorem, and the discrete-group quotient atlases Michael Rothgang is mentoring into Mathlib — is enumerated as ~20 named axioms, each with textbook citation and proof sketch.
+
+We do **not** claim a sorry-free solution and we do **not** claim autonomy. Every line of Lean was written by Claude; the load-bearing mathematical judgments — axiom-vs-proof boundary, what counts as a non-vacuous witness, which hack-smuggles to reject — were made by a mathematician-user. The claim is narrower and, we think, more useful: *stating* Buzzard's theorems and bolting down the foundation — the phase the Zulip thread treated as the long pole — is fast when a domain expert drives an AI, and the remaining sorries reduce to the enumerated classical theorems. This is what Emily Riehl and Timothy Chow's autonomy exchange converged on as the honest frame: no achievement is fully autonomous, so say exactly what the human and the AI each did.
+
+See [docs/challenge-summary.md](docs/challenge-summary.md) for the full Zulip discussion.
+
 ## Architecture
 
 Two parallel tracks, both building on a shared Part A:
@@ -67,15 +82,23 @@ See [docs/survey.md](docs/survey.md) for the Phase B audit. Key gaps blocking Tr
 
 See [docs/formalization-plan.md](docs/formalization-plan.md) §7 for discharge priority; see [docs/gemini-review-axioms.md](docs/gemini-review-axioms.md) for the Gemini round-3 axiom audit.
 
-**Declared with Lean signatures (8 axioms across 4 files):**
-- `Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms` (+ global `FiniteDimensional` instance, currently routed through `⊥`-stub without invoking the axiom).
-- `Axioms/H1FreeRank2g.lean` — `AX_H1FreeRank2g` via `Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀)`.
-- `Axioms/IntersectionForm.lean` — `intersectionForm x₀` (axiom-stub for a `def`) + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg`.
-- `Axioms/PeriodLattice.lean` — `instPeriodLatticeDiscrete` + `AX_PeriodLattice` (the period image is an `IsZLattice` in `Fin (genus X) → ℂ`; needed for the Jacobian bridge).
-- `RiemannSurface/IntersectionForm.lean` — `AX_PeriodInjective`.
-- `RiemannSurface/Periods.lean` — `periodMap` (axiom-stub for a `def` landing with `PathIntegral`).
+**Primitive functional axioms (consumed by real defs):**
+- `Axioms/AbelJacobiMap.lean` — `pathIntegralBasepointFunctional : X → X → (HolomorphicOneForm X →ₗ[ℂ] ℂ)` paired with `AX_pathIntegral_local_antiderivative` (Fundamental Theorem of Calculus: the functional's derivative at the chart image equals the 1-form's chart-local coefficient; binds functional to cocycle data, eliminating the trivial-zero unsoundness pathway). Fed into `ofCurveAmbient` / `ofCurveImpl`.
+- `Axioms/AbelJacobiMap.lean` — `pullbackOneForm : HolomorphicOneForm Y →ₗ[ℂ] HolomorphicOneForm X` and `pushforwardOneForm` (trace). Structured functorial primitives on 1-forms. The ambient linear maps `pushforwardAmbientLinear` and `pullbackAmbientLinear` are now real **`def`s** derived by transporting `.dualMap` through the basis dualisation.
+- `Axioms/AbelJacobiMap.lean` — `AX_pushforwardAmbient_preserves_lattice`, `AX_pullbackAmbient_preserves_lattice` (period-map naturality); fed into `pushforwardImpl`, `pullbackImpl`.
+- `Axioms/BranchLocus.lean` — `localOrder` + `AX_BranchLocus` (fed into `degreeImpl`).
+- `RiemannSurface/PathIntegral.lean` — `loopIntegralToH1` (fed into real `def periodMap`).
 
-**Declared doc-only targets (signatures sketched in comments, pending consumer-module types):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`. All six target signatures were revised 2026-04-22 per Gemini review (existentials shifted over basis choice, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
+**Property axioms on top of the real defs:** `AX_ofCurve_contMDiff`, `AX_ofCurve_inj`, `AX_pushforward_contMDiff`, `AX_pushforward_id_apply`, `AX_pushforward_comp_apply`, `AX_pullback_contMDiff`, `AX_pullback_id_apply`, `AX_pullback_comp_apply`, `AX_pushforward_pullback`. (`AX_jacobian_lieAddGroup` was retired from axiom to theorem 2026-04-23 via inline ULift-smoothness lemmas.)
+
+**Infrastructure axioms:**
+- `Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms`.
+- `Axioms/H1FreeRank2g.lean` — `AX_H1FreeRank2g`.
+- `Axioms/IntersectionForm.lean` — `intersectionForm`, `AX_IntersectionForm_alternating`, `AX_IntersectionForm_nondeg`.
+- `Axioms/PeriodLattice.lean` — `instPeriodLatticeDiscrete` + `AX_PeriodLattice`.
+- `RiemannSurface/IntersectionForm.lean` — `AX_PeriodInjective`.
+
+**Deep classical theorems (real Lean signatures, proofs pending):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_PluckerFormula`, `AX_Hyperelliptic_genus`, `AX_genus_eq_zero_iff_homeo`, plus the Hyperelliptic and PlaneCurve type/instance scaffolds. All target signatures were revised 2026-04-22 per Gemini review.
 
 ## Dependencies
 
@@ -89,7 +112,7 @@ lake update
 lake build
 ```
 
-Currently 8334 jobs, green. **Zero sorries** anywhere in the project. All 24 Buzzard sorries have been discharged via the named-axiom framework: the Jacobian bridge through `ComplexTorus`, 14 axiom-stubs in `Jacobians/Axioms/AbelJacobiMap.lean` + `Uniformization0.lean` encoding the classical Riemann-surface theory (path integration, Abel-Jacobi injectivity, branch-locus degree, genus-0 uniformization). Each axiom retires to a theorem once the corresponding Mathlib infrastructure (real-analytic path integration, line bundles, surface classification) lands.
+Currently 8341 jobs, green. **Zero sorries** anywhere in the project. All 24 Buzzard sorries have been discharged: the six challenge-exposed *data* definitions (`genus`, `Jacobian`, `ofCurve`, `pushforward`, `pullback`, `ContMDiff.degree`) are **real `def`s** layered over smaller functional axioms (path-integral functional, ambient linear maps with lattice preservation, `AX_BranchLocus`); the challenge-exposed *property* theorems route through named axioms in `Jacobians/Axioms/AbelJacobiMap.lean` + `Uniformization0.lean` encoding the classical Riemann-surface theory. Each axiom retires to a theorem once the corresponding Mathlib infrastructure (real-analytic path integration, pullback/trace of 1-forms, line bundles, surface classification) lands.
 
 ## Status
 

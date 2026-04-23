@@ -4,7 +4,7 @@ import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.Uniformization0
 -- ^ Our bridge. Fills all 24 Buzzard sorries via the named-axiom
 -- framework: `Jacobian` bridge through `ComplexTorus`, instances via
--- ULift transfer (+ one axiom for `LieAddGroup`), data defs (`ofCurve`,
+-- ULift transfer, data defs (`ofCurve`,
 -- pushforward, pullback, degree) and all 10 theorems axiom-stubbed
 -- against the classical Riemann-surface theory (PathIntegral,
 -- Abel-Jacobi, branch-locus degree formula, Uniformization for
@@ -113,8 +113,10 @@ instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jac
   infer_instance
 
 -- Prop
-instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) :=
-  Jacobians.Axioms.AX_jacobian_lieAddGroup
+instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
+  change LieAddGroup (modelWithCornersSelf ℂ (Fin (Jacobians.RiemannSurface.genus X) → ℂ))
+    ω (Jacobians.Jacobian X)
+  infer_instance
 
 /-- The Abel-Jacobi map from a compact Riemann surface to its Jacobian. -/
 noncomputable def ofCurve (P : X) : X → Jacobian X :=

@@ -180,40 +180,22 @@ noncomputable instance :
     IsManifold (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X) :=
   IsManifold.mk' _ _ _
 
--- `LieAddGroup (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)`:
--- transfer through ULift remains **open** at the proof level, but the
--- instance is supplied by `AX_jacobian_lieAddGroup` (axiom) from
--- `Jacobians/Axioms/AbelJacobiMap.lean`, closing the Challenge.lean
--- sorry. Scaffolding below is kept for when the universe-level
--- `Set.cast` obstacle is resolved and a direct proof becomes tractable.
---
--- Progress so far (useful scaffolding below):
--- * `IsTopologicalAddGroup (ULift M)` derives via the empty-field
---   constructor `⟨⟩` (ContinuousAdd + ContinuousNeg are auto-derived
---   Mathlib instances).
--- * `chartAt p z = chartAt p.down z.down` via `rfl` (the ULift chart
---   factors cleanly through the underlying chart).
--- * `extChartAt p z = extChartAt p.down z.down` as a *function* also
---   via `rfl`, since the model `𝓘(ℂ, Fin g → ℂ)` is self-modeling and
---   the chart composition is definitionally equal.
--- * The chart transition `(extChartAt q) ∘ ULift.down ∘ (extChartAt p).symm`
---   equals the chart transition `(extChartAt q) ∘ (extChartAt p.down).symm`
---   on `JacobianAmbient` via `rfl` (proved in scratch).
---
--- **Real blocker:** the chart *target sets* differ by universe level:
--- `(extChartAt p).target : Set.{max u 0} (Fin g → ℂ)` on `Jacobian X`
--- vs `(extChartAt p.down).target : Set.{0} (Fin g → ℂ)` on
--- `JacobianAmbient X`. These sets are extensionally equal but not
--- rfl-equal in Lean, so `ContDiffOn` cannot directly transport. Fixing
--- this needs either:
---   (a) a `Set.cast` / `ULift.Set`-style universe bridge that Mathlib
---       doesn't supply at this pin, or
---   (b) avoiding universe lift entirely — e.g., reformulate
---       `Jacobian X` without `ULift` by constructing a fresh
---       `Type u`-level type whose charted-space structure is built by
---       hand (massive extra work).
---
--- Verdict: this is a clean stopping point. Moving on.
+/-- The target-chart source on `Jacobian X` pulls back through `ULift.up`
+to the ambient source. -/
+theorem extChartAt_source_up_iff {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (y : Jacobian X) (w : JacobianAmbient X) :
+    ULift.up w ∈ (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) y).source ↔
+      w ∈ (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) y.down).source := by
+  rw [extChartAt_source, extChartAt_source]
+  change ULift.up w ∈
+      (Homeomorph.ulift.toOpenPartialHomeomorph.trans
+        (ChartedSpace.chartAt (H := Fin (genus X) → ℂ) y.down)).source ↔
+    w ∈ (ChartedSpace.chartAt (H := Fin (genus X) → ℂ) y.down).source
+  constructor <;> intro h <;>
+    simpa only [OpenPartialHomeomorph.trans_toPartialEquiv, PartialEquiv.trans_source,
+      Homeomorph.toOpenPartialHomeomorph_source, OpenPartialHomeomorph.toFun_eq_coe,
+      Homeomorph.toOpenPartialHomeomorph_apply, Set.univ_inter, Set.mem_preimage] using h
 
 /-- Helper: the ULift chart-factoring identity. Saved for future LieAddGroup work. -/
 lemma chartAt_jacobian_eq_chartAt_down {X : Type u} [TopologicalSpace X] [T2Space X]
@@ -233,6 +215,121 @@ lemma extChartAt_ulift_comp_down {X : Type u} [TopologicalSpace X] [T2Space X]
      (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p.down).symm) := by
   funext w
   rfl
+
+/-- The chart targets on `Jacobian X` and `JacobianAmbient X` agree propositionally. -/
+theorem extChartAt_target_iff {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (p : Jacobian X) (z : Fin (genus X) → ℂ) :
+    z ∈ (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).target ↔
+      z ∈ (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).target := by
+  constructor
+  · intro hz
+    have hs : (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z ∈
+        (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).source :=
+      (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).map_target hz
+    have hs' :
+        ULift.down ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z) ∈
+          (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).source := by
+      exact (extChartAt_source_up_iff (X := X) p
+        (ULift.down ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z))).1
+          (by simpa using hs)
+    have hz' :
+        extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down
+          (ULift.down ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z)) = z := by
+      simpa [extChartAt, chartedSpaceULift, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm]
+        using (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).right_inv hz
+    exact hz' ▸
+      (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).map_source hs'
+  · intro hz
+    have hs : (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z ∈
+        (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).source :=
+      (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).map_target hz
+    have hs' :
+        ULift.up ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z) ∈
+          (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).source := by
+      exact (extChartAt_source_up_iff (X := X) p
+        ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z)).2 hs
+    have hz' :
+        extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p
+          (ULift.up ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z)) = z := by
+      simpa [extChartAt, chartedSpaceULift, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm]
+        using (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).right_inv hz
+    exact hz' ▸
+      (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).map_source hs'
+
+/-- `ULift.up` is smooth for the Jacobian charted-space transfer. -/
+theorem contMDiff_ulift_up {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+    ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+      (ULift.up : JacobianAmbient X → Jacobian X) := by
+  have hid :
+      ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+        (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+        (fun z : JacobianAmbient X => z) := contMDiff_id
+  rw [contMDiff_iff] at hid ⊢
+  constructor
+  · simpa using (Homeomorph.ulift : Jacobian X ≃ₜ JacobianAmbient X).symm.continuous
+  · intro x y
+    convert hid.2 x y.down using 1
+    ext z
+    constructor
+    · rintro ⟨hz₁, hz₂⟩
+      refine ⟨hz₁, ?_⟩
+      simpa [Set.mem_preimage] using
+        (extChartAt_source_up_iff (X := X) y
+          ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) x).symm z)).1 hz₂
+    · rintro ⟨hz₁, hz₂⟩
+      refine ⟨hz₁, ?_⟩
+      simpa [Set.mem_preimage] using
+        (extChartAt_source_up_iff (X := X) y
+          ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) x).symm z)).2 hz₂
+
+/-- `ULift.down` is smooth for the Jacobian charted-space transfer. -/
+theorem contMDiff_ulift_down {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+    ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+      (ULift.down : Jacobian X → JacobianAmbient X) := by
+  have hid :
+      ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+        (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+        (fun z : JacobianAmbient X => z) := contMDiff_id
+  rw [contMDiff_iff] at hid ⊢
+  constructor
+  · simpa using (Homeomorph.ulift : Jacobian X ≃ₜ JacobianAmbient X).continuous
+  · intro p q
+    refine (hid.2 p.down q).mono ?_
+    intro z hz
+    rcases hz with ⟨hz₁, hz₂⟩
+    refine ⟨(extChartAt_target_iff (X := X) p z).1 hz₁, ?_⟩
+    simpa [Set.mem_preimage, Function.comp, extChartAt_ulift_comp_down (p := p) (q := q)] using hz₂
+
+/-- `LieAddGroup` transfers from the ambient torus to the ULifted Jacobian. -/
+noncomputable instance {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+    LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
+  refine { contMDiff_add := ?_, contMDiff_neg := ?_ }
+  · let I := modelWithCornersSelf ℂ (Fin (genus X) → ℂ)
+    let hdownProd :
+        ContMDiff (I.prod I) (I.prod I) ω
+          (fun p : Jacobian X × Jacobian X => (p.1.down, p.2.down)) :=
+      (contMDiff_ulift_down (X := X).comp contMDiff_fst).prodMk
+        (contMDiff_ulift_down (X := X).comp contMDiff_snd)
+    let haddAmbient :
+        ContMDiff (I.prod I) I ω
+          (fun p : JacobianAmbient X × JacobianAmbient X => p.1 + p.2) :=
+      contMDiff_add I ω
+    let hup : ContMDiff I I ω (ULift.up : JacobianAmbient X → Jacobian X) :=
+      contMDiff_ulift_up (X := X)
+    simpa [I] using hup.comp (haddAmbient.comp hdownProd)
+  · let I := modelWithCornersSelf ℂ (Fin (genus X) → ℂ)
+    let hnegAmbient :
+        ContMDiff I I ω (fun p : JacobianAmbient X => -p) :=
+      contMDiff_neg I ω
+    let hup : ContMDiff I I ω (ULift.up : JacobianAmbient X → Jacobian X) :=
+      contMDiff_ulift_up (X := X)
+    simpa [I] using hup.comp (hnegAmbient.comp (contMDiff_ulift_down (X := X)))
 
 end Jacobian
 

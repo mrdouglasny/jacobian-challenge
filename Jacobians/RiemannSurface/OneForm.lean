@@ -6,29 +6,51 @@ manifolds (nor a general `ContMDiff` section API that applies, since the
 cotangent bundle isn't constructed). We therefore use the chart-cocycle
 formulation per `docs/formalization-plan.md` §4.1 fallback path.
 
-A holomorphic 1-form is specified by a chart-local coefficient at each
-point, holomorphic on each chart target, satisfying the cotangent
-transformation law on chart overlaps:
+A holomorphic 1-form is specified by a chart-local coefficient
+`coeff : X → ℂ → ℂ` (first argument: the centre point of the chart;
+second: the coordinate in that chart's target) satisfying:
 
-    coeff y ((φ_y ∘ φ_x⁻¹) z) · D(φ_y ∘ φ_x⁻¹)(z) = coeff x z
+1. **Chart-local holomorphicity** (`IsHolomorphicOneFormCoeff`): for
+   each `x : X`, the function `coeff x : ℂ → ℂ` is analytic on
+   `(extChartAt 𝓘(ℂ) x).target`.
+2. **Cotangent cocycle** (`SatisfiesCotangentCocycle`): on chart
+   overlaps, the coefficient values transform via the derivative of the
+   chart transition:
+       coeff x z  =  coeff y (φ_y(φ_x⁻¹(z))) · D(φ_y ∘ φ_x⁻¹)(z)(1)
+   (the classical 1-form transformation law).
 
-for `φ_x` the preferred chart at `x`.
+## Current status (2026-04-23)
 
-**Status (2026-04-22): safe stub.** The submodule is fixed to `⊥` (the
-zero submodule) while the true predicates `IsHolomorphicOneFormCoeff` and
-`SatisfiesCotangentCocycle` are unavailable. A previous scaffold used
-the carrier `{f | True ∧ True}`, which is the top submodule — ℂ-linearly
-equivalent to the ambient `X → ℂ → ℂ`. Combined with `AX_FiniteDimOneForms`
-installed as a global instance, that scaffold let us derive `False` (via
-`rank_fun_infinite` + surjection onto `ℂ → ℂ`), so the scaffolding was
-unsound. Replacing the carrier with `⊥` makes `HolomorphicOneForm X`
-a zero-dimensional ℂ-module at the stub — trivially finite-dim, no axiom
-needed. Everything downstream (ℂ-module, `genus X = 0`, `periodMap`) still
-type-checks; refining the predicates will widen the submodule to its
-correct content and `AX_FiniteDimOneForms` will become load-bearing.
+**Real definition**, not a stub. `HolomorphicOneForm X` is the
+ℂ-submodule of `X → ℂ → ℂ` cut out by the two predicates above, with
+`zero_mem' / add_mem' / smul_mem'` discharged.
 
-See `docs/formalization-plan.md` §4.1 and `docs/gemini-review-axioms.md`
-for context.
+The earlier history note about a `⊥`-stub refers to iterations before
+the 2026-04-23 refactor. The carrier history:
+  1. `{f | True ∧ True}` (≅ full function space): with
+     `AX_FiniteDimOneForms` installed, gave an `exploit ⇒ False` via
+     `rank_fun_infinite`. Caught by Gemini 2026-04-22.
+  2. `⊥` (zero submodule): safe but vacuous — `genus X = 0` always.
+  3. (**Current**) Real predicates with analyticity + cocycle. The
+     `AX_FiniteDimOneForms` instance is load-bearing and finite-dim
+     follows classically (Hodge / Serre duality — see
+     `Jacobians/Axioms/FiniteDimOneForms.lean`).
+
+## API available here
+
+- `coeff form : X → ℂ → ℂ` — chart-local coefficient accessor.
+- `coeff_zero` / `coeff_add` / `coeff_smul` — `@[simp]` compatibility
+  with the `AddCommGroup` / `Module ℂ` structure (via `Submodule`).
+- `ext_of_coeff` — two forms are equal if their coefficient families
+  agree as functions.
+
+See also:
+  - `Jacobians/Axioms/FiniteDimOneForms.lean` — finite-dim axiom (classical theorem, still load-bearing).
+  - `Jacobians/ProjectiveCurve/Line/OneForm.lean` — derived fact that `HolomorphicOneForm ProjectiveLine` is a subsingleton (genus-0 collapse).
+  - `Jacobians/ProjectiveCurve/Elliptic/OneForm.lean` — explicit `ellipticDz` witness (invariant 1-form `dz`).
+
+`docs/formalization-plan.md` §4.1 and `docs/gemini-review-axioms.md`
+have further context.
 -/
 import Mathlib
 
@@ -117,24 +139,28 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 namespace's `ω` smoothness-level notation.) -/
 def coeff (form : HolomorphicOneForm X) : X → ℂ → ℂ := form.1
 
--- TODO: refine `IsHolomorphicOneFormCoeff` and `SatisfiesCotangentCocycle`
--- to their true content. Suggested concrete forms:
---
---   IsHolomorphicOneFormCoeff coeff ↔
---     ∀ x : X, AnalyticOn ℂ (coeff x) (extChartAt 𝓘(ℂ) x).target
---
---   SatisfiesCotangentCocycle coeff ↔
---     ∀ x y : X, ∀ z ∈ (extChartAt 𝓘(ℂ) x).target,
---       (extChartAt 𝓘(ℂ) x).symm z ∈ (extChartAt 𝓘(ℂ) y).source →
---       coeff y (extChartAt 𝓘(ℂ) y ((extChartAt 𝓘(ℂ) x).symm z)) *
---         fderivWithin ℂ (extChartAt 𝓘(ℂ) y ∘ (extChartAt 𝓘(ℂ) x).symm)
---           (range 𝓘(ℂ)) z 1 =
---       coeff x z
---
--- After refinement, verify that the `zero_mem'` / `add_mem'` / `smul_mem'`
--- proofs in `holomorphicOneFormSubmodule` still hold (they will: sum /
--- scalar multiple of holomorphic is holomorphic; cotangent cocycle is
--- ℂ-linear in the coefficient family).
+/-- The coefficient of the zero 1-form is the zero function. -/
+@[simp]
+theorem coeff_zero : (0 : HolomorphicOneForm X).coeff = 0 := rfl
+
+/-- The coefficient of a sum of 1-forms is the pointwise sum of
+coefficients. -/
+@[simp]
+theorem coeff_add (form₁ form₂ : HolomorphicOneForm X) :
+    (form₁ + form₂).coeff = form₁.coeff + form₂.coeff := rfl
+
+/-- The coefficient of a scalar multiple of a 1-form is the pointwise
+scalar multiple of the coefficient. -/
+@[simp]
+theorem coeff_smul (c : ℂ) (form : HolomorphicOneForm X) :
+    (c • form).coeff = c • form.coeff := rfl
+
+/-- Extensionality: two holomorphic 1-forms are equal iff their
+coefficient families coincide as `X → ℂ → ℂ` functions. -/
+@[ext]
+theorem ext_of_coeff {form₁ form₂ : HolomorphicOneForm X}
+    (h : form₁.coeff = form₂.coeff) : form₁ = form₂ :=
+  Subtype.ext h
 
 end HolomorphicOneForm
 
