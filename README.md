@@ -14,12 +14,12 @@ All underlying mathematics is classical (Abel 1829, Jacobi 1851). The challenge 
 
 Buzzard's challenge identifies Mathlib's real bottleneck: the differential-geometric API for *stating* modern theorems about Jacobians is missing. Jack McCarthy captured this sharply — "even stating the definitions requires lots of machinery in differential geometry which is not currently in Mathlib." Rado Kirov's 3-day Claude Code baseline ([rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)) — ~5K LOC, 10 named classical theorems still stubbed, self-rated ~10–15% toward a full end-to-end solution — bounds what a human with zero math background plus off-the-shelf AI tooling produces.
 
-With math+Lean expert steering — the configuration Kirov and Riccardo Brasca named as the realistic path — AI-written code produces an **API-complete, non-vacuous Lean 4 foundation** for Buzzard's file in days rather than months:
+With math+Lean expert steering — the configuration Kirov and Riccardo Brasca named as the realistic path — AI-written code produces a **foundation-closed, non-vacuous Lean 4 scaffold** for Buzzard's file in days rather than months:
 
-- **All six Buzzard-exposed definitions are real `def`s, not `axiom`s**: `genus`, `Jacobian`, `Jacobian.ofCurve`, `Jacobian.pushforward`, `Jacobian.pullback`, `ContMDiff.degree`. Plus `periodMap`, `H1`, `HolomorphicOneForm` at the supporting layer.
-- The axiomatization lives strictly *below* the Buzzard API: path-integral-as-functional, ambient linear maps on `Fin (genus X) → ℂ` with their lattice-preservation property, and the common-fiber existential (`AX_BranchLocus`). The top-level data maps are real quotient / ULift constructions over those primitives.
-- Buzzard's own hack-blockers — `ofCurve_self = 0` and `genus_eq_zero_iff_homeo` — discharge against concrete witnesses: `ProjectiveLine` (genus 0, via stereographic sphere homeomorphism) and `Elliptic ω₁ ω₂` (genus 1, torus with honest symplectic cycle basis) — not trivial groups. `ofCurve_self` is now a **derived theorem**, not an axiom, because the basepoint-subtraction is built into `ofCurveImpl`.
-- The residual 19th–20th century mathematics — Riemann-Roch, Serre duality, Riemann bilinear relations, period-lattice integration, Abel's theorem, and the discrete-group quotient atlases Michael Rothgang is mentoring into Mathlib — is enumerated as ~20 named axioms, each with textbook citation and proof sketch.
+- **Every Buzzard-exposed definition and instance is a real Lean `def` / `instance`, not an axiom.** All 13 data/instance sorries (§§1–13 of [`docs/challenge-annotated.md`](docs/challenge-annotated.md)) discharge as real constructions. `ofCurve_self = 0` is a derived theorem (definitional via basepoint subtraction). All 4 functoriality identities (`pushforward_id_apply`, `pushforward_comp_apply`, `pullback_id_apply`, `pullback_comp_apply`) are real theorems derived from form-level axioms via `LinearMap.dualMap_comp_dualMap`.
+- **The axiomatization lives strictly *below* the Buzzard API.** 5 data-level primitives (path-integral functional, pullback/trace of 1-forms, local order, H₁-loop integral; each with a construction plan in [`docs/construction-plans/`](docs/construction-plans/)) + ~10 Prop-level classical theorems (uniformization, Abel, Riemann-Roch, Serre duality, Riemann bilinear, etc. — each cited by textbook).
+- **Buzzard's hack-blockers bite.** `ofCurve_self = 0` and `genus_eq_zero_iff_homeo` discharge against concrete witnesses: `ProjectiveLine` (genus 0, via stereographic sphere homeomorphism) and `Elliptic ω₁ ω₂` (genus 1, torus with honest symplectic cycle basis) — not trivial groups. `Hyperelliptic` and `PlaneCurve` are also real `def`s now (via `OnePoint` compactification, 5/7 instances derived; atlas ChartedSpace+IsManifold still axiomatic).
+- **Full dependency trace** in [`docs/dependency-trace.md`](docs/dependency-trace.md): every foundation definition audited; every axiom classified as A-deep (classical theorem) or A-infra. As of 2026-04-23 round-3, **A-infra count is zero** — only classical-theorem axioms remain.
 
 We do **not** claim a sorry-free solution and we do **not** claim autonomy. Every line of Lean was written by Claude; the load-bearing mathematical judgments — axiom-vs-proof boundary, what counts as a non-vacuous witness, which hack-smuggles to reject — were made by a mathematician-user. The claim is narrower and, we think, more useful: *stating* Buzzard's theorems and bolting down the foundation — the phase the Zulip thread treated as the long pole — is fast when a domain expert drives an AI, and the remaining sorries reduce to the enumerated classical theorems. This is what Emily Riehl and Timothy Chow's autonomy exchange converged on as the honest frame: no achievement is fully autonomous, so say exactly what the human and the AI each did.
 
@@ -43,26 +43,28 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/AbelianVariety/ComplexTorus.lean](Jacobians/AbelianVariety/ComplexTorus.lean) | `ComplexTorus V L` — **all 7 Buzzard instances** (AddCommGroup, TopologicalSpace, IsTopologicalAddGroup, T2Space, CompactSpace, ChartedSpace V, IsManifold 𝓘(ℂ, V) ω, LieAddGroup 𝓘(ℂ, V) ω). Axiom-free, zero-sorry. |
 | [Jacobians/AbelianVariety/Siegel.lean](Jacobians/AbelianVariety/Siegel.lean) | `SiegelUpperHalfSpace g` as `Subtype` + `CoeFun` + `ext` |
 | [Jacobians/AbelianVariety/Theta.lean](Jacobians/AbelianVariety/Theta.lean) | `RiemannTheta (z, τ)` definition; summability / analyticity / quasi-periodicity TODOs |
-| [Jacobians/RiemannSurface/OneForm.lean](Jacobians/RiemannSurface/OneForm.lean) | `HolomorphicOneForm X` as `↥(⊥ : Submodule ℂ (X → ℂ → ℂ))` safe stub; predicates + real carrier TODO |
+| [Jacobians/RiemannSurface/OneForm.lean](Jacobians/RiemannSurface/OneForm.lean) | `HolomorphicOneForm X` — real submodule with `IsHolomorphicOneFormCoeff` (analyticity on chart targets) + `SatisfiesCotangentCocycle` (chart-transition derivative law); full `@[simp]` API |
 | [Jacobians/RiemannSurface/Homology.lean](Jacobians/RiemannSurface/Homology.lean) | `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` |
-| [Jacobians/RiemannSurface/Genus.lean](Jacobians/RiemannSurface/Genus.lean) | `genus X := Module.finrank ℂ (HolomorphicOneForm X)` (= 0 at the stub, provably) |
-| [Jacobians/RiemannSurface/Periods.lean](Jacobians/RiemannSurface/Periods.lean) | `periodMap X x₀ : H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)` — axiom-stub for a `def` landing with `PathIntegral.lean` |
+| [Jacobians/RiemannSurface/Genus.lean](Jacobians/RiemannSurface/Genus.lean) | `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
+| [Jacobians/RiemannSurface/Periods.lean](Jacobians/RiemannSurface/Periods.lean) | `periodMap X x₀ : H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)` — **real `def`** via `loopIntegralToH1` |
+| [Jacobians/RiemannSurface/PathIntegral.lean](Jacobians/RiemannSurface/PathIntegral.lean) | `pathIntegralOnChart` real def; `loopIntegralToH1` axiom (discharge plan in `docs/construction-plans/loop-integral-h1.md`) |
 | [Jacobians/RiemannSurface/IntersectionForm.lean](Jacobians/RiemannSurface/IntersectionForm.lean) | `AX_PeriodInjective` axiom + Hurewicz-bridge + symplectic-basis TODOs |
-| [Jacobians/Jacobian/Construction.lean](Jacobians/Jacobian/Construction.lean) | `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge |
-| [Jacobians/Axioms/](Jacobians/Axioms/) | 10 named-axiom files (see §Named axioms below) |
-| [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
-| [Jacobians/ProjectiveCurve/Elliptic.lean](Jacobians/ProjectiveCurve/Elliptic.lean) | `Elliptic ω₁ ω₂ h := ComplexTorus ℂ (ℤω₁ + ℤω₂)` — 7/7 X-side instances axiom-free via `ComplexTorus` bridge |
-| [Jacobians/ProjectiveCurve/Hyperelliptic.lean](Jacobians/ProjectiveCurve/Hyperelliptic.lean) | `HyperellipticData` (squarefree `f : ℂ[x]`) + affine model `{(x,y) \| y² = f(x)}`. Projective model + atlas + instances are TODOs |
-| [Jacobians/ProjectiveCurve/PlaneCurve.lean](Jacobians/ProjectiveCurve/PlaneCurve.lean) | `PlaneCurveData` (homogeneous `F ∈ ℂ[x,y,z]` + smoothness) + affine patch `{F(x,y,1) = 0}`. Projective curve + atlas + Plücker genus are TODOs |
-| [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with four rounds of adversarial review (Gemini ×2, Codex, Claude) |
-| [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 (plan) |
-| [docs/codex-review.md](docs/codex-review.md) | Codex (GPT-5) review, round 2 (plan) |
-| [docs/claude-review.md](docs/claude-review.md) | Claude self-review, round 3 (plan) |
-| [docs/gemini-review-2.md](docs/gemini-review-2.md) | Gemini round-2 review of Theta + Part B architecture |
-| [docs/gemini-review-axioms.md](docs/gemini-review-axioms.md) | Gemini round-3 review of the axiom suite (caught `AX_FiniteDimOneForms` unsoundness) |
+| [Jacobians/Jacobian/Construction.lean](Jacobians/Jacobian/Construction.lean) | `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge; `contMDiff_ulift_up/down` bridge lemmas close `LieAddGroup` |
+| [Jacobians/Axioms/](Jacobians/Axioms/) | Named-axiom files (see §Named axioms below) |
+| [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 instances + stereographic homeomorphism to S² |
+| [Jacobians/ProjectiveCurve/Line/OneForm.lean](Jacobians/ProjectiveCurve/Line/OneForm.lean) | `Subsingleton (HolomorphicOneForm ProjectiveLine)` derived from genus=0 |
+| [Jacobians/ProjectiveCurve/Elliptic.lean](Jacobians/ProjectiveCurve/Elliptic.lean) | `Elliptic ω₁ ω₂ h := ComplexTorus ℂ (ℤω₁ + ℤω₂)` — 7/7 instances axiom-free via `ComplexTorus` bridge |
+| [Jacobians/ProjectiveCurve/Hyperelliptic.lean](Jacobians/ProjectiveCurve/Hyperelliptic.lean) | `Hyperelliptic H := OnePoint (HyperellipticAffine H)` — real `def`, 5/7 instances derived; atlas `ChartedSpace`+`IsManifold` still axiomatic (see `docs/hyperelliptic-atlas-plan.md`) |
+| [Jacobians/ProjectiveCurve/PlaneCurve.lean](Jacobians/ProjectiveCurve/PlaneCurve.lean) | `PlaneCurve H := OnePoint (PlaneCurveAffine H)` — real `def`, 5/7 instances derived; atlas axiomatic |
+| [docs/challenge-annotated.md](docs/challenge-annotated.md) | **F/T classification of all 24 Buzzard sorries** — foundation vs theorem split, current status |
+| [docs/dependency-trace.md](docs/dependency-trace.md) | **Transitive dep audit** — every foundation def classified R / A-deep / A-infra |
+| [docs/construction-plans/](docs/construction-plans/) | **5 discharge plans** for the remaining data-level axioms (path integral, loop integral, pullbackOneForm, pushforwardOneForm, localOrder) |
 | [docs/challenge-summary.md](docs/challenge-summary.md) | Summary of the challenge and Zulip discussion |
+| [docs/hyperelliptic-atlas-plan.md](docs/hyperelliptic-atlas-plan.md) | 6-phase plan to discharge the Hyperelliptic atlas (~3 weeks) |
+| [docs/completion-plan.md](docs/completion-plan.md) | Higher-level completion roadmap |
 | [docs/status.md](docs/status.md) | Sorry inventory, axiom inventory, progress tracker |
 | [docs/history.md](docs/history.md) | Chronological work log — the *why* behind each session |
+| [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with four rounds of adversarial review (Gemini ×3, Codex, Claude) |
 
 ## Construction strategy
 
@@ -89,7 +91,9 @@ See [docs/formalization-plan.md](docs/formalization-plan.md) §7 for discharge p
 - `Axioms/BranchLocus.lean` — `localOrder` + `AX_BranchLocus` (fed into `degreeImpl`).
 - `RiemannSurface/PathIntegral.lean` — `loopIntegralToH1` (fed into real `def periodMap`).
 
-**Property axioms on top of the real defs:** `AX_ofCurve_contMDiff`, `AX_ofCurve_inj`, `AX_pushforward_contMDiff`, `AX_pushforward_id_apply`, `AX_pushforward_comp_apply`, `AX_pullback_contMDiff`, `AX_pullback_id_apply`, `AX_pullback_comp_apply`, `AX_pushforward_pullback`. (`AX_jacobian_lieAddGroup` was retired from axiom to theorem 2026-04-23 via inline ULift-smoothness lemmas.)
+**Property axioms on top of the real defs:** `AX_ofCurve_contMDiff`, `AX_ofCurve_inj`, `AX_pushforward_contMDiff`, `AX_pullback_contMDiff`, `AX_pushforward_pullback`.
+
+**Property theorems now derived (not axioms):** `AX_pushforward_id_apply`, `AX_pushforward_comp_apply`, `AX_pullback_id_apply`, `AX_pullback_comp_apply` (2026-04-23 round-3: derived from `AX_pullbackOneForm_id/comp`, `AX_pushforwardOneForm_id/comp` via `LinearMap.dualMap_comp_dualMap`). `AX_jacobian_lieAddGroup` also retired to a theorem (2026-04-23 via `contMDiff_ulift_up/down` bridge lemmas). `AX_ofCurve_self` retired earlier (basepoint subtraction is definitional).
 
 **Infrastructure axioms:**
 - `Axioms/FiniteDimOneForms.lean` — `AX_FiniteDimOneForms`.
@@ -112,7 +116,14 @@ lake update
 lake build
 ```
 
-Currently 8341 jobs, green. **Zero sorries** anywhere in the project. All 24 Buzzard sorries have been discharged: the six challenge-exposed *data* definitions (`genus`, `Jacobian`, `ofCurve`, `pushforward`, `pullback`, `ContMDiff.degree`) are **real `def`s** layered over smaller functional axioms (path-integral functional, ambient linear maps with lattice preservation, `AX_BranchLocus`); the challenge-exposed *property* theorems route through named axioms in `Jacobians/Axioms/AbelJacobiMap.lean` + `Uniformization0.lean` encoding the classical Riemann-surface theory. Each axiom retires to a theorem once the corresponding Mathlib infrastructure (real-analytic path integration, pullback/trace of 1-forms, line bundles, surface classification) lands.
+Currently **8342 jobs, green. Zero sorries** anywhere in the project. All 24 Buzzard sorries discharged. Foundation state:
+
+- **13/13 foundation defs + instances are real** (`genus`, `Jacobian`, all 7 typeclass instances including `LieAddGroup`, `ofCurve`, `pushforward`, `pullback`, `ContMDiff.degree`).
+- **5/11 property theorems are real theorems** derived from the supporting layer (`ofCurve_self`, `pushforward_id_apply`, `pushforward_comp_apply`, `pullback_id_apply`, `pullback_comp_apply`).
+- **6/11 property theorems still route through named axioms** (all deep classical facts: uniformization, Abel's theorem, three holomorphicity axioms, and `pushforward_pullback = deg • id`). Each has a textbook citation.
+- **5 data-level supporting axioms** (path-integral functional, pullback/pushforward of 1-forms, local order, loop-integral-to-H₁) — each with a construction plan in [`docs/construction-plans/`](docs/construction-plans/), total ~5–6 weeks focused contributor to discharge.
+
+See [`docs/challenge-annotated.md`](docs/challenge-annotated.md) for the full F/T/T-short/T-deep classification of Buzzard's 24 sorries, and [`docs/dependency-trace.md`](docs/dependency-trace.md) for the complete transitive axiom audit.
 
 ## Status
 
@@ -124,25 +135,30 @@ Currently 8341 jobs, green. **Zero sorries** anywhere in the project. All 24 Buz
 | `Siegel.lean` | ✅ scaffold — definition + `CoeFun` + `ext`; Sp(2g, ℤ)-action and concrete-lattice helpers TODO |
 | `Theta.lean` | ✅ scaffold — `RiemannTheta` defined; summability / analyticity / quasi-periodicity TODO |
 | **Part B — `RiemannSurface/`** | |
-| `OneForm.lean` | 🔄 safe stub — `HolomorphicOneForm X = ↥⊥`; predicates-and-real-carrier TODO |
+| `OneForm.lean` | ✅ real submodule via `IsHolomorphicOneFormCoeff` + `SatisfiesCotangentCocycle`; `@[simp]` API lemmas; extensionality |
 | `Homology.lean` | ✅ scaffold — `H1 X x₀ := Additive (Abelianization (π₁ X x₀))` |
-| `Genus.lean` | ✅ `genus X := Module.finrank ℂ (HolomorphicOneForm X)` (= 0 at stub) |
-| `Periods.lean` | ✅ scaffold — `periodMap` axiom-stub |
+| `Genus.lean` | ✅ `genus X := Module.finrank ℂ (HolomorphicOneForm X)` |
+| `Periods.lean` | ✅ **real `def`** — `periodMap X x₀ := loopIntegralToH1 x₀` |
 | `IntersectionForm.lean` | ✅ scaffold — `AX_PeriodInjective` |
-| `PathIntegral.lean` | — not started |
+| `PathIntegral.lean` | ✅ `pathIntegralOnChart` real def; `loopIntegralToH1` axiom pending discharge |
 | **Axioms — `Axioms/`** | |
-| `FiniteDimOneForms.lean` | ✅ declared; instance via `⊥`-stub (unsoundness fixed 2026-04-22) |
+| `FiniteDimOneForms.lean` | ✅ declared + global instance; load-bearing now that OneForm predicates are real |
 | `H1FreeRank2g.lean` | ✅ declared (typed) |
-| `IntersectionForm.lean` | ✅ declared (map axiom-stub + 2 property axioms) |
+| `IntersectionForm.lean` | ✅ declared (map axiom + 2 property axioms) |
 | `PeriodLattice.lean` | ✅ declared (`AX_PeriodLattice` + `instPeriodLatticeDiscrete`) |
-| `RiemannBilinear` / `RiemannRoch` / `SerreDuality` / `AbelTheorem` / `BranchLocus` / `PluckerFormula` | ✅ doc-only (signatures sketched, pending consumer modules) |
+| `AbelJacobiMap.lean` | ✅ `pathIntegralBasepointFunctional` + `AX_pathIntegral_local_antiderivative` (FTC) + `pullbackOneForm` / `pushforwardOneForm` + functoriality; 4 Jacobian-level theorems derived |
+| `BranchLocus.lean` | ✅ `localOrder` + `AX_BranchLocus` with real signatures |
+| `AnalyticCycleBasis.lean` | ✅ structure + `AX_AnalyticCycleBasis` existential; concrete witnesses for genus 0, 1 |
+| `AbelTheorem.lean`, `PluckerFormula.lean`, `RiemannBilinear.lean`, `RiemannRoch.lean`, `SerreDuality.lean`, `Uniformization0.lean` | ✅ real signatures with textbook citations |
 | **Bridge — `Jacobian/`** | |
-| `Construction.lean` | ✅ `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge (basis baked in). Universe-lift wrapper to match Buzzard's `: Type u` signature TODO |
+| `Construction.lean` | ✅ `Jacobian X := ULift (ComplexTorus ...)` + 7 typeclass instances (incl. `LieAddGroup` via `contMDiff_ulift_up/down`). All instances real, no axiom |
 | **Track 2 — `ProjectiveCurve/`** | |
-| `Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
-| `Elliptic.lean` | ✅ complete scaffold, 0 sorries, all 8 X-side Buzzard instances (incl. ConnectedSpace) inherited from `ComplexTorus`. `ofUpperHalfPlane τ hτ` constructor. `genus = 1`, `Jacobian(E) ≃ E`, explicit `AnalyticCycleBasis` TODO (blocked on `OneForm` refinement) |
-| `Hyperelliptic.lean` | ✅ thin scaffold: `HyperellipticData` + `HyperellipticAffine`. Projective compactification, 7 instances, and concrete holomorphic differentials are TODOs (substantial branch-cut work) |
-| `PlaneCurve.lean` | ✅ thin scaffold: `HomogeneousPoly`, `PlaneCurveData` + smoothness hypothesis, `PlaneCurveAffine`. Projective model + atlas + Plücker genus (d-1)(d-2)/2 are TODOs |
+| `Line.lean` | ✅ complete, 0 sorries, all 7 X-side instances + stereographic |
+| `Line/OneForm.lean` | ✅ `Subsingleton (HolomorphicOneForm ProjectiveLine)` derived from genus=0 |
+| `Elliptic.lean` | ✅ complete, 0 sorries, 7 X-side instances via `ComplexTorus` |
+| `Elliptic/Witnesses.lean` | ✅ concrete `AnalyticCycleBasis` witness (α-loop + β-loop, real symplectic proof) |
+| `Hyperelliptic.lean` | ✅ `Hyperelliptic H := OnePoint (HyperellipticAffine H)` real def; 5/7 instances derived; atlas `ChartedSpace` + `IsManifold` still axiomatic (`docs/hyperelliptic-atlas-plan.md`) |
+| `PlaneCurve.lean` | ✅ `PlaneCurve H := OnePoint (PlaneCurveAffine H)` real def; 5/7 instances derived; atlas axiomatic |
 
 ## License
 
