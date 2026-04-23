@@ -1,8 +1,11 @@
 import Mathlib -- compiles with commit 8e3c989104daaa052921bf43de9eef0e1ac9fbf5 (15th April 2026)
 import Jacobians.Jacobian
--- ^ Our bridge. Fills `genus`, `Jacobian`, and 6 of 7 typeclass-instance
--- sorries below. `LieAddGroup` remains a sorry pending the ULift
--- ContMDiff-of-add/neg transfer.
+import Jacobians.Axioms.AbelJacobiMap
+-- ^ Our bridge. Fills `genus`, `Jacobian`, 6 of 7 typeclass-instance
+-- sorries below, and `ofCurve` (via axiom-stub).
+-- `LieAddGroup` sorry remains pending the ULift ContMDiff-of-add/neg
+-- transfer; `ofCurve_*` theorem sorries remain pending path-integral
+-- machinery or further axiomatization.
 
 /-
 
@@ -101,7 +104,8 @@ instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jac
 instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := sorry
 
 /-- The Abel-Jacobi map from a compact Riemann surface to its Jacobian. -/
-def ofCurve (P : X) : X → Jacobian X := sorry
+noncomputable def ofCurve (P : X) : X → Jacobian X :=
+  Jacobians.Axioms.ofCurveImpl X P
 
 lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ)
     (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (ofCurve P) := sorry
@@ -117,9 +121,10 @@ variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [Connecte
 variable (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
 
 /-- The pushforward map between Jacobians associated to a map of the underlying curves. -/
-def pushforward (f : X → Y)
+noncomputable def pushforward (f : X → Y)
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
-    Jacobian X →ₜ+ Jacobian Y := sorry
+    Jacobian X →ₜ+ Jacobian Y :=
+  Jacobians.Axioms.pushforwardImpl X Y f hf
 
 -- pushforward is holomorphic
 theorem pushforward_contMDiff :
@@ -141,9 +146,10 @@ lemma pushforward_comp_apply (P : Jacobian X) :
 
 /-- Pullback map between Jacobians associated to a map of the underlying curves.
 Equal to the zero map if the map on curves is constant. -/
-def pullback (f : X → Y)
+noncomputable def pullback (f : X → Y)
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
-    Jacobian Y →ₜ+ Jacobian X := sorry
+    Jacobian Y →ₜ+ Jacobian X :=
+  Jacobians.Axioms.pullbackImpl X Y f hf
 
 -- pullback is holomorphic
 theorem pullback_contMDiff :
@@ -159,9 +165,9 @@ lemma pullback_comp_apply (P : Jacobian Z) :
 
 /-- The degree of a holomorphic map between compact Riemann surfaces. Equal to zero
 for constant maps, otherwise equal to the usual degree. -/
-def _root_.ContMDiff.degree
+noncomputable def _root_.ContMDiff.degree
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) : ℕ :=
-  sorry
+  Jacobians.Axioms.degreeImpl f hf
 
 lemma pushforward_pullback (P : Jacobian Y) :
   pushforward f hf (pullback f hf P) = (ContMDiff.degree f hf) • P := sorry
