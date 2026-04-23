@@ -13,6 +13,7 @@ Content is split across six submodules:
 See `docs/formalization-plan.md` §4 for the design.
 -/
 import Jacobians.RiemannSurface.OneForm
+import Jacobians.RiemannSurface.AnalyticArc
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.Periods

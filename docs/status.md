@@ -118,13 +118,14 @@ Axioms landing tracker (2026-04-22 post-bridge):
 
 ## Axiom inventory
 
-**Declared, with Lean signatures (10 axioms across 6 files):**
+**Declared, with Lean signatures (11 axioms across 7 files):**
 * `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean`
-* `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean`
+* `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean` (subsumed by `AX_AnalyticCycleBasis`; retained for migration)
 * `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean`
+* `AX_AnalyticCycleBasis` — `Jacobians/Axioms/AnalyticCycleBasis.lean` (new, 2026-04-22: piecewise-real-analytic ℤ-basis of `H_1`; motivated by periodMap tractability without building full `PathIntegral`)
 * `AX_PeriodLattice` + `instPeriodLatticeDiscrete` — `Jacobians/Axioms/PeriodLattice.lean`
 * `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
-* `periodMap` (stub-axiom, to be retired by `def` once `PathIntegral` lands) — `Jacobians/RiemannSurface/Periods.lean`
+* `periodMap` (stub-axiom, to be retired by `def` via `AX_AnalyticCycleBasis` + `curveIntegral`) — `Jacobians/RiemannSurface/Periods.lean`
 
 **Declared doc-only (6):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.). Target signatures revised 2026-04-22 per Gemini review (existentials, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
 

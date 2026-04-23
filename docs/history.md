@@ -356,6 +356,71 @@ each transfer lemma before committing.
 **Result: 8 Buzzard sorries closed, 16 remain** (all in
 `Challenge.lean`: `LieAddGroup` instance, 5 data defs, 10 theorems).
 
+### 2026-04-22 (late evening): `AX_AnalyticCycleBasis` design
+
+Design conversation on whether `PathIntegral.lean` (multi-week subproject
+per plan §4.4) is strictly necessary, or whether a more restricted
+notion of "path" can serve the period map.
+
+**Observation (user):** could we use change of coordinates to bring a
+contour to standard form `Im z = 0`?
+
+Answer: only for **analytic** paths, and even then the straightening
+is equivalent to ordinary reparametrization — doesn't simplify the
+abstract theory.
+
+**Follow-up (user):** can the period map be defined using only
+holomorphic / very-restricted contours?
+
+Yes. Three classical observations:
+- Every homology class has a piecewise-real-analytic representative
+  (Radó triangulation + classification of compact surfaces).
+- Every compact Riemann surface is projective (Kodaira embedding +
+  Riemann-Roch, or Riemann existence theorem), giving an algebraic
+  triangulation.
+- Morse theory with a real-analytic Morse function gives analytic
+  stable manifolds whose cycles form `H_1`.
+
+All three are classical and out of Mathlib reach at this pin — each
+would require substantial (6–12 month) independent formalization.
+But each gives the same conclusion we actually need for `PathIntegral`.
+
+**Design decision:** package the conclusion as a single axiom,
+`AX_AnalyticCycleBasis`, asserting the existence of a piecewise-real-
+analytic ℤ-basis of `H_1(X, ℤ)`. This:
+- subsumes `AX_H1FreeRank2g` (whose rank condition is a consequence);
+- enables a tractable path-integral theory restricted to analytic arcs,
+  reusing Mathlib's `curveIntegral` (on normed spaces) chart-locally;
+- matches how the classical theory is actually executed in textbooks
+  (Mumford, Griffiths-Harris, Forster) — one never integrates over a
+  "general smooth contour" in practice.
+
+**Landed:**
+- `Jacobians/RiemannSurface/AnalyticArc.lean` — data carriers
+  `AnalyticArc` and `AnalyticLoop`, with piecewise-analyticity held
+  behind a `IsAnalyticArc` predicate (stub-`True` until chart-cocycle
+  machinery lands, same pattern as `OneForm.lean`).
+- `Jacobians/Axioms/AnalyticCycleBasis.lean` — full motivation,
+  three proof sketches (Radó, Kodaira, Morse), discharge priority
+  analysis, and the axiom itself. Written as a showpiece of careful
+  axiomatic design: the kind of axiom an AI can propose with limited
+  supervision and defend on mathematical grounds.
+
+Revised discharge priority (in `Jacobians/Axioms.lean`):
+`AX_AnalyticCycleBasis` slots in as #4, after `AX_IntersectionForm`
+(which provides the intersection pairing) and before `AX_PeriodLattice`
+(which uses path integrals computed on the basis). `AX_H1FreeRank2g`
+stays declared so current callers don't break; it becomes a derived
+theorem once `periodMap` is rewritten to use `AX_AnalyticCycleBasis`.
+
+**Next pieces (deferred):**
+- Refine `IsAnalyticArc` predicate to its real content (chart-local
+  `ContMDiffWithinAt` with the right real/complex model bridge).
+- Add a symplectic-property predicate and axiom witness (needed by
+  `AX_RiemannBilinear`'s non-doc-only form).
+- Rewrite `periodMap` from axiom-stub to real def via the analytic
+  basis + `curveIntegral`.
+
 ## Status snapshot (end of 2026-04-22)
 
 - **Build:** green, 8328 jobs.
