@@ -47,8 +47,14 @@ proofs are in principle available" criterion.
   `pathIntegralAnalyticArc` with partition refinement and proving
   Cauchy-on-chart + Stokes-based homotopy invariance.
 - ⏳ E2: Full Hyperelliptic / PlaneCurve atlas construction —
-  implicit function theorem + branch-cut charts. 2-3 weeks per curve
-  family.
+  implicit function theorem + branch-cut charts.
+  - **Hyperelliptic**: detailed 6-phase plan in
+    [`docs/hyperelliptic-atlas-plan.md`](hyperelliptic-atlas-plan.md).
+    3-4 weeks. Phases H0-H5 discharge 7 of 8 axioms; H6 retires the
+    genus axiom.
+  - **PlaneCurve**: similar structure to Hyperelliptic, plus
+    Poincaré-residue construction for the genus basis `(d-1)(d-2)/2`.
+    ~4 weeks.
 
 The remaining 5% (to reach 100% "foundation done" with zero axioms
 in the discharge-able class):
