@@ -587,32 +587,61 @@ Two fixes applied:
 **Axiom count: 22 → 21** (1 new axiom `_perfect`, 1 retired-to-theorem
 `_nondeg`, 1 deleted `AX_PeriodInjective`). Build green at 8334 jobs.
 
-## Status snapshot (end of 2026-04-22)
+## Status snapshot (end of 2026-04-23)
 
-- **Build:** green, 8328 jobs.
-- **Sorries:** 16 in `Jacobians/Challenge.lean` (down from 24). Zero
-  elsewhere.
-- **Buzzard bridge:** `genus`, `Jacobian`, 6 of 7 typeclass instances
-  filled via `Jacobians.Jacobian` (ULift-lifted complex torus).
-  Remaining: `LieAddGroup`, Abel-Jacobi family (`ofCurve` + 3
-  theorems), pushforward family (def + 3 theorems), pullback family
-  (def + 3 theorems), `ContMDiff.degree`, `pushforward_pullback`,
-  `genus_eq_zero_iff_homeo`.
-- **Axioms declared with Lean signatures (10):** `AX_FiniteDimOneForms`,
-  `AX_H1FreeRank2g`, `intersectionForm` +
-  `AX_IntersectionForm_{alternating, nondeg}`, `AX_PeriodLattice` +
-  `instPeriodLatticeDiscrete`, `AX_PeriodInjective`, `periodMap`
-  (axiom-stub).
+- **Build:** green, 8334 jobs.
+- **Sorries:** **0** anywhere in the project. All 24 Buzzard sorries
+  closed via the named-axiom framework (audited via `lean_verify`).
+- **Buzzard bridge:** complete. `Jacobian X := ULift.{u,0} (ComplexTorus
+  (Fin (genus X) → ℂ) (periodLatticeInBasis ...))`. 8 typeclass
+  instances (AddCommGroup, TopologicalSpace, T2, Compact, Connected via
+  ComplexTorus, ChartedSpace + IsManifold via ULift transfer,
+  LieAddGroup via axiom).
+- **Axioms declared with Lean signatures (21):**
+  - *Infrastructure:* `AX_FiniteDimOneForms` (load-bearing after OneForm
+    predicate refinement); `intersectionForm` +
+    `AX_IntersectionForm_{alternating, perfect}` (perfect pairing);
+    `AX_AnalyticCycleBasis`; `AX_PeriodLattice` +
+    `instPeriodLatticeDiscrete`; `periodMap`.
+  - *Jacobian API (AbelJacobiMap.lean):* `ofCurveImpl`,
+    `pushforwardImpl`, `pullbackImpl`, `degreeImpl` (data);
+    `AX_ofCurve_{contMDiff, self, inj}`, `AX_pushforward_{contMDiff,
+    id_apply, comp_apply}`, `AX_pullback_{contMDiff, id_apply,
+    comp_apply}`, `AX_pushforward_pullback`, `AX_jacobian_lieAddGroup`
+    (properties).
+  - *Uniformization:* `AX_genus_eq_zero_iff_homeo`.
 - **Axioms declared doc-only (6):** `AX_RiemannBilinear`,
   `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`,
-  `AX_BranchLocus`, `AX_PluckerFormula`.
+  `AX_BranchLocus`, `AX_PluckerFormula`. Signatures sketched pending
+  consumer types.
+- **Former axioms, now theorems (2):** `AX_H1FreeRank2g` (derived from
+  `AX_AnalyticCycleBasis`, 2026-04-22); `AX_IntersectionForm_nondeg`
+  (derived from `AX_IntersectionForm_perfect`, 2026-04-23).
+- **Axioms deleted (1):** `AX_PeriodInjective` (strictly redundant given
+  `AX_PeriodLattice`, 2026-04-23).
+- **Reviews:** Gemini round 1 (2026-04-20, plan); Codex round 2
+  (2026-04-20, plan); Claude self-review round 3 (2026-04-20); Gemini
+  round 2 (2026-04-21, Theta + Part B); Gemini axiom review #1
+  (2026-04-22, caught `AX_FiniteDimOneForms` unsoundness); Gemini axiom
+  review #2 (2026-04-23, unimodularity upgrade + `AX_PeriodInjective`
+  retirement). No lethal unsoundness remains.
 - **Part A** (`AbelianVariety/`): `ComplexTorus` complete (7/7
-  instances, axiom-free); `Siegel` + `Theta` scaffolds.
-- **Part B** (`RiemannSurface/`): `OneForm` safe stub; `Homology`,
-  `Genus`, `Periods`, `IntersectionForm` scaffolds. `PathIntegral` not
-  started.
+  instances + ConnectedSpace, axiom-free); `Siegel` + `Theta`
+  scaffolds.
+- **Part B** (`RiemannSurface/`): `OneForm` with real predicates
+  (analyticity + cotangent cocycle); `Homology`, `Genus`, `Periods`,
+  `IntersectionForm`, `AnalyticArc` scaffolds. `PathIntegral` sidestepped
+  via `AX_AnalyticCycleBasis` design.
 - **Part C** (`Jacobian/`): `Construction.lean` bridges the abstract
-  surface to the complex torus with 7 instances. `ofCurve`,
-  `pushforward`, `pullback` not started.
-- **Track 2** (`ProjectiveCurve/`): `Line` complete (7/7, 0 sorries).
-  `Elliptic`, `Hyperelliptic`, `PlaneCurve` not started.
+  surface to the complex torus with 7 instances via ULift. `ofCurve`,
+  `pushforward`, `pullback`, `degree` axiom-stubbed in
+  `AbelJacobiMap.lean`.
+- **Track 2** (`ProjectiveCurve/`): `Line` complete (7/7, 0 sorries,
+  stereographic to S²). `Elliptic` complete (7/7 + `ConnectedSpace` +
+  `ofUpperHalfPlane`, axiom-free via `ComplexTorus`). `Hyperelliptic`
+  thin scaffold (data + affine model). `PlaneCurve` not started.
+- **Docs:** `formalization-plan.md` (design + progress log);
+  `history.md` (this file, narrative); `status.md` (inventory
+  snapshot); `gemini-review.md`, `gemini-review-2.md`,
+  `gemini-review-axioms.md`, `gemini-review-axioms-2.md`,
+  `codex-review.md`, `claude-review.md` (adversarial-review trail).
