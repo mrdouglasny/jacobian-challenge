@@ -368,6 +368,120 @@ noncomputable def jacobianHomOfAmbient (X : Type u) [TopologicalSpace X]
         exact (continuous_quot_mk).comp hL_cont
       exact (continuous_uliftUp).comp (hqCont.comp continuous_uliftDown) }
 
+theorem jacobianHomOfAmbient_id_apply (X : Type u) [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
+    jacobianHomOfAmbient X X (LinearMap.id : (Fin (genus X) → ℂ) →ₗ[ℂ] (Fin (genus X) → ℂ))
+      (by
+        intro v hv
+        simpa using hv) P = P := by
+  rcases P with ⟨P⟩
+  apply ULift.ext
+  refine Quotient.inductionOn P ?_
+  intro v
+  change
+      (QuotientAddGroup.map
+        (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+        (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+        LinearMap.id.toAddMonoidHom
+        (by
+          intro w hw
+          simpa using hw))
+        (QuotientAddGroup.mk'
+          (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v) =
+    QuotientAddGroup.mk'
+      (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v
+  simpa using
+    (QuotientAddGroup.map_mk'
+      (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+      (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+      LinearMap.id.toAddMonoidHom
+      (by
+        intro w hw
+        simpa using hw)
+      v)
+
+theorem jacobianHomOfAmbient_comp_apply
+    (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (Y : Type v) [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    (Z : Type w) [TopologicalSpace Z] [T2Space Z] [CompactSpace Z]
+    [ConnectedSpace Z] [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+    (LXY : (Fin (genus X) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ))
+    (hXY : ∀ v ∈ (periodLatticeInBasis X (Classical.arbitrary X)
+                    (jacobianBasis X)).toAddSubgroup,
+              LXY v ∈ (periodLatticeInBasis Y (Classical.arbitrary Y)
+                  (jacobianBasis Y)).toAddSubgroup)
+    (LYZ : (Fin (genus Y) → ℂ) →ₗ[ℂ] (Fin (genus Z) → ℂ))
+    (hYZ : ∀ v ∈ (periodLatticeInBasis Y (Classical.arbitrary Y)
+                    (jacobianBasis Y)).toAddSubgroup,
+              LYZ v ∈ (periodLatticeInBasis Z (Classical.arbitrary Z)
+                  (jacobianBasis Z)).toAddSubgroup)
+    (hXZ : ∀ v ∈ (periodLatticeInBasis X (Classical.arbitrary X)
+                    (jacobianBasis X)).toAddSubgroup,
+              (LYZ.comp LXY) v ∈ (periodLatticeInBasis Z (Classical.arbitrary Z)
+                  (jacobianBasis Z)).toAddSubgroup)
+    (P : Jacobian X) :
+    jacobianHomOfAmbient X Z (LYZ.comp LXY) hXZ P =
+      jacobianHomOfAmbient Y Z LYZ hYZ (jacobianHomOfAmbient X Y LXY hXY P) := by
+  rcases P with ⟨P⟩
+  apply ULift.ext
+  refine Quotient.inductionOn P ?_
+  intro v
+  change
+      (QuotientAddGroup.map
+        (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+        (periodLatticeInBasis Z (Classical.arbitrary Z) (jacobianBasis Z)).toAddSubgroup
+        (LYZ.comp LXY).toAddMonoidHom hXZ)
+        (QuotientAddGroup.mk'
+          (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v) =
+    (QuotientAddGroup.map
+      (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup
+      (periodLatticeInBasis Z (Classical.arbitrary Z) (jacobianBasis Z)).toAddSubgroup
+      LYZ.toAddMonoidHom hYZ)
+      ((QuotientAddGroup.map
+        (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
+        (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup
+        LXY.toAddMonoidHom hXY)
+        (QuotientAddGroup.mk'
+          (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v))
+  simp [QuotientAddGroup.map_mk']
+
+theorem jacobianHomOfAmbient_congr_apply
+    (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (Y : Type v) [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    {L L' : (Fin (genus X) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ)}
+    (hLL' : L = L')
+    (hL : ∀ v ∈ (periodLatticeInBasis X (Classical.arbitrary X)
+                    (jacobianBasis X)).toAddSubgroup,
+              L v ∈ (periodLatticeInBasis Y (Classical.arbitrary Y)
+                  (jacobianBasis Y)).toAddSubgroup)
+    (hL' : ∀ v ∈ (periodLatticeInBasis X (Classical.arbitrary X)
+                    (jacobianBasis X)).toAddSubgroup,
+              L' v ∈ (periodLatticeInBasis Y (Classical.arbitrary Y)
+                  (jacobianBasis Y)).toAddSubgroup)
+    (P : Jacobian X) :
+    jacobianHomOfAmbient X Y L hL P = jacobianHomOfAmbient X Y L' hL' P := by
+  subst hLL'
+  rfl
+
+theorem pushforwardAmbientLinear_id {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] :
+    pushforwardAmbientLinear (id : X → X) contMDiff_id = LinearMap.id := by
+  ext v i
+  simp [pushforwardAmbientLinear, AX_pullbackOneForm_id, LinearMap.dualMap_id]
+
+theorem pullbackAmbientLinear_id {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] :
+    pullbackAmbientLinear (id : X → X) contMDiff_id = LinearMap.id := by
+  ext v i
+  simp [pullbackAmbientLinear, AX_pushforwardOneForm_id, LinearMap.dualMap_id]
+
 /-! ### `pushforward` and `pullback` as real definitions -/
 
 /-- The pushforward on Jacobians, as a real `def`. -/
@@ -419,11 +533,13 @@ axiom AX_pushforward_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
       (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforwardImpl X Y f hf)
 
-/-- **Axiom.** Pushforward is the identity on identity. (Functoriality, part 1.) -/
-axiom AX_pushforward_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pushforward is the identity on identity. (Functoriality, part 1.) -/
+theorem AX_pushforward_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
-    pushforwardImpl X X id contMDiff_id P = P
+    pushforwardImpl X X id contMDiff_id P = P := by
+  simpa [pushforwardImpl, pushforwardAmbientLinear_id] using
+    (jacobianHomOfAmbient_id_apply X P)
 
 /-- **Axiom.** Pushforward respects composition. (Functoriality, part 2.) -/
 axiom AX_pushforward_comp_apply
@@ -448,11 +564,13 @@ axiom AX_pullback_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
       (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullbackImpl X Y f hf)
 
-/-- **Axiom.** Pullback is the identity on identity. (Functoriality, part 1.) -/
-axiom AX_pullback_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pullback is the identity on identity. (Functoriality, part 1.) -/
+theorem AX_pullback_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
-    pullbackImpl X X id contMDiff_id P = P
+    pullbackImpl X X id contMDiff_id P = P := by
+  simpa [pullbackImpl, pullbackAmbientLinear_id] using
+    (jacobianHomOfAmbient_id_apply X P)
 
 /-- **Axiom.** Pullback respects composition (contravariantly). (Functoriality, part 2.) -/
 axiom AX_pullback_comp_apply
