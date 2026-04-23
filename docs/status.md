@@ -1,16 +1,31 @@
 # Status
 
-_Last updated: 2026-04-22 (Jacobian bridge landed)_
+_Last updated: 2026-04-22 (universe lift + 8 Buzzard sorries closed)_
 
 ## Build status
 
-✅ Green. `lake build` completes 8328 jobs. No sorries outside `Challenge.lean`.
+✅ Green. `lake build` completes 8328 jobs. **16 sorries** (down from 24) — all in `Jacobians/Challenge.lean`. Zero sorries elsewhere.
 
 ## Sorry inventory
 
-All 24 sorries in `Jacobians/Challenge.lean` remain as originally stated by Buzzard (v0.2). None have been filled yet at the abstract-`X` level; work on closing them is in progress through Part A + Track 2 modules. **Zero sorries** in any non-Challenge file.
+**8/24 Buzzard sorries closed** (2026-04-22 universe-lift commit):
 
-(The early scaffold commits and initial docs mistakenly said 22; verified by `grep -c 'sorry' Jacobians/Challenge.lean` on 2026-04-20 — actual count is 24.)
+* `genus` (line 47) — filled via `Jacobians.RiemannSurface.genus`.
+* `Jacobian` (line 61) — filled via `Jacobians.Jacobian` (ULift-lifted).
+* `AddCommGroup (Jacobian X)` instance (line 72) — via `inferInstanceAs`.
+* `TopologicalSpace (Jacobian X)` instance (line 77) — via `inferInstanceAs`.
+* `T2Space (Jacobian X)` instance (line 81) — via `inferInstanceAs`.
+* `CompactSpace (Jacobian X)` instance (line 85) — via `inferInstanceAs`.
+* `ChartedSpace (Fin (genus X) → ℂ) (Jacobian X)` instance (line 90) — via `chartedSpaceULift` transfer from `ComplexTorus`.
+* `IsManifold (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)` instance (line 96) — via `uliftHasGroupoid` transfer + `IsManifold.mk'`.
+
+**16/24 remain.** Zero sorries outside `Challenge.lean`.
+
+Buzzard's file required two annotation changes for the fills to compile:
+* `def genus` → `noncomputable def genus` (because our `genus` routes through `Module.finrank`).
+* `def Jacobian` + several instances → `noncomputable` (downstream of `Classical.choice` on the basepoint).
+
+Type signatures are identical to Buzzard's v0.2; only `noncomputable` was added.
 
 ## Module progress
 
@@ -47,7 +62,22 @@ Axioms landing tracker (2026-04-22 post-bridge):
 * Declared and live: `AX_FiniteDimOneForms`, `AX_H1FreeRank2g`, `AX_PeriodInjective`, `intersectionForm` + `AX_IntersectionForm_{alternating, nondeg}`, `periodMap` (stub-axiom), `AX_PeriodLattice` + `instPeriodLatticeDiscrete`.
 * Declared doc-only (concrete signature pending consumer): `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula`.
 
-### Data sorries (9)
+### Remaining Challenge.lean sorries (16)
+
+#### Theorem / proof (10)
+- `genus_eq_zero_iff_homeo` (58) — can't close at stub since `genus X = 0` always; opens up honestly when OneForm predicates refined.
+- `ofCurve_contMDiff` (107), `ofCurve_self` (109), `ofCurve_inj` (112) — need `ofCurve` def.
+- `pushforward_contMDiff` (127), `pushforward_id_apply` (130), `pushforward_comp_apply` (140)
+- `pullback_contMDiff` (151), `pullback_id_apply` (154), `pullback_comp_apply` (158)
+- `pushforward_pullback` (167)
+
+#### Data (5)
+- `ofCurve` (104), `pushforward` (122), `pullback` (146), `ContMDiff.degree` (164).
+
+#### Instance (1)
+- `LieAddGroup ... (Jacobian X)` (101) — requires `IsTopologicalAddGroup (ULift _)` + `ContMDiff` of add/neg transfer.
+
+### Data sorries (pre-universe-lift breakdown, kept for history) (9)
 
 | Symbol | Line | Kind |
 |--------|------|------|

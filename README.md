@@ -86,7 +86,7 @@ lake update
 lake build
 ```
 
-Currently 8328 jobs, green. 24 sorries — all in `Jacobians/Challenge.lean` (Buzzard's verbatim file). Zero sorries anywhere else.
+Currently 8328 jobs, green. **16 sorries** (down from 24) — all in `Jacobians/Challenge.lean`. Zero sorries anywhere else. The 8 closed are `genus` + `Jacobian` + 6 of 7 typeclass instances; `LieAddGroup` and the Abel-Jacobi/pushforward/pullback theorems remain.
 
 ## Status
 

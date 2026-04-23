@@ -1,36 +1,37 @@
-/- 
+/-
 Bridge from the Riemann-surface scaffolding to `AbelianVariety.ComplexTorus`.
 
 ## Design
 
-Buzzard's challenge wants `Jacobian X` charted over `Fin (genus X) → ℂ`,
-not over the dual space `(HolomorphicOneForm X →ₗ[ℂ] ℂ)`. To avoid having
-two competing `ChartedSpace` instances on the same quotient, this module
-bakes a chosen basis of `HolomorphicOneForm X` into the construction:
+Buzzard's challenge wants `Jacobian (X : Type u) : Type u` charted over
+`Fin (genus X) → ℂ`, not over the dual space
+`(HolomorphicOneForm X →ₗ[ℂ] ℂ)`. Two obstacles:
 
-1. pick `jacobianBasis X : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)`;
-2. transport `periodMap` into basis coordinates via
-   `Axioms.periodMapInBasis`;
-3. take the quotient torus
-   `ComplexTorus (Fin (genus X) → ℂ) (periodLatticeInBasis ...)`.
+1. **Dual ChartedSpace.** To avoid having two competing `ChartedSpace`
+   instances on the quotient, this module bakes a chosen basis of
+   `HolomorphicOneForm X` into the construction. `jacobianBasis X :=
+   Module.finBasis ℂ (HolomorphicOneForm X)`, baseline:
+   `periodLatticeInBasis X x₀ b` lives in `Fin (genus X) → ℂ`.
 
-The basepoint is handled by `Classical.choice` from `[Nonempty X]`; this
-matches the current bridge attempt policy. Basepoint-independence is not
-proved here.
+2. **Universe lift.** `ComplexTorus (Fin (genus X) → ℂ) _` lives in
+   `Type`, but Buzzard's signature says `Jacobian : Type u`. We
+   therefore wrap the concrete torus in `ULift.{u, 0}` and transport
+   the manifold structure through `Homeomorph.ulift`.
+
+The basepoint is extracted from `[ConnectedSpace X]` (which extends
+`Nonempty X`) via `Classical.arbitrary`. Basepoint-independence of
+the lattice is not proved here — it needs `AX_RiemannBilinear`.
 
 ## Scope
 
-This file intentionally does **not** touch `Jacobians/Challenge.lean`.
-It packages the Jacobian construction and the seven inherited typeclass
-instances so the challenge file can swap to them later in one step.
+Provides the `Jacobian X` type plus all seven Buzzard typeclass
+instances at the `Type u` level, ready to drop into `Challenge.lean`
+via `inferInstance`.
 
-## Universe note
-
-The ambient `Fin (genus X) → ℂ` lives in `Type`, so this bridge currently
-defines `Jacobian` without forcing Buzzard's exact `: Type u` codomain
-annotation. The quotient/typeclass architecture is in place; a later
-universe-lift wrapper can be added if we insist on a literally
-universe-polymorphic replacement.
+The `LieAddGroup` instance requires `IsTopologicalAddGroup (ULift _)`
+and `ContMDiff` of add/neg through ULift — a substantial chunk of
+additional transfer lemmas. Left unproven here (Challenge.lean's
+`instance : LieAddGroup ... := sorry` remains).
 -/
 import Jacobians.AbelianVariety.ComplexTorus
 import Jacobians.Axioms.PeriodLattice
@@ -43,6 +44,78 @@ open Jacobians.RiemannSurface
 open Jacobians.Axioms
 open Jacobians.AbelianVariety
 
+/-! ### Generic ULift transfer helpers -/
+
+section ULiftTransfer
+
+variable {H : Type*} [TopologicalSpace H] {M : Type*} [TopologicalSpace M]
+  [ChartedSpace H M]
+
+/-- Charts on `ULift M` obtained by composing charts on `M` with the
+ULift homeomorphism. -/
+@[reducible] noncomputable def chartedSpaceULift : ChartedSpace H (ULift M) where
+  atlas := Set.image
+    (fun chart => Homeomorph.ulift.toOpenPartialHomeomorph.trans chart)
+    (ChartedSpace.atlas (H := H) (M := M))
+  chartAt p :=
+    Homeomorph.ulift.toOpenPartialHomeomorph.trans (ChartedSpace.chartAt p.down)
+  mem_chart_source p := by
+    simp only [OpenPartialHomeomorph.trans_toPartialEquiv, PartialEquiv.trans_source,
+      Homeomorph.toOpenPartialHomeomorph_source, OpenPartialHomeomorph.toFun_eq_coe,
+      Homeomorph.toOpenPartialHomeomorph_apply, Set.univ_inter, Set.mem_preimage]
+    exact ChartedSpace.mem_chart_source p.down
+  chart_mem_atlas p :=
+    ⟨ChartedSpace.chartAt p.down, ChartedSpace.chart_mem_atlas p.down, rfl⟩
+
+/-- The transition map between two ULift-composed charts agrees (on
+source) with the corresponding transition map downstairs. -/
+lemma ulift_charts_eqOnSource {Y Z : Type*} [TopologicalSpace Y]
+    [TopologicalSpace Z] (h : ULift.{u} Y ≃ₜ Y)
+    (a b : OpenPartialHomeomorph Y Z) :
+    (h.toOpenPartialHomeomorph.trans a).symm.trans
+        (h.toOpenPartialHomeomorph.trans b) ≈ a.symm.trans b := by
+  calc (h.toOpenPartialHomeomorph.trans a).symm.trans
+          (h.toOpenPartialHomeomorph.trans b)
+      = (a.symm.trans h.toOpenPartialHomeomorph.symm).trans
+          (h.toOpenPartialHomeomorph.trans b) := by
+        rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+    _ = a.symm.trans
+          ((h.toOpenPartialHomeomorph.symm.trans
+            h.toOpenPartialHomeomorph).trans b) := by
+        rw [OpenPartialHomeomorph.trans_assoc,
+          OpenPartialHomeomorph.trans_assoc]
+    _ ≈ a.symm.trans ((OpenPartialHomeomorph.ofSet
+            h.toOpenPartialHomeomorph.target (by
+              simp [Homeomorph.toOpenPartialHomeomorph])).trans b) := by
+        exact OpenPartialHomeomorph.EqOnSource.trans' (Setoid.refl _)
+          (OpenPartialHomeomorph.EqOnSource.trans'
+            (OpenPartialHomeomorph.symm_trans_self _) (Setoid.refl _))
+    _ = a.symm.trans ((OpenPartialHomeomorph.ofSet
+            Set.univ isOpen_univ).trans b) := by
+        simp [Homeomorph.toOpenPartialHomeomorph]
+    _ ≈ a.symm.trans b := by
+        refine OpenPartialHomeomorph.EqOnSource.trans' (Setoid.refl _) ?_
+        rw [OpenPartialHomeomorph.ofSet_univ_eq_refl,
+          OpenPartialHomeomorph.refl_trans]
+
+/-- `HasGroupoid` transfers from `M` to `ULift M` under the charted-space
+structure `chartedSpaceULift`. -/
+@[reducible] noncomputable def uliftHasGroupoid {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℂ E] {I : ModelWithCorners ℂ E H} {n : WithTop ℕ∞}
+    [HasGroupoid M (contDiffGroupoid n I)] :
+    letI : ChartedSpace H (ULift M) := chartedSpaceULift
+    HasGroupoid (ULift M) (contDiffGroupoid n I) := by
+  letI : ChartedSpace H (ULift M) := chartedSpaceULift
+  refine ⟨?_⟩
+  rintro e e' ⟨a, haMem, rfl⟩ ⟨b, hbMem, rfl⟩
+  exact StructureGroupoid.mem_of_eqOnSource _
+    (HasGroupoid.compatible haMem hbMem)
+    (ulift_charts_eqOnSource Homeomorph.ulift a b)
+
+end ULiftTransfer
+
+/-! ### Jacobian construction -/
+
 /-- The chosen basis used to write the Jacobian ambient space in the
 concrete coordinates `Fin (genus X) → ℂ`. This is `Module.finBasis`, so the
 index type is definitionally `Fin (genus X)`. -/
@@ -52,69 +125,60 @@ noncomputable def jacobianBasis (X : Type*) [TopologicalSpace X] [T2Space X]
     Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X) :=
   Module.finBasis ℂ (HolomorphicOneForm X)
 
-/-- The Jacobian of `X`, defined as the complex torus obtained by quotienting
-`Fin (genus X) → ℂ` by the period lattice written in the chosen basis
-`jacobianBasis X`.
-
-The present bridge picks a basepoint using `Classical.choice` from
-`[Nonempty X]`; later work can replace this with a proof that the resulting
-lattice is independent of the choice. -/
-noncomputable def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] :=
+/-- The concrete (Type 0) Jacobian: complex torus `(Fin (genus X) → ℂ) /
+periodLatticeInBasis`. Uses `abbrev` so `ComplexTorus`'s typeclass
+instances are available transparently. -/
+noncomputable abbrev JacobianAmbient (X : Type*) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] : Type :=
   ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X))
+    (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X))
+
+/-- The Jacobian of `X`, universe-lifted to `Type u` to match Buzzard's
+signature. Concretely it is `ULift (JacobianAmbient X)`; all seven
+Buzzard-required typeclass instances are provided below. -/
+noncomputable def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] : Type u :=
+  ULift.{u, 0} (JacobianAmbient X)
 
 namespace Jacobian
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-  [IsManifold 𝓘(ℂ) ω X]
+  [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
-/-- The Jacobian of a compact Riemann surface is an additive commutative
-group. This is inherited from the quotient-additive-group structure on
-`ComplexTorus`. -/
-noncomputable instance : AddCommGroup (Jacobian X) := by
-  change AddCommGroup (ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+/-- Instances inherited from `JacobianAmbient` via `ULift`. -/
+noncomputable instance : AddCommGroup (Jacobian X) :=
+  inferInstanceAs (AddCommGroup (ULift (JacobianAmbient X)))
 
-/-- The Jacobian carries the quotient topology from its ambient complex
-torus presentation. -/
-noncomputable instance : TopologicalSpace (Jacobian X) := by
-  change TopologicalSpace (ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+noncomputable instance : TopologicalSpace (Jacobian X) :=
+  inferInstanceAs (TopologicalSpace (ULift (JacobianAmbient X)))
 
-noncomputable instance : T2Space (Jacobian X) := by
-  change T2Space (ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+noncomputable instance : T2Space (Jacobian X) :=
+  inferInstanceAs (T2Space (ULift (JacobianAmbient X)))
 
-noncomputable instance : CompactSpace (Jacobian X) := by
-  change CompactSpace (ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+noncomputable instance : CompactSpace (Jacobian X) :=
+  inferInstanceAs (CompactSpace (ULift (JacobianAmbient X)))
 
-/-- The Jacobian is charted over `Fin (genus X) → ℂ` by construction. -/
-noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) := by
-  change ChartedSpace (Fin (genus X) → ℂ) (ComplexTorus (Fin (genus X) → ℂ)
-    (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+/-- ChartedSpace on `Jacobian X` via the ULift transfer. -/
+noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) :=
+  chartedSpaceULift (H := Fin (genus X) → ℂ) (M := JacobianAmbient X)
 
+/-- HasGroupoid (implicit in IsManifold) transfers through ULift. -/
 noncomputable instance :
-    IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
-  change IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
-    (ComplexTorus (Fin (genus X) → ℂ)
-      (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+    HasGroupoid (Jacobian X) (contDiffGroupoid ω 𝓘(ℂ, Fin (genus X) → ℂ)) :=
+  uliftHasGroupoid (H := Fin (genus X) → ℂ) (M := JacobianAmbient X)
 
+/-- `IsManifold` on `Jacobian X` via `HasGroupoid` + `IsManifold.mk'`. -/
 noncomputable instance :
-    LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
-  change LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
-    (ComplexTorus (Fin (genus X) → ℂ)
-      (periodLatticeInBasis X (Classical.choice ‹Nonempty X›) (jacobianBasis X)))
-  infer_instance
+    IsManifold (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X) :=
+  IsManifold.mk' _ _ _
+
+-- `LieAddGroup (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)`:
+-- transfer through ULift requires `IsTopologicalAddGroup (ULift _)` and
+-- `ContMDiff` of add/neg under the ULift chart structure. This is a
+-- substantial additional project and is left unfinished. The sorry at
+-- `Jacobians/Challenge.lean:86` for this instance remains.
 
 end Jacobian
 
