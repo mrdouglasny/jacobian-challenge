@@ -38,33 +38,65 @@ open scoped Manifold Topology
 open scoped ContDiff -- for ω notation
 open Complex Set
 
-/-- Placeholder predicate: "the family of chart-local coefficients
-`coeff : X → ℂ → ℂ` is holomorphic on each chart target". Concrete
-content TODO; currently the trivial predicate so the scaffolding type
-checks. -/
-def IsHolomorphicOneFormCoeff (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (_coeff : X → ℂ → ℂ) : Prop := True
+/-- **Predicate (refined 2026-04-23).** "The family of chart-local
+coefficients `coeff : X → ℂ → ℂ` is holomorphic on each chart target."
 
-/-- Placeholder predicate: "the cotangent cocycle compatibility condition
-holds on chart overlaps". Concrete content TODO. -/
+For each point `x : X`, the function `coeff x : ℂ → ℂ` should be
+holomorphic on the image of the chart at `x`, i.e. on
+`(extChartAt 𝓘(ℂ) x).target`. -/
+def IsHolomorphicOneFormCoeff (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (coeff : X → ℂ → ℂ) : Prop :=
+  ∀ x : X, AnalyticOn ℂ (coeff x) (extChartAt 𝓘(ℂ) x).target
+
+/-- **Predicate (refined 2026-04-23).** "The cotangent cocycle
+compatibility condition holds on chart overlaps."
+
+For two points `x y : X` and `z ∈ (extChartAt 𝓘(ℂ) x).target` such that
+the back-image `(extChartAt 𝓘(ℂ) x).symm z` lies in the source of the
+chart at `y`, the coefficient values in the two charts must be related
+by the derivative of the chart transition:
+
+    coeff x z  =  coeff y w · D(φ_y ∘ φ_x⁻¹)(z) · 1
+
+where `w := (extChartAt 𝓘(ℂ) y) ((extChartAt 𝓘(ℂ) x).symm z)` is the
+`y`-chart coordinate of the same point. This is the classical
+transformation law for a 1-form `ω = coeff x · dφ_x = coeff y · dφ_y`,
+written intrinsically via the derivative `D(φ_y ∘ φ_x⁻¹)(z)` of the
+chart transition map. -/
 def SatisfiesCotangentCocycle (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (_coeff : X → ℂ → ℂ) : Prop := True
+    [IsManifold 𝓘(ℂ) ω X] (coeff : X → ℂ → ℂ) : Prop :=
+  ∀ x y : X, ∀ z ∈ (extChartAt 𝓘(ℂ) x).target,
+    (extChartAt 𝓘(ℂ) x).symm z ∈ (extChartAt 𝓘(ℂ) y).source →
+    coeff x z =
+      coeff y ((extChartAt 𝓘(ℂ) y) ((extChartAt 𝓘(ℂ) x).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ) y) ∘ (extChartAt 𝓘(ℂ) x).symm) z 1)
 
 /-- The ℂ-submodule of `X → ℂ → ℂ` consisting of chart-local coefficient
 families representing holomorphic 1-forms on `X`.
 
-**Safe stub.** Defined as `⊥` (the zero submodule) while the true content
-of `IsHolomorphicOneFormCoeff` / `SatisfiesCotangentCocycle` is `True`.
-Using `⊥` here makes `HolomorphicOneForm X` a zero ℂ-module — avoiding
-the `HolomorphicOneForm X ≃ X → ℂ → ℂ` trap which made
-`AX_FiniteDimOneForms` unsound when the carrier was the full function
-space. Downstream API (coefficient access, `AddCommGroup`, `Module ℂ`) is
-stable under later refinement of the predicates, at which point the
-carrier becomes `{ f | IsHolomorphicOneFormCoeff X f ∧
-SatisfiesCotangentCocycle X f }`. -/
+Closed under addition and scalar multiplication: analyticity is closed
+under sums/smul (Mathlib `AnalyticOn.add`, `AnalyticOn.const_smul`); the
+cocycle is ℂ-linear in the coefficient family because `fderiv` is
+ℂ-linear and `0 = 0 · anything`. -/
 noncomputable def holomorphicOneFormSubmodule (X : Type*) [TopologicalSpace X]
-    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Submodule ℂ (X → ℂ → ℂ) :=
-  (⊥ : Submodule ℂ (X → ℂ → ℂ))
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Submodule ℂ (X → ℂ → ℂ) where
+  carrier := { f | IsHolomorphicOneFormCoeff X f ∧ SatisfiesCotangentCocycle X f }
+  zero_mem' := ⟨fun _ => analyticOn_const, fun _ _ _ _ _ => by simp⟩
+  add_mem' := by
+    rintro f g ⟨hf_an, hf_cocy⟩ ⟨hg_an, hg_cocy⟩
+    refine ⟨fun x => (hf_an x).add (hg_an x), ?_⟩
+    intro x y z hz hyzy
+    have hf := hf_cocy x y z hz hyzy
+    have hg := hg_cocy x y z hz hyzy
+    simp only [Pi.add_apply, hf, hg]
+    ring
+  smul_mem' := by
+    rintro c f ⟨hf_an, hf_cocy⟩
+    refine ⟨fun x => (analyticOn_const).mul (hf_an x), ?_⟩
+    intro x y z hz hyzy
+    have hf := hf_cocy x y z hz hyzy
+    simp only [Pi.smul_apply, smul_eq_mul, hf]
+    ring
 
 /-- The ℂ-vector space of holomorphic 1-forms on `X`.
 

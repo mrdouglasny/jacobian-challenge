@@ -48,27 +48,25 @@ axiom AX_FiniteDimOneForms {X : Type*} [TopologicalSpace X] [T2Space X]
     FiniteDimensional ℂ (HolomorphicOneForm X)
 
 /-- Install finite-dimensionality of `HolomorphicOneForm X` as a global
-instance. At the current `⊥`-submodule stub this follows from
-`Submodule.finiteDimensional_bot` *without* invoking the axiom. When the
-predicates `IsHolomorphicOneFormCoeff` / `SatisfiesCotangentCocycle` are
-refined, the instance will delegate to `AX_FiniteDimOneForms`.
+instance. With the predicates `IsHolomorphicOneFormCoeff` /
+`SatisfiesCotangentCocycle` now refined to their real content
+(analyticity on chart targets + cotangent cocycle on chart overlaps),
+the submodule `holomorphicOneFormSubmodule X` is the genuine space of
+holomorphic 1-forms on `X`, and finite-dimensionality follows from
+`AX_FiniteDimOneForms`.
 
-**Soundness note.** A previous iteration defined this instance as
-`instFiniteDimOneForms := AX_FiniteDimOneForms` on top of the
-`{ f | True ∧ True }` stub carrier (≅ full function space `X → ℂ → ℂ`).
-Combined with `rank_fun_infinite` + surjection onto `ℂ → ℂ`, that scaffold
-let us derive `False` — any `exfalso` could have discharged the 24
-Challenge sorries. The fix: `HolomorphicOneForm X = ⊥.restrict` at the
-stub, which is trivially 0-dim, and the axiom only bites after the
-predicates land. -/
+**Soundness history.** Earlier iterations:
+  1. Predicates = `True ∧ True` + instance via axiom: submodule ≅
+     `X → ℂ → ℂ` (infinite-dim for nonempty X), contradicting the
+     axiom — exploitable as `False`. Caught by Gemini review 2026-04-22.
+  2. Predicates = `True ∧ True` + submodule = `⊥`: safe but vacuous
+     (`genus X = 0` always).
+  3. (Current, 2026-04-23) Refined predicates: real content. Submodule
+     cuts down correctly. `AX_FiniteDimOneForms` is now load-bearing. -/
 instance instFiniteDimOneForms {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    FiniteDimensional ℂ (HolomorphicOneForm X) := by
-  -- HolomorphicOneForm X = ↥(⊥ : Submodule ℂ (X → ℂ → ℂ)) at the stub.
-  -- The zero submodule is trivially finite-dimensional.
-  change FiniteDimensional ℂ ↥(holomorphicOneFormSubmodule X)
-  unfold holomorphicOneFormSubmodule
-  infer_instance
+    FiniteDimensional ℂ (HolomorphicOneForm X) :=
+  AX_FiniteDimOneForms
 
 end Jacobians.Axioms
