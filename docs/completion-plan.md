@@ -1,8 +1,27 @@
 # Completion plan: getting the remaining ~20% of the foundation
 
-_Drafted 2026-04-23. Target: clean "foundation is solid; statements are
-correct; proofs are in principle available" state for the Jacobian
-Challenge._
+_Drafted 2026-04-23. Updated 2026-04-23 after Phase 1 completion._
+
+## Phase 1 status: ✅ **COMPLETE**
+
+All workstream items in Phase 1 landed in commits
+`a332cc3` (A1), `3e73417` (A3), `3dd8bd9` (A4+A5+A6), `e27ce74` (A7+E1+A2).
+
+- ✅ A1: Symplectic property on `AnalyticCycleBasis`.
+- ✅ A2: `AX_PluckerFormula` promoted.
+- ✅ A3: `AX_RiemannBilinear` promoted with symplectic basis +
+  SiegelUpperHalfSpace.
+- ✅ A4: Divisor / LineBundle / H⁰ / H¹ opaque type stubs.
+- ✅ A5: `AX_RiemannRoch` + `AX_SerreDuality` promoted (FD hypotheses +
+  ℤ-subtraction; iso form).
+- ✅ A6: `AX_AbelTheorem` promoted (kernel = PrincipalDivisors).
+- ✅ A7: `AX_BranchLocus` promoted via `localOrder` + `tsum`.
+- ✅ E1: `PlaneCurve` type + 6 instance axioms.
+
+**Doc-only axiom bin: 6 → 0.** All 25 originally-doc-only axioms now
+have real Lean statements. Build: 8337 jobs green. Zero sorries.
+
+---
 
 ## What "done" means
 
