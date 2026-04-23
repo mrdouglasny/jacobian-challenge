@@ -18,3 +18,4 @@ import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
+import Jacobians.RiemannSurface.PathIntegral
