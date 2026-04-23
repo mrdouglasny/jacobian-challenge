@@ -116,6 +116,10 @@ instance : T2Space (Elliptic ω₁ ω₂ h) :=
 instance : CompactSpace (Elliptic ω₁ ω₂ h) :=
   inferInstanceAs (CompactSpace (ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)))
 
+/-- Inherited: connected (quotient of `ℂ`). -/
+instance : ConnectedSpace (Elliptic ω₁ ω₂ h) :=
+  inferInstanceAs (ConnectedSpace (ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)))
+
 /-- Inherited: charted over ℂ. -/
 noncomputable instance : ChartedSpace ℂ (Elliptic ω₁ ω₂ h) :=
   inferInstanceAs (ChartedSpace ℂ (ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)))
@@ -131,12 +135,6 @@ instance : LieAddGroup 𝓘(ℂ, ℂ) ω (Elliptic ω₁ ω₂ h) :=
 /-- Inherited: nonempty (every quotient of a nonempty group is nonempty). -/
 instance : Nonempty (Elliptic ω₁ ω₂ h) :=
   inferInstanceAs (Nonempty (ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)))
-
--- TODO (connectedness): `ConnectedSpace (Elliptic ω₁ ω₂ h)` — follows
--- from the quotient map `ℂ → Elliptic ω₁ ω₂ h` being continuous + ℂ
--- being connected. Needed so `Elliptic` satisfies all Buzzard
--- typeclasses. `ComplexTorus` likely already has this via the
--- quotient; check and inherit.
 
 -- TODO (ofUpperHalfPlane): `Elliptic.ofUpperHalfPlane (τ : ℂ) (hτ : 0 < τ.im)`
 -- specialising to `ω₁ = 1`, `ω₂ = τ`. The ℝ-linear independence is a

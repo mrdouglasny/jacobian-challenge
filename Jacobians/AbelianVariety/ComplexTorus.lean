@@ -35,6 +35,10 @@ instance instT2Space : T2Space (ComplexTorus V L) := by
     inferInstance
   simpa [ComplexTorus] using (inferInstance : T2Space (V ⧸ L.toAddSubgroup))
 
+instance instConnectedSpace : ConnectedSpace (ComplexTorus V L) :=
+  Function.Surjective.connectedSpace QuotientAddGroup.mk_surjective
+    continuous_quotient_mk'
+
 instance instCompactSpace : CompactSpace (ComplexTorus V L) := by
   rw [← isCompact_univ_iff]
   simpa [ComplexTorus, Set.range_quotient_mk'] using
