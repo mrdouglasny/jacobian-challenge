@@ -43,15 +43,32 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- **Axiom-stub.** The Abel-Jacobi map `ofCurve P₀ : X → Jacobian X`
-sending `P` to the integral `[∫_{P₀}^P ω_i]_i` in period-lattice
-coordinates. Retired to a `def` when `PathIntegral.lean` is available.
+/-- **Axiom-stub.** The Abel-Jacobi map lifted to the ambient `Fin g → ℂ`
+(pre-quotient by the period lattice).
 
-The universe is `Type u` (matching `Jacobian : Type u`), tracking
-Buzzard's `Jacobian (X : Type u) : Type u` signature. -/
-axiom ofCurveImpl (X : Type u) [TopologicalSpace X] [T2Space X]
+Classical content: `(P₀, P) ↦ [∫_{P₀}^P ω_i]_i` computing the integral
+from `P₀` to `P` against a chosen basis of `HolomorphicOneForm X`.
+Well-defined only modulo the period lattice — reducing to
+`Jacobian X = (Fin g → ℂ) ⧸ Λ` recovers the real Abel-Jacobi map.
+
+Retired to a `def` when path integrals + basepoint choice are
+concrete. -/
+axiom ofCurveAmbient (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P₀ : X) : X → Jacobian X
+    [IsManifold 𝓘(ℂ) ω X] : X → X → (Fin (genus X) → ℂ)
+
+/-- The Abel-Jacobi map `ofCurveImpl P₀ : X → Jacobian X`, defined as the
+quotient of the ambient lift `ofCurveAmbient`, normalized so that
+`ofCurveImpl P₀ P₀ = 0`.
+
+Setting the formula to `ofCurveAmbient X P₀ P - ofCurveAmbient X P₀ P₀`
+before the quotient guarantees the basepoint-sent-to-zero property by
+construction, rather than needing it as a separate axiom. -/
+noncomputable def ofCurveImpl (X : Type u) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P₀ : X) : X → Jacobian X :=
+  fun P => ULift.up <|
+    QuotientAddGroup.mk' _ (ofCurveAmbient X P₀ P - ofCurveAmbient X P₀ P₀)
 
 /-- **Axiom-stub.** The pushforward map
 `pushforward f hf : Jacobian X →ₜ+ Jacobian Y` associated to a
@@ -106,11 +123,18 @@ axiom AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     ContMDiff 𝓘(ℂ, ℂ) (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
       (ofCurveImpl X P)
 
-/-- **Axiom.** The Abel-Jacobi map sends the basepoint to zero. -/
-axiom AX_ofCurve_self {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- **Theorem (retired 2026-04-23).** The Abel-Jacobi map sends the
+basepoint to zero. Used to be an axiom; now derivable because the
+`ofCurveImpl` definition subtracts `ofCurveAmbient X P₀ P₀` from the
+numerator, making the identity definitional. -/
+theorem AX_ofCurve_self {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P : X) :
-    ofCurveImpl X P P = 0
+    ofCurveImpl X P P = 0 := by
+  unfold ofCurveImpl
+  ext : 1
+  simp
+  rfl
 
 /-- **Axiom (= Abel's theorem, on the curve side).** The Abel-Jacobi
 map is injective when the genus is positive. -/
