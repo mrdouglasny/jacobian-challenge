@@ -36,6 +36,7 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/Jacobian/Construction.lean](Jacobians/Jacobian/Construction.lean) | `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge |
 | [Jacobians/Axioms/](Jacobians/Axioms/) | 10 named-axiom files (see §Named axioms below) |
 | [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
+| [Jacobians/ProjectiveCurve/Elliptic.lean](Jacobians/ProjectiveCurve/Elliptic.lean) | `Elliptic ω₁ ω₂ h := ComplexTorus ℂ (ℤω₁ + ℤω₂)` — 7/7 X-side instances axiom-free via `ComplexTorus` bridge |
 | [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with four rounds of adversarial review (Gemini ×2, Codex, Claude) |
 | [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 (plan) |
 | [docs/codex-review.md](docs/codex-review.md) | Codex (GPT-5) review, round 2 (plan) |
@@ -114,7 +115,7 @@ Currently 8328 jobs, green. **16 sorries** (down from 24) — all in `Jacobians/
 | `Construction.lean` | ✅ `Jacobian X` + 7 typeclass instances via `ComplexTorus` bridge (basis baked in). Universe-lift wrapper to match Buzzard's `: Type u` signature TODO |
 | **Track 2 — `ProjectiveCurve/`** | |
 | `Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
-| `Elliptic.lean` | — not started |
+| `Elliptic.lean` | ✅ scaffold, 0 sorries, all 7 X-side Buzzard instances inherited from `ComplexTorus`. `genus = 1`, `Jacobian(E) ≃ E`, explicit `AnalyticCycleBasis` TODO (blocked on `OneForm` refinement) |
 | `Hyperelliptic.lean` | — not started |
 | `PlaneCurve.lean` | — not started |
 
