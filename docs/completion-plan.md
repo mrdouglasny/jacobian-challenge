@@ -19,7 +19,19 @@ All workstream items in Phase 1 landed in commits
 - ✅ E1: `PlaneCurve` type + 6 instance axioms.
 
 **Doc-only axiom bin: 6 → 0.** All 25 originally-doc-only axioms now
-have real Lean statements. Build: 8337 jobs green. Zero sorries.
+have real Lean statements.
+
+## Phase 2 status: partially complete
+
+- ✅ B1 (`94296e2`): `genus (ProjectiveLine) = 0` via uniformization.
+- ✅ C1 (`c56766c`): concrete `AnalyticCycleBasis ProjectiveLine`
+  witness via `Module.Basis.empty` + `AX_H1_ProjectiveLine_trivial`.
+- ⏳ B2: `genus (Elliptic) = 1` via invariant `dz` form. Deferred —
+  substantial (needs covering space + invariance argument).
+- ⏳ C2: concrete `AnalyticCycleBasis Elliptic` witness with A-cycle +
+  B-cycle. Blocked on B2.
+
+Build: 8339 jobs green. Zero sorries.
 
 ---
 
