@@ -52,6 +52,7 @@ axiom-stub to a real def here.
 -/
 import Jacobians.RiemannSurface.AnalyticArc
 import Jacobians.RiemannSurface.OneForm
+import Jacobians.RiemannSurface.Homology
 
 namespace Jacobians.RiemannSurface
 
@@ -71,8 +72,9 @@ chart at `p` and doing an interval integral.
 
 This is correct **only when `γ`'s image lies entirely within
 `(extChartAt p).source`**. For general arcs, see
-`pathIntegralAnalyticArc` (TODO) which partitions subordinate to a chart
-cover. -/
+`pathIntegralAnalyticLoop` which uses an analogous chart-local formula
+with the basepoint `x₀` — correct for loops that stay near `x₀`.
+A proper multi-chart `pathIntegralAnalyticArc` is a TODO. -/
 noncomputable def pathIntegralOnChart
     (γ : AnalyticArc X) (p : X) (form : HolomorphicOneForm X) : ℂ :=
   ∫ r in (0 : ℝ)..1,
@@ -80,27 +82,25 @@ noncomputable def pathIntegralOnChart
       derivWithin (fun s : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend s))
         (Set.Ioo (0 : ℝ) 1) r
 
--- TODO (pathIntegralAnalyticArc): for a general `AnalyticArc`, define
--- `∫_γ ω` by:
---   1. Pick a finite chart cover `{U_i}` of `γ`'s image `γ([0, 1])`
---      (exists by compactness).
---   2. Refine `γ.partition` to a partition `0 = t_0 < t_1 < … < t_n = 1`
---      such that `γ([t_i, t_{i+1}]) ⊆ U_{σ(i)}` for some assignment σ.
---   3. Compute `∑_i pathIntegralOnChart (γ.restrict [t_i, t_{i+1}])
---      (chart center of U_{σ(i)}) ω`.
--- Independence of the chart cover / partition choice is a theorem
--- provable via the cotangent cocycle on `form` (see
--- `SatisfiesCotangentCocycle`).
+/-- **Axiom.** The period pairing: integration of a holomorphic 1-form
+along an element of `H_1(X, ℤ)`, as a ℂ-linear functional on
+`HolomorphicOneForm X`. This is the `H_1`-level period map, classically
+defined as `[γ] ↦ (ω ↦ ∫_γ ω)` where `γ` is any loop representative.
 
--- TODO (pathIntegral_homotopy_invariant): for smoothly homotopic
--- analytic arcs `γ ∼ γ'`, `pathIntegralAnalyticArc γ ω =
--- pathIntegralAnalyticArc γ' ω`. Proof: Cauchy on chart disks + Stokes.
+The single-axiom packaging reflects that three subfacts travel
+together:
+  (i) path integration along analytic loops (`pathIntegralOnChart`-style
+      chart-local formulas extended by partition + cocycle to
+      multi-chart arcs);
+  (ii) homotopy invariance (Cauchy on chart disks + Stokes on
+      homotopy rectangle), so `∫_γ ω` depends only on `[γ] ∈ H_1`;
+  (iii) ℂ-linearity of `ω ↦ ∫_γ ω` (standard `intervalIntegral` facts).
 
--- TODO (periodMap retirement): once the above two TODOs land:
---   noncomputable def periodMap (X) [...] (x₀ : X) :
---       H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ) :=
---     -- factor through `Abelianization` universal property + homotopy
---     -- invariance
--- and the axiom `periodMap` in `Periods.lean` is retired.
+Retires to a `def` when `pathIntegralAnalyticArc` + homotopy invariance
+land as theorems. -/
+axiom loopIntegralToH1 {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)
 
 end Jacobians.RiemannSurface

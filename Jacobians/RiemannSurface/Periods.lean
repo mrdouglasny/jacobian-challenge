@@ -7,39 +7,40 @@ over any loop representative of the homology class. Well-definedness on
 integral of a holomorphic 1-form (Cauchy's theorem applied in chart-local
 disks, patched via Stokes on a CW structure).
 
-**Current status (2026-04-22):** axiomatized opaquely because
-`PathIntegral.lean` is not yet built. The axiom `periodMap` gives the
-type of the map; downstream modules (`Jacobian/Construction.lean`) can
-typecheck against it. Once `PathIntegral` lands, `periodMap` gets a real
-definition and the axiom is retired.
+**Current status (2026-04-23):** axiom retired; `periodMap` is now a
+real `def` routing through `Jacobians.RiemannSurface.loopIntegralToH1`
+in `PathIntegral.lean`. `loopIntegralToH1` is the axiomatized compound
+"integral along a loop, descended to H_1" — the atomic classical fact,
+which retires when multi-chart `pathIntegralAnalyticArc` + homotopy
+invariance land.
 
 **Associated deep axiom:** `AX_RiemannBilinear` — the period matrix
 (in any basis of `HolomorphicOneForm X`) is symmetric with positive-
-definite imaginary part. See `Axioms/RiemannBilinear.lean` (TODO to
-land when consumed by the Jacobian bridge).
+definite imaginary part. See `Axioms/RiemannBilinear.lean`.
 
 See `docs/formalization-plan.md` §4.4.
 -/
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.RiemannSurface.Homology
+import Jacobians.RiemannSurface.PathIntegral
 
 namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology
 open scoped ContDiff
 
-/-- **Axiom (scaffold).** The period pairing
-`H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)`.
+/-- The period pairing `H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)`.
 
-Once `PathIntegral.lean` is available this axiom is replaced by the
-real definition
-  `periodMap X x₀ γ ω := ∫_{γ'} ω`   (γ' any loop representative of γ)
-and the type signature is verified by homotopy invariance of
-`pathIntegral` combined with the universal property of `Abelianization`. -/
-axiom periodMap (X : Type*) [TopologicalSpace X] [T2Space X]
+**Definition.** Routes through `loopIntegralToH1` from
+`PathIntegral.lean`, which wraps the "integral along a loop, descended
+to H_1" classical object as a single axiom.
+
+Retired from axiom to `def` (2026-04-23). -/
+noncomputable def periodMap (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
-    H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)
+    H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ) :=
+  loopIntegralToH1 x₀
 
 -- TODO (periodLattice): define
 --   `periodLattice X x₀ : AddSubgroup (HolomorphicOneForm X →ₗ[ℂ] ℂ)`
