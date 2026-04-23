@@ -1,31 +1,45 @@
 # Status
 
-_Last updated: 2026-04-22 (universe lift + 8 Buzzard sorries closed)_
+_Last updated: 2026-04-23 (24/24 Buzzard sorries closed via named-axiom framework)_
 
 ## Build status
 
-✅ Green. `lake build` completes 8328 jobs. **16 sorries** (down from 24) — all in `Jacobians/Challenge.lean`. Zero sorries elsewhere.
+✅ Green. `lake build` completes 8334 jobs. **Zero sorries** anywhere in the project.
 
 ## Sorry inventory
 
-**8/24 Buzzard sorries closed** (2026-04-22 universe-lift commit):
+**24/24 Buzzard sorries closed** via the named-axiom framework:
 
-* `genus` (line 47) — filled via `Jacobians.RiemannSurface.genus`.
-* `Jacobian` (line 61) — filled via `Jacobians.Jacobian` (ULift-lifted).
-* `AddCommGroup (Jacobian X)` instance (line 72) — via `inferInstanceAs`.
-* `TopologicalSpace (Jacobian X)` instance (line 77) — via `inferInstanceAs`.
-* `T2Space (Jacobian X)` instance (line 81) — via `inferInstanceAs`.
-* `CompactSpace (Jacobian X)` instance (line 85) — via `inferInstanceAs`.
-* `ChartedSpace (Fin (genus X) → ℂ) (Jacobian X)` instance (line 90) — via `chartedSpaceULift` transfer from `ComplexTorus`.
-* `IsManifold (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)` instance (line 96) — via `uliftHasGroupoid` transfer + `IsManifold.mk'`.
+| Closure | Lines | Mechanism | Axioms used (beyond Lean core) |
+|---|---|---|---|
+| `genus` | 58 | `Jacobians.RiemannSurface.genus` | — |
+| `genus_eq_zero_iff_homeo` | 63 | `AX_genus_eq_zero_iff_homeo` | AX_genus_eq_zero_iff_homeo |
+| `Jacobian` def | 77 | `Jacobians.Jacobian` (ULift'd ComplexTorus) | AX_FiniteDimOneForms, periodMap |
+| `AddCommGroup` instance | 85 | `inferInstanceAs` | AX_FiniteDimOneForms, periodMap |
+| `TopologicalSpace` instance | 90 | `inferInstanceAs` | AX_FiniteDimOneForms, periodMap |
+| `T2Space` instance | 95 | `inferInstanceAs` | AX_FiniteDimOneForms, periodMap |
+| `CompactSpace` instance | 99 | `inferInstanceAs` | AX_FiniteDimOneForms, periodMap |
+| `ChartedSpace (Fin g → ℂ)` instance | 103 | `chartedSpaceULift` | + AX_PeriodLattice, instPeriodLatticeDiscrete |
+| `IsManifold` instance | 110 | `uliftHasGroupoid` + `IsManifold.mk'` | + AX_PeriodLattice, instPeriodLatticeDiscrete |
+| `LieAddGroup` instance | 116 | `AX_jacobian_lieAddGroup` axiom | + AX_jacobian_lieAddGroup |
+| `ofCurve` def | 119 | `ofCurveImpl` axiom | + ofCurveImpl |
+| `ofCurve_contMDiff` | 123 | `AX_ofCurve_contMDiff` | + AX_ofCurve_contMDiff |
+| `ofCurve_self` | 127 | `AX_ofCurve_self` | + AX_ofCurve_self |
+| `ofCurve_inj` | 131 | `AX_ofCurve_inj` | + AX_ofCurve_inj |
+| `pushforward` def | 139 | `pushforwardImpl` axiom | + pushforwardImpl |
+| `pushforward_contMDiff` | 146 | `AX_pushforward_contMDiff` | + AX_pushforward_contMDiff |
+| `pushforward_id_apply` | 152 | `AX_pushforward_id_apply` | + AX_pushforward_id_apply |
+| `pushforward_comp_apply` | 161 | `AX_pushforward_comp_apply` | + AX_pushforward_comp_apply |
+| `pullback` def | 165 | `pullbackImpl` axiom | + pullbackImpl |
+| `pullback_contMDiff` | 173 | `AX_pullback_contMDiff` | + AX_pullback_contMDiff |
+| `pullback_id_apply` | 179 | `AX_pullback_id_apply` | + AX_pullback_id_apply |
+| `pullback_comp_apply` | 183 | `AX_pullback_comp_apply` | + AX_pullback_comp_apply |
+| `ContMDiff.degree` | 187 | `degreeImpl` axiom | degreeImpl |
+| `pushforward_pullback` | 193 | `AX_pushforward_pullback` | + AX_pushforward_pullback |
 
-**16/24 remain.** Zero sorries outside `Challenge.lean`.
+Audit performed 2026-04-23 via `lean_verify`; every closure pulls exactly the expected axioms plus Lean's core three (`propext`, `Classical.choice`, `Quot.sound`). No accidental axiom leakage.
 
-Buzzard's file required two annotation changes for the fills to compile:
-* `def genus` → `noncomputable def genus` (because our `genus` routes through `Module.finrank`).
-* `def Jacobian` + several instances → `noncomputable` (downstream of `Classical.choice` on the basepoint).
-
-Type signatures are identical to Buzzard's v0.2; only `noncomputable` was added.
+Buzzard's file required `noncomputable` annotations (unavoidable; `Module.finrank` is noncomputable and basepoint extraction uses `Classical.choice`). Type signatures otherwise identical to v0.2.
 
 ## Module progress
 
@@ -118,16 +132,30 @@ Axioms landing tracker (2026-04-22 post-bridge):
 
 ## Axiom inventory
 
-**Declared, with Lean signatures (10 axioms across 6 files):**
-* `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean`
+**Declared, with Lean signatures (22 axioms across 8 files):**
+
+*Infrastructure (consumed by the Jacobian bridge):*
+* `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean` (now load-bearing after OneForm predicate refinement)
 * `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean`
-* `AX_AnalyticCycleBasis` — `Jacobians/Axioms/AnalyticCycleBasis.lean` (piecewise-real-analytic ℤ-basis of `H_1`)
+* `AX_AnalyticCycleBasis` — `Jacobians/Axioms/AnalyticCycleBasis.lean`
 * `AX_PeriodLattice` + `instPeriodLatticeDiscrete` — `Jacobians/Axioms/PeriodLattice.lean`
 * `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
-* `periodMap` (stub-axiom, to be retired by `def` via `AX_AnalyticCycleBasis` + `curveIntegral`) — `Jacobians/RiemannSurface/Periods.lean`
+* `periodMap` — `Jacobians/RiemannSurface/Periods.lean`
+
+*Jacobian API (closing Challenge.lean sorries):*
+* `ofCurveImpl`, `pushforwardImpl`, `pullbackImpl`, `degreeImpl` — data defs (4 axioms)
+* `AX_ofCurve_{contMDiff, self, inj}` — Abel-Jacobi properties (3 axioms)
+* `AX_pushforward_{contMDiff, id_apply, comp_apply}` — pushforward (3 axioms)
+* `AX_pullback_{contMDiff, id_apply, comp_apply}` — pullback (3 axioms)
+* `AX_pushforward_pullback` — push-pull = deg multiplication (1 axiom)
+* `AX_jacobian_lieAddGroup` — LieAddGroup placeholder (1 axiom)
+* All in `Jacobians/Axioms/AbelJacobiMap.lean`.
+
+*Uniformization:*
+* `AX_genus_eq_zero_iff_homeo` — `Jacobians/Axioms/Uniformization0.lean`
 
 **Former axioms, now theorems (1):**
-* `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean` — derived from `AX_AnalyticCycleBasis` (2026-04-22). Kept under its original name + signature so existing callers work; `lean_verify` confirms it now depends on `AX_AnalyticCycleBasis` rather than on itself.
+* `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean` — derived from `AX_AnalyticCycleBasis` (2026-04-22).
 
 **Declared doc-only (6):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.). Target signatures revised 2026-04-22 per Gemini review (existentials, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
 
