@@ -12,24 +12,29 @@ infrastructure axioms first, since downstream constructions collapse
 silently when `genus X` is 0):
 
 1. `AX_FiniteDimOneForms` (compactness + normal families; foundation)
-2. `AX_H1FreeRank2g` (CW topology of compact oriented surfaces)
+2. `AX_H1FreeRank2g` (CW topology of compact oriented surfaces —
+   subsumed by #4 but kept for direct use while callers migrate)
 3. `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear pairing
    on `H_1`; prerequisite for "symplectic basis")
-4. `AX_PeriodLattice` (period image is a ℤ-lattice in `Fin g → ℂ`;
+4. `AX_AnalyticCycleBasis` (piecewise-real-analytic ℤ-basis of `H_1`;
+   enables a tractable `PathIntegral` restricted to analytic arcs, and
+   subsumes `AX_H1FreeRank2g` once `periodMap` uses the basis)
+5. `AX_PeriodLattice` (period image is a ℤ-lattice in `Fin g → ℂ`;
    needed for Jacobian as a complex torus)
-5. `AX_RiemannBilinear` (Hodge / symplectic positivity; discharges
+6. `AX_RiemannBilinear` (Hodge / symplectic positivity; discharges
    `AX_PeriodLattice`)
-6. `AX_BranchLocus` (local `meromorphicOrderAt` + properness)
-7. `AX_SerreDuality` (classical pairing)
-8. `AX_RiemannRoch` (deepest algebraic axiom)
-9. `AX_PluckerFormula` (adjunction; Track 2 `SmoothPlaneCurve` only)
-10. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
+7. `AX_BranchLocus` (local `meromorphicOrderAt` + properness)
+8. `AX_SerreDuality` (classical pairing)
+9. `AX_RiemannRoch` (deepest algebraic axiom)
+10. `AX_PluckerFormula` (adjunction; Track 2 `SmoothPlaneCurve` only)
+11. `AX_AbelTheorem` (via Riemann theta divisor or Forster-style residue)
 -/
 import Jacobians.Axioms.FiniteDimOneForms
 import Jacobians.Axioms.PeriodLattice
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.H1FreeRank2g
 import Jacobians.Axioms.IntersectionForm
+import Jacobians.Axioms.AnalyticCycleBasis
 import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 import Jacobians.Axioms.AbelTheorem
