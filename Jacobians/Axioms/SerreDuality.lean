@@ -2,56 +2,60 @@
 `AX_SerreDuality`: Serre duality for line bundles on a compact Riemann
 surface.
 
-**Statement.** For `X` compact Riemann surface and `D` a divisor,
+**Statement (Lean, refined 2026-04-23).** For `X` a compact Riemann
+surface and `D` a divisor:
 
-    H¹(X, 𝒪(D)) ≅ H⁰(X, Ω¹_X ⊗ 𝒪(-D))^*
+    H¹(X, 𝒪(D)) ≃ₗ[ℂ] Dual ℂ (H⁰(X, 𝒪(K - D)))
 
-as ℂ-vector spaces (or just the dimension equation, which is what our
-genus-0 proof of uniformization uses).
+where `K = canonicalDivisor X` represents the canonical sheaf `Ω¹_X`.
 
-**Consequences.**
+## Consequences
+
 * For `D = [P]` and `g = 0`: `dim H¹(𝒪([P])) = dim H⁰(Ω¹ ⊗ 𝒪(-[P])) ≤
   dim H⁰(Ω¹) = 0`. Combined with Riemann-Roch this gives
   `dim H⁰(𝒪([P])) = 2`, hence a biholomorphism to ℂP¹ (genus-0
   uniformization).
-* More generally, Serre duality is the input to many existence
-  arguments in the theory of compact Riemann surfaces (meromorphic
-  differentials with prescribed principal parts, etc.).
+* Plus `AX_RiemannRoch`, implies the classical numerical Riemann-Roch
+  `dim L(D) - dim L(K - D) = deg D - g + 1`.
 
-**Why axiomatized.** Same reason as `AX_RiemannRoch` — the sheaf-
-cohomology machinery on complex manifolds isn't in Mathlib at this pin.
+## Why axiomatized
 
-See `docs/formalization-plan.md` §7; discharge priority #7.
-Reference: Forster Ch. II §17; Mumford Vol I §II.2.
+Same reason as `AX_RiemannRoch` — sheaf cohomology on complex
+manifolds isn't in Mathlib at this pin.
+
+## History
+
+- 2026-04-22 (Gemini review #1): flagged — dimension equality alone is
+  silently vacuous (both sides 0 when infinite-dim); an isomorphism
+  statement is strictly stronger and transfers finite-dimensionality.
+- 2026-04-23 (A5 in completion plan): promoted from doc-only to real
+  Lean statement via `LineBundle` / `H0` / `H1` stubs + Mathlib's
+  `Module.Dual`.
+
+See `docs/formalization-plan.md` §7; `docs/completion-plan.md` workstream
+A5. Reference: Forster Ch. II §17; Mumford Vol I §II.2.
 -/
-import Jacobians.Axioms.RiemannRoch
+import Jacobians.RiemannSurface.LineBundle
 
 namespace Jacobians.Axioms
 
--- TODO (AX_SerreDuality): precise Lean statement requires the same
--- sheaf-cohomology scaffolding as AX_RiemannRoch. Declare when ready.
---
--- Target signature (revised 2026-04-22 post-Gemini review): state the
--- axiom as an isomorphism, not merely a dimension equality. Equality
--- of `finrank` is silently vacuous when both modules are infinite-dim
--- (both sides are 0). The isomorphism form:
---   (a) gives dimension equality as a derived corollary,
---   (b) transfers `FiniteDimensional` across the iso in one direction,
---   (c) is the classical statement ("perfect pairing") anyway.
---
---   axiom AX_SerreDuality {X : Type*} [...] (D : Divisor X) :
---     Nonempty
---       (H1 X (Divisor.LineBundle D) ≃ₗ[ℂ]
---        Module.Dual ℂ (H0 X (Divisor.Omega1Twist X (-D))))
---
--- Or, if we want to expose the pairing itself:
---
---   axiom serrePairing {X : Type*} [...] (D : Divisor X) :
---     H1 X (Divisor.LineBundle D) →ₗ[ℂ]
---       Module.Dual ℂ (H0 X (Divisor.Omega1Twist X (-D)))
---   axiom AX_SerrePairing_bijective {X : Type*} [...] (D : Divisor X) :
---     Function.Bijective (serrePairing X D)
---
--- Either form works; pick based on how consumers use it.
+open scoped Manifold Topology
+open scoped ContDiff
+open Jacobians.RiemannSurface
+
+/-- **Axiom (Serre duality).** For a compact Riemann surface `X` and a
+divisor `D`, there is a canonical ℂ-linear isomorphism
+
+    H¹(X, 𝒪(D)) ≃ₗ[ℂ] Dual ℂ (H⁰(X, 𝒪(K − D))),
+
+where `K := canonicalDivisor X` represents `Ω¹_X`. The isomorphism is
+"perfect pairing" shape, packaged via `Nonempty` of the equivalence
+to emphasize existence rather than a canonical choice. -/
+axiom AX_SerreDuality {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) :
+    Nonempty
+      (H1 (LineBundle.ofDivisor D) ≃ₗ[ℂ]
+        Module.Dual ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D))))
 
 end Jacobians.Axioms

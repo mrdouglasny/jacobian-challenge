@@ -16,6 +16,7 @@ import Jacobians.RiemannSurface.OneForm
 import Jacobians.RiemannSurface.AnalyticArc
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
+import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
 import Jacobians.RiemannSurface.PathIntegral
