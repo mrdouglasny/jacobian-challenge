@@ -10,6 +10,7 @@ See `docs/formalization-plan.md` §3.5 for the design.
 -/
 import Jacobians.ProjectiveCurve.Charts
 import Jacobians.ProjectiveCurve.Line
+import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Elliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.PlaneCurve
