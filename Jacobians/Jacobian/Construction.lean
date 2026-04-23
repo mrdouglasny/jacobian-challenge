@@ -180,10 +180,55 @@ noncomputable instance :
   IsManifold.mk' _ _ _
 
 -- `LieAddGroup (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)`:
--- transfer through ULift requires `IsTopologicalAddGroup (ULift _)` and
--- `ContMDiff` of add/neg under the ULift chart structure. This is a
--- substantial additional project and is left unfinished. The sorry at
--- `Jacobians/Challenge.lean:86` for this instance remains.
+-- transfer through ULift remains **open**. The sorry at
+-- `Jacobians/Challenge.lean:101` for this instance stays.
+--
+-- Progress so far (useful scaffolding below):
+-- * `IsTopologicalAddGroup (ULift M)` derives via the empty-field
+--   constructor `⟨⟩` (ContinuousAdd + ContinuousNeg are auto-derived
+--   Mathlib instances).
+-- * `chartAt p z = chartAt p.down z.down` via `rfl` (the ULift chart
+--   factors cleanly through the underlying chart).
+-- * `extChartAt p z = extChartAt p.down z.down` as a *function* also
+--   via `rfl`, since the model `𝓘(ℂ, Fin g → ℂ)` is self-modeling and
+--   the chart composition is definitionally equal.
+-- * The chart transition `(extChartAt q) ∘ ULift.down ∘ (extChartAt p).symm`
+--   equals the chart transition `(extChartAt q) ∘ (extChartAt p.down).symm`
+--   on `JacobianAmbient` via `rfl` (proved in scratch).
+--
+-- **Real blocker:** the chart *target sets* differ by universe level:
+-- `(extChartAt p).target : Set.{max u 0} (Fin g → ℂ)` on `Jacobian X`
+-- vs `(extChartAt p.down).target : Set.{0} (Fin g → ℂ)` on
+-- `JacobianAmbient X`. These sets are extensionally equal but not
+-- rfl-equal in Lean, so `ContDiffOn` cannot directly transport. Fixing
+-- this needs either:
+--   (a) a `Set.cast` / `ULift.Set`-style universe bridge that Mathlib
+--       doesn't supply at this pin, or
+--   (b) avoiding universe lift entirely — e.g., reformulate
+--       `Jacobian X` without `ULift` by constructing a fresh
+--       `Type u`-level type whose charted-space structure is built by
+--       hand (massive extra work).
+--
+-- Verdict: this is a clean stopping point. Moving on.
+
+/-- Helper: the ULift chart-factoring identity. Saved for future LieAddGroup work. -/
+lemma chartAt_jacobian_eq_chartAt_down {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (p : Jacobian X) (z : Jacobian X) :
+    (chartAt (Fin (genus X) → ℂ) p) z = (chartAt (Fin (genus X) → ℂ) p.down) z.down :=
+  rfl
+
+/-- Helper: the ULift chart-transition identity. Saved for future LieAddGroup work. -/
+lemma extChartAt_ulift_comp_down {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (p : Jacobian X) (q : JacobianAmbient X) :
+    ((extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) q) ∘
+     (ULift.down : Jacobian X → JacobianAmbient X) ∘
+     (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p).symm) =
+    ((extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) q) ∘
+     (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p.down).symm) := by
+  funext w
+  rfl
 
 end Jacobian
 
