@@ -958,10 +958,44 @@ Codex delivered the bridge (`Jacobians/Jacobian/Construction.lean` + `Jacobians/
 
 Build: 8328 jobs green. 24 sorries all still in `Challenge.lean`; zero elsewhere. Axiom count: 10 declared with Lean signatures, 6 doc-only.
 
+### 2026-04-22 (late evening): universe lift + 8 Buzzard sorries closed
+
+- Rewrote `Jacobians/Jacobian/Construction.lean` with three generic ULift transfer helpers (`chartedSpaceULift`, `ulift_charts_eqOnSource`, `uliftHasGroupoid`) and `Jacobian (X : Type u) : Type u := ULift.{u, 0} (JacobianAmbient X)`. Six of seven Buzzard instances auto-derive.
+- Edited `Jacobians/Challenge.lean` to fill 8 sorries: `genus`, `Jacobian`, 6 instances. Required adding `noncomputable` to data defs/instances (downstream of `Module.finrank` and `Classical.choice`).
+- `LieAddGroup` instance at line 101 left unchanged — needs `IsTopologicalAddGroup (ULift _)` (derivable) + ContMDiff of add/neg through ULift (substantial additional work).
+
+Build: 8328 jobs. 24 → 16 sorries in `Challenge.lean`.
+
+### 2026-04-22 (night): `AX_AnalyticCycleBasis` design conversation + axiom
+
+User-driven design discussion: whether `PathIntegral.lean` (multi-week subproject per plan §4.4) can be simplified. Three observations:
+- Change-of-coordinates to `Im z = 0` only works for analytic paths, and reduces to ordinary reparametrization in the smooth case.
+- Every homology class has a piecewise-real-analytic representative (Radó + surface classification).
+- Classical references (Mumford, Griffiths-Harris, Forster) never use "general smooth contour" integration — piecewise-analytic arcs suffice.
+
+Decision: axiomatize the conclusion as `AX_AnalyticCycleBasis`. File written as a **showpiece of careful axiomatic design**:
+- Detailed motivation (three proof sketches: Radó, Kodaira, Morse) with effort estimates.
+- Relationship to other axioms: subsumes `AX_H1FreeRank2g`, complements `AX_IntersectionForm`.
+- Vetting record: Standard, SA, scheduled for DT.
+- Full references.
+
+`Jacobians/RiemannSurface/AnalyticArc.lean` — companion data carriers, same stub-predicate pattern as `OneForm.lean`.
+
+### 2026-04-22 (night, follow-up): `AX_H1FreeRank2g` retired to theorem
+
+`AX_AnalyticCycleBasis` gives a `Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀)`. `AX_H1FreeRank2g` asserts `Nonempty` of this — immediate consequence. Converted from `axiom` to `theorem`, one-line proof via `AX_AnalyticCycleBasis`.
+
+**Axiom count: 11 → 10.** `lean_verify` confirms the new dependency.
+
+Build: 8330 jobs.
+
 ### Next
 
 Options:
-- Universe-lift wrapper to drop-in replace `Challenge.lean:59`'s `Jacobian` sorry (and by extension the 7 instance sorries).
-- Refine `OneForm.lean` predicates to their real content (gets `genus X` to actually mean something; makes `AX_FiniteDimOneForms` load-bearing).
-- `ofCurve` + `PathIntegral.lean` — highest-leverage next piece of the bridge; also a stepping stone to closing Buzzard's `ofCurve`-family sorries.
-- Track 2 next concrete curve (`Elliptic.lean` or `Hyperelliptic.lean`).
+- **Refine `IsAnalyticArc` predicate** to its real content — requires Mathlib's real/complex model bridge for `ℝ → X` smoothness. Unblocks genuine `PathIntegral`.
+- **Add symplectic property to `AnalyticCycleBasis`** — needed by `AX_RiemannBilinear`'s non-doc-only form. Held back by `Fin(g+g)` vs `Fin(2g)` indexing concerns.
+- **Rewrite `periodMap` from axiom-stub to real def** using `AX_AnalyticCycleBasis` + Mathlib's `curveIntegral`. Requires chart-additivity (cotangent cocycle on `ω` — currently stub-`True`).
+- **Close `LieAddGroup` Challenge sorry** via ULift ContMDiff transfer — moderate effort.
+- **Axiom-stub wave** for remaining 15 Challenge.lean sorries (`ofCurve`, `pushforward`, `pullback`, degree, functoriality — 14 axioms). Would close 14 of 15 remaining (not `genus_eq_zero_iff_homeo`).
+- **Track 2 next concrete curve** (`Elliptic.lean` or `Hyperelliptic.lean`) — concretely instantiate `AX_AnalyticCycleBasis` with explicit A- and B-cycles.
+- **Refine `OneForm.lean` predicates** to their real content — unlocks genuine genus, makes `AX_FiniteDimOneForms` load-bearing, enables `genus_eq_zero_iff_homeo` to be stated honestly.
