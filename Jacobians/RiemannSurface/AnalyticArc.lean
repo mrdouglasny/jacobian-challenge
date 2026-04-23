@@ -13,27 +13,29 @@ analytic continuation for homotopy arguments.
 
 **Classical fact (axiomatized as `AX_AnalyticCycleBasis`):** every
 homology class `[γ] ∈ H_1(X, ℤ)` has a piecewise-real-analytic
-representative, and there exists a *symplectic* ℤ-basis of `H_1`
-consisting of such representatives.
+representative, and there exists a ℤ-basis of `H_1` consisting of such
+representatives.
 
-## Skeleton vs full theory
+## Design (refined 2026-04-23)
 
-At this pin we define `AnalyticArc` / `AnalyticLoop` as **data carriers**
-— a continuous path from `unitInterval` to `X` plus a record of the
-piecewise-analytic partition. The actual content ("on each partition
-piece, the chart-read of the path is real-analytic") is held as a
-proposition predicate whose **stub form is `True`**; refining it to the
-true content is a TODO in the same spirit as the `OneForm.lean`
-predicate refinement.
+`AnalyticArc X` carries:
+  - `extend : ℝ → X` — the arc as a function of a real parameter,
+    defined for all `r : ℝ` but only meaningful on `[0, 1]`.
+  - `continuous'` — continuity of `extend`.
+  - `partition : Finset ℝ` — partition points in `[0, 1]` including
+    `0` and `1`.
+  - `is_analytic` — a real predicate (no longer `True`): on the
+    open interior of each partition interval, the chart-pullback
+    `(extChartAt p) ∘ extend` is real-analytic, where `p` is the
+    image point.
 
-At the stub level, `AnalyticArc X = { continuous path + partition data }`.
-This matches the pattern used for `HolomorphicOneForm X` in `OneForm.lean`.
-Downstream code (`AX_AnalyticCycleBasis`, the future `PathIntegral.lean`)
-can typecheck against the data; analyticity content will be plumbed
-through once the predicate is refined.
+Using `extend : ℝ → X` (as opposed to `toFun : unitInterval → X`) lets
+us state analyticity via Mathlib's `AnalyticAt ℝ` on ordinary
+`ℝ → ℂ` functions without subtype gymnastics.
 
-See `docs/formalization-plan.md` §4 and `docs/history.md` (2026-04-22
-PathIntegral design discussion).
+Compatibility: `toFun : unitInterval → X` is provided as
+`fun t => extend t.val`, with a coe via `AnalyticArc.toPath`-style
+helpers (TODO as needed).
 -/
 import Mathlib
 
@@ -42,61 +44,68 @@ namespace Jacobians.RiemannSurface
 open scoped Manifold Topology
 open scoped ContDiff
 
-/-- **Predicate (stub).** "`γ` is real-analytic when read in any chart on
-each closed subinterval of the partition". Currently `True` — to be
-refined once chart-cocycle machinery lands. -/
+/-- **Predicate.** "`γ` is real-analytic when read in any chart on the
+open interior of each partition subinterval."
+
+For each partition pair `s < t` and each interior point `u ∈ Ioo s t`,
+the composite `(extChartAt 𝓘(ℂ) (γ u)) ∘ γ : ℝ → ℂ` is real-analytic at
+`u`. Analyticity at `u` is purely local, so the chart-pullback is
+guaranteed to be well-defined in a neighborhood of `u`. -/
 def IsAnalyticArc (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (_toFun : unitInterval → X) (_partition : Finset ℝ) :
-    Prop := True
+    [IsManifold 𝓘(ℂ) ω X] (extend : ℝ → X) (partition : Finset ℝ) :
+    Prop :=
+  ∀ s ∈ partition, ∀ t ∈ partition, s < t →
+    ∀ u ∈ Set.Ioo s t,
+      AnalyticAt ℝ (fun r : ℝ => (extChartAt 𝓘(ℂ) (extend u)) (extend r)) u
 
 /-- A piecewise-real-analytic arc in a complex 1-manifold `X`.
 
-Data carrier: continuous path `toFun : unitInterval → X`, partition
-`partition : Finset ℝ` of `[0, 1]`, and (stub-True until predicate
-refined) the property that `toFun` is real-analytic in every chart on
-each closed subinterval of `partition`. -/
+Data:
+* `extend : ℝ → X` — continuous extension of the arc to the whole real
+  line. Only values on `[0, 1]` are mathematically meaningful;
+  outside, `extend` is a dummy continuation.
+* `partition : Finset ℝ` — partition of `[0, 1]` including endpoints.
+* `is_analytic` — real analyticity on each open partition interior
+  (see `IsAnalyticArc`). -/
 structure AnalyticArc (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] where
-  toFun : unitInterval → X
-  continuous' : Continuous toFun
+  extend : ℝ → X
+  continuous' : Continuous extend
   partition : Finset ℝ
   partition_subset : ↑partition ⊆ Set.Icc (0 : ℝ) 1
   zero_mem : (0 : ℝ) ∈ partition
   one_mem : (1 : ℝ) ∈ partition
-  is_analytic : IsAnalyticArc X toFun partition
-
-/-- A piecewise-real-analytic loop based at `x₀`. -/
-structure AnalyticLoop (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) where
-  arc : AnalyticArc X
-  start_eq : arc.toFun ⟨0, by simp⟩ = x₀
-  end_eq   : arc.toFun ⟨1, by simp⟩ = x₀
+  is_analytic : IsAnalyticArc X extend partition
 
 namespace AnalyticArc
 
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]
 
--- TODO (IsAnalyticArc refinement): replace the `True` stub with the real
--- predicate:
---
---   IsAnalyticArc X γ P ↔
---     ∀ s ∈ P, ∀ t ∈ P, s < t →
---       (∀ u ∈ Ioo s t, ContMDiffWithinAt ℝ I_real_to_complex ω
---         (γ ∘ Subtype.val_restr_to_Icc) (Icc s t) u)
---
--- where `I_real_to_complex` models `ℝ → X` viewed as a real-smooth map
--- from `ℝ` to `X`-as-real-manifold. Needs Mathlib's `ModelWithCorners`
--- infrastructure for viewing a complex manifold as a real manifold of
--- twice the dimension (which at this pin does exist via
--- `Manifold.ModelWithCorners.complexification`-adjacent machinery).
+/-- Evaluation of the arc at a point in `unitInterval`, ignoring the
+extension's out-of-range values. -/
+def toFun (γ : AnalyticArc X) (t : unitInterval) : X := γ.extend t.val
+
+lemma continuous_toFun (γ : AnalyticArc X) : Continuous γ.toFun :=
+  γ.continuous'.comp continuous_subtype_val
+
+end AnalyticArc
+
+/-- A piecewise-real-analytic loop based at `x₀`. -/
+structure AnalyticLoop (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) where
+  arc : AnalyticArc X
+  start_eq : arc.extend 0 = x₀
+  end_eq   : arc.extend 1 = x₀
 
 -- TODO (concat): concatenation of two analytic arcs `γ ++ δ` with
 -- matching endpoints. Partition becomes a scaled union. Piecewise-
 -- analytic is closed under concatenation.
 
--- TODO (reverse): `reverse γ (t) := γ (1 - t)`, partition reflected.
+-- TODO (reverse): `reverse γ (r) := γ (1 - r)`, partition reflected.
 
-end AnalyticArc
+-- TODO (Path interop): convert `AnalyticArc` to/from `Path a b` in
+-- Mathlib — `Path.extend` is the standard `ℝ → X` extension of a
+-- Path.
 
 end Jacobians.RiemannSurface
