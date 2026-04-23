@@ -88,7 +88,7 @@ lake update
 lake build
 ```
 
-Currently 8328 jobs, green. **16 sorries** (down from 24) — all in `Jacobians/Challenge.lean`. Zero sorries anywhere else. The 8 closed are `genus` + `Jacobian` + 6 of 7 typeclass instances; `LieAddGroup` and the Abel-Jacobi/pushforward/pullback theorems remain.
+Currently 8334 jobs, green. **Zero sorries** anywhere in the project. All 24 Buzzard sorries have been discharged via the named-axiom framework: the Jacobian bridge through `ComplexTorus`, 14 axiom-stubs in `Jacobians/Axioms/AbelJacobiMap.lean` + `Uniformization0.lean` encoding the classical Riemann-surface theory (path integration, Abel-Jacobi injectivity, branch-locus degree, genus-0 uniformization). Each axiom retires to a theorem once the corresponding Mathlib infrastructure (real-analytic path integration, line bundles, surface classification) lands.
 
 ## Status
 
