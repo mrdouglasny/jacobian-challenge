@@ -421,6 +421,61 @@ theorem once `periodMap` is rewritten to use `AX_AnalyticCycleBasis`.
 - Rewrite `periodMap` from axiom-stub to real def via the analytic
   basis + `curveIntegral`.
 
+## 2026-04-23: concrete curves + LieAddGroup blocker
+
+### Elliptic curve (Track 2)
+
+Concrete Track 2 curve landed: `Elliptic ω₁ ω₂ h := ComplexTorus ℂ
+(ℤω₁ + ℤω₂)` for `ω₁, ω₂ ∈ ℂ` ℝ-linearly independent. All 8 Buzzard
+typeclass constraints inherited axiom-free via `ComplexTorus`.
+
+`ConnectedSpace` instance added on `ComplexTorus` itself via
+`Function.Surjective.connectedSpace` — missed from the original 7/7
+(Buzzard actually needs 8: TopologicalSpace + T2 + Compact + Connected
++ Nonempty + ChartedSpace + IsManifold + LieAddGroup). Propagated to
+`Elliptic`.
+
+`Elliptic.ofUpperHalfPlane τ hτ` as convenience constructor for
+`τ ∈ ℂ` with `0 < τ.im`, supported by a 5-line
+`linearIndependent_one_of_pos_im` lemma.
+
+Validates the architecture works for non-trivial concrete Riemann
+surfaces, not just the abstract-`X` Jacobian bridge.
+
+### LieAddGroup ULift transfer — real blocker
+
+Attempted to close the 9th Buzzard sorry (`LieAddGroup` on the universe-
+lifted `Jacobian X`). The plan: prove `Homeomorph.ulift` is a diffeomorphism,
+transport `ContMDiffAdd` and `ContMDiff neg` from `JacobianAmbient` through
+the diffeomorphism.
+
+**Useful progress:**
+- `IsTopologicalAddGroup (ULift M)` derives via `⟨⟩` (empty-constructor).
+- `chartAt p z = chartAt p.down z.down` via `rfl` — ULift charts
+  factor cleanly through underlying charts.
+- `(extChartAt q) ∘ ULift.down ∘ (extChartAt p).symm =
+  (extChartAt q) ∘ (extChartAt p.down).symm` via `rfl` —
+  the chart-transition-through-ULift-down reduces definitionally to
+  the downstairs transition.
+
+Saved as `chartAt_jacobian_eq_chartAt_down` and
+`extChartAt_ulift_comp_down` helper lemmas in
+`Jacobians/Jacobian/Construction.lean`.
+
+**Blocker:** the chart *target sets* have a universe mismatch.
+`(extChartAt p).target` on `Jacobian X : Type u` lives in
+`Set.{max u 0} (Fin g → ℂ)`, while `(extChartAt p.down).target` on
+`JacobianAmbient X : Type` lives in `Set.{0} (Fin g → ℂ)`. These are
+extensionally equal but not `rfl`-equal, and Mathlib at this pin doesn't
+supply a universe-bridge for `Set.cast`. Fixing requires either
+(a) a manual `Set.cast`/`ULift.Set` development (substantial new
+infrastructure) or (b) redesigning `Jacobian` to avoid `ULift` entirely
+while still landing in `Type u` — e.g. a hand-built `Type u`-level
+charted space.
+
+Documented in Construction.lean. `LieAddGroup` sorry at
+Challenge.lean:101 remains — clean stopping point.
+
 ## Status snapshot (end of 2026-04-22)
 
 - **Build:** green, 8328 jobs.
