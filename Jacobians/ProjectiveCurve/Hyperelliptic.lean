@@ -58,6 +58,7 @@ Hyperelliptic curves provide:
   (smooth projective models).
 -/
 import Jacobians.AbelianVariety.ComplexTorus
+import Jacobians.RiemannSurface.Genus
 
 namespace Jacobians.ProjectiveCurve
 
@@ -96,32 +97,47 @@ there; see TODO below. -/
 def HyperellipticAffine (H : HyperellipticData) : Type :=
   { p : ℂ × ℂ // p.2 ^ 2 = H.f.eval p.1 }
 
--- TODO (Hyperelliptic): the compactified type
---
---   def Hyperelliptic (H : HyperellipticData) : Type
---
--- obtained by adding:
---   - 1 point at infinity if `H.hasBranchAtInfinity` (odd `deg f`),
---   - 2 points at infinity otherwise.
---
--- The construction can be done as a quotient / OnePoint-style
--- compactification, or (cleanly) via an embedding into a weighted
--- projective space. Either route requires the full atlas:
---   (a) affine chart: `(x, y) ↦ x` on the non-branch-point locus.
---   (b) branch-point chart: local parameter `t = √(x - a)` at each
---       branch point `a` (root of `f`).
---   (c) infinity chart: coordinate change `x ↦ 1/x` at ∞.
+/-- **Axiom-stub.** The compactified hyperelliptic curve `y² = f(x)` as
+a type. For `deg f = 2g + 1` odd: one branch point at infinity;
+for `deg f = 2g + 2` even: two points at infinity. Either way, a
+smooth compact Riemann surface.
 
--- TODO (instances): the 7 Buzzard typeclass instances
--- (TopologicalSpace, T2Space, CompactSpace, ConnectedSpace,
--- Nonempty, ChartedSpace ℂ, IsManifold 𝓘(ℂ) ω) on `Hyperelliptic H`.
--- Unlike `Elliptic`, these are NOT inherited from `ComplexTorus` —
--- the hyperelliptic curve for `g ≥ 2` doesn't admit a group structure.
--- Each instance must be built from the atlas directly.
+Classically constructed as a two-sheeted branched cover of `ℙ¹` by
+the `x`-projection, with branch points at the roots of `f`. Full atlas
+requires:
+  (a) affine chart: `(x, y) ↦ x` on the non-branch-point locus.
+  (b) branch-point chart: local parameter `t = √(x - a)` at each
+      branch point `a` (root of `f`).
+  (c) infinity chart: coordinate change `x ↦ 1/x` at ∞.
 
--- TODO (genus_eq): `genus (Hyperelliptic H) = H.genus` — matches the
--- concrete formula. Requires the `HolomorphicOneForm` predicate
--- refinement to be meaningful (currently all `genus X = 0` at stub).
+Axiomatized as a `Type` until the atlas lands (workstream E2). -/
+axiom Hyperelliptic (H : HyperellipticData) : Type
+
+/-- Buzzard typeclass instances on `Hyperelliptic H`, axiom-stubbed.
+Matches the `PlaneCurve` pattern (E1). Retires when the full atlas
+construction is available. -/
+axiom Hyperelliptic.instTopologicalSpace (H : HyperellipticData) :
+    TopologicalSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instTopologicalSpace
+axiom Hyperelliptic.instT2Space (H : HyperellipticData) : T2Space (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instT2Space
+axiom Hyperelliptic.instCompactSpace (H : HyperellipticData) : CompactSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instCompactSpace
+axiom Hyperelliptic.instConnectedSpace (H : HyperellipticData) : ConnectedSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instConnectedSpace
+axiom Hyperelliptic.instChartedSpace (H : HyperellipticData) : ChartedSpace ℂ (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instChartedSpace
+axiom Hyperelliptic.instIsManifold (H : HyperellipticData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instIsManifold
+
+/-- **Axiom.** The genus of `y² = f(x)` matches the combinatorial
+formula `⌊(deg f - 1) / 2⌋`. Classical: `H⁰(Ω¹)` is spanned by the
+explicit holomorphic differentials `x^k dx/y` for `0 ≤ k < g`.
+Mirrors `AX_PluckerFormula` for smooth plane curves. Retires when the
+explicit basis is constructed against the Hyperelliptic atlas. -/
+axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
+    Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus
 
 -- TODO (holomorphic differentials): explicit basis of
 -- `HolomorphicOneForm (Hyperelliptic H)` given by
