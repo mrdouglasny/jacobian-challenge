@@ -29,9 +29,10 @@ instances at the `Type u` level, ready to drop into `Challenge.lean`
 via `inferInstance`.
 
 The `LieAddGroup` instance requires `IsTopologicalAddGroup (ULift _)`
-and `ContMDiff` of add/neg through ULift — a substantial chunk of
-additional transfer lemmas. Left unproven here (Challenge.lean's
-`instance : LieAddGroup ... := sorry` remains).
+and `ContMDiff` of add/neg through ULift. A universe-level Set-cast
+obstacle was identified (see below) and the instance is currently
+**axiomatized** as `AX_jacobian_lieAddGroup` in
+`Jacobians/Axioms/AbelJacobiMap.lean` rather than proved here.
 -/
 import Jacobians.AbelianVariety.ComplexTorus
 import Jacobians.Axioms.PeriodLattice
@@ -180,8 +181,11 @@ noncomputable instance :
   IsManifold.mk' _ _ _
 
 -- `LieAddGroup (𝓘(ℂ, Fin (genus X) → ℂ)) ω (Jacobian X)`:
--- transfer through ULift remains **open**. The sorry at
--- `Jacobians/Challenge.lean:101` for this instance stays.
+-- transfer through ULift remains **open** at the proof level, but the
+-- instance is supplied by `AX_jacobian_lieAddGroup` (axiom) from
+-- `Jacobians/Axioms/AbelJacobiMap.lean`, closing the Challenge.lean
+-- sorry. Scaffolding below is kept for when the universe-level
+-- `Set.cast` obstacle is resolved and a direct proof becomes tractable.
 --
 -- Progress so far (useful scaffolding below):
 -- * `IsTopologicalAddGroup (ULift M)` derives via the empty-field

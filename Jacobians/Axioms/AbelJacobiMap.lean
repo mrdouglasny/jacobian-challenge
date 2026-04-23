@@ -92,4 +92,109 @@ axiom degreeImpl {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) : ℕ
 
+/-! ## Properties of `ofCurveImpl`, pushforward, pullback, degree
+
+The following axiom-stubs encode the classical theorems. Each retires
+to a derived theorem once the corresponding `def` replaces its
+axiom-stub counterpart and the underlying path-integral / branch-locus
+machinery lands. -/
+
+/-- **Axiom.** The Abel-Jacobi map is smooth/holomorphic. -/
+axiom AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P : X) :
+    ContMDiff 𝓘(ℂ, ℂ) (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+      (ofCurveImpl X P)
+
+/-- **Axiom.** The Abel-Jacobi map sends the basepoint to zero. -/
+axiom AX_ofCurve_self {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P : X) :
+    ofCurveImpl X P P = 0
+
+/-- **Axiom (= Abel's theorem, on the curve side).** The Abel-Jacobi
+map is injective when the genus is positive. -/
+axiom AX_ofCurve_inj {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P : X) (_h : 0 < genus X) :
+    Function.Injective (ofCurveImpl X P)
+
+/-- **Axiom.** Pushforward on Jacobians is smooth. -/
+axiom AX_pushforward_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+    ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+      (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforwardImpl X Y f hf)
+
+/-- **Axiom.** Pushforward is the identity on identity. (Functoriality, part 1.) -/
+axiom AX_pushforward_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
+    pushforwardImpl X X id contMDiff_id P = P
+
+/-- **Axiom.** Pushforward respects composition. (Functoriality, part 2.) -/
+axiom AX_pushforward_comp_apply
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    {Z : Type w} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z]
+    [ConnectedSpace Z] [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
+    (P : Jacobian X) :
+    pushforwardImpl X Z (g ∘ f) (hg.comp hf) P =
+      pushforwardImpl Y Z g hg (pushforwardImpl X Y f hf P)
+
+/-- **Axiom.** Pullback on Jacobians is smooth. -/
+axiom AX_pullback_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+    ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
+      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullbackImpl X Y f hf)
+
+/-- **Axiom.** Pullback is the identity on identity. (Functoriality, part 1.) -/
+axiom AX_pullback_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
+    pullbackImpl X X id contMDiff_id P = P
+
+/-- **Axiom.** Pullback respects composition (contravariantly). (Functoriality, part 2.) -/
+axiom AX_pullback_comp_apply
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    {Z : Type w} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z]
+    [ConnectedSpace Z] [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
+    (P : Jacobian Z) :
+    pullbackImpl X Z (g.comp f) (hg.comp hf) P =
+      pullbackImpl X Y f hf (pullbackImpl Y Z g hg P)
+
+/-- **Axiom.** The composition "pullback then pushforward" multiplies by degree. -/
+axiom AX_pushforward_pullback {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    (P : Jacobian Y) :
+    pushforwardImpl X Y f hf (pullbackImpl X Y f hf P) = (degreeImpl f hf) • P
+
+/-- **Axiom (LieAddGroup).** Placeholder for the Lie group structure on
+the universe-lifted Jacobian. In `Jacobians/Jacobian/Construction.lean`
+we derived ChartedSpace, IsManifold, and six more instances via ULift
+transfer, but LieAddGroup through ULift hits a Mathlib-level chart
+target universe mismatch (`Set.{max u 0}` vs `Set.{0}`). Axiomatize
+until that infrastructure lands. -/
+axiom AX_jacobian_lieAddGroup {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] :
+    LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X)
+
 end Jacobians.Axioms

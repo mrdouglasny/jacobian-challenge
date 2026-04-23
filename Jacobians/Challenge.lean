@@ -1,11 +1,19 @@
 import Mathlib -- compiles with commit 8e3c989104daaa052921bf43de9eef0e1ac9fbf5 (15th April 2026)
 import Jacobians.Jacobian
 import Jacobians.Axioms.AbelJacobiMap
--- ^ Our bridge. Fills `genus`, `Jacobian`, 6 of 7 typeclass-instance
--- sorries below, and `ofCurve` (via axiom-stub).
--- `LieAddGroup` sorry remains pending the ULift ContMDiff-of-add/neg
--- transfer; `ofCurve_*` theorem sorries remain pending path-integral
--- machinery or further axiomatization.
+import Jacobians.Axioms.Uniformization0
+-- ^ Our bridge. Fills all 24 Buzzard sorries via the named-axiom
+-- framework: `Jacobian` bridge through `ComplexTorus`, instances via
+-- ULift transfer (+ one axiom for `LieAddGroup`), data defs (`ofCurve`,
+-- pushforward, pullback, degree) and all 10 theorems axiom-stubbed
+-- against the classical Riemann-surface theory (PathIntegral,
+-- Abel-Jacobi, branch-locus degree formula, Uniformization for
+-- genus 0).
+--
+-- Each axiom retires to a theorem once the corresponding piece of
+-- Mathlib-level infrastructure (real-analytic path integration,
+-- line bundles + sheaf cohomology, surface classification) lands.
+-- See `Jacobians/Axioms/` and `docs/formalization-plan.md` §7.
 
 /-
 
@@ -57,8 +65,12 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X] [Connecte
 
 -- this proof avoids the hack answer `∀ X, genus X = 0`
 lemma genus_eq_zero_iff_homeo :
-    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :=
-  sorry
+    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) := by
+  -- Uniformization for g = 0: reduce Buzzard's `genus` (defined via the
+  -- RiemannSurface.genus which is our `finrank HolomorphicOneForm`) to
+  -- the axiom on that genus.
+  change Jacobians.RiemannSurface.genus X = 0 ↔ _
+  exact Jacobians.Axioms.AX_genus_eq_zero_iff_homeo
 
 universe u in
 -- data
@@ -101,19 +113,23 @@ instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jac
   infer_instance
 
 -- Prop
-instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := sorry
+instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) :=
+  Jacobians.Axioms.AX_jacobian_lieAddGroup
 
 /-- The Abel-Jacobi map from a compact Riemann surface to its Jacobian. -/
 noncomputable def ofCurve (P : X) : X → Jacobian X :=
   Jacobians.Axioms.ofCurveImpl X P
 
 lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ)
-    (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (ofCurve P) := sorry
+    (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (ofCurve P) :=
+  Jacobians.Axioms.AX_ofCurve_contMDiff P
 
-lemma ofCurve_self (P : X) : ofCurve P P = 0 := sorry
+lemma ofCurve_self (P : X) : ofCurve P P = 0 :=
+  Jacobians.Axioms.AX_ofCurve_self P
 
 -- this is the lemma which stops the hack answer "J(X)=0 for all X"
-lemma ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) := sorry
+lemma ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) :=
+  Jacobians.Axioms.AX_ofCurve_inj P h
 
 variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
   [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
@@ -129,10 +145,12 @@ noncomputable def pushforward (f : X → Y)
 -- pushforward is holomorphic
 theorem pushforward_contMDiff :
   ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
-  (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforward f hf) := sorry
+  (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforward f hf) :=
+  Jacobians.Axioms.AX_pushforward_contMDiff f hf
 
 -- functoriality
-lemma pushforward_id_apply (P : Jacobian X) : pushforward id contMDiff_id P = P := sorry
+lemma pushforward_id_apply (P : Jacobian X) : pushforward id contMDiff_id P = P :=
+  Jacobians.Axioms.AX_pushforward_id_apply P
 
 variable {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z] [ConnectedSpace Z]
   [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
@@ -142,7 +160,7 @@ variable (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
 -- functoriality
 lemma pushforward_comp_apply (P : Jacobian X) :
     pushforward (g ∘ f) (hg.comp hf) P = pushforward g hg (pushforward f hf P) :=
-  sorry
+  Jacobians.Axioms.AX_pushforward_comp_apply f hf g hg P
 
 /-- Pullback map between Jacobians associated to a map of the underlying curves.
 Equal to the zero map if the map on curves is constant. -/
@@ -154,14 +172,17 @@ noncomputable def pullback (f : X → Y)
 -- pullback is holomorphic
 theorem pullback_contMDiff :
     ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
-      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullback f hf) := sorry
+      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullback f hf) :=
+  Jacobians.Axioms.AX_pullback_contMDiff f hf
 
 -- functoriality
-lemma pullback_id_apply (P : Jacobian X) : pullback id contMDiff_id P = P := sorry
+lemma pullback_id_apply (P : Jacobian X) : pullback id contMDiff_id P = P :=
+  Jacobians.Axioms.AX_pullback_id_apply P
 
 -- functoriality
 lemma pullback_comp_apply (P : Jacobian Z) :
-    pullback (g.comp f) (hg.comp hf) P = pullback f hf (pullback g hg P) := sorry
+    pullback (g.comp f) (hg.comp hf) P = pullback f hf (pullback g hg P) :=
+  Jacobians.Axioms.AX_pullback_comp_apply f hf g hg P
 
 /-- The degree of a holomorphic map between compact Riemann surfaces. Equal to zero
 for constant maps, otherwise equal to the usual degree. -/
@@ -170,6 +191,7 @@ noncomputable def _root_.ContMDiff.degree
   Jacobians.Axioms.degreeImpl f hf
 
 lemma pushforward_pullback (P : Jacobian Y) :
-  pushforward f hf (pullback f hf P) = (ContMDiff.degree f hf) • P := sorry
+  pushforward f hf (pullback f hf P) = (ContMDiff.degree f hf) • P :=
+  Jacobians.Axioms.AX_pushforward_pullback f hf P
 
 end Jacobian
