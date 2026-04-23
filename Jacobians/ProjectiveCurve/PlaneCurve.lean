@@ -100,20 +100,36 @@ building charts at each affine/projective patch boundary. -/
 def PlaneCurveAffine (H : PlaneCurveData) : Type :=
   { p : ℂ × ℂ // H.F.val.eval ![p.1, p.2, (1 : ℂ)] = 0 }
 
--- TODO (PlaneCurve): the compactified type
---
---   def PlaneCurve (H : PlaneCurveData) : Type
---
--- obtained from a quotient of `{v ∈ ℂ³ \ {0} | F(v) = 0}` by the
--- `ℂ^× ` scaling action. Requires a full chart atlas derived from the
--- three standard patches `x ≠ 0`, `y ≠ 0`, `z ≠ 0` (projective
--- coordinates), each restricted to the smooth vanishing locus using
--- the implicit function theorem.
+/-- **Axiom-stub.** The compactified smooth projective plane curve
+`{[x:y:z] ∈ ℙ² | F(x, y, z) = 0}` as a type.
 
--- TODO (instances): seven Buzzard typeclass instances on
--- `PlaneCurve H`. Like `Hyperelliptic`, these do NOT inherit from
--- `ComplexTorus` — each must come from the atlas directly. Shared
--- machinery lives in `Jacobians/ProjectiveCurve/Charts.lean`.
+Classically constructed by quotienting `{v ∈ ℂ³ \ {0} | F(v) = 0}` by
+the `ℂ^×` scaling action. Full construction requires a chart atlas
+from the three standard patches `x ≠ 0`, `y ≠ 0`, `z ≠ 0` plus the
+implicit function theorem; see `ProjectiveCurve/Charts.lean` and
+discharge plan workstream E2.
+
+Axiomatized as a `Type` until the full atlas lands. -/
+axiom PlaneCurve (H : PlaneCurveData) : Type
+
+/-- Buzzard typeclass instances on `PlaneCurve H`, axiom-stubbed.
+Unlike `Elliptic` (which inherits from `ComplexTorus`), smooth plane
+curves for `d ≥ 3` have no group structure — each instance has to
+come from the atlas directly. -/
+axiom PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
+    TopologicalSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instTopologicalSpace
+axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
+attribute [instance] PlaneCurve.instT2Space
+axiom PlaneCurve.instCompactSpace (H : PlaneCurveData) : CompactSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instCompactSpace
+axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) : ConnectedSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instConnectedSpace
+axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) : ChartedSpace ℂ (PlaneCurve H)
+attribute [instance] PlaneCurve.instChartedSpace
+axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
+attribute [instance] PlaneCurve.instIsManifold
 
 -- TODO (genus_eq): `Jacobians.RiemannSurface.genus (PlaneCurve H) = H.genus`
 -- for `H.d ≥ 3` (Plücker). Awaits `OneForm` content at the concrete
