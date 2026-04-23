@@ -482,6 +482,48 @@ theorem pullbackAmbientLinear_id {X : Type u} [TopologicalSpace X] [T2Space X]
   ext v i
   simp [pullbackAmbientLinear, AX_pushforwardOneForm_id, LinearMap.dualMap_id]
 
+theorem pushforwardAmbientLinear_comp
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    {Z : Type w} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z]
+    [ConnectedSpace Z] [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g) :
+    pushforwardAmbientLinear (g ∘ f) (hg.comp hf) =
+      (pushforwardAmbientLinear g hg).comp (pushforwardAmbientLinear f hf) := by
+  apply LinearMap.ext
+  intro v
+  show ((jacobianBasis Z).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
+      ((pullbackOneForm (g ∘ f) (hg.comp hf)).dualMap
+        (((jacobianBasis X).dualBasis.equivFun).symm v)) = _
+  rw [AX_pullbackOneForm_comp f hf g hg,
+      ← LinearMap.dualMap_comp_dualMap (pullbackOneForm g hg) (pullbackOneForm f hf)]
+  simp only [pushforwardAmbientLinear, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+    LinearEquiv.symm_apply_apply]
+
+theorem pullbackAmbientLinear_comp
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+    {Z : Type w} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z]
+    [ConnectedSpace Z] [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g) :
+    pullbackAmbientLinear (g ∘ f) (hg.comp hf) =
+      (pullbackAmbientLinear f hf).comp (pullbackAmbientLinear g hg) := by
+  apply LinearMap.ext
+  intro v
+  show ((jacobianBasis X).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
+      ((pushforwardOneForm (g ∘ f) (hg.comp hf)).dualMap
+        (((jacobianBasis Z).dualBasis.equivFun).symm v)) = _
+  rw [AX_pushforwardOneForm_comp f hf g hg,
+      ← LinearMap.dualMap_comp_dualMap (pushforwardOneForm f hf) (pushforwardOneForm g hg)]
+  simp only [pullbackAmbientLinear, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+    LinearEquiv.symm_apply_apply]
+
 /-! ### `pushforward` and `pullback` as real definitions -/
 
 /-- The pushforward on Jacobians, as a real `def`. -/
@@ -541,8 +583,8 @@ theorem AX_pushforward_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
   simpa [pushforwardImpl, pushforwardAmbientLinear_id] using
     (jacobianHomOfAmbient_id_apply X P)
 
-/-- **Axiom.** Pushforward respects composition. (Functoriality, part 2.) -/
-axiom AX_pushforward_comp_apply
+/-- Pushforward respects composition. (Functoriality, part 2.) -/
+theorem AX_pushforward_comp_apply
     {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
@@ -553,7 +595,25 @@ axiom AX_pushforward_comp_apply
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (P : Jacobian X) :
     pushforwardImpl X Z (g ∘ f) (hg.comp hf) P =
-      pushforwardImpl Y Z g hg (pushforwardImpl X Y f hf P)
+      pushforwardImpl Y Z g hg (pushforwardImpl X Y f hf P) := by
+  -- Helper: composite lattice preservation
+  have hXZ : ∀ v ∈ (periodLatticeInBasis X (Classical.arbitrary X)
+                      (jacobianBasis X)).toAddSubgroup,
+      ((pushforwardAmbientLinear g hg).comp (pushforwardAmbientLinear f hf)) v ∈
+        (periodLatticeInBasis Z (Classical.arbitrary Z)
+          (jacobianBasis Z)).toAddSubgroup := fun v hv => by
+    simpa using AX_pushforwardAmbient_preserves_lattice g hg _
+      (AX_pushforwardAmbient_preserves_lattice f hf v hv)
+  calc pushforwardImpl X Z (g ∘ f) (hg.comp hf) P
+      = jacobianHomOfAmbient X Z
+          ((pushforwardAmbientLinear g hg).comp (pushforwardAmbientLinear f hf)) hXZ P := by
+        apply jacobianHomOfAmbient_congr_apply
+        exact pushforwardAmbientLinear_comp f hf g hg
+    _ = pushforwardImpl Y Z g hg (pushforwardImpl X Y f hf P) :=
+        jacobianHomOfAmbient_comp_apply X Y Z
+          (pushforwardAmbientLinear f hf) (AX_pushforwardAmbient_preserves_lattice f hf)
+          (pushforwardAmbientLinear g hg) (AX_pushforwardAmbient_preserves_lattice g hg)
+          hXZ P
 
 /-- **Axiom.** Pullback on Jacobians is smooth. -/
 axiom AX_pullback_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
@@ -572,8 +632,8 @@ theorem AX_pullback_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
   simpa [pullbackImpl, pullbackAmbientLinear_id] using
     (jacobianHomOfAmbient_id_apply X P)
 
-/-- **Axiom.** Pullback respects composition (contravariantly). (Functoriality, part 2.) -/
-axiom AX_pullback_comp_apply
+/-- Pullback respects composition (contravariantly). (Functoriality, part 2.) -/
+theorem AX_pullback_comp_apply
     {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
@@ -584,7 +644,24 @@ axiom AX_pullback_comp_apply
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (P : Jacobian Z) :
     pullbackImpl X Z (g.comp f) (hg.comp hf) P =
-      pullbackImpl X Y f hf (pullbackImpl Y Z g hg P)
+      pullbackImpl X Y f hf (pullbackImpl Y Z g hg P) := by
+  have hZX : ∀ v ∈ (periodLatticeInBasis Z (Classical.arbitrary Z)
+                      (jacobianBasis Z)).toAddSubgroup,
+      ((pullbackAmbientLinear f hf).comp (pullbackAmbientLinear g hg)) v ∈
+        (periodLatticeInBasis X (Classical.arbitrary X)
+          (jacobianBasis X)).toAddSubgroup := fun v hv => by
+    simpa using AX_pullbackAmbient_preserves_lattice f hf _
+      (AX_pullbackAmbient_preserves_lattice g hg v hv)
+  calc pullbackImpl X Z (g.comp f) (hg.comp hf) P
+      = jacobianHomOfAmbient Z X
+          ((pullbackAmbientLinear f hf).comp (pullbackAmbientLinear g hg)) hZX P := by
+        apply jacobianHomOfAmbient_congr_apply
+        exact pullbackAmbientLinear_comp f hf g hg
+    _ = pullbackImpl X Y f hf (pullbackImpl Y Z g hg P) :=
+        jacobianHomOfAmbient_comp_apply Z Y X
+          (pullbackAmbientLinear g hg) (AX_pullbackAmbient_preserves_lattice g hg)
+          (pullbackAmbientLinear f hf) (AX_pullbackAmbient_preserves_lattice f hf)
+          hZX P
 
 /-- **Axiom.** The composition "pullback then pushforward" multiplies by degree. -/
 axiom AX_pushforward_pullback {X : Type u} [TopologicalSpace X] [T2Space X]
