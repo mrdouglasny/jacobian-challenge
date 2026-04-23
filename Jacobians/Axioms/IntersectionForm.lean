@@ -69,13 +69,45 @@ axiom AX_IntersectionForm_alternating
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (a : H1 X x₀) :
     intersectionForm x₀ a a = 0
 
-/-- **Axiom.** The intersection form is non-degenerate: if `⟨a, b⟩ = 0`
-for every `b`, then `a = 0`. -/
-axiom AX_IntersectionForm_nondeg
+/-- **Axiom.** The intersection form is a **perfect pairing** — i.e. a
+ℤ-module isomorphism between `H_1(X, ℤ)` and its ℤ-dual. This is the
+**unimodularity** of the pairing, a consequence of Poincaré duality on
+a compact oriented surface.
+
+Perfect pairing is strictly stronger than non-degeneracy over ℤ:
+injectivity alone (the classical "non-degeneracy") says
+`⟨a, _⟩ = 0 ⟹ a = 0`, but unimodularity additionally says every
+ℤ-linear functional `φ : H_1 →+ ℤ` is of the form `⟨a, _⟩` for some
+unique `a`. Without surjectivity, one cannot extract a **symplectic
+basis over ℤ** that brings the period matrix to standard `[I | τ]`
+block form.
+
+Per Gemini review #2 (2026-04-23, `docs/gemini-review-axioms-2.md`),
+the weaker `AX_IntersectionForm_nondeg` is upgraded to this
+`Function.Bijective` form.
+
+Injectivity as a consequence is recorded as
+`AX_IntersectionForm_nondeg` (theorem below). -/
+axiom AX_IntersectionForm_perfect
+    {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    Function.Bijective (intersectionForm x₀)
+
+/-- **Theorem** (derived from `AX_IntersectionForm_perfect`). The
+intersection form is non-degenerate: if `⟨a, b⟩ = 0` for every `b`, then
+`a = 0`. Kept under its original name so existing callers continue to
+work. -/
+theorem AX_IntersectionForm_nondeg
     {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (a : H1 X x₀)
     (h : ∀ b : H1 X x₀, intersectionForm x₀ a b = 0) :
-    a = 0
+    a = 0 := by
+  have hInj := (AX_IntersectionForm_perfect x₀).1
+  apply hInj
+  apply AddMonoidHom.ext
+  intro b
+  simpa using h b
 
 end Jacobians.Axioms

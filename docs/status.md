@@ -136,10 +136,9 @@ Axioms landing tracker (2026-04-22 post-bridge):
 
 *Infrastructure (consumed by the Jacobian bridge):*
 * `AX_FiniteDimOneForms` — `Jacobians/Axioms/FiniteDimOneForms.lean` (now load-bearing after OneForm predicate refinement)
-* `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean`
+* `intersectionForm` + `AX_IntersectionForm_alternating` + `AX_IntersectionForm_perfect` — `Jacobians/Axioms/IntersectionForm.lean` (**strengthened from `nondeg` to `perfect` / unimodular** per Gemini review #2, 2026-04-23)
 * `AX_AnalyticCycleBasis` — `Jacobians/Axioms/AnalyticCycleBasis.lean`
 * `AX_PeriodLattice` + `instPeriodLatticeDiscrete` — `Jacobians/Axioms/PeriodLattice.lean`
-* `AX_PeriodInjective` — `Jacobians/RiemannSurface/IntersectionForm.lean`
 * `periodMap` — `Jacobians/RiemannSurface/Periods.lean`
 
 *Jacobian API (closing Challenge.lean sorries):*
@@ -154,8 +153,12 @@ Axioms landing tracker (2026-04-22 post-bridge):
 *Uniformization:*
 * `AX_genus_eq_zero_iff_homeo` — `Jacobians/Axioms/Uniformization0.lean`
 
-**Former axioms, now theorems (1):**
+**Former axioms, now theorems (2):**
 * `AX_H1FreeRank2g` — `Jacobians/Axioms/H1FreeRank2g.lean` — derived from `AX_AnalyticCycleBasis` (2026-04-22).
+* `AX_IntersectionForm_nondeg` — `Jacobians/Axioms/IntersectionForm.lean` — derived from `AX_IntersectionForm_perfect` (2026-04-23).
+
+**Axioms retired via deletion (1):**
+* `AX_PeriodInjective` — was `Jacobians/RiemannSurface/IntersectionForm.lean` — strictly redundant given `AX_PeriodLattice` (Gemini review #2, 2026-04-23). No Lean code depended on it; if injectivity is needed, derive via `AX_PeriodLattice` + `IsZLattice`-rank argument.
 
 **Declared doc-only (6):** `AX_RiemannBilinear`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`, `AX_BranchLocus`, `AX_PluckerFormula` — signatures sketched in their respective `Axioms/*.lean` files, concrete Lean statements deferred until the consumer module defines the missing types (`Divisor X`, `SmoothPlaneCurve F`, `localOrder`, etc.). Target signatures revised 2026-04-22 per Gemini review (existentials, `FiniteDimensional` hypotheses, ℤ-subtraction, `tsum`).
 

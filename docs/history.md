@@ -558,6 +558,35 @@ Both paths (close sorries vs. prove axioms) require the same
 underlying infrastructure — axiomatizing gets the API compiling today
 and downstream consumers can start building against a stable surface.
 
+### 2026-04-23 (follow-up): Gemini review #2 + axiom strengthening
+
+After the 24/24 closure, ran a second Gemini adversarial review
+(`docs/gemini-review-axioms-2.md`). No unsoundness found — Gemini
+confirmed the refined OneForm predicates are sound ("flawlessly
+executed Lean 4") and validated consistency on concrete curves,
+universe polymorphism, contravariance, and stub debt.
+
+Two fixes applied:
+
+1. **`AX_IntersectionForm_nondeg` → `AX_IntersectionForm_perfect`.**
+   Non-degeneracy (injectivity of `a ↦ ⟨a, _⟩`) is strictly weaker
+   than the classical fact: the intersection form on `H_1(X, ℤ)` is
+   a **perfect pairing** (unimodular, `Function.Bijective`). This is
+   what's needed to extract a symplectic basis over ℤ bringing the
+   period matrix to `[I | τ]` block form. Upgraded to the stronger
+   statement; `AX_IntersectionForm_nondeg` kept as a derived theorem
+   under its original name.
+
+2. **`AX_PeriodInjective` retired via deletion.** Strictly redundant
+   given `AX_PeriodLattice`: a `IsZLattice` in `ℝ^(2g)` forces
+   full-rank and hence injectivity of the underlying ℤ-linear map.
+   No Lean code depended on it, so deleted rather than converted to
+   a theorem (the derivation would need an `IsZLattice`-rank argument
+   not yet set up). Documented in the file header.
+
+**Axiom count: 22 → 21** (1 new axiom `_perfect`, 1 retired-to-theorem
+`_nondeg`, 1 deleted `AX_PeriodInjective`). Build green at 8334 jobs.
+
 ## Status snapshot (end of 2026-04-22)
 
 - **Build:** green, 8328 jobs.
