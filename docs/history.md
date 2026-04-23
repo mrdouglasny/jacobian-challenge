@@ -587,9 +587,62 @@ Two fixes applied:
 **Axiom count: 22 → 21** (1 new axiom `_perfect`, 1 retired-to-theorem
 `_nondeg`, 1 deleted `AX_PeriodInjective`). Build green at 8334 jobs.
 
-## Status snapshot (end of 2026-04-23)
+### 2026-04-23 (continued): ordered follow-ups after Gemini #2
 
-- **Build:** green, 8334 jobs.
+After the Gemini review cleanup (perfect-pairing upgrade,
+`AX_PeriodInjective` retirement), continued with a sequence of deferred
+items, in order:
+
+**#1 `IsAnalyticArc` predicate refined** (`28e61a7`). Replaced the
+`True` stub with real content:
+  ```
+  IsAnalyticArc X extend partition ↔
+    ∀ s, t ∈ partition, s < t →
+      ∀ u ∈ Ioo s t, AnalyticAt ℝ
+        (fun r : ℝ => (extChartAt 𝓘(ℂ) (extend u)) (extend r)) u
+  ```
+Required reformulating `AnalyticArc` to carry `extend : ℝ → X` (instead
+of `toFun : unitInterval → X`) so `AnalyticAt ℝ` works on a
+straightforward `ℝ → ℂ` composition, without subtype gymnastics.
+
+**#2 `PathIntegral.lean` scaffold** (`7bff724`). Chart-local path
+integral as a real def using Mathlib's `intervalIntegral`:
+  ```
+  pathIntegralOnChart γ p form :=
+    ∫ r in (0:ℝ)..1, form.coeff p (extChartAt p ∘ γ.extend r) *
+      derivWithin (extChartAt p ∘ γ.extend) (Ioo 0 1) r
+  ```
+Full `pathIntegralAnalyticArc` (multi-chart sum) and
+`pathIntegral_homotopy_invariant` (Cauchy + Stokes) documented as
+TODOs. When they land, `periodMap` retires from axiom-stub.
+
+**#3 `AX_ofCurve_self` retired to theorem** (`6a29bee`). Replaced
+`ofCurveImpl` axiom with `ofCurveAmbient : X → X → (Fin g → ℂ)` lift,
+then defined
+  ```
+  ofCurveImpl X P₀ P := ULift.up (QuotientAddGroup.mk
+    (ofCurveAmbient X P₀ P - ofCurveAmbient X P₀ P₀))
+  ```
+The subtraction makes `ofCurveImpl X P P = 0` structurally true.
+`AX_ofCurve_self` became a one-line theorem. **Axiom count 20 → 19**
+(wait: -1 axiom `AX_ofCurve_self`, -1 axiom `ofCurveImpl`,
++1 axiom `ofCurveAmbient` = net -1).
+
+**#4 Hyperelliptic atlas** and **#5 Concrete `AX_AnalyticCycleBasis`
+for `ProjectiveLine`** — both deferred as substantial independent
+projects:
+
+- Hyperelliptic atlas: branch-point charts via `t = √(x - a)` + chart
+  at infinity + implicit function theorem applications. Multi-day work.
+- ProjectiveLine concrete witness: requires either proving π₁(S²) = 0
+  from scratch (not in Mathlib) or proving `HolomorphicOneForm ℙ¹ = 0`
+  via Liouville + chart-cocycle argument (non-trivial Lean).
+
+Both tasked and queued for future work.
+
+## Status snapshot (end of 2026-04-23, late)
+
+- **Build:** green, 8336 jobs.
 - **Sorries:** **0** anywhere in the project. All 24 Buzzard sorries
   closed via the named-axiom framework (audited via `lean_verify`).
 - **Buzzard bridge:** complete. `Jacobian X := ULift.{u,0} (ComplexTorus
@@ -597,15 +650,15 @@ Two fixes applied:
   instances (AddCommGroup, TopologicalSpace, T2, Compact, Connected via
   ComplexTorus, ChartedSpace + IsManifold via ULift transfer,
   LieAddGroup via axiom).
-- **Axioms declared with Lean signatures (21):**
+- **Axioms declared with Lean signatures (19):**
   - *Infrastructure:* `AX_FiniteDimOneForms` (load-bearing after OneForm
     predicate refinement); `intersectionForm` +
     `AX_IntersectionForm_{alternating, perfect}` (perfect pairing);
     `AX_AnalyticCycleBasis`; `AX_PeriodLattice` +
     `instPeriodLatticeDiscrete`; `periodMap`.
-  - *Jacobian API (AbelJacobiMap.lean):* `ofCurveImpl`,
+  - *Jacobian API (AbelJacobiMap.lean):* `ofCurveAmbient`,
     `pushforwardImpl`, `pullbackImpl`, `degreeImpl` (data);
-    `AX_ofCurve_{contMDiff, self, inj}`, `AX_pushforward_{contMDiff,
+    `AX_ofCurve_{contMDiff, inj}`, `AX_pushforward_{contMDiff,
     id_apply, comp_apply}`, `AX_pullback_{contMDiff, id_apply,
     comp_apply}`, `AX_pushforward_pullback`, `AX_jacobian_lieAddGroup`
     (properties).
@@ -614,11 +667,14 @@ Two fixes applied:
   `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`,
   `AX_BranchLocus`, `AX_PluckerFormula`. Signatures sketched pending
   consumer types.
-- **Former axioms, now theorems (2):** `AX_H1FreeRank2g` (derived from
+- **Former axioms, now theorems (3):** `AX_H1FreeRank2g` (derived from
   `AX_AnalyticCycleBasis`, 2026-04-22); `AX_IntersectionForm_nondeg`
-  (derived from `AX_IntersectionForm_perfect`, 2026-04-23).
-- **Axioms deleted (1):** `AX_PeriodInjective` (strictly redundant given
-  `AX_PeriodLattice`, 2026-04-23).
+  (derived from `AX_IntersectionForm_perfect`, 2026-04-23);
+  `AX_ofCurve_self` (derived from the `ofCurveAmbient` normalization in
+  `ofCurveImpl`, 2026-04-23).
+- **Axioms deleted or replaced (2):** `AX_PeriodInjective` (strictly
+  redundant given `AX_PeriodLattice`, 2026-04-23); `ofCurveImpl`
+  (replaced by `ofCurveAmbient` lift + `def`, 2026-04-23).
 - **Reviews:** Gemini round 1 (2026-04-20, plan); Codex round 2
   (2026-04-20, plan); Claude self-review round 3 (2026-04-20); Gemini
   round 2 (2026-04-21, Theta + Part B); Gemini axiom review #1
@@ -630,16 +686,20 @@ Two fixes applied:
   scaffolds.
 - **Part B** (`RiemannSurface/`): `OneForm` with real predicates
   (analyticity + cotangent cocycle); `Homology`, `Genus`, `Periods`,
-  `IntersectionForm`, `AnalyticArc` scaffolds. `PathIntegral` sidestepped
-  via `AX_AnalyticCycleBasis` design.
+  `IntersectionForm` scaffolds; `AnalyticArc` with real `IsAnalyticArc`
+  predicate (via `extend : ℝ → X`); `PathIntegral` scaffold with
+  chart-local `pathIntegralOnChart` real def (full multi-chart version
+  + homotopy invariance are TODOs toward retiring the `periodMap`
+  axiom).
 - **Part C** (`Jacobian/`): `Construction.lean` bridges the abstract
   surface to the complex torus with 7 instances via ULift. `ofCurve`,
   `pushforward`, `pullback`, `degree` axiom-stubbed in
   `AbelJacobiMap.lean`.
 - **Track 2** (`ProjectiveCurve/`): `Line` complete (7/7, 0 sorries,
-  stereographic to S²). `Elliptic` complete (7/7 + `ConnectedSpace` +
+  stereographic to S²). `Elliptic` complete (8/8 + `ConnectedSpace` +
   `ofUpperHalfPlane`, axiom-free via `ComplexTorus`). `Hyperelliptic`
-  thin scaffold (data + affine model). `PlaneCurve` not started.
+  and `PlaneCurve` thin scaffolds (data + affine models; full
+  atlas + instances deferred as substantial projects).
 - **Docs:** `formalization-plan.md` (design + progress log);
   `history.md` (this file, narrative); `status.md` (inventory
   snapshot); `gemini-review.md`, `gemini-review-2.md`,
