@@ -37,13 +37,28 @@ Build: 8341 jobs green. Zero sorries.
 Foundation completeness: **~95%** against the "statements are correct;
 proofs are in principle available" criterion.
 
-The remaining 5%:
-- Phase 3 (optional): Full `PathIntegral.lean` (multi-chart +
-  homotopy invariance) retiring `periodMap` axiom; full Hyperelliptic
-  / PlaneCurve atlases retiring their instance axioms.
-- The Elliptic axioms (3) and ProjectiveLine H_1 axiom (1) are
-  Elliptic/Curve-specific — each would retire when the underlying
-  covering-space / chart-analyticity infrastructure lands.
+## Phase 3 status: partial
+
+- ✅ D (partial, `7bae6a7`): `periodMap` axiom retired to `def` via
+  a new `loopIntegralToH1` axiom in `PathIntegral.lean`. Architecture
+  more modular; full discharge (multi-chart partition + homotopy
+  invariance + integral linearity) is a 2-3 week subproject.
+- ⏳ D (full): discharge `loopIntegralToH1` by implementing
+  `pathIntegralAnalyticArc` with partition refinement and proving
+  Cauchy-on-chart + Stokes-based homotopy invariance.
+- ⏳ E2: Full Hyperelliptic / PlaneCurve atlas construction —
+  implicit function theorem + branch-cut charts. 2-3 weeks per curve
+  family.
+
+The remaining 5% (to reach 100% "foundation done" with zero axioms
+in the discharge-able class):
+- Elliptic/Curve-specific axioms (4): retire when covering-space /
+  chart-analyticity infrastructure is concrete.
+- `loopIntegralToH1`: retires via workstream D full.
+- 7 `PlaneCurve` instance axioms: retire via workstream E2.
+
+Each piece is bounded in scope but substantial in Lean effort.
+Foundation is solid against the current criterion.
 
 ---
 
