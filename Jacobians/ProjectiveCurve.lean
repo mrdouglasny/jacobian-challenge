@@ -13,5 +13,6 @@ import Jacobians.ProjectiveCurve.Line
 import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.Witnesses
 import Jacobians.ProjectiveCurve.Elliptic
+import Jacobians.ProjectiveCurve.Elliptic.Genus
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.PlaneCurve
