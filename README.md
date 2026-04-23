@@ -38,6 +38,7 @@ Two parallel tracks, both building on a shared Part A:
 | [Jacobians/ProjectiveCurve/Line.lean](Jacobians/ProjectiveCurve/Line.lean) | `ProjectiveLine := OnePoint ℂ` — 7/7 X-side instances + stereographic homeomorphism to S² |
 | [Jacobians/ProjectiveCurve/Elliptic.lean](Jacobians/ProjectiveCurve/Elliptic.lean) | `Elliptic ω₁ ω₂ h := ComplexTorus ℂ (ℤω₁ + ℤω₂)` — 7/7 X-side instances axiom-free via `ComplexTorus` bridge |
 | [Jacobians/ProjectiveCurve/Hyperelliptic.lean](Jacobians/ProjectiveCurve/Hyperelliptic.lean) | `HyperellipticData` (squarefree `f : ℂ[x]`) + affine model `{(x,y) \| y² = f(x)}`. Projective model + atlas + instances are TODOs |
+| [Jacobians/ProjectiveCurve/PlaneCurve.lean](Jacobians/ProjectiveCurve/PlaneCurve.lean) | `PlaneCurveData` (homogeneous `F ∈ ℂ[x,y,z]` + smoothness) + affine patch `{F(x,y,1) = 0}`. Projective curve + atlas + Plücker genus are TODOs |
 | [docs/formalization-plan.md](docs/formalization-plan.md) | Detailed plan with four rounds of adversarial review (Gemini ×2, Codex, Claude) |
 | [docs/gemini-review.md](docs/gemini-review.md) | Gemini 3 Pro review, round 1 (plan) |
 | [docs/codex-review.md](docs/codex-review.md) | Codex (GPT-5) review, round 2 (plan) |
@@ -118,7 +119,7 @@ Currently 8334 jobs, green. **Zero sorries** anywhere in the project. All 24 Buz
 | `Line.lean` | ✅ complete, 0 sorries, all 7 X-side Buzzard instances |
 | `Elliptic.lean` | ✅ complete scaffold, 0 sorries, all 8 X-side Buzzard instances (incl. ConnectedSpace) inherited from `ComplexTorus`. `ofUpperHalfPlane τ hτ` constructor. `genus = 1`, `Jacobian(E) ≃ E`, explicit `AnalyticCycleBasis` TODO (blocked on `OneForm` refinement) |
 | `Hyperelliptic.lean` | ✅ thin scaffold: `HyperellipticData` + `HyperellipticAffine`. Projective compactification, 7 instances, and concrete holomorphic differentials are TODOs (substantial branch-cut work) |
-| `PlaneCurve.lean` | — not started |
+| `PlaneCurve.lean` | ✅ thin scaffold: `HomogeneousPoly`, `PlaneCurveData` + smoothness hypothesis, `PlaneCurveAffine`. Projective model + atlas + Plücker genus (d-1)(d-2)/2 are TODOs |
 
 ## License
 
