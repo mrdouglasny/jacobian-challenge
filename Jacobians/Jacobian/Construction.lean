@@ -136,8 +136,13 @@ noncomputable abbrev JacobianAmbient (X : Type*) [TopologicalSpace X] [T2Space X
 
 /-- The Jacobian of `X`, universe-lifted to `Type u` to match Buzzard's
 signature. Concretely it is `ULift (JacobianAmbient X)`; all seven
-Buzzard-required typeclass instances are provided below. -/
-noncomputable def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X]
+Buzzard-required typeclass instances are provided below.
+
+`abbrev` (not `def`) so typeclass search sees through to
+`ULift (JacobianAmbient X)` — needed by downstream users who write
+`Homeomorph.ulift : Jacobian X → JacobianAmbient X` and expect to
+find the ChartedSpace instance on the ULift. -/
+noncomputable abbrev Jacobian (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] : Type u :=
   ULift.{u, 0} (JacobianAmbient X)
