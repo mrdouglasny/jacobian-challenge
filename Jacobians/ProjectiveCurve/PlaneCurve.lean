@@ -125,44 +125,63 @@ attribute [instance] AX_PlaneCurveAffine_noncompact
 
 end PlaneCurveAffine
 
-/-- **Compactified smooth projective plane curve** `{F = 0} ⊂ ℙ²`, real
-`def` via one-point compactification of the affine patch.
+/-! ### Projective compactification
 
-Refactored 2026-04-23: replaced `axiom PlaneCurve : Type` + 6 instance
-axioms with this real `def` and 5 real instances (derived from OnePoint
-+ affine-level subsidiary axioms). `ChartedSpace` + `IsManifold` stay
-axiomatic as they are the atlas construction. -/
-def PlaneCurve (H : PlaneCurveData) : Type :=
-  OnePoint (PlaneCurveAffine H)
+A smooth plane curve of degree `d` generically meets the line at
+infinity `{z = 0}` in **`d` distinct points** (by Bézout). So the
+classical smooth projective compactification adds `d` points at
+infinity (fewer if the curve is tangent to or contains the infinity
+line, but still ≥ 1 for smooth curves).
 
-namespace PlaneCurve
+The one-point compactification `OnePoint (PlaneCurveAffine H)` adds
+just **one** point — wrong for any `d ≥ 2`. A unified parity-style
+split as we used for `Hyperelliptic` doesn't work cleanly here because
+the number of infinity points depends on the curve's intersection with
+`{z = 0}`, not just parity.
 
-variable {H : PlaneCurveData}
+We therefore **axiomatize** the projective compactification with
+properly formulated instances, until the three-affine-chart atlas
+construction (dehomogenizing with `x ≠ 0`, `y ≠ 0`, `z ≠ 0` and
+gluing) is built explicitly.
 
-instance : TopologicalSpace (PlaneCurve H) :=
-  inferInstanceAs (TopologicalSpace (OnePoint (PlaneCurveAffine H)))
+Historical note: earlier versions (commits through `63ccce7`) defined
+`PlaneCurve H := OnePoint (PlaneCurveAffine H)` as a real def. That
+was topologically wrong for any `d ≥ 2`; Codex review 2026-04-23
+correctly flagged it. This version is the honest axiom-stub.
+-/
 
-instance : T2Space (PlaneCurve H) :=
-  inferInstanceAs (T2Space (OnePoint (PlaneCurveAffine H)))
+/-- **Axiom-stub.** The smooth projective plane curve `{F = 0} ⊂ ℙ²`
+as a type.
 
-instance : CompactSpace (PlaneCurve H) :=
-  inferInstanceAs (CompactSpace (OnePoint (PlaneCurveAffine H)))
+Classical construction: glue three affine charts `z ≠ 0`, `y ≠ 0`,
+`x ≠ 0` along their pairwise overlaps. The resulting space is a
+compact, connected, Hausdorff complex 1-manifold of genus
+`(d - 1)(d - 2) / 2` (Plücker). Axiomatized with properly formulated
+typeclass instances until the three-chart pushout is constructed. -/
+axiom PlaneCurve (H : PlaneCurveData) : Type
 
-instance : Nonempty (PlaneCurve H) :=
-  inferInstanceAs (Nonempty (OnePoint (PlaneCurveAffine H)))
+axiom PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
+    TopologicalSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instTopologicalSpace
 
-instance : ConnectedSpace (PlaneCurve H) :=
-  inferInstanceAs (ConnectedSpace (OnePoint (PlaneCurveAffine H)))
+axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
+attribute [instance] PlaneCurve.instT2Space
 
-end PlaneCurve
+axiom PlaneCurve.instCompactSpace (H : PlaneCurveData) :
+    CompactSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instCompactSpace
 
-/-- **Axiom.** `ChartedSpace ℂ (PlaneCurve H)` — atlas construction. -/
+axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
+    ConnectedSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instConnectedSpace
+
+axiom PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H)
+attribute [instance] PlaneCurve.instNonempty
+
 axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
     ChartedSpace ℂ (PlaneCurve H)
 attribute [instance] PlaneCurve.instChartedSpace
 
-/-- **Axiom.** `IsManifold 𝓘(ℂ) ω (PlaneCurve H)` — chart-transition
-analyticity. -/
 axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
     IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
 attribute [instance] PlaneCurve.instIsManifold

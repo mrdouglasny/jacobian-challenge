@@ -130,25 +130,25 @@ Abel's theorem on the curve side: the Abel-Jacobi map is injective when `genus X
 
 Holomorphicity of the pushforward map on Jacobians. Reduces to smoothness of `pullbackOneForm` + continuity of the dualisation / quotient. **Axiom-routed** (`AX_pushforward_contMDiff`). Once `pullbackOneForm` is a real def (not axiom), this becomes a medium-size proof.
 
-### §19. `lemma pushforward_id_apply : pushforward id _ P = P` — **T (short; derivable)**
+### §19. `lemma pushforward_id_apply : pushforward id _ P = P` — **T → derived theorem**
 
-**Axiom-routed** (`AX_pushforward_id_apply`), but **derivable from existing axioms**: the refactor added `AX_pullbackOneForm_id : pullbackOneForm id = LinearMap.id`. Combined with `LinearMap.dualMap_id` + basis-equiv cancellation + `QuotientAddGroup.map_id` + ULift identity, this unfolds to identity. Currently kept as axiom pending the unfolding proof (est. ~1 hour of Lean work).
+**✓ derived theorem** (2026-04-23 round-3). Retired from axiom to theorem using `pushforwardAmbientLinear_id` (proved from `AX_pullbackOneForm_id` + `LinearMap.dualMap_id`) + `jacobianHomOfAmbient_id_apply`. Real proof in `Jacobians/Axioms/AbelJacobiMap.lean`.
 
-### §20. `lemma pushforward_comp_apply` — **T (short; derivable)**
+### §20. `lemma pushforward_comp_apply` — **T → derived theorem**
 
-**Axiom-routed** (`AX_pushforward_comp_apply`), **derivable from `AX_pullbackOneForm_comp`** via contravariance of `.dualMap`. Same unfolding-proof status as §19.
+**✓ derived theorem** (2026-04-23 round-3). Retired using `pushforwardAmbientLinear_comp` (proved from `AX_pullbackOneForm_comp` + `LinearMap.dualMap_comp_dualMap`) + `jacobianHomOfAmbient_comp_apply`.
 
 ### §21. `theorem pullback_contMDiff` — **T (deep)**
 
 Symmetric to §18; axiom-routed.
 
-### §22. `lemma pullback_id_apply` — **T (short; derivable)**
+### §22. `lemma pullback_id_apply` — **T → derived theorem**
 
-Symmetric to §19, derivable from `AX_pushforwardOneForm_id`.
+**✓ derived theorem** (2026-04-23 round-3). Symmetric to §19, using `pullbackAmbientLinear_id` derived from `AX_pushforwardOneForm_id`.
 
-### §23. `lemma pullback_comp_apply` — **T (short; derivable)**
+### §23. `lemma pullback_comp_apply` — **T → derived theorem**
 
-Symmetric to §20, derivable from `AX_pushforwardOneForm_comp`.
+**✓ derived theorem** (2026-04-23 round-3). Symmetric to §20, using `pullbackAmbientLinear_comp` derived from `AX_pushforwardOneForm_comp`.
 
 ### §24. `lemma pushforward_pullback : f_* ∘ f^* = deg(f) • id` — **T (deepest)**
 
@@ -158,16 +158,20 @@ The big structural identity. Classical content: for a degree-`d` holomorphic cov
 
 ## Summary
 
-| Category | Count | Buzzard §§ | Current foundation |
+| Category | Count | Buzzard §§ | Current state |
 |---|---|---|---|
-| **F** (foundation — real def required) | 10 | §1, §2, §3, §4, §7, §10, §11, §12, §13, §16 (implicitly) | ✓ all discharged as real `def`s / derived theorems |
-| **H** (hybrid) | 5 | §5, §6, §8, §9, §16 | ✓ **5/5** real instances (§9 closed 2026-04-23 via ULift-smoothness lemmas) |
-| **T (short)** (derivable from existing axioms) | 4 | §19, §20, §22, §23 | Axiom-routed; unfolding-proof pending (~1h each) |
-| **T (deep)** (classical theorems, textbook proofs) | 5 | §14, §15, §17, §18, §21 | Axiom-routed; each 1–2 weeks |
+| **F** (foundation — real def required) | 10 | §1, §2, §3, §4, §7, §10, §11, §12, §13, §16 | ✓ all discharged as real `def`s / derived theorems |
+| **H** (hybrid — part def, part Prop) | 5 | §5, §6, §8, §9, §16 | ✓ **5/5** real instances (§9 closed 2026-04-23 round-3) |
+| **T → derived** (converted to theorems this session) | 5 | §16, §19, §20, §22, §23 | ✓ real theorems; derivations in `AbelJacobiMap.lean` |
+| **T (deep; classical theorems)** | 5 | §14, §15, §17, §18, §21 | Axiom-routed; each 1–2 weeks |
 | **T (deepest)** | 1 | §24 | Axiom-routed; 2–4 weeks |
 
-**Foundation status**: 10/10 F sorries and **5/5** H sorries closed as real `def`s / real instances. **No remaining foundation gap.** Every Buzzard-exposed definition and instance is a real Lean object; no axiom-routed foundation remains.
+**Foundation status**: 10/10 F sorries and 5/5 H sorries closed as real `def`s / real instances. **No axiom-routed foundation remains at the Buzzard interface.**
 
-**Theorem status**: 1/11 derived (§16), 10/11 axiom-routed. Of the 10 axioms, 4 are derivable from existing form-level functoriality axioms + Lean unfolding (a single session of detailed proof work); 6 are deep classical theorems requiring textbook-scale proofs (weeks each).
+**Theorem status**: 5/11 derived (§§16, 19, 20, 22, 23), 6/11 routed to classical-theorem axioms (§§14, 15, 17, 18, 21, 24).
 
-**Net claim**: every *definition* Buzzard asked for is present as a real Lean `def` / instance (modulo one universe-level ULift issue). Every *theorem* Buzzard asked for is stated against those real defs — so a future prover knows the statement is correctly formulated and every axiom cited is a classical fact with a textbook citation.
+**Caveats (per Codex 2026-04-23 review)**:
+1. The concrete genus witnesses used to argue "hack-blockers bite" are themselves axiom-routed: `genus ProjectiveLine = 0` discharges via `AX_genus_eq_zero_iff_homeo` applied to the stereographic homeomorphism (not a structurally independent proof); `genus (Elliptic ω₁ ω₂ h) = 1` is its own axiom. So the hack-blocker defense is as strong as those axioms, not independent of them.
+2. `Hyperelliptic H := OnePoint (HyperellipticAffine H)` is **mathematically correct only for odd `deg f`** (one branch point at infinity). For even `deg f` the classical projective model has two distinct points at infinity; `OnePoint` collapses them into one, producing a different topological space. Same caveat applies to `PlaneCurve` when the defining curve meets the line at infinity in more than one point. For broad classes of examples, these are **not the intended projective curve**. Solid concrete witnesses at present: `ProjectiveLine` (genus 0) and `Elliptic ω₁ ω₂ h` (genus 1).
+
+**Net claim**: every *definition* Buzzard asked for is present as a real Lean `def` / instance at his API boundary. Every *theorem* Buzzard asked for is stated against those real defs. The residual axioms split into (a) classical-theorem axioms with textbook citations and (b) repo-specific construction-interface axioms (5 function-existence + their property axioms); see `docs/dependency-trace.md` for the full classification.

@@ -156,54 +156,137 @@ attribute [instance] AX_HyperellipticAffine_noncompact
 
 end HyperellipticAffine
 
-/-- **Compactified hyperelliptic curve** `y² = f(x)`, real `def` via
-one-point compactification of the affine locus.
+/-! ### Parity-dispatched projective compactification
 
-For odd `deg f = 2g + 1`: `OnePoint` adds the single point at infinity
-— correct projective model.
+The one-point compactification of the affine hyperelliptic curve is
+**topologically correct only for odd `deg f`** (single branch point at
+∞). For even `deg f` the classical projective model has **two distinct
+points at infinity** `∞₊`, `∞₋` (the two `y → ± x^{g+1}` branches at
+large `|x|`).
 
-For even `deg f = 2g + 2`: the classical projective model has two
-points at infinity `∞₊`, `∞₋`; `OnePoint` identifies them into a
-single point, producing a model that differs from the smooth projective
-model by a quotient at `∞`. This is acceptable at the topology level
-(T2 + compact + connected) but requires the atlas to be built carefully
-(the `ChartedSpace` instance axiom handles this — real-def construction
-is in `docs/hyperelliptic-atlas-plan.md`).
+We present the two cases as separately named types. Each comes with
+its own real instances. No "unified" `Hyperelliptic H` type is
+attempted — doing so via `dite` at the type level trips instance-
+resolution (the `T2Space (dite ...)` can't find its `TopologicalSpace`
+through the dispatch without an ad-hoc congruence infrastructure).
+Downstream consumers select the correct variant based on parity.
 
-Refactored 2026-04-23: replaced `axiom Hyperelliptic : Type` +
-6 instance axioms with this real `def` and 5 real instances. -/
-def Hyperelliptic (H : HyperellipticData) : Type :=
+- `HyperellipticOdd H h` (where `h : Odd H.f.natDegree`) = `OnePoint (HyperellipticAffine H)`. **Real `def`, all 5 topology/T2/compact/connected/nonempty instances real.**
+- `HyperellipticEven H h` (where `h : ¬ Odd H.f.natDegree`) is **axiomatized** with its 5 typeclass-instance axioms, representing the two-point compactification; discharges to a real `def` via the pushout construction sketched below once the atlas work lands.
+
+Historical note: earlier versions (commits up through `63ccce7`) used
+`def Hyperelliptic H := OnePoint (HyperellipticAffine H)` for both
+parities. That was mathematically wrong for even `deg f` — Codex
+review 2026-04-23 correctly flagged it. This split is the honest fix.
+-/
+
+/-- Hyperelliptic curve with **odd** `deg f = 2g + 1`: a single branch
+point at infinity, correctly modeled by the one-point compactification
+of the affine locus. **Real `def`**; axiom-free beyond the subsidiary
+`HyperellipticAffine` axioms (nonempty, connected, noncompact). -/
+def HyperellipticOdd (H : HyperellipticData) (_h : Odd H.f.natDegree) : Type :=
   OnePoint (HyperellipticAffine H)
 
-namespace Hyperelliptic
+namespace HyperellipticOdd
 
-variable {H : HyperellipticData}
+variable {H : HyperellipticData} {h : Odd H.f.natDegree}
 
-/-- Instances inherited from `OnePoint` infrastructure. -/
-instance : TopologicalSpace (Hyperelliptic H) :=
+instance : TopologicalSpace (HyperellipticOdd H h) :=
   inferInstanceAs (TopologicalSpace (OnePoint (HyperellipticAffine H)))
-
-instance : T2Space (Hyperelliptic H) :=
+instance : T2Space (HyperellipticOdd H h) :=
   inferInstanceAs (T2Space (OnePoint (HyperellipticAffine H)))
-
-instance : CompactSpace (Hyperelliptic H) :=
+instance : CompactSpace (HyperellipticOdd H h) :=
   inferInstanceAs (CompactSpace (OnePoint (HyperellipticAffine H)))
-
-instance : Nonempty (Hyperelliptic H) :=
+instance : Nonempty (HyperellipticOdd H h) :=
   inferInstanceAs (Nonempty (OnePoint (HyperellipticAffine H)))
-
-instance : ConnectedSpace (Hyperelliptic H) :=
+instance : ConnectedSpace (HyperellipticOdd H h) :=
   inferInstanceAs (ConnectedSpace (OnePoint (HyperellipticAffine H)))
 
-end Hyperelliptic
+end HyperellipticOdd
 
-/-- **Axiom.** `ChartedSpace ℂ (Hyperelliptic H)` — the atlas construction
-for hyperelliptic curves. Requires:
-  (a) affine chart `(x, y) ↦ x` on the non-branch-point locus;
-  (b) branch-point chart: local parameter `t = √(x - a)` at each
-      branch point `a` (root of `f`);
-  (c) infinity chart.
-See `docs/hyperelliptic-atlas-plan.md` for the 6-phase discharge plan. -/
+/-- **Axiom-stub.** Hyperelliptic curve with **even** `deg f = 2g + 2`:
+the two-point compactification of the affine locus, adding distinct
+limit points `∞₊`, `∞₋` corresponding to the two sheets of the
+`x`-projection at infinity.
+
+Concrete construction (not yet built): change of variables
+`t = 1/x, u = y/x^{g+1}` gives the second affine chart
+`u² = f_reversed(t)` with `f_reversed(0) = leadCoef f ≠ 0`, so at
+`t = 0` there are two distinct solutions `u = ±√(leadCoef f)`. The
+two-point compactification is the pushout of the two affine charts
+along their overlap (the set where both charts are defined,
+i.e., `x ≠ 0` in the affine chart, `t ≠ 0` in the infinity chart).
+
+Properly axiomatized with 5 typeclass-instance axioms until that
+pushout is constructed explicitly. -/
+axiom HyperellipticEven (H : HyperellipticData) (_h : ¬ Odd H.f.natDegree) : Type
+
+axiom HyperellipticEven.instTopologicalSpace (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : TopologicalSpace (HyperellipticEven H h)
+attribute [instance] HyperellipticEven.instTopologicalSpace
+
+axiom HyperellipticEven.instT2Space (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : T2Space (HyperellipticEven H h)
+attribute [instance] HyperellipticEven.instT2Space
+
+axiom HyperellipticEven.instCompactSpace (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : CompactSpace (HyperellipticEven H h)
+attribute [instance] HyperellipticEven.instCompactSpace
+
+axiom HyperellipticEven.instConnectedSpace (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : ConnectedSpace (HyperellipticEven H h)
+attribute [instance] HyperellipticEven.instConnectedSpace
+
+axiom HyperellipticEven.instNonempty (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : Nonempty (HyperellipticEven H h)
+attribute [instance] HyperellipticEven.instNonempty
+
+/-- **Axiom-stub.** The compactified hyperelliptic curve `y² = f(x)`,
+as a type. Routes to `HyperellipticOdd H h` (real def, correct
+compactification) when `Odd H.f.natDegree`, and to `HyperellipticEven
+H h` (axiom-stubbed two-point compactification) otherwise.
+
+Because a unified real `def` via parity dispatch trips Lean's
+typeclass resolution on `dite`-at-the-type-level, we keep the unified
+type as an axiom whose content is pinned by two equality axioms below
+(`AX_Hyperelliptic_eq_odd`, `AX_Hyperelliptic_eq_even`). The atlas
+axioms `instChartedSpace`, `instIsManifold` attach directly to this
+unified type.
+
+Downstream code that needs to reason about specific parity should
+use the appropriate equality axiom to transport through. -/
+axiom Hyperelliptic (H : HyperellipticData) : Type
+
+/-- **Axiom.** `Hyperelliptic H` coincides with `HyperellipticOdd H h`
+for odd `deg f`. -/
+axiom AX_Hyperelliptic_eq_odd (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    Hyperelliptic H = HyperellipticOdd H h
+
+/-- **Axiom.** `Hyperelliptic H` coincides with `HyperellipticEven H h`
+for even `deg f`. -/
+axiom AX_Hyperelliptic_eq_even (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    Hyperelliptic H = HyperellipticEven H h
+
+axiom Hyperelliptic.instTopologicalSpace (H : HyperellipticData) :
+    TopologicalSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instTopologicalSpace
+
+axiom Hyperelliptic.instT2Space (H : HyperellipticData) : T2Space (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instT2Space
+
+axiom Hyperelliptic.instCompactSpace (H : HyperellipticData) :
+    CompactSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instCompactSpace
+
+axiom Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
+    ConnectedSpace (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instConnectedSpace
+
+axiom Hyperelliptic.instNonempty (H : HyperellipticData) : Nonempty (Hyperelliptic H)
+attribute [instance] Hyperelliptic.instNonempty
+
+/-- **Axiom.** `ChartedSpace ℂ (Hyperelliptic H)` — the atlas
+construction. Atlas plan in `docs/hyperelliptic-atlas-plan.md`. -/
 axiom Hyperelliptic.instChartedSpace (H : HyperellipticData) :
     ChartedSpace ℂ (Hyperelliptic H)
 attribute [instance] Hyperelliptic.instChartedSpace
