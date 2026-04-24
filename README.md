@@ -24,6 +24,20 @@ Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining
 - **5 data-level function-existence axioms** (`pathIntegralBasepointFunctional`, `loopIntegralToH1`, `pullbackOneForm`, `pushforwardOneForm`, `localOrder`): each has a construction plan in [`docs/construction-plans/`](docs/construction-plans/) summing to ~5–6 weeks focused contributor work.
 - **Curve-atlas axioms** for unified `Hyperelliptic` and for `PlaneCurve`: proper axiomatizations of classical atlas constructions; discharge is substantial atlas work.
 
+## Response to Buzzard's diagnosis
+
+Buzzard's challenge post identifies two Mathlib gaps that make the problem hard:
+
+> *"all definitions of Jacobian that I know involve quotienting a manifold by a discrete group, which isn't in mathlib as far as I know. The one where you use `X^g` by the symmetric group involves a delicate local analysis when points coincide and the one where you quotient out the dual of the holomorphic 1-forms by the first homology will involve integrating differentials around loops which we don't have either, at least in this generality."*
+
+We rejected the symmetric-product route `X^g / S_g` precisely because of the coincident-points local analysis Buzzard flags, and took the period-lattice route (quotient of `(HolomorphicOneForm X)*` by the period lattice). This carries Buzzard's two gaps differently:
+
+**Gap 1 — "quotient a manifold by a discrete group" — solved by hand for the specific case.** We don't wait for Mathlib's general theorem (Rothgang's PR in flight) or cite it. `Jacobians/AbelianVariety/ComplexTorus.lean` builds `ComplexTorus V L := V ⧸ L` for `L : Submodule ℤ V` with `[IsZLattice ℝ L]` and supplies all 7 Buzzard-required typeclass instances (`AddCommGroup`, `TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace V`, `IsManifold`, `LieAddGroup`) directly via translation atlas + lattice discreteness. Axiom-free, zero sorry. Limited scope (works only for `V ⧸ L`-shaped quotients) but covers the Jacobian construction entirely.
+
+**Gap 2 — "integrating differentials around loops" — isolated, not filled.** We do not supply a general theory of line integrals of 1-forms on manifolds. Instead we name the two function-existence primitives we actually need — `pathIntegralBasepointFunctional` and `loopIntegralToH1` — and carry them as axioms with written construction plans (multi-chart path integration + Stokes homotopy invariance, ~2 weeks focused work, [`docs/construction-plans/path-integral-basepoint.md`](docs/construction-plans/path-integral-basepoint.md), [`docs/construction-plans/loop-integral-h1.md`](docs/construction-plans/loop-integral-h1.md)). The `AX_pathIntegral_local_antiderivative` Prop-level companion (chart-local FTC) binds the functional to cocycle data so `:= 0` is not a valid witness.
+
+So the scoping decision is: solve Gap 1 by hand for the needed shape; isolate Gap 2 cleanly so the rest of the API closes around it. The foundation is complete modulo Gap 2.
+
 ## Current state
 
 | | |
