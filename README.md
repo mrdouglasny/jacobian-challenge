@@ -22,6 +22,18 @@ With math+Lean expert steering — the configuration Kirov and Riccardo Brasca n
 - **Full dependency trace** in [`docs/dependency-trace.md`](docs/dependency-trace.md): every foundation definition audited; every axiom classified as A-deep (classical theorem) or A-infra. As of 2026-04-23 round-3, **A-infra count is zero** — only classical-theorem axioms remain.
 - **Single-file consolidated artifact** in [`docs/challenge-filled.md`](docs/challenge-filled.md): Buzzard's spec with every sorry filled in, every transitive dependency inlined in topological order, and the **5 function-existence axioms** flagged with prominent banners pointing to their construction plans. Read this end-to-end to see the whole scaffold in one sitting.
 
+### Work done to reach this state
+
+| | |
+|---|---|
+| **Elapsed** | 2026-04-19 → 2026-04-23 (**5 calendar days, all active**) |
+| **Commits** | 85 |
+| **Lean code** | ~5,200 lines across `Jacobians/` (includes Buzzard's 199-line `Challenge.lean` filled in) |
+| **Documentation** | ~6,000 lines of markdown: 4 rounds of adversarial review (Gemini ×3, Codex), challenge annotation, dependency trace, 5 construction plans, Zulip summary, history log |
+| **External vetting** | 3 Gemini deep-think reviews (plan, Theta/Part B, axiom-audit), 1 Codex rescue pass (§9 ULift-smoothness + functoriality derivations), multiple self-review rounds |
+
+For cross-project comparison: Kirov's off-the-shelf Claude Code baseline ([rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)) — ~5K LOC after 3 days with zero math steering, self-rated ~10–15% toward full end-to-end, 10 named classical theorems still stubbed. Similar LOC, different frontier: we have every foundation def closed and every remaining axiom enumerated with a discharge plan; Kirov's is closer to a build-as-you-go sketch.
+
 We do **not** claim a sorry-free solution and we do **not** claim autonomy. Every line of Lean was written by Claude; the load-bearing mathematical judgments — axiom-vs-proof boundary, what counts as a non-vacuous witness, which hack-smuggles to reject — were made by a mathematician-user. The claim is narrower and, we think, more useful: *stating* Buzzard's theorems and bolting down the foundation — the phase the Zulip thread treated as the long pole — is fast when a domain expert drives an AI, and the remaining sorries reduce to the enumerated classical theorems. This is what Emily Riehl and Timothy Chow's autonomy exchange converged on as the honest frame: no achievement is fully autonomous, so say exactly what the human and the AI each did.
 
 See [docs/challenge-summary.md](docs/challenge-summary.md) for the full Zulip discussion.
