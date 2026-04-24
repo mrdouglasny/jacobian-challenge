@@ -267,6 +267,78 @@ private lemma extChartAt_apply_quotient_mk (p : ComplexTorus V L) {z : V}
     extChartAt 𝓘(ℂ, V) p (QuotientAddGroup.mk' L.toAddSubgroup z) = z := by
   simpa [extChartAt, modelWithCornersSelf_coe] using chart_apply_mk (L := L) p hz
 
+/-- On a complex torus `ℂ ⧸ L`, every chart transition is locally a translation, so its
+derivative applied to `1` is `1`. This is the key cocycle fact for the invariant differential
+`dz`. -/
+theorem transition_fderiv_apply_one {L : Submodule ℤ ℂ} [DiscreteTopology L] [IsZLattice ℝ L]
+    {p q : ComplexTorus ℂ L} {z : ℂ}
+    (hzp : z ∈ (extChartAt 𝓘(ℂ, ℂ) p).target)
+    (hzq : (extChartAt 𝓘(ℂ, ℂ) p).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q).source) :
+    fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q) ∘ (extChartAt 𝓘(ℂ, ℂ) p).symm) z 1 = 1 := by
+  have hz₁ : z ∈ chartTarget (L := L) p := (mem_extChartAt_target_iff (L := L) p).1 hzp
+  let a : ComplexTorus ℂ L := (extChartAt 𝓘(ℂ, ℂ) p).symm z
+  let w : ℂ := extChartAt 𝓘(ℂ, ℂ) q a
+  let c : ℂ := w - z
+  let s : Set ℂ := chartTarget (L := L) p ∩ (fun t : ℂ => t + c) ⁻¹' chartTarget (L := L) q
+  have hsopen : IsOpen s := by
+    exact (isOpen_chartTarget (L := L) p).inter
+      ((isOpen_chartTarget (L := L) q).preimage (Homeomorph.addRight c).continuous)
+  have hw : w ∈ chartTarget (L := L) q := by
+    have : w ∈ (extChartAt 𝓘(ℂ, ℂ) q).target := (extChartAt 𝓘(ℂ, ℂ) q).map_source hzq
+    exact (mem_extChartAt_target_iff (L := L) q).1 this
+  have hsz : z ∈ s := by
+    refine ⟨hz₁, ?_⟩
+    simpa [s, c, w]
+  have hs_eq : ∀ t ∈ s,
+      ((extChartAt 𝓘(ℂ, ℂ) q) ∘ (extChartAt 𝓘(ℂ, ℂ) p).symm) t = t + c := by
+    intro t ht
+    have htp : t ∈ chartTarget (L := L) p := ht.1
+    have htq : t + c ∈ chartTarget (L := L) q := ht.2
+    have hwa : a = QuotientAddGroup.mk' L.toAddSubgroup z :=
+      extChartAt_symm_eq_quotient_mk (L := L) p hz₁
+    have hta : (extChartAt 𝓘(ℂ, ℂ) p).symm t =
+        QuotientAddGroup.mk' L.toAddSubgroup t :=
+      extChartAt_symm_eq_quotient_mk (L := L) p htp
+    have hwq :
+        QuotientAddGroup.mk' L.toAddSubgroup w =
+          QuotientAddGroup.mk' L.toAddSubgroup z := by
+      have hleft : (extChartAt 𝓘(ℂ, ℂ) q).symm w = a := by
+        change (extChartAt 𝓘(ℂ, ℂ) q).symm ((extChartAt 𝓘(ℂ, ℂ) q) a) = a
+        exact (extChartAt 𝓘(ℂ, ℂ) q).left_inv hzq
+      exact (extChartAt_symm_eq_quotient_mk (L := L) q hw).symm.trans (hleft.trans hwa)
+    have hc_mem : c ∈ (L.toAddSubgroup : Set ℂ) := by
+      have :
+          -z + w ∈ (L.toAddSubgroup : Set ℂ) :=
+        QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hwq.symm)
+      simpa [c, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
+    have htq' :
+        QuotientAddGroup.mk' L.toAddSubgroup (t + c) =
+          QuotientAddGroup.mk' L.toAddSubgroup t := by
+      have hnegc : -c ∈ (L.toAddSubgroup : Set ℂ) :=
+        AddSubgroup.neg_mem L.toAddSubgroup hc_mem
+      apply Quotient.sound'
+      rw [QuotientAddGroup.leftRel_apply]
+      simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using hnegc
+    calc
+      ((extChartAt 𝓘(ℂ, ℂ) q) ∘ (extChartAt 𝓘(ℂ, ℂ) p).symm) t
+          = extChartAt 𝓘(ℂ, ℂ) q (QuotientAddGroup.mk' L.toAddSubgroup t) := by
+              rw [Function.comp, hta]
+      _ = extChartAt 𝓘(ℂ, ℂ) q (QuotientAddGroup.mk' L.toAddSubgroup (t + c)) := by
+            rw [htq'.symm]
+      _ = t + c := extChartAt_apply_quotient_mk (L := L) q htq
+  have hEq :
+      ((extChartAt 𝓘(ℂ, ℂ) q) ∘ (extChartAt 𝓘(ℂ, ℂ) p).symm) =ᶠ[𝓝 z] fun t : ℂ => t + c := by
+    refine Filter.mem_of_superset (hsopen.mem_nhds hsz) ?_
+    intro t ht
+    exact hs_eq t ht
+  calc
+    fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q) ∘ (extChartAt 𝓘(ℂ, ℂ) p).symm) z 1
+        = fderiv ℂ (fun t : ℂ => t + c) z 1 := by rw [hEq.fderiv_eq]
+    _ = fderiv ℂ id z 1 := by
+          rw [fderiv_add_const c]
+          rfl
+    _ = 1 := by simp [fderiv_id]
+
 private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × V} :
     z ∈ (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ↔
       z.1 ∈ chartTarget (L := L) p ∧ z.2 ∈ chartTarget (L := L) q := by
