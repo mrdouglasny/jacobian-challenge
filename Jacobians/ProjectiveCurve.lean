@@ -15,6 +15,7 @@ import Jacobians.ProjectiveCurve.Line.Witnesses
 import Jacobians.ProjectiveCurve.Line.OneForm
 import Jacobians.ProjectiveCurve.Elliptic
 import Jacobians.ProjectiveCurve.Elliptic.Genus
+import Jacobians.ProjectiveCurve.Elliptic.OneForm
 import Jacobians.ProjectiveCurve.Elliptic.Witnesses
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.PlaneCurve
