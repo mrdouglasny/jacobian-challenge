@@ -93,32 +93,53 @@ def SatisfiesCotangentCocycle (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ
       coeff y ((extChartAt 𝓘(ℂ) y) ((extChartAt 𝓘(ℂ) x).symm z)) *
         (fderiv ℂ ((extChartAt 𝓘(ℂ) y) ∘ (extChartAt 𝓘(ℂ) x).symm) z 1)
 
+/-- **Predicate (added 2026-04-24).** "The coefficient family is zero
+off each chart target."
+
+For each `x : X`, the function `coeff x : ℂ → ℂ` is required to be
+zero outside `(extChartAt 𝓘(ℂ) x).target`. This normalisation eliminates
+off-target ambiguity in the submodule representation: two coefficient
+families agreeing on all chart targets are then equal as functions
+`X → ℂ → ℂ`, so `HolomorphicOneForm.ext_of_coeff` gives the correct
+extensionality. Without this, the submodule would contain functions
+differing only off-target — which would be an infinite-dimensional
+degree of freedom inconsistent with `AX_FiniteDimOneForms`. -/
+def IsZeroOffChartTarget (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (coeff : X → ℂ → ℂ) : Prop :=
+  ∀ x : X, ∀ z : ℂ, z ∉ (extChartAt 𝓘(ℂ) x).target → coeff x z = 0
+
 /-- The ℂ-submodule of `X → ℂ → ℂ` consisting of chart-local coefficient
 families representing holomorphic 1-forms on `X`.
 
 Closed under addition and scalar multiplication: analyticity is closed
 under sums/smul (Mathlib `AnalyticOn.add`, `AnalyticOn.const_smul`); the
 cocycle is ℂ-linear in the coefficient family because `fderiv` is
-ℂ-linear and `0 = 0 · anything`. -/
+ℂ-linear; off-target zero is trivially preserved under linearity. -/
 noncomputable def holomorphicOneFormSubmodule (X : Type*) [TopologicalSpace X]
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Submodule ℂ (X → ℂ → ℂ) where
-  carrier := { f | IsHolomorphicOneFormCoeff X f ∧ SatisfiesCotangentCocycle X f }
-  zero_mem' := ⟨fun _ => analyticOn_const, fun _ _ _ _ _ => by simp⟩
+  carrier := { f | IsHolomorphicOneFormCoeff X f ∧ SatisfiesCotangentCocycle X f ∧
+    IsZeroOffChartTarget X f }
+  zero_mem' := ⟨fun _ => analyticOn_const, fun _ _ _ _ _ => by simp,
+    fun _ _ _ => rfl⟩
   add_mem' := by
-    rintro f g ⟨hf_an, hf_cocy⟩ ⟨hg_an, hg_cocy⟩
-    refine ⟨fun x => (hf_an x).add (hg_an x), ?_⟩
-    intro x y z hz hyzy
-    have hf := hf_cocy x y z hz hyzy
-    have hg := hg_cocy x y z hz hyzy
-    simp only [Pi.add_apply, hf, hg]
-    ring
+    rintro f g ⟨hf_an, hf_cocy, hf_off⟩ ⟨hg_an, hg_cocy, hg_off⟩
+    refine ⟨fun x => (hf_an x).add (hg_an x), ?_, ?_⟩
+    · intro x y z hz hyzy
+      have hf := hf_cocy x y z hz hyzy
+      have hg := hg_cocy x y z hz hyzy
+      simp only [Pi.add_apply, hf, hg]
+      ring
+    · intro x z hz
+      simp [Pi.add_apply, hf_off x z hz, hg_off x z hz]
   smul_mem' := by
-    rintro c f ⟨hf_an, hf_cocy⟩
-    refine ⟨fun x => (analyticOn_const).mul (hf_an x), ?_⟩
-    intro x y z hz hyzy
-    have hf := hf_cocy x y z hz hyzy
-    simp only [Pi.smul_apply, smul_eq_mul, hf]
-    ring
+    rintro c f ⟨hf_an, hf_cocy, hf_off⟩
+    refine ⟨fun x => (analyticOn_const).mul (hf_an x), ?_, ?_⟩
+    · intro x y z hz hyzy
+      have hf := hf_cocy x y z hz hyzy
+      simp only [Pi.smul_apply, smul_eq_mul, hf]
+      ring
+    · intro x z hz
+      simp [Pi.smul_apply, hf_off x z hz]
 
 /-- The ℂ-vector space of holomorphic 1-forms on `X`.
 
