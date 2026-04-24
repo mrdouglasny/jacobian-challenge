@@ -1,10 +1,25 @@
-# Plan: Replace `H1` with piecewise-analytic simplicial H₁
+# Plan: Replace `H1` with piecewise-regular simplicial H₁
 
 _Drafted 2026-04-24. Strategic refactor: redefine `H1 X x₀` from the
-topological `Additive (Abelianization (FundamentalGroup X x₀))` to the
-**piecewise-analytic simplicial homology group** `H1Analytic X x₀`.
-Retires `loopIntegralToH1` (function-existence axiom #2) and unblocks
-a structural computation `H1Analytic (Elliptic ω₁ ω₂ h) ≃ ℤ²`._
+topological `Additive (Abelianization (FundamentalGroup X x₀))` to a
+**piecewise-regular simplicial homology group** (regularity class to be
+chosen — analytic, smooth C∞, or C¹; see "Regularity-class tradeoff"
+section below). Retires `loopIntegralToH1` (function-existence axiom #2)
+and unblocks a structural computation `H1Concrete (Elliptic ω₁ ω₂ h) ≃ ℤ²`._
+
+## Not a Buzzard-challenge requirement
+
+This refactor is **internal polish, not a challenge requirement**.
+Buzzard's 24 sorries do not mention H₁, `periodMap`, or cycle regularity
+at all — his API is about `genus`, `Jacobian`, `ofCurve`, pushforward,
+pullback, and degree. The Jacobian construction *internally* uses
+`periodMap : H1 X x₀ →+ (Ω¹ X)^∨`, whose range gives the period lattice.
+That's why we need *some* H₁ definition — but any of smooth/analytic/C¹
+works equally, and the choice is invisible at the challenge API layer.
+
+The value of the refactor: retires the `loopIntegralToH1` axiom (one of
+the 5 function-existence axioms documented in
+`docs/construction-plans/`). Execution is optional but principled.
 
 ## Motivation
 
@@ -195,6 +210,39 @@ Preferred: **(A)** — cleaner, no classical equivalence needed.
 **Net**: retires 2 of 5 function-existence axioms + 1 Prop axiom + the
 Elliptic cases of 2 more axioms. Deep classical axioms (uniformization,
 Riemann-Roch, Serre duality, etc.) unchanged.
+
+## Regularity-class tradeoff (decide at execution time)
+
+The chains could use any of three regularity classes; each gives the
+same abstract H₁ (all equivalent to singular H₁ for a real-analytic
+manifold, by Whitney approximation + Grauert–Morrey). The choice is
+about Lean engineering, not mathematics.
+
+| Class | Carrier | Pros | Cons |
+|---|---|---|---|
+| **Piecewise-real-analytic** | `AnalyticArc X` (already in project) | Matches the `HolomorphicOneForm` cocycle symbolically; analytic-continuation-style arguments clean on paper; classical references (Radó triangulation) cite analytic cycles | Mathlib's analytic-of-manifold API is narrow; `AnalyticAt ℝ` and `AnalyticOn ℝ` are rigid; may require ad-hoc helpers |
+| **Piecewise-smooth (C∞)** | `ContMDiff (n := ⊤)` paths | Fluid Mathlib API (`ContMDiff`, `ContDiff`, `MDifferentiable`); smooth triangulation theorem (Whitney) equally classical | None of note — this is the "default" Lean manifold regularity |
+| **Piecewise-C¹** | `ContMDiff (n := 1)` paths | Minimal regularity for `intervalIntegral`; weakest hypothesis gives strongest theorem | Slightly less natural symbolically; mixing `C¹ ≠ C∞` may require care |
+
+**Gemini's recommendation (2026-04-24 consultation):** pick **piecewise-C¹**
+or **piecewise-C∞**. Quote:
+
+> "The 1-form is holomorphic (real-analytic), but the path of integration γ(t) only needs to be rectifiable (piecewise C¹). Analytic is overkill and heavily constrained in Mathlib; proving real-analytic is rigid, smooth is fluid. Stick to piecewise C¹ or C∞ for path integrals."
+
+**Historical note on why we originally chose analytic:** `docs/history.md`
+(2026-04-22 "PathIntegral design conversation") cites Radó's
+triangulation theorem + analytic-continuation homotopy arguments +
+matching the cocycle structure. None of these is *strictly required* —
+Radó has a smooth analogue (Whitney), Stokes handles homotopy invariance
+without analytic continuation, and the cocycle doesn't care about the
+regularity of the *path*. The original choice was aesthetic
+convenience, not mathematical necessity.
+
+**Execution-time recommendation:** pick piecewise-C∞ (`ContMDiff (n := ⊤)`)
+as the cleanest middle ground. Rename `AnalyticArc` → `SmoothArc` or
+add a new `SmoothArc` alongside, migrate. Alternative: keep
+`AnalyticArc` and weaken the predicate — this reduces churn but inherits
+the rigid analytic API.
 
 ## Risks and open questions
 
