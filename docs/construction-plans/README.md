@@ -20,6 +20,13 @@ content, Mathlib prerequisites, phase breakdown, effort estimate.
 | 4 | `pushforwardOneForm` | `(f : X → Y) → Ω¹(X) →ₗ[ℂ] Ω¹(Y)` | [`pushforward-one-form.md`](pushforward-one-form.md) |
 | 5 | `localOrder` | `(f : X → Y) → X → Y → ℕ` | [`local-order.md`](local-order.md) |
 
+### Concrete-curve genus discharge plans (retire hack-blocker genus axioms)
+
+| Target | Retires axiom | Plan |
+|---|---|---|
+| `genus (Elliptic ω₁ ω₂ h) = 1` | `AX_genus_Elliptic_eq_one` | [`elliptic-genus-upper-bound.md`](elliptic-genus-upper-bound.md) (~2 weeks) |
+| `genus (Hyperelliptic H) = H.genus` | `AX_Hyperelliptic_genus` | [`hyperelliptic-genus.md`](hyperelliptic-genus.md) (~9 weeks, incl. atlas prereq) |
+
 ## Shared prerequisites
 
 Several plans share underlying infrastructure. Building it once unlocks
