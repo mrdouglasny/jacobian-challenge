@@ -24,8 +24,14 @@ content, Mathlib prerequisites, phase breakdown, effort estimate.
 
 | Target | Retires axiom | Plan |
 |---|---|---|
-| `genus (Elliptic ω₁ ω₂ h) = 1` | `AX_genus_Elliptic_eq_one` | [`elliptic-genus-upper-bound.md`](elliptic-genus-upper-bound.md) (~2 weeks) |
+| `genus (Elliptic ω₁ ω₂ h) = 1` | `AX_genus_Elliptic_eq_one` | [`elliptic-genus-upper-bound.md`](elliptic-genus-upper-bound.md) — **discharged 2026-04-24**, see commit `a71a874` |
 | `genus (Hyperelliptic H) = H.genus` | `AX_Hyperelliptic_genus` | [`hyperelliptic-genus.md`](hyperelliptic-genus.md) (~9 weeks, incl. atlas prereq) |
+
+### Structural refactor: piecewise-analytic simplicial H₁
+
+| Target | Retires axioms | Plan |
+|---|---|---|
+| Replace `H1 X x₀` with `H1Analytic X x₀` (piecewise-analytic simplicial) | `loopIntegralToH1` (function-existence #2) + `AX_pathIntegral_local_antiderivative` (Prop) + partial `pathIntegralBasepointFunctional` + Elliptic cases of `AX_H1FreeRank2g` / `AX_AnalyticCycleBasis` | [`h1-analytic-refactor.md`](h1-analytic-refactor.md) (~2–2.5 weeks) |
 
 ## Shared prerequisites
 
