@@ -471,8 +471,10 @@ noncomputable def bridgeForm :
             ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y₀) y)
               ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v)) =
           form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v
-        rw [hmfd_eq, Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X]
-        rfl
+        rw [hmfd_eq]
+        -- Now goal: c • (continuousLinearMapAt y) ((symmL y) v) = c * v.
+        -- Use the round-trip continuousLinearMapAt_symmL = id.
+        simp only [Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X, smul_eq_mul]
         }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
