@@ -365,16 +365,115 @@ noncomputable def bridgeForm :
         -- reduce via `contMDiffAt_hom_bundle` to base smoothness (id) and inCoordinates rep.
         rw [contMDiffAt_hom_bundle]
         refine ⟨contMDiffAt_id, ?_⟩
-        -- Goal: ContMDiffAt _ _ ω (fun y => inCoordinates ... y₀ y y₀ y (rawCLM form y₀ y)) y₀.
-        -- The inCoordinates rep unfolds (via Bundle.Trivial.continuousLinearMapAt_trivialization
-        -- and the symmL/continuousLinearMapAt round-trip on the source side) to a scalar
-        -- multiple of `mfderiv (extChartAt y₀) y` viewed in the trivialization. By
-        -- `TangentBundle.continuousLinearMapAt_trivializationAt` this trivialized mfderiv
-        -- collapses to `id` after applying `symmL ∘ continuousLinearMapAt = id` from
-        -- `Bundle.Trivialization.symmL_continuousLinearMapAt`. The remaining scalar
-        -- `form.coeff y₀ ((extChartAt y₀) y)` is smooth via `coeff y₀` analytic on the
-        -- chart target plus smooth chart map. Left as `sorry` for now.
-        sorry }
+        -- Goal: ContMDiffAt _ _ ω
+        --   (fun y => inCoordinates ℂ (TangentSpace 𝓘(ℂ,ℂ)) ℂ (Bundle.Trivial X ℂ)
+        --       y₀ y y₀ y (rawCLM form y₀ y)) y₀.
+        -- Unfold via `inCoordinates` → trivialization layers, simplify the source-side
+        -- round-trip `(symmL ∘ continuousLinearMapAt)` to `id` (on trivialization base sets).
+        -- After simplification: rep collapses to `(form.coeff y₀ ((extChartAt y₀) y)) • id_ℂ`.
+        --
+        -- Strategy: prove smoothness of the SCALAR-times-id expression, then use
+        -- `congr_of_eventuallyEq` (with the trivialization simplification holding on a nbhd
+        -- of y₀) to transfer.
+        --
+        -- The scalar `y ↦ form.coeff y₀ ((extChartAt y₀) y)` is smooth at y₀ because:
+        --   * `extChartAt y₀ : X → ℂ` is smooth at y₀ (`contMDiffAt_extChartAt`).
+        --   * `form.coeff y₀ : ℂ → ℂ` is analytic on `(extChartAt y₀).target`
+        --     (`form.2.1 y₀`); `(extChartAt y₀) y₀ ∈ target` so analytic at that point;
+        --     promote `AnalyticAt` → `ContDiffAt` → `ContMDiffAt` (vector spaces).
+        --   * Compose.
+        --
+        -- The CLM-valued `id_ℂ` is a constant; `ContMDiffAt.smul` (NormedSpace.lean:276)
+        -- gives smoothness of `c • const`.
+        --
+        -- The trivialization simplification (`congr_of_eventuallyEq` step) is the
+        -- bookkeeping-heavy piece, mirroring `pullbackForm`'s `filter_upwards` block
+        -- (Vendor/Kirov/HolomorphicForms.lean:168–188).
+        --
+        -- Below: build the smoothness of the SCALAR `y ↦ form.coeff y₀ ((extChartAt y₀) y)`
+        -- as a stepping stone (always usable inside the final composition).
+        have hChart : ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (extChartAt 𝓘(ℂ, ℂ) y₀) y₀ :=
+          contMDiffAt_extChartAt
+        -- `form.coeff y₀` is analytic on `(extChartAt y₀).target`; `(extChartAt y₀) y₀` is in target.
+        have hCoeff_analyticAt : AnalyticAt ℂ (form.coeff y₀) ((extChartAt 𝓘(ℂ, ℂ) y₀) y₀) := by
+          have h_an_on : AnalyticOn ℂ (form.coeff y₀) (extChartAt 𝓘(ℂ, ℂ) y₀).target :=
+            form.2.1 y₀
+          have h_in_tgt : (extChartAt 𝓘(ℂ, ℂ) y₀) y₀ ∈ (extChartAt 𝓘(ℂ, ℂ) y₀).target :=
+            mem_extChartAt_target y₀
+          -- AnalyticOn → AnalyticAt via membership of an open set... (target may not be open
+          -- in ℂ in general; but extChartAt_target is open in range I, and for boundaryless
+          -- it's open in ℂ.) Use isOpen_extChartAt_target via boundaryless of 𝓘(ℂ,ℂ).
+          have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) y₀).target := by
+            rw [extChartAt_target]
+            simp [(chartAt ℂ y₀).open_target]
+          exact h_an_on.analyticAt (hOpen.mem_nhds h_in_tgt)
+        -- Promote AnalyticAt → ContMDiffAt.
+        have hCoeff_smooth : ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (form.coeff y₀)
+            ((extChartAt 𝓘(ℂ, ℂ) y₀) y₀) :=
+          hCoeff_analyticAt.contDiffAt.contMDiffAt
+        -- The scalar function: composition.
+        have hScalar : ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω
+            (fun y => form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y)) y₀ :=
+          hCoeff_smooth.comp y₀ hChart
+        -- The scalar-times-id_ℂ map is smooth (scalar smooth × constant CLM).
+        have hSmul : ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ →L[ℂ] ℂ) ω
+            (fun y => (form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y)) •
+              (ContinuousLinearMap.id ℂ ℂ)) y₀ :=
+          hScalar.smul contMDiffAt_const
+        -- It remains to show that the inCoordinates representative equals this scalar•id_ℂ
+        -- expression on a neighborhood of y₀ (where the trivialization round-trip simplifies).
+        -- `congr_of_eventuallyEq` will then transfer smoothness.
+        apply hSmul.congr_of_eventuallyEq
+        -- Goal: (fun y => (form.coeff y₀ ((extChartAt y₀) y)) • id_ℂ) =ᶠ[𝓝 y₀]
+        --       (fun y => inCoordinates ... y₀ y y₀ y (rawCLM form y₀ y))
+        -- (note: `congr_of_eventuallyEq` is ContMDiffAt of f → eq from f₁ =ᶠ f → ContMDiffAt f₁,
+        -- so the eventually-eq is in the direction f₁ =ᶠ f, i.e., scalar•id =ᶠ inCoordinates.)
+        --
+        -- Filter upwards on the tangent-bundle trivialization base set at y₀.
+        filter_upwards [
+          ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).open_baseSet.mem_nhds
+            (mem_baseSet_trivializationAt ℂ _ y₀))
+          ] with y hy_TS_X
+        -- hy_TS_X : y ∈ (trivializationAt ℂ TangentSpace y₀).baseSet
+        -- Goal: form.coeff y₀ ((extChartAt y₀) y) • id_ℂ
+        --     = inCoordinates ℂ TS_X ℂ Trivial_X y₀ y y₀ y (rawCLM form y₀ y).
+        apply ContinuousLinearMap.ext
+        intro v
+        simp only [ContinuousLinearMap.inCoordinates,
+          ContinuousLinearMap.comp_apply,
+          Bundle.Trivial.fiberBundle_trivializationAt',
+          Bundle.Trivial.continuousLinearMapAt_trivialization,
+          ContinuousLinearMap.id_apply,
+          ContinuousLinearMap.smul_apply, smul_eq_mul]
+        -- After simp, LHS:  form.coeff y₀ ((extChartAt y₀) y) * id_ℂ v = form.coeff y₀ (...) * v.
+        -- RHS: rawCLM form y₀ y ((trivTS y₀).symmL ℂ y v).
+        -- rawCLM = (form.coeff y₀ z) • mfderiv (extChartAt y₀) y, applied to (symmL v).
+        --        = (form.coeff y₀ z) • mfderiv (extChartAt y₀) y (symmL v).
+        -- And mfderiv (extChartAt y₀) y = (trivTS y₀).continuousLinearMapAt y, so
+        --   mfderiv (...) (symmL v) = (continuousLinearMapAt y) ((symmL y) v) = v
+        -- by `Bundle.Trivialization.continuousLinearMapAt_symmL`.
+        unfold BridgeForm.rawCLM
+        -- Goal: form.coeff y₀ ((extChartAt y₀) y) * v = (c • mfderiv (extChartAt y₀) y) (symmL v)
+        -- where c = form.coeff y₀ ((extChartAt y₀) y).
+        -- RHS = c • mfderiv (extChartAt y₀) y (symmL v) = c * (mfderiv (extChartAt y₀) y (symmL v)).
+        -- mfderiv (extChartAt y₀) y = (trivTS y₀).continuousLinearMapAt y, by
+        -- TangentBundle.continuousLinearMapAt_trivializationAt (when y ∈ chart source y₀).
+        -- We need y ∈ (chartAt y₀).source. This holds because hy_TS_X is the trivialization
+        -- base set, which equals the chart-at-y₀ source.
+        have hy_chart : y ∈ (chartAt ℂ y₀).source := by
+          -- The trivialization base set equals (chartAt y₀).source for the tangent bundle.
+          simpa [trivializationAt, FiberBundle.trivializationAt'] using hy_TS_X
+        have hmfd_eq : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y₀) y =
+            (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt ℂ y :=
+          (TangentBundle.continuousLinearMapAt_trivializationAt hy_chart).symm
+        -- The CLM smul-apply: (c • T) v = c • T v. We use show to reorient.
+        show form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
+            ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y₀) y)
+              ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v)) =
+          form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v
+        rw [hmfd_eq, Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X]
+        rfl
+        }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
     intro y
