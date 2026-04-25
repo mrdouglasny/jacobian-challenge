@@ -18,6 +18,19 @@ Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining
 
 **Concrete witnesses.** `ProjectiveLine` (genus 0) and `Elliptic ω₁ ω₂` (genus 1) are fully populated — real types, real `AnalyticCycleBasis`, `genus ProjectiveLine = 0` and `genus (Elliptic ω₁ ω₂ h) = 1` are **derived theorems** (the latter via intrinsic Liouville on compact complex manifolds applied to `ellipticDz`). Both parities of hyperelliptic curves are real types; unified `Hyperelliptic H` is an axiom type pinned by homeomorphism (`≃ₜ`) axioms to the real parity cases.
 
+**Test theorems beyond the challenge API** ([`Jacobians/Extensions/Hyperelliptic.lean`](Jacobians/Extensions/Hyperelliptic.lean)). A ladder of concrete theorems that exercise the formalization end-to-end and catch the regression where `Module.finrank` silently returns `0` (a real failure mode if the cocycle definition or the Kirov-Montel finite-dim bridge is wired wrong):
+
+```
+genus (HyperellipticOdd H h) = (H.f.natDegree - 1) / 2          -- headline test
+hyperellipticDxOverY        : HolomorphicOneForm (HyperellipticOdd H h)
+hyperellipticBasisDifferential k (k < g) : HolomorphicOneForm _    -- the canonical basis
+... linearIndependent                                              -- → lower bound on genus
+hyperellipticInvolution      : HyperellipticOdd H h → HyperellipticOdd H h
+... involutive, ContMDiff, pullback acts as -id, |Fix| = deg f + 1 -- stretch goals
+```
+
+All currently `:= by sorry` with proof sketches + classical references inline. Discharge order recommended in the file's docstring; Forster §17, Miranda Ch. VII, Mumford *Tata I* §III.3 are the textbook references.
+
 **Axioms are classified, not hidden** ([`docs/dependency-trace.md`](docs/dependency-trace.md)):
 
 - **Classical-theorem axioms** (Riemann–Roch, Serre duality, Abel, Riemann bilinear, period-lattice discreteness, branch locus, uniformization): each a textbook citation. The right shape of axiom for a layered formalization. *Finite-dimensionality of holomorphic 1-forms is no longer in this list — see "Cross-pollination" below.*
