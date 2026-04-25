@@ -323,8 +323,36 @@ noncomputable def bridgeForm :
   toFun form :=
     { toFun := fun y => BridgeForm.rawCLM form y y
       contMDiff_toFun := by
-        -- Smoothness: this is the deep obligation. See file/module docstring
-        -- and `docs/KirovHolomorphicLessons.md` for the planned route.
+        -- **Smoothness via local-equality + fixed-chart trivialization.**
+        --
+        -- Strategy (Step 2 of `docs/KirovHolomorphicLessons.md`):
+        --   1. `intro y₀` — fix the base point.
+        --   2. By `BridgeForm.rawCLM_swap_chart` (helper above), for `y` in the
+        --      `(extChartAt y₀).source` open nbhd of `y₀`,
+        --        `rawCLM form y y = rawCLM form y₀ y`.
+        --      Use `ContMDiffAt.congr_of_eventuallyEq` on the totalSpace function
+        --      `(fun y ↦ ⟨y, rawCLM form _ y⟩)` to swap chart-at-self → chart-at-y₀.
+        --   3. Apply `Bundle.Trivialization.contMDiffAt_section_iff` with the
+        --      hom-bundle trivialization `e := trivializationAt ℂ
+        --        (Bundle.ContinuousLinearMap (RingHom.id ℂ) (TangentSpace 𝓘(ℂ,ℂ))
+        --          (Bundle.Trivial X ℂ)) y₀` (whose baseSet contains `y₀`).
+        --   4. Reduce to smoothness of `(e ⟨y, rawCLM form y₀ y⟩).2 : ℂ →L[ℂ] ℂ`.
+        --   5. Inside `e` the trivialization unfolds via `hom_trivializationAt_apply`,
+        --      `Bundle.Trivial.continuousLinearMapAt_trivialization`, and
+        --      `TangentBundle.continuousLinearMapAt_trivializationAt`. The
+        --      `(symmL ∘ continuousLinearMapAt)` round-trip on a fiber element is
+        --      identity (`Bundle.Trivialization.symmL_continuousLinearMapAt`),
+        --      so the trivialized representative reduces to
+        --        `y ↦ (form.coeff y₀ ((extChartAt y₀) y)) • ContinuousLinearMap.id ℂ ℂ`.
+        --   6. Smoothness of that scalar: `form.coeff y₀ : ℂ → ℂ` is analytic on
+        --      `(extChartAt y₀).target` (`form.2.1 y₀`); compose with the smooth
+        --      `extChartAt y₀ : X → ℂ` (`contMDiffAt_extChartAt`) to get a smooth
+        --      ℂ-valued function. Then `ContMDiff.const_smul` lifts to the CLM.
+        --
+        -- Step 1 helper `rawCLM_swap_chart` is done. Steps 2–6 (the trivialization
+        -- bookkeeping and the analyticity → smoothness lift) are still open. The
+        -- closest in-repo template is `Jacobians.Vendor.Kirov.HolomorphicForms.pullbackForm`
+        -- (lines ~127–188), which uses the same `contMDiffAt_hom_bundle` reduction.
         sorry }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
