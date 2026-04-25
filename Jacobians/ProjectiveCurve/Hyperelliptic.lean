@@ -11,6 +11,7 @@ Public wrapper for the hyperelliptic curve models.
 -/
 import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
 
 namespace Jacobians.ProjectiveCurve
 

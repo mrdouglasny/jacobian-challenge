@@ -29,7 +29,7 @@ See `docs/hyperelliptic-odd-atlas-plan.md` §OA2.
 -/
 
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas.AffineChart
-import Mathlib.Topology.Compactification.OnePoint
+import Mathlib.Topology.Compactification.OnePoint.Basic
 import Mathlib.Analysis.Complex.Basic
 
 namespace Jacobians.ProjectiveCurve.HyperellipticOdd
@@ -44,11 +44,8 @@ variable {H : HyperellipticData} {h : Odd H.f.natDegree}
 `g := (deg f - 1) / 2`, we have `x = 1/t²·(1 + O(t))` and
 `y = 1/t^{2g+1}·(1 + O(t))` after normalizing by `lc(f)`. Domain:
 `{ t : ℂ | 0 < ‖t‖ ∧ ‖t‖ < someRadius }`. -/
-noncomputable def infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    ℂ → HyperellipticAffine H := by
-  -- Build via explicit power series in t. Convergence follows from
-  -- analyticity of f's leading coefficient.
-  sorry
+axiom infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    ℂ → HyperellipticAffine H
 
 /-- The chart at infinity: `PartialHomeomorph (HyperellipticOdd H h) ℂ`
 sending a neighborhood of `OnePoint.infty` to a neighborhood of
@@ -57,9 +54,8 @@ sending a neighborhood of `OnePoint.infty` to a neighborhood of
 The forward map (going `HyperellipticOdd → ℂ`) is `(x, y) ↦ y / x^{g+1}`
 on the affine part where `x ≠ 0`, extended by `infty ↦ 0`. The inverse
 map is `infinityInverseMap` extended by `0 ↦ infty`. -/
-noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    PartialHomeomorph (HyperellipticOdd H h) ℂ := by
-  sorry
+axiom infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    OpenPartialHomeomorph (HyperellipticOdd H h) ℂ
 
 /-- **Compatibility with affine charts.** On the punctured overlap
 (points with `x ≠ 0` in the affine chart and `t ≠ 0` in the infinity

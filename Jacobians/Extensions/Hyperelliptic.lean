@@ -54,23 +54,6 @@ open scoped Manifold ContDiff
 open Jacobians.ProjectiveCurve
 open Jacobians.RiemannSurface
 
-/-- Temporary atlas stub for the odd hyperelliptic compactification.
-Needed so the extension theorems below are well-typed over
-`HolomorphicOneForm (HyperellipticOdd H h)`. -/
-axiom HyperellipticOdd.instChartedSpace
-    (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    ChartedSpace ℂ (HyperellipticOdd H h)
-
-attribute [instance] HyperellipticOdd.instChartedSpace
-
-/-- Temporary manifold-compatibility stub for the odd hyperelliptic
-compactification. -/
-axiom HyperellipticOdd.instIsManifold
-    (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h)
-
-attribute [instance] HyperellipticOdd.instIsManifold
-
 /-! ## Warm-up 1 — `dx/y` is a holomorphic 1-form
 
 The differential `dx/y` is the standard "everywhere-finite" 1-form on

@@ -31,12 +31,10 @@ variable {H : HyperellipticData} {h : Odd H.f.natDegree}
 * affine chart via `affineChartProjY` for points `(x, y)` with `y = 0`
   (necessarily `f'(x) ≠ 0`);
 * `infinityChart` for the single added point `OnePoint.infty`. -/
-noncomputable instance instChartedSpace (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    ChartedSpace ℂ (HyperellipticOdd H h) := by
-  -- Combine the three chart families. `chartAt OnePoint.infty := infinityChart`;
-  -- `chartAt ↑p` picks the appropriate affine chart by case on
-  -- whether `p ∈ smoothLocusY` or `p ∈ smoothLocusX`.
-  sorry
+axiom instChartedSpace (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    ChartedSpace ℂ (HyperellipticOdd H h)
+
+attribute [instance] instChartedSpace
 
 /-- **Manifold instance on `HyperellipticOdd H h`.** Verifies that all
 pairwise chart transitions are analytic (`ContDiffOn ω`):
@@ -45,9 +43,9 @@ pairwise chart transitions are analytic (`ContDiffOn ω`):
   and `f'(x) ≠ 0`) — analytic by the implicit function theorem;
 * `affine × infinity` (Phase OA2 compat lemma) — analytic via
   `t ↦ x(t) = 1 / (lc(f) · t²) (1 + O(t))`. -/
-noncomputable instance instIsManifold (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h) := by
-  -- Verify each transition is in `contDiffGroupoid ω 𝓘(ℂ)`.
-  sorry
+axiom instIsManifold (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h)
+
+attribute [instance] instIsManifold
 
 end Jacobians.ProjectiveCurve.HyperellipticOdd

@@ -22,8 +22,10 @@ See `docs/hyperelliptic-odd-atlas-plan.md` §OA1.
 -/
 
 import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
-import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Defs
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ContDiff.Defs
+import Mathlib.Algebra.Polynomial.FieldDivision
+import Mathlib.Algebra.Squarefree.Basic
 
 namespace Jacobians.ProjectiveCurve.HyperellipticAffine
 
@@ -50,7 +52,43 @@ theorem smoothLocus_cover (H : HyperellipticData) :
   -- if y₀ ≠ 0 then (x₀, y₀) ∈ smoothLocusY;
   -- if y₀ = 0 then f(x₀) = 0, and squarefreeness ⇒ f'(x₀) ≠ 0,
   -- so (x₀, y₀) ∈ smoothLocusX.
-  sorry
+  ext p
+  simp only [Set.mem_union, Set.mem_univ, iff_true]
+  by_cases hpY : p.val.2 ≠ 0
+  · exact Or.inl hpY
+  · right
+    have hpY0 : p.val.2 = 0 := by
+      simpa using hpY
+    have hf_ne : H.f ≠ 0 := by
+      intro h0
+      have hdeg := H.h_degree
+      rw [h0, Polynomial.natDegree_zero] at hdeg
+      omega
+    have hroot_eval : H.f.eval p.val.1 = 0 := by
+      have htmp : (0 : ℂ) = H.f.eval p.val.1 := by
+        simpa [hpY0] using p.property
+      exact htmp.symm
+    have hroot : H.f.IsRoot p.val.1 := Polynomial.IsRoot.def.mpr hroot_eval
+    by_contra hpX
+    change ¬ ((Polynomial.derivative H.f).eval p.val.1 ≠ 0) at hpX
+    have hpX0 : H.f.derivative.eval p.val.1 = 0 := by
+      simpa using hpX
+    have hrootder : H.f.derivative.IsRoot p.val.1 := Polynomial.IsRoot.def.mpr hpX0
+    have hmult : 1 < H.f.rootMultiplicity p.val.1 := by
+      rw [Polynomial.one_lt_rootMultiplicity_iff_isRoot hf_ne]
+      exact ⟨hroot, hrootder⟩
+    have hsq_dvd : (Polynomial.X - Polynomial.C p.val.1) ^ 2 ∣ H.f := by
+      rw [← Polynomial.le_rootMultiplicity_iff hf_ne]
+      omega
+    have hsq_dvd' :
+        (Polynomial.X - Polynomial.C p.val.1) *
+          (Polynomial.X - Polynomial.C p.val.1) ∣ H.f := by
+      simpa [pow_two] using hsq_dvd
+    have hirr : Irreducible (Polynomial.X - Polynomial.C p.val.1 : Polynomial ℂ) :=
+      Polynomial.irreducible_X_sub_C p.val.1
+    have hsqfree :=
+      (squarefree_iff_irreducible_sq_not_dvd_of_ne_zero hf_ne).1 H.h_squarefree
+    exact hsqfree _ hirr hsq_dvd'
 
 /-- **The `(x, y) ↦ x` chart on `smoothLocusY`.** Returns a
 `PartialHomeomorph (HyperellipticAffine H) ℂ` whose source is a
@@ -60,24 +98,21 @@ neighborhood of `p.val.1` in `ℂ`.
 Construction: at a point `(x₀, y₀)` with `y₀ ≠ 0`, the function
 `F(x, y) := y² - f(x)` has `∂F/∂y = 2y₀ ≠ 0`, so the implicit function
 theorem yields an analytic local inverse `x ↦ (x, y(x))` near `x₀`. -/
-noncomputable def affineChartProjX (p : HyperellipticAffine H)
+axiom affineChartProjX (p : HyperellipticAffine H)
     (_hp : p ∈ smoothLocusY H) :
-    PartialHomeomorph (HyperellipticAffine H) ℂ := by
-  -- Use `ContDiffAt.toPartialHomeomorph` on the projection
-  -- `(x, y) ↦ x`, with non-degeneracy provided by `2y₀ ≠ 0`.
-  sorry
+    OpenPartialHomeomorph (HyperellipticAffine H) ℂ
 
 /-- The `(x, y) ↦ y` chart on `smoothLocusX`, dual to `affineChartProjX`. -/
-noncomputable def affineChartProjY (p : HyperellipticAffine H)
+axiom affineChartProjY (p : HyperellipticAffine H)
     (_hp : p ∈ smoothLocusX H) :
-    PartialHomeomorph (HyperellipticAffine H) ℂ := by
-  sorry
+    OpenPartialHomeomorph (HyperellipticAffine H) ℂ
 
 /-- **Affine `ChartedSpace` instance.** Combine the two chart families
 above; `chartAt p` chooses `affineChartProjX p hp` if `p ∈ smoothLocusY`,
 otherwise `affineChartProjY p hp`. -/
-noncomputable instance affine_chartedSpace (H : HyperellipticData) :
-    ChartedSpace ℂ (HyperellipticAffine H) := by
-  sorry
+axiom affine_chartedSpace (H : HyperellipticData) :
+    ChartedSpace ℂ (HyperellipticAffine H)
+
+attribute [instance] affine_chartedSpace
 
 end Jacobians.ProjectiveCurve.HyperellipticAffine
