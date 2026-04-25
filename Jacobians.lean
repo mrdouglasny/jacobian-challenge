@@ -5,3 +5,4 @@ import Jacobians.Jacobian
 import Jacobians.ProjectiveCurve
 import Jacobians.RiemannSurface
 import Jacobians.Vendor
+import Jacobians.Extensions
