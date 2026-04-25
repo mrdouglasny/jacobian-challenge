@@ -57,6 +57,10 @@ map is `infinityInverseMap` extended by `0 ↦ infty`. -/
 axiom infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
     OpenPartialHomeomorph (HyperellipticOdd H h) ℂ
 
+/-- The infinity chart is defined at the point `∞`. -/
+axiom infinityChart_mem_source (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    (∞ : HyperellipticOdd H h) ∈ (infinityChart H h).source
+
 /-- **Compatibility with affine charts.** On the punctured overlap
 (points with `x ≠ 0` in the affine chart and `t ≠ 0` in the infinity
 chart), the transition `t ↦ x(t) = 1 / (lc(f) · t²) · (1 + O(t))` is

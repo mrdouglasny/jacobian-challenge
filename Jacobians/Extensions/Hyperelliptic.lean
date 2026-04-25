@@ -54,6 +54,33 @@ open scoped Manifold ContDiff
 open Jacobians.ProjectiveCurve
 open Jacobians.RiemannSurface
 
+namespace HyperellipticAffine
+
+variable {H : HyperellipticData}
+
+/-- Affine sign-flip `(x, y) ↦ (x, -y)` on the hyperelliptic equation
+`y² = f(x)`. -/
+def involution (p : HyperellipticAffine H) : HyperellipticAffine H := by
+  refine ⟨(p.val.1, -p.val.2), ?_⟩
+  calc
+    (-p.val.2) ^ 2 = p.val.2 ^ 2 := by ring
+    _ = H.f.eval p.val.1 := p.property
+
+@[simp] theorem involution_val_fst (p : HyperellipticAffine H) :
+    (involution p).val.1 = p.val.1 :=
+  rfl
+
+@[simp] theorem involution_val_snd (p : HyperellipticAffine H) :
+    (involution p).val.2 = -p.val.2 :=
+  rfl
+
+@[simp] theorem involution_involution (p : HyperellipticAffine H) :
+    involution (involution p) = p := by
+  apply Subtype.ext
+  simp [involution]
+
+end HyperellipticAffine
+
 /-! ## Warm-up 1 — `dx/y` is a holomorphic 1-form
 
 The differential `dx/y` is the standard "everywhere-finite" 1-form on
@@ -171,16 +198,24 @@ identity then tests the functoriality side of the challenge API.
 model of a hyperelliptic curve. -/
 noncomputable def hyperellipticInvolution
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    HyperellipticOdd H h → HyperellipticOdd H h := by
+    HyperellipticOdd H h → HyperellipticOdd H h :=
   -- On the affine chart: send `⟨(x, y), hxy⟩` to `⟨(x, -y), neg_pow ▸ hxy⟩`.
   -- At infinity (single point in the odd-degree case): identity.
-  sorry
+  fun p =>
+    p.elim (OnePoint.infty : HyperellipticOdd H h)
+      (fun q => (((HyperellipticAffine.involution q : HyperellipticAffine H) :
+        OnePoint (HyperellipticAffine H)) : HyperellipticOdd H h))
 
 /-- The hyperelliptic involution is an order-2 map: `σ ∘ σ = id`. -/
 theorem hyperellipticInvolution_involutive
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Function.Involutive (hyperellipticInvolution H h) := by
-  sorry
+  intro p
+  induction p using OnePoint.rec with
+  | infty =>
+      simp [hyperellipticInvolution]
+  | coe q =>
+      simp [hyperellipticInvolution, HyperellipticAffine.involution_involution]
 
 /-- The hyperelliptic involution is smooth (hence in particular
 `ContMDiff` for the `ω` smoothness level Buzzard's challenge uses). -/
