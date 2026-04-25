@@ -67,6 +67,39 @@ open Jacobians.RiemannSurface
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
+namespace BridgeForm
+
+open Jacobians.Vendor.Kirov.Montel
+
+/-- Some chart in Kirov's finite inner-open cover contains `y`. -/
+private theorem exists_chartChoice [Nonempty X] (y : X) :
+    ∃ x ∈ (chartCover : Finset X), y ∈ innerChartOpen (X := X) x := by
+  have hy : y ∈ (Set.univ : Set X) := Set.mem_univ y
+  rw [← iUnion_innerChartOpen_chartCover_eq (X := X)] at hy
+  simp only [Set.mem_iUnion] at hy
+  rcases hy with ⟨x, hx, hxy⟩
+  exact ⟨x, hx, hxy⟩
+
+/-- A chart in Kirov's finite inner-open cover containing `y`. -/
+noncomputable def chartChoice [Nonempty X] (y : X) : X :=
+  Classical.choose (exists_chartChoice (X := X) y)
+
+theorem chartChoice_mem [Nonempty X] (y : X) :
+    chartChoice (X := X) y ∈ (chartCover : Finset X) :=
+  (Classical.choose_spec (exists_chartChoice (X := X) y)).1
+
+theorem mem_innerChartOpen_chartChoice [Nonempty X] (y : X) :
+    y ∈ innerChartOpen (X := X) (chartChoice (X := X) y) :=
+  (Classical.choose_spec (exists_chartChoice (X := X) y)).2
+
+/-- The cotangent value obtained from the chart-centered coefficient in the chart at `x`. -/
+noncomputable def rawCLM [Nonempty X] (form : HolomorphicOneForm X) (x y : X) :
+    TangentSpace 𝓘(ℂ, ℂ) y →L[ℂ] (Bundle.Trivial X ℂ) y :=
+  (form.coeff x ((extChartAt 𝓘(ℂ, ℂ) x) y)) •
+    (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y)
+
+end BridgeForm
+
 /-! ## Construction of the bridge map
 
 The construction proceeds by, for each holomorphic-1-form cocycle

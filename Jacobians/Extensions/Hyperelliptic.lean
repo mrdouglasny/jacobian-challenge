@@ -51,7 +51,25 @@ import Jacobians.Bridge.KirovHolomorphic
 namespace Jacobians.Extensions.Hyperelliptic
 
 open scoped Manifold ContDiff
+open Jacobians.ProjectiveCurve
 open Jacobians.RiemannSurface
+
+/-- Temporary atlas stub for the odd hyperelliptic compactification.
+Needed so the extension theorems below are well-typed over
+`HolomorphicOneForm (HyperellipticOdd H h)`. -/
+axiom HyperellipticOdd.instChartedSpace
+    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    ChartedSpace ℂ (HyperellipticOdd H h)
+
+attribute [instance] HyperellipticOdd.instChartedSpace
+
+/-- Temporary manifold-compatibility stub for the odd hyperelliptic
+compactification. -/
+axiom HyperellipticOdd.instIsManifold
+    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h)
+
+attribute [instance] HyperellipticOdd.instIsManifold
 
 /-! ## Warm-up 1 — `dx/y` is a holomorphic 1-form
 
@@ -137,7 +155,8 @@ formalization end-to-end: cocycle definition + Kirov-Montel
 finite-dim bridge + Riemann–Roch axiom + the canonical basis. -/
 theorem genus_HyperellipticOdd_eq
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    genus (HyperellipticOdd H h) = (H.f.natDegree - 1) / 2 := by
+    Jacobians.RiemannSurface.genus (HyperellipticOdd H h) =
+      (H.f.natDegree - 1) / 2 := by
   sorry
 
 /-- **Consistency check.** For odd-degree-3 hyperelliptic curves
@@ -148,7 +167,7 @@ via `HyperellipticOdd` with `deg = 3` — yield different values. -/
 theorem genus_HyperellipticOdd_eq_one_of_deg_three
     (H : HyperellipticData) (h : Odd H.f.natDegree)
     (hdeg : H.f.natDegree = 3) :
-    genus (HyperellipticOdd H h) = 1 := by
+    Jacobians.RiemannSurface.genus (HyperellipticOdd H h) = 1 := by
   -- Direct corollary of `genus_HyperellipticOdd_eq` after computing
   -- `(3 - 1) / 2 = 1`.
   rw [genus_HyperellipticOdd_eq H h, hdeg]
