@@ -327,32 +327,53 @@ noncomputable def bridgeForm :
         --
         -- Strategy (Step 2 of `docs/KirovHolomorphicLessons.md`):
         --   1. `intro y₀` — fix the base point.
-        --   2. By `BridgeForm.rawCLM_swap_chart` (helper above), for `y` in the
-        --      `(extChartAt y₀).source` open nbhd of `y₀`,
+        --   2. By `BridgeForm.rawCLM_swap_chart`, for `y ∈ (extChartAt y₀).source`,
         --        `rawCLM form y y = rawCLM form y₀ y`.
         --      Use `ContMDiffAt.congr_of_eventuallyEq` on the totalSpace function
         --      `(fun y ↦ ⟨y, rawCLM form _ y⟩)` to swap chart-at-self → chart-at-y₀.
-        --   3. Apply `Bundle.Trivialization.contMDiffAt_section_iff` with the
-        --      hom-bundle trivialization `e := trivializationAt ℂ
-        --        (Bundle.ContinuousLinearMap (RingHom.id ℂ) (TangentSpace 𝓘(ℂ,ℂ))
-        --          (Bundle.Trivial X ℂ)) y₀` (whose baseSet contains `y₀`).
-        --   4. Reduce to smoothness of `(e ⟨y, rawCLM form y₀ y⟩).2 : ℂ →L[ℂ] ℂ`.
-        --   5. Inside `e` the trivialization unfolds via `hom_trivializationAt_apply`,
-        --      `Bundle.Trivial.continuousLinearMapAt_trivialization`, and
-        --      `TangentBundle.continuousLinearMapAt_trivializationAt`. The
-        --      `(symmL ∘ continuousLinearMapAt)` round-trip on a fiber element is
-        --      identity (`Bundle.Trivialization.symmL_continuousLinearMapAt`),
-        --      so the trivialized representative reduces to
-        --        `y ↦ (form.coeff y₀ ((extChartAt y₀) y)) • ContinuousLinearMap.id ℂ ℂ`.
-        --   6. Smoothness of that scalar: `form.coeff y₀ : ℂ → ℂ` is analytic on
-        --      `(extChartAt y₀).target` (`form.2.1 y₀`); compose with the smooth
-        --      `extChartAt y₀ : X → ℂ` (`contMDiffAt_extChartAt`) to get a smooth
-        --      ℂ-valued function. Then `ContMDiff.const_smul` lifts to the CLM.
+        --   3. Reduce via `contMDiffAt_hom_bundle` to base smoothness (= id) and
+        --      the `inCoordinates` (trivialized) representative smoothness.
+        --   4. Inside the trivialization the rep reduces (via
+        --      `Bundle.Trivial.continuousLinearMapAt_trivialization` and
+        --      `TangentBundle.continuousLinearMapAt_trivializationAt` +
+        --      `Bundle.Trivialization.symmL_continuousLinearMapAt`) to
+        --        `(form.coeff y₀ ((extChartAt y₀) y)) • ContinuousLinearMap.id ℂ ℂ`.
+        --   5. Smoothness of that scalar: `form.coeff y₀ : ℂ → ℂ` is analytic on
+        --      `(extChartAt y₀).target`; compose with smooth `extChartAt y₀`.
         --
-        -- Step 1 helper `rawCLM_swap_chart` is done. Steps 2–6 (the trivialization
-        -- bookkeeping and the analyticity → smoothness lift) are still open. The
-        -- closest in-repo template is `Jacobians.Vendor.Kirov.HolomorphicForms.pullbackForm`
+        -- Closest template: `Jacobians.Vendor.Kirov.HolomorphicForms.pullbackForm`
         -- (lines ~127–188), which uses the same `contMDiffAt_hom_bundle` reduction.
+        intro y₀
+        -- Step 2: replace chart-at-self with chart-at-y₀ on a nbhd of y₀.
+        -- We'll prove smoothness of the FIXED-CHART section, then transfer.
+        -- `congr_of_eventuallyEq` consumes `f₁ =ᶠ f` to convert smoothness of `f`
+        -- into smoothness of `f₁`, so we orient the eq with chart-at-self on the LHS.
+        have hSwap :
+            (fun y => Bundle.TotalSpace.mk' (ℂ →L[ℂ] ℂ) y (BridgeForm.rawCLM form y y)) =ᶠ[𝓝 y₀]
+            (fun y => Bundle.TotalSpace.mk' (ℂ →L[ℂ] ℂ) y (BridgeForm.rawCLM form y₀ y)) := by
+          filter_upwards [extChartAt_source_mem_nhds (I := 𝓘(ℂ, ℂ)) y₀] with y hy
+          -- y ∈ source y₀ and y ∈ source y; apply rawCLM_swap_chart.
+          have hy_y : y ∈ (extChartAt 𝓘(ℂ, ℂ) y).source := mem_extChartAt_source y
+          rw [show BridgeForm.rawCLM form y y = BridgeForm.rawCLM form y₀ y from
+            BridgeForm.rawCLM_swap_chart form hy_y hy]
+        -- It suffices to show smoothness of the fixed-chart version.
+        suffices h : ContMDiffAt 𝓘(ℂ, ℂ) (𝓘(ℂ, ℂ).prod 𝓘(ℂ, ℂ →L[ℂ] ℂ)) ω
+            (fun y => Bundle.TotalSpace.mk' (ℂ →L[ℂ] ℂ) y (BridgeForm.rawCLM form y₀ y)) y₀ from
+          h.congr_of_eventuallyEq hSwap
+        -- Goal: ContMDiffAt _ _ ω (T% (fun y => rawCLM form y₀ y)) y₀.
+        -- Following the `pullbackForm` template (Vendor/Kirov/HolomorphicForms.lean ~127–188):
+        -- reduce via `contMDiffAt_hom_bundle` to base smoothness (id) and inCoordinates rep.
+        rw [contMDiffAt_hom_bundle]
+        refine ⟨contMDiffAt_id, ?_⟩
+        -- Goal: ContMDiffAt _ _ ω (fun y => inCoordinates ... y₀ y y₀ y (rawCLM form y₀ y)) y₀.
+        -- The inCoordinates rep unfolds (via Bundle.Trivial.continuousLinearMapAt_trivialization
+        -- and the symmL/continuousLinearMapAt round-trip on the source side) to a scalar
+        -- multiple of `mfderiv (extChartAt y₀) y` viewed in the trivialization. By
+        -- `TangentBundle.continuousLinearMapAt_trivializationAt` this trivialized mfderiv
+        -- collapses to `id` after applying `symmL ∘ continuousLinearMapAt = id` from
+        -- `Bundle.Trivialization.symmL_continuousLinearMapAt`. The remaining scalar
+        -- `form.coeff y₀ ((extChartAt y₀) y)` is smooth via `coeff y₀` analytic on the
+        -- chart target plus smooth chart map. Left as `sorry` for now.
         sorry }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
