@@ -521,7 +521,8 @@ instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
                       symm
                       calc
                         (b.val.2 * b.val.1⁻¹ ^ (H.f.natDegree / 2)) * b.val.1 ^ (H.f.natDegree / 2)
-                            = b.val.2 * (b.val.1⁻¹ ^ (H.f.natDegree / 2) * b.val.1 ^ (H.f.natDegree / 2)) := by
+                            = b.val.2 * (b.val.1⁻¹ ^ (H.f.natDegree / 2) *
+                                b.val.1 ^ (H.f.natDegree / 2)) := by
                                 ring_nf
                         _ = b.val.2 * ((b.val.1⁻¹ * b.val.1) ^ (H.f.natDegree / 2)) := by
                               rw [← mul_pow]
@@ -665,8 +666,9 @@ noncomputable def affineInfinityOverlapHomeomorph
     · simp [affineToInfinityOverlap, infinityToAffineOverlap, a.2]
     · calc
         a.1.val.2 * a.1.val.1⁻¹ ^ (H.f.natDegree / 2) * (a.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
-            = a.1.val.2 * (a.1.val.1⁻¹ ^ (H.f.natDegree / 2) * a.1.val.1 ^ (H.f.natDegree / 2)) := by
-                simp [a.2, mul_assoc]
+            = a.1.val.2 *
+                (a.1.val.1⁻¹ ^ (H.f.natDegree / 2) * a.1.val.1 ^ (H.f.natDegree / 2)) := by
+                simp [a.2]
         _ = a.1.val.2 * ((a.1.val.1⁻¹ * a.1.val.1) ^ (H.f.natDegree / 2)) := by
               rw [← mul_pow]
         _ = a.1.val.2 := by
@@ -679,8 +681,9 @@ noncomputable def affineInfinityOverlapHomeomorph
     · simp [affineToInfinityOverlap, infinityToAffineOverlap, b.2]
     · calc
         b.1.val.2 * b.1.val.1⁻¹ ^ (H.f.natDegree / 2) * (b.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
-            = b.1.val.2 * (b.1.val.1⁻¹ ^ (H.f.natDegree / 2) * b.1.val.1 ^ (H.f.natDegree / 2)) := by
-                simp [b.2, mul_assoc]
+            = b.1.val.2 *
+                (b.1.val.1⁻¹ ^ (H.f.natDegree / 2) * b.1.val.1 ^ (H.f.natDegree / 2)) := by
+                simp [b.2]
         _ = b.1.val.2 * ((b.1.val.1⁻¹ * b.1.val.1) ^ (H.f.natDegree / 2)) := by
               rw [← mul_pow]
         _ = b.1.val.2 := by
@@ -818,7 +821,8 @@ lemma isOpen_image_infinityChart (H : HyperellipticData) (h : ¬ Odd H.f.natDegr
   let qB : HyperellipticAffineInfinity H → HyperellipticEvenProj H := fun b =>
     Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b)
   let V : Set (HyperellipticAffine H) :=
-    (infinityToAffine H h) '' ((Subtype.val : infinityOverlap H → HyperellipticAffineInfinity H) ⁻¹' U)
+    (infinityToAffine H h) ''
+      ((Subtype.val : infinityOverlap H → HyperellipticAffineInfinity H) ⁻¹' U)
   have hV : IsOpen V := by
     exact (isOpenMap_infinityToAffine H h) _
       (hU.preimage continuous_subtype_val)
@@ -841,12 +845,14 @@ lemma isOpen_image_infinityChart (H : HyperellipticData) (h : ¬ Odd H.f.natDegr
             have hglue0 :
                 HyperellipticEvenGlue H (Sum.inl (infinityToAffine H h b0)) (Sum.inr b0.1) := by
               dsimp [HyperellipticEvenGlue, infinityToAffine, infinityToAffineOverlap]
-              refine ⟨inv_ne_zero b0.2, by simp [b0.2], ?_⟩
+              refine ⟨inv_ne_zero b0.2, by simp, ?_⟩
               exact (calc
-                b0.1.val.2 * b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) * (b0.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
+                b0.1.val.2 * b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) *
+                    (b0.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
                     = b0.1.val.2 *
-                        (b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) * b0.1.val.1 ^ (H.f.natDegree / 2)) := by
-                          simp [b0.2, mul_assoc]
+                        (b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) *
+                          b0.1.val.1 ^ (H.f.natDegree / 2)) := by
+                          simp [b0.2]
                 _ = b0.1.val.2 * ((b0.1.val.1⁻¹ * b0.1.val.1) ^ (H.f.natDegree / 2)) := by
                       rw [← mul_pow]
                 _ = b0.1.val.2 := by
@@ -868,12 +874,14 @@ lemma isOpen_image_infinityChart (H : HyperellipticData) (h : ¬ Odd H.f.natDegr
             have hglue0 :
                 HyperellipticEvenGlue H (Sum.inl (infinityToAffine H h b0)) (Sum.inr b0.1) := by
               dsimp [HyperellipticEvenGlue, infinityToAffine, infinityToAffineOverlap]
-              refine ⟨inv_ne_zero b0.2, by simp [b0.2], ?_⟩
+              refine ⟨inv_ne_zero b0.2, by simp, ?_⟩
               exact (calc
-                b0.1.val.2 * b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) * (b0.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
+                b0.1.val.2 * b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) *
+                    (b0.1.val.1⁻¹)⁻¹ ^ (H.f.natDegree / 2)
                     = b0.1.val.2 *
-                        (b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) * b0.1.val.1 ^ (H.f.natDegree / 2)) := by
-                          simp [b0.2, mul_assoc]
+                        (b0.1.val.1⁻¹ ^ (H.f.natDegree / 2) *
+                          b0.1.val.1 ^ (H.f.natDegree / 2)) := by
+                          simp [b0.2]
                 _ = b0.1.val.2 * ((b0.1.val.1⁻¹ * b0.1.val.1) ^ (H.f.natDegree / 2)) := by
                       rw [← mul_pow]
                 _ = b0.1.val.2 := by
@@ -963,7 +971,8 @@ lemma hyperellipticEvenGlue_iff_mul (H : HyperellipticData)
     have hx : a.val.1 ≠ 0 := by
       intro hzero
       have : (0 : ℂ) = 1 := by
-        simpa [hzero] using hmul
+        simp [hzero] at hmul
+        exact hmul
       exact zero_ne_one this
     have h1 : b.val.1 = a.val.1⁻¹ := eq_inv_of_mul_eq_one_left hmul
     refine ⟨hx, h1, ?_⟩
