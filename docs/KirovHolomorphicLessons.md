@@ -3,13 +3,15 @@
 This note records what the `Jacobians.Bridge.KirovHolomorphic` proof attempt
 established and where it got stuck.
 
-## Current branch status
+## Current branch status (updated 2026-04-25)
 
 - `Jacobians.ProjectiveCurve.Hyperelliptic.Even` had a real proof bug and is
   now fixed.
 - `lake build Jacobians.Extensions.Hyperelliptic` succeeds again.
-- `Jacobians.Bridge.KirovHolomorphic` still builds with the original two
-  `sorry`s in place.
+- `Jacobians.Bridge.KirovHolomorphic` builds with **one** remaining `sorry`
+  (the `bridgeForm.contMDiff_toFun` smoothness witness). `bridgeForm_injective`
+  is fully proved; `BridgeForm.rawCLM_swap_chart` (the chart-overlap lemma) was
+  added in commit `28a9111` and discharges Step 1 of the plan below.
 
 ## Useful scaffolding that should be kept
 
@@ -145,32 +147,107 @@ use it inside a `ContMDiffOn` proof.
 
 Add these as separate lemmas under `namespace BridgeForm`:
 
-- `rawCLM_eq_of_mem_innerChartOpen`
-- `rawCLM_trivialized_eq_smul_id`
+- `rawCLM_eq_of_mem_innerChartOpen` — **DONE** as `rawCLM_swap_chart`
+  (commit `28a9111`). Statement form is slightly more general:
 
-The second lemma should state the trivialized coordinate identity for fixed
-`x ∈ chartCover` and `y ∈ innerChartOpen x`.
+  ```lean
+  theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X}
+      (hxy : y ∈ (extChartAt 𝓘(ℂ, ℂ) x).source)
+      (hx'y : y ∈ (extChartAt 𝓘(ℂ, ℂ) x').source) :
+      rawCLM form x y = rawCLM form x' y
+  ```
 
-### Step 2: use the helpers to prove local smoothness
+  i.e., chart overlap on `(extChartAt x).source ∩ (extChartAt x').source` (which
+  contains `innerChartOpen x ∩ innerChartOpen x'` since
+  `innerChartOpen ⊆ chartOpen ⊆ coverOpen = source`).
 
-Then prove:
+- `rawCLM_trivialized_eq_smul_id` — **OPEN**
+
+  The second lemma should state the trivialized coordinate identity for fixed
+  `x ∈ chartCover` and `y ∈ innerChartOpen x`.
+
+#### `rawCLM_swap_chart` proof shape (what worked)
+
+The proof had three concrete subtleties not foreseen in the original notes:
+
+1. **`MDifferentiableAt.comp_of_eq` / `comp` named-argument syntax was finicky.**
+   Using `(g := ...) (f := ...)` named-arg form failed instance synthesis;
+   passing arguments positionally with explicit `(g := ...) (f := ...)` worked
+   only when the implicit `x` (basepoint) was unified by surrounding context.
+   The working form was
+
+   ```lean
+   have hsymm_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt x).symm z := by
+     have hrange : Set.range 𝓘(ℂ, ℂ) = Set.univ := ModelWithCorners.range_eq_univ _
+     rw [← mdifferentiableWithinAt_univ, ← hrange]
+     exact mdifferentiableWithinAt_extChartAt_symm hz_tgt
+   have hTrans_mdiff : MDifferentiableAt ... ((extChartAt x') ∘ (extChartAt x).symm) z := by
+     have := (hsymm ▸ hmdiff_x' :
+       MDifferentiableAt _ _ (extChartAt x') ((extChartAt x).symm z))
+     exact this.comp z hsymm_mdiff
+   ```
+
+2. **`mfderiv_comp_of_eq` is the right tool for the chain rule** when the
+   basepoint identity `f x = y` needs explicit handling. Combining with
+   `EventuallyEq.mfderiv_eq` to swap `extChartAt x'` for the `(transition) ∘
+   (extChartAt x)` form was the cleanest route.
+
+3. **CLM 1-D scalar identity required `show`-based form coercion.** The final
+   step `T 1 • w = T w` (for `T : ℂ →L[ℂ] ℂ`) was discharged by
+   `ContinuousLinearMap.map_smul` after rewriting `w` as `w • 1`, but the
+   `smul_eq_mul` rewrites would catch `w • T 1` first (RHS), not `T 1 • w`
+   (LHS), without an explicit `show T 1 * w = w * T 1` followed by `ring`.
+
+### Step 2: use the helpers to prove local smoothness — **OPEN**
+
+Then prove (or fold directly into `bridgeForm.contMDiff_toFun`):
 
 - `contMDiffOn_totalSpaceMk_rawCLM`
 
-This should be much shorter once the trivialized expression is already available.
+Concrete plan written into `bridgeForm.contMDiff_toFun` docstring:
+
+1. `intro y₀`.
+2. By `rawCLM_swap_chart`, `(fun y ↦ ⟨y, rawCLM form y y⟩) =ᶠ[𝓝 y₀]
+   (fun y ↦ ⟨y, rawCLM form y₀ y⟩)`. Use `ContMDiffAt.congr_of_eventuallyEq` to
+   swap.
+3. Apply `Bundle.Trivialization.contMDiffAt_section_iff` with the hom-bundle
+   trivialization `e := trivializationAt ℂ
+     (Bundle.ContinuousLinearMap (RingHom.id ℂ) (TangentSpace 𝓘(ℂ,ℂ))
+       (Bundle.Trivial X ℂ)) y₀`.
+4. Reduce to smoothness of `(e ⟨y, rawCLM form y₀ y⟩).2 : ℂ →L[ℂ] ℂ`.
+5. Inside `e` the trivialization unfolds via `hom_trivializationAt_apply`,
+   `Bundle.Trivial.continuousLinearMapAt_trivialization`,
+   `TangentBundle.continuousLinearMapAt_trivializationAt`. The
+   `(symmL ∘ continuousLinearMapAt)` round-trip on a fiber element is identity
+   (`Bundle.Trivialization.symmL_continuousLinearMapAt`), so the trivialized
+   representative reduces to
+   `y ↦ (form.coeff y₀ ((extChartAt y₀) y)) • ContinuousLinearMap.id ℂ ℂ`.
+6. Smoothness of that scalar: `form.coeff y₀ : ℂ → ℂ` is analytic on
+   `(extChartAt y₀).target` (`form.2.1 y₀`). Compose with the smooth
+   `extChartAt y₀ : X → ℂ` to get a smooth ℂ-valued function. Then
+   `ContMDiff.const_smul` (or `smul`) lifts to the CLM.
+
+The closest in-repo template is `Jacobians.Vendor.Kirov.HolomorphicForms.pullbackForm`
+(lines ~127–188), which uses the `contMDiffAt_hom_bundle` reduction.
 
 ### Step 3: only then define `bridgeForm`
 
 With overlap equality and local smoothness available, the actual `bridgeForm`
-definition should be mostly assembly:
+definition is mostly assembly:
 
-- pointwise value via `chartChoice`
-- local equality to a fixed-chart `rawCLM`
+- pointwise value via chart-at-self (Codex's choice; `chartChoice` is now only
+  used inside `rawCLM_swap_chart` arguments)
+- local equality to a fixed-chart `rawCLM` (provided by `rawCLM_swap_chart`)
 - local-to-global `ContMDiff`
 
-### Step 4: leave injectivity for after construction
+The constructor body (`toFun`, `map_add'`, `map_smul'`) is already in place;
+only the `contMDiff_toFun` field is `sorry`.
 
-The injectivity proof should come last. It is conceptually easier once the
-section formula is fixed and reusable lemmas exist about how `bridgeForm` looks
-in a chosen chart.
+### Step 4: injectivity — **DONE**
+
+The injectivity proof was completed in the working tree (committed in
+`28a9111`). The proof uses `mfderiv_extChartAt_self` to identify
+`mfderiv (extChartAt p) p = id`, extracts the diagonal coefficient via
+`DFunLike.congr_fun ... 1`, then extends via the cocycle predicate to all
+chart-target points and via `IsZeroOffChartTarget` to the off-target case.
 
