@@ -1,6 +1,6 @@
 # Buzzard's Jacobian Challenge — summary
 
-Posted 19 April 2026 by Kevin Buzzard to the Lean Zulip (stream `#Autoformalization`, topic `Jacobian challenge`). Canonical URL: https://tinyurl.com/JacobianChallenge, gist `kbuzzard/778bc714030b3e974ab5f4038783d1a9`. Version v0.2 as of the scaffolding of this repo. Thread spans 2026-04-19 through 2026-04-23 (53 messages at the time this file was written).
+Posted 19 April 2026 by Kevin Buzzard to the Lean Zulip (stream `#Autoformalization`, topic `Jacobian challenge`). Canonical URL: https://tinyurl.com/JacobianChallenge, gist `kbuzzard/778bc714030b3e974ab5f4038783d1a9`. Current version **v0.3** (2026-04-24). Thread spans 2026-04-19 through 2026-04-25 (65 messages at last sync; previous snapshot was 53 messages through 2026-04-23).
 
 ## The challenge
 
@@ -138,4 +138,25 @@ Brian Nugent suggested a workaround for the AG version: "swap out `Jacobian C` i
 
 ## Participants (in rough order of first appearance)
 
-Kevin Buzzard (author), Michael Stoll, Sébastien Gouëzel, Jason Rute, Michael Rothgang, Rado Kirov, Julian Berman, Riccardo Brasca, Jack McCarthy, Christian Merten (AG version), Emily Riehl, Timothy Chow, Kim Morrison (comparator), Dominic Steinitz, Ralf Stephan, Paul Lezeau, David Michael Roberts, Brian Nugent.
+Kevin Buzzard (author), Michael Stoll, Sébastien Gouëzel, Jason Rute, Michael Rothgang, Rado Kirov, Julian Berman, Riccardo Brasca, Jack McCarthy, Christian Merten (AG version), Emily Riehl, Timothy Chow, Kim Morrison (comparator), Dominic Steinitz, Ralf Stephan, Paul Lezeau, David Michael Roberts, Brian Nugent, Michael R Douglas, Snir Broshi, Michal Wallace (tangentstorm).
+
+## Update 2026-04-24 / 2026-04-25 (msgs 54–65)
+
+### v0.3 of the challenge
+
+Kevin Buzzard (2026-04-24): published v0.3 at https://tinyurl.com/JacobianChallenge, folding in Gouëzel's `ConnectedSpace`/`Nonempty` cleanup and intended as the final version. Sébastien Gouëzel immediately followed up: "You're still missing the notation for modelWithCornersSelf" — i.e. the `𝓘(ℂ, E)` notation fix had not yet landed.
+
+### Three independent repo solutions now public
+
+In addition to Kirov's baseline (https://github.com/rkirov/jacobian-claude), two more attempts were posted:
+
+1. **Michael R Douglas** (2026-04-24, 20:24Z): https://github.com/mrdouglasny/jacobian-challenge — "another attempt to address this interesting challenge — not a full proof but filling in all the definitions and skeleton/plans for proofs. I think I put in about 3 hours of my own time, and this counts typing 'keep going' into Claude Code." (Initially private/404'd; made public 2026-04-25.) **This is the present repository.**
+2. **Michal Wallace (tangentstorm)** (2026-04-25, 02:51Z): https://github.com/tangentstorm/JacobianChallenge — added to his AI-formalization portfolio. Strategy: extend Mathlib up to the problem, layered milestones. As of 2026-04-25 17:34Z his progress board reads: scaffolding 100%, Mathlib v4.28.0 inventory 100%, **Complex torus quotient 100% (ZLattice bridge sorry-free)**, quotient manifold layer 15% (`exists_chart_ball` proven), holomorphic forms / path integration / Abel-Jacobi / trace-degree-push-pull all 0%. He notes the math is "about 4 years of math classes over my head" and is relying on cross-AI checks; plans a Codex review of his ComplexTorus files followed by a human sanity check on Zulip.
+
+### License normalization for cross-pollination
+
+Rado Kirov (2026-04-25, 01:38Z) reminded the thread that anyone is welcome to remix his attempt to save tokens (with the caveat that experimental purity may argue against it). Snir Broshi flagged that MIT-vs-Apache-2 stickiness would block derivatives flowing into Mathlib or `merely-true`, and Kirov relicensed his repo to **Apache 2** the same hour ("done").
+
+### Kevin's framing of the right Mathlib lemma
+
+Closing the window (2026-04-25, 17:59Z), Kevin replied to tangentstorm's quotient-manifold milestone: "The correct thing to prove as far as mathlib is concerned is something like: if a discrete group acts on a manifold properly discontinuously then the quotient is a manifold. Or maybe something more general?" — pinging Michael Rothgang to ask whether someone is already working on this. (Cross-references Rothgang's 2026-04-19 note that the charted-space instance is awaiting review and a `SmoothLieGroupAction` definition is missing, plus Steinitz's draft in `PrincipalGBundle.lean` and Mathlib PR #38374.)
