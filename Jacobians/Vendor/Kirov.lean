@@ -11,11 +11,17 @@ Currently vendored:
                          (~3,400 LOC; one structural sorry on closed-ball compactness).
 * `HolomorphicForms`   — `FiniteDimensional ℂ (HolomorphicOneForms X)` from Montel
                          compactness, plus pullback/pushforward functoriality on forms.
+* `LineIntegral`       — `pathSpeed`, `lineIntegral`, linearity (add/smul/neg/const),
+                         path reversal, concatenation, and `pathSpeed_comp_eq_mfderiv`
+                         (chart-local chain rule). 602 LOC, **sorry-free**.
+                         Starting point for retiring `pathIntegralBasepointFunctional`
+                         and `loopIntegralToH1` from `Axioms/AbelJacobiMap.lean`.
 
 These modules are present in the build but not yet wired into the main
-`Jacobians.*` tree. Adoption work — replacing `Axioms/FiniteDimOneForms.lean`
-and friends with the real Montel-derived facts — is staged separately.
+`Jacobians.*` tree. Adoption work is staged via bridge files in
+`Jacobians/Bridge/` (e.g. `KirovHolomorphic.lean`).
 -/
 import Jacobians.Vendor.Kirov.Genus
 import Jacobians.Vendor.Kirov.Montel
 import Jacobians.Vendor.Kirov.HolomorphicForms
+import Jacobians.Vendor.Kirov.LineIntegral
