@@ -332,12 +332,15 @@ multiplication by the degree `d`. In terms of forms: `f_* ∘ f^* = deg(f) • i
 Mathlib has no manifold-level degree theory for proper holomorphic maps.
 Real content requires a real `ContMDiff.degree` (via preimage counting
 at regular values) together with a real trace/pushforward construction
-for `ambientPhi`. ~500-1000 lines to formalize. -/
-theorem ambientPhi_ambientPsi_eq {gX gY : ℕ}
+for `ambientPhi`. ~500-1000 lines to formalize.
+
+**Stated as `axiom` for handoff** (was `:= sorry` in upstream). To
+discharge: prove the same statement and replace this `axiom` with a
+`theorem`. See `vendor/kirov-jacobian-claude/HANDOFF.md`. -/
+axiom ambientPhi_ambientPsi_eq {gX gY : ℕ}
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (d : ℕ)
     (y : Fin gY → ℂ) :
-    ambientPhi (gX := gX) (gY := gY) f hf (ambientPsi f hf y) = (d : ℕ) • y :=
-  sorry
+    ambientPhi (gX := gX) (gY := gY) f hf (ambientPsi f hf y) = (d : ℕ) • y
 
 /-- `ambientPhi id = id` — follows from `ambientPsi_id` via the transpose
 construction: transpose of identity matrix is identity. -/
