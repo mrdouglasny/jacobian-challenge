@@ -98,6 +98,133 @@ noncomputable def rawCLM [Nonempty X] (form : HolomorphicOneForm X) (x y : X) :
   (form.coeff x ((extChartAt 𝓘(ℂ, ℂ) x) y)) •
     (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y)
 
+/-- **Chart-swap lemma.** On the overlap of two chart sources, `rawCLM` is independent of
+which chart is used. This is the cocycle-coherence property that drives both the
+`bridgeForm` smoothness proof (locally swap to a fixed cover-chart) and the
+chart-at-self-vs-fixed-chart equality used inside it.
+
+The proof combines the cocycle predicate (`form.2.2.1`) with the chain rule
+`mfderiv_comp` for `extChartAt x' = (extChartAt x' ∘ (extChartAt x).symm) ∘ extChartAt x`
+near `y`, plus the 1-dimensional identity `T(v) = (T 1) • v` for `T : ℂ →L[ℂ] ℂ`. -/
+theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X}
+    (hxy : y ∈ (extChartAt 𝓘(ℂ, ℂ) x).source)
+    (hx'y : y ∈ (extChartAt 𝓘(ℂ, ℂ) x').source) :
+    rawCLM form x y = rawCLM form x' y := by
+  -- Set up the key data.
+  set z : ℂ := (extChartAt 𝓘(ℂ, ℂ) x) y with hz_def
+  -- z is in `target x` since y ∈ source x.
+  have hz_tgt : z ∈ (extChartAt 𝓘(ℂ, ℂ) x).target :=
+    (extChartAt 𝓘(ℂ, ℂ) x).map_source hxy
+  -- And `(extChartAt x).symm z = y`.
+  have hsymm : (extChartAt 𝓘(ℂ, ℂ) x).symm z = y :=
+    (extChartAt 𝓘(ℂ, ℂ) x).left_inv hxy
+  -- Now invoke the cocycle predicate at (x, x', z).
+  have hcoc : form.coeff x z =
+      form.coeff x' ((extChartAt 𝓘(ℂ, ℂ) x') ((extChartAt 𝓘(ℂ, ℂ) x).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z 1) :=
+    form.2.2.1 x x' z hz_tgt (by rw [hsymm]; exact hx'y)
+  -- Substitute `(extChartAt x).symm z = y` inside the coefficient slot.
+  rw [hsymm] at hcoc
+  -- Chain rule: `mfderiv (extChartAt x') y = (mfderiv (extChartAt x' ∘ (extChartAt x).symm) z) ∘L (mfderiv (extChartAt x) y)`.
+  -- Strictly: `extChartAt x' = (extChartAt x' ∘ (extChartAt x).symm) ∘ extChartAt x` near `y`.
+  have hmdiff_x : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y := by
+    apply mdifferentiableAt_extChartAt
+    rwa [← extChartAt_source (I := 𝓘(ℂ, ℂ))]
+  have hmdiff_x' : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x') y := by
+    apply mdifferentiableAt_extChartAt
+    rwa [← extChartAt_source (I := 𝓘(ℂ, ℂ))]
+  -- The chart-transition map (extChartAt x' ∘ (extChartAt x).symm) is mdifferentiable at z.
+  have hmdiff_symm : MDifferentiableWithinAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+      (extChartAt 𝓘(ℂ, ℂ) x).symm (Set.range (𝓘(ℂ, ℂ))) z :=
+    mdifferentiableWithinAt_extChartAt_symm hz_tgt
+  -- For maps ℂ → ℂ, mfderiv = fderiv. We'll use this with the chart-transition.
+  -- Key fact: a CLM `T : ℂ →L[ℂ] ℂ` equals `T 1 • id`, so
+  --   `fderiv (φ' ∘ φ⁻¹) z 1 • mfderiv (extChartAt x) y = mfderiv (extChartAt x' ∘ (extChartAt x).symm) z ∘L mfderiv (extChartAt x) y = mfderiv (extChartAt x') y`.
+  -- Step 1: identify the trans-derivative as multiplication by a scalar.
+  -- The composition (extChartAt x' ∘ (extChartAt x).symm) is a map ℂ → ℂ; its mfderiv = fderiv.
+  -- For a 1-dim ℂ-linear map T, T = T(1) • id_ℂ.
+  -- Step 2: rewrite `mfderiv (extChartAt x') y` via composition = transition ∘L mfderiv (extChartAt x) y.
+  -- We use `extChartAt x' = (extChartAt x' ∘ (extChartAt x).symm) ∘ extChartAt x` LOCALLY near y,
+  -- which gives the chain rule via `Filter.EventuallyEq.mfderiv_eq` + `mfderiv_comp`.
+  -- The local equality holds because (extChartAt x).symm ∘ extChartAt x = id near y.
+  have hLocalEq : (extChartAt 𝓘(ℂ, ℂ) x') =ᶠ[𝓝 y]
+      (((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) ∘ (extChartAt 𝓘(ℂ, ℂ) x)) := by
+    filter_upwards [extChartAt_source_mem_nhds' hxy] with w hw
+    simp only [Function.comp_apply, (extChartAt 𝓘(ℂ, ℂ) x).left_inv hw]
+  -- Apply the chain rule.
+  have hmfd_eq : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x') y =
+      mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) ∘ (extChartAt 𝓘(ℂ, ℂ) x)) y := by
+    exact hLocalEq.mfderiv_eq
+  -- The transition map's mfderiv equals fderiv (vector-space case).
+  have hsymm_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x).symm z := by
+    -- 𝓘(ℂ,ℂ) is boundaryless, so range = univ and `mdifferentiableWithinAt` upgrades.
+    have hrange : (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+      ModelWithCorners.range_eq_univ _
+    rw [← mdifferentiableWithinAt_univ, ← hrange]
+    exact hmdiff_symm
+  have hTrans_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+      ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z := by
+    -- (extChartAt x).symm sends z to y; then extChartAt x' is mdifferentiable at y.
+    have hcomp : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z := by
+      have := (hsymm ▸ hmdiff_x' :
+        MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x')
+          ((extChartAt 𝓘(ℂ, ℂ) x).symm z))
+      exact this.comp z hsymm_mdiff
+    exact hcomp
+  -- Chain rule for `(transition) ∘ (extChartAt x)` at `y`:
+  --   mfderiv ((transition) ∘ (extChartAt x)) y = mfderiv (transition) z ∘L mfderiv (extChartAt x) y
+  -- since (extChartAt x) y = z.
+  have hcomp_chain : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) ∘ (extChartAt 𝓘(ℂ, ℂ) x)) y =
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z).comp
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) :=
+    mfderiv_comp_of_eq hTrans_mdiff hmdiff_x hz_def.symm
+  -- Combine `hmfd_eq` (equality of mfderivs) with the chain rule.
+  have hmfd_x'_chain : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x') y =
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z).comp
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) :=
+    hmfd_eq.trans hcomp_chain
+  -- Now unfold rawCLM and substitute hcoc + the chain rule.
+  unfold rawCLM
+  rw [hcoc, mul_smul, hmfd_x'_chain]
+  -- Goal: c2 • (fderiv T z 1 • mfderiv (extChartAt x) y) =
+  --       c2 • ((mfderiv T z) ∘L (mfderiv (extChartAt x) y))
+  congr 1
+  -- Goal: fderiv T z 1 • mfderiv (extChartAt x) y = mfderiv T z ∘L mfderiv (extChartAt x) y
+  -- Replace mfderiv (transition) with fderiv (transition) since both vector spaces.
+  have hmfd_trans : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z =
+      fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z :=
+    mfderiv_eq_fderiv
+  rw [hmfd_trans]
+  -- For T : ℂ →L[ℂ] ℂ, T ∘L S equals T(1) • S as continuous linear maps.
+  -- Use ContinuousLinearMap extensionality, applying both sides to a tangent vector v.
+  apply ContinuousLinearMap.ext
+  intro v
+  -- Goal: ((fderiv ... z 1) • (mfderiv ... y)) v = ((fderiv ... z) ∘L (mfderiv ... y)) v.
+  -- LHS = (fderiv ... z 1) • (mfderiv ... y v) = (fderiv ... z 1) * (mfderiv ... y v).
+  -- RHS = (fderiv ... z) (mfderiv ... y v).
+  -- For T : ℂ →L[ℂ] ℂ and w : ℂ, T w = T 1 * w by ℂ-linearity.
+  -- Both v's TangentSpace and the codomain TangentSpace at (extChartAt x) y are defeq to ℂ.
+  show (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z 1) •
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) v =
+      (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z)
+        ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) v)
+  -- Now both sides are ℂ-valued (the • is scalar mult on ℂ, the application is ℂ → ℂ).
+  set T := fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z with hT_def
+  set w : ℂ := (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) v with hw_def
+  -- Goal: T 1 • w = T w.
+  -- By 1-D linearity: T w = T (w • 1) = w • T 1 = T 1 • w (using mul_comm on ℂ).
+  have : T w = w • T 1 := by
+    conv_lhs => rw [show w = w • (1 : ℂ) from (mul_one w).symm]
+    rw [ContinuousLinearMap.map_smul]
+  rw [this]
+  -- Goal: T 1 • w = w • T 1.  Both sides are products in ℂ; commute via smul_eq_mul + mul_comm.
+  show T 1 * w = w * T 1
+  ring
+
 end BridgeForm
 
 /-! ## Construction of the bridge map
@@ -169,26 +296,50 @@ The discharge needs (likely subset; iterate via `lean_leansearch`):
 /-- **The bridge.** Canonical ℂ-linear map from chart-cocycle holomorphic
 1-forms to Kirov's `ContMDiffSection`-encoded holomorphic 1-forms.
 
-Discharges to a real `def` once the section construction + smoothness
-proof are filled in. See the file-level docstring for the construction
-sketch. -/
+The pointwise value at `y : X` is
+
+```
+form.coeff y ((extChartAt 𝓘(ℂ) y) y) • (mfderiv 𝓘(ℂ) 𝓘(ℂ) (extChartAt 𝓘(ℂ) y) y)
+```
+
+i.e. `BridgeForm.rawCLM form y y` in the chart **at `y` itself**. Using
+the chart-at-self has two advantages:
+
+* extensionality / injectivity is straightforward, because at the
+  basepoint `mfderiv (extChartAt y) y = id` (`mfderiv_extChartAt_self`),
+  so the section value reduces to `c • id` where `c` is the diagonal
+  coefficient `form.coeff y ((extChartAt y) y)`;
+* the pointwise value depends only on `form.coeff` along the diagonal,
+  so the sectional `map_add' / map_smul'` reduce to direct rewriting via
+  `coeff_add / coeff_smul` and the linearity of scalar multiplication on
+  CLMs.
+
+The smoothness witness `contMDiff_toFun` is the only deep obligation;
+it remains as a `sorry` for now (see `docs/KirovHolomorphicLessons.md`
+for the planned discharge route via `rawCLM_eq_of_mem_innerChartOpen`,
+`rawCLM_trivialized_eq_smul_id`, `contMDiffOn_totalSpaceMk_rawCLM`). -/
 noncomputable def bridgeForm :
-    HolomorphicOneForm X →ₗ[ℂ] Jacobians.Vendor.Kirov.HolomorphicOneForms X := by
-  -- Construction skeleton:
-  --
-  --   refine
-  --     { toFun := fun form =>
-  --         { toFun := fun p => <build cotangent value at p from form.coeff p>
-  --           contMDiff_toFun := <smoothness proof using form.2.1 (analyticity)
-  --                              and form.2.2.1 (cocycle)> }
-  --       map_add' := <pointwise; coeff_add + addition of CLMs>
-  --       map_smul' := <pointwise; coeff_smul + scalar mul of CLMs> }
-  --
-  -- See file-level docstring for the per-point construction and the
-  -- smoothness sketch. The Kirov `pullbackForm` proof in
-  -- `Vendor/Kirov/HolomorphicForms.lean:122` is the closest in-repo
-  -- template for the smoothness obligation.
-  sorry
+    HolomorphicOneForm X →ₗ[ℂ] Jacobians.Vendor.Kirov.HolomorphicOneForms X where
+  toFun form :=
+    { toFun := fun y => BridgeForm.rawCLM form y y
+      contMDiff_toFun := by
+        -- Smoothness: this is the deep obligation. See file/module docstring
+        -- and `docs/KirovHolomorphicLessons.md` for the planned route.
+        sorry }
+  map_add' form₁ form₂ := by
+    apply ContMDiffSection.ext
+    intro y
+    change BridgeForm.rawCLM (form₁ + form₂) y y =
+      BridgeForm.rawCLM form₁ y y + BridgeForm.rawCLM form₂ y y
+    simp only [BridgeForm.rawCLM, HolomorphicOneForm.coeff_add, Pi.add_apply, add_smul]
+    rfl
+  map_smul' c form := by
+    apply ContMDiffSection.ext
+    intro y
+    change BridgeForm.rawCLM (c • form) y y = c • BridgeForm.rawCLM form y y
+    simp only [BridgeForm.rawCLM, HolomorphicOneForm.coeff_smul, Pi.smul_apply,
+      smul_eq_mul, mul_smul]
+    rfl
 
 /-- **Injectivity of the bridge.** The cocycle ⇒ section map is
 injective: distinct cocycle 1-forms give rise to distinct global
@@ -241,18 +392,59 @@ So `form_1.coeff p = form_2.coeff p` for all `p`, i.e.
   extensionality. -/
 theorem bridgeForm_injective :
     Function.Injective (bridgeForm : HolomorphicOneForm X → _) := by
-  -- See proof sketch in the docstring above. Suggested top-level shape:
-  --
-  --   intro form₁ form₂ hEq
-  --   apply HolomorphicOneForm.ext_of_coeff
-  --   funext p z
-  --   by_cases hz : z ∈ (extChartAt 𝓘(ℂ) p).target
-  --   · -- on-target: use sections agreeing at q := (extChartAt 𝓘(ℂ) p).symm z
-  --     -- + cotangent cocycle (form_i.2.2.1) to unfold both sides
-  --     sorry
-  --   · -- off-target: form_i.coeff p z = 0 by IsZeroOffChartTarget
-  --     rw [form₁.2.2.2 p z hz, form₂.2.2.2 p z hz]
-  sorry
+  intro form₁ form₂ hEq
+  -- Step 1: pointwise section equality.
+  have hpt : ∀ p : X, BridgeForm.rawCLM form₁ p p = BridgeForm.rawCLM form₂ p p := by
+    intro p
+    have := congrArg (fun α : Jacobians.Vendor.Kirov.HolomorphicOneForms X => α.toFun p) hEq
+    -- `.toFun` of `bridgeForm form` at `p` is `rawCLM form p p` by construction.
+    exact this
+  -- Step 2: extract the diagonal coefficient equality
+  --   `form₁.coeff p ((extChartAt p) p) = form₂.coeff p ((extChartAt p) p)`
+  -- using `mfderiv_extChartAt_self` to identify `mfderiv (extChartAt p) p` with the identity,
+  -- then applying both sides of `c₁ • id = c₂ • id` to `1 : ℂ`.
+  have hdiag : ∀ p : X,
+      form₁.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) p) =
+        form₂.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) p) := by
+    intro p
+    have h := hpt p
+    -- Unfold rawCLM and rewrite via `mfderiv_extChartAt_self`.
+    have hmfd : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) p) p =
+        ContinuousLinearMap.id ℂ ℂ := mfderiv_extChartAt_self
+    simp only [BridgeForm.rawCLM, hmfd] at h
+    -- `h : c₁ • id = c₂ • id` as CLMs `ℂ →L[ℂ] ℂ`.
+    -- Apply to `1 : ℂ` to get `c₁ * 1 = c₂ * 1`, i.e. `c₁ = c₂`.
+    -- Apply both sides to `1 : ℂ`. Use `DFunLike.congr_fun` so the application is real.
+    have h1 := DFunLike.congr_fun h (1 : ℂ)
+    -- `h1 : (c₁ • id) 1 = (c₂ • id) 1`. Reduce: `(c • id) 1 = c • (id 1) = c • 1 = c * 1 = c`.
+    -- The `(c • f) x = c • f x` reduction is just `rfl` for CLMs (`smul_apply` is `rfl`).
+    change form₁.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) p) • (1 : ℂ) =
+        form₂.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) p) • (1 : ℂ) at h1
+    simpa using h1
+  -- Step 3: extend equality of `coeff` to all chart-target points using the cocycle.
+  apply HolomorphicOneForm.ext_of_coeff
+  funext p z
+  -- Unfold `coeff` to the underlying subtype coercion to match the cocycle/zero-off-target
+  -- predicates' phrasing (they refer to `↑form` directly, which is `form.1 = form.coeff`).
+  show (form₁ : X → ℂ → ℂ) p z = (form₂ : X → ℂ → ℂ) p z
+  by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) p).target
+  · -- On-target: pull `coeff p z` back to `coeff q ((extChartAt q) q)` for `q := (extChartAt p).symm z`.
+    set q : X := (extChartAt 𝓘(ℂ, ℂ) p).symm z with hq_def
+    have hq_src : q ∈ (extChartAt 𝓘(ℂ, ℂ) q).source := mem_extChartAt_source q
+    -- Apply the cocycle predicate: form_i.coeff p z = form_i.coeff q ((extChartAt q) q) * factor.
+    -- The "factor" is the same `fderiv` term for both forms.
+    have hcoc₁ := form₁.2.2.1 p q z hz hq_src
+    have hcoc₂ := form₂.2.2.1 p q z hz hq_src
+    -- Convert the `(extChartAt p).symm z` argument inside the `coeff` slots to `q`.
+    rw [← hq_def] at hcoc₁ hcoc₂
+    rw [hcoc₁, hcoc₂]
+    -- Both sides now share the `fderiv ... z 1` factor; cancel via `hdiag q`.
+    -- `hdiag q : form₁.coeff q ((extChartAt q) q) = form₂.coeff q ((extChartAt q) q)`,
+    -- which is `↑form₁ q ... = ↑form₂ q ...` definitionally (`coeff = .1 = ↑`).
+    congr 1
+    exact hdiag q
+  · -- Off-target: both coefficients are zero by `IsZeroOffChartTarget`.
+    rw [form₁.2.2.2 p z hz, form₂.2.2.2 p z hz]
 
 /-- **Derived instance.** Finite-dimensionality of `HolomorphicOneForm X`,
 transferred via the injective bridge from Kirov's Montel-derived
