@@ -20,7 +20,7 @@ Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining
 
 **Axioms are classified, not hidden** ([`docs/dependency-trace.md`](docs/dependency-trace.md)):
 
-- **Classical-theorem axioms** (Riemann–Roch, Serre duality, Abel, Riemann bilinear, period-lattice discreteness, finite-dim 1-forms, branch locus, uniformization): each a textbook citation. The right shape of axiom for a layered formalization.
+- **Classical-theorem axioms** (Riemann–Roch, Serre duality, Abel, Riemann bilinear, period-lattice discreteness, branch locus, uniformization): each a textbook citation. The right shape of axiom for a layered formalization. *Finite-dimensionality of holomorphic 1-forms is no longer in this list — see "Cross-pollination" below.*
 - **5 data-level function-existence axioms** (`pathIntegralBasepointFunctional`, `loopIntegralToH1`, `pullbackOneForm`, `pushforwardOneForm`, `localOrder`): each has a construction plan in [`docs/construction-plans/`](docs/construction-plans/) summing to ~5–6 weeks focused contributor work.
 - **Curve-atlas axioms** for unified `Hyperelliptic` and for `PlaneCurve`: proper axiomatizations of classical atlas constructions; discharge is substantial atlas work.
 
@@ -38,6 +38,20 @@ We rejected the symmetric-product route `X^g / S_g` precisely because of the coi
 
 So the scoping decision is: solve Gap 1 by hand for the needed shape; isolate Gap 2 cleanly so the rest of the API closes around it. The foundation is complete modulo Gap 2.
 
+## Cross-pollination from Kirov's Montel theorem
+
+After [Rado Kirov's 3-day Claude Code attempt](https://github.com/rkirov/jacobian-claude) was relicensed to Apache 2.0 (2026-04-25, Lean Zulip `#Autoformalization > Jacobian challenge` msg #61), we adopted the strongest piece of his work: a **real ~3,400 LOC proof of Montel's theorem** for holomorphic 1-forms on a compact connected complex 1-manifold, yielding a real `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` (his `Vendor/Kirov/HolomorphicForms.lean:89`).
+
+**Net change**: our previous abstract axiom `AX_FiniteDimOneForms` (Cartan–Serre / normal-families assertion) is **retired**, replaced by Kirov's real Montel construction reached through a small ℂ-linear bridge. Two structural axioms (`bridgeForm`, `bridgeForm_injective` — both mechanical, in Mathlib bundle/section formalism) take the place of the abstract finiteness claim.
+
+Layout:
+
+- [`vendor/kirov-jacobian-claude/`](vendor/kirov-jacobian-claude/) — verbatim copy of Kirov's tree at upstream commit `7ce9e2e8` (Apache 2.0). Outside the build root. See [`PROVENANCE.md`](vendor/kirov-jacobian-claude/PROVENANCE.md) and [`HANDOFF.md`](vendor/kirov-jacobian-claude/HANDOFF.md).
+- [`Jacobians/Vendor/Kirov/`](Jacobians/Vendor/Kirov/) — Kirov's `Genus`, `Montel.*`, `HolomorphicForms` modules ported into our build under namespace `Jacobians.Vendor.Kirov.*` with per-file Apache 2.0 attribution headers; mathematics unchanged. Two of his `:= sorry` declarations are stated as named `axiom`s (`genus_eq_zero_iff_homeo` for Uniformization; `ambientPhi_ambientPsi_eq` for the degree identity) for handoff.
+- [`Jacobians/Bridge/KirovHolomorphic.lean`](Jacobians/Bridge/KirovHolomorphic.lean) — the bridge from our chart-cocycle `HolomorphicOneForm X` to Kirov's `ContMDiffSection`-encoded `HolomorphicOneForms X`, with the derived `FiniteDimensional` instance.
+
+This is precisely the cooperation pattern Kirov suggested in the Zulip thread ("anyone can take my attempt and remix into theirs ... if going for more experimental purity"). The two repos remain independent attempts; we pull in his real proof rather than re-build it.
+
 ## Current state
 
 | | |
@@ -54,9 +68,9 @@ Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/ch
 
 | | |
 |---|---|
-| **Wall-clock** | 2026-04-19 → 2026-04-24 (6 calendar days, all active) |
-| **Commits** | 93 |
-| **Lean code** | ~6,600 lines across `Jacobians/` (includes Buzzard's filled-in `Challenge.lean`) |
+| **Wall-clock** | 2026-04-19 → 2026-04-25 (7 calendar days, all active) |
+| **Commits** | 93 + 5 on `kirov-import` |
+| **Lean code** | ~6,600 lines across `Jacobians/` + ~4,200 lines vendored from `rkirov/jacobian-claude` (Apache 2.0) under `Jacobians/Vendor/Kirov/` |
 | **Documentation** | ~6,800 lines: challenge annotation, dependency trace, 5 construction plans, adversarial-review records |
 | **Model time** | Claude Opus 4.7 (primary coder), GPT-5.4 Codex (rescue passes on Jacobian functoriality derivations, HyperellipticEven T2 / Compact proofs), Gemini 3 Pro deep-think (axiom audits, type-equality smell-test) |
 | **Human effort** | Mathematician-user directing: scope, axiom-vs-proof boundary, hack-blocker judgments, review of all landings. Zero human-written Lean. |
@@ -83,6 +97,7 @@ lake build
 - [`docs/dependency-trace.md`](docs/dependency-trace.md) — transitive axiom audit.
 - [`docs/construction-plans/`](docs/construction-plans/) — discharge plans for the 5 data-level axioms.
 - [`docs/formalization-plan.md`](docs/formalization-plan.md) — construction-strategy rationale.
+- [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md) — what we take from `rkirov/jacobian-claude` and `tangentstorm/JacobianChallenge`, what we considered and didn't.
 
 ## License
 
