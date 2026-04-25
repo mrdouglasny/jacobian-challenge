@@ -971,8 +971,7 @@ lemma hyperellipticEvenGlue_iff_mul (H : HyperellipticData)
     have hx : a.val.1 ≠ 0 := by
       intro hzero
       have : (0 : ℂ) = 1 := by
-        simp [hzero] at hmul
-        exact hmul
+        simpa [hzero] using hmul
       exact zero_ne_one this
     have h1 : b.val.1 = a.val.1⁻¹ := eq_inv_of_mul_eq_one_left hmul
     refine ⟨hx, h1, ?_⟩
