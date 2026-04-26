@@ -568,4 +568,41 @@ theorem affineChartProjY_to_projX_transition_hasDerivAt
   convert hcomp using 1
   field_simp
 
+/-- **Cocycle sub-case 4: projY × projY** — x-branch agreement.
+
+Mirror of sub-case 1. For two projY charts at p and q, if `chart_p.symm y ∈
+chart_q.source`, then the chart transition `chart_q ∘ chart_p.symm` is the
+identity at y, and the x-branches `e_p.symm` and `e_q.symm` agree on `y²`. -/
+theorem polynomialLocalHomeomorph_symm_eq_of_mem
+    (p q : HyperellipticAffine H)
+    (hpX : p ∈ smoothLocusX H) (hqX : q ∈ smoothLocusX H)
+    {y : ℂ}
+    (hy : y ∈ ((affineChartProjY (H := H) p hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target)
+    (hSymInX :
+      (polynomialLocalHomeomorph (H := H) p hpX).symm (y ^ 2) ∈
+        (polynomialLocalHomeomorph (H := H) q hqX).source) :
+    (polynomialLocalHomeomorph (H := H) p hpX).symm (y ^ 2) =
+      (polynomialLocalHomeomorph (H := H) q hqX).symm (y ^ 2) := by
+  set e_p := polynomialLocalHomeomorph (H := H) p hpX with he_p_def
+  set e_q := polynomialLocalHomeomorph (H := H) q hqX with he_q_def
+  have hy2_p : y ^ 2 ∈ e_p.target := by
+    simpa [affineChartProjY] using hy
+  -- The x-branch from chart p satisfies H.f.eval (e_p.symm (y²)) = y².
+  have hPolyRel : H.f.eval (e_p.symm (y ^ 2)) = y ^ 2 := by
+    have := e_p.right_inv hy2_p
+    simpa [polynomialLocalHomeomorph, e_p] using this
+  -- e_q.symm round-trips at e_p.symm(y²) ∈ e_q.source.
+  have hRoundtrip :
+      e_q.symm (e_q (e_p.symm (y ^ 2))) = e_p.symm (y ^ 2) :=
+    e_q.left_inv hSymInX
+  -- e_q applied to the same point gives H.f.eval of that point, which is y².
+  have hPolyRel_q : e_q (e_p.symm (y ^ 2)) = y ^ 2 := by
+    have : e_q (e_p.symm (y ^ 2)) = H.f.eval (e_p.symm (y ^ 2)) := by
+      simpa [polynomialLocalHomeomorph, e_q] using
+        congrArg (e_q : ℂ → ℂ) (rfl : e_p.symm (y ^ 2) = e_p.symm (y ^ 2))
+    rw [this, hPolyRel]
+  rw [hPolyRel_q] at hRoundtrip
+  exact hRoundtrip.symm
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
