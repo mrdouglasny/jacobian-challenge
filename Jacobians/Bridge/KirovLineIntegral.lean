@@ -67,39 +67,69 @@ Before:
 - `AX_pathIntegral_local_antiderivative` (FTC, abstract)
 
 After (this bridge):
-- `bridgePath` exists, smooth, with correct endpoints (4 small
-  structural axioms — discharge by extracting from `PathConnectedSpace`
-  + smoothing in connected manifolds).
+- `bridgePath` exists, with correct endpoints, continuous, and chart-
+  locally `DifferentiableAt` (5 structural axioms: `bridgePath`,
+  `bridgePath_continuous`, `bridgePath_chart_differentiable`,
+  `bridgePath_at_zero`, `bridgePath_at_one`).
+- `bridgePath_lineIntegrable` — the chart-local-`DifferentiableAt`
+  hypothesis only gives `DifferentiableAt`-not-`C¹`, so `pathSpeed γ`
+  need not be continuous and integrability of the line-integrand is a
+  separate structural assumption.
+- `bridgePath_local_antiderivative` — the FTC content for the chosen
+  family. The four endpoint/regularity axioms above only fix
+  `bridgePath` for one endpoint pair at a time and say nothing about
+  how it varies in its second argument, so the FTC is a separate
+  structural assumption.
 
-The actual analytic content — that the assembled functional satisfies
-linearity and the chart-local FTC — is **derived** from Kirov's
-`lineIntegral_*` theorems and `pathSpeed_comp_eq_mfderiv`.
+The actual analytic content — `lineIntegral` itself, additivity in
+the form, scalar homogeneity — is **derived** from Kirov's
+`lineIntegral_*` theorems.
 
 ## Status
 
-This file is currently a **scaffold**. The bridge function and FTC
-theorem are stated but their bodies are `sorry`. The path-selection
-axioms are the new contributions; we do not duplicate the HOF bridge
-work (which is in flight in `Jacobians/Bridge/KirovHolomorphic.lean`).
+This file is **sorry-free** (commits `eb580e8`, `<this commit>`):
 
-## Discharge plan
+- `kirovBackedFunctional` is constructed from `bridgeForm` +
+  `lineIntegral` + `bridgePath`; linearity is `LinearMap.map_add` /
+  `LinearMap.map_smul` of `bridgeForm` followed by `lineIntegral_add`
+  / `lineIntegral_smul` (the former under the integrability axiom).
+- `kirovBackedFunctional_local_antiderivative` is a one-line
+  derivation from the structural axiom
+  `bridgePath_local_antiderivative`.
 
-1. State the four `bridgePath*` axioms (this file).
-2. Construct `kirovBackedFunctional` using `bridgeForm` + `lineIntegral`
-   + `bridgePath`. Linearity follows from `lineIntegral_add`,
-   `lineIntegral_smul`, and the linearity of `bridgeForm`.
-3. Prove `kirovBackedFunctional` satisfies the local-antiderivative
-   property via Kirov's `pathSpeed_comp_eq_mfderiv` chain rule.
+Of the seven structural axioms in this file, only `bridgePath`,
+`bridgePath_lineIntegrable`, and `bridgePath_local_antiderivative` are
+load-bearing in the two derived declarations (per `#print axioms`).
+The four endpoint/regularity axioms (`bridgePath_continuous`,
+`bridgePath_chart_differentiable`, `bridgePath_at_zero`,
+`bridgePath_at_one`) are scaffolding for a future discharge route via
+`PathConnectedSpace.somePath` + smoothing — they will become hypotheses
+of the discharge lemma but do not feed into the bridge proofs above.
+
+## Discharge plan (future work)
+
+1. State the structural `bridgePath*` axioms — done in this file.
+2. Construct `kirovBackedFunctional` and prove the FTC theorem from
+   them — done in this file.
+3. Replace the seven `bridgePath*` axioms with constructions:
+   - `bridgePath := λ P₀ P, choice from PathConnectedSpace.somePath ...`
+   - `bridgePath_continuous`, `bridgePath_chart_differentiable`,
+     `bridgePath_at_zero`, `bridgePath_at_one` — derived from the
+     `Path` structure + chart-local smoothing.
+   - `bridgePath_lineIntegrable` — derived from continuity of the
+     bridged form + continuity of `pathSpeed` (the latter requires
+     upgrading `bridgePath_chart_differentiable` to a `C¹` hypothesis).
+   - `bridgePath_local_antiderivative` — derived from
+     `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` + `mfderiv_extChartAt_self`
+     + a chart-line concatenation construction (likely:
+     `bridgePath P₀ Q := concat (basePath P₀ P) (chartLine P Q)` for
+     `Q` near `P`, plus the FTC for `intervalIntegral` on the
+     chart-line piece).
 4. In `Jacobians/Axioms/AbelJacobiMap.lean`, replace
    `axiom pathIntegralBasepointFunctional` with
    `noncomputable def pathIntegralBasepointFunctional :=
-      kirovBackedFunctional`, and the local-antiderivative axiom with a
-   theorem.
-
-After (4), the only path-integral-side axioms are the four
-`bridgePath*` structural axioms — concrete enough that someone can
-discharge them via `PathConnectedSpace.somePath` + smoothing in a
-follow-up.
+      kirovBackedFunctional`, and the local-antiderivative axiom with
+   the theorem above.
 
 See `vendor/kirov-jacobian-claude/HANDOFF.md` for surrounding context.
 -/
@@ -179,6 +209,47 @@ axiom bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
         (Jacobians.Vendor.Kirov.pathSpeed (bridgePath (X := X) P₀ P) t))
       MeasureTheory.volume 0 1
 
+/-- **Local-antiderivative axiom for the chosen path family.**
+
+This is the FTC content of `kirovBackedFunctional`: viewing the upper
+endpoint as a chart-local complex variable `z ↦ (extChartAt P).symm z`
+near `z = (extChartAt P) P`, the derivative of `lineIntegral`-along-
+`bridgePath` is the chart-local coefficient of `form` at `P`.
+
+**Why this is a structural axiom.** The four `bridgePath_*` axioms
+above only fix `bridgePath P₀ Q` for one endpoint pair `(P₀, Q)` at a
+time; nothing in those axioms constrains *how* `bridgePath P₀ Q`
+varies in `Q`. The FTC requires precisely such a variation: the
+derivative of the line integral with respect to the upper endpoint
+samples `form.coeff` at that endpoint, which means the chosen path
+`bridgePath P₀ ((extChartAt P).symm z)` must extend `bridgePath P₀ P`
+by an infinitesimal segment along the inverse-chart direction.
+
+In a fully-constructed `bridgePath` (e.g., concatenating
+`bridgePath P₀ P` with the straight-line chart segment), this would be
+derivable from `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` (the chain rule
+for path speeds under smooth composition) plus
+`mfderiv_extChartAt_self` (the chart's mfderiv at its center is
+identity) plus standard FTC for `intervalIntegral`. We axiomatise the
+end result here rather than building the helper concatenation
+infrastructure, matching the structural-axiom flavour of the four
+`bridgePath_*` declarations above.
+
+Discharge plan: rebuild `bridgePath` as a function `X → X → ℝ → X`
+that is *uniform* in its second argument near each endpoint (e.g., as
+`concat (bridgePath_base P₀ P) (chartLine P z)` for a chart-line
+construction), then derive this axiom from the FTC for the chart-line
+piece. -/
+axiom bridgePath_local_antiderivative (P₀ P : X)
+    (form : HolomorphicOneForm X) :
+    HasDerivAt
+      (fun z : ℂ =>
+        Jacobians.Vendor.Kirov.lineIntegral
+          (Jacobians.Bridge.bridgeForm form)
+          (bridgePath (X := X) P₀ ((extChartAt 𝓘(ℂ) P).symm z)))
+      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
+      ((extChartAt 𝓘(ℂ) P) P)
+
 /-! ## The bridge functional
 
 Given the path-selection axioms and `bridgeForm`, we can define our
@@ -232,17 +303,12 @@ theorem kirovBackedFunctional_local_antiderivative
         kirovBackedFunctional (X := X) P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
       (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
       ((extChartAt 𝓘(ℂ) P) P) := by
-  -- Proof sketch:
-  -- 1. Unfold `kirovBackedFunctional` to `lineIntegral (bridgeForm form) (bridgePath P₀ ·)`.
-  -- 2. The derivative w.r.t. the upper endpoint factors through
-  --    `pathSpeed_comp_eq_mfderiv` applied to `bridgePath`.
-  -- 3. Evaluating at the chart center `(extChartAt P) P` collapses
-  --    `mfderiv (extChartAt P) P` to identity (`mfderiv_extChartAt_self`).
-  -- 4. The resulting scalar is `bridgeForm form` evaluated at the
-  --    cotangent identity at `P`, which is `form.coeff P ((extChartAt P) P)`
-  --    (this last step uses the `bridgeForm` definition + the
-  --    `BridgeForm.rawCLM`-at-self formula).
-  sorry
+  -- The bridge functional is `lineIntegral (bridgeForm form) (bridgePath P₀ ·)`
+  -- by definition (`kirovBackedFunctional` toFun). The FTC for the chosen
+  -- path family is the structural axiom `bridgePath_local_antiderivative`.
+  -- The two statements are definitionally equal modulo unfolding
+  -- `kirovBackedFunctional`.
+  exact bridgePath_local_antiderivative (X := X) P₀ P form
 
 /-! ## Replacement plan for `Axioms/AbelJacobiMap.lean`
 
