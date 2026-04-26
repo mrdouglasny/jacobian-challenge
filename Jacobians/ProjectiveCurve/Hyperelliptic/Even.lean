@@ -325,8 +325,9 @@ lemma HyperellipticAffineInfinity.mem_of_affine (H : HyperellipticData)
     _ = (Polynomial.reverse H.f).eval x⁻¹ := by
       simpa using hrev.symm
 
-instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+instance (H : HyperellipticData) [hf : Fact (¬ Odd H.f.natDegree)] :
     ConnectedSpace (HyperellipticEvenProj H) := by
+  have h : ¬ Odd H.f.natDegree := hf.out
   let qA : HyperellipticAffine H → HyperellipticEvenProj H :=
     fun a => Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
   let qB : HyperellipticAffineInfinity H → HyperellipticEvenProj H :=
@@ -420,8 +421,9 @@ lemma HyperellipticAffine.mem_of_infinity (H : HyperellipticData)
     _ = H.f.eval t⁻¹ := by
       simpa using hrev.symm
 
-instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+instance (H : HyperellipticData) [hf : Fact (¬ Odd H.f.natDegree)] :
     CompactSpace (HyperellipticEvenProj H) := by
+  have h : ¬ Odd H.f.natDegree := hf.out
   let R₁ : ℝ := max 1 (Finset.sum (Finset.range (H.f.natDegree + 1)) fun i => ‖H.f.coeff i‖)
   let R₂ : ℝ := max 1
     (Finset.sum (Finset.range ((Polynomial.reverse H.f).natDegree + 1))
@@ -1187,8 +1189,9 @@ lemma isClosed_hyperellipticEvenSetoidRel (H : HyperellipticData) :
   rw [hEq]
   exact (hdiag.union hglue).union hglue_symm
 
-instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+instance (H : HyperellipticData) [hf : Fact (¬ Odd H.f.natDegree)] :
     T2Space (HyperellipticEvenProj H) := by
+  have h : ¬ Odd H.f.natDegree := hf.out
   let π : HyperellipticEvenPre H → HyperellipticEvenProj H := fun x =>
     Quotient.mk (hyperellipticEvenSetoid H) x
   have hπ : IsOpenQuotientMap π := hyperellipticEven_isOpenQuotientMap H h

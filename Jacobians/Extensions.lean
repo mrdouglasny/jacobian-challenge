@@ -13,7 +13,13 @@ Currently:
 - `Jacobians.Extensions.HyperellipticEven` — analogous warm-ups + genus
   formula for the **even-degree** case (`HyperellipticEvenProj H` for
   `h : ¬ Odd H.f.natDegree`).
+- `Jacobians.Extensions.AbelJacobi` — Abel-Jacobi-side tests on the
+  hyperelliptic curves: period-lattice rank `2g`, σ-equivariance
+  `A(σ P) = -A(P)`, Abel's theorem on the principal divisor of
+  `x - x₀`, and the Riemann bilinear relations on the canonical
+  period matrix.
 -/
 
 import Jacobians.Extensions.Hyperelliptic
 import Jacobians.Extensions.HyperellipticEven
+import Jacobians.Extensions.AbelJacobi
