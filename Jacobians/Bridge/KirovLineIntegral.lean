@@ -153,6 +153,32 @@ axiom bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀
 /-- The chosen path ends at `P`. -/
 axiom bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P
 
+/-- **Integrability of the bridged line-integrand** along the chosen path.
+
+For every holomorphic 1-form `form : HolomorphicOneForm X` and every
+base pair `(P₀, P)`, the integrand `t ↦ (bridgeForm form)(γ t)(γ'(t))`
+of `Vendor.Kirov.lineIntegral` along `γ := bridgePath P₀ P` is
+interval-integrable on `[0, 1]`.
+
+This is needed to invoke `Vendor.Kirov.lineIntegral_add`, which requires
+integrability hypotheses for both summands. In a `C¹` regime this would
+follow from continuity of the integrand (continuous image of a compact
+interval is bounded, hence integrable), but the
+`bridgePath_chart_differentiable` axiom only gives `DifferentiableAt`
+chart-locally — not continuous differentiability — so `pathSpeed γ`
+need not be continuous in `t` and the integrability has to be assumed
+separately.
+
+Discharge plan: produce `bridgePath` as a `C¹`-or-better chart-local
+path via `PathConnectedSpace.somePath` + smoothing. Then the integrand
+is continuous and this axiom becomes a derived theorem. -/
+axiom bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
+    IntervalIntegrable
+      (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+        (bridgePath (X := X) P₀ P t)
+        (Jacobians.Vendor.Kirov.pathSpeed (bridgePath (X := X) P₀ P) t))
+      MeasureTheory.volume 0 1
+
 /-! ## The bridge functional
 
 Given the path-selection axioms and `bridgeForm`, we can define our
@@ -170,20 +196,28 @@ and the linearity of `bridgeForm`.
 
 This **shape-matches** our axiom `pathIntegralBasepointFunctional`. -/
 noncomputable def kirovBackedFunctional (P₀ P : X) :
-    HolomorphicOneForm X →ₗ[ℂ] ℂ := by
-  -- Construction skeleton:
-  --
-  --   refine
-  --     { toFun := fun form =>
-  --         Jacobians.Vendor.Kirov.lineIntegral
-  --           (bridgeForm form)
-  --           (bridgePath P₀ P)
-  --       map_add' := <use lineIntegral_add + bridgeForm.map_add>
-  --       map_smul' := <use lineIntegral_smul + bridgeForm.map_smul> }
-  --
-  -- Both linearity proofs are 2-3 lines, depending on the API of
-  -- `Jacobians.Vendor.Kirov.lineIntegral_{add,smul}`.
-  sorry
+    HolomorphicOneForm X →ₗ[ℂ] ℂ where
+  toFun form :=
+    Jacobians.Vendor.Kirov.lineIntegral
+      (Jacobians.Bridge.bridgeForm form)
+      (bridgePath (X := X) P₀ P)
+  map_add' form₁ form₂ := by
+    -- Use `bridgeForm.map_add'` to push `+` through `bridgeForm`, then
+    -- `lineIntegral_add` (under the integrability axioms) to split the integral.
+    have hBF : Jacobians.Bridge.bridgeForm (form₁ + form₂) =
+        Jacobians.Bridge.bridgeForm form₁ + Jacobians.Bridge.bridgeForm form₂ :=
+      LinearMap.map_add _ form₁ form₂
+    rw [hBF]
+    exact Jacobians.Vendor.Kirov.lineIntegral_add _ _ _
+      (bridgePath_lineIntegrable P₀ P form₁) (bridgePath_lineIntegrable P₀ P form₂)
+  map_smul' c form := by
+    -- Use `bridgeForm.map_smul'` to push `c • ·` through `bridgeForm`, then
+    -- `lineIntegral_smul` to extract the scalar (no integrability hypothesis needed).
+    have hBF : Jacobians.Bridge.bridgeForm (c • form) =
+        c • Jacobians.Bridge.bridgeForm form :=
+      LinearMap.map_smul _ c form
+    rw [hBF]
+    exact Jacobians.Vendor.Kirov.lineIntegral_smul c _ _
 
 /-- **Local-antiderivative property** — discharges the FTC axiom
 `AX_pathIntegral_local_antiderivative` from
