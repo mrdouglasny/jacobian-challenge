@@ -20,11 +20,13 @@ the projective `HolomorphicOneForm`. That assembly lives in `Form.lean`.
 -/
 
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas.AffineChart
+import Jacobians.RiemannSurface.OneForm
 
 namespace Jacobians.ProjectiveCurve.HyperellipticAffine
 
 open scoped Manifold ContDiff Topology
 open Polynomial
+open Jacobians.RiemannSurface
 
 variable {H : HyperellipticData}
 
@@ -604,5 +606,76 @@ theorem polynomialLocalHomeomorph_symm_eq_of_mem
     rw [this, hPolyRel]
   rw [hPolyRel_q] at hRoundtrip
   exact hRoundtrip.symm
+
+/-! ## Affine-side coefficient family
+
+Bundles the projX/projY case-split into a single coefficient function
+`hyperellipticAffineCoeff : HyperellipticAffine H → ℂ → ℂ`. This is the
+first piece that conforms to the `IsHolomorphicOneFormCoeff` /
+`IsZeroOffChartTarget` API used by `holomorphicOneFormSubmodule`. -/
+
+/-- The affine-side coefficient family for the form `g(x) dx / y`: case-split
+on whether the base point is in `smoothLocusY` (use projX coefficient) or
+`smoothLocusX` (use projY coefficient). -/
+noncomputable def hyperellipticAffineCoeff (g : Polynomial ℂ) :
+    HyperellipticAffine H → ℂ → ℂ := fun a z => by
+  classical
+  exact
+    if hpY : a ∈ smoothLocusY H then
+      affineProjXCoeff g a hpY z
+    else
+      affineProjYCoeff g a
+        (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY)) z
+
+/-- The affine coefficient family is analytic on each chart target. -/
+theorem hyperellipticAffineCoeff_isHolomorphicOneFormCoeff
+    (g : Polynomial ℂ) :
+    IsHolomorphicOneFormCoeff (HyperellipticAffine H)
+      (hyperellipticAffineCoeff (H := H) g) := by
+  classical
+  intro p
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
+    rw [extChartAt_target]
+    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    rw [Set.range_id, Set.inter_univ]
+    rfl
+  rw [hExt]
+  by_cases hpY : p ∈ smoothLocusY H
+  · rw [affineChartAt_of_mem_smoothLocusY (H := H) p hpY]
+    have hCoeff : (hyperellipticAffineCoeff (H := H) g) p = affineProjXCoeff g p hpY := by
+      funext z
+      simp [hyperellipticAffineCoeff, hpY]
+    rw [hCoeff]
+    exact affineProjXCoeff_analyticOn_chartTarget g p hpY
+  · have hpX : p ∈ smoothLocusX H :=
+      mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY)
+    rw [affineChartAt_of_not_mem_smoothLocusY (H := H) p hpY]
+    have hCoeff : (hyperellipticAffineCoeff (H := H) g) p = affineProjYCoeff g p hpX := by
+      funext z
+      simp [hyperellipticAffineCoeff, hpY]
+    rw [hCoeff]
+    exact affineProjYCoeff_analyticOn_chartTarget g p hpX
+
+/-- The affine coefficient family vanishes off each chart target. -/
+theorem hyperellipticAffineCoeff_isZeroOffChartTarget (g : Polynomial ℂ) :
+    IsZeroOffChartTarget (HyperellipticAffine H)
+      (hyperellipticAffineCoeff (H := H) g) := by
+  classical
+  intro p z hz
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
+    rw [extChartAt_target]
+    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    rw [Set.range_id, Set.inter_univ]
+    rfl
+  rw [hExt] at hz
+  by_cases hpY : p ∈ smoothLocusY H
+  · rw [affineChartAt_of_mem_smoothLocusY (H := H) p hpY] at hz
+    simp only [hyperellipticAffineCoeff, hpY, dite_true]
+    simp [affineProjXCoeff, hz]
+  · have hpX : p ∈ smoothLocusX H :=
+      mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY)
+    rw [affineChartAt_of_not_mem_smoothLocusY (H := H) p hpY] at hz
+    simp only [hyperellipticAffineCoeff, hpY, dite_false]
+    simp [affineProjYCoeff, hz]
 
 end Jacobians.ProjectiveCurve.HyperellipticAffine
