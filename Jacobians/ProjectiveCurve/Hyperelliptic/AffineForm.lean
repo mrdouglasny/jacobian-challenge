@@ -678,4 +678,79 @@ theorem hyperellipticAffineCoeff_isZeroOffChartTarget (g : Polynomial ℂ) :
     simp only [hyperellipticAffineCoeff, hpY, dite_false]
     simp [affineProjYCoeff, hz]
 
+/-! ## Cocycle equation, sub-case projX × projX
+
+The chart transition is the identity on the overlap source (Codex's
+`affineChartProjX_compat_affineChartProjX`), so its derivative is `1` and
+the cocycle reduces to coefficient equality. Coefficient equality reduces
+to y-branch agreement (`squareLocalHomeomorph_symm_eq_of_mem`).
+-/
+
+theorem hyperellipticAffineCoeff_cocycle_projX_projX
+    (g : Polynomial ℂ)
+    (p q : HyperellipticAffine H) (hpY : p ∈ smoothLocusY H) (hqY : q ∈ smoothLocusY H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) p hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target)
+    (hSrc : ((affineChartProjX (H := H) p hpY).symm z : HyperellipticAffine H) ∈
+              ((affineChartProjX (H := H) q hqY)).source) :
+    affineProjXCoeff g p hpY z =
+      affineProjXCoeff g q hqY
+        ((affineChartProjX (H := H) q hqY) ((affineChartProjX (H := H) p hpY).symm z)) *
+        (fderiv ℂ ((affineChartProjX (H := H) q hqY) ∘
+          ((affineChartProjX (H := H) p hpY)).symm) z 1) := by
+  classical
+  -- Step 1: chart_q ∘ chart_p.symm at z reduces to z.
+  have hQAt : (affineChartProjX (H := H) q hqY)
+      ((affineChartProjX (H := H) p hpY).symm z) = z := by
+    have h1 :
+        (((affineChartProjX (H := H) p hpY).symm z) : HyperellipticAffine H).val.1 = z :=
+      affineChartProjX_symm_apply_fst (H := H) p hpY hz
+    change (((affineChartProjX (H := H) p hpY).symm z) : HyperellipticAffine H).val.1 = z
+    exact h1
+  -- Step 2: chart transition equals id eventually near z.
+  set transition := (affineChartProjX (H := H) q hqY) ∘
+    ((affineChartProjX (H := H) p hpY)).symm with htrans_def
+  have hZinSrc : z ∈ (((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjX (H := H) q hqY))).source := ⟨hz, hSrc⟩
+  have hOpen : IsOpen (((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjX (H := H) q hqY))).source :=
+    ((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjX (H := H) q hqY)).open_source
+  have hEqId : transition =ᶠ[nhds z] id := by
+    refine Filter.eventually_of_mem (hOpen.mem_nhds hZinSrc) ?_
+    intro w hw
+    simp only [transition, Function.comp_apply, id]
+    have hw1 : w ∈ (affineChartProjX (H := H) p hpY).target := hw.1
+    have h1 :
+        (((affineChartProjX (H := H) p hpY).symm w) : HyperellipticAffine H).val.1 = w :=
+      affineChartProjX_symm_apply_fst (H := H) p hpY hw1
+    change (((affineChartProjX (H := H) p hpY).symm w) : HyperellipticAffine H).val.1 = w
+    exact h1
+  -- Step 3: fderiv (transition) z = id, so applied to 1 gives 1.
+  have hFderiv : fderiv ℂ transition z = ContinuousLinearMap.id ℂ ℂ := by
+    rw [Filter.EventuallyEq.fderiv_eq hEqId, fderiv_id]
+  -- Step 4: chart_q target also contains z, so RHS coeff also reduces.
+  have hQTarget : z ∈ ((affineChartProjX (H := H) q hqY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target := by
+    rw [← hQAt]
+    exact (affineChartProjX (H := H) q hqY).map_source hSrc
+  -- Step 5: y-branches agree at H.f.eval z.
+  have hSymInY :
+      (squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval z) ∈
+        (squareLocalHomeomorph (H := H) q hqY).source := by
+    have h2 := affineChartProjX_symm_apply_snd (H := H) p hpY hz
+    rw [← h2]
+    exact hSrc
+  have hAgree :
+      (squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval z) =
+        (squareLocalHomeomorph (H := H) q hqY).symm (H.f.eval z) :=
+    squareLocalHomeomorph_symm_eq_of_mem (H := H) p q hpY hqY hz hSymInY
+  -- Combine.
+  rw [hQAt, hFderiv]
+  simp only [ContinuousLinearMap.id_apply, mul_one]
+  rw [affineProjXCoeff_eq_on_target g p hpY hz,
+      affineProjXCoeff_eq_on_target g q hqY hQTarget,
+      hAgree]
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
