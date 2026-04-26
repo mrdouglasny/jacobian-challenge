@@ -51,6 +51,15 @@ namespace HyperellipticAffineInfinity
 
 variable {H : HyperellipticData}
 
+noncomputable def mirrorMonoidHom : Polynomial ℂ →* Polynomial ℂ where
+  toFun := Polynomial.mirror
+  map_one' := by
+    change Polynomial.reverse (Polynomial.C 1) * Polynomial.X ^ Polynomial.natTrailingDegree 1 = 1
+    rw [Polynomial.reverse_C, Polynomial.natTrailingDegree_one, pow_zero, mul_one]
+    simpa using (Polynomial.C_1 : Polynomial.C (1 : ℂ) = (1 : Polynomial ℂ))
+  map_mul' p q := by
+    simpa using Polynomial.mirror_mul_of_domain (p := p) (q := q)
+
 instance : TopologicalSpace (HyperellipticAffineInfinity H) :=
   inferInstanceAs (TopologicalSpace
     { p : ℂ × ℂ // p.2 ^ 2 = (Polynomial.reverse H.f).eval p.1 })
@@ -92,14 +101,81 @@ noncomputable instance : Nonempty (HyperellipticAffineInfinity H) := by
     rw [← Polynomial.coeff_zero_eq_eval_zero, Polynomial.coeff_zero_reverse]
   rw [hev, sq, hc]
 
-/-- **Axiom (NOT VERIFIED).** The affine-infinity chart is connected.
-Classical: same reasoning as `AX_HyperellipticAffine_connected` — the
-curve `u² = f_rev(t)` is an irreducible algebraic variety for `f`
-squarefree, hence connected in the classical topology. -/
-axiom AX_HyperellipticAffineInfinity_connected (H : HyperellipticData) :
-    ConnectedSpace (HyperellipticAffineInfinity H)
+/-- Squarefreeness is preserved by `Polynomial.mirror`. -/
+lemma squarefree_mirror {f : Polynomial ℂ} (hf : Squarefree f) :
+    Squarefree f.mirror := by
+  intro g hg
+  rcases hg with ⟨q, hq⟩
+  have hmir : f = g.mirror * g.mirror * q.mirror := by
+    calc
+      f = f.mirror.mirror := by
+        exact (Polynomial.mirror_mirror (p := f)).symm
+      _ = (g * g * q).mirror := by rw [hq]
+      _ = g.mirror * g.mirror * q.mirror := by
+        rw [Polynomial.mirror_mul_of_domain, Polynomial.mirror_mul_of_domain]
+  have hsqdiv : g.mirror * g.mirror ∣ f := ⟨q.mirror, by simpa [mul_assoc] using hmir⟩
+  have hunit_mir : IsUnit (g.mirror) := hf (g.mirror) hsqdiv
+  simpa [mirrorMonoidHom, Polynomial.mirror_mirror] using hunit_mir.map mirrorMonoidHom
 
-attribute [instance] AX_HyperellipticAffineInfinity_connected
+/-- A squarefree polynomial has at most a simple zero at `0`. -/
+lemma natTrailingDegree_le_one (H : HyperellipticData) :
+    H.f.natTrailingDegree ≤ 1 := by
+  have hf0 : H.f ≠ 0 := by
+    intro hf
+    have hdeg := H.h_degree
+    rw [hf, Polynomial.natDegree_zero] at hdeg
+    omega
+  by_contra hgt
+  have hge : 2 ≤ H.f.natTrailingDegree := by
+    omega
+  have hXsq : (Polynomial.X : Polynomial ℂ) * Polynomial.X ∣ H.f := by
+    have hXpow : (Polynomial.X : Polynomial ℂ) ^ 2 ∣ H.f := by
+      rw [Polynomial.X_pow_dvd_iff]
+      intro d hd
+      exact Polynomial.coeff_eq_zero_of_lt_natTrailingDegree (lt_of_lt_of_le hd hge)
+    simpa [pow_two] using hXpow
+  have hsqfree := (squarefree_iff_irreducible_sq_not_dvd_of_ne_zero hf0).1 H.h_squarefree
+  exact hsqfree _ Polynomial.irreducible_X hXsq
+
+/-- Squarefreeness passes from `f` to `reverse f`. -/
+lemma squarefree_reverse (H : HyperellipticData) :
+    Squarefree H.f.reverse := by
+  have hmir : Squarefree H.f.mirror := squarefree_mirror H.h_squarefree
+  by_cases htd : H.f.natTrailingDegree = 0
+  · simpa [Polynomial.mirror, htd] using hmir
+  · have htd1 : H.f.natTrailingDegree = 1 := by
+      have hle := natTrailingDegree_le_one H
+      omega
+    have hprod : Squarefree (H.f.reverse * Polynomial.X) := by
+      simpa [Polynomial.mirror, htd1] using hmir
+    exact Squarefree.of_mul_left hprod
+
+/-- The reversed polynomial package attached to an even-degree hyperelliptic
+curve. Its affine model is definitionally `HyperellipticAffineInfinity H`. -/
+noncomputable def reverseData (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    HyperellipticData where
+  f := H.f.reverse
+  h_squarefree := squarefree_reverse H
+  h_degree := by
+    have hdeg4 : 4 ≤ H.f.natDegree := by
+      have hdeg := H.h_degree
+      obtain ⟨m, hm⟩ := Nat.not_odd_iff_even.mp h
+      omega
+    have htrail : H.f.natTrailingDegree ≤ 1 := natTrailingDegree_le_one H
+    have hsub : H.f.natDegree - 1 ≤ H.f.natDegree - H.f.natTrailingDegree := by
+      exact Nat.sub_le_sub_left htrail H.f.natDegree
+    have hthree : 3 ≤ H.f.natDegree - 1 := by
+      omega
+    have hrevdeg : 3 ≤ H.f.natDegree - H.f.natTrailingDegree := le_trans hthree hsub
+    simpa [Polynomial.reverse_natDegree] using hrevdeg
+
+/-- In even degree, the infinity chart is just the affine hyperelliptic curve
+for `reverse f`, hence connected by the existing affine connectedness axiom. -/
+instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    ConnectedSpace (HyperellipticAffineInfinity H) := by
+  let Hrev := reverseData H h
+  change ConnectedSpace (HyperellipticAffine Hrev)
+  infer_instance
 
 /-- **Axiom (NOT VERIFIED).** The affine-infinity chart is noncompact
 (mirror of `AX_HyperellipticAffine_noncompact`). -/
@@ -259,6 +335,10 @@ instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
     refine isConnected_range ?_
     simpa [qA] using (continuous_quotient_mk'.comp continuous_inl)
   have hB : IsConnected (Set.range qB) := by
+    letI : ConnectedSpace (HyperellipticAffineInfinity H) := by
+      let Hrev := HyperellipticAffineInfinity.reverseData H h
+      change ConnectedSpace (HyperellipticAffine Hrev)
+      infer_instance
     refine isConnected_range ?_
     simpa [qB] using (continuous_quotient_mk'.comp continuous_inr)
   have hpoly_ne : Polynomial.X * H.f ≠ 0 := by
