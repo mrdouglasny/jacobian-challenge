@@ -47,10 +47,11 @@ Kirov's real Montel proof.
 
 ## Status
 
-`bridgeForm` and `bridgeForm_injective` are currently scaffolded as
-`theorem ... := by sorry`, with detailed proof sketches inline. Pick
-either sorry and discharge it; the other can stay open during work on
-the first.
+Both `bridgeForm` and `bridgeForm_injective` are now real (no `sorry`).
+The construction relies on the helper `BridgeForm.rawCLM_swap_chart`
+(chart-overlap equality from the cocycle) plus standard Mathlib bundle
+trivialization API; see `docs/KirovHolomorphicLessons.md` for the proof
+shape.
 
 See `vendor/kirov-jacobian-claude/HANDOFF.md` for the surrounding
 classical-citation handoff.
@@ -314,10 +315,12 @@ the chart-at-self has two advantages:
   `coeff_add / coeff_smul` and the linearity of scalar multiplication on
   CLMs.
 
-The smoothness witness `contMDiff_toFun` is the only deep obligation;
-it remains as a `sorry` for now (see `docs/KirovHolomorphicLessons.md`
-for the planned discharge route via `rawCLM_eq_of_mem_innerChartOpen`,
-`rawCLM_trivialized_eq_smul_id`, `contMDiffOn_totalSpaceMk_rawCLM`). -/
+The smoothness witness `contMDiff_toFun` is discharged using the
+`BridgeForm.rawCLM_swap_chart` helper above to swap chart-at-self for
+chart-at-y₀ on a neighborhood of each base point, then a
+`contMDiffAt_hom_bundle` reduction + bundle-trivialization round-trip
+(`Bundle.Trivialization.continuousLinearMapAt_symmL`) to collapse the
+trivialized representative to a smooth scalar multiple of `id_ℂ`. -/
 noncomputable def bridgeForm :
     HolomorphicOneForm X →ₗ[ℂ] Jacobians.Vendor.Kirov.HolomorphicOneForms X where
   toFun form :=
@@ -474,7 +477,15 @@ noncomputable def bridgeForm :
         rw [hmfd_eq]
         -- Now goal: c • (continuousLinearMapAt y) ((symmL y) v) = c * v.
         -- Use the round-trip continuousLinearMapAt_symmL = id.
-        simp only [Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X, smul_eq_mul]
+        have h_round : (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt
+            ℂ y ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v) = v :=
+          Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X v
+        -- The CLM symbols are subtle; congr-style.
+        calc form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
+              ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt ℂ y)
+                ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v)
+            = form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) • v := by rw [h_round]
+          _ = form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v := by rw [smul_eq_mul]
         }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
