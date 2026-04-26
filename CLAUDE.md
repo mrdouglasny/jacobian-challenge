@@ -89,6 +89,21 @@ adoption status.
   declare `haveI : Fact (¬ Odd ...) := ⟨h⟩` once. See
   `Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean` for the
   pattern.
+- **Convert the WHOLE chain, not just the top.** When converting a
+  hypothesis-using type to `[Fact ...]`, every instance the typeclass
+  synthesis traverses must take `[Fact ...]` (not explicit `(h : ...)`).
+  Partial conversion looks like it works (top-level `inferInstance`
+  succeeds in toy tests) but downstream typeclass synthesis hits the
+  unconverted lower instance, fails, and **times out** rather than
+  failing fast — `(deterministic) timeout at typeclass, maximum number
+  of heartbeats (20000) has been reached`. Concrete failure: my EA3
+  fix `b7dd81a` converted ChartedSpace and IsManifold on
+  `HyperellipticEvenProj` to `[Fact ...]` but left T2Space /
+  CompactSpace / ConnectedSpace in `Even.lean` with explicit `(h : ...)`.
+  Codex's `a9e93fc` finished the conversion. Lesson: when starting a
+  Fact-conversion of one instance, audit the dependency graph
+  (`grep '(h : ¬ Odd'` etc.) and convert all participants in the same
+  commit.
 - **`reverseData` definitional equality.** `HyperellipticAffineInfinity H`
   is definitionally `HyperellipticAffine (HyperellipticAffineInfinity.reverseData H h)`
   for `h : ¬ Odd H.f.natDegree`. The `change` tactic accepts this, so
