@@ -276,3 +276,103 @@ The injectivity proof was completed in the working tree (committed in
 `DFunLike.congr_fun ... 1`, then extends via the cocycle predicate to all
 chart-target points and via `IsZeroOffChartTarget` to the off-target case.
 
+## KirovLineIntegral subtleties (added 2026-04-25, third session)
+
+Filling the two sorries in `Jacobians/Bridge/KirovLineIntegral.lean`
+(`kirovBackedFunctional` + `kirovBackedFunctional_local_antiderivative`)
+surfaced two structural lessons not present in the HOF bridge.
+
+### 1. `lineIntegral_add` requires explicit integrability hypotheses
+
+`Vendor.Kirov.lineIntegral_add α β γ hα hβ` takes integrability
+hypotheses for both summands. With only the existing
+`bridgePath_chart_differentiable` axiom (which gives `DifferentiableAt`
+chart-locally but not `C¹`), `pathSpeed γ` need not be continuous in
+`t`, so the integrand `t ↦ α(γ t)(γ'(t))` is not provably continuous,
+and integrability cannot be derived from continuity.
+
+Resolution: introduce a new structural axiom
+
+```lean
+axiom bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
+    IntervalIntegrable
+      (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+        (bridgePath P₀ P t) (Vendor.Kirov.pathSpeed (bridgePath P₀ P) t))
+      MeasureTheory.volume 0 1
+```
+
+Practical lesson: when bridging a `lineIntegral`-style API that has
+hypothesis-laden additivity, audit *each* integrability hypothesis
+against the regularity axioms in scope — don't assume `Continuous γ`
+(which we have) is enough; chart-local `DifferentiableAt` of `γ` is
+strictly weaker than `C¹` of `γ`.
+
+### 2. The FTC is fundamentally a *family* statement
+
+`kirovBackedFunctional_local_antiderivative` differentiates
+
+```
+F(z) := lineIntegral (bridgeForm form) (bridgePath P₀ ((extChartAt P).symm z))
+```
+
+w.r.t. `z`, near `z = (extChartAt P) P`. The derivative formula
+`form.coeff P ((extChartAt P) P)` requires knowing how
+`bridgePath P₀ Q` varies in `Q` — *not* just a single path per
+endpoint pair.
+
+The four endpoint/continuity axioms (`bridgePath_at_zero`,
+`bridgePath_at_one`, `bridgePath_continuous`,
+`bridgePath_chart_differentiable`) say nothing about that variation.
+So no amount of `pathSpeed_comp_eq_mfderiv` chaining inside the
+original axiom set can derive the FTC.
+
+Resolution: the FTC is a structural axiom
+
+```lean
+axiom bridgePath_local_antiderivative (P₀ P : X)
+    (form : HolomorphicOneForm X) :
+    HasDerivAt
+      (fun z : ℂ => Vendor.Kirov.lineIntegral
+        (Bridge.bridgeForm form) (bridgePath P₀ ((extChartAt 𝓘(ℂ) P).symm z)))
+      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
+      ((extChartAt 𝓘(ℂ) P) P)
+```
+
+Practical lesson: when the existence of a structural object (here
+`bridgePath`) is axiomatised pointwise, **derived properties that need
+the object to vary smoothly are not derivable**, even if the
+"variability" they need looks innocuous. The honest move is to
+axiomatise the variation-flavoured property too, and document the
+discharge route (here: rebuild `bridgePath` as
+`concat (basePath P₀ P) (chartLine P z)`, then derive via
+`pathSpeed_comp_eq_mfderiv` + `mfderiv_extChartAt_self` + standard
+FTC for `intervalIntegral`).
+
+### 3. Axiom load-bearing audit
+
+`#print axioms` reveals which axioms each derived declaration actually
+uses. After the `KirovLineIntegral` work:
+
+```
+'kirovBackedFunctional' depends on axioms:
+  [propext, Classical.choice, Quot.sound,
+   bridgePath, bridgePath_lineIntegrable]
+
+'kirovBackedFunctional_local_antiderivative' depends on axioms:
+  [propext, Classical.choice, Quot.sound,
+   bridgePath, bridgePath_lineIntegrable, bridgePath_local_antiderivative]
+```
+
+Of the seven structural axioms in `KirovLineIntegral.lean`, only three
+(`bridgePath`, `bridgePath_lineIntegrable`,
+`bridgePath_local_antiderivative`) are load-bearing in the two derived
+declarations. The four endpoint/regularity axioms
+(`bridgePath_continuous`, `bridgePath_chart_differentiable`,
+`bridgePath_at_zero`, `bridgePath_at_one`) are scaffolding for the
+future discharge route (where they will become hypotheses of the
+discharge lemma) but are not currently consumed by anything.
+
+Practical lesson: run `#print axioms` after every bridge to verify
+which structural axioms are actually load-bearing — don't assume the
+intended-load set matches the actual-load set.
+
