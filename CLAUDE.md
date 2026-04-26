@@ -29,6 +29,31 @@ of:
 For tiny edits (docs, typo fixes, single-line renames), skip and rely
 on CI as final confirmation.
 
+**Sub-rule for `lean_run_code` tests.** The test snippet must exercise
+the declaration **with the exact signature shape it actually has** —
+same implicit/explicit/instance argument structure, same hypothesis
+form. Specifically:
+
+* Don't add `haveI`, `letI`, or extra hypotheses to the test's TYPE
+  signature that aren't in the declaration's signature. Doing so
+  elaborates the test in a richer context than the real def will see,
+  hiding signature-time typeclass-synthesis failures.
+* DO put `haveI` in the test's PROOF body when needed to discharge
+  hypotheses for the call — that mirrors how downstream callers will
+  use the declaration.
+* For declarations that take `[TypeClass]` arguments, the test should
+  let typeclass synthesis find them, not pass them explicitly.
+
+Example failure mode that CI caught and `lean_run_code` missed
+(EA3, commit `4c7a959` → fix `b7dd81a`): a def with body
+`(H : ...) (h : ¬ Odd ...) := by haveI : Fact ... := ⟨h⟩; ...` and
+return type `HolomorphicOneForm X` failed CI because the SIGNATURE
+elaboration needed `ChartedSpace ℂ X` which only resolves under
+`Fact`. The `haveI` in the body doesn't help signature elaboration.
+Fix: take `[Fact ...]` as instance arg. The original test passed
+because it added `haveI` in the test TYPE signature too — testing a
+*corrected* version, not the actual def.
+
 ## CI
 
 CI is GitHub Actions, runs `lake build` on every push to `main`. Each
