@@ -25,6 +25,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ContDiff.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Polynomial
+import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Algebra.Polynomial.FieldDivision
 import Mathlib.Algebra.Squarefree.Basic
 
@@ -116,22 +117,139 @@ theorem smoothLocus_cover (H : HyperellipticData) :
       simpa [smoothLocusY] using hpY
     exact mem_smoothLocusX_of_y_eq_zero H hpY0
 
-/-- **The `(x, y) ↦ x` chart on `smoothLocusY`.** Returns a
-`PartialHomeomorph (HyperellipticAffine H) ℂ` whose source is a
-neighborhood of `p` in `smoothLocusY` and whose target is a
-neighborhood of `p.val.1` in `ℂ`.
+/-  The `(x, y) ↦ x` chart on `smoothLocusY` is built from a local inverse to
+the square map at `y₀ ≠ 0`, so that `x ↦ (x, y(x))` is defined near the base
+point. -/
+/-- Local inverse package for the square map `y ↦ y²` at a point where
+`y ≠ 0`. -/
+noncomputable def squareLocalHomeomorph (p : HyperellipticAffine H)
+    (hp : p ∈ smoothLocusY H) : OpenPartialHomeomorph ℂ ℂ := by
+  let c : ℂ := p.val.2 * 2
+  have hc : c ≠ 0 := by
+    simpa [smoothLocusY, c] using mul_ne_zero hp (show (2 : ℂ) ≠ 0 by norm_num)
+  let e' : ℂ ≃L[ℂ] ℂ := ContinuousLinearEquiv.smulLeft (Units.mk0 c hc)
+  have hmap : ((e' : ℂ →L[ℂ] ℂ)) = ContinuousLinearMap.toSpanSingleton ℂ c := by
+    apply ContinuousLinearMap.ext
+    intro z
+    change (p.val.2 * 2) * z = z * (p.val.2 * 2)
+    ring
+  have hf : HasFDerivAt (fun y : ℂ => y ^ 2) (e' : ℂ →L[ℂ] ℂ) p.val.2 := by
+    simpa [hmap, c, pow_two, two_mul, mul_assoc, mul_left_comm, mul_comm] using
+      (hasDerivAt_pow 2 p.val.2).hasFDerivAt
+  have hcont : ContDiffAt ℂ ω (fun y : ℂ => y ^ 2) p.val.2 := by
+    simpa using (contDiffAt_id.pow 2 : ContDiffAt ℂ ω (fun y : ℂ => y ^ 2) p.val.2)
+  exact hcont.toOpenPartialHomeomorph (fun y : ℂ => y ^ 2) hf (by simp)
 
-Construction: at a point `(x₀, y₀)` with `y₀ ≠ 0`, the function
-`F(x, y) := y² - f(x)` has `∂F/∂y = 2y₀ ≠ 0`, so the implicit function
-theorem yields an analytic local inverse `x ↦ (x, y(x))` near `x₀`. -/
-axiom affineChartProjX (p : HyperellipticAffine H)
-    (_hp : p ∈ smoothLocusY H) :
-    OpenPartialHomeomorph (HyperellipticAffine H) ℂ
+/-- The `(x, y) ↦ x` chart on `smoothLocusY`, built from a local inverse to
+`y ↦ y²` near the base point. -/
+noncomputable def affineChartProjX (p : HyperellipticAffine H)
+    (hp : p ∈ smoothLocusY H) :
+    OpenPartialHomeomorph (HyperellipticAffine H) ℂ := by
+  classical
+  let e := squareLocalHomeomorph (H := H) p hp
+  let source : Set (HyperellipticAffine H) := { q | q.val.2 ∈ e.source }
+  let target : Set ℂ := { x | H.f.eval x ∈ e.target }
+  letI : DecidablePred fun x : ℂ => x ∈ target := Classical.decPred _
+  let invFun : ℂ → HyperellipticAffine H := fun x =>
+    if hx : x ∈ target then
+      ⟨(x, e.symm (H.f.eval x)), by
+        change (e.symm (H.f.eval x)) ^ 2 = H.f.eval x
+        simpa [e, squareLocalHomeomorph] using
+          (e.right_inv (by simpa [target] using hx))⟩
+    else Classical.choice (inferInstance : Nonempty (HyperellipticAffine H))
+  refine
+    { toPartialEquiv :=
+        { toFun := fun q => q.val.1
+          invFun := invFun
+          source := source
+          target := target
+          map_source' := by
+            intro q hq
+            change H.f.eval q.val.1 ∈ e.target
+            simpa [e, squareLocalHomeomorph, q.property] using e.map_source hq
+          map_target' := by
+            intro x hx
+            dsimp [invFun]
+            simp only [hx, dite_true, source]
+            exact e.map_target (by simpa [target] using hx)
+          left_inv' := by
+            intro q hq
+            have hy : q.val.2 ∈ e.source := hq
+            have hx : q.val.1 ∈ target := by
+              simpa [target, e, squareLocalHomeomorph, q.property] using e.map_source hy
+            dsimp [invFun]
+            rw [dif_pos hx]
+            apply Subtype.ext
+            have hy' : e.symm (H.f.eval q.val.1) = q.val.2 := by
+              simpa [e, squareLocalHomeomorph, q.property] using e.left_inv hy
+            exact Prod.ext rfl hy'
+          right_inv' := by
+            intro x hx
+            dsimp [invFun]
+            simp [hx] }
+      open_source := by
+        simpa [source] using e.open_source.preimage continuous_subtype_val.snd
+      open_target := by
+        simpa [target] using e.open_target.preimage ((Polynomial.continuous H.f))
+      continuousOn_toFun := by
+        simpa [source] using continuous_subtype_val.fst.continuousOn
+      continuousOn_invFun := by
+        rw [continuousOn_iff_continuous_restrict]
+        change Continuous (fun x : target => invFun x)
+        have hEq :
+            (fun x : target => invFun x) =
+              (fun x : target =>
+                ⟨((x : ℂ), e.symm (H.f.eval (x : ℂ))), by
+                  change (e.symm (H.f.eval (x : ℂ))) ^ 2 = H.f.eval (x : ℂ)
+                  simpa [target, e, squareLocalHomeomorph] using (e.right_inv x.property)⟩) := by
+          funext x
+          have hx' : H.f.eval (x : ℂ) ∈ e.target := x.property
+          change
+            (if hx : H.f.eval (x : ℂ) ∈ e.target then
+              ⟨((x : ℂ), e.symm (H.f.eval (x : ℂ))), by
+                change (e.symm (H.f.eval (x : ℂ))) ^ 2 = H.f.eval (x : ℂ)
+                simpa [target, e, squareLocalHomeomorph] using (e.right_inv hx)⟩
+             else Classical.choice (inferInstance : Nonempty (HyperellipticAffine H))) =
+            ⟨((x : ℂ), e.symm (H.f.eval (x : ℂ))), by
+              change (e.symm (H.f.eval (x : ℂ))) ^ 2 = H.f.eval (x : ℂ)
+              simpa [target, e, squareLocalHomeomorph] using (e.right_inv x.property)⟩
+          rw [dif_pos hx']
+        rw [hEq]
+        have hsecond : Continuous (fun x : target => e.symm (H.f.eval (x : ℂ))) := by
+          have hsecondOn : ContinuousOn (fun x : ℂ => e.symm (H.f.eval x)) target := by
+            simpa [Function.comp] using
+              (ContinuousOn.comp (s := target) (t := e.target) e.symm.continuousOn
+                ((Polynomial.continuous H.f).continuousOn) (by
+                  intro x hx
+                  simpa [target] using hx))
+          simpa [Set.restrict] using continuousOn_iff_continuous_restrict.mp hsecondOn
+        exact Continuous.subtype_mk (continuous_subtype_val.prodMk hsecond) (by
+          intro x
+          change (e.symm (Polynomial.eval (x : ℂ) H.f)) ^ 2 = Polynomial.eval (x : ℂ) H.f
+          simpa [target, e, squareLocalHomeomorph] using (e.right_inv x.property))
+      }
 
 /-- The chosen `x`-projection chart is defined at its base point. -/
-axiom affineChartProjX_mem_source (p : HyperellipticAffine H)
+theorem affineChartProjX_mem_source (p : HyperellipticAffine H)
     (hp : p ∈ smoothLocusY H) :
-    p ∈ (affineChartProjX p hp).source
+    p ∈ (affineChartProjX p hp).source := by
+  let e := squareLocalHomeomorph (H := H) p hp
+  change p.val.2 ∈ e.source
+  dsimp [e, squareLocalHomeomorph]
+  let c : ℂ := p.val.2 * 2
+  have hc : c ≠ 0 := by
+    simpa [smoothLocusY, c] using mul_ne_zero hp (show (2 : ℂ) ≠ 0 by norm_num)
+  let e' : ℂ ≃L[ℂ] ℂ := ContinuousLinearEquiv.smulLeft (Units.mk0 c hc)
+  have hmap : ((e' : ℂ →L[ℂ] ℂ)) = ContinuousLinearMap.toSpanSingleton ℂ c := by
+    apply ContinuousLinearMap.ext
+    intro z
+    change (p.val.2 * 2) * z = z * (p.val.2 * 2)
+    ring
+  have hf : HasFDerivAt (fun y : ℂ => y ^ 2) (e' : ℂ →L[ℂ] ℂ) p.val.2 := by
+    simpa [hmap, c, pow_two, two_mul, mul_assoc, mul_left_comm, mul_comm] using
+      (hasDerivAt_pow 2 p.val.2).hasFDerivAt
+  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
+    (contDiffAt_id.pow 2 : ContDiffAt ℂ ω (fun y : ℂ => y ^ 2) p.val.2) (hf' := hf) (hn := by simp)
 
 /-- Local inverse package for the polynomial map `x ↦ f(x)` at a point where
 `f'(x) ≠ 0`. -/
@@ -291,11 +409,22 @@ noncomputable instance affine_chartedSpace (H : HyperellipticData) :
   chart_mem_atlas p := ⟨p, rfl⟩
 
 /-- Remaining OA1 compatibility boundary: `x`-chart followed by `x`-chart. -/
-axiom affineChartProjX_compat_affineChartProjX
+theorem affineChartProjX_compat_affineChartProjX
     (p q : HyperellipticAffine H) (hp : p ∈ smoothLocusY H) (hq : q ∈ smoothLocusY H) :
     ContDiffOn ℂ ω
       (((affineChartProjX p hp).symm.trans (affineChartProjX q hq)) : ℂ → ℂ)
-      (((affineChartProjX p hp).symm.trans (affineChartProjX q hq)).source)
+      (((affineChartProjX p hp).symm.trans (affineChartProjX q hq)).source) := by
+  let ep := affineChartProjX (H := H) p hp
+  let eq := affineChartProjX (H := H) q hq
+  exact ContDiffOn.congr
+    (f := fun x : ℂ => x)
+    (s := (ep.symm.trans eq).source)
+    contDiffOn_id
+    (by
+      intro x hx
+      have hx0 : x ∈ ep.target := hx.1
+      change ep (ep.symm x) = x
+      exact ep.right_inv hx0)
 
 /-- Remaining OA1 compatibility boundary: `x`-chart followed by `y`-chart. -/
 axiom affineChartProjX_compat_affineChartProjY
@@ -312,11 +441,22 @@ axiom affineChartProjY_compat_affineChartProjX
       (((affineChartProjY p hp).symm.trans (affineChartProjX q hq)).source)
 
 /-- Remaining OA1 compatibility boundary: `y`-chart followed by `y`-chart. -/
-axiom affineChartProjY_compat_affineChartProjY
+theorem affineChartProjY_compat_affineChartProjY
     (p q : HyperellipticAffine H) (hp : p ∈ smoothLocusX H) (hq : q ∈ smoothLocusX H) :
     ContDiffOn ℂ ω
       (((affineChartProjY p hp).symm.trans (affineChartProjY q hq)) : ℂ → ℂ)
-      (((affineChartProjY p hp).symm.trans (affineChartProjY q hq)).source)
+      (((affineChartProjY p hp).symm.trans (affineChartProjY q hq)).source) := by
+  let ep := affineChartProjY (H := H) p hp
+  let eq := affineChartProjY (H := H) q hq
+  exact ContDiffOn.congr
+    (f := fun y : ℂ => y)
+    (s := (ep.symm.trans eq).source)
+    contDiffOn_id
+    (by
+      intro y hy
+      have hy0 : y ∈ ep.target := hy.1
+      change ep (ep.symm y) = y
+      exact ep.right_inv hy0)
 
 /-- Chart-transition compatibility for the chosen affine chart package. -/
 theorem affineChartAt_compat (p q : HyperellipticAffine H) :
