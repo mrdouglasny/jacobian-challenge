@@ -14,17 +14,22 @@ checking yet". This has caused multiple back-to-back CI failures.
 not pure renames, not formatting) MUST be validated before push by one
 of:
 
-1. **`lean_run_code`** with a `#check` or `example` exercising the new
-   declaration. For new `instance`s, write `example : InferredType :=
-   inferInstance`. For new theorems, write `example : T := myThm _ _`.
-   For new defs, exercise them at a use site. This is the default
-   for fast iteration.
+1. **`lake env lean <file.lean>`** — compiles the file as the build
+   would, ~5–30s for an incremental project file (Mathlib stays
+   cached). **This is the most reliable check** and the one to use by
+   default. Returns same errors/warnings as CI.
 
-2. **`lake build <ModulePath>`** for substantive proof work. Mathlib is
-   cached; incremental builds of one or two files are ~10–60s. Use
-   when `lean_run_code` snippets get awkward or when changes touch
-   typeclass resolution (which `lean_run_code` exercises only at the
-   snippet's use site, not at every downstream resolution point).
+2. **`lean_run_code`** with a `#check` or `example` exercising the new
+   declaration. Use as a quick sanity check during interactive
+   development. **CAVEAT: can return false positives** — a snippet may
+   compile when the imported file would fail (observed `b2ae9f9` →
+   CI failure: `Decidable` instance error in the file did not surface
+   in the snippet check). Always follow with `lake env lean` for
+   pre-push validation.
+
+3. **`lake build <ModulePath>`** for substantive proof work touching
+   many files. Slower than `lake env lean` but checks downstream
+   consumers too.
 
 For tiny edits (docs, typo fixes, single-line renames), skip and rely
 on CI as final confirmation.
