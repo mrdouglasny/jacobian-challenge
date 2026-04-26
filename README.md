@@ -1,4 +1,15 @@
-# Jacobians of Compact Riemann Surfaces
+# Jacobians of Compact Riemann Surfaces — solo attempt
+
+> **Branch note.** This `solo` branch preserves the state of the project
+> **before any outside contributions were imported** (frozen at the v0.2
+> snapshot of 2026-04-25, 93 commits in). The current development branch
+> [`main`](https://github.com/mrdouglasny/jacobian-challenge/tree/main)
+> integrates Rado Kirov's Apache 2.0-licensed
+> [`jacobian-claude`](https://github.com/rkirov/jacobian-claude) — most
+> notably his ~3,400 LOC Montel proof, retiring our previous
+> `AX_FiniteDimOneForms` axiom — plus a sorry-free `LineIntegral`
+> module and ongoing bridge work toward retiring the path-integral
+> axioms. See `main`'s README for the cross-pollinated state.
 
 An interface-complete Lean 4 bridge to Kevin Buzzard's [Jacobian Challenge](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026): all 24 `sorry`s in `Challenge.lean` discharged as real `def`s and `instance`s, with the remaining mathematical content organized as classified axioms (textbook-citable classical theorems + 5 function-existence axioms with construction plans). Not a from-first-principles proof of Jacobian theory; a scaffold that closes Buzzard's exposed API and enumerates the work below it.
 
