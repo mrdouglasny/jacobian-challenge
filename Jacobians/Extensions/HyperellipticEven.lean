@@ -75,11 +75,13 @@ including across the affine ↔ affine-infinity gluing region.
 -/
 
 /-- The holomorphic 1-form `dx / y` on a hyperelliptic curve with even
-degree `f`. -/
+degree `f`. The hypothesis `¬ Odd H.f.natDegree` is wrapped as `Fact`
+so that `ChartedSpace ℂ (HyperellipticEvenProj H)` resolves at signature
+elaboration time. Callers in even-degree contexts declare
+`haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩` once. -/
 noncomputable def hyperellipticEvenDxOverY
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     HolomorphicOneForm (HyperellipticEvenProj H) := by
-  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
   -- Construct the cocycle (`coeff`, three predicates) explicitly. In
   -- the affine chart at `(x₀, y₀)` with `y₀ ≠ 0`, the local
   -- representative is `1 / y(z)` where `y(z)` is the chart-local
@@ -103,10 +105,9 @@ infinity points in the even case (vs the single ∞ in odd).
 hyperelliptic curve, valid for `k ≤ g - 1` where
 `g = H.f.natDegree / 2 - 1`. -/
 noncomputable def hyperellipticEvenBasisDifferential
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)]
     (k : ℕ) (_hk : k < H.f.natDegree / 2 - 1) :
     HolomorphicOneForm (HyperellipticEvenProj H) := by
-  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
   -- Multiply the local coefficient of `hyperellipticEvenDxOverY` by `x^k`.
   -- Use the same cocycle argument; `x^k` is analytic and the
   -- transition law is multiplicative on the chart-transition mfderiv.
@@ -129,12 +130,10 @@ independent polynomials.
 /-- The canonical basis of holomorphic 1-forms on an even-degree
 hyperelliptic curve is linearly independent. -/
 theorem hyperellipticEvenBasisDifferential_linearIndependent
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     LinearIndependent ℂ
       (fun k : Fin (H.f.natDegree / 2 - 1) =>
-        hyperellipticEvenBasisDifferential H h k.val k.isLt) := by
-  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+        hyperellipticEvenBasisDifferential H k.val k.isLt) := by
   sorry
 
 /-! ## Headline test — genus theorem for even hyperelliptic
@@ -158,11 +157,9 @@ when `H.f.natDegree = 2g + 2`.
 formalization end-to-end on the even-quotient atlas + bridge +
 basis + Riemann-Roch. -/
 theorem genus_HyperellipticEven_eq
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) =
       H.f.natDegree / 2 - 1 := by
-  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
   sorry
 
 /-- **Consistency check.** For even-degree-4 hyperelliptic curves
@@ -172,11 +169,9 @@ that "genus 1 curve" is consistently realized across all three
 parameterizations: `Elliptic`, `HyperellipticOdd` with `deg = 3`, and
 `HyperellipticEvenProj` with `deg = 4`. -/
 theorem genus_HyperellipticEven_eq_one_of_deg_four
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)]
     (hdeg : H.f.natDegree = 4) :
-    haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) = 1 := by
-  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
-  rw [genus_HyperellipticEven_eq H h, hdeg]
+  rw [genus_HyperellipticEven_eq H, hdeg]
 
 end Jacobians.Extensions.HyperellipticEven
