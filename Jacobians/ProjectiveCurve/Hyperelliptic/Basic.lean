@@ -105,10 +105,28 @@ attribute [instance] AX_HyperellipticAffine_connected
 
 /-- **Axiom (NOT VERIFIED).** The affine hyperelliptic curve is
 noncompact. -/
-axiom AX_HyperellipticAffine_noncompact (H : HyperellipticData) :
-    NoncompactSpace (HyperellipticAffine H)
-
-attribute [instance] AX_HyperellipticAffine_noncompact
+instance : NoncompactSpace (HyperellipticAffine H) := by
+  refine ⟨?_⟩
+  intro hcompact
+  let π : HyperellipticAffine H → ℂ := fun p => p.val.1
+  have hπ : Continuous π := continuous_subtype_val.fst
+  have hsurj : Function.Surjective π := by
+    intro x
+    obtain ⟨y, hy⟩ : ∃ y : ℂ, H.f.eval x = y * y :=
+      (Complex.isSquare (H.f.eval x)).exists_mul_self
+    refine ⟨⟨(x, y), ?_⟩, rfl⟩
+    simpa [sq, hy] using hy.symm
+  have himage : π '' (Set.univ : Set (HyperellipticAffine H)) = Set.univ := by
+    ext x
+    constructor
+    · intro _
+      simp
+    · intro _
+      rcases hsurj x with ⟨p, rfl⟩
+      exact ⟨p, Set.mem_univ _, rfl⟩
+  have hcompactC : IsCompact (Set.univ : Set ℂ) := by
+    simpa [himage] using hcompact.image hπ
+  exact (inferInstance : NoncompactSpace ℂ).noncompact_univ hcompactC
 
 end HyperellipticAffine
 
