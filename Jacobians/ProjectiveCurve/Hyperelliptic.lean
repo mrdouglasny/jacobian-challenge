@@ -29,16 +29,19 @@ instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
   Jacobians.ProjectiveCurve.instTopologicalSpaceHyperellipticEvenProj H
 
 instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    T2Space (HyperellipticEven H h) :=
-  Jacobians.ProjectiveCurve.instT2SpaceHyperellipticEvenProjOfNotOddNatNatDegreeComplexF H h
+    T2Space (HyperellipticEven H h) := by
+  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+  exact (inferInstance : T2Space (HyperellipticEvenProj H))
 
 instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    CompactSpace (HyperellipticEven H h) :=
-  Jacobians.ProjectiveCurve.instCompactSpaceHyperellipticEvenProjOfNotOddNatNatDegreeComplexF H h
+    CompactSpace (HyperellipticEven H h) := by
+  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+  exact (inferInstance : CompactSpace (HyperellipticEvenProj H))
 
 instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    ConnectedSpace (HyperellipticEven H h) :=
-  Jacobians.ProjectiveCurve.instConnectedSpaceHyperellipticEvenProjOfNotOddNatNatDegreeComplexF H h
+    ConnectedSpace (HyperellipticEven H h) := by
+  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+  exact (inferInstance : ConnectedSpace (HyperellipticEvenProj H))
 
 instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
     Nonempty (HyperellipticEven H h) :=
