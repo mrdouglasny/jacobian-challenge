@@ -53,15 +53,17 @@ So the scoping decision is: solve Gap 1 by hand for the needed shape; isolate Ga
 
 ## Cross-pollination from Kirov's Montel theorem
 
-After [Rado Kirov's 3-day Claude Code attempt](https://github.com/rkirov/jacobian-claude) was relicensed to Apache 2.0 (2026-04-25, Lean Zulip `#Autoformalization > Jacobian challenge` msg #61), we adopted the strongest piece of his work: a **real ~3,400 LOC proof of Montel's theorem** for holomorphic 1-forms on a compact connected complex 1-manifold, yielding a real `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` (his `Vendor/Kirov/HolomorphicForms.lean:89`).
+After [Rado Kirov's 3-day Claude Code attempt](https://github.com/rkirov/jacobian-claude) was relicensed to Apache 2.0 (2026-04-25, Lean Zulip `#Autoformalization > Jacobian challenge` msg #61), we adopted the strongest pieces of his work: a **real ~3,400 LOC proof of Montel's theorem** for holomorphic 1-forms (yielding `instance : FiniteDimensional ℂ HolomorphicOneForms X`), a sorry-free **`LineIntegral`** module (path speed via chart-local `fderiv`, line integral linearity, concat, reversal, the `pathSpeed_comp_eq_mfderiv` chain rule), and the sorry-free **`ZLatticeQuotient`** quotient-manifold infrastructure.
 
-**Net change**: our previous abstract axiom `AX_FiniteDimOneForms` (Cartan–Serre / normal-families assertion) is **retired**, replaced by Kirov's real Montel construction reached through a small ℂ-linear bridge. Two structural axioms (`bridgeForm`, `bridgeForm_injective` — both mechanical, in Mathlib bundle/section formalism) take the place of the abstract finiteness claim.
+**Adoption results (axiom changes):**
+- ✅ **`AX_FiniteDimOneForms` retired.** A ℂ-linear bridge `bridgeForm : HolomorphicOneForm X →ₗ[ℂ] Vendor.Kirov.HolomorphicOneForms X` and its injectivity are now **real proofs** (no sorries, no structural axioms in the bridge file), so `FiniteDimensional ℂ (HolomorphicOneForm X)` derives from Kirov's Montel via `Module.Finite.of_injective`. The deep finite-dim content is genuinely Lean-checked, not asserted.
+- 🚧 **`pathIntegralBasepointFunctional` retirement in flight.** A `kirovBackedFunctional` composing `bridgeForm` with `Vendor.Kirov.lineIntegral` along a chosen path is real (linearity derived from Kirov's `lineIntegral_add` / `_smul`). The FTC theorem (`kirovBackedFunctional_local_antiderivative`) is open as a single `sorry` with a concrete 5-step derivation chain; first reduction lemmas (`chartLine` def + chart-image equality) already landed.
 
 Layout:
 
 - [`vendor/kirov-jacobian-claude/`](vendor/kirov-jacobian-claude/) — verbatim copy of Kirov's tree at upstream commit `7ce9e2e8` (Apache 2.0). Outside the build root. See [`PROVENANCE.md`](vendor/kirov-jacobian-claude/PROVENANCE.md) and [`HANDOFF.md`](vendor/kirov-jacobian-claude/HANDOFF.md).
-- [`Jacobians/Vendor/Kirov/`](Jacobians/Vendor/Kirov/) — Kirov's `Genus`, `Montel.*`, `HolomorphicForms` modules ported into our build under namespace `Jacobians.Vendor.Kirov.*` with per-file Apache 2.0 attribution headers; mathematics unchanged. Two of his `:= sorry` declarations are stated as named `axiom`s (`genus_eq_zero_iff_homeo` for Uniformization; `ambientPhi_ambientPsi_eq` for the degree identity) for handoff.
-- [`Jacobians/Bridge/KirovHolomorphic.lean`](Jacobians/Bridge/KirovHolomorphic.lean) — the bridge from our chart-cocycle `HolomorphicOneForm X` to Kirov's `ContMDiffSection`-encoded `HolomorphicOneForms X`, with the derived `FiniteDimensional` instance.
+- [`Jacobians/Vendor/Kirov/`](Jacobians/Vendor/Kirov/) — six modules ported into our build under namespace `Jacobians.Vendor.Kirov.*` (`Genus`, `Montel.*`, `HolomorphicForms`, `LineIntegral`, `ChartedSpaceOfLocalHomeomorph`, `ZLatticeQuotient`), ~5,600 LOC total, with per-file Apache 2.0 attribution headers; mathematics unchanged. Two of Kirov's `:= sorry` declarations are stated as named `axiom`s (`genus_eq_zero_iff_homeo` for Uniformization; `ambientPhi_ambientPsi_eq` for the degree identity) for handoff.
+- [`Jacobians/Bridge/`](Jacobians/Bridge/) — `KirovHolomorphic.lean` (real `bridgeForm` + injectivity, derived `FiniteDimensional` instance) and `KirovLineIntegral.lean` (real `kirovBackedFunctional` + `chartLine` + endpoint lemmas; FTC theorem in flight).
 
 This is precisely the cooperation pattern Kirov suggested in the Zulip thread ("anyone can take my attempt and remix into theirs ... if going for more experimental purity"). The two repos remain independent attempts; we pull in his real proof rather than re-build it.
 
@@ -82,8 +84,8 @@ Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/ch
 | | |
 |---|---|
 | **Wall-clock** | 2026-04-19 → 2026-04-25 (7 calendar days, all active) |
-| **Commits** | 93 + 5 on `kirov-import` |
-| **Lean code** | ~6,600 lines across `Jacobians/` + ~4,200 lines vendored from `rkirov/jacobian-claude` (Apache 2.0) under `Jacobians/Vendor/Kirov/` |
+| **Commits** | 93 + 22 on `kirov-import` |
+| **Lean code** | ~6,600 lines across `Jacobians/` + ~5,600 lines vendored from `rkirov/jacobian-claude` (Apache 2.0) under `Jacobians/Vendor/Kirov/` |
 | **Documentation** | ~6,800 lines: challenge annotation, dependency trace, 5 construction plans, adversarial-review records |
 | **Model time** | Claude Opus 4.7 (primary coder), GPT-5.4 Codex (rescue passes on Jacobian functoriality derivations, HyperellipticEven T2 / Compact proofs), Gemini 3 Pro deep-think (axiom audits, type-equality smell-test) |
 | **Human effort** | Mathematician-user directing: scope, axiom-vs-proof boundary, hack-blocker judgments, review of all landings. Zero human-written Lean. |
