@@ -826,4 +826,110 @@ theorem hyperellipticAffineCoeff_cocycle_projY_projY
       affineProjYCoeff_eq_on_target g q hqX hQTarget,
       hAgree]
 
+/-! ## Cocycle equation, sub-case projX × projY (chain rule)
+
+The cross sub-case where the chart transition is `z ↦ y(z) =
+e_p.symm(H.f.eval z)`. The derivative `f'(z)/(2 y(z))` from
+`affineChartProjX_to_projY_transition_hasDerivAt` makes the cocycle
+close exactly:
+
+    g(z)/y(z) = (2 g(z)/f'(z)) · (f'(z)/(2 y(z)))
+
+The rewrite `x(y(z)) = z` (via `e_q.left_inv` at `z ∈ e_q.source`)
+collapses the projY coefficient to `2 g(z)/f'(z)`.
+-/
+
+theorem hyperellipticAffineCoeff_cocycle_projX_projY
+    (g : Polynomial ℂ)
+    (p q : HyperellipticAffine H) (hpY : p ∈ smoothLocusY H) (hqX : q ∈ smoothLocusX H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) p hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target)
+    (hSrc : ((affineChartProjX (H := H) p hpY).symm z : HyperellipticAffine H) ∈
+              ((affineChartProjY (H := H) q hqX)).source) :
+    affineProjXCoeff g p hpY z =
+      affineProjYCoeff g q hqX
+        ((affineChartProjY (H := H) q hqX) ((affineChartProjX (H := H) p hpY).symm z)) *
+        (fderiv ℂ ((affineChartProjY (H := H) q hqX) ∘
+          ((affineChartProjX (H := H) p hpY)).symm) z 1) := by
+  classical
+  set e_p := squareLocalHomeomorph (H := H) p hpY with he_p_def
+  set e_q := polynomialLocalHomeomorph (H := H) q hqX with he_q_def
+  set y_z := e_p.symm (H.f.eval z) with hy_z_def
+  -- Step 0: z ∈ e_q.source (extracted from hSrc).
+  have hZinEqSource : z ∈ e_q.source := by
+    have h1 := affineChartProjX_symm_apply_fst (H := H) p hpY hz
+    have hSrc' : (((affineChartProjX (H := H) p hpY).symm z) :
+        HyperellipticAffine H).val.1 ∈ e_q.source := hSrc
+    rw [h1] at hSrc'
+    exact hSrc'
+  -- Step 1: chart_q (chart_p.symm z) = y_z.
+  have hQAt : (affineChartProjY (H := H) q hqX)
+      ((affineChartProjX (H := H) p hpY).symm z) = y_z := by
+    have h2 := affineChartProjX_symm_apply_snd (H := H) p hpY hz
+    change (((affineChartProjX (H := H) p hpY).symm z) :
+      HyperellipticAffine H).val.2 = y_z
+    exact h2
+  -- Step 2: chart transition equals (e_p.symm ∘ H.f.eval) eventually near z.
+  set transition := (affineChartProjY (H := H) q hqX) ∘
+    ((affineChartProjX (H := H) p hpY)).symm with htrans_def
+  have hZinSrc : z ∈ (((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjY (H := H) q hqX))).source := ⟨hz, hSrc⟩
+  have hOpen : IsOpen (((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjY (H := H) q hqX))).source :=
+    ((affineChartProjX (H := H) p hpY).symm.trans
+      (affineChartProjY (H := H) q hqX)).open_source
+  have hEqTrans : transition =ᶠ[nhds z] (fun w : ℂ => e_p.symm (H.f.eval w)) := by
+    refine Filter.eventually_of_mem (hOpen.mem_nhds hZinSrc) ?_
+    intro w hw
+    simp only [transition, Function.comp_apply]
+    have hw1 : w ∈ (affineChartProjX (H := H) p hpY).target := hw.1
+    have h2 := affineChartProjX_symm_apply_snd (H := H) p hpY hw1
+    change (((affineChartProjX (H := H) p hpY).symm w) :
+      HyperellipticAffine H).val.2 = _
+    simpa [e_p] using h2
+  -- Step 3: derivative via chain-rule helper.
+  have hDeriv :
+      HasDerivAt (fun w : ℂ => e_p.symm (H.f.eval w))
+        (H.f.derivative.eval z / (2 * y_z)) z := by
+    simpa [e_p, y_z] using
+      affineChartProjX_to_projY_transition_hasDerivAt (H := H) p hpY hz
+  have hFderivVal :
+      fderiv ℂ transition z 1 = H.f.derivative.eval z / (2 * y_z) := by
+    rw [Filter.EventuallyEq.fderiv_eq hEqTrans]
+    rw [show fderiv ℂ (fun w : ℂ => e_p.symm (H.f.eval w)) z 1 =
+        deriv (fun w : ℂ => e_p.symm (H.f.eval w)) z from rfl]
+    exact hDeriv.deriv
+  -- Step 4: y_z ∈ chart_q target, x(y_z) = z, f'(z) ≠ 0.
+  have hY2 : y_z ^ 2 = H.f.eval z := by
+    have hHfz : H.f.eval z ∈ e_p.target := hz
+    have := e_p.right_inv hHfz
+    simpa [squareLocalHomeomorph, e_p, y_z] using this
+  have hHfz_in_eq_target : H.f.eval z ∈ e_q.target := by
+    have h := e_q.map_source hZinEqSource
+    have heq : (e_q : ℂ → ℂ) z = H.f.eval z := by
+      simpa [polynomialLocalHomeomorph, e_q] using
+        congrArg (e_q : ℂ → ℂ) (rfl : z = z)
+    rw [heq] at h
+    exact h
+  have hY_z_inQTarget : y_z ∈ ((affineChartProjY (H := H) q hqX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target := by
+    change y_z ^ 2 ∈ e_q.target
+    rw [hY2]; exact hHfz_in_eq_target
+  have hXofYz : e_q.symm (y_z ^ 2) = z := by
+    rw [hY2]
+    exact e_q.left_inv hZinEqSource
+  have hFder : H.f.derivative.eval z ≠ 0 :=
+    polynomialLocalHomeomorph_no_critical_in_source q hqX hZinEqSource
+  have hYz_ne : y_z ≠ 0 := squareLocalHomeomorph_symm_ne_zero p hpY hz
+  -- Combine.
+  rw [affineProjXCoeff_eq_on_target g p hpY hz]
+  rw [hQAt]
+  rw [affineProjYCoeff_eq_on_target g q hqX hY_z_inQTarget]
+  rw [hXofYz, hFderivVal]
+  -- LHS = g(z) / y_z;
+  -- RHS = (2 g(z) / f'(z)) * (f'(z) / (2 y_z)) = g(z) / y_z.
+  show g.eval z / y_z = _
+  field_simp
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
