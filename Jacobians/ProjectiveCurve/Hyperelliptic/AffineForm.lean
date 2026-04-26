@@ -130,4 +130,23 @@ theorem affineProjXCoeff_smul (c : ℂ) (g : Polynomial ℂ) (a : HyperellipticA
     ring
   · simp [hz]
 
+/-- **Closed form on chart target.** For `z ∈ chart target`,
+`affineProjXCoeff g a hpY z = g.eval z / (squareLocalHomeomorph.symm (H.f.eval z))`. -/
+theorem affineProjXCoeff_eq_on_target (g : Polynomial ℂ) (a : HyperellipticAffine H)
+    (hpY : a ∈ smoothLocusY H) {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    affineProjXCoeff g a hpY z =
+      g.eval z / ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z)) := by
+  classical
+  unfold affineProjXCoeff
+  simp [hz]
+
+/-- The chart target of `affineChartProjX` is open (Codex's chart def). -/
+theorem affineChartProjX_target_isOpen (a : HyperellipticAffine H)
+    (hpY : a ∈ smoothLocusY H) :
+    IsOpen (((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :=
+  (affineChartProjX (H := H) a hpY).open_target
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
