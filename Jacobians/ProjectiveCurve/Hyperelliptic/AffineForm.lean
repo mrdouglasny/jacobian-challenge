@@ -1043,4 +1043,98 @@ theorem hyperellipticAffineCoeff_cocycle_projY_projX
   show 2 * g.eval x_y / _ = _
   field_simp
 
+/-! ## Bundled cocycle predicate
+
+Combines the four sub-case cocycles into a single
+`SatisfiesCotangentCocycle` proof on the affine atlas. This is the
+third (and last analytic) predicate needed for membership in
+`holomorphicOneFormSubmodule (HyperellipticAffine H)`.
+-/
+
+theorem hyperellipticAffineCoeff_satisfiesCotangentCocycle (g : Polynomial ℂ) :
+    SatisfiesCotangentCocycle (HyperellipticAffine H)
+      (hyperellipticAffineCoeff (H := H) g) := by
+  classical
+  intro p q z hz hSrc
+  -- Reduce extChartAt to chartAt = affineChartAt.
+  have hChartTarget :
+      (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
+    rw [extChartAt_target]
+    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    rw [Set.range_id, Set.inter_univ]
+    rfl
+  have hChartSrc_q :
+      (extChartAt 𝓘(ℂ, ℂ) q).source = (affineChartAt (H := H) q).source := by
+    rw [extChartAt_source]
+    rfl
+  -- Convert extChartAt symm and goal-side extChartAt q applications
+  -- to affineChartAt before doing the case-split.
+  have hSymmEq_p :
+      ((extChartAt 𝓘(ℂ, ℂ) p).symm : ℂ → HyperellipticAffine H) =
+        ((affineChartAt (H := H) p).symm : ℂ → HyperellipticAffine H) := by
+    funext w; rfl
+  have hCoe_q :
+      ((extChartAt 𝓘(ℂ, ℂ) q) : HyperellipticAffine H → ℂ) =
+        ((affineChartAt (H := H) q) : HyperellipticAffine H → ℂ) := by
+    funext w; rfl
+  rw [hChartTarget] at hz
+  rw [hChartSrc_q, hSymmEq_p] at hSrc
+  rw [hSymmEq_p, hCoe_q]
+  by_cases hpY : p ∈ smoothLocusY H
+  · rw [affineChartAt_of_mem_smoothLocusY (H := H) p hpY] at hz hSrc ⊢
+    by_cases hqY : q ∈ smoothLocusY H
+    · -- projX × projX
+      rw [affineChartAt_of_mem_smoothLocusY (H := H) q hqY] at hSrc ⊢
+      have hLHS : hyperellipticAffineCoeff (H := H) g p z = affineProjXCoeff g p hpY z := by
+        simp [hyperellipticAffineCoeff, hpY]
+      have hRHS_cf : hyperellipticAffineCoeff (H := H) g q = affineProjXCoeff g q hqY := by
+        funext w
+        simp [hyperellipticAffineCoeff, hqY]
+      rw [hLHS, hRHS_cf]
+      exact hyperellipticAffineCoeff_cocycle_projX_projX g p q hpY hqY hz hSrc
+    · -- projX × projY
+      have hqX : q ∈ smoothLocusX H :=
+        mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hqY)
+      rw [affineChartAt_of_not_mem_smoothLocusY (H := H) q hqY] at hSrc ⊢
+      have hLHS : hyperellipticAffineCoeff (H := H) g p z = affineProjXCoeff g p hpY z := by
+        simp [hyperellipticAffineCoeff, hpY]
+      have hRHS_cf : hyperellipticAffineCoeff (H := H) g q = affineProjYCoeff g q hqX := by
+        funext w
+        simp [hyperellipticAffineCoeff, hqY]
+      rw [hLHS, hRHS_cf]
+      exact hyperellipticAffineCoeff_cocycle_projX_projY g p q hpY hqX hz hSrc
+  · have hpX : p ∈ smoothLocusX H :=
+      mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY)
+    rw [affineChartAt_of_not_mem_smoothLocusY (H := H) p hpY] at hz hSrc ⊢
+    by_cases hqY : q ∈ smoothLocusY H
+    · -- projY × projX
+      rw [affineChartAt_of_mem_smoothLocusY (H := H) q hqY] at hSrc ⊢
+      have hLHS : hyperellipticAffineCoeff (H := H) g p z = affineProjYCoeff g p hpX z := by
+        simp [hyperellipticAffineCoeff, hpY]
+      have hRHS_cf : hyperellipticAffineCoeff (H := H) g q = affineProjXCoeff g q hqY := by
+        funext w
+        simp [hyperellipticAffineCoeff, hqY]
+      rw [hLHS, hRHS_cf]
+      exact hyperellipticAffineCoeff_cocycle_projY_projX g p q hpX hqY hz hSrc
+    · -- projY × projY
+      have hqX : q ∈ smoothLocusX H :=
+        mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hqY)
+      rw [affineChartAt_of_not_mem_smoothLocusY (H := H) q hqY] at hSrc ⊢
+      have hLHS : hyperellipticAffineCoeff (H := H) g p z = affineProjYCoeff g p hpX z := by
+        simp [hyperellipticAffineCoeff, hpY]
+      have hRHS_cf : hyperellipticAffineCoeff (H := H) g q = affineProjYCoeff g q hqX := by
+        funext w
+        simp [hyperellipticAffineCoeff, hqY]
+      rw [hLHS, hRHS_cf]
+      exact hyperellipticAffineCoeff_cocycle_projY_projY g p q hpX hqX hz hSrc
+
+/-- Final affine-side bundle: `hyperellipticAffineCoeff g` is a member of
+`holomorphicOneFormSubmodule (HyperellipticAffine H)`. -/
+theorem hyperellipticAffineCoeff_mem_submodule (g : Polynomial ℂ) :
+    hyperellipticAffineCoeff (H := H) g ∈
+      holomorphicOneFormSubmodule (HyperellipticAffine H) :=
+  ⟨hyperellipticAffineCoeff_isHolomorphicOneFormCoeff g,
+   hyperellipticAffineCoeff_satisfiesCotangentCocycle g,
+   hyperellipticAffineCoeff_isZeroOffChartTarget g⟩
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
