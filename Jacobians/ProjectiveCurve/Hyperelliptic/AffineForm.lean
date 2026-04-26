@@ -202,4 +202,167 @@ theorem affineProjXCoeff_analyticOn_chartTarget
   -- `affineProjXCoeff_eq_on_target` gives directly.
   exact hQuotient.congr (fun z hz => affineProjXCoeff_eq_on_target g a hpY hz)
 
+/-! ## ProjY chart coefficient (S2 — mirror of S1)
+
+For `a ∈ smoothLocusX` (i.e. `f'(a.val.1) ≠ 0`), the projY chart
+`(x, y) ↦ y` represents `g(x) dx/y` in chart-y coordinates as
+`2 g(x(y)) / f'(x(y))` after the change of variable `dx = (2y/f'(x)) dy`.
+
+The chart-symm has `.val.1 = polynomialLocalHomeomorph.symm (y²)`
+(per `affineChartProjY_symm_apply_fst`).
+-/
+
+/-- **Narrow structural axiom.** No critical point of `x ↦ H.f.eval x`
+lies in the source of `polynomialLocalHomeomorph p hp`. Mirror of
+`squareLocalHomeomorph_zero_notMem_source`: the IFT-derived chart at
+`a.val.1` (where `f'(a.val.1) ≠ 0`) has a source bounded away from
+zeros of the derivative. -/
+axiom polynomialLocalHomeomorph_no_critical_in_source
+    (p : HyperellipticAffine H) (hp : p ∈ smoothLocusX H)
+    {x : ℂ} (hx : x ∈ (polynomialLocalHomeomorph (H := H) p hp).source) :
+    H.f.derivative.eval x ≠ 0
+
+/-- The derivative `f'(x(z))` is nonzero on the projY chart target,
+where `x(z) = polynomialLocalHomeomorph.symm (z²)`.
+
+**Proof.** `polynomialLocalHomeomorph.symm` maps target to source
+(`map_target`); on source, `f' ≠ 0` by the axiom above. -/
+theorem polynomialLocalHomeomorph_symm_eval_derivative_ne_zero
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    H.f.derivative.eval
+      ((polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)) ≠ 0 := by
+  set e := polynomialLocalHomeomorph (H := H) a hpX with he_def
+  have hz' : z ^ 2 ∈ e.target := by
+    simpa [affineChartProjY] using hz
+  exact polynomialLocalHomeomorph_no_critical_in_source a hpX (e.map_target hz')
+
+/-- Chart-local coefficient of `g(x) dx / y` in the projY chart at
+`a ∈ smoothLocusX` (i.e. `f'(a.val.1) ≠ 0`). For `z ∈ chart target`,
+this is `2 g(x(z)) / f'(x(z))` where `x(z) = polynomialLocalHomeomorph.symm (z²)`.
+
+Off-target the value is `0` (per `IsZeroOffChartTarget`). -/
+noncomputable def affineProjYCoeff (g : Polynomial ℂ) (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) (z : ℂ) : ℂ := by
+  classical
+  exact
+    if z ∈ ((affineChartProjY (H := H) a hpX) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target then
+      2 * g.eval ((polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)) /
+        H.f.derivative.eval
+          ((polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2))
+    else 0
+
+@[simp] theorem affineProjYCoeff_zero (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) (z : ℂ) :
+    affineProjYCoeff (0 : Polynomial ℂ) a hpX z = 0 := by
+  classical
+  unfold affineProjYCoeff
+  by_cases hz : z ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
+  · simp [hz, Polynomial.eval_zero]
+  · simp [hz]
+
+theorem affineProjYCoeff_add (g g' : Polynomial ℂ) (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) (z : ℂ) :
+    affineProjYCoeff (g + g') a hpX z =
+      affineProjYCoeff g a hpX z + affineProjYCoeff g' a hpX z := by
+  classical
+  unfold affineProjYCoeff
+  by_cases hz : z ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
+  · simp only [hz, if_true, Polynomial.eval_add]
+    ring
+  · simp [hz]
+
+theorem affineProjYCoeff_smul (c : ℂ) (g : Polynomial ℂ) (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) (z : ℂ) :
+    affineProjYCoeff (c • g) a hpX z = c * affineProjYCoeff g a hpX z := by
+  classical
+  unfold affineProjYCoeff
+  by_cases hz : z ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
+  · simp only [hz, if_true]
+    set x := (polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)
+    rw [show ((c • g : Polynomial ℂ).eval x) = c * g.eval x from by
+      simp [Polynomial.smul_eval, smul_eq_mul]]
+    ring
+  · simp [hz]
+
+theorem affineProjYCoeff_eq_on_target (g : Polynomial ℂ) (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) {z : ℂ}
+    (hz : z ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    affineProjYCoeff g a hpX z =
+      2 * g.eval ((polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)) /
+        H.f.derivative.eval
+          ((polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)) := by
+  classical
+  unfold affineProjYCoeff
+  simp [hz]
+
+theorem affineChartProjY_target_isOpen (a : HyperellipticAffine H)
+    (hpX : a ∈ smoothLocusX H) :
+    IsOpen (((affineChartProjY (H := H) a hpX) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :=
+  (affineChartProjY (H := H) a hpX).open_target
+
+/-- **Analyticity of the projY coefficient on chart target.** Mirror of
+`affineProjXCoeff_analyticOn_chartTarget`. Combines:
+* `H.f.derivative.eval` analytic everywhere (polynomial)
+* `polynomialLocalHomeomorph.symm` analytic on its target via Codex's
+  `polynomialLocalHomeomorph_contDiffOn_symm` + `contDiffOn_omega_iff_analyticOn`
+* `z ↦ z^2` analytic everywhere
+* polynomial composition + division by non-vanishing analytic. -/
+theorem affineProjYCoeff_analyticOn_chartTarget
+    (g : Polynomial ℂ) (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H) :
+    AnalyticOn ℂ (affineProjYCoeff g a hpX)
+      (((affineChartProjY (H := H) a hpX) :
+          OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) := by
+  set e := polynomialLocalHomeomorph (H := H) a hpX with he_def
+  set chartTarget :=
+    (((affineChartProjY (H := H) a hpX) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) with hct_def
+  -- Step 1: z ↦ z^2 is analytic on ℂ.
+  have hSq : AnalyticOn ℂ (fun z : ℂ => z ^ 2) chartTarget :=
+    (analyticOn_id.pow 2).mono (Set.subset_univ _)
+  -- Step 2: e.symm is analytic on e.target.
+  have hSymm : AnalyticOn ℂ e.symm e.target := by
+    have hCD : ContDiffOn ℂ ω e.symm e.target :=
+      polynomialLocalHomeomorph_contDiffOn_symm (H := H) a hpX
+    rw [show (ω : WithTop ℕ∞) = ⊤ from rfl] at hCD
+    exact (contDiffOn_omega_iff_analyticOn (𝕜 := ℂ) (E := ℂ) (F := ℂ)
+      e.open_target.uniqueDiffOn).mp hCD
+  -- Step 3: x(z) = e.symm (z^2) analytic on chartTarget.
+  have hMaps : Set.MapsTo (fun z : ℂ => z ^ 2) chartTarget e.target := by
+    intro z hz
+    -- chartTarget = { y | y^2 ∈ e.target }
+    change z ^ 2 ∈ e.target
+    simpa [affineChartProjY] using hz
+  have hX : AnalyticOn ℂ (fun z : ℂ => e.symm (z ^ 2)) chartTarget :=
+    hSymm.comp hSq hMaps
+  -- Step 4: g(x(z)) and f'(x(z)) analytic on chartTarget (composing with polynomials).
+  have hG : AnalyticOn ℂ (fun z : ℂ => g.eval (e.symm (z ^ 2))) chartTarget :=
+    hX.aeval_polynomial g
+  have hFder : AnalyticOn ℂ
+      (fun z : ℂ => H.f.derivative.eval (e.symm (z ^ 2))) chartTarget :=
+    hX.aeval_polynomial H.f.derivative
+  -- Step 5: 2*g(x(z)) analytic.
+  have hNum : AnalyticOn ℂ
+      (fun z : ℂ => 2 * g.eval (e.symm (z ^ 2))) chartTarget :=
+    analyticOn_const.mul hG
+  -- Step 6: Denominator non-vanishing.
+  have hNeZero : ∀ z ∈ chartTarget,
+      H.f.derivative.eval (e.symm (z ^ 2)) ≠ 0 :=
+    fun z hz => polynomialLocalHomeomorph_symm_eval_derivative_ne_zero a hpX hz
+  -- Step 7: Quotient analytic.
+  have hQuotient : AnalyticOn ℂ
+      (fun z : ℂ => 2 * g.eval (e.symm (z ^ 2)) /
+        H.f.derivative.eval (e.symm (z ^ 2))) chartTarget :=
+    hNum.div hFder hNeZero
+  -- Step 8: Match `affineProjYCoeff` on chartTarget.
+  exact hQuotient.congr (fun z hz => affineProjYCoeff_eq_on_target g a hpX hz)
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
