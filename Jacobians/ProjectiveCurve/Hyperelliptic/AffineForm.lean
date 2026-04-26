@@ -365,4 +365,66 @@ theorem affineProjYCoeff_analyticOn_chartTarget
   -- Step 8: Match `affineProjYCoeff` on chartTarget.
   exact hQuotient.congr (fun z hz => affineProjYCoeff_eq_on_target g a hpX hz)
 
+/-! ## Cocycle compatibility on chart overlaps (S3)
+
+For the form `g(x) dx / y` to be a holomorphic 1-form, the chart-local
+coefficient must transform correctly across chart overlaps. The
+cocycle predicate (in `RiemannSurface/OneForm.lean`):
+```
+coeff_p z = coeff_q (chart_q (chart_p.symm z)) * fderiv (chart_q ∘ chart_p.symm) z 1
+```
+
+For our affine chart system, this has 4 sub-cases based on (p, q)
+chart families:
+* projX × projX: chart transition is identity (both project to x);
+  reduces to y-branch agreement at the common point.
+* projX × projY: transition is `x ↦ y(x) = ±√f(x)` with derivative
+  `f'(x)/(2y)`; the cocycle absorbs this factor exactly.
+* projY × projX: symmetric.
+* projY × projY: chart transition is identity.
+-/
+
+/-- **Cocycle sub-case 1: projX × projX** — y-branch agreement.
+
+For two projX charts at p and q, if `chart_p.symm z ∈ chart_q.source`,
+then the chart transition `chart_q ∘ chart_p.symm` is the identity at
+z, and the y-branches `e_p.symm` and `e_q.symm` agree on `H.f.eval z`. -/
+theorem squareLocalHomeomorph_symm_eq_of_mem
+    (p q : HyperellipticAffine H)
+    (hpY : p ∈ smoothLocusY H) (hqY : q ∈ smoothLocusY H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) p hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target)
+    (hSymInY :
+      (squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval z) ∈
+        (squareLocalHomeomorph (H := H) q hqY).source) :
+    (squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval z) =
+      (squareLocalHomeomorph (H := H) q hqY).symm (H.f.eval z) := by
+  set e_p := squareLocalHomeomorph (H := H) p hpY with he_p_def
+  set e_q := squareLocalHomeomorph (H := H) q hqY with he_q_def
+  -- The y-branch from chart p satisfies (e_p.symm (H.f.eval z))^2 = H.f.eval z
+  -- by `e_p.right_inv` at H.f.eval z ∈ e_p.target.
+  have hHfz_p : H.f.eval z ∈ e_p.target := hz
+  have hSqRel : (e_p.symm (H.f.eval z)) ^ 2 = H.f.eval z := by
+    have := e_p.right_inv hHfz_p
+    -- e_p.toFun is `fun y => y^2` on its source
+    -- The actual identity: e_p (e_p.symm (H.f.eval z)) = H.f.eval z
+    -- We need to convert e_p applied to a value to that value squared.
+    -- Codex's chart def: e_p.toFun = (fun y : ℂ => y ^ 2) by construction.
+    simpa [squareLocalHomeomorph, e_p] using this
+  -- Now e_q.symm (H.f.eval z): by left_inv at e_p.symm (H.f.eval z) (which is in e_q.source):
+  have hRoundtrip :
+      e_q.symm (e_q (e_p.symm (H.f.eval z))) = e_p.symm (H.f.eval z) :=
+    e_q.left_inv hSymInY
+  -- e_q applied: e_q.toFun is also `y^2` on its source.
+  have hSqRel_q : e_q (e_p.symm (H.f.eval z)) = H.f.eval z := by
+    have : e_q (e_p.symm (H.f.eval z)) = (e_p.symm (H.f.eval z)) ^ 2 := by
+      simpa [squareLocalHomeomorph, e_q] using
+        congr_arg id (rfl : e_q (e_p.symm (H.f.eval z)) =
+          e_q (e_p.symm (H.f.eval z)))
+    rw [this, hSqRel]
+  -- Combining: rewrite hRoundtrip using hSqRel_q.
+  rw [hSqRel_q] at hRoundtrip
+  exact hRoundtrip.symm
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
