@@ -500,4 +500,72 @@ theorem affineChartProjX_to_projY_transition_hasDerivAt
   convert hcomp using 1
   rw [one_div, mul_comm, ← div_eq_inv_mul]
 
+/-! ### S3 sub-case 3: projY × projX chain rule
+
+Mirror of sub-case 2. The transition `affineChartProjY_q .symm . trans
+affineChartProjX_p` at `y` equals `(polynomialLocalHomeomorph q).symm (y²)`
+(the x-branch). By implicit differentiation of `f(x(y)) = y²`:
+`f'(x(y)) · x'(y) = 2y`, so `x'(y) = 2y / f'(x(y))`. -/
+
+/-- Derivative of the chosen x-branch `e_q.symm` at `y²`:
+`(e_q.symm)' (y²) = 1 / f'(e_q.symm (y²))`.
+
+Proof: `f(x) = H.f.eval x` has derivative `f'(x₀)` at `x₀ = e_q.symm(y²)`,
+which is nonzero by `polynomialLocalHomeomorph_symm_eval_derivative_ne_zero`,
+and `f (e_q.symm w) = w` for `w ∈ e_q.target` (open). The inverse function
+theorem (`HasDerivAt.of_local_left_inverse`) gives the result. -/
+theorem polynomialLocalHomeomorph_symm_hasDerivAt
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    {y : ℂ}
+    (hy : y ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    HasDerivAt (polynomialLocalHomeomorph (H := H) a hpX).symm
+      (1 / H.f.derivative.eval
+        ((polynomialLocalHomeomorph (H := H) a hpX).symm (y ^ 2)))
+      (y ^ 2) := by
+  set e := polynomialLocalHomeomorph (H := H) a hpX with he_def
+  have hy2 : y ^ 2 ∈ e.target := by
+    simpa [affineChartProjY] using hy
+  set x₀ := e.symm (y ^ 2) with hx₀
+  have hfHas : HasDerivAt (fun x : ℂ => H.f.eval x) (H.f.derivative.eval x₀) x₀ :=
+    H.f.hasDerivAt x₀
+  have hCont : ContinuousAt e.symm (y ^ 2) := e.continuousAt_symm hy2
+  have hLeftInv : ∀ᶠ (w : ℂ) in nhds (y ^ 2),
+      (fun x : ℂ => H.f.eval x) (e.symm w) = w := by
+    refine Filter.eventually_of_mem (e.open_target.mem_nhds hy2) ?_
+    intro w hw
+    have hRight : (e : ℂ → ℂ) (e.symm w) = w := e.right_inv hw
+    have hPoly : (e : ℂ → ℂ) (e.symm w) = H.f.eval (e.symm w) := by
+      simpa [e, polynomialLocalHomeomorph] using
+        congrArg (e : ℂ → ℂ) (rfl : e.symm w = e.symm w)
+    rw [hPoly] at hRight
+    exact hRight
+  have hFder : H.f.derivative.eval x₀ ≠ 0 :=
+    polynomialLocalHomeomorph_symm_eval_derivative_ne_zero a hpX hy
+  have key := HasDerivAt.of_local_left_inverse hCont hfHas hFder hLeftInv
+  convert key using 1
+  rw [one_div]
+
+/-- Chain-rule derivative of the projY→projX chart transition: at `y` in
+the projY chart target, the transition `y ↦ (polynomialLocalHomeomorph q).symm
+(y²)` has derivative `2y / f'(x(y))` where
+`x(y) = (polynomialLocalHomeomorph q).symm (y²)`. -/
+theorem affineChartProjY_to_projX_transition_hasDerivAt
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    {y : ℂ}
+    (hy : y ∈ ((affineChartProjY (H := H) a hpX) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    HasDerivAt
+      (fun w : ℂ => (polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))
+      (2 * y /
+        H.f.derivative.eval
+          ((polynomialLocalHomeomorph (H := H) a hpX).symm (y ^ 2)))
+      y := by
+  have hSymm := polynomialLocalHomeomorph_symm_hasDerivAt (H := H) a hpX hy
+  have hSq : HasDerivAt (fun w : ℂ => w ^ 2) (2 * y) y := by
+    simpa using hasDerivAt_pow 2 y
+  have hcomp := hSymm.comp y hSq
+  convert hcomp using 1
+  field_simp
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
