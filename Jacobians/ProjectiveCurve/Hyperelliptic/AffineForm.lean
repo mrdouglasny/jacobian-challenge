@@ -34,37 +34,64 @@ this is `g(z) / y(z)` where `y(z)` is the chart's local
 `squareLocalHomeomorph.symm` branch. Off-target the value is `0`
 (per `IsZeroOffChartTarget`). -/
 noncomputable def affineProjXCoeff (g : Polynomial ℂ) (a : HyperellipticAffine H)
-    (hpY : a ∈ smoothLocusY H) (z : ℂ) : ℂ :=
-  if z ∈ ((affineChartProjX (H := H) a hpY) :
-      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target then
-    g.eval z /
-      ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
-  else 0
+    (hpY : a ∈ smoothLocusY H) (z : ℂ) : ℂ := by
+  classical
+  exact
+    if z ∈ ((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target then
+      g.eval z /
+        ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
+    else 0
+
+/-- **Narrow structural axiom.** The point `0 ∈ ℂ` is not in the
+source of `squareLocalHomeomorph p hp`.
+
+This is the only piece of `squareLocalHomeomorph_symm_ne_zero` that
+isn't directly derivable from the chart's `right_inv`. It is true
+because `squareLocalHomeomorph` is built from the IFT-derived
+`ContDiffAt.toOpenPartialHomeomorph` on `y ↦ y²` at `p.val.2 ≠ 0`,
+and the IFT's source neighborhood is bounded away from the critical
+point `y = 0` of the squaring map.
+
+Discharge requires either:
+* an explicit characterization of the source of
+  `ContDiffAt.toOpenPartialHomeomorph` (Mathlib does not currently
+  expose one beyond `mem_toOpenPartialHomeomorph_source`), or
+* a topological argument that the squaring map is not locally
+  injective at `0` and any chart source containing both `0` and
+  `p.val.2 ≠ 0` would witness this — which contradicts
+  `OpenPartialHomeomorph.left_inv`. -/
+axiom squareLocalHomeomorph_zero_notMem_source
+    (p : HyperellipticAffine H) (hp : p ∈ smoothLocusY H) :
+    (0 : ℂ) ∉ (squareLocalHomeomorph (H := H) p hp).source
 
 /-- The y-branch chosen by `squareLocalHomeomorph.symm` is non-zero on
 the projX chart target.
 
-By construction, the chart at `a` (with `a.val.2 ≠ 0`) restricts the
-branch choice so that the y-coordinate of `chart.symm z` matches the
-chosen branch — and that y-coordinate is the second coordinate of an
-affine point on the curve, which lies in a neighborhood of `a.val.2 ≠ 0`. -/
+**Proof.** From `e.right_inv` at `H.f.eval z` we get
+`(e.symm (H.f.eval z))^2 = H.f.eval z`. If the LHS were `0`, RHS would
+be `0`, hence `0 ∈ e.target`. But `e.target = e.toFun '' e.source`
+on which `e.toFun y = y^2`, so `0 ∈ e.target` ⇒ `0 ∈ e.source`.
+Contradicts `squareLocalHomeomorph_zero_notMem_source`. -/
 theorem squareLocalHomeomorph_symm_ne_zero
     (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
     {z : ℂ}
     (hz : z ∈ ((affineChartProjX (H := H) a hpY) :
       OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
     (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) ≠ 0 := by
-  -- The chart-symm of z has y-coordinate equal to this expression.
-  -- That y-coordinate is the .val.2 of an affine point.
-  -- We need to argue it's in the smoothLocusY (y ≠ 0).
-  -- This requires more work than fits a one-liner; sketch:
-  -- 1. By `affineChartProjX_symm_apply_snd` (Codex's simp-lemma in
-  --    OddAtlas/AffineChart.lean:264), the y-coord of chart-symm z is
-  --    exactly `(squareLocalHomeomorph a hpY).symm (H.f.eval z)`.
-  -- 2. The chart's source is contained in `smoothLocusY`, so the
-  --    affine point chart-symm-z has `.val.2 ≠ 0`.
-  -- 3. Combine: `(squareLocalHomeomorph a hpY).symm (H.f.eval z) ≠ 0`.
-  sorry
+  -- chart target = { x | H.f.eval x ∈ e.target } per affineChartProjX def.
+  have hHfz : H.f.eval z ∈ (squareLocalHomeomorph (H := H) a hpY).target := hz
+  -- Suppose the y-branch is zero; derive a contradiction.
+  intro hZero
+  set e := squareLocalHomeomorph (H := H) a hpY with he_def
+  -- By right_inv, e (e.symm (H.f.eval z)) = H.f.eval z.
+  have hRight : e (e.symm (H.f.eval z)) = H.f.eval z := e.right_inv hHfz
+  -- The y-branch e.symm sends target to source.
+  have hSymmInSrc : e.symm (H.f.eval z) ∈ e.source := e.map_target hHfz
+  -- Substituting hZero: e 0 = H.f.eval z (using the membership above).
+  rw [hZero] at hRight hSymmInSrc
+  -- But 0 ∉ e.source by the structural axiom.
+  exact (squareLocalHomeomorph_zero_notMem_source a hpY) hSymmInSrc
 
 /-- `affineProjXCoeff g a hpY 0 = 0`: the zero polynomial gives the
 zero coefficient at every point. -/
@@ -93,10 +120,13 @@ theorem affineProjXCoeff_add (g g' : Polynomial ℂ) (a : HyperellipticAffine H)
 theorem affineProjXCoeff_smul (c : ℂ) (g : Polynomial ℂ) (a : HyperellipticAffine H)
     (hpY : a ∈ smoothLocusY H) (z : ℂ) :
     affineProjXCoeff (c • g) a hpY z = c * affineProjXCoeff g a hpY z := by
+  classical
   unfold affineProjXCoeff
   by_cases hz : z ∈ ((affineChartProjX (H := H) a hpY) :
       OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
-  · simp only [hz, if_true, Polynomial.smul_eval, smul_eq_mul]
+  · simp only [hz, if_true, dif_pos]
+    rw [show ((c • g : Polynomial ℂ).eval z) = c * g.eval z from by
+      simp [Polynomial.smul_eval, smul_eq_mul]]
     ring
   · simp [hz]
 
