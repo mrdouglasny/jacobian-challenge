@@ -20,4 +20,5 @@ import Jacobians.ProjectiveCurve.Elliptic.Witnesses
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
+import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas.InfinityAffineChart
 import Jacobians.ProjectiveCurve.PlaneCurve
