@@ -3,15 +3,16 @@
 This note records what the `Jacobians.Bridge.KirovHolomorphic` proof attempt
 established and where it got stuck.
 
-## Current branch status (updated 2026-04-25)
+## Current branch status (updated 2026-04-25, second session)
 
 - `Jacobians.ProjectiveCurve.Hyperelliptic.Even` had a real proof bug and is
   now fixed.
 - `lake build Jacobians.Extensions.Hyperelliptic` succeeds again.
-- `Jacobians.Bridge.KirovHolomorphic` builds with **one** remaining `sorry`
-  (the `bridgeForm.contMDiff_toFun` smoothness witness). `bridgeForm_injective`
-  is fully proved; `BridgeForm.rawCLM_swap_chart` (the chart-overlap lemma) was
-  added in commit `28a9111` and discharges Step 1 of the plan below.
+- **`Jacobians.Bridge.KirovHolomorphic` is now sorry-free.** Both `bridgeForm`
+  and `bridgeForm_injective` are real proofs. The construction relies on
+  `BridgeForm.rawCLM_swap_chart` (chart-overlap from the cocycle, Step 1) plus
+  the standard bundle-trivialization round-trip
+  (`Bundle.Trivialization.continuousLinearMapAt_symmL`).
 
 ## Useful scaffolding that should be kept
 
@@ -198,13 +199,10 @@ The proof had three concrete subtleties not foreseen in the original notes:
    `smul_eq_mul` rewrites would catch `w • T 1` first (RHS), not `T 1 • w`
    (LHS), without an explicit `show T 1 * w = w * T 1` followed by `ring`.
 
-### Step 2: use the helpers to prove local smoothness — **OPEN**
+### Step 2: use the helpers to prove local smoothness — **DONE**
 
-Then prove (or fold directly into `bridgeForm.contMDiff_toFun`):
-
-- `contMDiffOn_totalSpaceMk_rawCLM`
-
-Concrete plan written into `bridgeForm.contMDiff_toFun` docstring:
+The smoothness proof is folded directly into `bridgeForm.contMDiff_toFun` in
+commit `3d540b5`. The shape that ended up working:
 
 1. `intro y₀`.
 2. By `rawCLM_swap_chart`, `(fun y ↦ ⟨y, rawCLM form y y⟩) =ᶠ[𝓝 y₀]
@@ -229,6 +227,33 @@ Concrete plan written into `bridgeForm.contMDiff_toFun` docstring:
 
 The closest in-repo template is `Jacobians.Vendor.Kirov.HolomorphicForms.pullbackForm`
 (lines ~127–188), which uses the `contMDiffAt_hom_bundle` reduction.
+
+#### Subtleties encountered while proving smoothness (Step 2, second session)
+
+1. **`congr_of_eventuallyEq` direction matters.** The lemma signature is
+   `(h : ContMDiffAt _ _ n f x) (h₁ : f₁ =ᶠ[𝓝 x] f) : ContMDiffAt _ _ n f₁ x`,
+   so the eventually-eq must be oriented `<goal-function> =ᶠ <fixed-chart-function>`.
+   Reversing the orientation manifests as a confusing "Application type mismatch"
+   on the `apply` step.
+
+2. **`AnalyticAt → ContMDiffAt` requires the `target` open.** `extChartAt y₀`'s
+   target lives in `range 𝓘(ℂ,ℂ) = univ` (since `𝓘(ℂ,ℂ)` is boundaryless), so
+   `extChartAt_target = chartAt.target` (preimage under `I.symm` is identity), and
+   the chart's `open_target` gives openness. Then `AnalyticOn.analyticAt` with
+   `(IsOpen).mem_nhds` lifts to `AnalyticAt`, and `.contDiffAt.contMDiffAt` does
+   the rest (vector-space case `contMDiffAt_iff_contDiffAt`).
+
+3. **The trivialization round-trip rewrite needed `calc`, not `rw` or `simp`.**
+   `Bundle.Trivialization.continuousLinearMapAt_symmL _ hb v` is conceptually
+   `e.continuousLinearMapAt b (e.symmL b v) = v`, but in our context the LHS
+   instance `R := ℂ` was failing to unify in `rw` (showed as `?m.1168`). A
+   `calc` block with the precise goal stated explicitly (`have h_round := ...; calc ...`)
+   side-stepped the issue.
+
+4. **`(c • f) v = c * f v` for CLM-valued `f` over `ℂ` worked via `show ...; rfl`,
+   not `ContinuousLinearMap.smul_apply`.** The latter pattern-matched but the
+   subsequent type didn't reduce, due to subtle `TangentSpace` vs `ℂ`
+   indirection in the bundle codomain.
 
 ### Step 3: only then define `bridgeForm`
 
