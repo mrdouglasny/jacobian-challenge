@@ -149,4 +149,57 @@ theorem affineChartProjX_target_isOpen (a : HyperellipticAffine H)
         OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :=
   (affineChartProjX (H := H) a hpY).open_target
 
+/-- **Analyticity of the projX coefficient on chart target.** Combines:
+* polynomial analyticity (`AnalyticOn.eval_polynomial`) for `g` and `H.f`;
+* `squareLocalHomeomorph.symm` is analytic on `e.target`
+  (from Codex's `squareLocalHomeomorph_contDiffOn_symm` via the
+  `ContDiffOn ω ↔ AnalyticOn` equivalence over ℂ);
+* composition + division by non-vanishing analytic
+  (`AnalyticOn.div`, `_ne_zero`). -/
+theorem affineProjXCoeff_analyticOn_chartTarget
+    (g : Polynomial ℂ) (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H) :
+    AnalyticOn ℂ (affineProjXCoeff g a hpY)
+      (((affineChartProjX (H := H) a hpY) :
+          OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) := by
+  -- Abbreviate
+  set e := squareLocalHomeomorph (H := H) a hpY with he_def
+  set chartTarget :=
+    (((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) with hct_def
+  -- Step 1: g.eval is analytic everywhere, hence on chartTarget.
+  have hG : AnalyticOn ℂ (fun z : ℂ => g.eval z) chartTarget :=
+    (AnalyticOn.eval_polynomial g).mono (Set.subset_univ _)
+  -- Step 2: H.f.eval is analytic everywhere, hence on chartTarget.
+  have hF : AnalyticOn ℂ (fun z : ℂ => H.f.eval z) chartTarget :=
+    (AnalyticOn.eval_polynomial H.f).mono (Set.subset_univ _)
+  -- Step 3: e.symm is analytic on e.target. Convert ContDiffOn ω → AnalyticOn ℂ.
+  have hSymm : AnalyticOn ℂ (e.symm) e.target := by
+    have hCD : ContDiffOn ℂ ω e.symm e.target :=
+      squareLocalHomeomorph_contDiffOn_symm (H := H) a hpY
+    rw [show (ω : WithTop ℕ∞) = ⊤ from rfl] at hCD
+    exact (contDiffOn_omega_iff_analyticOn (𝕜 := ℂ) (E := ℂ) (F := ℂ)
+      e.open_target.uniqueDiffOn).mp hCD
+  -- Step 4: e.symm ∘ H.f.eval analytic on chartTarget.
+  -- Need: image of H.f.eval on chartTarget lands in e.target.
+  -- This holds by the chart target def: chartTarget = { z | H.f.eval z ∈ e.target }.
+  have hMaps : Set.MapsTo (fun z : ℂ => H.f.eval z) chartTarget e.target := by
+    intro z hz
+    -- chartTarget = { z | H.f.eval z ∈ e.target } per affineChartProjX definition
+    -- This is a `change` that the definition unfolds to.
+    change H.f.eval z ∈ e.target
+    exact hz
+  have hSymmComp : AnalyticOn ℂ (fun z : ℂ => e.symm (H.f.eval z)) chartTarget :=
+    hSymm.comp hF hMaps
+  -- Step 5: Denominator non-vanishing on chartTarget.
+  have hNeZero : ∀ z ∈ chartTarget, e.symm (H.f.eval z) ≠ 0 :=
+    fun z hz => squareLocalHomeomorph_symm_ne_zero a hpY hz
+  -- Step 6: Quotient is analytic.
+  have hQuotient : AnalyticOn ℂ (fun z : ℂ => g.eval z / e.symm (H.f.eval z)) chartTarget :=
+    hG.div hSymmComp hNeZero
+  -- Step 7: Match `affineProjXCoeff` to the quotient on chartTarget.
+  -- `AnalyticOn.congr` takes `EqOn g f s` (output `g`, input `f`), so we want
+  -- `affineProjXCoeff z = quotient z` per element — exactly what
+  -- `affineProjXCoeff_eq_on_target` gives directly.
+  exact hQuotient.congr (fun z hz => affineProjXCoeff_eq_on_target g a hpY hz)
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
