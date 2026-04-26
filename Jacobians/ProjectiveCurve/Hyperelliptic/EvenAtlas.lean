@@ -108,4 +108,74 @@ theorem isOpenEmbedding_proj_inr (H : HyperellipticData) (h : ¬ Odd H.f.natDegr
   · exact hq.continuous.comp continuous_inr
   · exact hq.isOpenMap.comp Topology.IsOpenEmbedding.inr.isOpenMap
 
+/-! ## Lifted charts -/
+
+/-- Affine chart, lifted via `proj ∘ Sum.inl` to a chart on the
+even-projective curve. -/
+noncomputable def affineLiftChart (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (a : HyperellipticAffine H) :
+    OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ :=
+  (HyperellipticAffine.affineChartAt (H := H) a).lift_openEmbedding
+    (isOpenEmbedding_proj_inl H h)
+
+/-- Affine-infinity chart, lifted via `proj ∘ Sum.inr` to a chart on the
+even-projective curve. -/
+noncomputable def infinityLiftChart (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (b : HyperellipticAffineInfinity H) :
+    OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ :=
+  (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H h) b).lift_openEmbedding
+    (isOpenEmbedding_proj_inr H h)
+
+/-- Preferred chart at a point of `HyperellipticEvenProj H`: pick the
+canonical representative via `Quotient.out` and case-split on `Sum.inl` /
+`Sum.inr` to use the affine or affine-infinity lifted chart. -/
+noncomputable def chartAt (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    HyperellipticEvenProj H → OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ :=
+  fun q =>
+    match Quotient.out q with
+    | Sum.inl a => affineLiftChart H h a
+    | Sum.inr b => infinityLiftChart H h b
+
+/-! ## ChartedSpace instance
+
+The hypothesis `h : ¬ Odd H.f.natDegree` is wrapped as `Fact` so the
+ChartedSpace instance can be auto-resolved by typeclass synthesis: a
+caller declares `haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩` once, and
+then `ChartedSpace ℂ (HyperellipticEvenProj H)` resolves automatically.
+-/
+
+theorem mem_chartAt_source (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (q : HyperellipticEvenProj H) :
+    q ∈ (chartAt H h q).source := by
+  have hQout : Quotient.mk (hyperellipticEvenSetoid H) (Quotient.out q) = q :=
+    Quotient.out_eq q
+  rcases hQout_cases : Quotient.out q with a | b
+  · -- Sum.inl case: chart is `affineLiftChart H h a`, source contains `proj (Sum.inl a)`
+    simp only [chartAt, hQout_cases, affineLiftChart,
+      OpenPartialHomeomorph.lift_openEmbedding_source]
+    refine ⟨a, ?_, ?_⟩
+    · exact ChartedSpace.mem_chart_source a
+    · -- Need `(proj H ∘ Sum.inl) a = q`
+      change Quotient.mk _ (Sum.inl a) = q
+      rw [← hQout_cases]
+      exact hQout
+  · -- Sum.inr case: symmetric
+    simp only [chartAt, hQout_cases, infinityLiftChart,
+      OpenPartialHomeomorph.lift_openEmbedding_source]
+    refine ⟨b, ?_, ?_⟩
+    · exact ChartedSpace.mem_chart_source b
+    · change Quotient.mk _ (Sum.inr b) = q
+      rw [← hQout_cases]
+      exact hQout
+
+/-- `ChartedSpace ℂ (HyperellipticEvenProj H)` for even-degree `H.f`. -/
+noncomputable instance instChartedSpace (H : HyperellipticData)
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    ChartedSpace ℂ (HyperellipticEvenProj H) where
+  atlas := Set.range (chartAt H hf.out)
+  chartAt := chartAt H hf.out
+  mem_chart_source q := mem_chartAt_source H hf.out q
+  chart_mem_atlas q := ⟨q, rfl⟩
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
