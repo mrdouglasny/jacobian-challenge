@@ -25,10 +25,17 @@ path** `γ : ℝ → X`. To compose them we need a **path-selection axiom**:
 
 ```
 axiom bridgePath : (P₀ P : X) → ℝ → X
-axiom bridgePath_isSmooth : ContMDiff (𝓘(ℝ, ℝ)) 𝓘(ℂ, ℂ) ω (bridgePath P₀ P)
-axiom bridgePath_at_zero  : bridgePath P₀ P 0 = P₀
-axiom bridgePath_at_one   : bridgePath P₀ P 1 = P
+axiom bridgePath_continuous            : Continuous (bridgePath P₀ P)
+axiom bridgePath_chart_differentiable  : ∀ t, DifferentiableAt ℝ
+                                          (chartAt _ ∘ bridgePath P₀ P) t
+axiom bridgePath_at_zero               : bridgePath P₀ P 0 = P₀
+axiom bridgePath_at_one                : bridgePath P₀ P 1 = P
 ```
+
+The chart-local smoothness hypothesis matches Kirov's `lineIntegral`
+ecosystem (`pathSpeed_comp_eq_mfderiv`, `lineIntegral_pullback`),
+sidestepping the real-vs-complex `ModelWithCorners` mismatch a global
+`ContMDiff` hypothesis would introduce.
 
 In a connected (locally-)path-connected manifold these *exist* (use
 `PathConnectedSpace` from Mathlib + smoothing). Choosing one is the
@@ -119,9 +126,26 @@ abstractly here and discharge them in a follow-up. -/
 /-- A chosen smooth path from `P₀` to `P` in `X`. -/
 axiom bridgePath (P₀ P : X) : ℝ → X
 
-/-- The chosen path is smooth (analytic) as a map `ℝ → X`. -/
-axiom bridgePath_contMDiff (P₀ P : X) :
-    ContMDiff (𝓘(ℝ, ℝ)) 𝓘(ℂ, ℂ) ω (bridgePath (X := X) P₀ P)
+/-- The chosen path is continuous. -/
+axiom bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P)
+
+/-- The chosen path is `C¹` in chart pullbacks at every `t`.
+
+This is the chart-local smoothness hypothesis used throughout
+`Jacobians.Vendor.Kirov.LineIntegral` (cf.
+`pathSpeed_comp_eq_mfderiv`, `lineIntegral_pullback`). It
+sidesteps the real-vs-complex `ModelWithCorners` mismatch that a
+naive `ContMDiff (𝓘(ℝ, ℝ)) 𝓘(ℂ, ℂ) ω` hypothesis would create.
+
+Discharge plan: in a connected complex manifold, a path produced by
+`PathConnectedSpace.somePath` can be smoothed (Mathlib has the
+relevant smoothing infra in `Topology.MetricSpace.LipschitzAddSubgroup`
+and friends; the exact statement we need is "every continuous path
+between two points is homotopic to a chart-local-`C¹` path"). -/
+axiom bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (bridgePath (X := X) P₀ P t)).toFun ∘
+        (bridgePath (X := X) P₀ P)) t
 
 /-- The chosen path starts at `P₀`. -/
 axiom bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀
