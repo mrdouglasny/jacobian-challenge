@@ -148,6 +148,7 @@ then `ChartedSpace ℂ (HyperellipticEvenProj H)` resolves automatically.
 theorem mem_chartAt_source (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
     (q : HyperellipticEvenProj H) :
     q ∈ (chartAt H h q).source := by
+  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
   have hQout : Quotient.mk (hyperellipticEvenSetoid H) (Quotient.out q) = q :=
     Quotient.out_eq q
   rcases hQout_cases : Quotient.out q with a | b
@@ -160,7 +161,7 @@ theorem mem_chartAt_source (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
       change Quotient.mk _ (Sum.inl a) = q
       rw [← hQout_cases]
       exact hQout
-  · -- Sum.inr case: symmetric
+  · -- Sum.inr case: symmetric (typeclass synth picks up the Fact for HyperellipticAffineInfinity)
     simp only [chartAt, hQout_cases, infinityLiftChart,
       OpenPartialHomeomorph.lift_openEmbedding_source]
     refine ⟨b, ?_, ?_⟩
@@ -177,5 +178,120 @@ noncomputable instance instChartedSpace (H : HyperellipticData)
   chartAt := chartAt H hf.out
   mem_chart_source q := mem_chartAt_source H hf.out q
   chart_mem_atlas q := ⟨q, rfl⟩
+
+/-! ## Chart-transition compatibility (EA2 stage 3)
+
+Four pairwise compatibility theorems on the lifted charts:
+
+* `affineLiftChart_compat_affineLiftChart` -- mechanical via
+  `lift_openEmbedding_trans` + Codex's `affineChartAt_compat`.
+* `infinityLiftChart_compat_infinityLiftChart` -- same, with
+  `affineChartAt_compat` for the `reverseData` polynomial.
+* `affineLiftChart_compat_infinityLiftChart` and the symmetric
+  `infinityLiftChart_compat_affineLiftChart` -- the cross-summand
+  transitions, where the underlying chart-level map involves the
+  Möbius identification `x ↦ 1/x` on the gluing region. Currently
+  axiomatized; their discharge requires explicit chart-formula
+  computations (see docstrings below). -/
+
+/-- Same-summand affine compatibility, transferred from
+`HyperellipticAffine.affineChartAt_compat` via `lift_openEmbedding_trans`. -/
+theorem affineLiftChart_compat_affineLiftChart
+    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (a a' : HyperellipticAffine H) :
+    ContDiffOn ℂ ω
+      (((affineLiftChart H h a).symm.trans (affineLiftChart H h a')) : ℂ → ℂ)
+      ((affineLiftChart H h a).symm.trans (affineLiftChart H h a')).source := by
+  have hLift :
+      (affineLiftChart H h a).symm.trans (affineLiftChart H h a') =
+        (HyperellipticAffine.affineChartAt (H := H) a).symm.trans
+          (HyperellipticAffine.affineChartAt (H := H) a') := by
+    simpa [affineLiftChart] using
+      OpenPartialHomeomorph.lift_openEmbedding_trans
+        (HyperellipticAffine.affineChartAt (H := H) a)
+        (HyperellipticAffine.affineChartAt (H := H) a')
+        (isOpenEmbedding_proj_inl H h)
+  rw [hLift]
+  exact HyperellipticAffine.affineChartAt_compat (H := H) a a'
+
+/-- Same-summand affine-infinity compatibility, transferred from
+`HyperellipticAffine.affineChartAt_compat` for the `reverseData` polynomial. -/
+theorem infinityLiftChart_compat_infinityLiftChart
+    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (b b' : HyperellipticAffineInfinity H) :
+    ContDiffOn ℂ ω
+      (((infinityLiftChart H h b).symm.trans (infinityLiftChart H h b')) : ℂ → ℂ)
+      ((infinityLiftChart H h b).symm.trans (infinityLiftChart H h b')).source := by
+  have hLift :
+      (infinityLiftChart H h b).symm.trans (infinityLiftChart H h b') =
+        (HyperellipticAffine.affineChartAt
+            (H := HyperellipticAffineInfinity.reverseData H h) b).symm.trans
+          (HyperellipticAffine.affineChartAt
+            (H := HyperellipticAffineInfinity.reverseData H h) b') := by
+    simpa [infinityLiftChart] using
+      OpenPartialHomeomorph.lift_openEmbedding_trans
+        (HyperellipticAffine.affineChartAt
+            (H := HyperellipticAffineInfinity.reverseData H h) b)
+        (HyperellipticAffine.affineChartAt
+            (H := HyperellipticAffineInfinity.reverseData H h) b')
+        (isOpenEmbedding_proj_inr H h)
+  rw [hLift]
+  exact HyperellipticAffine.affineChartAt_compat
+    (H := HyperellipticAffineInfinity.reverseData H h) b b'
+
+/-- **Cross-summand compatibility (affine → infinity).** The chart-transition
+between an affine chart and an affine-infinity chart through the gluing
+region. The underlying chart-level transition involves the Möbius map
+`x ↦ 1/x` (when both sides use proj-X) plus root-of-polynomial corrections
+when proj-Y is used on either side.
+
+**Currently axiomatized.** Discharge requires explicit case-split on the
+four sub-cases (projX/Y × projX/Y) and explicit computation of the
+transition formula in each. The smoothness of `x ↦ 1/x` on its domain
+is `Inv.contDiffOn` style; the polynomial-root cases use Codex's
+`polynomialLocalHomeomorph` machinery from `OddAtlas/AffineChart.lean`. -/
+axiom affineLiftChart_compat_infinityLiftChart
+    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (a : HyperellipticAffine H) (b : HyperellipticAffineInfinity H) :
+    ContDiffOn ℂ ω
+      (((affineLiftChart H h a).symm.trans (infinityLiftChart H h b)) : ℂ → ℂ)
+      ((affineLiftChart H h a).symm.trans (infinityLiftChart H h b)).source
+
+/-- **Cross-summand compatibility (infinity → affine).** Symmetric to
+`affineLiftChart_compat_infinityLiftChart`. -/
+axiom infinityLiftChart_compat_affineLiftChart
+    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (b : HyperellipticAffineInfinity H) (a : HyperellipticAffine H) :
+    ContDiffOn ℂ ω
+      (((infinityLiftChart H h b).symm.trans (affineLiftChart H h a)) : ℂ → ℂ)
+      ((infinityLiftChart H h b).symm.trans (affineLiftChart H h a)).source
+
+/-- Combined chart-transition compatibility for `chartAt`, by case-split on
+both `Quotient.out` representatives. -/
+theorem chartAt_compat (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
+    (q q' : HyperellipticEvenProj H) :
+    ContDiffOn ℂ ω
+      (((chartAt H h q).symm.trans (chartAt H h q')) : ℂ → ℂ)
+      ((chartAt H h q).symm.trans (chartAt H h q')).source := by
+  unfold chartAt
+  rcases hQ : Quotient.out q with a | b <;>
+    rcases hQ' : Quotient.out q' with a' | b' <;>
+    simp only [hQ, hQ']
+  · exact affineLiftChart_compat_affineLiftChart H h a a'
+  · exact affineLiftChart_compat_infinityLiftChart H h a b'
+  · exact infinityLiftChart_compat_affineLiftChart H h b a'
+  · exact infinityLiftChart_compat_infinityLiftChart H h b b'
+
+/-- `IsManifold ℂ ω (HyperellipticEvenProj H)` for even-degree `H.f`. -/
+noncomputable instance instIsManifold (H : HyperellipticData)
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+  apply isManifold_of_contDiffOn
+  intro e e' he he'
+  rcases he with ⟨q, rfl⟩
+  rcases he' with ⟨q', rfl⟩
+  simpa only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+    Set.range_id, Set.preimage_id, id_eq, Set.inter_univ, Set.univ_inter] using
+    chartAt_compat H hf.out q q'
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
