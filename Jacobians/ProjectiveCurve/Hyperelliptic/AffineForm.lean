@@ -427,4 +427,77 @@ theorem squareLocalHomeomorph_symm_eq_of_mem
   rw [hSqRel_q] at hRoundtrip
   exact hRoundtrip.symm
 
+/-! ### S3 sub-case 2: projX × projY chain rule
+
+The chart transition `affineChartProjX_p .symm . trans affineChartProjY_q` at
+`z` equals `(squareLocalHomeomorph p).symm (H.f.eval z)` (the y-branch). To
+verify the cocycle we need its derivative. By implicit differentiation of
+`y(z)^2 = f(z)`: `2 y(z) y'(z) = f'(z)`, so `y'(z) = f'(z) / (2 y(z))`.
+
+Below we make this rigorous via `HasDerivAt.of_local_left_inverse` for the
+inverse branch, then chain with `Polynomial.hasDerivAt`. -/
+
+/-- Derivative of the chosen y-branch `e_p.symm` at `H.f.eval z`:
+`(e_p.symm)' (H.f.eval z) = 1 / (2 * e_p.symm (H.f.eval z))`.
+
+Proof: `f(y) = y²` has derivative `2 y₀` at `y₀ = e_p.symm (H.f.eval z) ≠ 0`,
+and `f (e_p.symm y) = y` for `y ∈ e_p.target` (open). The inverse function
+theorem (`HasDerivAt.of_local_left_inverse`) gives `e_p.symm` derivative
+`(2 y₀)⁻¹` at `H.f.eval z`. -/
+theorem squareLocalHomeomorph_symm_hasDerivAt
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    HasDerivAt (squareLocalHomeomorph (H := H) a hpY).symm
+      (1 / (2 * (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z)))
+      (H.f.eval z) := by
+  set e := squareLocalHomeomorph (H := H) a hpY with he_def
+  have hHfz : H.f.eval z ∈ e.target := hz
+  set y₀ := e.symm (H.f.eval z) with hy₀
+  -- Step 1: f = (· ^ 2) has derivative 2 * y₀ at y₀.
+  have hfHas : HasDerivAt (fun y : ℂ => y ^ 2) (2 * y₀) y₀ := by
+    simpa using hasDerivAt_pow 2 y₀
+  -- Step 2: e.symm continuous at H.f.eval z.
+  have hCont : ContinuousAt e.symm (H.f.eval z) := e.continuousAt_symm hHfz
+  -- Step 3: f (e.symm y) = y eventually near H.f.eval z (since e.target is open).
+  have hLeftInv : ∀ᶠ (y : ℂ) in nhds (H.f.eval z),
+      (fun y' : ℂ => y' ^ 2) (e.symm y) = y := by
+    refine Filter.eventually_of_mem (e.open_target.mem_nhds hHfz) ?_
+    intro y hy
+    have hRight : (e : ℂ → ℂ) (e.symm y) = y := e.right_inv hy
+    have hSq : (e : ℂ → ℂ) (e.symm y) = (e.symm y) ^ 2 := by
+      simpa [e, squareLocalHomeomorph] using
+        congrArg (e : ℂ → ℂ) (rfl : e.symm y = e.symm y)
+    rw [hSq] at hRight
+    exact hRight
+  -- Step 4: 2 * y₀ ≠ 0.
+  have hY₀ : y₀ ≠ 0 := squareLocalHomeomorph_symm_ne_zero a hpY hz
+  have h2Y : (2 : ℂ) * y₀ ≠ 0 := mul_ne_zero (by norm_num) hY₀
+  -- Step 5: Inverse function theorem.
+  have key := HasDerivAt.of_local_left_inverse hCont hfHas h2Y hLeftInv
+  convert key using 1
+  rw [one_div]
+
+/-- Chain-rule derivative of the projX→projY chart transition: at `z` in
+the projX chart target, the transition `z ↦ (squareLocalHomeomorph p).symm
+(H.f.eval z)` has derivative `f'(z) / (2 * y(z))` where
+`y(z) = (squareLocalHomeomorph p).symm (H.f.eval z)`. -/
+theorem affineChartProjX_to_projY_transition_hasDerivAt
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    HasDerivAt
+      (fun w : ℂ => (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w))
+      (H.f.derivative.eval z /
+        (2 * (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z)))
+      z := by
+  have hSymm := squareLocalHomeomorph_symm_hasDerivAt (H := H) a hpY hz
+  have hFeval : HasDerivAt (fun w : ℂ => H.f.eval w) (H.f.derivative.eval z) z :=
+    H.f.hasDerivAt z
+  have hcomp := hSymm.comp z hFeval
+  convert hcomp using 1
+  rw [one_div, mul_comm, ← div_eq_inv_mul]
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
