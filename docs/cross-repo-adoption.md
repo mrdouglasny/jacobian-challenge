@@ -22,11 +22,14 @@ why.
 
 | Module | Provenance file | LOC | Status in our build |
 |---|---|---|---|
-| `Genus.lean` | upstream `Jacobians/Genus.lean` | 81 | Compiled under namespace `Jacobians.Vendor.Kirov`. One `:= sorry` (`genus_eq_zero_iff_homeo`, Uniformization) converted to a named `axiom` for handoff. |
+| `Genus.lean` | upstream `Jacobians/Genus.lean` | 95 | Compiled under namespace `Jacobians.Vendor.Kirov`. One `:= sorry` (`genus_eq_zero_iff_homeo`, Uniformization) converted to a named `axiom` for handoff. |
 | `Montel.lean` + `Montel/{Cover,LocalRep,ChartNorm,SupNorm,Compactness,ChartTransition,Complete}.lean` | upstream `Jacobians/Montel*.lean` | ~3,400 | Compiled under namespace `Jacobians.Vendor.Kirov.Montel`. Real proof of compactness of holomorphic 1-forms (Arzelà–Ascoli + normal families, Ahlfors–Sario style) — the `closedBall_isCompact` step that was Kirov's "single structural sorry" is **closed** in his `7ce9e2e` commit. |
-| `HolomorphicForms.lean` | upstream `Jacobians/HolomorphicForms.lean` | 366 | Compiled under namespace `Jacobians.Vendor.Kirov`. Yields `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` from Montel, plus `pullbackForm`, `ambientPhi`, `ambientPsi`. One `:= sorry` (`ambientPhi_ambientPsi_eq`, degree identity) converted to named `axiom`. |
+| `HolomorphicForms.lean` | upstream `Jacobians/HolomorphicForms.lean` | 380 | Compiled under namespace `Jacobians.Vendor.Kirov`. Yields `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` from Montel, plus `pullbackForm`, `ambientPhi`, `ambientPsi`. One `:= sorry` (`ambientPhi_ambientPsi_eq`, degree identity) converted to named `axiom`. |
+| `LineIntegral.lean` | upstream `Jacobians/LineIntegral.lean` | 602 | Compiled under namespace `Jacobians.Vendor.Kirov`. Sorry-free upstream and after the port. Provides `pathSpeed`, `lineIntegral` with linearity (add/smul/zero/neg/const), reverse, concat, and the key chain-rule identity `pathSpeed_comp_eq_mfderiv`. Used by `Jacobians/Bridge/KirovLineIntegral.lean` to build `kirovBackedFunctional`. |
+| `ChartedSpaceOfLocalHomeomorph.lean` | upstream `Jacobians/ChartedSpaceOfLocalHomeomorph.lean` | 55 | Extends Mathlib's `IsLocalHomeomorph` namespace with a `ChartedSpace` constructor; helper for `ZLatticeQuotient`. |
+| `ZLatticeQuotient.lean` | upstream `Jacobians/ZLatticeQuotient.lean` | 740 | Compiled under namespace `Jacobians.Vendor.Kirov.ZLatticeQuotient`. Sorry-free. The quotient `V ⧸ Λ` for `Λ : Submodule ℤ V` with `[IsZLattice ℝ Λ]`: covering-map structure, `ChartedSpace` and `LieAddGroup` instance transfer. Candidate to replace the `ULift`-transfer workaround in `Jacobians/Jacobian/Construction.lean`. Not yet wired in. |
 
-**Total adopted**: 4,234 LOC, 9 modules, 2 axioms (handed off in
+**Total adopted**: ~5,600 LOC, 12 modules, 2 axioms (handed off in
 [`vendor/kirov-jacobian-claude/HANDOFF.md`](../vendor/kirov-jacobian-claude/HANDOFF.md)).
 
 **Mathematical content unchanged.** The only modifications relative to
@@ -49,28 +52,19 @@ in [`vendor/kirov-jacobian-claude/`](../vendor/kirov-jacobian-claude/).
 
 ### How adopted code is wired in
 
-The single load-bearing use is in
-[`Jacobians/Bridge/KirovHolomorphic.lean`](../Jacobians/Bridge/KirovHolomorphic.lean):
-a small ℂ-linear bridge `bridgeForm : HolomorphicOneForm X →ₗ[ℂ]
-Jacobians.Vendor.Kirov.HolomorphicOneForms X`, with `bridgeForm_injective`,
-delivers `instance : FiniteDimensional ℂ (HolomorphicOneForm X)` via
-`Module.Finite.of_injective` applied to Kirov's
-Montel-built instance.
+Two bridge files in [`Jacobians/Bridge/`](../Jacobians/Bridge/):
 
-This **retires our previous abstract axiom `AX_FiniteDimOneForms`**.
-[`Jacobians/Axioms/FiniteDimOneForms.lean`](../Jacobians/Axioms/FiniteDimOneForms.lean)
-is now a backward-compat shim: the historical name `instFiniteDimOneForms`
-forwards to the bridge-derived instance, so external consumers continue
-to resolve `FiniteDimensional` via typeclass synthesis without change.
+1. [`KirovHolomorphic.lean`](../Jacobians/Bridge/KirovHolomorphic.lean): a ℂ-linear bridge `bridgeForm : HolomorphicOneForm X →ₗ[ℂ] Jacobians.Vendor.Kirov.HolomorphicOneForms X` (real, sorry-free), with `bridgeForm_injective` (real). Delivers `instance : FiniteDimensional ℂ (HolomorphicOneForm X)` via `Module.Finite.of_injective` applied to Kirov's Montel-built instance. **Retires `AX_FiniteDimOneForms` truly** — no structural axioms in the bridge file. The shim [`Jacobians/Axioms/FiniteDimOneForms.lean`](../Jacobians/Axioms/FiniteDimOneForms.lean) forwards the historical instance name `instFiniteDimOneForms` to the bridge-derived instance.
+
+2. [`KirovLineIntegral.lean`](../Jacobians/Bridge/KirovLineIntegral.lean): `kirovBackedFunctional P₀ P : HolomorphicOneForm X →ₗ[ℂ] ℂ` defined as `lineIntegral ∘ bridgeForm` along a chosen path; linearity derived from Kirov's `lineIntegral_add` / `lineIntegral_smul`. The corresponding FTC theorem (`kirovBackedFunctional_local_antiderivative`) is **in flight** — currently a single open `sorry` with a concrete 5-step derivation chain (the first reduction, `extChartAt_chartLine`, already lands; the chain depends on no new axioms beyond five small structural `bridgePath*` axioms scoped to path selection). When the FTC theorem closes, `pathIntegralBasepointFunctional` and `AX_pathIntegral_local_antiderivative` retire from `Axioms/AbelJacobiMap.lean`.
 
 ### Considered but not yet adopted
 
 | Module | Why not (yet) |
 |---|---|
-| Kirov's `LineIntegral.lean` (602 LOC) | High value: would let us start retiring `pathIntegralBasepointFunctional` and `loopIntegralToH1` — our two largest data-level axioms in `Axioms/AbelJacobiMap.lean`. **Planned next.** Deferred only because it is a separate work item with its own type-bridging needs (his `pathSpeed` uses chart-local `fderiv` to dodge an `IsScalarTower` diamond, which is exactly the trick our discharge plan needs). |
-| Kirov's `ZLatticeQuotient.lean` (740 LOC, sorry-free) | Could replace the `ULift`-transfer workaround in our `Jacobians/Jacobian/Construction.lean`. Lateral refactor, not an axiom retirement — strictly an internal cleanup. Deferred. |
-| Kirov's `Abel.lean` chart-invariance of `meromorphicOrderAt` | Could retire `localOrder` from our `Axioms/BranchLocus.lean`. Smaller payoff than Montel; deferred. |
+| Kirov's `Abel.lean` chart-invariance of `meromorphicOrderAt` | Could retire `localOrder` from our `Axioms/BranchLocus.lean`. Smaller payoff than Montel/LineIntegral; deferred. |
 | Kirov's `PeriodLattice.lean`, `Jacobians.lean` (his answer file) | His Abel-Jacobi machinery is tightly coupled to his own definitions of `genus`, `HolomorphicOneForms`, etc. Not a clean lift; we have our own period-lattice route working. |
+| `ZLatticeQuotient` rewiring of `Jacobian/Construction.lean` | The module is ported (above) but not yet used as a replacement for the `ULift`-transfer workaround. Lateral refactor, not an axiom retirement — strictly an internal cleanup. |
 
 ### Considered and rejected
 
