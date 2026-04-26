@@ -216,6 +216,72 @@ axiom bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
         (Jacobians.Vendor.Kirov.pathSpeed (bridgePath (X := X) P₀ P) t))
       MeasureTheory.volume 0 1
 
+/-! ## ChartLine — concrete affine path in chart coordinates
+
+The straight line from `(extChartAt P) P` to `z` in the chart at `P`,
+pulled back through `(extChartAt P).symm`. This is the concrete path
+whose FTC we can derive directly from Mathlib + Kirov primitives, with
+no further structural axioms.
+
+Used inside the proof of `kirovBackedFunctional_local_antiderivative`
+once we connect `bridgePath` to a chart-line concatenation near each
+endpoint. -/
+
+/-- The straight line in chart coordinates from `(extChartAt P) P` to `z`,
+pulled back through `(extChartAt P).symm`. -/
+noncomputable def chartLine (P : X) (z : ℂ) : ℝ → X :=
+  fun t => (extChartAt 𝓘(ℂ, ℂ) P).symm ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z)
+
+@[simp] theorem chartLine_at_zero (P : X) (z : ℂ) :
+    chartLine (X := X) P z 0 = P := by
+  simp [chartLine]
+
+@[simp] theorem chartLine_at_one (P : X) (z : ℂ) :
+    chartLine (X := X) P z 1 = (extChartAt 𝓘(ℂ, ℂ) P).symm z := by
+  simp [chartLine]
+
+/-! ### Reduction lemmas for `chartLine`
+
+The `chartLine_FTC` proof factors through six small lemmas:
+
+* `extChartAt_chartLine` — chart image of `chartLine P z t` is the affine
+  line `(1 - t) • (extChartAt P) P + t • z`.
+* `pathSpeed_extChartAt_chartLine` — derivative of that affine line is
+  the constant `z - (extChartAt P) P`.
+* `mfderiv_extChartAt_pathSpeed_chartLine` — combining the above with
+  `Vendor.Kirov.pathSpeed_comp_eq_mfderiv`.
+* `bridgeForm_chartLine_integrand` — combining `rawCLM_swap_chart`
+  (chart-swap to fixed chart at `P`) with the above to get the integrand
+  in closed form `(form.coeff P (1 - t) • a + t • z) * (z - a)`.
+* `lineIntegral_chartLine_eq` — change of variable `u = a + t (z - a)`
+  reduces the line integral to `∫_a^z form.coeff P u du`.
+* `chartLine_FTC` — `intervalIntegral.integral_hasDerivAt_right` plus
+  continuity of `form.coeff P` (from `IsHolomorphicOneFormCoeff`). -/
+
+/-- Chart image of the chart-line: an affine line in ℂ from
+`(extChartAt P) P` to `z`, parameterized by `t ∈ [0, 1]`. -/
+theorem extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (extChartAt 𝓘(ℂ, ℂ) P) (chartLine (X := X) P z t) =
+      (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
+  exact (extChartAt 𝓘(ℂ, ℂ) P).right_inv hz
+
+/-- **FTC for `chartLine`.** The line integral of `bridgeForm form` along
+the chart-line from `P` to `(extChartAt P).symm z` has derivative w.r.t.
+`z` equal to `form.coeff P ((extChartAt P) P)` at `z = (extChartAt P) P`.
+
+Derivation (genuine, no extra axioms): see the six reduction lemmas
+above. -/
+theorem chartLine_FTC [Nonempty X] (P : X) (form : HolomorphicOneForm X) :
+    HasDerivAt
+      (fun z : ℂ =>
+        Jacobians.Vendor.Kirov.lineIntegral (Jacobians.Bridge.bridgeForm form)
+          (chartLine (X := X) P z))
+      (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
+      ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  sorry
+
 /-! ## The bridge functional
 
 Given the path-selection axioms and `bridgeForm`, we can define our
