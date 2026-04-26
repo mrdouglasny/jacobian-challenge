@@ -79,17 +79,55 @@ theorem affineLiftChart_compat (p q : HyperellipticAffine H) :
   rw [hEq]
   exact HyperellipticAffine.affineChartAt_compat (H := H) p q
 
-/-- Remaining OA2 compatibility boundary: infinity chart followed by a lifted affine chart. -/
-axiom infinityChart_compat_affineLift (p : HyperellipticAffine H) :
+/-- Infinity chart followed by the chosen lifted affine chart. -/
+theorem infinityChart_compat_affineLift (p : HyperellipticAffine H) :
     ContDiffOn ℂ ω
       (((infinityChart H h).symm.trans (affineLiftChart (H := H) (h := h) p)) : ℂ → ℂ)
-      ((infinityChart H h).symm.trans (affineLiftChart (H := H) (h := h) p)).source
+      ((infinityChart H h).symm.trans (affineLiftChart (H := H) (h := h) p)).source := by
+  by_cases hpY : p ∈ HyperellipticAffine.smoothLocusY H
+  · have hchart :
+        (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
+          HyperellipticAffine.affineChartProjX (H := H) p hpY := by
+        change HyperellipticAffine.affineChartAt (H := H) p =
+          HyperellipticAffine.affineChartProjX (H := H) p hpY
+        simp [HyperellipticAffine.affineChartAt, hpY]
+    rw [affineLiftChart, hchart]
+    exact infinityChart_compat_affineLiftProjX (H := H) (h := h) p hpY
+  · have hpX : p ∈ HyperellipticAffine.smoothLocusX H :=
+      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa [HyperellipticAffine.smoothLocusY] using hpY)
+    have hchart :
+        (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
+          HyperellipticAffine.affineChartProjY (H := H) p hpX := by
+        change HyperellipticAffine.affineChartAt (H := H) p =
+          HyperellipticAffine.affineChartProjY (H := H) p hpX
+        simp [HyperellipticAffine.affineChartAt, hpY, hpX]
+    rw [affineLiftChart, hchart]
+    exact infinityChart_compat_affineLiftProjY (H := H) (h := h) p hpX
 
-/-- Remaining OA2 compatibility boundary: a lifted affine chart followed by the infinity chart. -/
-axiom affineLift_compat_infinityChart (p : HyperellipticAffine H) :
+/-- Chosen lifted affine chart followed by the infinity chart. -/
+theorem affineLift_compat_infinityChart (p : HyperellipticAffine H) :
     ContDiffOn ℂ ω
       (((affineLiftChart (H := H) (h := h) p).symm.trans (infinityChart H h)) : ℂ → ℂ)
-      ((affineLiftChart (H := H) (h := h) p).symm.trans (infinityChart H h)).source
+      ((affineLiftChart (H := H) (h := h) p).symm.trans (infinityChart H h)).source := by
+  by_cases hpY : p ∈ HyperellipticAffine.smoothLocusY H
+  · have hchart :
+        (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
+          HyperellipticAffine.affineChartProjX (H := H) p hpY := by
+        change HyperellipticAffine.affineChartAt (H := H) p =
+          HyperellipticAffine.affineChartProjX (H := H) p hpY
+        simp [HyperellipticAffine.affineChartAt, hpY]
+    rw [affineLiftChart, hchart]
+    exact affineLiftProjX_compat_infinityChart (H := H) (h := h) p hpY
+  · have hpX : p ∈ HyperellipticAffine.smoothLocusX H :=
+      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa [HyperellipticAffine.smoothLocusY] using hpY)
+    have hchart :
+        (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
+          HyperellipticAffine.affineChartProjY (H := H) p hpX := by
+        change HyperellipticAffine.affineChartAt (H := H) p =
+          HyperellipticAffine.affineChartProjY (H := H) p hpX
+        simp [HyperellipticAffine.affineChartAt, hpY, hpX]
+    rw [affineLiftChart, hchart]
+    exact affineLiftProjY_compat_infinityChart (H := H) (h := h) p hpX
 
 /-- **Charted-space instance on `HyperellipticOdd H h`.** Combines:
 

@@ -101,4 +101,28 @@ formula `⌊(deg f - 1) / 2⌋`. -/
 axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
     Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus
 
+/-- The genus of the unified hyperelliptic curve matches the combinatorial
+formula `⌊(deg f - 1) / 2⌋`. -/
+theorem genus_Hyperelliptic_eq (H : HyperellipticData) :
+    Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus :=
+  AX_Hyperelliptic_genus H
+
+/-- Even-degree specialization of the hyperelliptic genus formula. For
+`deg f = 2g + 2`, the genus is `g = deg(f) / 2 - 1`. -/
+theorem genus_Hyperelliptic_eq_of_even
+    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
+    Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.f.natDegree / 2 - 1 := by
+  rw [genus_Hyperelliptic_eq, HyperellipticData.genus]
+  obtain ⟨k, hk⟩ := Nat.not_odd_iff_even.mp h
+  rw [hk]
+  omega
+
+/-- Concrete even-degree form of the hyperelliptic genus formula:
+if `deg f = 2g + 2`, then the genus is `g`. -/
+theorem genus_Hyperelliptic_eq_of_even_degree
+    (H : HyperellipticData) (g : ℕ) (hdeg : H.f.natDegree = 2 * g + 2) :
+    Jacobians.RiemannSurface.genus (Hyperelliptic H) = g := by
+  rw [genus_Hyperelliptic_eq, HyperellipticData.genus, hdeg]
+  omega
+
 end Jacobians.ProjectiveCurve

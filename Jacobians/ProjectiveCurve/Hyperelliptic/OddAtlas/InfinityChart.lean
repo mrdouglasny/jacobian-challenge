@@ -31,6 +31,7 @@ See `docs/hyperelliptic-odd-atlas-plan.md` §OA2.
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas.AffineChart
 import Mathlib.Topology.Compactification.OnePoint.Basic
 import Mathlib.Analysis.Complex.Basic
+import Mathlib.Topology.OpenPartialHomeomorph.Constructions
 
 namespace Jacobians.ProjectiveCurve.HyperellipticOdd
 
@@ -61,18 +62,52 @@ axiom infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
 axiom infinityChart_mem_source (H : HyperellipticData) (h : Odd H.f.natDegree) :
     (∞ : HyperellipticOdd H h) ∈ (infinityChart H h).source
 
-/-- **Compatibility with affine charts.** On the punctured overlap
-(points with `x ≠ 0` in the affine chart and `t ≠ 0` in the infinity
-chart), the transition `t ↦ x(t) = 1 / (lc(f) · t²) · (1 + O(t))` is
-analytic. -/
-theorem infinityChart_compat_affineProjX
+/-- Remaining OA2 local boundary: infinity chart followed by the lifted affine `x`-chart. -/
+axiom infinityChart_compat_affineLiftProjX
     (H : HyperellipticData) (h : Odd H.f.natDegree) (p : HyperellipticAffine H)
-    (hpY : p ∈ HyperellipticAffine.smoothLocusY H)
-    (hp_neq_zero : p.val.1 ≠ 0) :
-    True := by
-  -- Real statement: the composition of `(infinityChart H h).symm` with
-  -- `affineChartProjX p hpY` is `ContDiffOn ω` on the appropriate
-  -- punctured open set in ℂ.
-  trivial
+    (hpY : p ∈ HyperellipticAffine.smoothLocusY H) :
+    ContDiffOn ℂ ω
+      (((infinityChart H h).symm.trans
+          ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+            (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))) : ℂ → ℂ)
+      ((infinityChart H h).symm.trans
+        ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source
+
+/-- Remaining OA2 local boundary: the lifted affine `x`-chart followed by the infinity chart. -/
+axiom affineLiftProjX_compat_infinityChart
+    (H : HyperellipticData) (h : Odd H.f.natDegree) (p : HyperellipticAffine H)
+    (hpY : p ∈ HyperellipticAffine.smoothLocusY H) :
+    ContDiffOn ℂ ω
+      ((((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
+          (infinityChart H h)) : ℂ → ℂ)
+      ((((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
+          (infinityChart H h))).source
+
+/-- Remaining OA2 local boundary: infinity chart followed by the lifted affine `y`-chart. -/
+axiom infinityChart_compat_affineLiftProjY
+    (H : HyperellipticData) (h : Odd H.f.natDegree) (p : HyperellipticAffine H)
+    (hpX : p ∈ HyperellipticAffine.smoothLocusX H) :
+    ContDiffOn ℂ ω
+      (((infinityChart H h).symm.trans
+          ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+            (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))) : ℂ → ℂ)
+      ((infinityChart H h).symm.trans
+        ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source
+
+/-- Remaining OA2 local boundary: the lifted affine `y`-chart followed by the infinity chart. -/
+axiom affineLiftProjY_compat_infinityChart
+    (H : HyperellipticData) (h : Odd H.f.natDegree) (p : HyperellipticAffine H)
+    (hpX : p ∈ HyperellipticAffine.smoothLocusX H) :
+    ContDiffOn ℂ ω
+      ((((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
+          (infinityChart H h)) : ℂ → ℂ)
+      ((((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+          (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
+          (infinityChart H h))).source
 
 end Jacobians.ProjectiveCurve.HyperellipticOdd
