@@ -103,10 +103,28 @@ attribute [instance] AX_HyperellipticAffineInfinity_connected
 
 /-- **Axiom (NOT VERIFIED).** The affine-infinity chart is noncompact
 (mirror of `AX_HyperellipticAffine_noncompact`). -/
-axiom AX_HyperellipticAffineInfinity_noncompact (H : HyperellipticData) :
-    NoncompactSpace (HyperellipticAffineInfinity H)
-
-attribute [instance] AX_HyperellipticAffineInfinity_noncompact
+instance : NoncompactSpace (HyperellipticAffineInfinity H) := by
+  refine ⟨?_⟩
+  intro hcompact
+  let π : HyperellipticAffineInfinity H → ℂ := fun p => p.val.1
+  have hπ : Continuous π := continuous_subtype_val.fst
+  have hsurj : Function.Surjective π := by
+    intro t
+    obtain ⟨u, hu⟩ : ∃ u : ℂ, (Polynomial.reverse H.f).eval t = u * u :=
+      (Complex.isSquare ((Polynomial.reverse H.f).eval t)).exists_mul_self
+    refine ⟨⟨(t, u), ?_⟩, rfl⟩
+    simpa [sq, hu] using hu.symm
+  have himage : π '' (Set.univ : Set (HyperellipticAffineInfinity H)) = Set.univ := by
+    ext t
+    constructor
+    · intro _
+      simp
+    · intro _
+      rcases hsurj t with ⟨p, rfl⟩
+      exact ⟨p, Set.mem_univ _, rfl⟩
+  have hcompactC : IsCompact (Set.univ : Set ℂ) := by
+    simpa [himage] using hcompact.image hπ
+  exact (inferInstance : NoncompactSpace ℂ).noncompact_univ hcompactC
 
 end HyperellipticAffineInfinity
 

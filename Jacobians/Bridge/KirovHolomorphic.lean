@@ -477,15 +477,23 @@ noncomputable def bridgeForm :
         rw [hmfd_eq]
         -- Now goal: c • (continuousLinearMapAt y) ((symmL y) v) = c * v.
         -- Use the round-trip continuousLinearMapAt_symmL = id.
-        have h_round : (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt
-            ℂ y ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v) = v :=
-          Bundle.Trivialization.continuousLinearMapAt_symmL _ hy_TS_X v
-        -- The CLM symbols are subtle; congr-style.
-        calc form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
-              ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt ℂ y)
-                ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v)
-            = form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) • v := by rw [h_round]
-          _ = form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v := by rw [smul_eq_mul]
+        have hroundtrip :
+            (Bundle.Trivialization.continuousLinearMapAt ℂ
+                (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀) y)
+              ((Bundle.Trivialization.symmL ℂ
+                  (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀) y) v) = v := by
+          exact Bundle.Trivialization.continuousLinearMapAt_symmL
+            (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀) hy_TS_X v
+        calc
+          form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
+              (Bundle.Trivialization.continuousLinearMapAt ℂ
+                (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀) y)
+                ((Bundle.Trivialization.symmL ℂ
+                  (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀) y) v) =
+              form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) • v := by
+                rw [hroundtrip]
+          _ = form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v := by
+                simp only [smul_eq_mul]
         }
   map_add' form₁ form₂ := by
     apply ContMDiffSection.ext
