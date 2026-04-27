@@ -542,4 +542,19 @@ lemma eval_eq_neg_infReverse_eval_inv_mul_pow
   rw [Polynomial.eval_neg]
   linear_combination -hRefl
 
+/-! ## Möbius derivative helpers for the S5 cocycle discharge -/
+
+/-- Derivative of the Möbius map `z ↦ 1/z` at nonzero `z`: `-(z²)⁻¹`. -/
+lemma hasDerivAt_inv_complex {z : ℂ} (hz : z ≠ 0) :
+    HasDerivAt (fun w : ℂ => w⁻¹) (-(z ^ 2)⁻¹) z := by
+  have := (hasFDerivAt_inv hz).hasDerivAt
+  simpa using this
+
+/-- `fderiv` of `z ↦ 1/z` at nonzero `z` applied to `1` gives `-(z²)⁻¹`. -/
+lemma fderiv_inv_apply_one {z : ℂ} (hz : z ≠ 0) :
+    fderiv ℂ (fun w : ℂ => w⁻¹) z 1 = -(z ^ 2)⁻¹ := by
+  have hderiv := hasDerivAt_inv_complex hz
+  change deriv (fun w : ℂ => w⁻¹) z = _
+  exact hderiv.deriv
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
