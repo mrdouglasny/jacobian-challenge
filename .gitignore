@@ -6,3 +6,4 @@ lake-packages/
 *.trace
 *.hash
 .DS_Store
+.claude/
