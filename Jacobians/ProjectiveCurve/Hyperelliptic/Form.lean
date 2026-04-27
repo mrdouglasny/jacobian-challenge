@@ -194,6 +194,36 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothY
   rw [hReduce g, hReduce g'] at hCoeff
   exact hyperellipticAffineCoeff_injective_at_smoothLocusY a hpY hCoeff
 
+/-- **Conditional form-level injectivity** (smoothLocusX variant).
+Mirror of `hyperellipticForm_eq_of_agree_at_affine_smoothY` for the
+projY chart family: if two `hyperellipticForm`s agree at `q` whose
+`Quotient.out` is `Sum.inl a` with `a ∈ smoothLocusX H \ smoothLocusY H`,
+then the underlying polynomials are equal.
+
+Useful when `H.f(0) = 0`: the witness point is `(0, 0)`, which lies in
+`smoothLocusX` (since `f'(0) ≠ 0` follows from `H.f` being squarefree)
+but not in `smoothLocusY`. -/
+theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    {g g' : Polynomial ℂ}
+    {q : HyperellipticEvenProj H}
+    {a : HyperellipticAffine H}
+    (hpX : a ∈ smoothLocusX H) (hpYn : a ∉ smoothLocusY H)
+    (hQ : Quotient.out q = Sum.inl a)
+    (hCoeff : (hyperellipticForm H g).coeff q =
+              (hyperellipticForm H g').coeff q) :
+    g = g' := by
+  have hReduce : ∀ (g₀ : Polynomial ℂ),
+      (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
+    intro g₀
+    show (hyperellipticEvenCoeff (H := H) g₀ (infReverse H g₀)) q = _
+    show (match Quotient.out q with
+      | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
+    rw [hQ]
+  rw [hReduce g, hReduce g'] at hCoeff
+  exact hyperellipticAffineCoeff_injective_at_smoothLocusX a hpX hpYn hCoeff
+
 /-- Injectivity of `hyperellipticForm` on polynomials of degree
 `< H.f.natDegree / 2 - 1`. The form `g(x) dx / y` is nonzero whenever
 `g` is a nonzero polynomial of degree `< g_topology` (the geometric
