@@ -651,6 +651,32 @@ lemma affineGluingImage_mem_smoothLocusY
   rw [affineGluingImage_val_snd]
   exact mul_ne_zero hpY (pow_ne_zero _ (inv_ne_zero hxNZ))
 
+/-- If `proj (Sum.inl a) = proj (Sum.inr b)` in `HyperellipticEvenProj H`,
+then `b` is forced to be the gluing image of `a` (and `a.val.1 ≠ 0`).
+
+This is the structural fact that pins down the infinity-side
+representative when an affine and infinity point project to the same
+quotient class. Used to identify chart values in the cross-summand
+cocycle. -/
+lemma proj_inl_eq_proj_inr_iff
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    {a : HyperellipticAffine H} {b : HyperellipticAffineInfinity H}
+    (h : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) =
+         Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b)) :
+    ∃ (hxNZ : a.val.1 ≠ 0), b = affineGluingImage a hxNZ := by
+  have hRel : (hyperellipticEvenSetoid H).r (Sum.inl a) (Sum.inr b) :=
+    Quotient.exact h
+  rw [hyperellipticEvenSetoid_rel_iff] at hRel
+  rcases hRel with hEq | hGl | hGl
+  · exact absurd hEq (by simp)
+  · obtain ⟨hxNZ, hb1, hb2⟩ := hGl
+    refine ⟨hxNZ, ?_⟩
+    apply Subtype.ext
+    apply Prod.ext
+    · simp [affineGluingImage_val_fst, hb1]
+    · simp [affineGluingImage_val_snd, hb2]
+  · exact absurd hGl (by simp [HyperellipticEvenGlue])
+
 /-- **Coordinate-level cross-summand cocycle.** Given:
 * low-degree polynomial `g_aff` (degree < `g_topology - 1`),
 * coordinates `z, y, v` with `z ≠ 0`, `y ≠ 0`, `v ≠ 0`,
