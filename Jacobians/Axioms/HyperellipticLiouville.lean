@@ -213,13 +213,39 @@ theorem genus_HyperellipticEven_le
     [Module.Finite ℂ (HolomorphicOneForm (HyperellipticEvenProj H))] :
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) ≤
       H.f.natDegree / 2 - 1 := by
-  -- Strategy: construct a surjection from a `(H.f.natDegree / 2 - 1)`-dim
-  -- subspace of `Polynomial ℂ` onto `HolomorphicOneForm (HyperellipticEvenProj H)`,
-  -- giving the dimension bound directly. AX_HyperellipticOneForm_eq_form
-  -- supplies the required surjectivity.
-  -- Implementation deferred — full proof requires a clean handle on
-  -- `Module.finrank` of the form submodule and its relation to `genus`.
-  -- The theorem statement is correct and the proof plan is documented above.
-  sorry
+  set n := H.f.natDegree / 2 - 1 with hn_def
+  -- Build the linear map degreeLT ℂ n → HolomorphicOneForm via hyperellipticForm.
+  let φ : Polynomial.degreeLT ℂ n →ₗ[ℂ]
+      HolomorphicOneForm (HyperellipticEvenProj H) :=
+    (HyperellipticEvenProj.hyperellipticFormLinearMap H).comp
+      (Polynomial.degreeLT ℂ n).subtype
+  -- φ is surjective by Level 3 axiom.
+  have hφ_surj : Function.Surjective φ := by
+    intro form
+    obtain ⟨g, hg_deg, hgform⟩ := AX_HyperellipticOneForm_eq_form form
+    have hg_in : g ∈ Polynomial.degreeLT ℂ n := by
+      rw [Polynomial.mem_degreeLT]
+      by_cases hg : g = 0
+      · rw [hg]; simp [Polynomial.degree_zero]
+      · rw [Polynomial.degree_eq_natDegree hg]; exact_mod_cast hg_deg
+    refine ⟨⟨g, hg_in⟩, ?_⟩
+    change HyperellipticEvenProj.hyperellipticForm H g = form
+    exact hgform.symm
+  -- Module.rank inequality from surjective linear map.
+  have h_rank_le : Module.rank ℂ (HolomorphicOneForm (HyperellipticEvenProj H)) ≤
+      Module.rank ℂ (Polynomial.degreeLT ℂ n) :=
+    LinearMap.rank_le_of_surjective φ hφ_surj
+  -- Convert to finrank.
+  have h_target_finite : Module.Finite ℂ (Polynomial.degreeLT ℂ n) :=
+    inferInstance
+  have h_finrank_le : Module.finrank ℂ (HolomorphicOneForm (HyperellipticEvenProj H)) ≤
+      Module.finrank ℂ (Polynomial.degreeLT ℂ n) :=
+    Module.finrank_le_finrank_of_rank_le_rank (by simpa using h_rank_le)
+      (Module.rank_lt_aleph0 ℂ _)
+  -- Compute Module.finrank ℂ (Polynomial.degreeLT ℂ n) = n.
+  have h_finrank_degreeLT : Module.finrank ℂ (Polynomial.degreeLT ℂ n) = n := by
+    rw [Module.finrank_eq_card_basis (Polynomial.degreeLT.basis ℂ n)]; simp
+  change Module.finrank ℂ (HolomorphicOneForm (HyperellipticEvenProj H)) ≤ n
+  rw [← h_finrank_degreeLT]; exact h_finrank_le
 
 end Jacobians.Axioms.HyperellipticLiouville
