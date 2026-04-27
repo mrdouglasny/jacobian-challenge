@@ -41,9 +41,12 @@ factor that exactly absorbs the change of variable above.
 
 ## Status
 
-This file is currently **scaffolded** — the constructor and all
-supporting lemmas are stated with `sorry` bodies. The discharge plan
-documents the concrete proof obligations.
+All theorems in this file are now **sorry-free**. The construction
+rests on two cross-summand cocycle axioms in `EvenForm.lean` (the
+Möbius gluing region), which are explicitly hypothesized on the
+gluing relation `g_inf = infReverse H g_aff` so that they are
+mathematically correct as statements; their discharge requires
+explicit chain-rule computations on `x ↦ 1/x`.
 
 ## Discharge plan
 
@@ -224,23 +227,122 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
   rw [hReduce g, hReduce g'] at hCoeff
   exact hyperellipticAffineCoeff_injective_at_smoothLocusX a hpX hpYn hCoeff
 
+/-! ### Witness existence and full injectivity
+
+To discharge `injOn_lowDegree` we need a quotient point `q` whose
+`Quotient.out` lands on the affine summand at a point in either
+`smoothLocusY` or `smoothLocusX`. The natural witness is
+`a₀ = (0, ±√H.f(0))`: any affine point with `x = 0` is isolated in
+the gluing graph, since `HyperellipticEvenGlue (Sum.inl a) (Sum.inr b)`
+requires `a.val.1 ≠ 0`. Case-splitting on `H.f(0) = 0`:
+* `H.f(0) ≠ 0`: `a₀ ∈ smoothLocusY` (since `a₀.val.2² = H.f(0) ≠ 0`).
+* `H.f(0) = 0`: `a₀ = (0, 0) ∈ smoothLocusX` (since `H.f` squarefree
+  implies `f'(0) ≠ 0` when `0` is a root). -/
+
+/-- `Quotient.out` returns the input when the gluing graph isolates it
+(no glue arrow touches `Sum.inl a₀` when `a₀.val.1 = 0`). -/
+lemma quotient_out_of_zero_x (a₀ : HyperellipticAffine H) (h0 : a₀.val.1 = 0) :
+    Quotient.out (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a₀)) = Sum.inl a₀ := by
+  set q : HyperellipticEvenProj H := Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a₀)
+  set u := Quotient.out q
+  have hRel : (hyperellipticEvenSetoid H).r u (Sum.inl a₀) :=
+    Quotient.exact (Quotient.out_eq q)
+  rw [hyperellipticEvenSetoid_rel_iff] at hRel
+  rcases hRel with hEq | hGl1 | hGl2
+  · exact hEq
+  · rcases u with a' | b' <;> simp [HyperellipticEvenGlue] at hGl1
+  · rcases u with a' | b' <;> simp [HyperellipticEvenGlue] at hGl2
+    exact absurd hGl2.1 (by simp [h0])
+
+/-- Witness affine point for the injectivity proof: `(0, y)` where
+`y² = H.f(0)`. Has `x = 0` so it sits outside the gluing region. -/
+noncomputable def witnessZeroX (H : HyperellipticData) : HyperellipticAffine H :=
+  ⟨(0, (exists_complex_sq_eq (H.f.eval 0)).choose), by
+    simpa using (exists_complex_sq_eq (H.f.eval 0)).choose_spec⟩
+
+@[simp] lemma witnessZeroX_val_fst (H : HyperellipticData) :
+    (witnessZeroX H).val.1 = 0 := rfl
+
+lemma witnessZeroX_val_snd_sq (H : HyperellipticData) :
+    (witnessZeroX H).val.2 ^ 2 = H.f.eval 0 := by
+  simpa using (witnessZeroX H).property
+
+lemma witnessZeroX_mem_smoothLocusY_iff (H : HyperellipticData) :
+    witnessZeroX H ∈ smoothLocusY H ↔ H.f.eval 0 ≠ 0 := by
+  unfold smoothLocusY
+  constructor
+  · intro hY h0
+    apply hY
+    have hSq : (witnessZeroX H).val.2 ^ 2 = 0 := by
+      rw [witnessZeroX_val_snd_sq]; exact h0
+    exact pow_eq_zero_iff (by norm_num : 2 ≠ 0) |>.mp hSq
+  · intro h0 hY
+    have hSq : (witnessZeroX H).val.2 ^ 2 = H.f.eval 0 := witnessZeroX_val_snd_sq H
+    rw [hY, zero_pow (by norm_num : 2 ≠ 0)] at hSq
+    exact h0 hSq.symm
+
+lemma witnessZeroX_mem_smoothLocusX_of_zero_root (H : HyperellipticData)
+    (h0 : H.f.eval 0 = 0) :
+    witnessZeroX H ∈ smoothLocusX H := by
+  unfold smoothLocusX
+  show (Polynomial.derivative H.f).eval (witnessZeroX H).val.1 ≠ 0
+  rw [witnessZeroX_val_fst]
+  exact eval_derivative_ne_zero_of_eval_eq_zero H h0
+
+/-- **Unconditional injectivity** of `hyperellipticForm`: any two
+polynomials yielding equal forms are equal. -/
+theorem hyperellipticForm_injective (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] :
+    Function.Injective (hyperellipticForm H) := by
+  intro g g' hForm
+  set q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl (witnessZeroX H))
+  have hQ : Quotient.out q = Sum.inl (witnessZeroX H) :=
+    quotient_out_of_zero_x (witnessZeroX H) (witnessZeroX_val_fst H)
+  have hCoeff : (hyperellipticForm H g).coeff q = (hyperellipticForm H g').coeff q := by
+    rw [hForm]
+  by_cases h0 : H.f.eval 0 = 0
+  · have hpX := witnessZeroX_mem_smoothLocusX_of_zero_root H h0
+    have hpYn : witnessZeroX H ∉ smoothLocusY H := by
+      rw [witnessZeroX_mem_smoothLocusY_iff]
+      exact fun h => h h0
+    exact hyperellipticForm_eq_of_agree_at_affine_smoothX hpX hpYn hQ hCoeff
+  · have hpY : witnessZeroX H ∈ smoothLocusY H :=
+      (witnessZeroX_mem_smoothLocusY_iff H).mpr h0
+    exact hyperellipticForm_eq_of_agree_at_affine_smoothY hpY hQ hCoeff
+
 /-- Injectivity of `hyperellipticForm` on polynomials of degree
-`< H.f.natDegree / 2 - 1`. The form `g(x) dx / y` is nonzero whenever
-`g` is a nonzero polynomial of degree `< g_topology` (the geometric
-genus). -/
+`< H.f.natDegree / 2 - 1`, as a corollary of unconditional injectivity. -/
 theorem hyperellipticForm_injOn_lowDegree
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     Set.InjOn (hyperellipticForm H)
-      { g : Polynomial ℂ | g.natDegree < H.f.natDegree / 2 - 1 } := by
-  sorry
+      { g : Polynomial ℂ | g.natDegree < H.f.natDegree / 2 - 1 } :=
+  fun _ _ _ _ hForm => hyperellipticForm_injective H hForm
 
 /-- Linear independence of the canonical basis. Combines
-`Polynomial.linearIndependent_pow_lt` with `hyperellipticForm_injOn_lowDegree`. -/
+linear independence of `Polynomial.basisMonomials` with the
+unconditional injectivity of `hyperellipticFormLinearMap`. -/
 theorem hyperellipticForm_linearIndependent (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] :
     LinearIndependent ℂ
       (fun k : Fin (H.f.natDegree / 2 - 1) =>
         hyperellipticForm H (Polynomial.X ^ k.val)) := by
-  sorry
+  -- (1) Powers of X are linearly independent in ℂ[X].
+  have hCoe : ⇑(Polynomial.basisMonomials ℂ) = fun n => (Polynomial.X : Polynomial ℂ) ^ n := by
+    funext n
+    rw [Polynomial.coe_basisMonomials, ← Polynomial.monomial_one_right_eq_X_pow n]
+  have hPowLI : LinearIndependent ℂ (fun n : ℕ => (Polynomial.X : Polynomial ℂ) ^ n) := by
+    have := (Polynomial.basisMonomials ℂ).linearIndependent
+    rw [hCoe] at this; exact this
+  -- (2) Restrict to `Fin (g_topology - 1)` via the `Fin.val` coercion.
+  have hFinLI : LinearIndependent ℂ
+      (fun k : Fin (H.f.natDegree / 2 - 1) => (Polynomial.X : Polynomial ℂ) ^ k.val) :=
+    hPowLI.comp (fun k : Fin (H.f.natDegree / 2 - 1) => k.val) Fin.val_injective
+  -- (3) Push through the injective ℂ-linear map `hyperellipticFormLinearMap H`.
+  have hKer : (hyperellipticFormLinearMap H).ker = ⊥ := by
+    rw [LinearMap.ker_eq_bot]
+    exact hyperellipticForm_injective H
+  have := (LinearMap.linearIndependent_iff (hyperellipticFormLinearMap H) hKer).mpr hFinLI
+  convert this using 1
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
