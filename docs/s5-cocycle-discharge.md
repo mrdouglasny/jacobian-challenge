@@ -81,28 +81,60 @@ ball reasoning, plus understanding of `IsOpen` in the IFT chart targets.
 **Statement:** Discharge the cross-summand axiom
 `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` (and the symmetric one).
 
-**Approach:**
-1. From `hQ : Quotient.out q = Sum.inl a` and `hQ' : Quotient.out q' =
-   Sum.inr b`, identify `chart_q = affineLiftChart H _ a` and
-   `chart_q' = infinityLiftChart H _ b`.
-2. From `hz : z ∈ chart_q.target` and `hSrc : chart_q.symm z ∈
-   chart_q'.source`, unwind via `lift_openEmbedding_target/source`:
-   `z ∈ affineChartAt a .target` and the affine point
-   `affineChartAt a .symm z` (which we know has x-coord `z` in projX
-   case) is gluing-related to some infinity point in `chart_b.source`.
-3. By `proj_inl_eq_proj_inr_iff` applied to the projection-equality
-   from gluing, the infinity point is `affineGluingImage (chart_a.symm z)
-   (hxNZ)` for some `hxNZ` derived from `hSrc`.
-4. By `lift_openEmbedding_apply`, `chart_q' (chart_q.symm z) =
-   affineChartAt (reverseData) b applied to the gluing image`.
-   In the projU case, this evaluates to the gluing image's u-coord = `z⁻¹`.
-5. By `Filter.EventuallyEq.fderiv_eq`, `fderiv (chart_q' ∘ chart_q.symm)
-   z 1 = fderiv (z ↦ z⁻¹) z 1 = -(z²)⁻¹` (using `fderiv_inv_apply_one`).
-6. Apply `cross_summand_cocycle_coord` with `(z, y, v) = (z,
-   e_a.symm (H.f.eval z), e_b.symm ((H.f.reverse).eval z⁻¹))`. The
-   gluing relation `v = y · z⁻¹^(g+1)` follows from step 1 above.
+**Approach (refined after spike of projX/projU sub-case):**
 
-**Estimated effort:** 200-400 LOC. Lots of structural unwinding.
+Architectural setup (steps 1-4 are mostly mechanical):
+1. `hChQ : chartAt ℂ q = affineLiftChart H hf.out a` (from `hQ`).
+2. `hChQ' : chartAt ℂ q' = infinityLiftChart H hf.out b` (from `hQ'`).
+3. Reduce `extChartAt 𝓘(ℂ, ℂ) q .target` and `.symm` to `affineLiftChart`
+   target/symm via `extChartAt_target`, `Set.range_id`, `inter_univ`.
+4. Reduce `affineLiftChart` and `infinityLiftChart` via
+   `lift_openEmbedding_target/source/symm`.
+
+Per-sub-case work (the projX/projU case below; other 3 sub-cases parallel):
+
+5. **Case-split**: assume `a ∈ smoothLocusY` and `b ∈ smoothLocusY`
+   (of reverseData). Use `affineChartAt_of_mem_smoothLocusY` to
+   reduce charts to `affineChartProjX`. The other 3 cases need their
+   own structural work.
+
+6. **Gluing identification**: from `hSrc`, obtain `bb ∈ chart_b.source`
+   and `(proj∘Sum.inr) bb = (proj∘Sum.inl) ((chart_a).symm z)`. By
+   `proj_inl_eq_proj_inr_iff`, `bb = affineGluingImage (chart_a.symm z) hxNZ`.
+   The chart_a.symm z .val.1 = z (by `affineChartProjX_symm_apply_fst`),
+   so `hxNZ : z ≠ 0`.
+
+7. **Compute chart_q' (chart_q.symm z) = z⁻¹**:
+   ```
+   infinityLiftChart H _ b ((proj∘Sum.inr) bb)
+     = (affineChartAt (reverseData) b) bb       [lift_openEmbedding_apply]
+     = (affineChartProjX (reverseData) b hpY_b) bb  [smoothLocusY case]
+     = bb.val.1                                  [projX def]
+     = (gluing image).val.1                      [hbb]
+     = (chart_a.symm z).val.1⁻¹                  [affineGluingImage_val_fst]
+     = z⁻¹                                       [affineChartProjX_symm_apply_fst]
+   ```
+
+8. **Compute fderiv**: show that on the chart-overlap source, the
+   transition equals `z ↦ z⁻¹`. Then by `Filter.EventuallyEq.fderiv_eq`,
+   `fderiv (chart_q' ∘ chart_q.symm) z 1 = fderiv (z ↦ z⁻¹) z 1 = -(z²)⁻¹`
+   via `fderiv_inv_apply_one`.
+
+9. **Compute coefficients**:
+   * LHS = `hyperellipticEvenCoeff g_aff g_inf q z` reduces (via Quotient.out
+     dispatch) to `affineProjXCoeff g_aff a hpY z = g_aff(z) / e_a.symm(H.f.eval z)`.
+   * RHS coefficient at `z⁻¹` reduces to `g_inf(z⁻¹) / e_b.symm((H.f.reverse).eval z⁻¹)`.
+
+10. **Apply `cross_summand_cocycle_coord`** with `y = e_a.symm(H.f.eval z)`,
+    `v = e_b.symm((H.f.reverse).eval z⁻¹)`. The gluing relation
+    `v = y · z⁻¹^(g+1)` follows from `squareLocalHomeomorph_symm_gluing`
+    once we verify the LHS-membership hypothesis `y · z⁻¹^(g+1) ∈ e_b.source`,
+    which holds because `y · z⁻¹^(g+1) = bb.val.2 ∈ e_b.source` (from
+    `hbb_src`'s reduction).
+
+**Estimated effort:** ~250 LOC for the projX/projU sub-case (architecture
+verified in spike); 4 sub-cases × ~250 LOC = ~1000 LOC for the full
+inl_inr discharge.
 
 ### 3. Mirror axiom (`_inr_inl`)
 
