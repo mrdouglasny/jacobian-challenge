@@ -82,6 +82,8 @@ namespace Jacobians.ProjectiveCurve.HyperellipticEvenProj
 open scoped Manifold ContDiff
 open Jacobians.RiemannSurface
 open Polynomial
+open Jacobians.ProjectiveCurve.HyperellipticAffine
+open Jacobians.ProjectiveCurve.HyperellipticAffineInfinity
 
 variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 
@@ -154,6 +156,43 @@ of `{ X^k : 0 ≤ k < g }` in `Polynomial ℂ` (standard Mathlib fact)
 via injectivity of `hyperellipticFormLinearMap` restricted to the
 degree-`< g` subspace.
 -/
+
+/-! ### Form-level injectivity
+
+The architectural pattern: a `hyperellipticForm` is determined by its
+underlying coefficient function on `HyperellipticEvenProj H`. Evaluating
+the coefficient at a quotient point `q` whose `Quotient.out q = Sum.inl a`
+recovers the affine coefficient `hyperellipticAffineCoeff g a`, from which
+`g` is determined (via the affine-side polynomial-recovery argument).
+
+The "conditional" injectivity below assumes the existence of such a
+witness `(q, a)`; full injectivity will follow once we discharge the
+existence (pick an affine point `a₀` not in the gluing region — typically
+`x₀ = 0` when `H.f(0) ≠ 0`). -/
+
+/-- **Conditional form-level injectivity.** If two `hyperellipticForm`s
+agree at a quotient point whose `Quotient.out` lands on the affine
+summand at a `smoothLocusY` representative, then the underlying
+polynomials are equal. -/
+theorem hyperellipticForm_eq_of_agree_at_affine_smoothY
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    {g g' : Polynomial ℂ}
+    {q : HyperellipticEvenProj H}
+    {a : HyperellipticAffine H} (hpY : a ∈ smoothLocusY H)
+    (hQ : Quotient.out q = Sum.inl a)
+    (hCoeff : (hyperellipticForm H g).coeff q =
+              (hyperellipticForm H g').coeff q) :
+    g = g' := by
+  have hReduce : ∀ (g₀ : Polynomial ℂ),
+      (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
+    intro g₀
+    show (hyperellipticEvenCoeff (H := H) g₀ (infReverse H g₀)) q = _
+    show (match Quotient.out q with
+      | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
+    rw [hQ]
+  rw [hReduce g, hReduce g'] at hCoeff
+  exact hyperellipticAffineCoeff_injective_at_smoothLocusY a hpY hCoeff
 
 /-- Injectivity of `hyperellipticForm` on polynomials of degree
 `< H.f.natDegree / 2 - 1`. The form `g(x) dx / y` is nonzero whenever
