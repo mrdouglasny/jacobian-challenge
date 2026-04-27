@@ -73,6 +73,7 @@ See `docs/hyperelliptic-even-atlas-plan.md` for the broader plan.
 -/
 
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
+import Jacobians.ProjectiveCurve.Hyperelliptic.EvenForm
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
 
@@ -86,21 +87,33 @@ variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 
 /-! ## The reusable `hyperellipticForm` constructor -/
 
+/-- The "infinity-side" polynomial paired with `g` in the gluing.
+
+For a basis monomial `g = X^k` (with `k ≤ g_topology - 1`), this is
+`-X^(g_topology - 1 - k)`. In general it is `-Polynomial.reflect
+(g_topology - 1) g`, where `g_topology = H.f.natDegree / 2 - 1` is the
+expected geometric genus. This is the polynomial such that the form
+`g(x) dx / y` extends holomorphically across the gluing region — the
+relation `g_inf(u) = -u^(g_topology - 1) g(1/u)` exactly cancels the
+factors `dx = -du/u^2` and `y = v / u^(g_topology + 1)`. -/
+noncomputable def infReverse (H : HyperellipticData) (g : Polynomial ℂ) :
+    Polynomial ℂ :=
+  -Polynomial.reflect (H.f.natDegree / 2 - 2) g
+
 /-- The holomorphic 1-form `g(x) dx / y` on `HyperellipticEvenProj H`,
 parameterized by an arbitrary polynomial `g : Polynomial ℂ`.
 
-This is the central reusable object: every holomorphic 1-form arising
-in the basis-differentials / genus-theorem chain is an instance of
-this constructor. Linearity (`hyperellipticForm_add`,
-`hyperellipticForm_smul`) plus linear independence
-(`hyperellipticForm_linearIndependent_of_polynomial_linearIndependent`)
-make the genus theorem a near-trivial corollary.
-
-Currently `sorry`. Discharge plan in this file's docstring. -/
+Constructed as the unified coefficient family
+`hyperellipticEvenCoeff g (infReverse H g)` together with its
+`holomorphicOneFormSubmodule` membership proof. The membership proof
+is real on the within-summand cocycle predicates (analyticity,
+off-target, same-summand cocycle) and rests on two cross-summand
+axioms in `EvenForm.lean` for the Möbius gluing region. -/
 noncomputable def hyperellipticForm (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (g : Polynomial ℂ) :
-    HolomorphicOneForm (HyperellipticEvenProj H) := by
-  sorry
+    HolomorphicOneForm (HyperellipticEvenProj H) :=
+  ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
+   hyperellipticEvenCoeff_mem_submodule g (infReverse H g)⟩
 
 /-! ## Linearity -/
 
