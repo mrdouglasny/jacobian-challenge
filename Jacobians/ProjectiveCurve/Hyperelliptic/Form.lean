@@ -187,7 +187,6 @@ agree at a quotient point whose `Quotient.out` lands on the affine
 summand at a `smoothLocusY` representative, then the underlying
 polynomials are equal. -/
 theorem hyperellipticForm_eq_of_agree_at_affine_smoothY
-    [hf : Fact (¬ Odd H.f.natDegree)]
     {g g' : Polynomial ℂ}
     {q : HyperellipticEvenProj H}
     {a : HyperellipticAffine H} (hpY : a ∈ smoothLocusY H)
@@ -216,7 +215,6 @@ Useful when `H.f(0) = 0`: the witness point is `(0, 0)`, which lies in
 `smoothLocusX` (since `f'(0) ≠ 0` follows from `H.f` being squarefree)
 but not in `smoothLocusY`. -/
 theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
-    [hf : Fact (¬ Odd H.f.natDegree)]
     {g g' : Polynomial ℂ}
     {q : HyperellipticEvenProj H}
     {a : HyperellipticAffine H}
@@ -248,6 +246,7 @@ requires `a.val.1 ≠ 0`. Case-splitting on `H.f(0) = 0`:
 * `H.f(0) = 0`: `a₀ = (0, 0) ∈ smoothLocusX` (since `H.f` squarefree
   implies `f'(0) ≠ 0` when `0` is a root). -/
 
+omit [Fact (¬ Odd H.f.natDegree)] in
 /-- `Quotient.out` returns the input when the gluing graph isolates it
 (no glue arrow touches `Sum.inl a₀` when `a₀.val.1 = 0`). -/
 lemma quotient_out_of_zero_x (a₀ : HyperellipticAffine H) (h0 : a₀.val.1 = 0) :
