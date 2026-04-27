@@ -870,6 +870,74 @@ private lemma chart_transition_eq_inv_X_U
       b hpY_b]
   exact hbb1
 
+/-! ### Chart transition formula (projY × projU sub-case)
+
+For `a ∉ smoothLocusY` (so `chart_a = affineChartProjY` at branch
+point) and `b ∈ smoothLocusY` of reverseData (so `chart_b =
+affineChartProjX` in reverseData frame), the chart transition is
+`w ↦ x_a(w)⁻¹` where `x_a(w) = polynomialLocalHomeomorph.symm(w²)`. -/
+
+private lemma chart_transition_eq_inv_Y_U
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    (hpYn : a ∉ smoothLocusY H)
+    (b : HyperellipticAffineInfinity H)
+    (hpY_b : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    {w : ℂ}
+    (hw : w ∈ ((affineLiftChart H hf.out a).symm.trans
+        (infinityLiftChart H hf.out b)).source) :
+    (infinityLiftChart H hf.out b) ((affineLiftChart H hf.out a).symm w) =
+      ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹ := by
+  have hwt : w ∈ (affineLiftChart H hf.out a).target := hw.1
+  have hws : (affineLiftChart H hf.out a).symm w ∈
+      (infinityLiftChart H hf.out b).source := hw.2
+  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target] at hwt
+  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
+    OpenPartialHomeomorph.lift_openEmbedding_symm, affineLiftChart] at hws
+  rw [affineChartAt_of_not_mem_smoothLocusY a hpYn] at hwt hws
+  -- Use that hpX matches the smoothLocusX derivation from hpYn.
+  have hpX_eq : mem_smoothLocusX_of_y_eq_zero H (show a.val.2 = 0 by simpa [smoothLocusY] using hpYn) = hpX :=
+    rfl
+  obtain ⟨bb, hbb_src, hbb_eq⟩ := hws
+  rw [show (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b) =
+      ((affineChartProjX
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpY_b) :
+        OpenPartialHomeomorph _ _) from
+    affineChartAt_of_mem_smoothLocusY (H := HyperellipticAffineInfinity.reverseData H hf.out)
+      b hpY_b] at hbb_src
+  have hbb_eq' : Quotient.mk (hyperellipticEvenSetoid H)
+      (Sum.inl ((affineChartProjY (H := H) a hpX).symm w)) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bb) := hbb_eq.symm
+  obtain ⟨hwNZ, hbb⟩ := proj_inl_eq_proj_inr_iff hbb_eq'
+  have hbb1 : bb.val.1 =
+      ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹ := by
+    rw [hbb]; simp only [affineGluingImage_val_fst]
+    rw [affineChartProjY_symm_apply_fst a hpX hwt]
+  -- Now compute infinityLiftChart applied to chart_a.symm w.
+  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_symm,
+    Function.comp_apply]
+  rw [show (HyperellipticAffine.affineChartAt (H := H) a).symm w =
+      ((affineChartProjY (H := H) a hpX).symm w : HyperellipticAffine H) from by
+    rw [affineChartAt_of_not_mem_smoothLocusY a hpYn]]
+  rw [show proj H (Sum.inl ((affineChartProjY (H := H) a hpX).symm w)) =
+      proj H (Sum.inr bb) from
+    show (proj H ∘ Sum.inl) ((affineChartProjY (H := H) a hpX).symm w) =
+      (proj H ∘ Sum.inr) bb from hbb_eq.symm]
+  show ((HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).lift_openEmbedding
+      (isOpenEmbedding_proj_inr H hf.out)) ((proj H ∘ Sum.inr) bb) =
+      ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹
+  rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+  rw [show (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b) =
+      ((affineChartProjX
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpY_b) :
+        OpenPartialHomeomorph _ _) from
+    affineChartAt_of_mem_smoothLocusY (H := HyperellipticAffineInfinity.reverseData H hf.out)
+      b hpY_b]
+  exact hbb1
+
 /-! ### Cross-summand cocycle: projX × projU sub-case (real proof)
 
 The first sub-case of the cross-summand cocycle is now a real proof
@@ -1035,4 +1103,5 @@ theorem cocycle_inl_inr_smoothLocusY_smoothLocusY
   rw [hLHS, hQ'apply, hRHScoeff, hFderivEq]
   rw [hGluing]
   exact cross_summand_cocycle_coord hDeg hzNZ hyNZ hgluing_yz.symm
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
