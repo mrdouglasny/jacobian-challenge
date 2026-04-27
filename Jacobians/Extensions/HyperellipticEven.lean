@@ -136,10 +136,26 @@ when `H.f.natDegree = 2g + 2`.
   Riemann–Roch (`AX_RiemannRoch`) to the canonical divisor.
 -/
 
+/-- **Lower bound for the genus.** The linear independence of the
+canonical basis `{x^k dx/y : k < g_topology}` immediately gives
+`g_topology ≤ genus` via `LinearIndependent.fintype_card_le_finrank`.
+The `FiniteDimensional` instance comes from `Jacobians.Bridge.KirovHolomorphic`
+(without it `Module.finrank` would silently collapse to 0). -/
+theorem hyperellipticEvenGenus_lower_bound
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
+    H.f.natDegree / 2 - 1 ≤
+      Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) := by
+  have hLI := hyperellipticEvenBasisDifferential_linearIndependent H
+  simpa using hLI.fintype_card_le_finrank
+
 /-- **Genus formula for even-degree hyperelliptic curves.** Mirrors
 `genus_HyperellipticOdd_eq` for the even parity. Tests the
 formalization end-to-end on the even-quotient atlas + bridge +
-basis + Riemann-Roch. -/
+basis + Riemann-Roch.
+
+The lower bound is `hyperellipticEvenGenus_lower_bound`; the upper
+bound currently requires Riemann–Roch infrastructure (line bundles,
+sheaf cohomology, canonical divisor) that lives behind several stubs. -/
 theorem genus_HyperellipticEven_eq
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) =
