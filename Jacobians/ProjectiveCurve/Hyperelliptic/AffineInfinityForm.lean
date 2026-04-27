@@ -73,4 +73,27 @@ theorem hyperellipticAffineInfinityCoeff_mem_submodule
   Jacobians.ProjectiveCurve.HyperellipticAffine.hyperellipticAffineCoeff_mem_submodule
     (H := HyperellipticAffineInfinity.reverseData H hf.out) g
 
+/-! ## Linearity (transferred from the affine bundle) -/
+
+@[simp] theorem hyperellipticAffineInfinityCoeff_zero
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    hyperellipticAffineInfinityCoeff (H := H) (0 : Polynomial ℂ) = 0 :=
+  Jacobians.ProjectiveCurve.HyperellipticAffine.hyperellipticAffineCoeff_zero
+    (H := HyperellipticAffineInfinity.reverseData H hf.out)
+
+theorem hyperellipticAffineInfinityCoeff_add
+    [hf : Fact (¬ Odd H.f.natDegree)] (g g' : Polynomial ℂ) :
+    hyperellipticAffineInfinityCoeff (H := H) (g + g') =
+      hyperellipticAffineInfinityCoeff (H := H) g +
+        hyperellipticAffineInfinityCoeff (H := H) g' :=
+  Jacobians.ProjectiveCurve.HyperellipticAffine.hyperellipticAffineCoeff_add
+    (H := HyperellipticAffineInfinity.reverseData H hf.out) g g'
+
+theorem hyperellipticAffineInfinityCoeff_smul
+    [hf : Fact (¬ Odd H.f.natDegree)] (c : ℂ) (g : Polynomial ℂ) :
+    hyperellipticAffineInfinityCoeff (H := H) (c • g) =
+      c • hyperellipticAffineInfinityCoeff (H := H) g :=
+  Jacobians.ProjectiveCurve.HyperellipticAffine.hyperellipticAffineCoeff_smul
+    (H := HyperellipticAffineInfinity.reverseData H hf.out) c g
+
 end Jacobians.ProjectiveCurve.HyperellipticAffineInfinity

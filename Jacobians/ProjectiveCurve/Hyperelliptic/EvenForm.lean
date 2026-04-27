@@ -444,4 +444,57 @@ theorem hyperellipticEvenCoeff_mem_submodule
    hyperellipticEvenCoeff_satisfiesCotangentCocycle g_aff g_inf hGluing,
    hyperellipticEvenCoeff_isZeroOffChartTarget g_aff g_inf⟩
 
+/-! ## Linearity of `hyperellipticEvenCoeff` and `infReverse` -/
+
+@[simp] theorem hyperellipticEvenCoeff_zero
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    hyperellipticEvenCoeff (H := H) 0 0 = 0 := by
+  funext q z
+  unfold hyperellipticEvenCoeff
+  rcases hQ : Quotient.out q with a | b
+  · simp [hQ, hyperellipticAffineCoeff_zero]
+  · simp [hQ, hyperellipticAffineInfinityCoeff_zero]
+
+theorem hyperellipticEvenCoeff_add
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff₁ g_inf₁ g_aff₂ g_inf₂ : Polynomial ℂ) :
+    hyperellipticEvenCoeff (H := H) (g_aff₁ + g_aff₂) (g_inf₁ + g_inf₂) =
+      hyperellipticEvenCoeff (H := H) g_aff₁ g_inf₁ +
+        hyperellipticEvenCoeff (H := H) g_aff₂ g_inf₂ := by
+  funext q z
+  unfold hyperellipticEvenCoeff
+  rcases hQ : Quotient.out q with a | b
+  · simp [hQ, hyperellipticAffineCoeff_add]
+  · simp [hQ, hyperellipticAffineInfinityCoeff_add]
+
+theorem hyperellipticEvenCoeff_smul
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (c : ℂ) (g_aff g_inf : Polynomial ℂ) :
+    hyperellipticEvenCoeff (H := H) (c • g_aff) (c • g_inf) =
+      c • hyperellipticEvenCoeff (H := H) g_aff g_inf := by
+  funext q z
+  unfold hyperellipticEvenCoeff
+  rcases hQ : Quotient.out q with a | b
+  · simp [hQ, hyperellipticAffineCoeff_smul]
+  · simp [hQ, hyperellipticAffineInfinityCoeff_smul]
+
+@[simp] theorem infReverse_zero (H : HyperellipticData) :
+    infReverse H 0 = 0 := by
+  unfold infReverse; simp
+
+theorem infReverse_add (H : HyperellipticData) (g g' : Polynomial ℂ) :
+    infReverse H (g + g') = infReverse H g + infReverse H g' := by
+  unfold infReverse
+  rw [Polynomial.reflect_add]
+  ring
+
+theorem infReverse_smul (H : HyperellipticData) (c : ℂ) (g : Polynomial ℂ) :
+    infReverse H (c • g) = c • infReverse H g := by
+  unfold infReverse
+  have : Polynomial.reflect (H.f.natDegree / 2 - 2) (c • g) =
+      c • Polynomial.reflect (H.f.natDegree / 2 - 2) g := by
+    ext n
+    simp [Polynomial.coeff_reflect]
+  rw [this, smul_neg]
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
