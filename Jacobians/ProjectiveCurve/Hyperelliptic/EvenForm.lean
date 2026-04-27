@@ -1393,4 +1393,352 @@ theorem cocycle_inl_inr_smoothLocusXNotY_smoothLocusY
     _ = (infReverse H g_aff).eval x_a⁻¹ / v *
           (-(2 * z / H.f.derivative.eval x_a) / x_a^2) := by ring
 
+/-! ### Cross-summand cocycle: projX × projV sub-case (real proof)
+
+For `a ∈ smoothLocusY` (so `chart_a = affineChartProjX`) and `b ∉
+smoothLocusY` of reverseData but `b ∈ smoothLocusX` (so `chart_b =
+affineChartProjY` at infinity branch point), the cocycle holds. Key
+ingredients:
+* `chart_transition_eq_X_V` (transition formula `T(w) = e_a.symm(H.f.eval w) · w⁻¹^(g+1)`)
+* Product rule via `HasDerivAt.fun_mul` on `e_a.symm(H.f.eval w)` and `w⁻¹^(g+1)`
+* Implicit identity `T(w)² = (H.f.reverse).eval w⁻¹` plus chain-rule
+  uniqueness on `T²` to derive the implicit-form derivative
+  `2 v T'_explicit z² = -(H.f.reverse)'(z⁻¹)`.
+* `cross_summand_cocycle_coord` plus the implicit identity discharge
+  the cocycle equation algebraically.
+-/
+
+theorem cocycle_inl_inr_smoothLocusY_smoothLocusXNotY
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff g_inf : Polynomial ℂ)
+    (hGluing : g_inf = infReverse H g_aff)
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (b : HyperellipticAffineInfinity H)
+    (hpX_b : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn_b : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (q q' : HyperellipticEvenProj H)
+    (hQ : Quotient.out q = Sum.inl a) (hQ' : Quotient.out q' = Sum.inr b)
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
+      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
+        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
+  classical
+  have hChQ : (_root_.chartAt ℂ q : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      affineLiftChart H hf.out a := by
+    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q = _
+    unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt; rw [hQ]
+  have hChQ' : (_root_.chartAt ℂ q' : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      infinityLiftChart H hf.out b := by
+    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q' = _
+    unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt; rw [hQ']
+  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = (affineLiftChart H hf.out a).target := by
+    rw [extChartAt_target]
+    show ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
+      (affineLiftChart H hf.out a).target
+    rw [hChQ]
+    show _ ∩ Set.range (id : ℂ → ℂ) = _
+    rw [Set.range_id, Set.inter_univ]
+    rfl
+  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
+      ((affineLiftChart H hf.out a).symm : ℂ → HyperellipticEvenProj H) := by
+    funext w; show (_root_.chartAt ℂ q).symm w = _; rw [hChQ]
+  have hExtCoe' : ((extChartAt 𝓘(ℂ, ℂ) q') : HyperellipticEvenProj H → ℂ) =
+      ((infinityLiftChart H hf.out b) : HyperellipticEvenProj H → ℂ) := by
+    funext w; show (_root_.chartAt ℂ q') w = _; rw [hChQ']
+  have hExtSrc' : (extChartAt 𝓘(ℂ, ℂ) q').source = (infinityLiftChart H hf.out b).source := by
+    rw [extChartAt_source, hChQ']
+  rw [hExtTarget] at hz
+  have hSrc_lift : (affineLiftChart H hf.out a).symm z ∈
+      (infinityLiftChart H hf.out b).source := by
+    rw [hExtSymm] at hSrc; rw [hExtSrc'] at hSrc; exact hSrc
+  have hzInOverlap : z ∈ ((affineLiftChart H hf.out a).symm.trans
+      (infinityLiftChart H hf.out b)).source := ⟨hz, hSrc_lift⟩
+  have hOverlapOpen : IsOpen ((affineLiftChart H hf.out a).symm.trans
+      (infinityLiftChart H hf.out b)).source :=
+    ((affineLiftChart H hf.out a).symm.trans (infinityLiftChart H hf.out b)).open_source
+  rw [show (affineLiftChart H hf.out a).target =
+      ((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target from by
+    simp [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target]
+    rw [affineChartAt_of_mem_smoothLocusY a hpY]] at hz
+  have hSrc_unwound : ((affineLiftChart H hf.out a).symm z) ∈
+      (infinityLiftChart H hf.out b).source := hSrc_lift
+  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
+    OpenPartialHomeomorph.lift_openEmbedding_symm, affineLiftChart] at hSrc_unwound
+  rw [affineChartAt_of_mem_smoothLocusY a hpY] at hSrc_unwound
+  obtain ⟨bb, hbb_src, hbb_eq⟩ := hSrc_unwound
+  rw [show (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b) =
+      ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b) :
+        OpenPartialHomeomorph _ _) from
+    affineChartAt_of_not_mem_smoothLocusY (H := HyperellipticAffineInfinity.reverseData H hf.out)
+      b hpYn_b] at hbb_src
+  have hbb_eq' : Quotient.mk (hyperellipticEvenSetoid H)
+      (Sum.inl ((affineChartProjX (H := H) a hpY).symm z)) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bb) := hbb_eq.symm
+  obtain ⟨hxNZ, hbb⟩ := proj_inl_eq_proj_inr_iff hbb_eq'
+  have hzNZ : z ≠ 0 := by
+    rw [affineChartProjX_symm_apply_fst a hpY hz] at hxNZ; exact hxNZ
+  set y : ℂ := (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) with hy_def
+  have hyNZ : y ≠ 0 := squareLocalHomeomorph_symm_ne_zero a hpY hz
+  set v : ℂ := y * z⁻¹ ^ (H.f.natDegree / 2) with hv_def
+  have hvNZ : v ≠ 0 :=
+    mul_ne_zero hyNZ (pow_ne_zero _ (inv_ne_zero hzNZ))
+  have hzsqNZ : z^2 ≠ 0 := pow_ne_zero _ hzNZ
+  have hbb1 : bb.val.1 = z⁻¹ := by
+    rw [hbb]; simp only [affineGluingImage_val_fst]
+    rw [affineChartProjX_symm_apply_fst a hpY hz]
+  have hbb2 : bb.val.2 = v := by
+    rw [hbb]; simp only [affineGluingImage_val_snd]
+    rw [affineChartProjX_symm_apply_fst a hpY hz, affineChartProjX_symm_apply_snd a hpY hz]
+  -- chart_q' (chart_q.symm z) = v (from chart_transition_eq_X_V).
+  have hQ'apply :
+      (extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z) = v := by
+    rw [hExtCoe', hExtSymm]
+    exact chart_transition_eq_X_V a hpY b hpX_b hpYn_b hzInOverlap
+  -- HasDerivAt for T(w) = e_a.symm(H.f.eval w) * w⁻¹^(g+1).
+  have hy_deriv : HasDerivAt
+      (fun w : ℂ => (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w))
+      (H.f.derivative.eval z / (2 * y)) z :=
+    affineChartProjX_to_projY_transition_hasDerivAt (H := H) a hpY hz
+  have hinv_deriv : HasDerivAt (fun w : ℂ => w⁻¹) (-(z^2)⁻¹) z :=
+    hasDerivAt_inv_complex hzNZ
+  have hpow_deriv : HasDerivAt
+      (fun w : ℂ => w⁻¹ ^ (H.f.natDegree / 2))
+      ((H.f.natDegree / 2 : ℕ) * z⁻¹ ^ ((H.f.natDegree / 2) - 1) * (-(z^2)⁻¹)) z :=
+    hinv_deriv.fun_pow _
+  have hT_deriv := hy_deriv.fun_mul hpow_deriv
+  -- T(w)² = (H.f.reverse).eval w⁻¹ on chart-target ∩ {w ≠ 0}.
+  have hT_sq_eventually :
+      (fun w : ℂ => ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w) *
+        w⁻¹ ^ (H.f.natDegree / 2)) ^ 2) =ᶠ[nhds z]
+      (fun w => (Polynomial.reverse H.f).eval w⁻¹) := by
+    have hOpen1 : IsOpen (((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :=
+      (affineChartProjX (H := H) a hpY).open_target
+    have hOpen2 : IsOpen ({w : ℂ | w ≠ 0}) := isOpen_compl_singleton
+    have hOpen : IsOpen (((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target ∩ {w | w ≠ 0}) :=
+      hOpen1.inter hOpen2
+    have hMem : z ∈ ((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target ∩ {w | w ≠ 0} :=
+      ⟨hz, hzNZ⟩
+    refine eventually_of_mem (hOpen.mem_nhds hMem) ?_
+    rintro w ⟨hwt, hwNZ⟩
+    show ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w) *
+        w⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = (Polynomial.reverse H.f).eval w⁻¹
+    have hsymm_sq : ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w))^2 =
+        H.f.eval w := by
+      have hAct : ((squareLocalHomeomorph (H := H) a hpY) : ℂ → ℂ)
+          ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w)) =
+          ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w))^2 := by
+        simp [squareLocalHomeomorph]
+      have hRight := (squareLocalHomeomorph (H := H) a hpY).right_inv
+        (show H.f.eval w ∈ (squareLocalHomeomorph (H := H) a hpY).target from hwt)
+      rw [hAct] at hRight; exact hRight
+    rw [mul_pow, hsymm_sq]
+    have hpow_eq : (w⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = w⁻¹ ^ H.f.natDegree := by
+      rw [← pow_mul]
+      congr 1
+      have hev : ¬ Odd H.f.natDegree := hf.out
+      have heven : Even H.f.natDegree := Nat.not_odd_iff_even.mp hev
+      obtain ⟨m, hm⟩ := heven; omega
+    rw [hpow_eq]
+    exact (reverse_eval_inv_eq w hwNZ).symm
+  have h_revs_deriv : HasDerivAt (fun w : ℂ => (Polynomial.reverse H.f).eval w⁻¹)
+      ((Polynomial.reverse H.f).derivative.eval z⁻¹ * (-(z^2)⁻¹)) z := by
+    have h2 := (Polynomial.reverse H.f).hasDerivAt z⁻¹
+    exact h2.comp z hinv_deriv
+  have hTsq_deriv_explicit := hT_deriv.fun_pow 2
+  have hTsq_deriv_implicit : HasDerivAt
+      (fun w : ℂ => ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w) *
+        w⁻¹ ^ (H.f.natDegree / 2)) ^ 2)
+      ((Polynomial.reverse H.f).derivative.eval z⁻¹ * (-(z^2)⁻¹)) z :=
+    h_revs_deriv.congr_of_eventuallyEq hT_sq_eventually
+  -- Uniqueness of derivative for T².
+  have h_unique := hTsq_deriv_explicit.unique hTsq_deriv_implicit
+  push_cast at h_unique
+  simp only [pow_one] at h_unique
+  -- h_unique : 2 * v * T'_explicit = (H.f.reverse)'(z⁻¹) * -(z²)⁻¹.
+  -- Multiply both sides by z² (manually to avoid field_simp converting z⁻¹ inside eval):
+  have h_unique_z2 :
+      2 * v * (H.f.derivative.eval z / (2 * y) * z⁻¹ ^ (H.f.natDegree / 2) +
+        y * (((H.f.natDegree / 2 : ℕ) : ℂ) * z⁻¹ ^ ((H.f.natDegree / 2) - 1) *
+          -(z^2)⁻¹)) * z^2 =
+      -(Polynomial.reverse H.f).derivative.eval z⁻¹ := by
+    have step1 := congr_arg (fun e => e * z^2) h_unique
+    simp only at step1
+    rw [show ((Polynomial.reverse H.f).derivative.eval z⁻¹ * -(z^2)⁻¹) * z^2 =
+        -((Polynomial.reverse H.f).derivative.eval z⁻¹ * ((z^2)⁻¹ * z^2)) from by ring,
+        inv_mul_cancel₀ hzsqNZ, mul_one] at step1
+    convert step1 using 1
+  -- fderiv computation via Filter.EventuallyEq.fderiv_eq.
+  have hFderivEq :
+      fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1 =
+        H.f.derivative.eval z / (2 * y) * z⁻¹ ^ (H.f.natDegree / 2) +
+          y * (((H.f.natDegree / 2 : ℕ) : ℂ) * z⁻¹ ^ ((H.f.natDegree / 2) - 1) *
+            -(z^2)⁻¹) := by
+    rw [hExtCoe', hExtSymm]
+    have hEqOnSrc : (fun w => (infinityLiftChart H hf.out b)
+        ((affineLiftChart H hf.out a).symm w)) =ᶠ[nhds z]
+      (fun w : ℂ => (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w) *
+        w⁻¹ ^ (H.f.natDegree / 2)) := by
+      refine eventually_of_mem (hOverlapOpen.mem_nhds hzInOverlap) ?_
+      intro w hw
+      exact chart_transition_eq_X_V a hpY b hpX_b hpYn_b hw
+    show fderiv ℂ (fun w => (infinityLiftChart H hf.out b)
+        ((affineLiftChart H hf.out a).symm w)) z 1 = _
+    rw [Filter.EventuallyEq.fderiv_eq hEqOnSrc]
+    change deriv (fun w : ℂ => (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval w) *
+        w⁻¹ ^ (H.f.natDegree / 2)) z = _
+    exact hT_deriv.deriv
+  -- LHS coefficient: g_aff(z) / y.
+  have hLHS : hyperellipticEvenCoeff (H := H) g_aff g_inf q z = g_aff.eval z / y := by
+    show (match Quotient.out q with
+      | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) z = _
+    rw [hQ]
+    show hyperellipticAffineCoeff (H := H) g_aff a z = _
+    have h1 : hyperellipticAffineCoeff (H := H) g_aff a z = affineProjXCoeff g_aff a hpY z := by
+      simp [hyperellipticAffineCoeff, hpY]
+    rw [h1, affineProjXCoeff_eq_on_target g_aff a hpY hz]
+  -- RHS coefficient at v: bb is in chart_b.source (projY in reverseData), so coeff = 2 g_inf(z⁻¹) / (H.f.reverse)'(z⁻¹).
+  have hbb1_target_proj : bb.val.1 ∈
+      (polynomialLocalHomeomorph
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b).source := hbb_src
+  have hzInv_in_source : z⁻¹ ∈
+      (polynomialLocalHomeomorph
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b).source := by
+    rw [← hbb1]; exact hbb1_target_proj
+  have hf'_red_NZ : (Polynomial.reverse H.f).derivative.eval z⁻¹ ≠ 0 :=
+    polynomialLocalHomeomorph_no_critical_in_source
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b hzInv_in_source
+  have hv_in_target : v ∈ ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b)).target := by
+    have h1 : ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b)) bb ∈
+      ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b)).target :=
+      OpenPartialHomeomorph.map_source _ hbb_src
+    rw [show ((affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b)) bb = bb.val.2 from rfl,
+      hbb2] at h1
+    exact h1
+  -- polynomialLocalHomeomorph.symm(v²) = z⁻¹ via left_inv on z⁻¹ ∈ source + (H.f.reverse).eval z⁻¹ = v².
+  have hxb_eq : (polynomialLocalHomeomorph
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b).symm (v^2) = z⁻¹ := by
+    have hv_sq_eq : v^2 = (Polynomial.reverse H.f).eval z⁻¹ := by
+      show (y * z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = _
+      have hsymm_sq : y^2 = H.f.eval z := by
+        have hAct : ((squareLocalHomeomorph (H := H) a hpY) : ℂ → ℂ) y = y^2 := by
+          simp [squareLocalHomeomorph]
+        have hRight := (squareLocalHomeomorph (H := H) a hpY).right_inv hz
+        rw [hAct] at hRight
+        show y^2 = H.f.eval z
+        exact hRight
+      rw [mul_pow, hsymm_sq]
+      have hpow_eq : (z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = z⁻¹ ^ H.f.natDegree := by
+        rw [← pow_mul]
+        congr 1
+        have hev : ¬ Odd H.f.natDegree := hf.out
+        have heven : Even H.f.natDegree := Nat.not_odd_iff_even.mp hev
+        obtain ⟨m, hm⟩ := heven; omega
+      rw [hpow_eq]
+      exact (reverse_eval_inv_eq z hzNZ).symm
+    rw [hv_sq_eq]
+    -- (poly.symm)((H.f.reverse).eval z⁻¹) = z⁻¹ via left_inv.
+    have hLeftInv := (polynomialLocalHomeomorph
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b).left_inv hzInv_in_source
+    have hAct : ((polynomialLocalHomeomorph
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b) : ℂ → ℂ) z⁻¹ =
+        (Polynomial.reverse H.f).eval z⁻¹ := by
+      show (HyperellipticAffineInfinity.reverseData H hf.out).f.eval z⁻¹ = _
+      rfl
+    rw [hAct] at hLeftInv; exact hLeftInv
+  have hRHScoeff : hyperellipticEvenCoeff (H := H) g_aff g_inf q' v =
+      2 * g_inf.eval z⁻¹ / (Polynomial.reverse H.f).derivative.eval z⁻¹ := by
+    show (match Quotient.out q' with
+      | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) v = _
+    rw [hQ']
+    show hyperellipticAffineInfinityCoeff (H := H) g_inf b v = _
+    have h1 : hyperellipticAffineInfinityCoeff (H := H) g_inf b v =
+        hyperellipticAffineCoeff
+          (H := HyperellipticAffineInfinity.reverseData H hf.out) g_inf b v := rfl
+    rw [h1]
+    have h2 : hyperellipticAffineCoeff
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) g_inf b v =
+        affineProjYCoeff
+          (H := HyperellipticAffineInfinity.reverseData H hf.out) g_inf b hpX_b v := by
+      show (if hpY : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) then
+          affineProjXCoeff (H := HyperellipticAffineInfinity.reverseData H hf.out)
+            g_inf b hpY v
+        else affineProjYCoeff (H := HyperellipticAffineInfinity.reverseData H hf.out)
+          g_inf b _ v) = _
+      rw [dif_neg hpYn_b]
+    rw [h2, affineProjYCoeff_eq_on_target
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) g_inf b hpX_b hv_in_target]
+    rw [hxb_eq]
+    rfl
+  -- Algebraic close.
+  rw [hLHS, hQ'apply, hRHScoeff, hFderivEq]
+  rw [hGluing]
+  -- Goal: g_aff(z)/y =
+  --       (2 * (infReverse H g_aff)(z⁻¹) / (H.f.reverse)'(z⁻¹)) *
+  --       (T'_explicit)
+  -- Via cross_summand_cocycle_coord and h_unique_z2.
+  have hcore := cross_summand_cocycle_coord (H := H) (g_aff := g_aff)
+    hDeg hzNZ hyNZ rfl
+  -- hcore : g_aff(z)/y = (infReverse H g_aff)(z⁻¹)/v · (-(z²)⁻¹)
+  -- We have h_unique_z2 : 2 * v * T'_explicit * z² = -(H.f.reverse)'(z⁻¹).
+  -- T'_explicit (call this E) = (f'(z)/(2y)) * z⁻¹^(g+1) + y * ((g+1) * z⁻¹^g * (-(z²)⁻¹)).
+  -- Goal: g_aff(z)/y = (2 g_inf(z⁻¹)/(H.f.reverse)'(z⁻¹)) * E
+  -- Multiply both sides by (H.f.reverse)'(z⁻¹) * v * z²:
+  --   g_aff(z) (H.f.reverse)'(z⁻¹) v z² / y = 2 g_inf(z⁻¹) v z² E
+  -- Substitute 2 v z² E = -(H.f.reverse)'(z⁻¹) (from h_unique_z2 rearranged):
+  --   = -g_inf(z⁻¹) (H.f.reverse)'(z⁻¹)
+  -- So: g_aff(z) v z² / y = -g_inf(z⁻¹).
+  -- This is cross_summand_cocycle_coord rearranged.
+  set E : ℂ := H.f.derivative.eval z / (2 * y) * z⁻¹ ^ (H.f.natDegree / 2) +
+    y * (((H.f.natDegree / 2 : ℕ) : ℂ) * z⁻¹ ^ ((H.f.natDegree / 2) - 1) *
+      -(z^2)⁻¹) with hE_def
+  -- Goal (with E): g_aff(z)/y = (2 (infReverse H g_aff)(z⁻¹)/(H.f.reverse)'(z⁻¹)) * E.
+  show g_aff.eval z / y =
+    2 * (infReverse H g_aff).eval z⁻¹ / (Polynomial.reverse H.f).derivative.eval z⁻¹ * E
+  -- h_unique_z2 (re-stated): 2 * v * E * z² = -(H.f.reverse)'(z⁻¹).
+  have h_step : 2 * v * E * z^2 = -(Polynomial.reverse H.f).derivative.eval z⁻¹ := by
+    have := h_unique_z2
+    show 2 * v * E * z^2 = _
+    linear_combination this
+  -- Cocycle equation derivation: clear denominators manually to avoid field_simp
+  -- introducing `1/z` form that breaks ring inside `eval`.
+  -- From hcore (multiplied by y * v * z²): g_aff(z) * v * z² = -y * (infReverse)(z⁻¹).
+  have h_cross : g_aff.eval z * v * z^2 = -(y * (infReverse H g_aff).eval z⁻¹) := by
+    have := hcore
+    rw [div_eq_iff hyNZ] at this
+    rw [this, hv_def]
+    field_simp
+  -- Cocycle goal: g_aff(z)/y = (2 * (infReverse)(z⁻¹) / (H.f.reverse)'(z⁻¹)) * E
+  -- Clear denominators: multiply both sides by y * (H.f.reverse)'(z⁻¹).
+  rw [div_eq_iff hyNZ]
+  -- Goal: g_aff(z) = (2 * (infReverse)(z⁻¹) / (H.f.reverse)'(z⁻¹) * E) * y
+  rw [show (2 * (infReverse H g_aff).eval z⁻¹ /
+        (Polynomial.reverse H.f).derivative.eval z⁻¹ * E) * y =
+      (2 * (infReverse H g_aff).eval z⁻¹ * E * y) /
+        (Polynomial.reverse H.f).derivative.eval z⁻¹ from by ring]
+  rw [eq_div_iff hf'_red_NZ]
+  -- Goal: g_aff(z) * (H.f.reverse)'(z⁻¹) = 2 * (infReverse)(z⁻¹) * E * y
+  -- From h_step: (H.f.reverse)'(z⁻¹) = -(2 v E z²).
+  -- From h_cross: y * (infReverse)(z⁻¹) = -(g_aff(z) * v * z²).
+  have h_step' : (Polynomial.reverse H.f).derivative.eval z⁻¹ = -(2 * v * E * z^2) := by
+    linear_combination h_step
+  have h_cross' : y * (infReverse H g_aff).eval z⁻¹ = -(g_aff.eval z * v * z^2) := by
+    linear_combination h_cross
+  rw [h_step']
+  linear_combination -2 * E * h_cross'
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
