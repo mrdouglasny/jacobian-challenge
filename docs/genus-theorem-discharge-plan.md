@@ -40,82 +40,68 @@ theorem.
 **File:**
 [`Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean)
 
-**Status:** def + linearity (3 lemmas) **DONE** (commit `b2ae9f9`).
-Analyticity helper `squareLocalHomeomorph_symm_ne_zero` is `sorry`.
-
-**Remaining:** Prove `squareLocalHomeomorph_symm_ne_zero` (chart-source
-⊆ smoothLocusY argument), then prove
-`affineProjXCoeff_analyticOn_chartTarget` via composition of
-analyticity facts.
-
-**Estimate:** ~50–100 LOC.
+**Status: DONE** (`a525b4d`, `1f75707`). Def + linearity + analyticity
+on the chart target. The `squareLocalHomeomorph_symm_ne_zero` helper
+discharged via the narrow IFT axiom
+`squareLocalHomeomorph_zero_notMem_source`.
 
 ### S2. Affine projY coefficient + analyticity (mirror of S1)
 
-**File:** to add to
-[`Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean)
-or new sibling.
+**File:**
+[`Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean).
 
-**Status:** Not started.
-
-**Mirror of S1:** `affineProjYCoeff` formula `2 g(x(z)) / f'(x(z))`
-where `x(z)` is via `polynomialLocalHomeomorph`.
-
-**Estimate:** ~150 LOC.
+**Status: DONE** (`689b602`). `affineProjYCoeff` def + linearity +
+analyticity on the chart target landed via the mirror of S1, with the
+narrow IFT axiom `polynomialLocalHomeomorph_no_critical_in_source` for
+the structural piece.
 
 ### S3. Affine cocycle compatibility on chart overlaps
 
-**Status:** Not started.
+**Status: DONE** (`ad554ee`, `e28c7ac`, `25286be`, `6fe2a18`).
 
-**Content:** Proves that the chart-local coefficient transforms
-correctly across affine-affine chart overlaps:
-* projX × projX: identity transition (both project to x).
-* projX × projY: `g(x)/y = 2g(x(y))/f'(x(y)) · f'(x)/(2y)` (chain rule).
-* projY × projX: symmetric.
-* projY × projY: identity transition (both project to y).
-
-**Reuses Codex's** `affineChartAt_compat` machinery — this is
-chart-side compatibility rather than form-side, but the chain-rule
-factor that absorbs the change of variable is the same.
-
-**Estimate:** ~150–200 LOC.
+All four sub-cases assembled in
+[`AffineForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean):
+* projX × projX (`hyperellipticAffineCoeff_cocycle_projX_projX`)
+* projY × projY (`hyperellipticAffineCoeff_cocycle_projY_projY`)
+* projX × projY (`hyperellipticAffineCoeff_cocycle_projX_projY`,
+  chain rule)
+* projY × projX (mirror, chain rule)
 
 ### S4. Affine-infinity extension via `reverseData`
 
-**Status:** Not started.
+**Status: DONE** (`1fa766a`). The full affine bundle transferred to
+`HyperellipticAffineInfinity` via the EA1 definitional equality, in
+[`AffineInfinityForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/AffineInfinityForm.lean).
+Sorry-free, axiom-free — pure `change` + reuse.
 
-**Content:** S1–S3 transferred to `HyperellipticAffineInfinity` via
-the EA1 definitional equality `HyperellipticAffineInfinity H ≡
-HyperellipticAffine (reverseData H h)`. Should be ~5 LOC of
-`change` + reuse.
-
-**Estimate:** ~50 LOC.
-
-### S5. Cross-summand cocycle (discharges EA2 axioms)
+### S5. Cross-summand cocycle (`EvenForm` Möbius axioms)
 
 **Files:**
-[`Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean)
-(2 axioms `affineLiftChart_compat_infinityLiftChart` and the symmetric).
+[`EvenForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/EvenForm.lean).
 
-**Status:** Currently `axiom`. To convert to `theorem`.
+**Status: scaffolded with sound hypothesis** (`ea35935`, post-Gemini
+review). The two cross-summand cocycle axioms now take the gluing
+relation `g_inf = infReverse H g_aff` as an **explicit hypothesis**
+rather than quantifying over arbitrary pairs (the latter was unsound:
+the cocycle equation only holds for the Möbius-paired infinity-side
+polynomial).
 
-**Content:** Möbius transition `x ↦ 1/x` on the gluing region for
-projX-projX cross. Three other sub-cases (projX-projY, projY-projX,
-projY-projY) involve polynomial corrections.
+**Content:** Möbius transition `x ↦ 1/x` on the gluing region.
+Discharging the axioms requires explicit chain-rule computations on
+the polynomial corrections.
 
-**Estimate:** ~200–400 LOC across 4 sub-cases.
+**Estimate:** ~200–400 LOC across the 4 sub-cases. Currently
+axiomatized; the soundness fix means the axioms are no longer false.
 
-### S6. Form-level linearity (`Form.lean` sorries)
+### S6. Form-level constructor + linearity (`Form.lean`)
 
-**Status:** All 4 sorries open (`hyperellipticForm`,
-`hyperellipticForm_add`, `hyperellipticForm_smul`,
-`hyperellipticForm_zero`).
-
-**Content:** With S1–S5 done, the form is `coeff = case-split on
-charts using affineProjXCoeff/affineProjYCoeff/their reverseData
-transfers`. Linearity is pointwise from S1's linearity lemmas.
-
-**Estimate:** ~100 LOC.
+**Status: DONE** (`d07b9bc`, `337f569`). The constructor
+`hyperellipticForm` is real (composes `hyperellipticEvenCoeff` with
+the bundled-cocycle membership proof from
+[`EvenForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/EvenForm.lean)).
+Linearity (`_add`, `_smul`, `_zero`, packaged
+`hyperellipticFormLinearMap`) is sorry-free, derived from the
+within-summand linearity lemmas + `infReverse_add` / `infReverse_smul`.
 
 ### S7. Linear independence
 
@@ -171,8 +157,13 @@ Recommended: S1 (foundation) → S2 (mirror) → S3 (cocycle) → S4
 Each step is a clean commit. S1, S2, S6, S7 are largely mechanical.
 S3 and S5 are the genuinely harder pieces.
 
-## Currently in flight (commit `b2ae9f9`)
+## Currently in flight (as of `337f569`, 2026-04-26)
 
-S1 partial — affine projX coefficient def + linearity (3 lemmas)
-done; analyticity helper `squareLocalHomeomorph_symm_ne_zero` is
-sorry. Working on closing this in the next commits.
+S1–S4 are done as real proofs. S5 cross-summand cocycles are
+axiomatized but with the soundness hypothesis fix (`ea35935`,
+post-Gemini deep-think review). S6 — `hyperellipticForm` constructor
+and linearity — is sorry-free. S7 (linear independence) and S8
+(Riemann–Roch upper bound) are the remaining pieces.
+
+Form.lean current sorry inventory: 3 (down from 8 at the original
+scaffold).
