@@ -101,11 +101,20 @@ Constructed as the unified coefficient family
 `g_inf = infReverse H g` is supplied as `rfl` since this constructor
 always pairs `g` with its canonical infinity-side polynomial.
 
-The membership proof is real on the within-summand cocycle predicates
-(analyticity, off-target, same-summand cocycle) and rests on two
-cross-summand axioms in `EvenForm.lean` for the Möbius gluing region;
-those axioms now carry the gluing relation as an explicit hypothesis,
-so they are no longer mathematically false for non-matching pairs. -/
+**KNOWN SOUNDNESS GAP** (recorded in `docs/gemini-review-genus-framework.md`).
+The cross-summand cocycle axioms in `EvenForm.lean` are mathematically false
+for `g.natDegree ≥ H.f.natDegree / 2 - 1`, because the form `g(x) dx/y`
+then has poles at infinity (so the cocycle equation literally fails). The
+fix is to add a degree bound `(hDeg : g.natDegree < H.f.natDegree / 2 - 1)`
+to those axioms and thread it through here. This is deferred because the
+refactor cascades through linearity theorems and `hyperellipticFormLinearMap`
+(which would need to become a map on `Polynomial.degreeLT ℂ g_topology`).
+
+In the meantime, this constructor should be applied **only to low-degree
+polynomials** (`g.natDegree < H.f.natDegree / 2 - 1`). All current callers
+in `Extensions/HyperellipticEven.lean` satisfy this constraint
+(via the `_hk : k < H.f.natDegree / 2 - 1` hypothesis on the basis
+differentials). -/
 noncomputable def hyperellipticForm (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (g : Polynomial ℂ) :
     HolomorphicOneForm (HyperellipticEvenProj H) :=
