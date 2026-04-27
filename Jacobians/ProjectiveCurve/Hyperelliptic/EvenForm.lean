@@ -2184,4 +2184,52 @@ theorem cocycle_inl_inr_smoothLocusXNotY_smoothLocusXNotY
     2 * h_cleared +
     (-2 * (infReverse H g_aff).eval x_a⁻¹) * hEfpxaN
 
+/-! ### Unified inl_inr cocycle (real proof, low-degree)
+
+Discharges the inl_inr cross-summand cocycle by case-splitting on
+smoothLocusY/smoothLocusX membership for both `a` (affine side) and
+`b` (infinity side, in reverseData frame), and dispatching to one of
+the four sub-case theorems. -/
+
+theorem hyperellipticEvenCoeff_cocycle_inl_inr
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff g_inf : Polynomial ℂ)
+    (hGluing : g_inf = infReverse H g_aff)
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)
+    (q q' : HyperellipticEvenProj H)
+    (a : HyperellipticAffine H) (b : HyperellipticAffineInfinity H)
+    (hQ : Quotient.out q = Sum.inl a) (hQ' : Quotient.out q' = Sum.inr b)
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
+      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
+        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
+  classical
+  by_cases hpY : a ∈ smoothLocusY H
+  · by_cases hpY_b : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out)
+    · exact cocycle_inl_inr_smoothLocusY_smoothLocusY g_aff g_inf hGluing hDeg
+        a hpY b hpY_b q q' hQ hQ' hz hSrc
+    · have hb2_zero : b.val.2 = 0 := by
+        by_contra h0; exact hpY_b h0
+      have hpX_b : b ∈ smoothLocusX
+          (HyperellipticAffineInfinity.reverseData H hf.out) :=
+        mem_smoothLocusX_of_y_eq_zero _ hb2_zero
+      exact cocycle_inl_inr_smoothLocusY_smoothLocusXNotY g_aff g_inf hGluing hDeg
+        a hpY b hpX_b hpY_b q q' hQ hQ' hz hSrc
+  · have ha2_zero : a.val.2 = 0 := by
+      by_contra h0; exact hpY h0
+    have hpX : a ∈ smoothLocusX H :=
+      mem_smoothLocusX_of_y_eq_zero _ ha2_zero
+    by_cases hpY_b : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out)
+    · exact cocycle_inl_inr_smoothLocusXNotY_smoothLocusY g_aff g_inf hGluing hDeg
+        a hpX hpY b hpY_b q q' hQ hQ' hz hSrc
+    · have hb2_zero : b.val.2 = 0 := by
+        by_contra h0; exact hpY_b h0
+      have hpX_b : b ∈ smoothLocusX
+          (HyperellipticAffineInfinity.reverseData H hf.out) :=
+        mem_smoothLocusX_of_y_eq_zero _ hb2_zero
+      exact cocycle_inl_inr_smoothLocusXNotY_smoothLocusXNotY g_aff g_inf hGluing hDeg
+        a hpX hpY b hpX_b hpY_b q q' hQ hQ' hz hSrc
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
