@@ -610,4 +610,56 @@ lemma proj_eq_affineGluingImage
   right; left
   exact hyperellipticEvenGlue_affineGluingImage a hxNZ
 
+/-! ## Coordinate-level cross-summand cocycle
+
+The cocycle equation for the cross-summand transition, formulated in
+coordinates (z, y, v) instead of going through chart structures.
+This is the **algebraic core** of the cross-summand cocycle:
+once chart-level structures are unwound to provide concrete coordinate
+values satisfying the gluing relation `v = y · z⁻¹^(g+1)`, the cocycle
+follows from `eval_eq_neg_infReverse_eval_inv_mul_pow`.
+-/
+
+/-- **Coordinate-level cross-summand cocycle.** Given:
+* low-degree polynomial `g_aff` (degree < `g_topology - 1`),
+* coordinates `z, y, v` with `z ≠ 0`, `y ≠ 0`, `v ≠ 0`,
+* gluing relation `v = y · z⁻¹^(H.f.natDegree / 2)`,
+
+the cocycle equation
+`g_aff(z)/y = (infReverse H g_aff)(z⁻¹)/v · (-(z²)⁻¹)`
+holds. (The on-curve equations `y² = H.f.eval z`, `v² = H.f.reverse.eval z⁻¹`
+are not needed for this purely algebraic identity, only the gluing
+relation between `y` and `v`.) -/
+lemma cross_summand_cocycle_coord
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    {g_aff : Polynomial ℂ}
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)
+    {z y v : ℂ}
+    (hz : z ≠ 0) (hy : y ≠ 0) (hv : v ≠ 0)
+    (hglue : v = y * z⁻¹ ^ (H.f.natDegree / 2)) :
+    g_aff.eval z / y =
+      (infReverse H g_aff).eval (z⁻¹) / v * (-(z ^ 2)⁻¹) := by
+  classical
+  have hPoly := eval_eq_neg_infReverse_eval_inv_mul_pow H hDeg hz
+  -- Sanity: H.f.natDegree / 2 ≥ 2 (since deg ≥ 3 and even).
+  have hge : H.f.natDegree / 2 ≥ 2 := by
+    have hd := H.h_degree
+    have hev : ¬ Odd H.f.natDegree := hf.out
+    have : Even H.f.natDegree := Nat.not_odd_iff_even.mp hev
+    obtain ⟨m, hm⟩ := this; omega
+  -- Key identity: z² · z^(N-2) · z⁻¹^N = 1 where N = H.f.natDegree / 2.
+  set N := H.f.natDegree / 2 with hN_def
+  have hPow : z ^ 2 * z ^ (N - 2) * z⁻¹ ^ N = 1 := by
+    have hNeq : 2 + (N - 2) = N := by omega
+    rw [show z ^ 2 * z ^ (N - 2) = z ^ N from by rw [← pow_add, hNeq]]
+    rw [← mul_pow]
+    rw [mul_inv_cancel₀ hz, one_pow]
+  rw [hglue]
+  field_simp
+  rw [hPoly]
+  -- Normalize 1/z back to z⁻¹.
+  rw [show (1 / z : ℂ) = z⁻¹ from one_div z]
+  -- Goal should be of the form `... * (z² · z^(N-2) · z⁻¹^N) = ...`
+  linear_combination -hPow * (infReverse H g_aff).eval z⁻¹
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
