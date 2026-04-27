@@ -1193,6 +1193,21 @@ lemma open_nonempty_complex_infinite {S : Set ℂ} (hS : IsOpen S) (h : S.Nonemp
   rw [Set.infinite_coe_iff.symm]
   exact Cardinal.infinite_iff.mpr (le_trans Cardinal.aleph0_le_continuum h_card)
 
+/-- `p.val.1` is in the source of `polynomialLocalHomeomorph p hp`
+(definitional unfolding of `affineChartProjY_mem_source`). -/
+lemma polynomialLocalHomeomorph_mem_source
+    (p : HyperellipticAffine H) (hp : p ∈ smoothLocusX H) :
+    p.val.1 ∈ (polynomialLocalHomeomorph (H := H) p hp).source :=
+  affineChartProjY_mem_source p hp
+
+/-- Existence of a square root in ℂ (algebraic closure). -/
+lemma exists_complex_sq_eq (w : ℂ) : ∃ z : ℂ, z ^ 2 = w := by
+  obtain ⟨z, hz⟩ := IsAlgClosed.exists_root (k := ℂ) (Polynomial.X ^ 2 - Polynomial.C w) (by
+    rw [Polynomial.degree_X_pow_sub_C (by norm_num : 0 < 2) w]; decide)
+  refine ⟨z, ?_⟩
+  have : (Polynomial.X ^ 2 - Polynomial.C w).IsRoot z := hz
+  simpa [Polynomial.IsRoot, sub_eq_zero] using this
+
 /-- **Affine-side injectivity** at a `smoothLocusY` point: two polynomials
 yielding the same `hyperellipticAffineCoeff` at `a ∈ smoothLocusY H` must
 be equal.
@@ -1240,6 +1255,66 @@ theorem hyperellipticAffineCoeff_injective_at_smoothLocusY
     apply poly_zero_of_eval_zero_on_infinite hInfinite
     intro z hz
     simp [Polynomial.eval_sub, hPolyEq z hz]
+  linear_combination hZero
+
+/-- **Affine-side injectivity** at a `smoothLocusX` (and not `smoothLocusY`)
+point: two polynomials yielding the same `hyperellipticAffineCoeff` at
+such an `a` must be equal.
+
+Proof: at a `smoothLocusX \ smoothLocusY` point the coefficient is the
+projY form `2 g(x(z)) / f'(x(z))` on the chart target. For any `x` in
+`(polynomialLocalHomeomorph a hpX).source` we can pick `z` with
+`z² = e(x)`, giving `e.symm(z²) = x`; equality of coefficients then gives
+`g(x) = g'(x)` on a non-empty open subset (the source), hence `g = g'`. -/
+theorem hyperellipticAffineCoeff_injective_at_smoothLocusX
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    (hpYn : a ∉ smoothLocusY H)
+    {g g' : Polynomial ℂ}
+    (hEq : hyperellipticAffineCoeff (H := H) g a =
+           hyperellipticAffineCoeff (H := H) g' a) :
+    g = g' := by
+  classical
+  have hPjEq : ∀ z, affineProjYCoeff g a hpX z = affineProjYCoeff g' a hpX z := by
+    intro z
+    have hL : hyperellipticAffineCoeff (H := H) g a z = affineProjYCoeff g a hpX z := by
+      simp [hyperellipticAffineCoeff, hpYn]
+    have hR : hyperellipticAffineCoeff (H := H) g' a z = affineProjYCoeff g' a hpX z := by
+      simp [hyperellipticAffineCoeff, hpYn]
+    rw [← hL, ← hR]; exact congr_fun hEq z
+  set e := polynomialLocalHomeomorph (H := H) a hpX with he_def
+  have hPolyEq : ∀ x ∈ e.source, g.eval x = g'.eval x := by
+    intro x hx
+    have hex_target : (e : ℂ → ℂ) x ∈ e.target := e.map_source hx
+    obtain ⟨z, hz_sq⟩ := exists_complex_sq_eq ((e : ℂ → ℂ) x)
+    have hz_target : z ∈ ((affineChartProjY (H := H) a hpX) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target := by
+      change z ^ 2 ∈ e.target
+      rw [hz_sq]; exact hex_target
+    have hex_eq : e.symm ((e : ℂ → ℂ) x) = x := e.left_inv hx
+    have hL := affineProjYCoeff_eq_on_target g a hpX hz_target
+    have hR := affineProjYCoeff_eq_on_target g' a hpX hz_target
+    have hFne := polynomialLocalHomeomorph_symm_eval_derivative_ne_zero a hpX hz_target
+    have heq : 2 * g.eval (e.symm (z ^ 2)) /
+                 H.f.derivative.eval (e.symm (z ^ 2)) =
+               2 * g'.eval (e.symm (z ^ 2)) /
+                 H.f.derivative.eval (e.symm (z ^ 2)) := by
+      rw [show e = polynomialLocalHomeomorph (H := H) a hpX from rfl] at *
+      rw [← hL, ← hR]; exact hPjEq z
+    have h2g_eq : 2 * g.eval (e.symm (z ^ 2)) = 2 * g'.eval (e.symm (z ^ 2)) :=
+      (div_left_inj' hFne).mp heq
+    have h2 : (2 : ℂ) ≠ 0 := by norm_num
+    have hg_eq : g.eval (e.symm (z ^ 2)) = g'.eval (e.symm (z ^ 2)) :=
+      mul_left_cancel₀ h2 h2g_eq
+    rw [hz_sq, hex_eq] at hg_eq
+    exact hg_eq
+  have hSrcOpen : IsOpen e.source := e.open_source
+  have hSrcNonempty : e.source.Nonempty :=
+    ⟨a.val.1, polynomialLocalHomeomorph_mem_source a hpX⟩
+  have hSrcInfinite : e.source.Infinite :=
+    open_nonempty_complex_infinite hSrcOpen hSrcNonempty
+  have hZero : g - g' = 0 := by
+    apply poly_zero_of_eval_zero_on_infinite hSrcInfinite
+    intro x hx; simp [Polynomial.eval_sub, hPolyEq x hx]
   linear_combination hZero
 
 end Jacobians.ProjectiveCurve.HyperellipticAffine
