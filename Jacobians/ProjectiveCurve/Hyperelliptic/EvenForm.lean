@@ -650,6 +650,96 @@ lemma affineGluingImage_mem_smoothLocusY
   rw [affineGluingImage_val_snd]
   exact mul_ne_zero hpY (pow_ne_zero _ (inv_ne_zero hxNZ))
 
+/-- The reflection identity at the chart level: for nonzero `x`,
+`(H.f.reverse).eval x⁻¹ = H.f.eval x · x⁻¹^(deg H.f)`. -/
+lemma reverse_eval_inv_eq
+    (x : ℂ) (hx : x ≠ 0) :
+    (H.f.reverse).eval x⁻¹ = H.f.eval x * x⁻¹ ^ H.f.natDegree := by
+  haveI := invertibleOfNonzero hx
+  have key := Polynomial.eval₂_reverse_mul_pow (RingHom.id ℂ) x H.f
+  have hinv : (⅟x : ℂ) = x⁻¹ := invOf_eq_inv x
+  simp only [Polynomial.eval₂_eq_eval_map, Polynomial.map_id, hinv] at key
+  have hx_pow : (x ^ H.f.natDegree) ≠ 0 := pow_ne_zero _ hx
+  have h2 : (H.f.eval x * x⁻¹ ^ H.f.natDegree) * x ^ H.f.natDegree = H.f.eval x := by
+    rw [mul_assoc, ← mul_pow, inv_mul_cancel₀ hx, one_pow, mul_one]
+  rw [← mul_right_cancel₀ hx_pow (key.trans h2.symm)]
+
+/-- **Chart-symm gluing identity (membership-conditional).** Given:
+* `a ∈ smoothLocusY` with `a.val.1 ≠ 0`,
+* `H.f.eval z ∈ e_a.target` (so `e_a.symm` is defined at this value),
+* `z ≠ 0`,
+* `LHS = e_a.symm(H.f.eval z) · z⁻¹^(g+1) ∈ e_b.source` (the "right
+  branch" condition; ensures the IFT chart at `b` picks the matching
+  branch),
+
+we have `LHS = e_b.symm((H.f.reverse).eval z⁻¹)`. The on-curve
+relations square both sides to `(H.f.reverse).eval z⁻¹`, and the
+membership of `LHS` in `e_b.source` lets us apply `e_b` to both sides
+(both end up at `(H.f.reverse).eval z⁻¹`), giving equality via
+injectivity of `e_b` on its source. -/
+lemma squareLocalHomeomorph_symm_gluing
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (hxNZ : a.val.1 ≠ 0)
+    {z : ℂ} (hzMem : H.f.eval z ∈ (squareLocalHomeomorph (H := H) a hpY).target)
+    (hzNZ : z ≠ 0)
+    (hSourceLHS :
+      (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) *
+        z⁻¹ ^ (H.f.natDegree / 2) ∈
+      (squareLocalHomeomorph
+        (H := HyperellipticAffineInfinity.reverseData H hf.out)
+        (affineGluingImage a hxNZ)
+        (affineGluingImage_mem_smoothLocusY a hpY hxNZ)).source) :
+    (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) *
+        z⁻¹ ^ (H.f.natDegree / 2) =
+      (squareLocalHomeomorph
+        (H := HyperellipticAffineInfinity.reverseData H hf.out)
+        (affineGluingImage a hxNZ)
+        (affineGluingImage_mem_smoothLocusY a hpY hxNZ)).symm
+        ((Polynomial.reverse H.f).eval z⁻¹) := by
+  set e_a := squareLocalHomeomorph (H := H) a hpY with he_a_def
+  set b := affineGluingImage a hxNZ with hb_def
+  set hpY_b := affineGluingImage_mem_smoothLocusY a hpY hxNZ
+  set e_b := squareLocalHomeomorph
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpY_b with he_b_def
+  set y := e_a.symm (H.f.eval z)
+  set lhs := y * z⁻¹ ^ (H.f.natDegree / 2)
+  -- `y² = H.f.eval z` from chart right_inv.
+  have hy_sq : y ^ 2 = H.f.eval z := by
+    have h := e_a.right_inv hzMem
+    have hAct : (e_a : ℂ → ℂ) y = y ^ 2 := by simp [e_a, squareLocalHomeomorph]
+    rw [← hAct]; exact h
+  -- Hence `lhs² = (H.f.reverse).eval z⁻¹` via the on-curve reflection.
+  have hlhs_sq : lhs ^ 2 = (Polynomial.reverse H.f).eval z⁻¹ := by
+    show (y * z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = (Polynomial.reverse H.f).eval z⁻¹
+    rw [mul_pow, hy_sq]
+    have hpow_eq : (z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = z⁻¹ ^ H.f.natDegree := by
+      rw [← pow_mul]
+      congr 1
+      have hev : ¬ Odd H.f.natDegree := hf.out
+      have heven : Even H.f.natDegree := Nat.not_odd_iff_even.mp hev
+      obtain ⟨m, hm⟩ := heven; omega
+    rw [hpow_eq]
+    exact (reverse_eval_inv_eq z hzNZ).symm
+  -- Apply `e_b` to both sides; they coincide at `(H.f.reverse).eval z⁻¹`.
+  have he_b_lhs : (e_b : ℂ → ℂ) lhs = lhs ^ 2 := by
+    simp [e_b, squareLocalHomeomorph]
+  have he_b_rhs_target :
+      (Polynomial.reverse H.f).eval z⁻¹ ∈ e_b.target := by
+    rw [← hlhs_sq, ← he_b_lhs]
+    exact e_b.map_source hSourceLHS
+  have he_b_rhs_source :
+      e_b.symm ((Polynomial.reverse H.f).eval z⁻¹) ∈ e_b.source :=
+    e_b.map_target he_b_rhs_target
+  have he_b_rhs : (e_b : ℂ → ℂ) (e_b.symm ((Polynomial.reverse H.f).eval z⁻¹)) =
+      (Polynomial.reverse H.f).eval z⁻¹ :=
+    e_b.right_inv he_b_rhs_target
+  have hcombine :
+      (e_b : ℂ → ℂ) lhs =
+      (e_b : ℂ → ℂ) (e_b.symm ((Polynomial.reverse H.f).eval z⁻¹)) := by
+    rw [he_b_lhs, hlhs_sq, he_b_rhs]
+  exact e_b.injOn hSourceLHS he_b_rhs_source hcombine
+
 /-- If `proj (Sum.inl a) = proj (Sum.inr b)` in `HyperellipticEvenProj H`,
 then `b` is forced to be the gluing image of `a` (and `a.val.1 ≠ 0`).
 
