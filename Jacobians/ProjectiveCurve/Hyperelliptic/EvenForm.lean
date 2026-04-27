@@ -557,4 +557,57 @@ lemma fderiv_inv_apply_one {z : ℂ} (hz : z ≠ 0) :
   change deriv (fun w : ℂ => w⁻¹) z = _
   exact hderiv.deriv
 
+/-! ## Gluing construction (affine ↔ infinity)
+
+Explicit constructor for the infinity-image of an affine point with
+nonzero `x`-coordinate, plus the proof that this image is gluing-related
+to the original. Used to instantiate the cross-summand cocycle witnesses. -/
+
+/-- Gluing image of an affine point with nonzero `x`-coordinate. Maps
+`a = (z, y)` on the affine side to its image `b = (1/z, y · z⁻¹^(g+1))`
+on the infinity side via the Möbius identification. -/
+noncomputable def affineGluingImage
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hxNZ : a.val.1 ≠ 0) :
+    HyperellipticAffineInfinity H :=
+  ⟨(a.val.1⁻¹, a.val.2 * a.val.1⁻¹ ^ (H.f.natDegree / 2)),
+   by
+     change (a.val.2 * a.val.1⁻¹ ^ (H.f.natDegree / 2)) ^ 2 =
+            (Polynomial.reverse H.f).eval a.val.1⁻¹
+     exact HyperellipticAffineInfinity.mem_of_affine H hf.out a.val.1 a.val.2
+       a.property hxNZ⟩
+
+@[simp] lemma affineGluingImage_val_fst
+    [Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hxNZ : a.val.1 ≠ 0) :
+    (affineGluingImage a hxNZ).val.1 = a.val.1⁻¹ := rfl
+
+@[simp] lemma affineGluingImage_val_snd
+    [Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hxNZ : a.val.1 ≠ 0) :
+    (affineGluingImage a hxNZ).val.2 =
+      a.val.2 * a.val.1⁻¹ ^ (H.f.natDegree / 2) := rfl
+
+/-- The gluing image is in the gluing relation with the original. -/
+lemma hyperellipticEvenGlue_affineGluingImage
+    [Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hxNZ : a.val.1 ≠ 0) :
+    HyperellipticEvenGlue H (Sum.inl a) (Sum.inr (affineGluingImage a hxNZ)) := by
+  refine ⟨hxNZ, ?_, ?_⟩
+  · simp [affineGluingImage_val_fst]
+  · simp [affineGluingImage_val_snd]
+
+/-- The two representatives `Sum.inl a` and `Sum.inr (affineGluingImage a)`
+project to the same point in `HyperellipticEvenProj H`. -/
+lemma proj_eq_affineGluingImage
+    [Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hxNZ : a.val.1 ≠ 0) :
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr (affineGluingImage a hxNZ)) := by
+  apply Quotient.sound
+  show (hyperellipticEvenSetoid H).r (Sum.inl a) (Sum.inr (affineGluingImage a hxNZ))
+  rw [hyperellipticEvenSetoid_rel_iff]
+  right; left
+  exact hyperellipticEvenGlue_affineGluingImage a hxNZ
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
