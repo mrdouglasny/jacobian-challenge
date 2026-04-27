@@ -197,7 +197,28 @@ Recommended: S1 (foundation) → S2 (mirror) → S3 (cocycle) → S4
 Each step is a clean commit. S1, S2, S6, S7 are largely mechanical.
 S3 and S5 are the genuinely harder pieces.
 
-## Currently in flight (as of `840bc65`, 2026-04-27)
+## Currently in flight (as of `9ab627a`, 2026-04-27 evening)
+
+S5 has substantial new infrastructure (commits `b0717b6`, `cb828ac`,
+`44a4e00`, `b0b09b8`, `9ab627a`):
+
+* **Polynomial identities** for the Möbius reflection
+  (`reflect_eval_inv_mul_pow`, `eval_eq_neg_infReverse_eval_inv_mul_pow`).
+* **Möbius derivative** (`hasDerivAt_inv_complex`, `fderiv_inv_apply_one`).
+* **Gluing-image construction** (`affineGluingImage`,
+  `proj_eq_affineGluingImage`, `affineGluingImage_mem_smoothLocusY`).
+* **Coordinate-level cocycle** (`cross_summand_cocycle_coord`) — the
+  algebraic core: given coordinates `(z, y, v)` with the gluing relation,
+  the cocycle equation follows from the polynomial identity.
+* **Chart-symm at basepoint** (`squareLocalHomeomorph_symm_at_basepoint`).
+
+The remaining work for the chart-level cocycle: extend chart-symm
+identification from the basepoint to a neighborhood (analytic-continuation
+/ branch-uniqueness argument), then lift the coordinate cocycle through
+the chart structures. ~50% of the discharge effort remaining per Gemini's
+1-3 weeks estimate.
+
+## State as of `840bc65`, 2026-04-27 morning
 
 S1–S4 done as real proofs. S5 cross-summand cocycles axiomatized with
 the gluing hypothesis (`ea35935`); known soundness gap for high-degree
