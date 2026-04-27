@@ -495,4 +495,51 @@ theorem infReverse_smul (H : HyperellipticData) (c : ℂ) (g : Polynomial ℂ) :
     simp [Polynomial.coeff_reflect]
   rw [this, smul_neg]
 
+/-! ## Polynomial-identity helpers for the S5 cocycle discharge
+
+The Möbius gluing `(x, y) ↔ (1/x, y/x^(g+1))` translates the form
+`g_aff(x) dx/y` into `g_inf(u) du/v` where `g_inf = -u^(g_top - 1) g_aff(1/u)`
+(for `g_aff` of degree `< g_top`). The polynomial-level identity we need
+for the cocycle discharge is the inverse of this:
+
+  `g_aff(x) = -(infReverse H g_aff)(1/x) * x^(g_top - 1)`
+
+valid when `g_aff.natDegree < g_top`. Below we prove this via
+`Polynomial.eval₂_reflect_mul_pow`. -/
+
+/-- **Polynomial identity for the Möbius reflection.** For
+`p.natDegree ≤ N` and nonzero `x`,
+`(reflect N p).eval (x⁻¹) * x^N = p.eval x`. Standard reflection lemma
+in disguise — derived from `Polynomial.eval₂_reflect_mul_pow`. -/
+lemma reflect_eval_inv_mul_pow {p : Polynomial ℂ} {N : ℕ}
+    (h : p.natDegree ≤ N) {x : ℂ} (hx : x ≠ 0) :
+    (Polynomial.reflect N p).eval (x⁻¹) * x ^ N = p.eval x := by
+  haveI := invertibleOfNonzero hx
+  have key := Polynomial.eval₂_reflect_mul_pow (RingHom.id ℂ) x N p h
+  have hinv : (⅟x : ℂ) = x⁻¹ := invOf_eq_inv x
+  simp only [Polynomial.eval₂_eq_eval_map, Polynomial.map_id, hinv] at key
+  exact key
+
+/-- **`infReverse`–evaluation identity (the gluing relation).** For
+`g.natDegree < H.f.natDegree / 2 - 1` and nonzero `x`,
+
+    `g.eval x = -(infReverse H g).eval (x⁻¹) * x ^ (H.f.natDegree / 2 - 2)`
+
+This is the algebraic core of the cross-summand cocycle: it expresses
+the polynomial transformation under `x ↦ 1/x` matching the chart-
+transition between affine and infinity charts. -/
+lemma eval_eq_neg_infReverse_eval_inv_mul_pow
+    (H : HyperellipticData) {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1) {x : ℂ} (hx : x ≠ 0) :
+    g.eval x =
+      -(infReverse H g).eval (x⁻¹) * x ^ (H.f.natDegree / 2 - 2) := by
+  -- hDeg : g.natDegree < H.f.natDegree / 2 - 1, i.e., g.natDegree ≤ H.f.natDegree / 2 - 2.
+  have hN : g.natDegree ≤ H.f.natDegree / 2 - 2 := by omega
+  have hRefl := reflect_eval_inv_mul_pow hN hx
+  -- hRefl : (reflect (H.f.natDegree / 2 - 2) g).eval (x⁻¹) * x ^ (H.f.natDegree / 2 - 2)
+  --       = g.eval x
+  unfold infReverse
+  rw [Polynomial.eval_neg]
+  linear_combination -hRefl
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
