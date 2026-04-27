@@ -4,6 +4,13 @@ _Drafted 2026-04-27 (continuing from autonomous-loop session). Captures
 the current state of the S5 work and the precise remaining steps to
 replace the cross-summand cocycle axioms with real proofs._
 
+_Updated 2026-04-27: projX × projU sub-case is now a real theorem
+(`cocycle_inl_inr_smoothLocusY_smoothLocusY` in `EvenForm.lean`).
+The chart-symm gluing identity (`squareLocalHomeomorph_symm_gluing`)
+was generalized to take any `b/hpY_b` on the infinity side rather than
+requiring `b = affineGluingImage a`. Three sub-cases of `inl_inr` and
+the symmetric `inr_inl` axiom remain._
+
 ## Goal
 
 Replace the two cross-summand cocycle axioms in `EvenForm.lean`
