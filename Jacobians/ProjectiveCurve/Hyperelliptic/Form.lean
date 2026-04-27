@@ -114,19 +114,28 @@ theorem hyperellipticForm_add (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (g g' : Polynomial ℂ) :
     hyperellipticForm H (g + g') =
       hyperellipticForm H g + hyperellipticForm H g' := by
-  sorry
+  apply Subtype.ext
+  show hyperellipticEvenCoeff (H := H) (g + g') (infReverse H (g + g')) = _
+  rw [infReverse_add]
+  exact hyperellipticEvenCoeff_add g (infReverse H g) g' (infReverse H g')
 
 /-- `hyperellipticForm` is ℂ-linear (scalar mult side). -/
 theorem hyperellipticForm_smul (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (c : ℂ) (g : Polynomial ℂ) :
     hyperellipticForm H (c • g) = c • hyperellipticForm H g := by
-  sorry
+  apply Subtype.ext
+  show hyperellipticEvenCoeff (H := H) (c • g) (infReverse H (c • g)) = _
+  rw [infReverse_smul]
+  exact hyperellipticEvenCoeff_smul c g (infReverse H g)
 
 /-- `hyperellipticForm` of the zero polynomial is the zero form. -/
 theorem hyperellipticForm_zero (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] :
     hyperellipticForm H (0 : Polynomial ℂ) = 0 := by
-  sorry
+  apply Subtype.ext
+  show hyperellipticEvenCoeff (H := H) 0 (infReverse H 0) = 0
+  rw [infReverse_zero]
+  exact hyperellipticEvenCoeff_zero
 
 /-- The packaged ℂ-linear map version of `hyperellipticForm`. -/
 noncomputable def hyperellipticFormLinearMap (H : HyperellipticData)

@@ -1137,4 +1137,39 @@ theorem hyperellipticAffineCoeff_mem_submodule (g : Polynomial ℂ) :
    hyperellipticAffineCoeff_satisfiesCotangentCocycle g,
    hyperellipticAffineCoeff_isZeroOffChartTarget g⟩
 
+/-! ## Linearity of the affine coefficient family -/
+
+@[simp] theorem hyperellipticAffineCoeff_zero :
+    hyperellipticAffineCoeff (H := H) (0 : Polynomial ℂ) = 0 := by
+  classical
+  funext a z
+  unfold hyperellipticAffineCoeff
+  by_cases hpY : a ∈ smoothLocusY H
+  · simp [hpY]
+  · simp [hpY]
+
+theorem hyperellipticAffineCoeff_add (g g' : Polynomial ℂ) :
+    hyperellipticAffineCoeff (H := H) (g + g') =
+      hyperellipticAffineCoeff (H := H) g + hyperellipticAffineCoeff (H := H) g' := by
+  classical
+  funext a z
+  unfold hyperellipticAffineCoeff
+  by_cases hpY : a ∈ smoothLocusY H
+  · simp only [hpY, dite_true, Pi.add_apply]
+    exact affineProjXCoeff_add g g' a hpY z
+  · simp only [hpY, dite_false, Pi.add_apply]
+    exact affineProjYCoeff_add g g' a _ z
+
+theorem hyperellipticAffineCoeff_smul (c : ℂ) (g : Polynomial ℂ) :
+    hyperellipticAffineCoeff (H := H) (c • g) =
+      c • hyperellipticAffineCoeff (H := H) g := by
+  classical
+  funext a z
+  unfold hyperellipticAffineCoeff
+  by_cases hpY : a ∈ smoothLocusY H
+  · simp only [hpY, dite_true, Pi.smul_apply]
+    exact affineProjXCoeff_smul c g a hpY z
+  · simp only [hpY, dite_false, Pi.smul_apply]
+    exact affineProjYCoeff_smul c g a _ z
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
