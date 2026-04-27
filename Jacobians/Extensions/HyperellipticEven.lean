@@ -47,6 +47,7 @@ See `docs/hyperelliptic-even-atlas-plan.md` for the full plan.
 import Jacobians.Challenge
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
+import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
 
@@ -75,23 +76,11 @@ including across the affine ↔ affine-infinity gluing region.
 -/
 
 /-- The holomorphic 1-form `dx / y` on a hyperelliptic curve with even
-degree `f`. The hypothesis `¬ Odd H.f.natDegree` is wrapped as `Fact`
-so that `ChartedSpace ℂ (HyperellipticEvenProj H)` resolves at signature
-elaboration time. Callers in even-degree contexts declare
-`haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩` once. -/
+degree `f`, namely `hyperellipticForm H 1`. -/
 noncomputable def hyperellipticEvenDxOverY
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
-    HolomorphicOneForm (HyperellipticEvenProj H) := by
-  -- Construct the cocycle (`coeff`, three predicates) explicitly. In
-  -- the affine chart at `(x₀, y₀)` with `y₀ ≠ 0`, the local
-  -- representative is `1 / y(z)` where `y(z)` is the chart-local
-  -- branch of `√f(z)`. Same form on the affine-infinity side via
-  -- the `reverseData` polynomial. At Weierstrass points use the local
-  -- uniformizer `t` with `t² = x - α`. On the gluing overlap, the
-  -- cocycle compatibility comes from the chain-rule transformation
-  -- of `dx/y` under the change of coordinates `x ↦ 1/x`,
-  -- `y ↦ y / x^{g+1}`.
-  sorry
+    HolomorphicOneForm (HyperellipticEvenProj H) :=
+  HyperellipticEvenProj.hyperellipticForm H 1
 
 /-! ## Warm-up 2 — `x^k dx / y` for `k = 0, ..., g-1`
 
@@ -102,20 +91,14 @@ infinity points in the even case (vs the single ∞ in odd).
 -/
 
 /-- The holomorphic 1-form `x^k · dx / y` on an even-degree
-hyperelliptic curve, valid for `k ≤ g - 1` where
-`g = H.f.natDegree / 2 - 1`. -/
+hyperelliptic curve, namely `hyperellipticForm H (X^k)`. The degree
+constraint is preserved as a hypothesis to document the basis range,
+even though `hyperellipticForm` itself is total over `Polynomial ℂ`. -/
 noncomputable def hyperellipticEvenBasisDifferential
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)]
     (k : ℕ) (_hk : k < H.f.natDegree / 2 - 1) :
-    HolomorphicOneForm (HyperellipticEvenProj H) := by
-  -- Multiply the local coefficient of `hyperellipticEvenDxOverY` by `x^k`.
-  -- Use the same cocycle argument; `x^k` is analytic and the
-  -- transition law is multiplicative on the chart-transition mfderiv.
-  -- The `k < g - 1` constraint ensures the resulting form remains
-  -- holomorphic at both infinity points: in the infinity chart, the
-  -- coordinate change `x = 1/t` introduces a `t^{2k - 2g - 2 + 1}`
-  -- factor, finite iff `k ≤ g - 1`.
-  sorry
+    HolomorphicOneForm (HyperellipticEvenProj H) :=
+  HyperellipticEvenProj.hyperellipticForm H (Polynomial.X ^ k)
 
 /-! ## Linear independence of the basis family
 
@@ -128,13 +111,14 @@ independent polynomials.
 -/
 
 /-- The canonical basis of holomorphic 1-forms on an even-degree
-hyperelliptic curve is linearly independent. -/
+hyperelliptic curve is linearly independent (immediate corollary of
+`hyperellipticForm_linearIndependent`). -/
 theorem hyperellipticEvenBasisDifferential_linearIndependent
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     LinearIndependent ℂ
       (fun k : Fin (H.f.natDegree / 2 - 1) =>
-        hyperellipticEvenBasisDifferential H k.val k.isLt) := by
-  sorry
+        hyperellipticEvenBasisDifferential H k.val k.isLt) :=
+  HyperellipticEvenProj.hyperellipticForm_linearIndependent H
 
 /-! ## Headline test — genus theorem for even hyperelliptic
 
