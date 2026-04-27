@@ -126,9 +126,9 @@ theorem affineProjXCoeff_smul (c : ℂ) (g : Polynomial ℂ) (a : HyperellipticA
   unfold affineProjXCoeff
   by_cases hz : z ∈ ((affineChartProjX (H := H) a hpY) :
       OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
-  · simp only [hz, if_true, dif_pos]
+  · simp only [hz, if_true]
     rw [show ((c • g : Polynomial ℂ).eval z) = c * g.eval z from by
-      simp [Polynomial.smul_eval, smul_eq_mul]]
+      simp [smul_eq_mul]]
     ring
   · simp [hz]
 
@@ -289,7 +289,7 @@ theorem affineProjYCoeff_smul (c : ℂ) (g : Polynomial ℂ) (a : HyperellipticA
   · simp only [hz, if_true]
     set x := (polynomialLocalHomeomorph (H := H) a hpX).symm (z ^ 2)
     rw [show ((c • g : Polynomial ℂ).eval x) = c * g.eval x from by
-      simp [Polynomial.smul_eval, smul_eq_mul]]
+      simp [smul_eq_mul]]
     ring
   · simp [hz]
 
@@ -421,9 +421,7 @@ theorem squareLocalHomeomorph_symm_eq_of_mem
   -- e_q applied: e_q.toFun is also `y^2` on its source.
   have hSqRel_q : e_q (e_p.symm (H.f.eval z)) = H.f.eval z := by
     have : e_q (e_p.symm (H.f.eval z)) = (e_p.symm (H.f.eval z)) ^ 2 := by
-      simpa [squareLocalHomeomorph, e_q] using
-        congr_arg id (rfl : e_q (e_p.symm (H.f.eval z)) =
-          e_q (e_p.symm (H.f.eval z)))
+      simp [squareLocalHomeomorph, e_q]
     rw [this, hSqRel]
   -- Combining: rewrite hRoundtrip using hSqRel_q.
   rw [hSqRel_q] at hRoundtrip
@@ -469,8 +467,7 @@ theorem squareLocalHomeomorph_symm_hasDerivAt
     intro y hy
     have hRight : (e : ℂ → ℂ) (e.symm y) = y := e.right_inv hy
     have hSq : (e : ℂ → ℂ) (e.symm y) = (e.symm y) ^ 2 := by
-      simpa [e, squareLocalHomeomorph] using
-        congrArg (e : ℂ → ℂ) (rfl : e.symm y = e.symm y)
+      simp [e, squareLocalHomeomorph]
     rw [hSq] at hRight
     exact hRight
   -- Step 4: 2 * y₀ ≠ 0.
@@ -538,8 +535,7 @@ theorem polynomialLocalHomeomorph_symm_hasDerivAt
     intro w hw
     have hRight : (e : ℂ → ℂ) (e.symm w) = w := e.right_inv hw
     have hPoly : (e : ℂ → ℂ) (e.symm w) = H.f.eval (e.symm w) := by
-      simpa [e, polynomialLocalHomeomorph] using
-        congrArg (e : ℂ → ℂ) (rfl : e.symm w = e.symm w)
+      simp [e, polynomialLocalHomeomorph]
     rw [hPoly] at hRight
     exact hRight
   have hFder : H.f.derivative.eval x₀ ≠ 0 :=
@@ -601,8 +597,7 @@ theorem polynomialLocalHomeomorph_symm_eq_of_mem
   -- e_q applied to the same point gives H.f.eval of that point, which is y².
   have hPolyRel_q : e_q (e_p.symm (y ^ 2)) = y ^ 2 := by
     have : e_q (e_p.symm (y ^ 2)) = H.f.eval (e_p.symm (y ^ 2)) := by
-      simpa [polynomialLocalHomeomorph, e_q] using
-        congrArg (e_q : ℂ → ℂ) (rfl : e_p.symm (y ^ 2) = e_p.symm (y ^ 2))
+      simp [polynomialLocalHomeomorph, e_q]
     rw [this, hPolyRel]
   rw [hPolyRel_q] at hRoundtrip
   exact hRoundtrip.symm
@@ -908,8 +903,7 @@ theorem hyperellipticAffineCoeff_cocycle_projX_projY
   have hHfz_in_eq_target : H.f.eval z ∈ e_q.target := by
     have h := e_q.map_source hZinEqSource
     have heq : (e_q : ℂ → ℂ) z = H.f.eval z := by
-      simpa [polynomialLocalHomeomorph, e_q] using
-        congrArg (e_q : ℂ → ℂ) (rfl : z = z)
+      simp [polynomialLocalHomeomorph, e_q]
     rw [heq] at h
     exact h
   have hY_z_inQTarget : y_z ∈ ((affineChartProjY (H := H) q hqX) :
@@ -1014,8 +1008,7 @@ theorem hyperellipticAffineCoeff_cocycle_projY_projX
   have hY2_in_eq_target : y ^ 2 ∈ e_q.target := by
     have h := e_q.map_source hYinEqSource
     have heq : (e_q : ℂ → ℂ) y = y ^ 2 := by
-      simpa [squareLocalHomeomorph, e_q] using
-        congrArg (e_q : ℂ → ℂ) (rfl : y = y)
+      simp [squareLocalHomeomorph, e_q]
     rw [heq] at h
     exact h
   have hX_y_inQTarget : x_y ∈ ((affineChartProjX (H := H) q hqY) :

@@ -56,7 +56,7 @@ noncomputable def mirrorMonoidHom : Polynomial ℂ →* Polynomial ℂ where
   map_one' := by
     change Polynomial.reverse (Polynomial.C 1) * Polynomial.X ^ Polynomial.natTrailingDegree 1 = 1
     rw [Polynomial.reverse_C, Polynomial.natTrailingDegree_one, pow_zero, mul_one]
-    simpa using (Polynomial.C_1 : Polynomial.C (1 : ℂ) = (1 : Polynomial ℂ))
+    simp
   map_mul' p q := by
     simpa using Polynomial.mirror_mul_of_domain (p := p) (q := q)
 
@@ -189,7 +189,7 @@ instance : NoncompactSpace (HyperellipticAffineInfinity H) := by
     obtain ⟨u, hu⟩ : ∃ u : ℂ, (Polynomial.reverse H.f).eval t = u * u :=
       (Complex.isSquare ((Polynomial.reverse H.f).eval t)).exists_mul_self
     refine ⟨⟨(t, u), ?_⟩, rfl⟩
-    simpa [sq, hu] using hu.symm
+    simp [sq, hu]
   have himage : π '' (Set.univ : Set (HyperellipticAffineInfinity H)) = Set.univ := by
     ext t
     constructor
@@ -570,7 +570,7 @@ instance (H : HyperellipticData) [hf : Fact (¬ Odd H.f.natDegree)] :
           · have hx0 : a.val.1 ≠ 0 := by
               intro hx'
               apply hx
-              simpa [hx'] using (norm_nonneg (0 : ℂ))
+              simp [hx']
             have hx1 : 1 ≤ ‖a.val.1‖ := le_of_lt (lt_of_not_ge hx)
             let b : HyperellipticAffineInfinity H :=
               ⟨(a.val.1⁻¹, a.val.2 * a.val.1⁻¹ ^ (H.f.natDegree / 2)),
@@ -595,7 +595,7 @@ instance (H : HyperellipticData) [hf : Fact (¬ Odd H.f.natDegree)] :
           · have ht0 : b.val.1 ≠ 0 := by
               intro ht'
               apply ht
-              simpa [ht'] using (norm_nonneg (0 : ℂ))
+              simp [ht']
             have ht1 : 1 ≤ ‖b.val.1‖ := le_of_lt (lt_of_not_ge ht)
             let a : HyperellipticAffine H :=
               ⟨(b.val.1⁻¹, b.val.2 * b.val.1⁻¹ ^ (H.f.natDegree / 2)),
@@ -1071,7 +1071,7 @@ lemma hyperellipticEvenGlue_iff_mul (H : HyperellipticData)
     have hx : a.val.1 ≠ 0 := by
       intro hzero
       have : (0 : ℂ) = 1 := by
-        simpa [hzero] using hmul
+        simp [hzero] at hmul
       exact zero_ne_one this
     have h1 : b.val.1 = a.val.1⁻¹ := eq_inv_of_mul_eq_one_left hmul
     refine ⟨hx, h1, ?_⟩

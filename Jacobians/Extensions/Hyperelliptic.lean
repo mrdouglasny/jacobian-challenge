@@ -237,7 +237,7 @@ through the Kirov-bridge to use `Vendor.Kirov.HolomorphicForms.pullbackForm`.
 The signature below uses option (a), so this theorem also exercises the
 `pullbackOneForm` axiom — discharging it is the prerequisite. -/
 theorem pullback_hyperellipticInvolution_eq_neg
-    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    (H : HyperellipticData) (_h : Odd H.f.natDegree) :
     True := by
   -- Placeholder signature — see NOTE in the docstring. Real statement:
   --   pullbackOneForm (hyperellipticInvolution H h)

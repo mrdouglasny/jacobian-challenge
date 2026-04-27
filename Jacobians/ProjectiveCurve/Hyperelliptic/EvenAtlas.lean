@@ -206,11 +206,7 @@ theorem affineLiftChart_compat_affineLiftChart
       (affineLiftChart H h a).symm.trans (affineLiftChart H h a') =
         (HyperellipticAffine.affineChartAt (H := H) a).symm.trans
           (HyperellipticAffine.affineChartAt (H := H) a') := by
-    simpa [affineLiftChart] using
-      OpenPartialHomeomorph.lift_openEmbedding_trans
-        (HyperellipticAffine.affineChartAt (H := H) a)
-        (HyperellipticAffine.affineChartAt (H := H) a')
-        (isOpenEmbedding_proj_inl H h)
+    simp [affineLiftChart]
   rw [hLift]
   exact HyperellipticAffine.affineChartAt_compat (H := H) a a'
 
@@ -228,13 +224,7 @@ theorem infinityLiftChart_compat_infinityLiftChart
             (H := HyperellipticAffineInfinity.reverseData H h) b).symm.trans
           (HyperellipticAffine.affineChartAt
             (H := HyperellipticAffineInfinity.reverseData H h) b') := by
-    simpa [infinityLiftChart] using
-      OpenPartialHomeomorph.lift_openEmbedding_trans
-        (HyperellipticAffine.affineChartAt
-            (H := HyperellipticAffineInfinity.reverseData H h) b)
-        (HyperellipticAffine.affineChartAt
-            (H := HyperellipticAffineInfinity.reverseData H h) b')
-        (isOpenEmbedding_proj_inr H h)
+    simp [infinityLiftChart]
   rw [hLift]
   exact HyperellipticAffine.affineChartAt_compat
     (H := HyperellipticAffineInfinity.reverseData H h) b b'
@@ -274,9 +264,8 @@ theorem chartAt_compat (H : HyperellipticData) (h : ¬ Odd H.f.natDegree)
       (((chartAt H h q).symm.trans (chartAt H h q')) : ℂ → ℂ)
       ((chartAt H h q).symm.trans (chartAt H h q')).source := by
   unfold chartAt
-  rcases hQ : Quotient.out q with a | b <;>
-    rcases hQ' : Quotient.out q' with a' | b' <;>
-    simp only [hQ, hQ']
+  rcases Quotient.out q with a | b <;>
+    rcases Quotient.out q' with a' | b'
   · exact affineLiftChart_compat_affineLiftChart H h a a'
   · exact affineLiftChart_compat_infinityLiftChart H h a b'
   · exact infinityLiftChart_compat_affineLiftChart H h b a'

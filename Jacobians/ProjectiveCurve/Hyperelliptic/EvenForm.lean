@@ -68,8 +68,7 @@ theorem hyperellipticEvenCoeff_isHolomorphicOneFormCoeff
   rw [hExt]
   unfold chartAt
   rcases hQ : Quotient.out q with a | b
-  · simp only [hQ]
-    show AnalyticOn ℂ _
+  · show AnalyticOn ℂ _
       (((HyperellipticAffine.affineChartAt (H := H) a)
         : OpenPartialHomeomorph (HyperellipticAffine H) ℂ).lift_openEmbedding
           (isOpenEmbedding_proj_inl H hf.out)).target
@@ -89,8 +88,7 @@ theorem hyperellipticEvenCoeff_isHolomorphicOneFormCoeff
       rfl
     rw [hExtA] at h
     exact h
-  · simp only [hQ]
-    show AnalyticOn ℂ _
+  · show AnalyticOn ℂ _
       (((HyperellipticAffine.affineChartAt
           (H := HyperellipticAffineInfinity.reverseData H hf.out) b)
         : OpenPartialHomeomorph (HyperellipticAffineInfinity H) ℂ).lift_openEmbedding
@@ -452,8 +450,8 @@ theorem hyperellipticEvenCoeff_mem_submodule
   funext q z
   unfold hyperellipticEvenCoeff
   rcases hQ : Quotient.out q with a | b
-  · simp [hQ, hyperellipticAffineCoeff_zero]
-  · simp [hQ, hyperellipticAffineInfinityCoeff_zero]
+  · simp [hyperellipticAffineCoeff_zero]
+  · simp [hyperellipticAffineInfinityCoeff_zero]
 
 theorem hyperellipticEvenCoeff_add
     [hf : Fact (¬ Odd H.f.natDegree)]
