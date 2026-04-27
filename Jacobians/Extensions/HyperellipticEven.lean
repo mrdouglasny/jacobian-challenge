@@ -50,6 +50,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
+import Jacobians.Axioms.HyperellipticLiouville
 
 namespace Jacobians.Extensions.HyperellipticEven
 
@@ -154,13 +155,15 @@ formalization end-to-end on the even-quotient atlas + bridge +
 basis + Riemann-Roch.
 
 The lower bound is `hyperellipticEvenGenus_lower_bound`; the upper
-bound currently requires Riemann–Roch infrastructure (line bundles,
-sheaf cohomology, canonical divisor) that lives behind several stubs. -/
+bound is `Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le`,
+derived from the Liouville/maximum-modulus axiom hierarchy. -/
 theorem genus_HyperellipticEven_eq
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) =
-      H.f.natDegree / 2 - 1 := by
-  sorry
+      H.f.natDegree / 2 - 1 :=
+  le_antisymm
+    (Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le H)
+    (hyperellipticEvenGenus_lower_bound H)
 
 /-- **Consistency check.** For even-degree-4 hyperelliptic curves
 (`y² = quartic`), the genus formula gives `1`. Together with the
