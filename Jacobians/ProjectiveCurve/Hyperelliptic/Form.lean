@@ -87,33 +87,25 @@ variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 
 /-! ## The reusable `hyperellipticForm` constructor -/
 
-/-- The "infinity-side" polynomial paired with `g` in the gluing.
-
-For a basis monomial `g = X^k` (with `k ≤ g_topology - 1`), this is
-`-X^(g_topology - 1 - k)`. In general it is `-Polynomial.reflect
-(g_topology - 1) g`, where `g_topology = H.f.natDegree / 2 - 1` is the
-expected geometric genus. This is the polynomial such that the form
-`g(x) dx / y` extends holomorphically across the gluing region — the
-relation `g_inf(u) = -u^(g_topology - 1) g(1/u)` exactly cancels the
-factors `dx = -du/u^2` and `y = v / u^(g_topology + 1)`. -/
-noncomputable def infReverse (H : HyperellipticData) (g : Polynomial ℂ) :
-    Polynomial ℂ :=
-  -Polynomial.reflect (H.f.natDegree / 2 - 2) g
-
 /-- The holomorphic 1-form `g(x) dx / y` on `HyperellipticEvenProj H`,
 parameterized by an arbitrary polynomial `g : Polynomial ℂ`.
 
 Constructed as the unified coefficient family
 `hyperellipticEvenCoeff g (infReverse H g)` together with its
-`holomorphicOneFormSubmodule` membership proof. The membership proof
-is real on the within-summand cocycle predicates (analyticity,
-off-target, same-summand cocycle) and rests on two cross-summand
-axioms in `EvenForm.lean` for the Möbius gluing region. -/
+`holomorphicOneFormSubmodule` membership proof. The gluing hypothesis
+`g_inf = infReverse H g` is supplied as `rfl` since this constructor
+always pairs `g` with its canonical infinity-side polynomial.
+
+The membership proof is real on the within-summand cocycle predicates
+(analyticity, off-target, same-summand cocycle) and rests on two
+cross-summand axioms in `EvenForm.lean` for the Möbius gluing region;
+those axioms now carry the gluing relation as an explicit hypothesis,
+so they are no longer mathematically false for non-matching pairs. -/
 noncomputable def hyperellipticForm (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (g : Polynomial ℂ) :
     HolomorphicOneForm (HyperellipticEvenProj H) :=
   ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
-   hyperellipticEvenCoeff_mem_submodule g (infReverse H g)⟩
+   hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl⟩
 
 /-! ## Linearity -/
 
