@@ -180,11 +180,96 @@ directly from the affine (resp. affine-infinity) bundle's
 `SatisfiesCotangentCocycle` proof through `affineLiftChart`
 (resp. `infinityLiftChart`).
 
+Both same-summand cases are derived from a single generic helper
+`cocycle_lifted_through_lift_openEmbedding`, parameterized by the
+underlying type (`HyperellipticAffine H` or `HyperellipticAffineInfinity H`),
+the open embedding (`proj ∘ Sum.inl` or `proj ∘ Sum.inr`), and the
+within-summand cocycle bundle.
+
 Cross-summand cases (`Sum.inl × Sum.inr`, `Sum.inr × Sum.inl`) are
 the gluing-region cocycles that depend on the Möbius `x ↦ 1/x`
 transition smoothness — currently axiomatized in `EvenAtlas.lean`. -/
 
-/-- Same-summand cocycle on the affine summand. -/
+/-- **Generic cocycle lift through an open embedding of charts.**
+
+If a coefficient family `coeff'` on `X'` satisfies the cotangent cocycle on
+`X'` and the chart at points `q, q' : HyperellipticEvenProj H` agrees with
+the lift of the chart at corresponding `x, x' : X'` through an injective
+open embedding `f`, then the lifted coefficient family satisfies the
+cocycle equation between q and q'.
+
+This is the structural pattern shared by both same-summand cocycles. -/
+theorem cocycle_lifted_through_lift_openEmbedding
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    {X' : Type*} [TopologicalSpace X']
+    {f : X' → HyperellipticEvenProj H} (hOpen : Topology.IsOpenEmbedding f)
+    (hInj : Function.Injective f)
+    [ChartedSpace ℂ X'] [IsManifold 𝓘(ℂ, ℂ) ω X']
+    (coeff' : X' → ℂ → ℂ)
+    (hCocy' : SatisfiesCotangentCocycle X' coeff')
+    (coeff_lifted : HyperellipticEvenProj H → ℂ → ℂ)
+    {q q' : HyperellipticEvenProj H} {x x' : X'}
+    (hChQ : (_root_.chartAt ℂ q : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      (_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).lift_openEmbedding hOpen)
+    (hChQ' : (_root_.chartAt ℂ q' : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      (_root_.chartAt ℂ x' : OpenPartialHomeomorph X' ℂ).lift_openEmbedding hOpen)
+    (hCoeffQ : coeff_lifted q = coeff' x)
+    (hCoeffQ' : coeff_lifted q' = coeff' x')
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    coeff_lifted q z =
+      coeff_lifted q' ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
+  classical
+  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target =
+      ((_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).lift_openEmbedding hOpen).target := by
+    rw [extChartAt_target]
+    show ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
+      ((_root_.chartAt ℂ x).lift_openEmbedding hOpen).target
+    rw [hChQ]
+    show _ ∩ Set.range (id : ℂ → ℂ) = _
+    rw [Set.range_id, Set.inter_univ]
+    rfl
+  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
+      (((_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).lift_openEmbedding hOpen).symm
+        : ℂ → HyperellipticEvenProj H) := by
+    funext w; show (_root_.chartAt ℂ q).symm w = _; rw [hChQ]
+  have hExtCoe' : ((extChartAt 𝓘(ℂ, ℂ) q') : HyperellipticEvenProj H → ℂ) =
+      (((_root_.chartAt ℂ x' : OpenPartialHomeomorph X' ℂ).lift_openEmbedding hOpen)
+        : HyperellipticEvenProj H → ℂ) := by
+    funext w; show (_root_.chartAt ℂ q') w = _; rw [hChQ']
+  rw [hExtTarget] at hz
+  rw [hExtSymm] at hSrc
+  rw [extChartAt_source, hChQ'] at hSrc
+  simp only [OpenPartialHomeomorph.lift_openEmbedding_target] at hz
+  simp only [OpenPartialHomeomorph.lift_openEmbedding_source,
+    OpenPartialHomeomorph.lift_openEmbedding_symm] at hSrc
+  obtain ⟨x'', hx''_src, hx''_eq⟩ := hSrc
+  -- Use injectivity of f to extract the X'-side source hypothesis.
+  have hx_eq : (_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).symm z = x'' :=
+    hInj hx''_eq.symm
+  have hSrcSmall : (_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).symm z ∈
+      (_root_.chartAt ℂ x' : OpenPartialHomeomorph X' ℂ).source := by
+    rw [hx_eq]; exact hx''_src
+  have hzX : z ∈ (extChartAt 𝓘(ℂ, ℂ) x).target := by
+    rw [extChartAt_target]
+    show z ∈ ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ x).target ∩ Set.range ↑𝓘(ℂ, ℂ)
+    show z ∈ _ ∩ Set.range (id : ℂ → ℂ)
+    rw [Set.range_id, Set.inter_univ]
+    exact hz
+  have hSrcX : (extChartAt 𝓘(ℂ, ℂ) x).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) x').source := by
+    rw [extChartAt_source]
+    show (_root_.chartAt ℂ x : OpenPartialHomeomorph X' ℂ).symm z ∈ _
+    exact hSrcSmall
+  have hCocyVal := hCocy' x x' z hzX hSrcX
+  rw [hCoeffQ]
+  rw [hCoeffQ', hExtCoe', hExtSymm]
+  simp only [OpenPartialHomeomorph.lift_openEmbedding_symm,
+    Function.comp_def, OpenPartialHomeomorph.lift_openEmbedding_apply]
+  exact hCocyVal
+
+/-- Same-summand cocycle on the affine summand, derived from
+`cocycle_lifted_through_lift_openEmbedding`. -/
 theorem hyperellipticEvenCoeff_cocycle_inl_inl
     [hf : Fact (¬ Odd H.f.natDegree)]
     (g_aff g_inf : Polynomial ℂ)
@@ -197,79 +282,32 @@ theorem hyperellipticEvenCoeff_cocycle_inl_inl
       hyperellipticEvenCoeff (H := H) g_aff g_inf q'
         ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
         (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
-  classical
-  have hChQ : (_root_.chartAt ℂ q : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
-      affineLiftChart H hf.out a := by
-    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q = _
+  refine cocycle_lifted_through_lift_openEmbedding (x := a) (x' := a')
+    (isOpenEmbedding_proj_inl H hf.out)
+    (proj_inl_injective H)
+    (hyperellipticAffineCoeff (H := H) g_aff)
+    (hyperellipticAffineCoeff_satisfiesCotangentCocycle (H := H) g_aff)
+    (hyperellipticEvenCoeff (H := H) g_aff g_inf)
+    ?_ ?_ ?_ ?_ hz hSrc
+  · show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q = _
     unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt
-    rw [hQ]
-  have hChQ' : (_root_.chartAt ℂ q' : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
-      affineLiftChart H hf.out a' := by
-    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q' = _
+    rw [hQ]; rfl
+  · show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q' = _
     unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt
-    rw [hQ']
-  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target =
-      (affineLiftChart H hf.out a).target := by
-    rw [extChartAt_target]
-    show ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
-      (affineLiftChart H hf.out a).target
-    rw [hChQ]
-    show _ ∩ Set.range (id : ℂ → ℂ) = _
-    rw [Set.range_id, Set.inter_univ]
-    rfl
-  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
-      ((affineLiftChart H hf.out a).symm : ℂ → HyperellipticEvenProj H) := by
-    funext w; show (_root_.chartAt ℂ q).symm w = _; rw [hChQ]
-  have hExtCoe' : ((extChartAt 𝓘(ℂ, ℂ) q') : HyperellipticEvenProj H → ℂ) =
-      ((affineLiftChart H hf.out a') : HyperellipticEvenProj H → ℂ) := by
-    funext w; show (_root_.chartAt ℂ q') w = _; rw [hChQ']
-  rw [hExtTarget] at hz
-  rw [hExtSymm] at hSrc
-  rw [extChartAt_source, hChQ'] at hSrc
-  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target] at hz
-  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
-    OpenPartialHomeomorph.lift_openEmbedding_symm] at hSrc
-  obtain ⟨a'', ha''_src, ha''_eq⟩ := hSrc
-  have ha_eq : (HyperellipticAffine.affineChartAt (H := H) a).symm z = a'' :=
-    proj_inl_injective H ha''_eq.symm
-  have hSrcAff : (HyperellipticAffine.affineChartAt (H := H) a).symm z ∈
-      (HyperellipticAffine.affineChartAt (H := H) a').source := by
-    rw [ha_eq]; exact ha''_src
-  have hExtTargetA : (extChartAt 𝓘(ℂ, ℂ) a).target =
-      (HyperellipticAffine.affineChartAt (H := H) a).target := by
-    rw [extChartAt_target]
-    show _ ∩ Set.range (id : ℂ → ℂ) = _
-    rw [Set.range_id, Set.inter_univ]
-    rfl
-  have hzA : z ∈ (extChartAt 𝓘(ℂ, ℂ) a).target := hExtTargetA ▸ hz
-  have hSrcA : (extChartAt 𝓘(ℂ, ℂ) a).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) a').source := by
-    rw [extChartAt_source]
-    show (HyperellipticAffine.affineChartAt (H := H) a).symm z ∈ _
-    exact hSrcAff
-  have hAffCocy := hyperellipticAffineCoeff_satisfiesCotangentCocycle (H := H) g_aff
-    a a' z hzA hSrcA
-  have hLHS_evencoe : hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
-      hyperellipticAffineCoeff (H := H) g_aff a z := by
+    rw [hQ']; rfl
+  · funext w
     show (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
-      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) z = _
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ]
-  have hRHS_evencoe : hyperellipticEvenCoeff (H := H) g_aff g_inf q' =
-      hyperellipticAffineCoeff (H := H) g_aff a' := by
-    funext w
+  · funext w
     show (match Quotient.out q' with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ']
-  rw [hLHS_evencoe, hRHS_evencoe]
-  rw [hExtCoe', hExtSymm]
-  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_symm,
-    Function.comp_def, OpenPartialHomeomorph.lift_openEmbedding_apply]
-  -- After simp: goal matches hAffCocy modulo extChartAt vs affineChartAt
-  -- (which are defeq for our trivial model 𝓘(ℂ, ℂ)).
-  exact hAffCocy
 
-/-- Same-summand cocycle on the affine-infinity summand. -/
+/-- Same-summand cocycle on the affine-infinity summand, derived from
+`cocycle_lifted_through_lift_openEmbedding`. -/
 theorem hyperellipticEvenCoeff_cocycle_inr_inr
     [hf : Fact (¬ Odd H.f.natDegree)]
     (g_aff g_inf : Polynomial ℂ)
@@ -282,79 +320,28 @@ theorem hyperellipticEvenCoeff_cocycle_inr_inr
       hyperellipticEvenCoeff (H := H) g_aff g_inf q'
         ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
         (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
-  classical
-  have hChQ : (_root_.chartAt ℂ q : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
-      infinityLiftChart H hf.out b := by
-    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q = _
+  refine cocycle_lifted_through_lift_openEmbedding (x := b) (x' := b')
+    (isOpenEmbedding_proj_inr H hf.out)
+    (proj_inr_injective H)
+    (hyperellipticAffineInfinityCoeff (H := H) g_inf)
+    (hyperellipticAffineInfinityCoeff_satisfiesCotangentCocycle (H := H) g_inf)
+    (hyperellipticEvenCoeff (H := H) g_aff g_inf)
+    ?_ ?_ ?_ ?_ hz hSrc
+  · show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q = _
     unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt
-    rw [hQ]
-  have hChQ' : (_root_.chartAt ℂ q' : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
-      infinityLiftChart H hf.out b' := by
-    show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q' = _
+    rw [hQ]; rfl
+  · show Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt H hf.out q' = _
     unfold Jacobians.ProjectiveCurve.HyperellipticEvenProj.chartAt
-    rw [hQ']
-  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target =
-      (infinityLiftChart H hf.out b).target := by
-    rw [extChartAt_target]
-    show ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
-      (infinityLiftChart H hf.out b).target
-    rw [hChQ]
-    show _ ∩ Set.range (id : ℂ → ℂ) = _
-    rw [Set.range_id, Set.inter_univ]
-    rfl
-  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
-      ((infinityLiftChart H hf.out b).symm : ℂ → HyperellipticEvenProj H) := by
-    funext w; show (_root_.chartAt ℂ q).symm w = _; rw [hChQ]
-  have hExtCoe' : ((extChartAt 𝓘(ℂ, ℂ) q') : HyperellipticEvenProj H → ℂ) =
-      ((infinityLiftChart H hf.out b') : HyperellipticEvenProj H → ℂ) := by
-    funext w; show (_root_.chartAt ℂ q') w = _; rw [hChQ']
-  rw [hExtTarget] at hz
-  rw [hExtSymm] at hSrc
-  rw [extChartAt_source, hChQ'] at hSrc
-  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target] at hz
-  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
-    OpenPartialHomeomorph.lift_openEmbedding_symm] at hSrc
-  obtain ⟨b'', hb''_src, hb''_eq⟩ := hSrc
-  have hb_eq : (HyperellipticAffine.affineChartAt
-      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).symm z = b'' :=
-    proj_inr_injective H hb''_eq.symm
-  have hSrcInf : (HyperellipticAffine.affineChartAt
-      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).symm z ∈
-      (HyperellipticAffine.affineChartAt
-        (H := HyperellipticAffineInfinity.reverseData H hf.out) b').source := by
-    rw [hb_eq]; exact hb''_src
-  have hExtTargetB : (extChartAt 𝓘(ℂ, ℂ) b).target =
-      (HyperellipticAffine.affineChartAt
-        (H := HyperellipticAffineInfinity.reverseData H hf.out) b).target := by
-    rw [extChartAt_target]
-    show _ ∩ Set.range (id : ℂ → ℂ) = _
-    rw [Set.range_id, Set.inter_univ]
-    rfl
-  have hzB : z ∈ (extChartAt 𝓘(ℂ, ℂ) b).target := hExtTargetB ▸ hz
-  have hSrcB : (extChartAt 𝓘(ℂ, ℂ) b).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) b').source := by
-    rw [extChartAt_source]
-    show (HyperellipticAffine.affineChartAt
-      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).symm z ∈ _
-    exact hSrcInf
-  have hInfCocy := hyperellipticAffineInfinityCoeff_satisfiesCotangentCocycle
-    (H := H) g_inf b b' z hzB hSrcB
-  have hLHS_evencoe : hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
-      hyperellipticAffineInfinityCoeff (H := H) g_inf b z := by
+    rw [hQ']; rfl
+  · funext w
     show (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
-      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) z = _
+      | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ]
-  have hRHS_evencoe : hyperellipticEvenCoeff (H := H) g_aff g_inf q' =
-      hyperellipticAffineInfinityCoeff (H := H) g_inf b' := by
-    funext w
+  · funext w
     show (match Quotient.out q' with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g_aff a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ']
-  rw [hLHS_evencoe, hRHS_evencoe]
-  rw [hExtCoe', hExtSymm]
-  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_symm,
-    Function.comp_def, OpenPartialHomeomorph.lift_openEmbedding_apply]
-  exact hInfCocy
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
