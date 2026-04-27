@@ -1165,4 +1165,81 @@ theorem hyperellipticAffineCoeff_smul (c : ℂ) (g : Polynomial ℂ) :
   · simp only [hpY, dite_false, Pi.smul_apply]
     exact affineProjYCoeff_smul c g a _ z
 
+/-! ## Polynomial-recovery / injectivity helpers
+
+Foundation for the genus theorem's lower bound: the affine coefficient
+family at a `smoothLocusY` point uniquely determines the polynomial,
+because on the chart target it equals `g(z) / y(z)` (with `y(z) ≠ 0`)
+and the chart target is a non-empty open subset of ℂ (hence infinite).
+-/
+
+/-- A polynomial vanishing on an infinite subset of ℂ is the zero
+polynomial. -/
+lemma poly_zero_of_eval_zero_on_infinite {p : Polynomial ℂ} {S : Set ℂ}
+    (hS : S.Infinite) (h : ∀ z ∈ S, Polynomial.eval z p = 0) : p = 0 := by
+  by_contra hp
+  have hRootsFin : (p.roots.toFinset : Set ℂ).Finite := (p.roots.toFinset).finite_toSet
+  have hSsub : S ⊆ ↑p.roots.toFinset := by
+    intro z hz
+    rw [Finset.mem_coe, Multiset.mem_toFinset, Polynomial.mem_roots hp]
+    exact h z hz
+  exact hS (hRootsFin.subset hSsub)
+
+/-- A non-empty open subset of ℂ is infinite (uncountable, in fact). -/
+lemma open_nonempty_complex_infinite {S : Set ℂ} (hS : IsOpen S) (h : S.Nonempty) :
+    S.Infinite := by
+  have h_card : Cardinal.continuum ≤ Cardinal.mk ↑S :=
+    continuum_le_cardinal_of_isOpen ℂ hS h
+  rw [Set.infinite_coe_iff.symm]
+  exact Cardinal.infinite_iff.mpr (le_trans Cardinal.aleph0_le_continuum h_card)
+
+/-- **Affine-side injectivity** at a `smoothLocusY` point: two polynomials
+yielding the same `hyperellipticAffineCoeff` at `a ∈ smoothLocusY H` must
+be equal.
+
+Proof: at a `smoothLocusY` point the coefficient is the projX form
+`g(z) / y(z)` on the chart target. Equality of the coefficients yields
+`g(z) = g'(z)` on the chart target (an open non-empty subset of ℂ, hence
+infinite). The polynomial identity theorem then gives `g = g'`. -/
+theorem hyperellipticAffineCoeff_injective_at_smoothLocusY
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {g g' : Polynomial ℂ}
+    (hEq : hyperellipticAffineCoeff (H := H) g a =
+           hyperellipticAffineCoeff (H := H) g' a) :
+    g = g' := by
+  classical
+  have hCoeffX : ∀ z, hyperellipticAffineCoeff (H := H) g a z =
+      affineProjXCoeff g a hpY z := by
+    intro z; simp [hyperellipticAffineCoeff, hpY]
+  have hCoeffX' : ∀ z, hyperellipticAffineCoeff (H := H) g' a z =
+      affineProjXCoeff g' a hpY z := by
+    intro z; simp [hyperellipticAffineCoeff, hpY]
+  have hPjEq : ∀ z, affineProjXCoeff g a hpY z = affineProjXCoeff g' a hpY z := by
+    intro z; rw [← hCoeffX, ← hCoeffX']; exact congr_fun hEq z
+  set chartTarget : Set ℂ :=
+    ((affineChartProjX (H := H) a hpY) :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target
+  have hOpen : IsOpen chartTarget :=
+    ((affineChartProjX (H := H) a hpY)).open_target
+  have hAinSrc : a ∈ ((affineChartProjX (H := H) a hpY)).source :=
+    affineChartProjX_mem_source a hpY
+  have hImgInTarget : ((affineChartProjX (H := H) a hpY)) a ∈ chartTarget :=
+    ((affineChartProjX (H := H) a hpY)).map_source hAinSrc
+  have hInfinite : chartTarget.Infinite :=
+    open_nonempty_complex_infinite hOpen ⟨_, hImgInTarget⟩
+  have hPolyEq : ∀ z ∈ chartTarget, g.eval z = g'.eval z := by
+    intro z hz
+    have hL := affineProjXCoeff_eq_on_target g a hpY hz
+    have hR := affineProjXCoeff_eq_on_target g' a hpY hz
+    have hYne := squareLocalHomeomorph_symm_ne_zero a hpY hz
+    have heq : g.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) =
+               g'.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) := by
+      rw [← hL, ← hR]; exact hPjEq z
+    field_simp at heq; exact heq
+  have hZero : g - g' = 0 := by
+    apply poly_zero_of_eval_zero_on_infinite hInfinite
+    intro z hz
+    simp [Polynomial.eval_sub, hPolyEq z hz]
+  linear_combination hZero
+
 end Jacobians.ProjectiveCurve.HyperellipticAffine
