@@ -344,4 +344,75 @@ theorem hyperellipticEvenCoeff_cocycle_inr_inr
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ']
 
+/-! ## Cross-summand cocycle (axiomatized)
+
+The Möbius `x ↦ 1/x` transition between affine and affine-infinity charts.
+For the cocycle to actually hold, the polynomials `g_aff` and `g_inf` must
+satisfy the gluing relation `g_inf(u) = -u^(g-1) g_aff(1/u)` (where
+`g = (deg H.f - 2)/2` is the genus). This relation is implicit in the axioms
+below; discharging them requires explicit Möbius chain-rule computations.
+
+These are the analytic content of S5; they correspond to (and depend on)
+the smoothness axioms in `EvenAtlas.lean`. -/
+
+/-- **Cross-summand cocycle (affine → infinity).** Axiomatized. -/
+axiom hyperellipticEvenCoeff_cocycle_inl_inr_axiom
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff g_inf : Polynomial ℂ)
+    (q q' : HyperellipticEvenProj H)
+    (a : HyperellipticAffine H) (b : HyperellipticAffineInfinity H)
+    (hQ : Quotient.out q = Sum.inl a) (hQ' : Quotient.out q' = Sum.inr b)
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
+      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
+        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1)
+
+/-- **Cross-summand cocycle (infinity → affine).** Axiomatized. -/
+axiom hyperellipticEvenCoeff_cocycle_inr_inl_axiom
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff g_inf : Polynomial ℂ)
+    (q q' : HyperellipticEvenProj H)
+    (b : HyperellipticAffineInfinity H) (a : HyperellipticAffine H)
+    (hQ : Quotient.out q = Sum.inr b) (hQ' : Quotient.out q' = Sum.inl a)
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
+      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
+        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1)
+
+/-! ## Bundled cocycle and submodule membership
+
+Combines the four sub-case cocycles (two real same-summand proofs +
+two cross-summand axioms) into the single `SatisfiesCotangentCocycle`
+predicate, then assembles full `holomorphicOneFormSubmodule` membership.
+-/
+
+theorem hyperellipticEvenCoeff_satisfiesCotangentCocycle
+    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ) :
+    SatisfiesCotangentCocycle (HyperellipticEvenProj H)
+      (hyperellipticEvenCoeff (H := H) g_aff g_inf) := by
+  intro q q' z hz hSrc
+  rcases hQ : Quotient.out q with a | b
+  · rcases hQ' : Quotient.out q' with a' | b'
+    · exact hyperellipticEvenCoeff_cocycle_inl_inl g_aff g_inf q q' a a' hQ hQ' hz hSrc
+    · exact hyperellipticEvenCoeff_cocycle_inl_inr_axiom g_aff g_inf q q' a b' hQ hQ' hz hSrc
+  · rcases hQ' : Quotient.out q' with a' | b'
+    · exact hyperellipticEvenCoeff_cocycle_inr_inl_axiom g_aff g_inf q q' b a' hQ hQ' hz hSrc
+    · exact hyperellipticEvenCoeff_cocycle_inr_inr g_aff g_inf q q' b b' hQ hQ' hz hSrc
+
+/-- **Submodule membership for the unified coefficient family.**
+
+`hyperellipticEvenCoeff g_aff g_inf` is a member of
+`holomorphicOneFormSubmodule (HyperellipticEvenProj H)`. -/
+theorem hyperellipticEvenCoeff_mem_submodule
+    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf ∈
+      holomorphicOneFormSubmodule (HyperellipticEvenProj H) :=
+  ⟨hyperellipticEvenCoeff_isHolomorphicOneFormCoeff g_aff g_inf,
+   hyperellipticEvenCoeff_satisfiesCotangentCocycle g_aff g_inf,
+   hyperellipticEvenCoeff_isZeroOffChartTarget g_aff g_inf⟩
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
