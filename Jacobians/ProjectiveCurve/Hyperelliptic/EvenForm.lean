@@ -1741,4 +1741,74 @@ theorem cocycle_inl_inr_smoothLocusY_smoothLocusXNotY
   rw [h_step']
   linear_combination -2 * E * h_cross'
 
+/-! ### Chart transition formula (projY × projV sub-case)
+
+For `a ∉ smoothLocusY` (so `chart_a = affineChartProjY` at affine
+branch point) and `b ∉ smoothLocusY` of reverseData but
+`b ∈ smoothLocusX` (so `chart_b = affineChartProjY` at infinity branch
+point), the chart transition is
+`w ↦ w · x_a(w)⁻¹^(g+1)` where `x_a(w) = polynomialLocalHomeomorph.symm(w²)`. -/
+private lemma chart_transition_eq_Y_V
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hpX : a ∈ smoothLocusX H)
+    (hpYn : a ∉ smoothLocusY H)
+    (b : HyperellipticAffineInfinity H)
+    (hpX_b : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn_b : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    {w : ℂ}
+    (hw : w ∈ ((affineLiftChart H hf.out a).symm.trans
+        (infinityLiftChart H hf.out b)).source) :
+    (infinityLiftChart H hf.out b) ((affineLiftChart H hf.out a).symm w) =
+      w * ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹ ^
+        (H.f.natDegree / 2) := by
+  have hwt : w ∈ (affineLiftChart H hf.out a).target := hw.1
+  have hws : (affineLiftChart H hf.out a).symm w ∈
+      (infinityLiftChart H hf.out b).source := hw.2
+  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target] at hwt
+  simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
+    OpenPartialHomeomorph.lift_openEmbedding_symm, affineLiftChart] at hws
+  rw [affineChartAt_of_not_mem_smoothLocusY a hpYn] at hwt hws
+  obtain ⟨bb, hbb_src, hbb_eq⟩ := hws
+  rw [show (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b) =
+      ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b) :
+        OpenPartialHomeomorph _ _) from
+    affineChartAt_of_not_mem_smoothLocusY (H := HyperellipticAffineInfinity.reverseData H hf.out)
+      b hpYn_b] at hbb_src
+  have hbb_eq' : Quotient.mk (hyperellipticEvenSetoid H)
+      (Sum.inl ((affineChartProjY (H := H) a hpX).symm w)) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bb) := hbb_eq.symm
+  obtain ⟨hwNZ, hbb⟩ := proj_inl_eq_proj_inr_iff hbb_eq'
+  have hbb2 : bb.val.2 =
+      w * ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹ ^
+        (H.f.natDegree / 2) := by
+    rw [hbb]; simp only [affineGluingImage_val_snd]
+    rw [affineChartProjY_symm_apply_fst a hpX hwt,
+        affineChartProjY_symm_apply_snd a hpX hwt]
+  -- Now compute infinityLiftChart applied to chart_a.symm w.
+  simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_symm,
+    Function.comp_apply]
+  rw [show (HyperellipticAffine.affineChartAt (H := H) a).symm w =
+      ((affineChartProjY (H := H) a hpX).symm w : HyperellipticAffine H) from by
+    rw [affineChartAt_of_not_mem_smoothLocusY a hpYn]]
+  rw [show proj H (Sum.inl ((affineChartProjY (H := H) a hpX).symm w)) =
+      proj H (Sum.inr bb) from
+    show (proj H ∘ Sum.inl) ((affineChartProjY (H := H) a hpX).symm w) =
+      (proj H ∘ Sum.inr) bb from hbb_eq.symm]
+  show ((HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).lift_openEmbedding
+      (isOpenEmbedding_proj_inr H hf.out)) ((proj H ∘ Sum.inr) bb) =
+      w * ((polynomialLocalHomeomorph (H := H) a hpX).symm (w ^ 2))⁻¹ ^
+        (H.f.natDegree / 2)
+  rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+  rw [show (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b) =
+      ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX_b) :
+        OpenPartialHomeomorph _ _) from
+    affineChartAt_of_not_mem_smoothLocusY (H := HyperellipticAffineInfinity.reverseData H hf.out)
+      b hpYn_b]
+  exact hbb2
+
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
