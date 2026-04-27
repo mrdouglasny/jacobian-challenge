@@ -633,8 +633,7 @@ lemma squareLocalHomeomorph_symm_at_basepoint
   set e := squareLocalHomeomorph (H := H) a hpY with he_def
   have hSrc : a.val.2 ∈ e.source := affineChartProjX_mem_source a hpY
   have hApp : (e : ℂ → ℂ) a.val.2 = a.val.2 ^ 2 := by
-    simpa [e, squareLocalHomeomorph] using
-      congrArg (e : ℂ → ℂ) (rfl : a.val.2 = a.val.2)
+    simp [e, squareLocalHomeomorph]
   rw [show (H.f.eval a.val.1) = a.val.2 ^ 2 from a.property.symm]
   rw [← hApp]
   exact e.left_inv hSrc
@@ -679,20 +678,21 @@ lemma proj_inl_eq_proj_inr_iff
 
 /-- **Coordinate-level cross-summand cocycle.** Given:
 * low-degree polynomial `g_aff` (degree < `g_topology - 1`),
-* coordinates `z, y, v` with `z ≠ 0`, `y ≠ 0`, `v ≠ 0`,
+* coordinates `z, y` with `z ≠ 0`, `y ≠ 0`,
 * gluing relation `v = y · z⁻¹^(H.f.natDegree / 2)`,
 
 the cocycle equation
 `g_aff(z)/y = (infReverse H g_aff)(z⁻¹)/v · (-(z²)⁻¹)`
 holds. (The on-curve equations `y² = H.f.eval z`, `v² = H.f.reverse.eval z⁻¹`
 are not needed for this purely algebraic identity, only the gluing
-relation between `y` and `v`.) -/
+relation between `y` and `v`. `v ≠ 0` follows automatically from
+`y ≠ 0`, `z ≠ 0`, and the gluing relation.) -/
 lemma cross_summand_cocycle_coord
     [hf : Fact (¬ Odd H.f.natDegree)]
     {g_aff : Polynomial ℂ}
     (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)
     {z y v : ℂ}
-    (hz : z ≠ 0) (hy : y ≠ 0) (hv : v ≠ 0)
+    (hz : z ≠ 0) (hy : y ≠ 0)
     (hglue : v = y * z⁻¹ ^ (H.f.natDegree / 2)) :
     g_aff.eval z / y =
       (infReverse H g_aff).eval (z⁻¹) / v * (-(z ^ 2)⁻¹) := by
