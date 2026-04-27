@@ -620,6 +620,37 @@ values satisfying the gluing relation `v = y · z⁻¹^(g+1)`, the cocycle
 follows from `eval_eq_neg_infReverse_eval_inv_mul_pow`.
 -/
 
+/-! ### Chart-symm at the basepoint -/
+
+/-- The IFT-derived `squareLocalHomeomorph` chart's `symm` evaluated at
+the y² value (= `H.f.eval a.val.1`) returns the basepoint y-coordinate
+`a.val.2`. This is the simplest chart-symm identification — it just uses
+the chart's `left_inv` at the basepoint, no analytic-continuation
+argument. -/
+lemma squareLocalHomeomorph_symm_at_basepoint
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H) :
+    (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval a.val.1) = a.val.2 := by
+  set e := squareLocalHomeomorph (H := H) a hpY with he_def
+  have hSrc : a.val.2 ∈ e.source := affineChartProjX_mem_source a hpY
+  have hApp : (e : ℂ → ℂ) a.val.2 = a.val.2 ^ 2 := by
+    simpa [e, squareLocalHomeomorph] using
+      congrArg (e : ℂ → ℂ) (rfl : a.val.2 = a.val.2)
+  rw [show (H.f.eval a.val.1) = a.val.2 ^ 2 from a.property.symm]
+  rw [← hApp]
+  exact e.left_inv hSrc
+
+/-- The gluing image of `a ∈ smoothLocusY` (with nonzero `x`) lies in
+`smoothLocusY` of the reversed data (its `y`-coordinate is nonzero). -/
+lemma affineGluingImage_mem_smoothLocusY
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (hxNZ : a.val.1 ≠ 0) :
+    affineGluingImage a hxNZ ∈
+      smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) := by
+  show (affineGluingImage a hxNZ).val.2 ≠ 0
+  rw [affineGluingImage_val_snd]
+  exact mul_ne_zero hpY (pow_ne_zero _ (inv_ne_zero hxNZ))
+
 /-- **Coordinate-level cross-summand cocycle.** Given:
 * low-degree polynomial `g_aff` (degree < `g_topology - 1`),
 * coordinates `z, y, v` with `z ≠ 0`, `y ≠ 0`, `v ≠ 0`,
