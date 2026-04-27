@@ -666,6 +666,69 @@ lemma reverse_eval_inv_eq
     rw [mul_assoc, ← mul_pow, inv_mul_cancel₀ hx, one_pow, mul_one]
   rw [← mul_right_cancel₀ hx_pow (key.trans h2.symm)]
 
+/-- **Reverse-derivative identity** (cleared form). For nonzero `x`:
+`x^N · (H.f.reverse)'(x⁻¹) + H.f'(x) · x² = N · H.f(x) · x`
+where `N = H.f.natDegree`. Derived from differentiating
+`reverse_eval_inv_eq` and equating via `HasDerivAt.unique`. -/
+lemma reverse_derivative_eval_inv_mul_pow (x : ℂ) (hx : x ≠ 0) :
+    x ^ H.f.natDegree * (Polynomial.reverse H.f).derivative.eval x⁻¹ +
+      H.f.derivative.eval x * x ^ 2 =
+      (H.f.natDegree : ℂ) * H.f.eval x * x := by
+  have hxsqNZ : x ^ 2 ≠ 0 := pow_ne_zero _ hx
+  have h_inv : HasDerivAt (fun w : ℂ => w⁻¹) (-(x ^ 2)⁻¹) x := hasDerivAt_inv_complex hx
+  have h_lhs : HasDerivAt (fun w : ℂ => (Polynomial.reverse H.f).eval w⁻¹)
+      ((Polynomial.reverse H.f).derivative.eval x⁻¹ * (-(x ^ 2)⁻¹)) x := by
+    have h1 := (Polynomial.reverse H.f).hasDerivAt x⁻¹
+    exact h1.comp x h_inv
+  have h_inv_pow : HasDerivAt
+      (fun w : ℂ => w⁻¹ ^ H.f.natDegree)
+      ((H.f.natDegree : ℕ) * x⁻¹ ^ (H.f.natDegree - 1) * (-(x ^ 2)⁻¹)) x :=
+    h_inv.fun_pow _
+  have h_f := H.f.hasDerivAt x
+  have h_rhs := h_f.fun_mul h_inv_pow
+  have h_eq_funs : (fun w : ℂ => (Polynomial.reverse H.f).eval w⁻¹) =ᶠ[nhds x]
+      (fun w : ℂ => H.f.eval w * w⁻¹ ^ H.f.natDegree) := by
+    have hOpen : IsOpen ({w : ℂ | w ≠ 0}) := isOpen_compl_singleton
+    refine eventually_of_mem (hOpen.mem_nhds hx) ?_
+    intro w hwNZ
+    exact reverse_eval_inv_eq w hwNZ
+  have h_rhs_lifted := h_rhs.congr_of_eventuallyEq h_eq_funs
+  have h_unique := h_lhs.unique h_rhs_lifted
+  push_cast at h_unique
+  have h_step1 : (Polynomial.reverse H.f).derivative.eval x⁻¹ =
+      -x ^ 2 * H.f.derivative.eval x * x⁻¹ ^ H.f.natDegree +
+      (H.f.natDegree : ℂ) * H.f.eval x * x⁻¹ ^ (H.f.natDegree - 1) := by
+    have hxsq_cancel : (-(x ^ 2)⁻¹) * -(x ^ 2) = 1 := by
+      rw [neg_mul_neg]; exact inv_mul_cancel₀ hxsqNZ
+    have h1 : (Polynomial.reverse H.f).derivative.eval x⁻¹ =
+        ((Polynomial.reverse H.f).derivative.eval x⁻¹ * -(x ^ 2)⁻¹) * -(x ^ 2) := by
+      rw [mul_assoc, hxsq_cancel, mul_one]
+    rw [h1, h_unique]
+    linear_combination
+      ((H.f.natDegree : ℂ) * H.f.eval x * x⁻¹ ^ (H.f.natDegree - 1)) * hxsq_cancel
+  rw [h_step1]
+  by_cases hN : H.f.natDegree = 0
+  · exfalso
+    have hd := H.h_degree
+    omega
+  have hNge1 : H.f.natDegree ≥ 1 := Nat.one_le_iff_ne_zero.mpr hN
+  have h_invN : x⁻¹ ^ H.f.natDegree * x ^ H.f.natDegree = 1 := by
+    rw [← mul_pow, inv_mul_cancel₀ hx, one_pow]
+  have h_invN_pred : x⁻¹ ^ (H.f.natDegree - 1) * x ^ H.f.natDegree = x := by
+    have hNeq : x ^ H.f.natDegree = x ^ (H.f.natDegree - 1) * x := by
+      rw [show x ^ H.f.natDegree = x ^ (H.f.natDegree - 1 + 1) from by
+        rw [Nat.sub_add_cancel hNge1]]
+      rw [pow_succ]
+    rw [hNeq]
+    rw [show x⁻¹ ^ (H.f.natDegree - 1) * (x ^ (H.f.natDegree - 1) * x) =
+      (x⁻¹ ^ (H.f.natDegree - 1) * x ^ (H.f.natDegree - 1)) * x from by ring]
+    rw [show x⁻¹ ^ (H.f.natDegree - 1) * x ^ (H.f.natDegree - 1) = 1 from by
+      rw [← mul_pow, inv_mul_cancel₀ hx, one_pow]]
+    ring
+  linear_combination
+    (-(x ^ 2) * H.f.derivative.eval x) * h_invN +
+      ((H.f.natDegree : ℂ) * H.f.eval x) * h_invN_pred
+
 /-- **Chart-symm gluing identity (membership-conditional).** Given:
 * `a ∈ smoothLocusY` with `a.val.1 ≠ 0`,
 * `H.f.eval z ∈ e_a.target` (so `e_a.symm` is defined at this value),
