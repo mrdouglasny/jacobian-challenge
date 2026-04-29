@@ -1,26 +1,46 @@
 # Genus theorem discharge plan
 
-_Drafted 2026-04-26. Concrete sub-task breakdown for honestly proving
-`genus_HyperellipticEven_eq` and `genus_HyperellipticOdd_eq`._
+_Drafted 2026-04-26. Updated 2026-04-29._
+
+## Status header (2026-04-29)
+
+* **Even parity — landed.** `genus_HyperellipticEven_eq` is now a real
+  theorem: `le_antisymm` of `hyperellipticEvenGenus_lower_bound` (S7,
+  via real linear independence of the basis) and
+  `Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le`
+  (S8, real proof on top of the 3-level Liouville axiom hierarchy
+  introduced in commit `cbcbdb3`).
+* **Odd parity — pending.** `genus_HyperellipticOdd_eq` still `sorry`
+  in `Jacobians/Extensions/Hyperelliptic.lean`. The framework mirrors
+  cleanly — once the cross-summand soundness fix lands the odd-side
+  port is largely mechanical (`reverseData` definitional shortcut + a
+  parallel single-summand 1-form on `OnePoint (HyperellipticAffine H)`).
+* **Open soundness fix (task #21).** The cross-summand `inl_inr` cocycle
+  is *also* available as a real theorem under
+  `g_aff.natDegree < N/2 - 1` (`hyperellipticEvenCoeff_cocycle_inl_inr`,
+  commit `8ad0d44`), but the bundling step
+  `hyperellipticEvenCoeff_satisfiesCotangentCocycle` still calls the
+  unsound axiomatic version. Threading `hDeg` through `hyperellipticForm`
+  retires the two cross-summand axioms.
 
 ## Goal
 
-Discharge the two open genus theorems:
+Discharge the two genus theorems:
 
 * `genus_HyperellipticEven_eq` in
   [`Jacobians/Extensions/HyperellipticEven.lean`](../Jacobians/Extensions/HyperellipticEven.lean):
   ```
   genus (HyperellipticEvenProj H) = H.f.natDegree / 2 - 1
   ```
+  **DONE** as of `65410a0` modulo the Liouville hierarchy axioms.
 * `genus_HyperellipticOdd_eq` in
   [`Jacobians/Extensions/Hyperelliptic.lean`](../Jacobians/Extensions/Hyperelliptic.lean):
   ```
   genus (HyperellipticOdd H h) = (H.f.natDegree - 1) / 2
   ```
-
-Both are currently `sorry`. The discharge plan below applies in
-parallel to both parities; per-step work is largely shared via the
-`reverseData` definitional shortcut for `HyperellipticAffineInfinity`.
+  Still `sorry`. The discharge plan below applies in parallel to both
+  parities; per-step work is largely shared via the `reverseData`
+  definitional shortcut for `HyperellipticAffineInfinity`.
 
 ## Strategy
 
@@ -79,33 +99,40 @@ Sorry-free, axiom-free — pure `change` + reuse.
 **Files:**
 [`EvenForm.lean`](../Jacobians/ProjectiveCurve/Hyperelliptic/EvenForm.lean).
 
-**Status: scaffolded with partial soundness fix** (`ea35935`,
-post-Gemini review #1). The two cross-summand cocycle axioms now take
-the gluing relation `g_inf = infReverse H g_aff` as an **explicit
-hypothesis** rather than quantifying over arbitrary pairs (the latter
-was unsound: the cocycle equation only holds for the Möbius-paired
-infinity-side polynomial).
+**Status: `inl_inr` direction discharged as a real low-degree theorem
+(commits `564fd82, 2d4e446, f2acb4c, 06db77c, 7d7a7bf, 76bbc23, 8214395,
+d46b84d, 8ad0d44`).** All four sub-cases proven across ~1100 LOC:
 
-**KNOWN SOUNDNESS GAP** (Gemini review #2,
-`docs/gemini-review-genus-framework.md`, §B with Claude's correction):
-the axioms are still mathematically false for `g_aff.natDegree ≥
-H.f.natDegree / 2 - 1` (form has poles at infinity, cocycle equation
-literally fails). Hard to exploit due to non-computable `Quotient.out`,
-but a real liability.
+* `cocycle_inl_inr_smoothLocusY_smoothLocusY` (projX × projU)
+* `cocycle_inl_inr_smoothLocusXNotY_smoothLocusY` (projY × projU)
+* `cocycle_inl_inr_smoothLocusY_smoothLocusXNotY` (projX × projV)
+* `cocycle_inl_inr_smoothLocusXNotY_smoothLocusXNotY` (projY × projV)
 
-**Recommended fix:** Add `(hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)`
-to both axioms; refactor `hyperellipticForm` to take `Polynomial.degreeLT
-ℂ g_topology` (subtype) so the LinearMap structure is preserved. Cascading
-refactor through linearity theorems and basis differentials. Tracked as
-task #21.
+Each sub-case is a Möbius-derivative + reverse-polynomial-identity
+calculation on the affine-affine infinity overlap. The unified
+`hyperellipticEvenCoeff_cocycle_inl_inr` (commit `8ad0d44`) dispatches
+to the four sub-cases via `by_cases` on `smoothLocusY`/`smoothLocusX`
+membership, under hypothesis `hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1`.
 
-**Content (long-term):** Möbius transition `x ↦ 1/x` on the gluing region.
-Discharging the axioms (replacing them with real proofs for the constrained
-domain) requires explicit chain-rule computations on the polynomial
-corrections.
+**SOUNDNESS GAP STILL OPEN (task #21).** The bundling step
+`hyperellipticEvenCoeff_satisfiesCotangentCocycle` still calls the
+two unsound axioms `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` and
+`_inr_inl_axiom`. The `inl_inr` axiom is now redundant — the real
+theorem exists — but plumbing `hDeg` through `hyperellipticEvenCoeff_mem_submodule`
+and `hyperellipticForm` requires refactoring the constructor to take
+`Polynomial.degreeLT ℂ g_topology` (subtype). Cascading refactor through
+linearity theorems and basis differentials.
 
-**Estimate:** Soundness fix ~200 LOC of refactoring. Real discharge of
-the axioms ~200–400 LOC of new proof per Gemini's 1-3 weeks estimate.
+**Remaining work for full S5 discharge:**
+1. Soundness refactor: thread `hDeg` from `hyperellipticForm` down to
+   `_satisfiesCotangentCocycle`; replace `_inl_inr_axiom` with the
+   real low-degree theorem.
+2. Discharge `inr_inl` direction (still axiomatized). Symmetric
+   structure to `inl_inr`; can swap via the chart-transition
+   derivative-product-to-1 lemma.
+
+**Estimate:** Soundness fix ~200 LOC of refactoring; `inr_inl`
+discharge ~300–500 LOC mirroring the `inl_inr` chain.
 
 ### S6. Form-level constructor + linearity (`Form.lean`)
 
@@ -146,43 +173,60 @@ Cross-references: `b384a12` discharges `hyperellipticEvenDxOverY`,
 `Extensions/HyperellipticEven.lean`. `95f22fa` adds
 `hyperellipticEvenGenus_lower_bound` (`g_topology ≤ genus`).
 
-### S8. Riemann–Roch upper bound + headline theorem
+### S8. Genus upper bound + headline theorem
 
-**Status: lower bound DONE** (`95f22fa`,
-`hyperellipticEvenGenus_lower_bound`); upper bound still open.
+**Status: DONE for even parity** (`cbcbdb3`, `65410a0`).
 
-**File:** the remaining sorry is `genus_HyperellipticEven_eq` in
-[`Jacobians/Extensions/HyperellipticEven.lean`](../Jacobians/Extensions/HyperellipticEven.lean)
-(and the analogous `genus_HyperellipticOdd_eq` in
-[`Hyperelliptic.lean`](../Jacobians/Extensions/Hyperelliptic.lean)).
+**Path taken:** the Riemann-Roch route was deferred (Gemini estimated
+6–12 months); instead the upper bound is derived from a 3-level Liouville
+axiom hierarchy in
+[`Jacobians/Axioms/HyperellipticLiouville.lean`](../Jacobians/Axioms/HyperellipticLiouville.lean):
+
+* **Level 1** (`AX_Liouville_compact_complex_manifold`) — every analytic
+  function on a compact connected complex manifold is constant.
+  Mathlib-shaped statement; no project definitions involved. Discharge
+  target: chart-local maximum-modulus + connectedness gluing.
+* **Level 2** (`AX_HyperellipticForm_polynomial_decomposition`) —
+  every holomorphic 1-form on `HyperellipticEvenProj H` has a chart-local
+  representation `g(z)/y(z)` for `g.natDegree < N/2 - 1` on the projX
+  chart at any `a ∈ smoothLocusY`. Mid-level: derives from Level 1 +
+  growth bounds at infinity.
+* **Level 3** (`AX_HyperellipticOneForm_eq_form`) — every holomorphic
+  1-form equals `hyperellipticForm H g` for some low-degree `g`.
+  Project-specific. Derives from Level 2 + the cocycle (real for `inl_inr`
+  modulo task #21).
+
+The genus upper bound (`genus_HyperellipticEven_le`) is a real theorem:
+build `degreeLT ℂ n →ₗ[ℂ] HolomorphicOneForm` via `hyperellipticFormLinearMap`,
+get surjectivity from Level 3, then `Module.finrank` of the target ≤
+`Module.finrank` of `degreeLT ℂ n = n` via `LinearMap.rank_le_of_surjective`.
 
 **Lower bound (DONE):** the basis
 `{ hyperellipticEvenBasisDifferential H k _hk : k < g_topology }` is
 linearly independent (S7), so via `LinearIndependent.fintype_card_le_finrank`
-plus the bridge-derived `FiniteDimensional` instance,
+plus the bridge-derived `FiniteDimensional` instance (Kirov's Montel),
 `g_topology ≤ Module.finrank ℂ (HolomorphicOneForm (HyperellipticEvenProj H))
 ≡ genus`.
 
-**Upper bound (TODO):** Apply `AX_RiemannRoch` to the canonical divisor:
-`dim H⁰(K) - dim H¹(K) = deg K + 1 - g`. With `deg K = 2g - 2`,
-`dim H¹(K) = dim H⁰(O) = 1` (Serre duality + connectedness),
-`dim H⁰(K) = dim H⁰(Ω¹) = genus`, gives `genus = g`.
+**Headline:** `genus_HyperellipticEven_eq H : genus (HyperellipticEvenProj H) = H.f.natDegree / 2 - 1`
+is `le_antisymm` of the two bounds above, both real proofs.
 
-Requires setting up the canonical divisor and identifying
-`H⁰(K) ≅ HolomorphicOneForm`. Substantial side machinery — Gemini
-review #2 estimated 6-12 months for this path.
+**Vetting:** the Liouville hierarchy was Gemini-vetted on 2026-04-29
+(verdicts saved to `history/gemini_deep_think.md`); all six review
+criteria green-lit, derivation chain "impeccable", "ready for inclusion".
 
-Per Gemini review #2 (E), the **strongly recommended alternative** is
-to discharge the cross-summand cocycle (S5) for low-degree polynomials
-first. This:
-* Eliminates the soundness gap from S5.
-* Produces forms that are *truly* holomorphic at infinity.
-* Makes the upper bound argument constructive: any global holomorphic
-  1-form must be of the form `hyperellipticForm H g` for some low-
-  degree `g`, by a Liouville/maximum-principle-style argument on the
-  affine chart.
+**Riemann-Roch route remains** as a longer-term alternative — would
+discharge Level 3 directly via the canonical divisor + Serre duality,
+removing the Liouville axioms but pulling in `AX_RiemannRoch` and
+canonical-divisor machinery. Tracked as future work, not actively
+pursued.
 
-**Estimate:** Cocycle discharge ~1-3 weeks; full Riemann-Roch ~6-12 months.
+**Odd parity:** still open. Mirror the framework into
+`Jacobians/Extensions/Hyperelliptic.lean` — the affine-side machinery
+already transfers via `reverseData`; the missing piece is the Liouville-
+hierarchy analogue for `HyperellipticOdd H h`, which has *one* point
+at infinity (vs two in the even case) so the polynomial-decomposition
+constraint is `g.natDegree < (N-1)/2`.
 
 ## Total estimate
 
@@ -197,39 +241,23 @@ Recommended: S1 (foundation) → S2 (mirror) → S3 (cocycle) → S4
 Each step is a clean commit. S1, S2, S6, S7 are largely mechanical.
 S3 and S5 are the genuinely harder pieces.
 
-## Currently in flight (as of `9ab627a`, 2026-04-27 evening)
+## State as of `65410a0`, 2026-04-29
 
-S5 has substantial new infrastructure (commits `b0717b6`, `cb828ac`,
-`44a4e00`, `b0b09b8`, `9ab627a`):
+S1–S7 done as real proofs. S5 cross-summand `inl_inr` direction is a
+real low-degree theorem (`hyperellipticEvenCoeff_cocycle_inl_inr`,
+`8ad0d44`); the bundling step still routes through axioms because
+`hDeg` is not yet plumbed through `hyperellipticForm` (task #21).
+S8 upper bound discharged via the Liouville axiom hierarchy (`cbcbdb3`),
+giving `genus_HyperellipticEven_eq` as a real theorem (`65410a0`).
 
-* **Polynomial identities** for the Möbius reflection
-  (`reflect_eval_inv_mul_pow`, `eval_eq_neg_infReverse_eval_inv_mul_pow`).
-* **Möbius derivative** (`hasDerivAt_inv_complex`, `fderiv_inv_apply_one`).
-* **Gluing-image construction** (`affineGluingImage`,
-  `proj_eq_affineGluingImage`, `affineGluingImage_mem_smoothLocusY`).
-* **Coordinate-level cocycle** (`cross_summand_cocycle_coord`) — the
-  algebraic core: given coordinates `(z, y, v)` with the gluing relation,
-  the cocycle equation follows from the polynomial identity.
-* **Chart-symm at basepoint** (`squareLocalHomeomorph_symm_at_basepoint`).
+Form.lean and EvenForm.lean have zero `sorry`. Extensions/HyperellipticEven.lean
+is sorry-free. Open work for the even parity: discharge the
+two cross-summand axioms (replace with low-degree-only versions),
+discharge the three Liouville-hierarchy axioms.
 
-The remaining work for the chart-level cocycle: extend chart-symm
-identification from the basepoint to a neighborhood (analytic-continuation
-/ branch-uniqueness argument), then lift the coordinate cocycle through
-the chart structures. ~50% of the discharge effort remaining per Gemini's
-1-3 weeks estimate.
-
-## State as of `840bc65`, 2026-04-27 morning
-
-S1–S4 done as real proofs. S5 cross-summand cocycles axiomatized with
-the gluing hypothesis (`ea35935`); known soundness gap for high-degree
-g_aff (Gemini review #2, task #21). S6 (form constructor + linearity),
-S7 (injectivity + linear independence), and the S8 lower bound are
-all sorry-free. Only `genus_HyperellipticEven_eq` itself remains
-(needs S8 upper bound from RR or — Gemini's preferred path — from
-discharging the S5 cocycle for low-degree g).
-
-Form.lean is sorry-free. Extensions/HyperellipticEven.lean has 1 sorry
-(`genus_HyperellipticEven_eq`).
+Open for odd parity: mirror the framework into Hyperelliptic.lean
+(extension theorems still mostly `sorry`); the affine machinery
+already transfers via `reverseData`.
 
 ### Recent commits chronological
 
@@ -249,3 +277,13 @@ Form.lean is sorry-free. Extensions/HyperellipticEven.lean has 1 sorry
 * `7673ef2`: Gemini review #2 doc with soundness analysis
 * `5447723`: docstring warning for known soundness gap
 * `840bc65`: lint cleanup (omit + drop redundant Fact args)
+* `b0717b6, cb828ac, 44a4e00, b0b09b8, 9ab627a, 5641420`: S5
+  infrastructure (Möbius helpers, gluing image, chart-symm at basepoint)
+* `5e098dd, 564fd82, 2d4e446, f2acb4c, 06db77c, 7d7a7bf, 76bbc23,
+  8214395, d46b84d`: S5 four cross-summand sub-cases (real proofs)
+* `8ad0d44`: S5 unified `inl_inr` cocycle theorem (dispatches the four
+  sub-cases on smoothLocusY/X membership)
+* `cbcbdb3`: Liouville axiom hierarchy + `genus_HyperellipticEven_le`
+  upper bound (real theorem on top of 3 axioms)
+* `65410a0`: `genus_HyperellipticEven_eq` is now a real theorem
+  (`le_antisymm` of S7 lower + S8 upper)

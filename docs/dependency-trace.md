@@ -1,11 +1,26 @@
 # Dependency trace — foundation closure audit
 
-_Drafted 2026-04-23. User claim: "for each foundation definition to
-claim it is closed, everything it depends on must be complete or else
-a hard theorem stated as an axiom." This document traces the
-transitive dependencies of every F-class and H-class (foundation)
-definition in Buzzard's `Challenge.lean`, and classifies each
-dependency as (R) real def/instance or (A) properly-formulated axiom._
+_Drafted 2026-04-23. Updated 2026-04-29._
+
+**Update note (2026-04-29):** since the original draft, two important
+changes:
+1. `AX_FiniteDimOneForms` is **retired**. Finite-dimensionality now
+   derives from Kirov's Montel theorem via the real
+   `Jacobians.Bridge.KirovHolomorphic` bridge (commit `dfe57b0` and
+   subsequent). The aggregate axiom list below still references it for
+   historical traceability — read the row as "now derived, not asserted".
+2. A new **3-level Liouville axiom hierarchy** lives at
+   `Jacobians/Axioms/HyperellipticLiouville.lean`. It is *not* used by
+   any foundation `def` (genus, Jacobian, ofCurve, …); it is consumed
+   only by the hyperelliptic test theorem `genus_HyperellipticEven_eq`.
+   Listed in §A-test below for completeness.
+
+_Original purpose: for each foundation definition to claim it is closed,
+everything it depends on must be complete or else a hard theorem stated
+as an axiom. This document traces the transitive dependencies of every
+F-class and H-class (foundation) definition in Buzzard's `Challenge.lean`,
+and classifies each dependency as (R) real def/instance or (A)
+properly-formulated axiom._
 
 **Legend:**
 - **R** = real `def` / `instance` / derived theorem. No axiom invoked.
@@ -213,6 +228,36 @@ with explicit discharge roadmaps.
 **None** (as of 2026-04-23 round-3 refactor). `AX_jacobian_lieAddGroup`
 was closed via Path A — proving the two ULift-smoothness lemmas
 `contMDiff_ulift_up` / `contMDiff_ulift_down` inline.
+
+### A-test (axioms used only by extension/test theorems, not foundation):
+
+| # | Axiom | Statement | Used by |
+|---|---|---|---|
+| T1 | `AX_Liouville_compact_complex_manifold` | analytic `f : M → ℂ` on compact connected complex manifold ⇒ `f` constant | `AX_HyperellipticForm_polynomial_decomposition` (Level 2) |
+| T2 | `AX_HyperellipticForm_polynomial_decomposition` | every holomorphic 1-form on `HyperellipticEvenProj H` has chart-local representation `g(z)/y(z)` for `g.natDegree < N/2 - 1` | `AX_HyperellipticOneForm_eq_form` (Level 3) |
+| T3 | `AX_HyperellipticOneForm_eq_form` | every holomorphic 1-form on `HyperellipticEvenProj H` equals `hyperellipticForm H g` for some low-degree `g` | `genus_HyperellipticEven_le` (real theorem) |
+| T4 | `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` | cross-summand cocycle equation, `inl_inr` direction (under gluing hypothesis) | `_satisfiesCotangentCocycle` bundling |
+| T5 | `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` | cross-summand cocycle equation, `inr_inl` direction (under gluing hypothesis) | `_satisfiesCotangentCocycle` bundling |
+
+T1–T3 form the layered Liouville hierarchy. T1 is a statement about
+arbitrary compact complex manifolds (no project-specific defs); discharge
+needs Mathlib's not-yet-fully-assembled chart-local maximum modulus
+plus a connectedness-gluing argument. T2 derives from T1 + growth bounds
+at infinity. T3 derives from T2 + the cocycle (real for `inl_inr`
+under low-degree, modulo the soundness fix on T4).
+
+T4 is **also available as a real theorem** under
+`g_aff.natDegree < N/2 - 1` (`hyperellipticEvenCoeff_cocycle_inl_inr`);
+the axiom remains in the bundling step until task #21 plumbs `hDeg`
+through `hyperellipticForm`.
+
+T5 still requires a real proof — symmetric structure to T4 with the
+chart-transition derivative-product-to-1 swap.
+
+A-test axioms are **soundness-gated by task #21** (T4 high-degree
+unsoundness) but no foundation theorem is exposed to that gap; only
+`genus_HyperellipticEven_eq` and the Liouville-hierarchy chain land
+on these.
 
 ---
 
