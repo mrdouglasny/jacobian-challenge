@@ -127,9 +127,26 @@ Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/ch
 | **Model time** | Claude Opus 4.7 (primary coder), GPT-5.4 Codex (rescue passes on Jacobian functoriality derivations, HyperellipticEven T2 / Compact proofs, affine cocycle equations), Gemini 3 Pro deep-think (axiom audits, type-equality smell-test) |
 | **Human effort** | Mathematician-user directing: scope, axiom-vs-proof boundary, hack-blocker judgments, review of all landings. Zero human-written Lean. |
 
+## Axiom hygiene and vetting
+
+**Caveat for outside reviewers.** This repo introduces axioms as a deliberate part of its workflow — they are how we make progress on a piece of mathematics that is bigger than what one contributor can prove from first principles in Lean today. Every axiom currently in the repo has been authored or curated in this session and **none has yet received independent human-mathematician review**. If you are evaluating the formalization, the axiom files are where to look first.
+
+**When we introduce an axiom.** An axiom is added when (a) the statement is a classical textbook theorem we are not going to redo (Riemann–Roch, Serre duality, Liouville on compact complex manifolds, etc.), (b) the statement is a concrete data-level fact whose construction is scoped out (e.g. `pathIntegralBasepointFunctional`), or (c) we are deferring a proof that is in flight elsewhere in the repo and want the downstream theorem to compile in the meantime. Axioms are never used to "make a proof go through" without a documented discharge story.
+
+**Procedure for each new axiom.**
+
+1. **Statement first, in a dedicated `Jacobians/Axioms/*.lean` file** — never inline `axiom` in a proof file.
+2. **Classification** — every axiom is tagged in [`docs/dependency-trace.md`](docs/dependency-trace.md) as one of: classical-theorem (textbook citation), data-level function-existence (with construction plan), or atlas/structure axiom (with atlas-completion plan).
+3. **Discharge plan** — for non-textbook axioms a written plan lives under [`docs/construction-plans/`](docs/construction-plans/) or alongside the axiom file as a doc comment. The plan names the Mathlib pieces it would consume and estimates effort.
+4. **LLM cross-vetting** — before landing, axiom statements are reviewed by a second LLM family (typically Gemini 3 Pro deep-think) against six criteria: type-correctness in Lean, mathematical correctness as stated, faithfulness to the classical statement, soundness of any derivation chain among the axioms, absence of accidental existential collapse (e.g. vacuous statements), and consistency with the repo's existing typeclass shapes. The reviewer's verdicts and any tightenings are recorded in commit messages and, for substantive findings, in [`docs/adversarial-review/`](docs/) (example: the `EvenForm` Möbius axioms were caught as unsound on 2026-04-26 and tightened with an explicit `g_inf = infReverse H g_aff` hypothesis in `ea35935`).
+5. **Layered axioms over single big axioms.** Where a result is structurally a chain (Liouville → polynomial decomposition → form surjectivity), we prefer a **hierarchy of axioms** so each level can be discharged independently as Mathlib catches up. The genus upper bound for `HyperellipticEvenProj` is the current example, sitting on a 3-level Liouville hierarchy in [`Jacobians/Axioms/HyperellipticLiouville.lean`](Jacobians/Axioms/HyperellipticLiouville.lean).
+6. **Soundness checks.** Every commit that lands an axiom or a theorem consuming axioms runs `lake env lean` locally before push (per [`CLAUDE.md`](CLAUDE.md)), and CI runs `lake build` end-to-end. Mathlib has no inconsistency detector; we rely on the kernel + the hierarchy structure (no axiom asserts a contradiction, each is a known-true classical statement or a clearly-scoped existence claim).
+
+**What outside reviewers can do.** The highest-value reviews are: (i) read [`Jacobians/Axioms/`](Jacobians/Axioms/) and challenge any statement whose classical version is misquoted or whose Lean encoding is too strong; (ii) point at Mathlib lemmas that would let us discharge an axiom directly; (iii) flag any axiom whose discharge plan is wishful. Open an issue or post in the Lean Zulip `#Autoformalization > Jacobian challenge` thread.
+
 ## What this claim does and doesn't say
 
-We claim a **solid foundation with correct definitions** for Buzzard's challenge: the interface is closed with real constructions, genus-0 / genus-1 / hyperelliptic curves are populated as real types, and every remaining axiom is enumerated and classified. We do not claim a sorry-free end-to-end solution — the five data-level axioms and the ten classical-theorem citations remain, each with a discharge plan.
+We claim a **solid foundation with correct definitions** for Buzzard's challenge: the interface is closed with real constructions, genus-0 / genus-1 / hyperelliptic curves are populated as real types, and every remaining axiom is enumerated and classified. We do not claim a sorry-free end-to-end solution — the five data-level axioms and the ten classical-theorem citations remain, each with a discharge plan. Axioms have been LLM-vetted but not yet human-mathematician-reviewed; downstream theorems whose only non-Lean-proven content is a textbook-classical axiom should be read as "reduced to that classical input", not as "fully proven from Mathlib".
 
 ## Build
 
