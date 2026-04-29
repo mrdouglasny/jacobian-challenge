@@ -1,8 +1,31 @@
 # Status
 
-_Last updated: 2026-04-23 (24/24 Buzzard sorries closed; data maps refactored to real defs)_
+_Last full rewrite: 2026-04-23. Header refreshed: 2026-04-29._
 
-## Build status
+> **Read this first** — this document was authored 2026-04-23 and
+> describes the API-closure state at that point (24/24 Buzzard sorries
+> closed). The "Module progress" sections below are accurate for their
+> date; they do not reflect the substantial 1-form framework, S5
+> cross-summand cocycle, S7 linear independence, S8 Liouville-hierarchy
+> upper bound, or `genus_HyperellipticEven_eq` headline theorem that
+> all landed between 2026-04-26 and 2026-04-29.
+>
+> For the **current** state, see:
+> * [`README.md`](../README.md) — public-facing summary, current state
+>   table, axiom inventory.
+> * [`docs/genus-theorem-discharge-plan.md`](genus-theorem-discharge-plan.md)
+>   — S1–S8 sub-task statuses (the genus framework workstream is the
+>   bulk of post-2026-04-26 work).
+> * [`docs/dependency-trace.md`](dependency-trace.md) — axiom audit; has
+>   a 2026-04-29 update note flagging `AX_FiniteDimOneForms` as retired
+>   and the new Liouville hierarchy.
+>
+> Below is the snapshot from 2026-04-23 — kept for historical
+> traceability.
+
+---
+
+## Build status (2026-04-23 snapshot)
 
 ✅ Green. `lake build` completes 8341 jobs. **Zero sorries** anywhere in the project.
 
