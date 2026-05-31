@@ -1,24 +1,21 @@
 /-
 `genus ProjectiveLine = 0`.
 
-**Direct proof via uniformization.** Since we have `stereographic :
-ProjectiveLine ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1` from
-`Jacobians/ProjectiveCurve/Line.lean`, we just apply the ⇐ direction
-of `AX_genus_eq_zero_iff_homeo`:
+**Direct proof (axiom-free).** By definition `genus X = Module.finrank ℂ
+(HolomorphicOneForm X)`, and `Line/OneForm.lean` proves
+`Subsingleton (HolomorphicOneForm ProjectiveLine)` directly via Liouville
+(no uniformization axiom). The `finrank` of a subsingleton module is `0`.
 
-    genus X = 0 ↔ Nonempty (X ≃ₜ S²)
-
-to discharge.
-
-This routes `genus ProjectiveLine = 0` through the uniformization
-axiom. An alternative direct proof via Liouville + chart cocycle on
-`HolomorphicOneForm ProjectiveLine` exists but is substantially more
-Lean work; deferred until we need a non-axiom-based route.
-
-See `docs/completion-plan.md` workstream B1.
+This **retires `AX_genus_eq_zero_iff_homeo` from the `genus ℙ¹ = 0` cell**.
+The previous proof routed through that uniformization axiom; the
+dependency is now inverted — `Line/OneForm.lean` proves the subsingleton
+from first principles and this file derives the genus from it. The
+abstract `genus_eq_zero_iff_homeo` in `Challenge.lean` still uses the
+axiom; only the concrete ℙ¹ value no longer does. See
+`docs/contracts/genus.md`.
 -/
-import Jacobians.ProjectiveCurve.Line
-import Jacobians.Axioms.Uniformization0
+import Jacobians.ProjectiveCurve.Line.OneForm
+import Jacobians.RiemannSurface.Genus
 
 namespace Jacobians.ProjectiveCurve
 
@@ -26,13 +23,11 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- The genus of `ProjectiveLine` is zero.
-
-Proof: use the `stereographic` homeomorphism `ProjectiveLine ≃ₜ S²`
-and apply the uniformization axiom `AX_genus_eq_zero_iff_homeo`. -/
+/-- The genus of `ProjectiveLine` is zero. Axiom-free: `finrank` of the
+(subsingleton) space of holomorphic 1-forms on ℙ¹, which vanishes by the
+direct Liouville argument in `Line/OneForm.lean`. -/
 theorem genus_projectiveLine_eq_zero :
-    Jacobians.RiemannSurface.genus ProjectiveLine = 0 := by
-  rw [Jacobians.Axioms.AX_genus_eq_zero_iff_homeo]
-  exact ⟨ProjectiveLine.stereographic⟩
+    Jacobians.RiemannSurface.genus ProjectiveLine = 0 :=
+  Module.finrank_eq_zero_of_subsingleton ℂ (HolomorphicOneForm ProjectiveLine)
 
 end Jacobians.ProjectiveCurve

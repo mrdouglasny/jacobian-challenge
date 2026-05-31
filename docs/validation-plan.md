@@ -148,13 +148,16 @@ done) so they can't drift from the validated constructions.
 ## Part 3 — The validation backlog (prioritized)
 
 1. **CI axiom-trace guard** (Part 1.1) — ~1 hr, permanent.
-2. **Discharge the genus-side anti-hack on a witness** — prove
-   `genus ProjectiveLine = 0` *directly* (`HolomorphicOneForm ℙ¹ = ⊥`, a
-   Liouville/degree argument on the real cocycle submodule) without
-   `AX_genus_eq_zero_iff_homeo`. Achievable because the form module is
-   concretely defined. Turns the ℙ¹ cell `proven_via_axiom →
-   PROVEN_CORE_AXIOMS`. (The `ofCurve_inj` analogue is **not** here — see
-   the note below; it is blocked upstream.)
+2. ~~**Discharge the genus-side anti-hack on a witness**~~ — **DONE
+   (2026-05-31).** `genus ProjectiveLine = 0` is now proved *directly*: a
+   chart-cocycle + Liouville argument shows `HolomorphicOneForm ℙ¹` is a
+   subsingleton (`Line/OneForm.lean`, ~250 LOC, axiom-free), and `finrank`
+   of a subsingleton is 0. `AX_genus_eq_zero_iff_homeo` is retired from the
+   ℙ¹ genus cell (`proven_via_axiom → PROVEN_CORE_AXIOMS`); `genus ℙ¹` and
+   `genus Elliptic` are now both core-axioms-only. The dependency was
+   inverted: `OneForm` proves the subsingleton from first principles and
+   `Genus` derives the value from it. (The `ofCurve_inj` analogue is **not**
+   here — see the note below; it is blocked upstream.)
 3. **Make `pathIntegralBasepointFunctional` concrete on `Elliptic`** — the
    real prerequisite for validating `ofCurve` at all. Wire in
    `kirovBackedFunctional` (needs the FTC theorem

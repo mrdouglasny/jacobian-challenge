@@ -96,6 +96,10 @@
  Axioms.pullbackOneForm,
  Axioms.pushforwardOneForm,
  RiemannSurface.loopIntegralToH1]
+'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 'Jacobians.ProjectiveCurve.genus_Elliptic_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq' depends on axioms: [propext,
  Classical.choice,
