@@ -68,6 +68,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.RiemannSurface
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
+import Jacobians.GeneralResults.EntireGrowth
 import Mathlib.Analysis.Analytic.Basic
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 
@@ -203,7 +204,14 @@ The chart-local form `g(z) / e_a.symm(H.f.eval z)` matches step 5 (with
 - Use the cocycle (now real for inl_inr) to extend chart-local
   agreement to global.
 - Bound `deg(g)` via the chart-overlap behaviour at infinity.
--/
+
+**Step 4 of this plan ("the extracted `g := coeff · √f` is entire with
+polynomial growth ⇒ it is a polynomial of degree `< N/2 − 1`") is now a
+proven, axiom-free lemma**: `differentiable_eq_polynomial_of_growth` in
+`Jacobians/GeneralResults/EntireGrowth.lean`. What remains project-specific
+is constructing that entire extension and its growth exponent from the
+chart-cocycle data (steps 1–3) — the branch-point regularity and the
+degree-at-infinity bound. -/
 axiom AX_HyperellipticForm_polynomial_decomposition
     {H : HyperellipticData} [hf : Fact (¬ Odd H.f.natDegree)]
     (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
