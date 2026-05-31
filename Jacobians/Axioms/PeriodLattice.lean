@@ -32,7 +32,7 @@ Ch. 2 §2.
 At the current project stage the actual proof depends on path integrals,
 the intersection form, and the positive-definiteness statement packaged in
 `AX_RiemannBilinear`, so we expose the lattice property here as a named
-axiom for the Jacobian bridge.
+axiom for the Jacobian bridge.\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 
 Both axioms below are **NOT VERIFIED** and should be retired once the
 Riemann-bilinear infrastructure lands.

@@ -114,7 +114,7 @@ _Verified snapshot with exact sorry/axiom counts and remote-sync state:_
 
 | | |
 |---|---|
-| Build | `lake build` green (8378 jobs, verified 2026-05-31); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). 105 axioms (103 ours + 2 vendored), classified below; `genus ℙ¹ = 0`, `genus Elliptic = 1`, and Liouville Level 1 are axiom-free |
+| Build | `lake build` green (8378 jobs, verified 2026-05-31); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). **95 axioms (93 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, and Liouville Level 1 are axiom-free |
 | Foundation defs | 13/13 real (`Jacobian X`, all 7 typeclass instances, `ofCurve`, `pushforward`, `pullback`, `degree`) |
 | Property theorems derived | `ofCurve_self`, `pushforward_id_apply` / `_comp_apply`, `pullback_id_apply` / `_comp_apply`, `genus_ProjectiveLine_eq_zero`, `genus_Elliptic_eq_one`, **`genus_HyperellipticEven_eq` = `H.f.natDegree / 2 - 1`** (real, modulo Liouville hierarchy axioms) |
 | Concrete real curve types | `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`, `HyperellipticEven` / `HyperellipticEvenProj` (two-chart pushout, full instance chain via `[Fact (¬ Odd ...)]`) |
@@ -167,6 +167,7 @@ lake build
 
 ## Further documentation
 
+- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (95), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
 - [`docs/status-2026-05-31.md`](docs/status-2026-05-31.md) — current verified status snapshot (build, exact sorry/axiom inventory, open workstreams, remote-sync state).
 - [`docs/validation-plan.md`](docs/validation-plan.md) — how to judge the definitions and axioms before proving them: mechanical `#print axioms` guard, axiom taxonomy by validation risk, the prioritized validation backlog, and a human-readable contract + AI-modelable specification-first pipeline.
 - [`docs/contracts/`](docs/contracts/) — per-object contract cards (judge an object without reading its proofs): [`genus`](docs/contracts/genus.md) (validated on `Elliptic` from core axioms), [`ofCurve`](docs/contracts/ofCurve.md) (anti-hack property found opaque-blocked).

@@ -24,12 +24,12 @@ object. The path-integral bridge has an extra ingredient: ours takes
 path** `γ : ℝ → X`. To compose them we need a **path-selection axiom**:
 
 ```
-axiom bridgePath : (P₀ P : X) → ℝ → X
-axiom bridgePath_continuous            : Continuous (bridgePath P₀ P)
-axiom bridgePath_chart_differentiable  : ∀ t, DifferentiableAt ℝ
+axiom bridgePath : (P₀ P : X) → ℝ → X\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_continuous            : Continuous (bridgePath P₀ P)\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_chart_differentiable  : ∀ t, DifferentiableAt ℝ\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
                                           (chartAt _ ∘ bridgePath P₀ P) t
-axiom bridgePath_at_zero               : bridgePath P₀ P 0 = P₀
-axiom bridgePath_at_one                : bridgePath P₀ P 1 = P
+axiom bridgePath_at_zero               : bridgePath P₀ P 0 = P₀\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_at_one                : bridgePath P₀ P 1 = P\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 ```
 
 The chart-local smoothness hypothesis matches Kirov's `lineIntegral`

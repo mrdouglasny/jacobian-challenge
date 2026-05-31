@@ -230,7 +230,7 @@ compile-clean.
   via the two connected chart images with nonempty overlap.
 
 Once those land, flip `HyperellipticEven` in `Hyperelliptic.lean` from
-axiom stub to a real `def := HyperellipticEvenProj` and retire the 5
+axiom stub to a real `def := HyperellipticEvenProj` and retire the 5\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 typeclass-instance axioms on `HyperellipticEven`.
 -/
 
