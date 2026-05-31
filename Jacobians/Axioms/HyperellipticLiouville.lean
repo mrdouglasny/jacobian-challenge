@@ -1,11 +1,13 @@
 /-
 # Liouville axioms for hyperelliptic curves and the genus upper bound
 
-This file packages three axioms forming a hierarchy from most abstract
-to most project-specific. Each lower-level axiom is *derivable* from the
-one above plus standard complex analysis machinery — but Mathlib does
-not yet supply that machinery, so we axiomatize at three levels and
-document the proof plan for each derivation.
+This file packages a three-level hierarchy from most abstract to most
+project-specific. Each lower level is *derivable* from the one above plus
+standard complex-analysis machinery. **Level 1 is now a proven theorem**
+(`liouville_compact_complex_manifold`, axiom-free, 2026-05-31); Levels 2
+and 3 remain axiomatized because the chart-local growth-bound and
+function-field-decomposition machinery they need is not yet in Mathlib.
+Each carries a documented proof plan for its eventual derivation.
 
 The lowest-level axiom (`AX_HyperellipticOneForm_eq_form`) is what
 actually feeds the genus upper bound; the higher-level axioms exist to
@@ -15,7 +17,7 @@ future discharge starting from whichever level Mathlib catches up to.
 ## The hierarchy
 
 ```
-            AX_Liouville_compact_complex_manifold       (Level 1)
+       liouville_compact_complex_manifold  (Level 1 — PROVEN, axiom-free)
                           ↓
                   + identity theorem
                   + chart-local growth bounds
@@ -71,7 +73,7 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 
 namespace Jacobians.Axioms.HyperellipticLiouville
 
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Topology
 open Jacobians.RiemannSurface
 open Jacobians.ProjectiveCurve
 
@@ -89,27 +91,84 @@ chart cover gives a maximum at some interior point, then maximum
 modulus principle locally gives constant on the chart, then identity
 theorem extends by connectedness.
 
-**Mathlib status.** Has the Liouville theorem for entire functions
-ℂ → ℂ (`Function.const_of_bounded` style); does not have the
-manifold-level analogue. Discharging this would require either:
-- packaging maximum modulus principle for analytic functions on
-  open connected subsets of ℂ (mostly exists), and
-- gluing across charts using identity theorem (`AnalyticOn.eqOn_of_*`).
+**Status: PROVEN (2026-05-31), axiom-free.** No longer an axiom — the
+global maximum-modulus principle is now a real theorem
+`liouville_compact_complex_manifold` below, depending only on Lean's core
+axioms. The proof realises the plan below using Mathlib's chart-local
+maximum modulus (`Complex.eqOn_of_isPreconnected_of_isMaxOn_norm`) and the
+smoothness of chart inverses (`contMDiffOn_extChartAt_symm`).
 
-**Proof plan (when Mathlib is ready).**
-1. Compactness ⇒ |f| attains its max at some `p ∈ M`.
-2. `extChartAt I p` is a chart at `p`; `f ∘ (extChartAt I p).symm` is
-   analytic on the chart target near `(extChartAt I p) p`.
-3. Maximum modulus on the chart ⇒ `f ∘ (extChartAt I p).symm` is
-   constant on the chart's connected component of the target.
-4. Connectedness of `M` + identity theorem ⇒ `f` constant globally.
+**Proof.**
+1. Compactness ⇒ `‖f‖` attains its max at some `p₀ ∈ M`.
+2. The set `S = {x | f x = f p₀}` is closed (continuity) and nonempty.
+3. `S` is open: at any `q ∈ S`, `F := f ∘ (extChartAt I q).symm` is
+   holomorphic on the chart target and `‖F‖` has its maximum at the centre
+   (global max), so by the maximum modulus principle `F` is constant on a
+   ball; pulling back gives `f = f q = f p₀` on a neighbourhood of `q`.
+4. `S` clopen + `M` connected ⇒ `S = univ`, i.e. `f ≡ f p₀`.
 -/
-axiom AX_Liouville_compact_complex_manifold
+open Set Filter Metric in
+/-- **Liouville / global maximum modulus.** Every holomorphic
+(`MDifferentiable`) function from a compact connected complex 1-manifold
+(a compact connected Riemann surface) to `ℂ` is constant. Axiom-free. -/
+theorem liouville_compact_complex_manifold
     (M : Type*) [TopologicalSpace M] [CompactSpace M] [ConnectedSpace M]
     [ChartedSpace ℂ M] [IsManifold 𝓘(ℂ) ω M]
     (f : M → ℂ)
     (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) :
-    ∃ c : ℂ, ∀ x : M, f x = c
+    ∃ c : ℂ, ∀ x : M, f x = c := by
+  have hcont : Continuous f := hf.continuous
+  -- `‖f‖` attains a global maximum at some `p₀` (compactness).
+  obtain ⟨p₀, -, hp₀⟩ := isCompact_univ.exists_isMaxOn (univ_nonempty (α := M))
+    hcont.norm.continuousOn
+  have hp₀' : ∀ x, ‖f x‖ ≤ ‖f p₀‖ := fun x => hp₀ (mem_univ x)
+  refine ⟨f p₀, ?_⟩
+  set S : Set M := {x | f x = f p₀} with hS
+  have hSne : S.Nonempty := ⟨p₀, rfl⟩
+  have hScl : IsClosed S := isClosed_eq hcont continuous_const
+  have hSop : IsOpen S := by
+    rw [isOpen_iff_mem_nhds]
+    intro q hq                       -- hq : f q = f p₀
+    set φ := extChartAt 𝓘(ℂ) q with hφ
+    have hqs : q ∈ φ.source := mem_extChartAt_source q
+    have hqsymm : φ.symm (φ q) = q := φ.left_inv hqs
+    have hc_mem : φ q ∈ φ.target := mem_extChartAt_target q
+    obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.mp (isOpen_extChartAt_target q) (φ q) hc_mem
+    -- `F := f ∘ φ.symm` is holomorphic on the ball.
+    have hFdiff : DifferentiableOn ℂ (f ∘ φ.symm) (ball (φ q) r) := by
+      have h1 : MDifferentiableOn 𝓘(ℂ) 𝓘(ℂ) φ.symm φ.target :=
+        (contMDiffOn_extChartAt_symm q).mdifferentiableOn WithTop.top_ne_zero
+      have hf_on : MDifferentiableOn 𝓘(ℂ) 𝓘(ℂ) f univ := hf.mdifferentiableOn
+      have h2 : MDifferentiableOn 𝓘(ℂ) 𝓘(ℂ) (f ∘ φ.symm) φ.target :=
+        hf_on.comp h1 (mapsTo_univ _ _)
+      exact (mdifferentiableOn_iff_differentiableOn.mp h2).mono hball
+    -- `‖F‖` has its maximum on the ball at the centre `φ q`.
+    have hmax : IsMaxOn (norm ∘ (f ∘ φ.symm)) (ball (φ q) r) (φ q) := by
+      intro z _
+      simp only [Function.comp_apply]
+      calc ‖f (φ.symm z)‖ ≤ ‖f p₀‖ := hp₀' _
+        _ = ‖f q‖ := by rw [hq]
+        _ = ‖f (φ.symm (φ q))‖ := by rw [hqsymm]
+    -- Maximum modulus ⇒ `F` constant on the ball.
+    have heq := Complex.eqOn_of_isPreconnected_of_isMaxOn_norm isPreconnected_ball
+      isOpen_ball hFdiff (mem_ball_self hr) hmax
+    -- Pull the constancy back to a neighbourhood of `q`.
+    have hN : φ ⁻¹' (ball (φ q) r) ∈ 𝓝 q :=
+      (continuousAt_extChartAt q).preimage_mem_nhds (ball_mem_nhds _ hr)
+    have hsrc : φ.source ∈ 𝓝 q := extChartAt_source_mem_nhds q
+    have hsub : φ.source ∩ φ ⁻¹' (ball (φ q) r) ⊆ S := by
+      rintro x ⟨hxs, hxb⟩
+      have hx := heq hxb
+      have hxx : φ.symm (φ x) = x := φ.left_inv hxs
+      show f x = f p₀
+      have hfx : f (φ.symm (φ x)) = f (φ.symm (φ q)) := hx
+      rw [hxx, hqsymm, hq] at hfx
+      exact hfx
+    exact Filter.mem_of_superset (Filter.inter_mem hsrc hN) hsub
+  have hSuniv : S = univ := IsClopen.eq_univ ⟨hScl, hSop⟩ hSne
+  intro x
+  have hxS : x ∈ S := hSuniv ▸ mem_univ x
+  exact hxS
 
 /-! ## Level 2 — chart-local polynomial decomposition for hyperelliptic forms
 
@@ -138,8 +197,9 @@ The chart-local form `g(z) / e_a.symm(H.f.eval z)` matches step 5 (with
 `g = b` and `e_a.symm` the IFT-derived branch of `√(H.f.eval z)`).
 
 **Proof plan from Level 1.**
-- Apply `AX_Liouville_compact_complex_manifold` to `f - g/y` for
-  appropriate test polynomials, deducing `f = g/y` modulo a constant.
+- Apply `liouville_compact_complex_manifold` (now a proven theorem) to
+  `f - g/y` for appropriate test polynomials, deducing `f = g/y` modulo a
+  constant.
 - Use the cocycle (now real for inl_inr) to extend chart-local
   agreement to global.
 - Bound `deg(g)` via the chart-overlap behaviour at infinity.
