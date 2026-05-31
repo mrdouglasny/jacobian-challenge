@@ -157,8 +157,18 @@ discharge is substantial chart work. The unified `Hyperelliptic` and
 | `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm`; consumes L2 + the flagged cocycle axioms. Feeds `genus_HyperellipticEven_le`. |
 
 **Priority.** The two cocycle axioms (unsound) outrank everything else in
-the audit: they break the trust boundary of a headline theorem and the fix
-is plumbing (the math is already proven). Do task #21 first.
+the audit: they break the trust boundary of a headline theorem.
+
+**Task #21 progress (2026-05-31).** *Part 1 (the hard math) is DONE* —
+both directions are now real, axiom-free theorems
+(`hyperellipticEvenCoeff_cocycle_inl_inr` and the new `…_inr_inl`, the
+latter via the general `transition_fderiv_mul` chart-transition symmetry in
+`GeneralResults/ChartTransition.lean`). *Part 2 (plumbing)* — thread `hDeg`
+from these theorems up through `hyperellipticForm` and delete the axioms —
+is a ~150–250 LOC mechanical cascade scoped step-by-step in
+[`docs/task-21-discharge-plan.md`](docs/task-21-discharge-plan.md). Until
+Part 2 lands, the two axioms remain wired into `_satisfiesCotangentCocycle`
+and the even-genus theorem is still not sound.
 
 ---
 
