@@ -29,6 +29,7 @@ encoded in S5; here we set up the framework before assembling it.
 import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm
 import Jacobians.ProjectiveCurve.Hyperelliptic.AffineInfinityForm
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
+import Jacobians.GeneralResults.ChartTransition
 
 namespace Jacobians.ProjectiveCurve.HyperellipticEvenProj
 
@@ -2248,5 +2249,42 @@ theorem hyperellipticEvenCoeff_cocycle_inl_inr
         mem_smoothLocusX_of_y_eq_zero _ hb2_zero
       exact cocycle_inl_inr_smoothLocusXNotY_smoothLocusXNotY g_aff g_inf hGluing hDeg
         a hpX hpY b hpX_b hpY_b q q' hQ hQ' hz hSrc
+
+/-- **Cross-summand cocycle (infinity → affine), real theorem.** Derived
+from `hyperellipticEvenCoeff_cocycle_inl_inr` by chart-transition symmetry
+(`transition_fderiv_mul`): the cocycle equation reverses because the two
+chart-transition derivatives multiply to `1`. Replaces the (unsound)
+`hyperellipticEvenCoeff_cocycle_inr_inl_axiom`. -/
+theorem hyperellipticEvenCoeff_cocycle_inr_inl
+    [hf : Fact (¬ Odd H.f.natDegree)]
+    (g_aff g_inf : Polynomial ℂ)
+    (hGluing : g_inf = infReverse H g_aff)
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1)
+    (q q' : HyperellipticEvenProj H)
+    (b : HyperellipticAffineInfinity H) (a : HyperellipticAffine H)
+    (hQ : Quotient.out q = Sum.inr b) (hQ' : Quotient.out q' = Sum.inl a)
+    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
+    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
+      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
+        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
+        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1) := by
+  set φq := extChartAt 𝓘(ℂ, ℂ) q with hφqd
+  set φq' := extChartAt 𝓘(ℂ, ℂ) q' with hφq'd
+  set w := φq' (φq.symm z) with hwd
+  have hwt : w ∈ φq'.target := φq'.map_source hSrc
+  have hws : φq'.symm w ∈ φq.source := by
+    rw [hwd, φq'.left_inv hSrc]; exact φq.map_target hz
+  -- apply the real inl_inr at (q', q, w):  q' affine (a), q infinity (b)
+  have hfwd := hyperellipticEvenCoeff_cocycle_inl_inr g_aff g_inf hGluing hDeg
+    q' q a b hQ' hQ hwt hws
+  rw [show φq (φq'.symm w) = z from by rw [hwd, φq'.left_inv hSrc, φq.right_inv hz]] at hfwd
+  -- hfwd : coeff q' w = coeff q z * D_bwd
+  have htfm := Jacobians.GeneralResults.transition_fderiv_mul q q' hz hSrc
+  -- htfm : D_fwd * D_bwd = 1
+  rw [hfwd, mul_assoc,
+    show fderiv ℂ (⇑φq ∘ ⇑φq'.symm) w 1 * fderiv ℂ (⇑φq' ∘ ⇑φq.symm) z 1 = 1 from by
+      rw [mul_comm]; exact htfm,
+    mul_one]
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
