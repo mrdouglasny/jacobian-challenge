@@ -25,7 +25,7 @@ previously top-level axioms.
 
 Still axiomatic (smaller-grained than before; 2026-04-23 round-2
 refactor responded to Gemini review by adding the local-antiderivative
-axiom and structured form primitives):
+axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 - `pathIntegralBasepointFunctional` — the functional
   `X → X → (HolomorphicOneForm X →ₗ[ℂ] ℂ)`, "integrate from `P₀` to
   `P`". Now paired with:

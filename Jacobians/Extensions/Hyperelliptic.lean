@@ -232,7 +232,7 @@ under `σ` is the negation map on `HolomorphicOneForm (HyperellipticOdd H h)`.
 
 NOTE: stating this requires either (a) our cocycle-side pullback API
 on `HolomorphicOneForm` (not yet built — currently lives only as the
-axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`), or (b) routing
+axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`), or (b) routing\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 through the Kirov-bridge to use `Vendor.Kirov.HolomorphicForms.pullbackForm`.
 The signature below uses option (a), so this theorem also exercises the
 `pullbackOneForm` axiom — discharging it is the prerequisite. -/
