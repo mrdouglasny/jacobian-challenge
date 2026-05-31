@@ -131,12 +131,34 @@ discharge is substantial chart work. The unified `Hyperelliptic` and
 
 ### 2d. Flagged — *known concern, do not trust downstream as-is*
 
-| Axiom | File:Line | Concern |
-|-------|-----------|---------|
-| `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` | `…/Hyperelliptic/EvenForm.lean:380` | **mathematically false for `deg g ≥ N/2−1`** (the form has poles at ∞); sound only on the low-degree subspace. The `inl_inr` direction is *also* a real theorem under `deg g < N/2−1`. Task #21: thread the degree bound through `hyperellipticForm` and retire. **Currently load-bearing** for `genus_HyperellipticEven_eq`. |
-| `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` | `…/Hyperelliptic/EvenForm.lean:397` | same; discharge via a swap lemma from `inl_inr` once degree-bounded. |
-| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | form not yet checked end-to-end; **step 4 of its proof plan is now proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
-| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | surjectivity of `hyperellipticForm`; consumes L2 + the flagged cocycle axioms. Feeds `genus_HyperellipticEven_le`. |
+> ⚠️ **The two cocycle axioms are UNSOUND — false as stated, not merely
+> unproven.** Each asserts a cocycle *equation* under the hypothesis
+> `g_inf = infReverse H g_aff`, which is always satisfiable (`rfl` in
+> `hyperellipticForm`) and does **not** restrict the degree. `infReverse`
+> is the genuine Möbius gluing only for `deg g_aff ≤ N/2−2`; at higher
+> degree the equation is false, so the axiom is a false proposition under
+> satisfiable hypotheses → the environment is strictly inconsistent.
+> Deriving `False` is obstructed only by the noncomputability of
+> `Quotient.out`, so no contradiction has been exhibited — but the trust
+> boundary is broken. **`genus_HyperellipticEven_eq` (and `…_le`)
+> transitively depend on these, so the even-genus headline is not yet a
+> sound proof.** The matching low-degree statements are already **proven
+> theorems** in `EvenForm.lean` (`cross_summand_cocycle_coord`, ~line 1238,
+> under `hDeg : g_aff.natDegree < N/2−1`); **task #21** is to add `hDeg` to
+> the axioms and thread it through `hyperellipticForm` /
+> `hyperellipticFormLinearMap` (→ `Polynomial.degreeLT ℂ (N/2−1)`),
+> retiring them. Plumbing, not new mathematics.
+
+| Axiom | File:Line | Status |
+|-------|-----------|--------|
+| `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` | `…/Hyperelliptic/EvenForm.lean:380` | **unsound** (false for `deg g ≥ N/2−1`); real low-degree theorem exists; load-bearing for the even-genus theorem. Task #21. |
+| `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` | `…/Hyperelliptic/EvenForm.lean:397` | **unsound**, same; discharge via the swap lemma from `inl_inr` once degree-bounded. Task #21. |
+| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven (not unsound). **Step 4 of its proof plan is now proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
+| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm`; consumes L2 + the flagged cocycle axioms. Feeds `genus_HyperellipticEven_le`. |
+
+**Priority.** The two cocycle axioms (unsound) outrank everything else in
+the audit: they break the trust boundary of a headline theorem and the fix
+is plumbing (the math is already proven). Do task #21 first.
 
 ---
 

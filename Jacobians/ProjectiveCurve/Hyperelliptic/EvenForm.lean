@@ -355,11 +355,28 @@ Discharging the axioms (replacing them with real proofs) requires
 explicit Möbius chain-rule computations; those depend on the smoothness
 axioms in `EvenAtlas.lean`.
 
-**Soundness note.** A previous version of these axioms quantified over all
-pairs `(g_aff, g_inf)` without the gluing hypothesis — that was unsound
-because the cocycle is genuinely false for non-matching pairs. The current
-form (with `hGluing`) is mathematically correct as a *statement*; the
-remaining work is to prove it. -/
+**SOUNDNESS WARNING — these axioms are still false as stated (task #21).**
+The `hGluing : g_inf = infReverse H g_aff` hypothesis does NOT fix the
+unsoundness: it is always satisfiable (it holds by `rfl` in
+`hyperellipticForm`), and `infReverse` (a `reflect` at degree `N/2 − 2`) is
+the genuine Möbius gluing polynomial **only when** `deg g_aff ≤ N/2 − 2`.
+For `deg g_aff ≥ N/2 − 1` the true gluing is not a polynomial (the form
+`g_aff·dx/y` has a pole at ∞), so `infReverse` returns the wrong polynomial
+and the asserted cocycle equation is **false** under satisfiable hypotheses.
+Hence the environment is, strictly, inconsistent; deriving `False` is
+obstructed only by the noncomputability of `Quotient.out` (constructing the
+witness points is hard), so no contradiction has been exhibited — but the
+trust boundary is broken, and `genus_HyperellipticEven_eq` transitively
+depends on these axioms.
+
+**The real fix already exists below**: the cross-summand cocycle is a proven
+theorem (`cross_summand_cocycle_coord` and friends, ~line 1238) under the
+degree bound `hDeg : g_aff.natDegree < N/2 − 1`. Task #21 is to add that
+`hDeg` hypothesis to these two axioms (making them true) and thread it
+through `hyperellipticForm` / `hyperellipticFormLinearMap` (restricting to
+`Polynomial.degreeLT ℂ (N/2−1)`), retiring the axioms entirely. This is
+plumbing, not new mathematics. See `docs/gemini-review-genus-framework.md`
+§(B) and `AXIOM_AUDIT.md` Class 2d. -/
 
 /-- The "infinity-side" polynomial paired with `g` in the Möbius gluing.
 
