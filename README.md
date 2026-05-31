@@ -109,9 +109,12 @@ So the scoping decision is: solve Gap 1 by hand for the needed shape; isolate Ga
 
 ## Current state
 
+_Verified snapshot with exact sorry/axiom counts and remote-sync state:_
+[`docs/status-2026-05-31.md`](docs/status-2026-05-31.md).
+
 | | |
 |---|---|
-| Build | `lake build` green; foundation has zero `sorry` in `Challenge.lean`; 46 `sorry` total across active framework / extension scaffolds |
+| Build | `lake build` green (8378 jobs, verified 2026-05-31); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). 106 axioms (104 ours + 2 vendored), classified below |
 | Foundation defs | 13/13 real (`Jacobian X`, all 7 typeclass instances, `ofCurve`, `pushforward`, `pullback`, `degree`) |
 | Property theorems derived | `ofCurve_self`, `pushforward_id_apply` / `_comp_apply`, `pullback_id_apply` / `_comp_apply`, `genus_ProjectiveLine_eq_zero`, `genus_Elliptic_eq_one`, **`genus_HyperellipticEven_eq` = `H.f.natDegree / 2 - 1`** (real, modulo Liouville hierarchy axioms) |
 | Concrete real curve types | `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`, `HyperellipticEven` / `HyperellipticEvenProj` (two-chart pushout, full instance chain via `[Fact (¬ Odd ...)]`) |
@@ -125,7 +128,7 @@ Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/ch
 | | |
 |---|---|
 | **Wall-clock** | 2026-04-19 → 2026-04-29 (11 calendar days, all active) |
-| **Commits** | 170+ on `main` + 22 on `kirov-import` |
+| **Commits** | 209 on `main` (the `kirov-import` branch is fully merged in) |
 | **Lean code** | ~10,000 lines across `Jacobians/` (incl. ~3,200 LOC of 1-form framework + Liouville axiom hierarchy) + ~5,600 lines vendored from `rkirov/jacobian-claude` (Apache 2.0) under `Jacobians/Vendor/Kirov/` |
 | **Documentation** | ~7,500 lines: challenge annotation, dependency trace, 5 construction plans, adversarial-review records, genus-theorem discharge plan, S5 cocycle architecture, Kirov-bridge subtleties |
 | **Model time** | Claude Opus 4.7 (primary coder), GPT-5.4 Codex (rescue passes on Jacobian functoriality derivations, HyperellipticEven T2 / Compact proofs, affine cocycle equations), Gemini 3 Pro deep-think (axiom audits, type-equality smell-test) |
@@ -164,6 +167,10 @@ lake build
 
 ## Further documentation
 
+- [`docs/status-2026-05-31.md`](docs/status-2026-05-31.md) — current verified status snapshot (build, exact sorry/axiom inventory, open workstreams, remote-sync state).
+- [`docs/validation-plan.md`](docs/validation-plan.md) — how to judge the definitions and axioms before proving them: mechanical `#print axioms` guard, axiom taxonomy by validation risk, the prioritized validation backlog, and a human-readable contract + AI-modelable specification-first pipeline.
+- [`docs/contracts/`](docs/contracts/) — per-object contract cards (judge an object without reading its proofs): [`genus`](docs/contracts/genus.md) (validated on `Elliptic` from core axioms), [`ofCurve`](docs/contracts/ofCurve.md) (anti-hack property found opaque-blocked).
+- [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace of every headline (regenerate with [`scripts/axiom_report.lean`](scripts/axiom_report.lean)); confirms no `sorryAx` under any closed declaration.
 - [`Jacobians/Challenge.lean`](Jacobians/Challenge.lean) — Buzzard's v0.2 file verbatim (24 sorries), pinned.
 - [`docs/challenge-filled.md`](docs/challenge-filled.md) — filled-in spec, every sorry resolved with its prerequisites inlined.
 - [`docs/challenge-annotated.md`](docs/challenge-annotated.md) — F/T classification of the 24 sorries.
