@@ -37,8 +37,8 @@ known_values:                    # the test matrix: instance → expected → st
   - instance: ProjectiveLine
     expected: 0
     theorem: Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero
-    status: proven_via_axiom
-    axiom_deps: [AX_genus_eq_zero_iff_homeo]        # uniformization, genus 0
+    status: PROVEN_CORE_AXIOMS                       # ← direct Liouville proof (2026-05-31)
+    axiom_deps: []                                   # was [AX_genus_eq_zero_iff_homeo]; retired
   - instance: "Elliptic ω₁ ω₂"
     expected: 1
     theorem: Jacobians.ProjectiveCurve.genus_Elliptic_eq_one
@@ -77,7 +77,7 @@ anti_degeneracy:
     genus_Elliptic_eq_one = 1 from CORE AXIOMS ONLY positively proves
     HolomorphicOneForm(Elliptic) is genuinely 1-dimensional — i.e. the
     definition is NOT the ⊥-stub on at least one positive-genus curve.
-status: validated_on {Elliptic}; ProjectiveLine asserted via uniformization;
+status: validated_on {ProjectiveLine, Elliptic} from core axioms;
         even-hyperelliptic proven mod axioms; odd open.
 ```
 
@@ -96,21 +96,24 @@ You can judge `genus` without opening a Lean proof:
    - `PROVEN_CORE_AXIOMS` (Elliptic): fully from Mathlib, nothing
      asserted. This is the strongest possible validation of the
      definition — the machinery genuinely computes genus 1 on a torus.
-   - `proven_via_axiom` (ProjectiveLine): the *value* 0 is correct but is
-     obtained by **assuming** uniformization (`AX_genus_eq_zero_iff_homeo`),
-     not by computing `dim H⁰(Ω¹) = 0` directly. So this cell validates
-     consistency-of-the-API, not the definition itself.
+   - `PROVEN_CORE_AXIOMS` (ProjectiveLine): as of 2026-05-31, `genus ℙ¹ = 0`
+     is proved **directly** — `HolomorphicOneForm ProjectiveLine` is a
+     subsingleton by a chart-cocycle + Liouville argument
+     (`Line/OneForm.lean`), and `finrank` of a subsingleton is 0. The
+     uniformization axiom `AX_genus_eq_zero_iff_homeo` is no longer in this
+     cell's dependency set. A second fully-validated cell.
    - `proven_mod_axioms` (even-hyperelliptic): correct value, reduced to a
      named axiom set (Liouville hierarchy + atlas + the two task-#21
      cocycle axioms). Read as "reduced to those inputs", not "proven".
 
 3. **Could it be the degenerate hack?** Read `anti_degeneracy`. The
    `finrank ≡ 0` collapse was a real bug; it is now positively excluded on
-   `Elliptic` by the gold cell. It is **not** yet excluded by direct
-   computation on ℙ¹ (that cell routes through the uniformization axiom)
-   or on the hyperelliptic families (those route through the Liouville
-   axioms). Closing those routes to direct `dim H⁰(Ω¹)` computations is
-   the remaining definition-validation work.
+   `Elliptic` (genus 1, gold cell) and on `ProjectiveLine` (where the
+   module is provably the *zero* space — the correct non-degenerate answer
+   for genus 0 — by direct computation, not the uniformization axiom). It
+   is not yet excluded by direct `dim H⁰(Ω¹)` computation on the
+   hyperelliptic families (those route through the Liouville axioms);
+   that is the remaining definition-validation work.
 
 ## What this card says is *not* yet validated
 
@@ -127,11 +130,11 @@ You can judge `genus` without opening a Lean proof:
 
 ## Highest-value next checks for this object
 
-1. **Direct ℙ¹ computation.** Prove `genus ProjectiveLine = 0` by showing
-   `HolomorphicOneForm ProjectiveLine = ⊥` directly (no holomorphic 1-form
-   on ℙ¹ except 0 — a Liouville/degree argument), retiring the
-   `AX_genus_eq_zero_iff_homeo` route for this specific cell. Turns the
-   ProjectiveLine cell from `proven_via_axiom` to `PROVEN_CORE_AXIOMS`.
+1. ~~**Direct ℙ¹ computation.**~~ **Done (2026-05-31).** `genus ProjectiveLine
+   = 0` is now proved directly: `Subsingleton (HolomorphicOneForm ℙ¹)` via a
+   chart-cocycle + Liouville argument in `Line/OneForm.lean`, then `finrank`
+   of a subsingleton is 0. The cell is `PROVEN_CORE_AXIOMS`;
+   `AX_genus_eq_zero_iff_homeo` retired from it.
 2. **Odd-hyperelliptic cell** — mirror the even-side framework (task #21)
    to fill the one `sorry`.
 3. Whichever discharge in the even-hyperelliptic `axiom_deps` is closest

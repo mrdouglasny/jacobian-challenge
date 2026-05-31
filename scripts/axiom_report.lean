@@ -16,6 +16,8 @@ README "Current state". See docs/validation-plan.md Part 1.1.
 import Jacobians.Challenge
 import Jacobians.Extensions.HyperellipticEven
 import Jacobians.ProjectiveCurve.Elliptic.OneForm
+import Jacobians.ProjectiveCurve.Line.Genus
+import Jacobians.ProjectiveCurve.Line.OneForm
 
 open Jacobians Jacobian
 
@@ -39,5 +41,8 @@ open Jacobians Jacobian
 #print axioms Jacobian.pushforward_pullback
 
 -- Concrete genus headlines (the definition-validating results).
+-- `genus ℙ¹ = 0` and `genus Elliptic = 1` are PROVEN_CORE_AXIOMS (no project axioms).
+#print axioms Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero
+#print axioms Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero
 #print axioms Jacobians.ProjectiveCurve.genus_Elliptic_eq_one
 #print axioms Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq

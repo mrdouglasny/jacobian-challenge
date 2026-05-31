@@ -54,8 +54,10 @@ lake env lean scripts/axiom_report.lean > docs/axiom-report.txt
 
 ## Cards
 
-- [`genus.md`](genus.md) — prototype. Validated on `Elliptic` (core
-  axioms); other cells route through axioms.
+- [`genus.md`](genus.md) — prototype. Validated on `ProjectiveLine` and
+  `Elliptic` from core axioms (the ℙ¹ cell was upgraded from
+  `proven_via_axiom` to `PROVEN_CORE_AXIOMS` on 2026-05-31 by a direct
+  Liouville proof); hyperelliptic cells route through axioms.
 - [`ofCurve.md`](ofCurve.md) — the Abel–Jacobi map. Records the
   2026-05-31 experiment finding that its anti-hack property `ofCurve_inj`
   is **opaque-blocked** (unprovable from the current definition).
