@@ -94,8 +94,9 @@ tagging is in [`dependency-trace.md`](dependency-trace.md).)
 ### A. Classical-theorem axioms — *validate by faithful-encoding review*
 `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_AbelTheorem`,
 `AX_BranchLocus`, `AX_PluckerFormula`, `AX_genus_eq_zero_iff_homeo`
-(uniformization, genus 0), `AX_AnalyticCycleBasis`,
-`AX_Liouville_compact_complex_manifold`.
+(uniformization, genus 0), `AX_AnalyticCycleBasis`. (Liouville on compact
+complex manifolds was here; it is now the proven theorem
+`liouville_compact_complex_manifold` — 2026-05-31, axiom-free.)
 
 Sound by citation — *if* the Lean statement faithfully encodes the
 textbook theorem. The only real risk is mis-encoding: hypotheses too weak
