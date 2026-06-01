@@ -11,9 +11,12 @@ the curve, built by descending `(x,y) ↦ (x,−y)` (on each affine summand)
 through the gluing quotient — σ respects the glue `(x,y) ↔ (1/x, y/x^{g+1})`
 because negating `y` negates both sides.
 -/
-import Jacobians.ProjectiveCurve.Hyperelliptic.Even
+import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
+import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace Jacobians.ProjectiveCurve
+
+open scoped Manifold ContDiff Topology
 
 variable {H : HyperellipticData}
 
@@ -113,6 +116,133 @@ theorem HyperellipticAffineInfinity.continuous_invol :
   refine Continuous.subtype_mk ?_ _
   exact (continuous_fst.comp continuous_subtype_val).prodMk
     ((continuous_snd.comp continuous_subtype_val).neg)
+
+/-! ## Smoothness on the affine summands -/
+
+lemma HyperellipticAffine.invol_mem_smoothLocusY (a : HyperellipticAffine H)
+    (ha : a ∈ HyperellipticAffine.smoothLocusY H) :
+    a.invol ∈ HyperellipticAffine.smoothLocusY H := by
+  simpa [HyperellipticAffine.smoothLocusY, HyperellipticAffine.invol]
+    using neg_ne_zero.mpr ha
+
+lemma HyperellipticAffine.invol_mem_smoothLocusX (a : HyperellipticAffine H)
+    (ha : a ∈ HyperellipticAffine.smoothLocusX H) :
+    a.invol ∈ HyperellipticAffine.smoothLocusX H := by
+  simpa [HyperellipticAffine.smoothLocusX, HyperellipticAffine.invol] using ha
+
+theorem HyperellipticAffine.contMDiffAt_invol (a : HyperellipticAffine H) :
+    ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω HyperellipticAffine.invol a := by
+  classical
+  by_cases haY : a ∈ HyperellipticAffine.smoothLocusY H
+  · let e := HyperellipticAffine.affineChartProjX (H := H) a haY
+    let haY' := HyperellipticAffine.invol_mem_smoothLocusY a haY
+    let e' := HyperellipticAffine.affineChartProjX (H := H) a.invol haY'
+    have hchart :
+        (chartAt ℂ a : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) = e := by
+      change HyperellipticAffine.affineChartAt (H := H) a = e
+      simp [e, HyperellipticAffine.affineChartAt, haY]
+    have hchart' :
+        (chartAt ℂ a.invol : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) = e' := by
+      change HyperellipticAffine.affineChartAt (H := H) a.invol = e'
+      simp [e', HyperellipticAffine.affineChartAt, haY']
+    have hx : a ∈ e.source := by
+      dsimp [e]
+      exact HyperellipticAffine.affineChartProjX_mem_source a haY
+    rw [contMDiffAt_iff]
+    constructor
+    · exact HyperellipticAffine.continuous_invol.continuousAt
+    · have hEq :
+          (fun z : ℂ => (extChartAt 𝓘(ℂ, ℂ) a.invol)
+              (HyperellipticAffine.invol
+                ((extChartAt 𝓘(ℂ, ℂ) a).symm z)))
+            =ᶠ[𝓝 ((extChartAt 𝓘(ℂ, ℂ) a) a)]
+          (fun z : ℂ => z) := by
+        have ht : e.target ∈ 𝓝 (e a) := e.open_target.mem_nhds (e.map_source hx)
+        have ht' : e.target ∈ 𝓝 ((extChartAt 𝓘(ℂ, ℂ) a) a) := by
+          simpa [extChartAt_coe, hchart, e, modelWithCornersSelf_coe] using ht
+        filter_upwards [ht'] with z hz
+        have hz0 : z ∈ e.target := hz
+        dsimp [e, e'] at hz0
+        simp only [extChartAt_coe, extChartAt_coe_symm, hchart, hchart',
+          Function.comp_apply, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, id_eq]
+        change
+          ((HyperellipticAffine.invol
+            ((HyperellipticAffine.affineChartProjX (H := H) a haY).symm z)).val.1) = z
+        simp [HyperellipticAffine.invol,
+          HyperellipticAffine.affineChartProjX_symm_apply_fst (H := H) a haY hz0]
+      have hAt : ContDiffAt ℂ ω (fun z : ℂ => z)
+          ((extChartAt 𝓘(ℂ, ℂ) a) a) := contDiffAt_id
+      have hAt' : ContDiffAt ℂ ω
+          (fun z : ℂ => (extChartAt 𝓘(ℂ, ℂ) a.invol)
+            (HyperellipticAffine.invol ((extChartAt 𝓘(ℂ, ℂ) a).symm z)))
+          ((extChartAt 𝓘(ℂ, ℂ) a) a) :=
+        hAt.congr_of_eventuallyEq hEq
+      simpa [modelWithCornersSelf_coe, Set.range_id] using hAt'.contDiffWithinAt
+  · have haY0 : a.val.2 = 0 := by
+      simpa [HyperellipticAffine.smoothLocusY] using haY
+    have haX : a ∈ HyperellipticAffine.smoothLocusX H :=
+      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H haY0
+    let e := HyperellipticAffine.affineChartProjY (H := H) a haX
+    let haX' := HyperellipticAffine.invol_mem_smoothLocusX a haX
+    let e' := HyperellipticAffine.affineChartProjY (H := H) a.invol haX'
+    have haInvNotY : a.invol ∉ HyperellipticAffine.smoothLocusY H := by
+      intro h
+      apply haY
+      simpa [HyperellipticAffine.smoothLocusY, HyperellipticAffine.invol] using h
+    have hchart :
+        (chartAt ℂ a : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) = e := by
+      change HyperellipticAffine.affineChartAt (H := H) a = e
+      simp [e, HyperellipticAffine.affineChartAt, haY]
+    have hchart' :
+        (chartAt ℂ a.invol : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) = e' := by
+      change HyperellipticAffine.affineChartAt (H := H) a.invol = e'
+      simp [e', HyperellipticAffine.affineChartAt, haInvNotY]
+    have hx : a ∈ e.source := by
+      dsimp [e]
+      exact HyperellipticAffine.affineChartProjY_mem_source a haX
+    rw [contMDiffAt_iff]
+    constructor
+    · exact HyperellipticAffine.continuous_invol.continuousAt
+    · have hEq :
+          (fun z : ℂ => (extChartAt 𝓘(ℂ, ℂ) a.invol)
+              (HyperellipticAffine.invol
+                ((extChartAt 𝓘(ℂ, ℂ) a).symm z)))
+            =ᶠ[𝓝 ((extChartAt 𝓘(ℂ, ℂ) a) a)]
+          (fun z : ℂ => -z) := by
+        have ht : e.target ∈ 𝓝 (e a) := e.open_target.mem_nhds (e.map_source hx)
+        have ht' : e.target ∈ 𝓝 ((extChartAt 𝓘(ℂ, ℂ) a) a) := by
+          simpa [extChartAt_coe, hchart, e, modelWithCornersSelf_coe] using ht
+        filter_upwards [ht'] with z hz
+        have hz0 : z ∈ e.target := hz
+        dsimp [e, e'] at hz0
+        simp only [extChartAt_coe, extChartAt_coe_symm, hchart, hchart',
+          Function.comp_apply, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, id_eq]
+        change
+          ((HyperellipticAffine.invol
+            ((HyperellipticAffine.affineChartProjY (H := H) a haX).symm z)).val.2) = -z
+        simp [HyperellipticAffine.invol,
+          HyperellipticAffine.affineChartProjY_symm_apply_snd (H := H) a haX hz0]
+      have hAt : ContDiffAt ℂ ω (fun z : ℂ => -z)
+          ((extChartAt 𝓘(ℂ, ℂ) a) a) := contDiff_neg.contDiffAt
+      have hAt' : ContDiffAt ℂ ω
+          (fun z : ℂ => (extChartAt 𝓘(ℂ, ℂ) a.invol)
+            (HyperellipticAffine.invol ((extChartAt 𝓘(ℂ, ℂ) a).symm z)))
+          ((extChartAt 𝓘(ℂ, ℂ) a) a) :=
+        hAt.congr_of_eventuallyEq hEq
+      simpa [modelWithCornersSelf_coe, Set.range_id] using hAt'.contDiffWithinAt
+
+theorem HyperellipticAffine.contMDiff_invol :
+    ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (HyperellipticAffine.invol (H := H)) :=
+  fun a => HyperellipticAffine.contMDiffAt_invol a
+
+theorem HyperellipticAffineInfinity.contMDiff_invol
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω
+      (HyperellipticAffineInfinity.invol (H := H)) := by
+  let Hrev := HyperellipticAffineInfinity.reverseData H hf.out
+  change ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω
+    (HyperellipticAffine.invol (H := Hrev))
+  exact HyperellipticAffine.contMDiff_invol
 
 theorem hyperellipticEvenInvolPre_continuous (H : HyperellipticData) :
     Continuous (hyperellipticEvenInvolPre H) :=
