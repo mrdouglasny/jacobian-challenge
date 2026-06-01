@@ -233,11 +233,11 @@ was closed via Path A — proving the two ULift-smoothness lemmas
 
 | # | Axiom | Statement | Used by |
 |---|---|---|---|
-| T1 | `AX_Liouville_compact_complex_manifold` | analytic `f : M → ℂ` on compact connected complex manifold ⇒ `f` constant | `AX_HyperellipticForm_polynomial_decomposition` (Level 2) |
-| T2 | `AX_HyperellipticForm_polynomial_decomposition` | every holomorphic 1-form on `HyperellipticEvenProj H` has chart-local representation `g(z)/y(z)` for `g.natDegree < N/2 - 1` | `AX_HyperellipticOneForm_eq_form` (Level 3) |
-| T3 | `AX_HyperellipticOneForm_eq_form` | every holomorphic 1-form on `HyperellipticEvenProj H` equals `hyperellipticForm H g` for some low-degree `g` | `genus_HyperellipticEven_le` (real theorem) |
-| T4 | `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` | cross-summand cocycle equation, `inl_inr` direction (under gluing hypothesis) | `_satisfiesCotangentCocycle` bundling |
-| T5 | `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` | cross-summand cocycle equation, `inr_inl` direction (under gluing hypothesis) | `_satisfiesCotangentCocycle` bundling |
+| T1 | ~~`AX_Liouville_compact_complex_manifold`~~ **PROVEN** (`liouville_compact_complex_manifold`, 2026-05-31) | analytic `f : M → ℂ` on compact connected complex manifold ⇒ `f` constant | (Level 2) |
+| T2 | `AX_HyperellipticForm_polynomial_decomposition` (Level 2) | every holomorphic 1-form on `HyperellipticEvenProj H` has chart-local representation `g(z)/y(z)` for `g.natDegree < N/2 - 1` | `AX_HyperellipticOneForm_eq_form` (Level 3). L2-step-4 proven; core remains — see `genus-L2-L3-discharge-plan.md` |
+| T3 | `AX_HyperellipticOneForm_eq_form` (Level 3) | every holomorphic 1-form equals `hyperellipticForm H g` for some low-degree `g` | `genus_HyperellipticEven_le`. Reduces to L2 + cocycle propagation (`hyperellipticForm_coeff_projX`) |
+| T4 | ~~`hyperellipticEvenCoeff_cocycle_inl_inr_axiom`~~ **RETIRED (task #21)** → real theorem `…_cocycle_inl_inr` | cross-summand cocycle, `inl_inr` | — |
+| T5 | ~~`hyperellipticEvenCoeff_cocycle_inr_inl_axiom`~~ **RETIRED (task #21)** → real theorem `…_cocycle_inr_inl` (via chart-transition symmetry) | cross-summand cocycle, `inr_inl` | — |
 
 T1–T3 form the layered Liouville hierarchy. T1 is a statement about
 arbitrary compact complex manifolds (no project-specific defs); discharge

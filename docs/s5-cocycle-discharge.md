@@ -1,5 +1,13 @@
 # S5 cross-summand cocycle discharge — architecture and remaining work
 
+> ✅ **COMPLETED (task #21, 2026-06-01).** Both cross-summand cocycle axioms
+> are now real, axiom-free theorems (`hyperellipticEvenCoeff_cocycle_inl_inr`
+> and `…_inr_inl`, the latter via the general chart-transition symmetry
+> `transition_fderiv_mul` in `GeneralResults/ChartTransition.lean`), and
+> `hyperellipticForm` is rewired onto `Polynomial.degreeLT ℂ (N/2−1)`. This
+> document is retained as the design record. See
+> [`task-21-discharge-plan.md`](task-21-discharge-plan.md).
+
 _Drafted 2026-04-27 (continuing from autonomous-loop session). Captures
 the current state of the S5 work and the precise remaining steps to
 replace the cross-summand cocycle axioms with real proofs._

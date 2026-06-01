@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-05-31.*
+*Last updated 2026-06-01.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -134,13 +134,17 @@ discharge is substantial chart work. The unified `Hyperelliptic` and
 
 The two cross-summand cocycle axioms that used to live here were **unsound**
 (false for `deg g ≥ N/2−1`) and are now **retired** — see Recently
-discharged. The remaining two are the Liouville hierarchy L2/L3: genuinely
-true, but not yet checked end-to-end.
+discharged. The remaining two are the Liouville hierarchy L2/L3 — genuinely true,
+but not yet checked end-to-end. They are the classical canonical-differentials
+theorem for hyperelliptic curves (the deepest result left); L3 is shown to
+reduce to L2 + cocycle propagation (`hyperellipticForm_coeff_projX`), and L2
+is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-discharge-plan.md)
+(L2-step-4 already proven; the branch-point + degree-at-∞ core remains, ~1–2 months).
 
 | Axiom | File:Line | Status |
 |-------|-----------|--------|
 | `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven. **Step 4 of its proof plan is proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
-| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm` onto the low-degree forms; feeds `genus_HyperellipticEven_le`. The only remaining gap in the even-genus theorem. |
+| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm` onto the low-degree forms; feeds `genus_HyperellipticEven_le`. **Reduces to L2 + cocycle propagation** (`hyperellipticForm_coeff_projX`, the bridge lemma). The only remaining gap in the even-genus theorem. |
 
 ---
 
