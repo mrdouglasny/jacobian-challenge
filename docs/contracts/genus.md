@@ -47,12 +47,10 @@ known_values:                    # the test matrix: instance → expected → st
   - instance: HyperellipticEvenProj
     expected: "N/2 − 1"
     theorem: Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq
-    status: proven_mod_axioms__INCLUDING_2_UNSOUND   # see AXIOM_AUDIT.md Class 2d
+    status: proven_mod_axioms                        # Liouville L2/L3 + atlas; sound (task #21)
     axiom_deps:
       - AX_HyperellipticOneForm_eq_form              # Liouville hierarchy L3 (true-but-unproven)
       - AX_HyperellipticAffine_connected
-      - hyperellipticEvenCoeff_cocycle_inl_inr_axiom # UNSOUND (false for high deg); task #21
-      - hyperellipticEvenCoeff_cocycle_inr_inl_axiom # UNSOUND; task #21
       - affineLiftChart_compat_infinityLiftChart
       - infinityLiftChart_compat_affineLiftChart
       - polynomialLocalHomeomorph_no_critical_in_source   # IFT-shape
@@ -102,15 +100,13 @@ You can judge `genus` without opening a Lean proof:
      (`Line/OneForm.lean`), and `finrank` of a subsingleton is 0. The
      uniformization axiom `AX_genus_eq_zero_iff_homeo` is no longer in this
      cell's dependency set. A second fully-validated cell.
-   - `proven_mod_axioms__INCLUDING_2_UNSOUND` (even-hyperelliptic): correct
-     value, but the named axiom set it reduces to **includes two axioms that
-     are false as stated** (`hyperellipticEvenCoeff_cocycle_{inl_inr,inr_inl}_axiom`
-     — see `AXIOM_AUDIT.md` Class 2d). So this cell is **not yet a sound
-     proof**: the trust boundary is broken until task #21 adds the degree
-     bound (the underlying low-degree math is already proven). The Liouville
-     L2/L3 deps, by contrast, are true-but-unproven. Read this cell as
-     "morally correct at the degrees actually used, but logically resting on
-     an inconsistent axiom until task #21."
+   - `proven_mod_axioms` (even-hyperelliptic): correct value, reduced to a
+     named axiom set that is now all **true-but-unproven** (Liouville L2/L3 +
+     atlas/IFT). Task #21 (2026-06-01) retired the two previously-**unsound**
+     cross-summand cocycle axioms — they are real theorems now
+     (`hyperellipticEvenCoeff_cocycle_{inl_inr,inr_inl}`, the latter via
+     chart-transition symmetry) — so this cell is a **sound** reduction. The
+     remaining gap is Liouville L3 (`AX_HyperellipticOneForm_eq_form`).
 
 3. **Could it be the degenerate hack?** Read `anti_degeneracy`. The
    `finrank ≡ 0` collapse was a real bug; it is now positively excluded on

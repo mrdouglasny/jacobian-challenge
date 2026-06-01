@@ -343,41 +343,16 @@ theorem hyperellipticEvenCoeff_cocycle_inr_inr
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) g_inf b) w = _
     rw [hQ']
 
-/-! ## Cross-summand cocycle (axiomatized, with gluing hypothesis)
+/-! ## Cross-summand cocycle
 
 The Möbius `x ↦ 1/x` transition between affine and affine-infinity charts.
-The cocycle holds **only when** `g_inf` is determined from `g_aff` by the
-gluing relation `g_inf(u) = -u^(g-1) g_aff(1/u)` (where
-`g = (deg H.f - 2)/2` is the genus). The axioms below take this gluing
-condition as an explicit hypothesis (`g_inf = infReverse H g_aff`), so they
-are no longer mathematically false for arbitrary `(g_aff, g_inf)`.
-
-Discharging the axioms (replacing them with real proofs) requires
-explicit Möbius chain-rule computations; those depend on the smoothness
-axioms in `EvenAtlas.lean`.
-
-**SOUNDNESS WARNING — these axioms are still false as stated (task #21).**
-The `hGluing : g_inf = infReverse H g_aff` hypothesis does NOT fix the
-unsoundness: it is always satisfiable (it holds by `rfl` in
-`hyperellipticForm`), and `infReverse` (a `reflect` at degree `N/2 − 2`) is
-the genuine Möbius gluing polynomial **only when** `deg g_aff ≤ N/2 − 2`.
-For `deg g_aff ≥ N/2 − 1` the true gluing is not a polynomial (the form
-`g_aff·dx/y` has a pole at ∞), so `infReverse` returns the wrong polynomial
-and the asserted cocycle equation is **false** under satisfiable hypotheses.
-Hence the environment is, strictly, inconsistent; deriving `False` is
-obstructed only by the noncomputability of `Quotient.out` (constructing the
-witness points is hard), so no contradiction has been exhibited — but the
-trust boundary is broken, and `genus_HyperellipticEven_eq` transitively
-depends on these axioms.
-
-**The real fix already exists below**: the cross-summand cocycle is a proven
-theorem (`cross_summand_cocycle_coord` and friends, ~line 1238) under the
-degree bound `hDeg : g_aff.natDegree < N/2 − 1`. Task #21 is to add that
-`hDeg` hypothesis to these two axioms (making them true) and thread it
-through `hyperellipticForm` / `hyperellipticFormLinearMap` (restricting to
-`Polynomial.degreeLT ℂ (N/2−1)`), retiring the axioms entirely. This is
-plumbing, not new mathematics. See `docs/gemini-review-genus-framework.md`
-§(B) and `AXIOM_AUDIT.md` Class 2d. -/
+The cocycle holds when `g_inf` is determined from `g_aff` by the gluing
+relation `g_inf(u) = -u^(g-1) g_aff(1/u)` (i.e. `g_inf = infReverse H g_aff`)
+**and** `deg g_aff < N/2 − 1`. Both cross-summand directions are real,
+axiom-free theorems (`hyperellipticEvenCoeff_cocycle_inl_inr` and
+`…_inr_inl`, below); the bundling into `SatisfiesCotangentCocycle` is at the
+end of this file. (Historical note: these were two unsound axioms — false
+for `deg g_aff ≥ N/2 − 1` — retired by task #21.) -/
 
 /-- The "infinity-side" polynomial paired with `g` in the Möbius gluing.
 
@@ -390,77 +365,9 @@ noncomputable def infReverse (H : HyperellipticData) (g : Polynomial ℂ) :
     Polynomial ℂ :=
   -Polynomial.reflect (H.f.natDegree / 2 - 2) g
 
-/-- **Cross-summand cocycle (affine → infinity).** Axiomatized for the
-sub-cases not yet discharged. The smoothLocusY × smoothLocusY case is
-real (`cocycle_inl_inr_smoothLocusY_smoothLocusY`); the other 3 sub-cases
-remain axiomatized. Takes the Möbius gluing relation
-`g_inf = infReverse H g_aff` as an explicit hypothesis. -/
-axiom hyperellipticEvenCoeff_cocycle_inl_inr_axiom
-    [hf : Fact (¬ Odd H.f.natDegree)]
-    (g_aff g_inf : Polynomial ℂ)
-    (hGluing : g_inf = infReverse H g_aff)
-    (q q' : HyperellipticEvenProj H)
-    (a : HyperellipticAffine H) (b : HyperellipticAffineInfinity H)
-    (hQ : Quotient.out q = Sum.inl a) (hQ' : Quotient.out q' = Sum.inr b)
-    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
-    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
-    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
-      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
-        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
-        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1)
-
-/-- **Cross-summand cocycle (infinity → affine).** Axiomatized; takes the
-Möbius gluing relation `g_inf = infReverse H g_aff` as an explicit
-hypothesis. -/
-axiom hyperellipticEvenCoeff_cocycle_inr_inl_axiom
-    [hf : Fact (¬ Odd H.f.natDegree)]
-    (g_aff g_inf : Polynomial ℂ)
-    (hGluing : g_inf = infReverse H g_aff)
-    (q q' : HyperellipticEvenProj H)
-    (b : HyperellipticAffineInfinity H) (a : HyperellipticAffine H)
-    (hQ : Quotient.out q = Sum.inr b) (hQ' : Quotient.out q' = Sum.inl a)
-    {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target)
-    (hSrc : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈ (extChartAt 𝓘(ℂ, ℂ) q').source) :
-    hyperellipticEvenCoeff (H := H) g_aff g_inf q z =
-      hyperellipticEvenCoeff (H := H) g_aff g_inf q'
-        ((extChartAt 𝓘(ℂ, ℂ) q') ((extChartAt 𝓘(ℂ, ℂ) q).symm z)) *
-        (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1)
-
-/-! ## Bundled cocycle and submodule membership
-
-Combines the four sub-case cocycles (two real same-summand proofs +
-two cross-summand axioms) into the single `SatisfiesCotangentCocycle`
-predicate, then assembles full `holomorphicOneFormSubmodule` membership.
--/
-
-theorem hyperellipticEvenCoeff_satisfiesCotangentCocycle
-    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ)
-    (hGluing : g_inf = infReverse H g_aff) :
-    SatisfiesCotangentCocycle (HyperellipticEvenProj H)
-      (hyperellipticEvenCoeff (H := H) g_aff g_inf) := by
-  intro q q' z hz hSrc
-  rcases hQ : Quotient.out q with a | b
-  · rcases hQ' : Quotient.out q' with a' | b'
-    · exact hyperellipticEvenCoeff_cocycle_inl_inl g_aff g_inf q q' a a' hQ hQ' hz hSrc
-    · exact hyperellipticEvenCoeff_cocycle_inl_inr_axiom g_aff g_inf hGluing
-        q q' a b' hQ hQ' hz hSrc
-  · rcases hQ' : Quotient.out q' with a' | b'
-    · exact hyperellipticEvenCoeff_cocycle_inr_inl_axiom g_aff g_inf hGluing
-        q q' b a' hQ hQ' hz hSrc
-    · exact hyperellipticEvenCoeff_cocycle_inr_inr g_aff g_inf q q' b b' hQ hQ' hz hSrc
-
-/-- **Submodule membership for the unified coefficient family** (with the
-gluing condition). `hyperellipticEvenCoeff g_aff g_inf` is in
-`holomorphicOneFormSubmodule (HyperellipticEvenProj H)` whenever
-`g_inf = infReverse H g_aff`. -/
-theorem hyperellipticEvenCoeff_mem_submodule
-    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ)
-    (hGluing : g_inf = infReverse H g_aff) :
-    hyperellipticEvenCoeff (H := H) g_aff g_inf ∈
-      holomorphicOneFormSubmodule (HyperellipticEvenProj H) :=
-  ⟨hyperellipticEvenCoeff_isHolomorphicOneFormCoeff g_aff g_inf,
-   hyperellipticEvenCoeff_satisfiesCotangentCocycle g_aff g_inf hGluing,
-   hyperellipticEvenCoeff_isZeroOffChartTarget g_aff g_inf⟩
+/-! The two cross-summand cocycle directions are proved later in this file
+(`hyperellipticEvenCoeff_cocycle_inl_inr` and `…_inr_inl`), and bundled into
+`SatisfiesCotangentCocycle` / `…_mem_submodule` at the very end. -/
 
 /-! ## Linearity of `hyperellipticEvenCoeff` and `infReverse` -/
 
@@ -2286,5 +2193,44 @@ theorem hyperellipticEvenCoeff_cocycle_inr_inl
     show fderiv ℂ (⇑φq ∘ ⇑φq'.symm) w 1 * fderiv ℂ (⇑φq' ∘ ⇑φq.symm) z 1 = 1 from by
       rw [mul_comm]; exact htfm,
     mul_one]
+
+/-! ## Bundled cocycle and submodule membership
+
+Combines the four sub-case cocycles (two same-summand + the two
+cross-summand **real theorems** above) into `SatisfiesCotangentCocycle`,
+then assembles `holomorphicOneFormSubmodule` membership. Requires the
+low-degree bound `hDeg : g_aff.natDegree < N/2 − 1` under which the
+cross-summand cocycle genuinely holds (task #21). -/
+
+theorem hyperellipticEvenCoeff_satisfiesCotangentCocycle
+    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ)
+    (hGluing : g_inf = infReverse H g_aff)
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1) :
+    SatisfiesCotangentCocycle (HyperellipticEvenProj H)
+      (hyperellipticEvenCoeff (H := H) g_aff g_inf) := by
+  intro q q' z hz hSrc
+  rcases hQ : Quotient.out q with a | b
+  · rcases hQ' : Quotient.out q' with a' | b'
+    · exact hyperellipticEvenCoeff_cocycle_inl_inl g_aff g_inf q q' a a' hQ hQ' hz hSrc
+    · exact hyperellipticEvenCoeff_cocycle_inl_inr g_aff g_inf hGluing hDeg
+        q q' a b' hQ hQ' hz hSrc
+  · rcases hQ' : Quotient.out q' with a' | b'
+    · exact hyperellipticEvenCoeff_cocycle_inr_inl g_aff g_inf hGluing hDeg
+        q q' b a' hQ hQ' hz hSrc
+    · exact hyperellipticEvenCoeff_cocycle_inr_inr g_aff g_inf q q' b b' hQ hQ' hz hSrc
+
+/-- **Submodule membership for the unified coefficient family.**
+`hyperellipticEvenCoeff g_aff g_inf` is in `holomorphicOneFormSubmodule
+(HyperellipticEvenProj H)` whenever `g_inf = infReverse H g_aff` and
+`g_aff.natDegree < N/2 − 1`. -/
+theorem hyperellipticEvenCoeff_mem_submodule
+    [hf : Fact (¬ Odd H.f.natDegree)] (g_aff g_inf : Polynomial ℂ)
+    (hGluing : g_inf = infReverse H g_aff)
+    (hDeg : g_aff.natDegree < H.f.natDegree / 2 - 1) :
+    hyperellipticEvenCoeff (H := H) g_aff g_inf ∈
+      holomorphicOneFormSubmodule (HyperellipticEvenProj H) :=
+  ⟨hyperellipticEvenCoeff_isHolomorphicOneFormCoeff g_aff g_inf,
+   hyperellipticEvenCoeff_satisfiesCotangentCocycle g_aff g_inf hGluing hDeg,
+   hyperellipticEvenCoeff_isZeroOffChartTarget g_aff g_inf⟩
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj

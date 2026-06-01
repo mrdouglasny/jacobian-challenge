@@ -282,11 +282,10 @@ theorem genus_HyperellipticEven_le
     Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) ≤
       H.f.natDegree / 2 - 1 := by
   set n := H.f.natDegree / 2 - 1 with hn_def
-  -- Build the linear map degreeLT ℂ n → HolomorphicOneForm via hyperellipticForm.
+  -- The linear map degreeLT ℂ n → HolomorphicOneForm is `hyperellipticFormLinearMap`.
   let φ : Polynomial.degreeLT ℂ n →ₗ[ℂ]
       HolomorphicOneForm (HyperellipticEvenProj H) :=
-    (HyperellipticEvenProj.hyperellipticFormLinearMap H).comp
-      (Polynomial.degreeLT ℂ n).subtype
+    HyperellipticEvenProj.hyperellipticFormLinearMap H
   -- φ is surjective by Level 3 axiom.
   have hφ_surj : Function.Surjective φ := by
     intro form

@@ -41,12 +41,15 @@ factor that exactly absorbs the change of variable above.
 
 ## Status
 
-All theorems in this file are now **sorry-free**. The construction
-rests on two cross-summand cocycle axioms in `EvenForm.lean` (the
-Möbius gluing region), which are explicitly hypothesized on the
-gluing relation `g_inf = infReverse H g_aff` so that they are
-mathematically correct as statements; their discharge requires
-explicit chain-rule computations on `x ↦ 1/x`.
+All theorems in this file are **sorry-free and axiom-free** (task #21,
+2026-06-01). The two cross-summand cocycle axioms that this construction
+used to rest on are now real theorems in `EvenForm.lean`
+(`hyperellipticEvenCoeff_cocycle_{inl_inr,inr_inl}`, the latter via
+chart-transition symmetry), so `hyperellipticForm` no longer invokes any
+axiom. To stay sound it is defined to return the zero form for `deg g ≥
+N/2 − 1` (where `g(x) dx/y` has a pole at ∞), and the linear-algebra API
+(`hyperellipticFormLinearMap`, injectivity, linear independence) lives on
+the low-degree subspace `Polynomial.degreeLT ℂ (N/2 − 1)`.
 
 ## Discharge plan
 
@@ -92,73 +95,120 @@ variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 
 /-! ## The reusable `hyperellipticForm` constructor -/
 
-/-- The holomorphic 1-form `g(x) dx / y` on `HyperellipticEvenProj H`,
-parameterized by an arbitrary polynomial `g : Polynomial ℂ`.
-
-Constructed as the unified coefficient family
-`hyperellipticEvenCoeff g (infReverse H g)` together with its
-`holomorphicOneFormSubmodule` membership proof. The gluing hypothesis
-`g_inf = infReverse H g` is supplied as `rfl` since this constructor
-always pairs `g` with its canonical infinity-side polynomial.
-
-**KNOWN SOUNDNESS GAP** (recorded in `docs/gemini-review-genus-framework.md`).
-The cross-summand cocycle axioms in `EvenForm.lean` are mathematically false
-for `g.natDegree ≥ H.f.natDegree / 2 - 1`, because the form `g(x) dx/y`
-then has poles at infinity (so the cocycle equation literally fails). The
-fix is to add a degree bound `(hDeg : g.natDegree < H.f.natDegree / 2 - 1)`
-to those axioms and thread it through here. This is deferred because the
-refactor cascades through linearity theorems and `hyperellipticFormLinearMap`
-(which would need to become a map on `Polynomial.degreeLT ℂ g_topology`).
-
-In the meantime, this constructor should be applied **only to low-degree
-polynomials** (`g.natDegree < H.f.natDegree / 2 - 1`). All current callers
-in `Extensions/HyperellipticEven.lean` satisfy this constraint
-(via the `_hk : k < H.f.natDegree / 2 - 1` hypothesis on the basis
-differentials). -/
+/-- The holomorphic 1-form `g(x) dx / y` on `HyperellipticEvenProj H`, for a
+polynomial `g` of degree `< N/2 − 1` (the bound under which it is a genuine
+holomorphic 1-form — the cross-summand cocycle holds, `EvenForm.lean`).
+Outside that range it returns the zero form, keeping the constructor total
+and **axiom-free** (no longer invoking the retired high-degree cocycle
+axioms; task #21). -/
 noncomputable def hyperellipticForm (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] (g : Polynomial ℂ) :
     HolomorphicOneForm (HyperellipticEvenProj H) :=
-  ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
-   hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl⟩
+  if h : g.natDegree < H.f.natDegree / 2 - 1 then
+    ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
+     hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl h⟩
+  else 0
 
-/-! ## Linearity -/
+/-- On low-degree polynomials, `hyperellipticForm` is the real form. -/
+theorem hyperellipticForm_of_lt (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1) :
+    hyperellipticForm H g =
+      ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
+       hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl hDeg⟩ :=
+  dif_pos hDeg
 
-/-- `hyperellipticForm` is additive in the polynomial. -/
-theorem hyperellipticForm_add (H : HyperellipticData)
-    [Fact (¬ Odd H.f.natDegree)] (g g' : Polynomial ℂ) :
+/-- The coefficient of a low-degree `hyperellipticForm`. -/
+theorem hyperellipticForm_coeff_of_lt (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1) :
+    (hyperellipticForm H g).coeff = hyperellipticEvenCoeff (H := H) g (infReverse H g) := by
+  rw [hyperellipticForm_of_lt H hDeg]; rfl
+
+/-- A polynomial in `degreeLT ℂ n` with `0 < n` has `natDegree < n`. -/
+theorem natDegree_lt_of_mem_degreeLT {n : ℕ} (hn : 0 < n) {g : Polynomial ℂ}
+    (hg : g ∈ Polynomial.degreeLT ℂ n) : g.natDegree < n := by
+  by_cases h0 : g = 0
+  · simpa [h0] using hn
+  · rw [Polynomial.mem_degreeLT] at hg
+    exact (Polynomial.natDegree_lt_iff_degree_lt h0).mpr hg
+
+/-! ## Linearity (on the low-degree subspace) -/
+
+/-- `hyperellipticForm` is additive on low-degree polynomials. -/
+theorem hyperellipticForm_add_of_lt (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] {g g' : Polynomial ℂ}
+    (h : g.natDegree < H.f.natDegree / 2 - 1)
+    (h' : g'.natDegree < H.f.natDegree / 2 - 1)
+    (h'' : (g + g').natDegree < H.f.natDegree / 2 - 1) :
     hyperellipticForm H (g + g') =
       hyperellipticForm H g + hyperellipticForm H g' := by
+  rw [hyperellipticForm_of_lt H h, hyperellipticForm_of_lt H h', hyperellipticForm_of_lt H h'']
   apply Subtype.ext
   show hyperellipticEvenCoeff (H := H) (g + g') (infReverse H (g + g')) = _
   rw [infReverse_add]
   exact hyperellipticEvenCoeff_add g (infReverse H g) g' (infReverse H g')
 
-/-- `hyperellipticForm` is ℂ-linear (scalar mult side). -/
-theorem hyperellipticForm_smul (H : HyperellipticData)
-    [Fact (¬ Odd H.f.natDegree)] (c : ℂ) (g : Polynomial ℂ) :
+/-- `hyperellipticForm` is ℂ-linear (scalar mult side) on low-degree
+polynomials. -/
+theorem hyperellipticForm_smul_of_lt (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] (c : ℂ) {g : Polynomial ℂ}
+    (h : g.natDegree < H.f.natDegree / 2 - 1)
+    (h' : (c • g).natDegree < H.f.natDegree / 2 - 1) :
     hyperellipticForm H (c • g) = c • hyperellipticForm H g := by
+  rw [hyperellipticForm_of_lt H h, hyperellipticForm_of_lt H h']
   apply Subtype.ext
   show hyperellipticEvenCoeff (H := H) (c • g) (infReverse H (c • g)) = _
   rw [infReverse_smul]
   exact hyperellipticEvenCoeff_smul c g (infReverse H g)
 
 /-- `hyperellipticForm` of the zero polynomial is the zero form. -/
-theorem hyperellipticForm_zero (H : HyperellipticData)
+@[simp] theorem hyperellipticForm_zero (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] :
     hyperellipticForm H (0 : Polynomial ℂ) = 0 := by
-  apply Subtype.ext
-  show hyperellipticEvenCoeff (H := H) 0 (infReverse H 0) = 0
-  rw [infReverse_zero]
-  exact hyperellipticEvenCoeff_zero
+  unfold hyperellipticForm
+  split
+  · apply Subtype.ext
+    show hyperellipticEvenCoeff (H := H) 0 (infReverse H 0) = 0
+    rw [infReverse_zero]; exact hyperellipticEvenCoeff_zero
+  · rfl
 
-/-- The packaged ℂ-linear map version of `hyperellipticForm`. -/
+/-- Every element of `degreeLT ℂ 0` is the zero polynomial. -/
+private theorem eq_zero_of_mem_degreeLT_zero {p : Polynomial ℂ}
+    (hp : p ∈ Polynomial.degreeLT ℂ 0) : p = 0 := by
+  rw [Polynomial.mem_degreeLT, Nat.cast_zero, Nat.WithBot.lt_zero_iff,
+    Polynomial.degree_eq_bot] at hp
+  exact hp
+
+/-- The packaged ℂ-linear map version of `hyperellipticForm`, on the
+low-degree subspace `Polynomial.degreeLT ℂ (N/2−1)`. -/
 noncomputable def hyperellipticFormLinearMap (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] :
-    Polynomial ℂ →ₗ[ℂ] HolomorphicOneForm (HyperellipticEvenProj H) where
-  toFun := hyperellipticForm H
-  map_add' := hyperellipticForm_add H
-  map_smul' c g := by
-    simpa [RingHom.id_apply] using hyperellipticForm_smul H c g
+    Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1) →ₗ[ℂ]
+      HolomorphicOneForm (HyperellipticEvenProj H) where
+  toFun gd := hyperellipticForm H gd.1
+  map_add' gd gd' := by
+    rcases Nat.eq_zero_or_pos (H.f.natDegree / 2 - 1) with hn | hn
+    · -- n = 0: degreeLT is {0}, all forms are 0
+      have e : ∀ p : Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1), p.1 = 0 := by
+        intro p; exact eq_zero_of_mem_degreeLT_zero (hn ▸ p.2)
+      simp only [AddSubmonoid.coe_add, Submodule.coe_toAddSubmonoid, e, add_zero,
+        hyperellipticForm_zero]
+    · have h1 := natDegree_lt_of_mem_degreeLT hn gd.2
+      have h2 := natDegree_lt_of_mem_degreeLT hn gd'.2
+      have h3 : (gd.1 + gd'.1).natDegree < H.f.natDegree / 2 - 1 :=
+        lt_of_le_of_lt (Polynomial.natDegree_add_le _ _) (max_lt h1 h2)
+      exact hyperellipticForm_add_of_lt H h1 h2 h3
+  map_smul' c gd := by
+    rcases Nat.eq_zero_or_pos (H.f.natDegree / 2 - 1) with hn | hn
+    · have e : ∀ p : Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1), p.1 = 0 := by
+        intro p; exact eq_zero_of_mem_degreeLT_zero (hn ▸ p.2)
+      simp only [RingHom.id_apply, SetLike.val_smul, e, smul_zero, hyperellipticForm_zero]
+    · have h1 := natDegree_lt_of_mem_degreeLT hn gd.2
+      have h2 : (c • gd.1).natDegree < H.f.natDegree / 2 - 1 :=
+        lt_of_le_of_lt (Polynomial.natDegree_smul_le _ _) h1
+      show hyperellipticForm H (c • gd.1) = c • hyperellipticForm H gd.1
+      exact hyperellipticForm_smul_of_lt H c h1 h2
 
 /-! ## Linear independence
 
@@ -188,21 +238,22 @@ summand at a `smoothLocusY` representative, then the underlying
 polynomials are equal. -/
 theorem hyperellipticForm_eq_of_agree_at_affine_smoothY
     {g g' : Polynomial ℂ}
+    (hg : g.natDegree < H.f.natDegree / 2 - 1) (hg' : g'.natDegree < H.f.natDegree / 2 - 1)
     {q : HyperellipticEvenProj H}
     {a : HyperellipticAffine H} (hpY : a ∈ smoothLocusY H)
     (hQ : Quotient.out q = Sum.inl a)
     (hCoeff : (hyperellipticForm H g).coeff q =
               (hyperellipticForm H g').coeff q) :
     g = g' := by
-  have hReduce : ∀ (g₀ : Polynomial ℂ),
+  have hReduce : ∀ (g₀ : Polynomial ℂ), g₀.natDegree < H.f.natDegree / 2 - 1 →
       (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
-    intro g₀
-    show (hyperellipticEvenCoeff (H := H) g₀ (infReverse H g₀)) q = _
+    intro g₀ hg₀
+    rw [hyperellipticForm_coeff_of_lt H hg₀]
     show (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
     rw [hQ]
-  rw [hReduce g, hReduce g'] at hCoeff
+  rw [hReduce g hg, hReduce g' hg'] at hCoeff
   exact hyperellipticAffineCoeff_injective_at_smoothLocusY a hpY hCoeff
 
 /-- **Conditional form-level injectivity** (smoothLocusX variant).
@@ -216,6 +267,7 @@ Useful when `H.f(0) = 0`: the witness point is `(0, 0)`, which lies in
 but not in `smoothLocusY`. -/
 theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
     {g g' : Polynomial ℂ}
+    (hg : g.natDegree < H.f.natDegree / 2 - 1) (hg' : g'.natDegree < H.f.natDegree / 2 - 1)
     {q : HyperellipticEvenProj H}
     {a : HyperellipticAffine H}
     (hpX : a ∈ smoothLocusX H) (hpYn : a ∉ smoothLocusY H)
@@ -223,15 +275,15 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
     (hCoeff : (hyperellipticForm H g).coeff q =
               (hyperellipticForm H g').coeff q) :
     g = g' := by
-  have hReduce : ∀ (g₀ : Polynomial ℂ),
+  have hReduce : ∀ (g₀ : Polynomial ℂ), g₀.natDegree < H.f.natDegree / 2 - 1 →
       (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
-    intro g₀
-    show (hyperellipticEvenCoeff (H := H) g₀ (infReverse H g₀)) q = _
+    intro g₀ hg₀
+    rw [hyperellipticForm_coeff_of_lt H hg₀]
     show (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
     rw [hQ]
-  rw [hReduce g, hReduce g'] at hCoeff
+  rw [hReduce g hg, hReduce g' hg'] at hCoeff
   exact hyperellipticAffineCoeff_injective_at_smoothLocusX a hpX hpYn hCoeff
 
 /-! ### Witness existence and full injectivity
@@ -297,12 +349,15 @@ lemma witnessZeroX_mem_smoothLocusX_of_zero_root (H : HyperellipticData)
   rw [witnessZeroX_val_fst]
   exact eval_derivative_ne_zero_of_eval_eq_zero H h0
 
-/-- **Unconditional injectivity** of `hyperellipticForm`: any two
-polynomials yielding equal forms are equal. -/
-theorem hyperellipticForm_injective (H : HyperellipticData)
-    [Fact (¬ Odd H.f.natDegree)] :
-    Function.Injective (hyperellipticForm H) := by
-  intro g g' hForm
+/-- **Injectivity of `hyperellipticForm` on the low-degree subspace.**
+Two polynomials of degree `< N/2 − 1` yielding equal forms are equal.
+(No longer unconditional: high-degree polynomials all map to the zero form.) -/
+theorem hyperellipticForm_injOn_lowDegree
+    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
+    Set.InjOn (hyperellipticForm H)
+      { g : Polynomial ℂ | g.natDegree < H.f.natDegree / 2 - 1 } := by
+  intro g hg g' hg' hForm
+  simp only [Set.mem_setOf_eq] at hg hg'
   set q : HyperellipticEvenProj H :=
     Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl (witnessZeroX H))
   have hQ : Quotient.out q = Sum.inl (witnessZeroX H) :=
@@ -314,43 +369,52 @@ theorem hyperellipticForm_injective (H : HyperellipticData)
     have hpYn : witnessZeroX H ∉ smoothLocusY H := by
       rw [witnessZeroX_mem_smoothLocusY_iff]
       exact fun h => h h0
-    exact hyperellipticForm_eq_of_agree_at_affine_smoothX hpX hpYn hQ hCoeff
+    exact hyperellipticForm_eq_of_agree_at_affine_smoothX hg hg' hpX hpYn hQ hCoeff
   · have hpY : witnessZeroX H ∈ smoothLocusY H :=
       (witnessZeroX_mem_smoothLocusY_iff H).mpr h0
-    exact hyperellipticForm_eq_of_agree_at_affine_smoothY hpY hQ hCoeff
+    exact hyperellipticForm_eq_of_agree_at_affine_smoothY hg hg' hpY hQ hCoeff
 
-/-- Injectivity of `hyperellipticForm` on polynomials of degree
-`< H.f.natDegree / 2 - 1`, as a corollary of unconditional injectivity. -/
-theorem hyperellipticForm_injOn_lowDegree
-    (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
-    Set.InjOn (hyperellipticForm H)
-      { g : Polynomial ℂ | g.natDegree < H.f.natDegree / 2 - 1 } :=
-  fun _ _ _ _ hForm => hyperellipticForm_injective H hForm
+/-- The low-degree linear map `hyperellipticFormLinearMap` is injective. -/
+theorem hyperellipticFormLinearMap_injective (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] :
+    Function.Injective (hyperellipticFormLinearMap H) := by
+  intro gd gd' h
+  apply Subtype.ext
+  rcases Nat.eq_zero_or_pos (H.f.natDegree / 2 - 1) with hn | hn
+  · have e : ∀ p : Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1), p.1 = 0 := by
+      intro p; exact eq_zero_of_mem_degreeLT_zero (hn ▸ p.2)
+    rw [e gd, e gd']
+  · exact hyperellipticForm_injOn_lowDegree H
+      (Set.mem_setOf.mpr (natDegree_lt_of_mem_degreeLT hn gd.2))
+      (Set.mem_setOf.mpr (natDegree_lt_of_mem_degreeLT hn gd'.2)) h
 
-/-- Linear independence of the canonical basis. Combines
-linear independence of `Polynomial.basisMonomials` with the
-unconditional injectivity of `hyperellipticFormLinearMap`. -/
+/-- Linear independence of the canonical basis `{ hyperellipticForm (X^k) :
+0 ≤ k < N/2 − 1 }`, via injectivity of the low-degree linear map. -/
 theorem hyperellipticForm_linearIndependent (H : HyperellipticData)
     [Fact (¬ Odd H.f.natDegree)] :
     LinearIndependent ℂ
       (fun k : Fin (H.f.natDegree / 2 - 1) =>
         hyperellipticForm H (Polynomial.X ^ k.val)) := by
-  -- (1) Powers of X are linearly independent in ℂ[X].
-  have hCoe : ⇑(Polynomial.basisMonomials ℂ) = fun n => (Polynomial.X : Polynomial ℂ) ^ n := by
-    funext n
-    rw [Polynomial.coe_basisMonomials, ← Polynomial.monomial_one_right_eq_X_pow n]
-  have hPowLI : LinearIndependent ℂ (fun n : ℕ => (Polynomial.X : Polynomial ℂ) ^ n) := by
-    have := (Polynomial.basisMonomials ℂ).linearIndependent
-    rw [hCoe] at this; exact this
-  -- (2) Restrict to `Fin (g_topology - 1)` via the `Fin.val` coercion.
-  have hFinLI : LinearIndependent ℂ
-      (fun k : Fin (H.f.natDegree / 2 - 1) => (Polynomial.X : Polynomial ℂ) ^ k.val) :=
-    hPowLI.comp (fun k : Fin (H.f.natDegree / 2 - 1) => k.val) Fin.val_injective
-  -- (3) Push through the injective ℂ-linear map `hyperellipticFormLinearMap H`.
-  have hKer : (hyperellipticFormLinearMap H).ker = ⊥ := by
-    rw [LinearMap.ker_eq_bot]
-    exact hyperellipticForm_injective H
-  have := (LinearMap.linearIndependent_iff (hyperellipticFormLinearMap H) hKer).mpr hFinLI
-  convert this using 1
+  set n := H.f.natDegree / 2 - 1 with hn
+  -- X^k ∈ degreeLT ℂ n
+  have hmem : ∀ k : Fin n, (Polynomial.X ^ k.val : Polynomial ℂ) ∈ Polynomial.degreeLT ℂ n := by
+    intro k; rw [Polynomial.mem_degreeLT, Polynomial.degree_X_pow]; exact_mod_cast k.isLt
+  set v : Fin n → Polynomial.degreeLT ℂ n := fun k => ⟨Polynomial.X ^ k.val, hmem k⟩ with hv
+  -- (1) X^k linearly independent in ℂ[X]
+  have hCoe : ⇑(Polynomial.basisMonomials ℂ) = fun m => (Polynomial.X : Polynomial ℂ) ^ m := by
+    funext m; rw [Polynomial.coe_basisMonomials, ← Polynomial.monomial_one_right_eq_X_pow m]
+  have hPowLI : LinearIndependent ℂ (fun m : ℕ => (Polynomial.X : Polynomial ℂ) ^ m) := by
+    have := (Polynomial.basisMonomials ℂ).linearIndependent; rw [hCoe] at this; exact this
+  have hFinLI : LinearIndependent ℂ (fun k : Fin n => (Polynomial.X : Polynomial ℂ) ^ k.val) :=
+    hPowLI.comp (fun k : Fin n => k.val) Fin.val_injective
+  -- (2) v linearly independent in degreeLT (reflect through the injective subtype;
+  --     `subtype ∘ v = fun k => X^k` holds by `rfl`)
+  have hvLI : LinearIndependent ℂ v :=
+    LinearIndependent.of_comp (Polynomial.degreeLT ℂ n).subtype hFinLI
+  -- (3) push through the injective low-degree map
+  have hKer : LinearMap.ker (hyperellipticFormLinearMap H) = ⊥ :=
+    LinearMap.ker_eq_bot.mpr (hyperellipticFormLinearMap_injective H)
+  have hmap := hvLI.map' (hyperellipticFormLinearMap H) hKer
+  exact hmap
 
 end Jacobians.ProjectiveCurve.HyperellipticEvenProj
