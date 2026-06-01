@@ -204,6 +204,31 @@ theorem affineProjXCoeff_analyticOn_chartTarget
   -- `affineProjXCoeff_eq_on_target` gives directly.
   exact hQuotient.congr (fun z hz => affineProjXCoeff_eq_on_target g a hpY hz)
 
+/-- **L2 milestone M0.1.** The `y`-branch `z ↦ √(f(z)) = squareLocalHomeomorph.symm (f.eval z)`
+is analytic on the projX chart target. (Extracted from
+`affineProjXCoeff_analyticOn_chartTarget`; the building block for `G = coeff·√f`
+in the Liouville-L2 decomposition — see `docs/genus-L2-execution-roadmap.md`.) -/
+theorem squareLocalHomeomorph_symm_eval_analyticOn
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H) :
+    AnalyticOn ℂ (fun z : ℂ => (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
+      (((affineChartProjX (H := H) a hpY) :
+          OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) := by
+  set e := squareLocalHomeomorph (H := H) a hpY with he_def
+  set chartTarget :=
+    (((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) with hct_def
+  have hF : AnalyticOn ℂ (fun z : ℂ => H.f.eval z) chartTarget :=
+    (AnalyticOn.eval_polynomial H.f).mono (Set.subset_univ _)
+  have hSymm : AnalyticOn ℂ (e.symm) e.target := by
+    have hCD : ContDiffOn ℂ ω e.symm e.target :=
+      squareLocalHomeomorph_contDiffOn_symm (H := H) a hpY
+    rw [show (ω : WithTop ℕ∞) = ⊤ from rfl] at hCD
+    exact (contDiffOn_omega_iff_analyticOn (𝕜 := ℂ) (E := ℂ) (F := ℂ)
+      e.open_target.uniqueDiffOn).mp hCD
+  have hMaps : Set.MapsTo (fun z : ℂ => H.f.eval z) chartTarget e.target := by
+    intro z hz; change H.f.eval z ∈ e.target; exact hz
+  exact hSymm.comp hF hMaps
+
 /-! ## ProjY chart coefficient (S2 — mirror of S1)
 
 For `a ∈ smoothLocusX` (i.e. `f'(a.val.1) ≠ 0`), the projY chart

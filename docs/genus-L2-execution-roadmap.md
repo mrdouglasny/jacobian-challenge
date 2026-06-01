@@ -6,25 +6,48 @@ gap toward a fully axiom-clean even-genus theorem. Companion to the scoping
 doc [`genus-L2-L3-discharge-plan.md`](genus-L2-L3-discharge-plan.md); this one
 is the *how*, with signatures and an order to execute against.
 
-## Strategy decision: elementary chart-gluing (no involution)
+## Strategy — corrected after the M0.3 design spike (2026-06-01)
 
-The classical proof writes `R := ω/(dx/y)`, observes `R` is σ-invariant (so
-`R ∈ ℂ(x)`) via the hyperelliptic involution `σ(x,y)=(x,−y)`, then bounds it.
-**The even side has no `σ` built** (only the odd side does), and proving
-"holomorphic differentials are σ-anti-invariant" is itself deep (it needs
-`H⁰(Ω)` of the `ℙ¹` quotient `= 0`).
+> **The "avoid the involution" plan was wrong.** Starting M0 revealed that
+> σ-anti-invariance is *intrinsic* to L2, not optional. **Proof:** L2 asserts
+> a single `g` with `coeff(q,z) = g(z) / squareLocalHomeomorph_a.symm(f z)`
+> for *every* smooth-Y `a`. Over one `z`, the two sheets `a = (x,+√f)` and
+> `a' = (x,−√f)` give the `+` and `−` branches, so L2 forces
+> `coeff(q',z) = g(z)/(−√f) = −coeff(q,z)`. I.e. **L2 ⟹ `coeff(σq,·) =
+> −coeff(q,·)` (σ-anti-invariance)** — so it must be *proven* en route, and
+> cannot "emerge from the branch-point analysis" (which only gives
+> analyticity/removability, never the sheet-negation).
 
-**We avoid `σ` entirely.** The candidate `G := coeff_ω · √f` is built
-chart-locally and glued using the **now-real cocycle** (task #21):
-- along each sheet, by the same-summand cocycle (identity transition);
-- *across* branch points (`y=0`), by the projY chart — this is where the two
-  sheets connect, so single-valuedness emerges *from* the branch-point
-  analysis, not from `σ`;
-- at infinity, by the cross-summand cocycle.
-Branch points become **removable singularities** (Mathlib:
-`Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`,
-`differentiableOn_update_limUnder_of_bddAbove`). More laborious than the `σ`
-route, but elementary and built on what we already have.
+So the central, hardest piece is establishing σ-anti-invariance of an
+arbitrary holomorphic differential. The route that leverages our assets:
+
+1. **Build the hyperelliptic involution `σ`** on `HyperellipticEvenProj`
+   (`σ(x,y)=(x,−y)`; the even side has none — only the odd side does). Show
+   `σ` is holomorphic (`ContMDiff`) and involutive.
+2. **Anti-invariance via `ℙ¹`-descent** (uses our **proven** `genus ℙ¹ = 0`):
+   `ω + σ*ω` is σ-invariant, hence descends to a holomorphic 1-form on the
+   quotient `HyperellipticEvenProj / σ ≅ ℙ¹`; `genus ℙ¹ = 0` ⇒ that form is
+   `0` ⇒ `σ*ω = −ω`. *(Needs the quotient map and form-descent — substantial.)*
+   A more hands-on alternative: show `coeff(q,·) + coeff(σq,·)` is the
+   chart-coefficient of a form pulled back from `ℙ¹`, hence `0`.
+
+Only **with** σ-anti-invariance in hand does the rest go through: define
+`g(z) := coeff(q,z) · √f(z)` from one sheet, and anti-invariance gives the
+formula on the other sheet automatically. Then `g` is entire (branch points
+removable, Mathlib:
+`Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) with
+polynomial growth (infinity chart) ⇒ a polynomial (`differentiable_eq_polynomial_of_growth`).
+
+**Revised estimate:** the σ-construction + `ℙ¹`-descent is new infrastructure
+the even side lacks; this pushes L2 to the **~2–3 month** range, dominated by
+the involution/quotient machinery (the original 6–8 week estimate assumed the
+flawed gluing route). The branch-point/infinity analysis (M2/M3) remains, but
+now *after* anti-invariance.
+
+### Down payment landed
+- **M0.1** `squareLocalHomeomorph_symm_eval_analyticOn` (`AffineForm.lean`) —
+  the `√f` branch is analytic on the projX target. Real, axiom-free; valid
+  regardless of the strategy correction.
 
 ## Target (restated)
 
@@ -118,13 +141,26 @@ L3 into L2. Then `genus_HyperellipticEven_le` is axiom-clean.
 - **M0.3 (G's representation)** — a wrong domain/sheet choice makes M1–M2
   awkward. Worth a short spike before committing.
 
-## Recommended order
-1. **M0** (foundations + the `G` design spike).
-2. **M1** (analytic off branch locus) — first real, self-contained chunk.
-3. **M3** before **M2**: the infinity growth bound (M3) is more self-contained
-   than the branch-point removability (M2); doing it first de-risks M4 and
-   leaves the hardest piece (M2) last with everything else in place.
-4. **M2**, then **M4**.
+## Recommended order (revised 2026-06-01)
+1. **M0** — done: design spike (which produced the strategy correction above)
+   + `M0.1` landed.
+2. **Mσ — σ-anti-invariance** (the new central, hardest milestone): build the
+   even-side involution `σ`, prove holomorphic + involutive, then
+   `σ*ω = −ω` via `ℙ¹`-descent (uses `genus ℙ¹ = 0`). *Everything downstream
+   depends on this.*
+3. **M1** (`G` analytic off branch locus) + **M0.1** — straightforward once Mσ
+   gives well-definedness across sheets.
+4. **M3** (infinity growth) before **M2** (branch-point removability).
+5. **M4** — assemble (`differentiable_eq_polynomial_of_growth`, done).
 
-Total: **~6–8 weeks** focused, dominated by M2 and M3. Optionally do the
-**L3 propagation** in parallel — it's independent and collapses an axiom.
+Total: **~2–3 months**, now dominated by **Mσ** (the involution + quotient
+descent — new even-side infrastructure). The **L3 propagation** remains
+independent and tractable (~1 week, uses `hyperellipticForm_coeff_projX`);
+worth doing regardless, as it collapses L3 into L2.
+
+**Honest note.** The σ-anti-invariance requirement makes the Liouville route
+comparable in cost to the Riemann–Roch route it was meant to undercut. Before
+committing months, it is worth weighing: (a) build `σ` + `ℙ¹`-descent for L2;
+vs (b) the Riemann–Roch upper bound directly; vs (c) leaving even-genus sound
+modulo L2/L3 and spending the effort elsewhere (the `ofCurve_inj` anti-hack,
+the Class-1 vetting). The M0 spike's job was to surface this — it did.
