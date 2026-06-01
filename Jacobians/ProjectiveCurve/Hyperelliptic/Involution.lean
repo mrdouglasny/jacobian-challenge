@@ -100,4 +100,27 @@ theorem hyperellipticEvenInvol_involutive (H : HyperellipticData) :
     Function.Involutive (hyperellipticEvenInvol H) :=
   hyperellipticEvenInvol_invol H
 
+/-! ## Continuity -/
+
+theorem HyperellipticAffine.continuous_invol :
+    Continuous (HyperellipticAffine.invol (H := H)) := by
+  refine Continuous.subtype_mk ?_ _
+  exact (continuous_fst.comp continuous_subtype_val).prodMk
+    ((continuous_snd.comp continuous_subtype_val).neg)
+
+theorem HyperellipticAffineInfinity.continuous_invol :
+    Continuous (HyperellipticAffineInfinity.invol (H := H)) := by
+  refine Continuous.subtype_mk ?_ _
+  exact (continuous_fst.comp continuous_subtype_val).prodMk
+    ((continuous_snd.comp continuous_subtype_val).neg)
+
+theorem hyperellipticEvenInvolPre_continuous (H : HyperellipticData) :
+    Continuous (hyperellipticEvenInvolPre H) :=
+  HyperellipticAffine.continuous_invol.sumMap HyperellipticAffineInfinity.continuous_invol
+
+theorem hyperellipticEvenInvol_continuous (H : HyperellipticData) :
+    Continuous (hyperellipticEvenInvol H) :=
+  isQuotientMap_quotient_mk'.continuous_iff.mpr
+    ((continuous_quotient_mk').comp (hyperellipticEvenInvolPre_continuous H))
+
 end Jacobians.ProjectiveCurve
