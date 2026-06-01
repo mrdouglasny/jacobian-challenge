@@ -60,6 +60,38 @@ needed**).
 ## Tasks (in order)
 
 ### Mσ.2 — `σ` is `ContMDiff` (holomorphic)
+
+> **Status (2026-06-02): affine summands DONE; quotient descent scoped, not done.**
+> `HyperellipticAffine.contMDiff_invol` and `HyperellipticAffineInfinity.contMDiff_invol`
+> are proven (axiom-free) — the chart representative is `z↦z` (smoothLocusY) /
+> `z↦−z` (smoothLocusX). Remaining: `hyperellipticEvenInvol_contMDiff`.
+>
+> **Corrected scoping for the descent:**
+> - **Do NOT require it axiom-free.** EvenProj's smooth structure already rests
+>   on `affineLiftChart_compat_infinityLiftChart` / `…_inr_…` (Class 2c), and
+>   `genus_HyperellipticEven_eq` already depends on them — so σ depending on the
+>   EvenProj manifold structure adds **nothing** to the even-genus footprint.
+>   Use `chartAt`/`extChartAt`/`IsManifold` freely.
+> - **Gotcha:** `EvenAtlas.chartAt q` uses `Quotient.out q`, which returns an
+>   *arbitrary* representative of `q`'s class. For `q = ⟦inl a⟧` with `a.1 ≠ 0`
+>   the class is `{inl a, inr b}` and `out q` may be the **infinity** rep `inr b`,
+>   so `extChartAt ⟦inl a⟧ ≠ affineLiftChart a` in general. Plan around this:
+>   either (i) prove `proj_inl`/`proj_inr` are `ContMDiff` open *local
+>   diffeomorphisms* and transfer `σ ∘ proj_inl = proj_inl ∘ σ_aff` (cleanest if
+>   a smooth-open-embedding transfer lemma is available), or (ii) use a
+>   maximal-atlas chart-switch to `affineLiftChart a` (compatible with the atlas
+>   via the proven `affineLiftChart_compat_affineLiftChart` same-summand and the
+>   axiomatic cross-summand compat) and reduce to the affine representative via
+>   `lift_openEmbedding_apply`/`_symm` + the commutation `hyperellipticEvenInvol_mk`.
+> - **Reconsider whether ContMDiff is even on the critical path:** Mσ.3's
+>   `pullbackInvolution` is defined directly on the coefficient cocycle
+>   (`(σ*ω).coeff q z := ω.coeff (σq) z`); check whether its
+>   submodule-membership proof needs full `ContMDiff` of σ or only the
+>   chart-coordinate facts (σ fixes `x` in projX). If the latter, the
+>   `ContMDiff` descent may be skippable. **Resolve this before grinding the
+>   descent.**
+
+(Original signature, if pursued:)
 ```lean
 theorem hyperellipticEvenInvol_contMDiff (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)] :
     ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (hyperellipticEvenInvol H)
