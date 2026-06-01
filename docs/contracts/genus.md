@@ -139,8 +139,11 @@ You can judge `genus` without opening a Lean proof:
    `AX_genus_eq_zero_iff_homeo` retired from it.
 2. **Odd-hyperelliptic cell** — mirror the even-side framework (task #21)
    to fill the one `sorry`.
-3. Shrink the even-hyperelliptic cell's `axiom_deps`. Liouville **Level 1**
-   (`liouville_compact_complex_manifold`) is now **proven** (2026-05-31,
-   axiom-free) — the abstract base of the hierarchy. The remaining
-   hyperelliptic-specific levels (L2 function-field decomposition, L3 form
-   surjectivity) are the project-specific work that still gates this cell.
+3. Shrink the even-hyperelliptic cell's `axiom_deps` to zero. Liouville
+   **L1** is proven (axiom-free), **L2-step-4** is proven (`EntireGrowth`),
+   the two cross-summand cocycle axioms are retired (task #21), and **L3 is
+   shown to reduce to L2 + cocycle propagation** (`hyperellipticForm_coeff_projX`).
+   The only remaining gap is the **L2 core** (branch-point regularity +
+   degree-at-∞) — the canonical-differentials theorem, scoped in
+   [`../genus-L2-L3-discharge-plan.md`](../genus-L2-L3-discharge-plan.md)
+   (~1–2 months, the deepest result left).
