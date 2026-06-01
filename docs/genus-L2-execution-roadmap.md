@@ -38,11 +38,27 @@ removable, Mathlib:
 `Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) with
 polynomial growth (infinity chart) ⇒ a polynomial (`differentiable_eq_polynomial_of_growth`).
 
-**Revised estimate:** the σ-construction + `ℙ¹`-descent is new infrastructure
-the even side lacks; this pushes L2 to the **~2–3 month** range, dominated by
-the involution/quotient machinery (the original 6–8 week estimate assumed the
-flawed gluing route). The branch-point/infinity analysis (M2/M3) remains, but
-now *after* anti-invariance.
+**Gemini cross-check (gemini-2.5-pro, 2026-06-01) — estimate revised DOWN.**
+The descent to `ℙ¹` is **not** needed: the direct-Liouville argument for
+"a σ-invariant holomorphic 1-form is `0`" is confirmed sound and complete
+(single-valued `c(x)`; entire via removable singularities at branch points;
+`c = O(1/x²)` at the two infinity points; `c ≡ 0` by our Liouville). It is a
+pure chart computation reusing assets we already have — **no quotient map,
+no form-pushforward.** And σ itself is medium-difficulty (identity in projX
+coords; `y↦−y` at branch points; swaps the two `∞` points). So the realistic
+range is **~1–2 months**, not 2–3, dominated by: building σ and a *concrete*
+`σ*` on the cocycle representation (do **not** use the axiomatized
+`pullbackOneForm` — define it directly: `(σ*ω).coeff q z = ω.coeff (σq) z`
+since σ is `x↦x` in projX coords), then the (now reusable) branch/infinity
+Liouville bookkeeping. M2/M3 still follow.
+
+**Warning — the tempting "cheaper route" is circular.** Gemini's first
+suggestion ("posit `{x^k dx/y}`, prove independent, conclude basis since
+`dim H⁰(Ω) = g`") **assumes the upper bound `dim ≤ g`** — exactly what L2/L3
+establishes. We have only the *lower* bound (S7) + finite-dimensionality
+(Montel); `dim = g` is the goal. That route is Riemann–Roch in disguise. There
+is **no free lunch for the upper bound**: it requires either σ-anti-invariance
+(the direct-Liouville route above) or Riemann–Roch.
 
 ### Down payment landed
 - **M0.1** `squareLocalHomeomorph_symm_eval_analyticOn` (`AffineForm.lean`) —
@@ -153,14 +169,25 @@ L3 into L2. Then `genus_HyperellipticEven_le` is axiom-clean.
 4. **M3** (infinity growth) before **M2** (branch-point removability).
 5. **M4** — assemble (`differentiable_eq_polynomial_of_growth`, done).
 
-Total: **~2–3 months**, now dominated by **Mσ** (the involution + quotient
-descent — new even-side infrastructure). The **L3 propagation** remains
-independent and tractable (~1 week, uses `hyperellipticForm_coeff_projX`);
-worth doing regardless, as it collapses L3 into L2.
+Total: **~1–2 months** (revised down after the Gemini cross-check — the
+quotient descent is avoided), dominated by **Mσ** (build σ + concrete `σ*` +
+the direct-Liouville vanishing of σ-invariant forms). The **L3 propagation**
+remains independent and tractable (~1 week, uses `hyperellipticForm_coeff_projX`).
 
-**Honest note.** The σ-anti-invariance requirement makes the Liouville route
-comparable in cost to the Riemann–Roch route it was meant to undercut. Before
-committing months, it is worth weighing: (a) build `σ` + `ℙ¹`-descent for L2;
-vs (b) the Riemann–Roch upper bound directly; vs (c) leaving even-genus sound
-modulo L2/L3 and spending the effort elsewhere (the `ofCurve_inj` anti-hack,
-the Class-1 vetting). The M0 spike's job was to surface this — it did.
+**Mσ, concretely:**
+- `σ : HyperellipticEvenProj H → HyperellipticEvenProj H`, `(x,y)↦(x,−y)`;
+  prove involutive + `ContMDiff` (identity in projX coords — easy; `y↦−y` at
+  branch points; swaps the two `∞` points).
+- `pullbackInvolution : HolomorphicOneForm → HolomorphicOneForm`, defined
+  *concretely* on the cocycle: `(σ*ω).coeff q z = ω.coeff (σq) z` (no axiom).
+- `sigma_invariant_form_eq_zero`: a σ-invariant holomorphic 1-form is `0`
+  (the direct-Liouville chart argument; reuses `liouville_*` + the
+  branch/infinity bookkeeping). ⇒ `σ*ω = −ω`.
+- Then `a := ω.coeff·√f` from one sheet; anti-invariance gives the other;
+  entire + growth ⇒ polynomial ⇒ L2.
+
+**Decision note.** Even at ~1–2 months this is a campaign. Worth weighing
+against (b) the Riemann–Roch upper bound directly, or (c) banking even-genus
+*sound modulo L2/L3* and spending effort on higher-certainty wins
+(`ofCurve_inj` anti-hack, Class-1 vetting). But the cost is now correctly
+understood, and the path is concrete.
