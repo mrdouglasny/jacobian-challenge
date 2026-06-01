@@ -286,6 +286,32 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
   rw [hReduce g hg, hReduce g' hg'] at hCoeff
   exact hyperellipticAffineCoeff_injective_at_smoothLocusX a hpX hpYn hCoeff
 
+/-- **Bridge lemma (L3 ⟸ L2).** On a projX chart at a `smoothLocusY` point,
+the coefficient of `hyperellipticForm H g` (for low-degree `g`) is exactly
+`g(z) / √(f(z))` — the same `g/√f` shape that the Liouville-L2 axiom
+(`AX_HyperellipticForm_polynomial_decomposition`) produces. So an arbitrary
+form's L2 decomposition agrees with `hyperellipticForm g` on every smooth-Y
+projX chart; propagating that agreement (via the now-real cocycle) to all
+charts yields L3 (`form = hyperellipticForm g`). See
+`docs/genus-L2-L3-discharge-plan.md`. -/
+theorem hyperellipticForm_coeff_projX {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1)
+    {a : HyperellipticAffine H} (hpY : a ∈ smoothLocusY H)
+    {q : HyperellipticEvenProj H} (hQ : Quotient.out q = Sum.inl a)
+    {z : ℂ}
+    (hz : z ∈ ((affineChartProjX (H := H) a hpY) :
+        OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target) :
+    (hyperellipticForm H g).coeff q z =
+      g.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) := by
+  rw [hyperellipticForm_coeff_of_lt H hDeg]
+  show (hyperellipticEvenCoeff (H := H) g (infReverse H g)) q z = _
+  show (match Quotient.out q with
+    | Sum.inl a => hyperellipticAffineCoeff (H := H) g a
+    | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g) b) z = _
+  rw [hQ]
+  show hyperellipticAffineCoeff (H := H) g a z = _
+  rw [hyperellipticAffineCoeff, dif_pos hpY, affineProjXCoeff, if_pos hz]
+
 /-! ### Witness existence and full injectivity
 
 To discharge `injOn_lowDegree` we need a quotient point `q` whose
