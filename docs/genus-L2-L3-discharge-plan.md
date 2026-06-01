@@ -89,3 +89,13 @@ for hyperelliptic curves; it is the deepest remaining result in the repo.
 2. **L2-a + L2-b** — build `G` and its sheet-independence.
 3. **L2-d** (infinity growth) — feeds L2-e (done).
 4. **L2-c** (branch points) — the last and hardest piece.
+
+## Execution roadmap
+
+A concrete, lemma-by-lemma plan (milestones M0–M4, with signatures, the
+chosen *elementary chart-gluing* strategy that avoids the hyperelliptic
+involution, Mathlib tools, and a risk register) is in
+[`genus-L2-execution-roadmap.md`](genus-L2-execution-roadmap.md). Start at M0
+(foundations + a short spike to fix `G`'s representation), then M1, then M3
+before M2 (infinity growth is more self-contained than branch-point
+removability).
