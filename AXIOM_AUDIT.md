@@ -10,11 +10,12 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 95** — **93** in our modules + **2** vendored Kirov
+**Active project axioms: 93** — **91** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 93 once the 9 doc-comment example lines tagged
-`-- not-an-axiom` are excluded.)
+`^axiom ` also reports 91 once the 9 doc-comment example lines tagged
+`-- not-an-axiom` are excluded.) Down from 95: the two unsound cocycle
+axioms were retired by task #21 (2026-06-01).
 
 ---
 
@@ -26,7 +27,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (81 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (79 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -39,7 +40,7 @@ Per the review plan, axioms are split into two classes:
 | 2a — data-existence | 27 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 11 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
-| 2d — **flagged** | 4 | known concern / unsound at edge | **do not trust downstream as-is** |
+| 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
 
@@ -129,46 +130,17 @@ discharge is substantial chart work. The unified `Hyperelliptic` and
 | Elliptic witnesses (`AX_Elliptic_aLoop_analytic`, `_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:86,90,166` | 3 |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
-### 2d. Flagged — *known concern, do not trust downstream as-is*
+### 2d. Flagged — *true-but-unproven; needs end-to-end check*
 
-> ⚠️ **The two cocycle axioms are UNSOUND — false as stated, not merely
-> unproven.** Each asserts a cocycle *equation* under the hypothesis
-> `g_inf = infReverse H g_aff`, which is always satisfiable (`rfl` in
-> `hyperellipticForm`) and does **not** restrict the degree. `infReverse`
-> is the genuine Möbius gluing only for `deg g_aff ≤ N/2−2`; at higher
-> degree the equation is false, so the axiom is a false proposition under
-> satisfiable hypotheses → the environment is strictly inconsistent.
-> Deriving `False` is obstructed only by the noncomputability of
-> `Quotient.out`, so no contradiction has been exhibited — but the trust
-> boundary is broken. **`genus_HyperellipticEven_eq` (and `…_le`)
-> transitively depend on these, so the even-genus headline is not yet a
-> sound proof.** The matching low-degree statements are already **proven
-> theorems** in `EvenForm.lean` (`cross_summand_cocycle_coord`, ~line 1238,
-> under `hDeg : g_aff.natDegree < N/2−1`); **task #21** is to add `hDeg` to
-> the axioms and thread it through `hyperellipticForm` /
-> `hyperellipticFormLinearMap` (→ `Polynomial.degreeLT ℂ (N/2−1)`),
-> retiring them. Plumbing, not new mathematics.
+The two cross-summand cocycle axioms that used to live here were **unsound**
+(false for `deg g ≥ N/2−1`) and are now **retired** — see Recently
+discharged. The remaining two are the Liouville hierarchy L2/L3: genuinely
+true, but not yet checked end-to-end.
 
 | Axiom | File:Line | Status |
 |-------|-----------|--------|
-| `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` | `…/Hyperelliptic/EvenForm.lean:380` | **unsound** (false for `deg g ≥ N/2−1`); real low-degree theorem exists; load-bearing for the even-genus theorem. Task #21. |
-| `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` | `…/Hyperelliptic/EvenForm.lean:397` | **unsound**, same; discharge via the swap lemma from `inl_inr` once degree-bounded. Task #21. |
-| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven (not unsound). **Step 4 of its proof plan is now proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
-| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm`; consumes L2 + the flagged cocycle axioms. Feeds `genus_HyperellipticEven_le`. |
-
-**Priority.** The two cocycle axioms (unsound) outrank everything else in
-the audit: they break the trust boundary of a headline theorem.
-
-**Task #21 progress (2026-05-31).** *Part 1 (the hard math) is DONE* —
-both directions are now real, axiom-free theorems
-(`hyperellipticEvenCoeff_cocycle_inl_inr` and the new `…_inr_inl`, the
-latter via the general `transition_fderiv_mul` chart-transition symmetry in
-`GeneralResults/ChartTransition.lean`). *Part 2 (plumbing)* — thread `hDeg`
-from these theorems up through `hyperellipticForm` and delete the axioms —
-is a ~150–250 LOC mechanical cascade scoped step-by-step in
-[`docs/task-21-discharge-plan.md`](docs/task-21-discharge-plan.md). Until
-Part 2 lands, the two axioms remain wired into `_satisfiesCotangentCocycle`
-and the even-genus theorem is still not sound.
+| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven. **Step 4 of its proof plan is proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
+| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm` onto the low-degree forms; feeds `genus_HyperellipticEven_le`. The only remaining gap in the even-genus theorem. |
 
 ---
 
@@ -180,8 +152,16 @@ and the even-genus theorem is still not sound.
 | `genus ℙ¹ = 0` *(via `AX_genus_eq_zero_iff_homeo`)* | direct chart-cocycle + Liouville ⇒ `HolomorphicOneForm ℙ¹` subsingleton | `ProjectiveCurve/Line/OneForm.lean` |
 | `AX_Liouville_compact_complex_manifold` (Liouville L1) | global max-modulus (`Complex.eqOn_…isMaxOn_norm`) + clopen connectedness | `Axioms/HyperellipticLiouville.lean` (`liouville_compact_complex_manifold`) |
 | Liouville L2 **step 4** (growth ⇒ polynomial) | induction + Liouville + `dslope` | `GeneralResults/EntireGrowth.lean` (`differentiable_eq_polynomial_of_growth`) |
+| `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` *(was UNSOUND)* | real low-degree proof (S5 sub-cases) | `EvenForm.lean` (`…_cocycle_inl_inr`) |
+| `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` *(was UNSOUND)* | chart-transition symmetry from `inl_inr` | `EvenForm.lean` (`…_cocycle_inr_inl`) + `GeneralResults/ChartTransition.lean` |
 
-All four verified core-axioms-only via `#print axioms`.
+The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
+axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
+sound modulo the (true-but-unproven) Liouville L2/L3. `hyperellipticForm`
+is now total-but-axiom-free (zero form above degree `N/2−1`), with its
+linear-algebra API on `Polynomial.degreeLT ℂ (N/2−1)`.
+
+All verified core-axioms-only via `#print axioms`.
 
 ---
 

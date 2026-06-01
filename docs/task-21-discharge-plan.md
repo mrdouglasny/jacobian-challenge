@@ -1,6 +1,10 @@
-# Task #21 — retire the unsound cross-summand cocycle axioms
+# Task #21 — retire the unsound cross-summand cocycle axioms ✅ DONE
 
-*Last updated 2026-05-31.*
+*Completed 2026-06-01.* Both parts landed: the two unsound axioms are gone,
+`genus_HyperellipticEven_eq` no longer depends on them (verified by
+`#print axioms`), and the build is green. The plan below is retained as a
+record. Net effect: project axioms 93 → 91; the even-genus theorem is now
+sound modulo the true-but-unproven Liouville L2/L3.
 
 Goal: make `genus_HyperellipticEven_eq` (and `…_le`) sound by removing its
 dependence on the two **unsound** axioms
