@@ -10,10 +10,10 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 93** — **91** in our modules + **2** vendored Kirov
+**Active project axioms: 94** — **92** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 91 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 92 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) Down from 95: the two unsound cocycle
 axioms were retired by task #21 (2026-06-01).
 
@@ -23,7 +23,7 @@ axioms were retired by task #21 (2026-06-01).
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (14 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (15 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
@@ -36,7 +36,7 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 14 | classical theorems, citable | high |
+| 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 27 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 11 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
@@ -63,6 +63,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
+| `AX_curve_generates_jacobian` | `Axioms/UniversalProperty.lean:44` | Mumford *Curves & their Jacobians*; Milne *AV* §I — *unused stub* (see Universal-property section) |
 | `Vendor.Kirov…genus_eq_zero_iff_homeo` | `Vendor/Kirov/Genus.lean:94` | uniformization (Kirov handoff) |
 | `Vendor.Kirov…ambientPhi_ambientPsi_eq` | `Vendor/Kirov/HolomorphicForms.lean:340` | degree identity (Kirov handoff) |
 
@@ -148,6 +149,28 @@ is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-dischar
 
 ---
 
+## Universal-property axioms (discharge plan)
+
+Deferred textbook leaves of [`docs/universal-property-proof-plan.md`] (proving
+`Jacobians.IsJacobian x₀ (Jacobian X) (ofCurve x₀)` — the categoricity theorem).
+All cross-model vetted **Gemini (gemini-3-pro-preview) + Codex, 2026-06-02**
+(`GR`+`CX`); ratings **Standard**/**Likely correct**. None is yet used by a
+theorem (so the headline-reachable axiom set is unchanged); they are forward debt.
+
+| Axiom | Status | Reference |
+|-------|--------|-----------|
+| `AX_curve_generates_jacobian` | **stated** — `Axioms/UniversalProperty.lean:44` (compiles; unused stub, +1 to the declared count) | Mumford; Milne *AV* §I |
+| `AX_torus_oneforms_dualCover` | **planned** — Lean form pending complex-torus 1-form ≅ cotangent API (Codex: Mathlib has `GroupLieAlgebra`/`addInvariantVectorField` scaffolding; the equiv is absent) | Birkenhake–Lange Ch. 1 |
+| `AX_torus_self_albanese` | **planned** — pending a torus-Albanese object | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | **planned** — pending the singular/de-Rham period pairing + naturality (Codex: `curveIntegral` + `singularHomologyFunctor` exist; pairing absent) | Griffiths–Harris Ch. 0 & 2 |
+
+The holomorphicity step (E6 in the plan) is **likely provable** from Mathlib
+(`LinearMap.toContinuousLinearMap` + `ZLatticeQuotient`), not axiomatized; the
+"every abstract torus hom is holomorphic" form is *false* (Codex-flagged) — use the
+ℂ-linear-lift form only. Step 0 (the `ConnectedSpace (Jacobian X)` instance needed
+for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
+`Challenge.lean`).
+
 ## Recently discharged (now axiom-free)
 
 | Was axiom | Discharged via | Proof lives in |
@@ -184,7 +207,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 93; add the 2 Vendor/Kirov axioms for the total 95.
+#   prints 94; add the 2 Vendor/Kirov axioms for the total 96.
 lake env lean <<'LEAN'
 import Jacobians
 open Lean

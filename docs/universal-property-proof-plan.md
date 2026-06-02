@@ -28,11 +28,17 @@ theorem ofCurve_isJacobian {X : Type} [TopologicalSpace X] [T2Space X]
 - **[done] Dimension fix.** The statement now models `J`/`A` on `Fin g → ℂ` /
   `Fin m → ℂ` (was `ℂ`, which restricted it to genus 1). Verified: every instance
   on `Jacobian X` resolves except the next item.
-- **[todo, easy] `instance : ConnectedSpace (Jacobian X)`.** A complex torus is
-  connected (continuous surjective image of the connected `Fin g → ℂ` under the
-  quotient map). Buzzard's API supplies `T2Space`/`CompactSpace` but not this.
-  ~10–20 LOC via `ConnectedSpace` of a quotient of a connected space
-  (`Quotient`/`ZLatticeQuotient` surjection). Needed for the goal to typecheck.
+- **[done] `instance : ConnectedSpace (Jacobian X)`.** Added a general
+  `ConnectedSpace (ULift α)` transfer (`Homeomorph.connectedSpace_iff`; Mathlib
+  lacked it) + the exposure on `Jacobian X`
+  (`Jacobian/Construction.lean`, `Challenge.lean`). The underlying `ComplexTorus`
+  already had `ConnectedSpace`; it just wasn't surfaced through the `ULift`/opaque-
+  `def` layers. Full `lake build` green.
+- **[usage note] supply `g` explicitly.** The goal must be written
+  `IsJacobian (g := genus X) x₀ (Jacobian X) (ofCurve x₀)` — otherwise `g` is a
+  metavariable when `LieAddGroup` synthesis fires (resolution stalls before the
+  `ChartedSpace (Fin g → ℂ)` instance pins it). With `(g := genus X)` the goal type
+  fully elaborates against the real genus-`g` Jacobian (verified).
 
 ## The `universal` field — lemma DAG
 
