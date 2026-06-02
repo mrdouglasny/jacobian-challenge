@@ -66,6 +66,11 @@ needed**).
 > are proven (axiom-free) — the chart representative is `z↦z` (smoothLocusY) /
 > `z↦−z` (smoothLocusX). Remaining: `hyperellipticEvenInvol_contMDiff`.
 >
+> **➜ Executable recipe: [`descent-codex-plan.md`](descent-codex-plan.md).** It
+> pins the exact Mathlib lemmas (`contMDiffWithinAt_iff_of_mem_maximalAtlas`,
+> `mem_maximalAtlas_iff`, `lift_openEmbedding_apply`/`_symm`) and the 3-step proof
+> skeleton (maximal-atlas route). Do that first; the prose below is background.
+>
 > **Corrected scoping for the descent:**
 > - **Do NOT require it axiom-free.** EvenProj's smooth structure already rests
 >   on `affineLiftChart_compat_infinityLiftChart` / `…_inr_…` (Class 2c), and
