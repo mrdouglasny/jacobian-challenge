@@ -1,0 +1,108 @@
+\chapter{The even-degree hyperelliptic genus}
+
+This blueprint tracks the remaining work toward an axiom-clean even-degree
+hyperelliptic genus theorem. Each node links to its Lean declaration. A
+\textbf{green} node ($\leanok$) is fully proved; a node carrying a $\lean{}$ link
+\emph{without} $\leanok$ is stated in Lean (here, often as an \texttt{axiom} or a
+\texttt{sorry}-stub) and \textbf{ready to be discharged} --- these are the
+contribution units (see \texttt{docs/subprojects.md}). $\notready$ nodes are
+planned but not yet stated in Lean.
+
+\section{Atlas: chart compatibility on the quotient curve}
+
+\begin{lemma}[same-summand affine compatibility]
+  \label{lem:compat-aa}
+  \lean{Jacobians.ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_affineLiftChart}
+  \leanok
+  The transition between two affine projection-to-$x$ charts on the even
+  projective curve is $C^\omega$.
+\end{lemma}
+
+\begin{lemma}[cross-summand compatibility, affine $\to$ infinity (SP-1)]
+  \label{lem:compat-ai}
+  \lean{Jacobians.ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart}
+  \uses{lem:compat-aa}
+  The transition between an affine chart and an affine-infinity chart, through the
+  gluing region (the M\"obius map $x \mapsto 1/x$ with polynomial-root
+  corrections), is $C^\omega$. \emph{Currently an axiom; subproject SP-1.}
+\end{lemma}
+
+\begin{lemma}[cross-summand compatibility, infinity $\to$ affine (SP-2)]
+  \label{lem:compat-ia}
+  \lean{Jacobians.ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart}
+  \uses{lem:compat-aa}
+  Symmetric to Lemma~\ref{lem:compat-ai}. \emph{Axiom; subproject SP-2.}
+\end{lemma}
+
+\section{The hyperelliptic involution}
+
+\begin{theorem}[the involution is holomorphic]
+  \label{thm:invol-smooth}
+  \lean{Jacobians.ProjectiveCurve.hyperellipticEvenInvol_contMDiff}
+  \leanok
+  \uses{lem:compat-ai,lem:compat-ia}
+  The hyperelliptic involution $\sigma(x,y) = (x,-y)$ is $C^\omega$ on the even
+  projective curve.
+\end{theorem}
+
+\section{Anti-invariance via a symmetric scalar (route D)}
+
+\begin{lemma}[odd-part difference quotient]
+  \label{lem:oddpart}
+  \lean{Jacobians.GeneralResults.analyticAt_dslope_oddPart}
+  \leanok
+  For $h$ analytic at $0$, $\dslope(w \mapsto h(w) - h(-w))$ is analytic at $0$.
+  This is the cancellation behind branch-point removability: the $\pm 1/\sqrt{f}$
+  singularities of the two sheets cancel.
+\end{lemma}
+
+\begin{definition}[the $dx$-coefficient]
+  \label{def:omegaDx}
+  \lean{Jacobians.ProjectiveCurve.omegaDx}
+  \leanok
+  For a holomorphic $1$-form and a smooth-$Y$ point, the coefficient of the form
+  with respect to $dx$, transported into the affine projection-to-$x$ chart.
+\end{definition}
+
+\begin{lemma}[local analyticity of the $dx$-coefficient (P0)]
+  \label{lem:omegaDx-analytic}
+  \lean{Jacobians.ProjectiveCurve.omegaDx_analyticAt}
+  \uses{def:omegaDx}
+  $\omega_{dx}$ is analytic at the base $x$-coordinate. \emph{In progress
+  (\texttt{sorry}-stub on \texttt{main}); subproject SP-3.}
+\end{lemma}
+
+\begin{lemma}[branch-point removability (SP-4)]
+  \label{lem:branch}
+  \notready
+  \uses{lem:oddpart,lem:omegaDx-analytic}
+  The symmetric scalar $s = \omega_{dx}(a) + \omega_{dx}(\sigma a)$ extends
+  analytically across branch points. \emph{Planned; subproject SP-4.}
+\end{lemma}
+
+\begin{theorem}[$\sigma$-anti-invariance (SP-6)]
+  \label{thm:antiinv}
+  \notready
+  \uses{lem:branch,thm:invol-smooth}
+  On smooth-$Y$ charts, $\coeff(\sigma q,\cdot) = -\coeff(q,\cdot)$: a global
+  Liouville argument forces the symmetric scalar $s \equiv 0$. \emph{Planned;
+  subproject SP-6.}
+\end{theorem}
+
+\section{Liouville L2 and the genus bound}
+
+\begin{theorem}[polynomial decomposition, L2 (SP-7)]
+  \label{thm:L2}
+  \lean{Jacobians.Axioms.HyperellipticLiouville.AX_HyperellipticForm_polynomial_decomposition}
+  \uses{thm:antiinv}
+  Every holomorphic $1$-form is $g(x)\,dx/y$ with $\deg g < N/2 - 1$. \emph{Currently
+  an axiom; subproject SP-7, to discharge from Theorem~\ref{thm:antiinv}.}
+\end{theorem}
+
+\begin{theorem}[even genus upper bound]
+  \label{thm:genus-le}
+  \lean{Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le}
+  \leanok
+  \uses{thm:L2}
+  The genus of the even-degree hyperelliptic curve is at most $N/2 - 1$.
+\end{theorem}

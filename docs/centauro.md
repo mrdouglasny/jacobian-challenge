@@ -42,6 +42,13 @@ per-axiom discharge docstrings). Two more structural advantages:
   projects are not — a wrong proof simply does not compile.
 - **Natural decomposition.** The remaining work is a DAG of lemmas/axioms, each
   small. We already maintain the dependency trace and axiom audit.
+- **Built on the community standard.** Centauro adopts
+  [`leanblueprint`](https://github.com/PatrickMassot/leanblueprint) — the tool
+  FLT, PFR, etc. use to distribute Lean work — so a subproject *is* a blue node in
+  the project blueprint (`blueprint/`), and the dependency graph of ready units is
+  generated for free. Our additions ride on top: the machine-gated acceptance,
+  **Chiron** review, and the Proposer. See
+  [`subproject-format.md`](subproject-format.md) (blueprint-native).
 
 The risk inverts the usual one: the danger is not bad code slipping in, it is an
 agent **gaming the statement** (weakening it, adding an axiom, hiding a `sorry`).
