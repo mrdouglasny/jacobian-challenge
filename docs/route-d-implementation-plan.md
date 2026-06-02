@@ -52,34 +52,48 @@ arbitrary `ω : HolomorphicOneForm (HyperellipticEvenProj H)`, then L2. Phases:
   `Form.lean:297 hyperellipticForm_coeff_projX` (how coeff at a smooth-Y point is
   accessed via `Quotient.out q = Sum.inl a`).
 
-## P0 — the transported projX coefficient (DESIGN — do first, Claude/MRD)
+## P0 — the local `dx`-coefficient (DESIGN — do first, Claude/MRD)
 
-`ω.coeff q` is only constrained on the *preferred* chart `extChartAt q`
-(`Quotient.out`, arbitrary). The clean object for route D is ω's coefficient in
-the **affine projX chart** `affineLiftChart H h a` (deterministic in `a`):
+> **CORRECTION (2026-06-02), critical — read before coding.** The "transport
+> `ω.coeff ⟦inl a⟧` to the **full** affine projX target" framing is **wrong**: it
+> hits the **exact §2 crux of `anti-invariance-route-decision.md`** — the
+> preferred chart at `⟦inl a⟧` (`Quotient.out`, arbitrary) need not cover the
+> whole affine target, so the transport is junk/non-analytic on part of it. Do
+> **NOT** build a global `cX` analytic on a full chart target.
+>
+> **Why route D survives anyway (the key distinction from the σ*-pullback):**
+> route D's Liouville step needs `s` **entire** = `AnalyticAt` at *each* point —
+> only **local/pointwise** analyticity. It NEVER needs a coefficient analytic on
+> a full fixed-chart target (that was submodule condition (1), the thing that
+> sank σ*). So work **locally**: at each `x`, the two preimages each sit in
+> *some* affine projX chart whose overlap with the relevant preferred chart is a
+> neighborhood of that preimage — local analyticity holds there; assemble via the
+> locality of `AnalyticOn`.
 
+**The right object:** the coordinate-free **`dx`-coefficient** at a smooth-Y
+point `p` — ω paired with `∂/∂x` (the coordinate vector of the affine x-chart).
+Concretely, for `p = ⟦inl a⟧`, `a ∈ smoothLocusY`,
 ```
-cX ω a (z) := ω.coeff ⟦inl a⟧ ( E_out ((affineLiftChart H h a).symm z) )
-              · fderiv ℂ ( E_out ∘ (affineLiftChart H h a).symm ) z 1
+ωdx ω a (x) := ω.coeff ⟦inl a⟧ ( E_out (lc.symm x) ) · fderiv ℂ ( E_out ∘ lc.symm ) x 1
+              ,  lc := affineChartProjX a  (lifted),  E_out := extChartAt ⟦inl a⟧
 ```
-where `E_out := extChartAt ⟦inl a⟧`. **Two design options — pick in P0:**
+but the deliverable is only its **local** analyticity:
+- **`ωdx_analyticAt`**: `AnalyticAt ℂ (ωdx ω a) (x a)` (and on a nbhd of `x a`),
+  from: `ω.coeff ⟦inl a⟧` analytic (ω's condition (1) at `⟦inl a⟧`) ∘ the *local*
+  transition `E_out ∘ lc.symm` (analytic on the **overlap** nbhd of `a`, via
+  `affineLiftChart_mem_maximalAtlas` + `StructureGroupoid.compatible_of_mem_maximalAtlas`),
+  × `fderiv` of that transition. **All on a neighborhood of `a` — never the full
+  target.**
+- **`ωdx_chart_indep`**: `ωdx` is independent of which projX chart represents the
+  sheet (same-sheet projX transition derivative `= 1`, so the value agrees) — this
+  is what makes `s` well-defined and single-valued.
+- **`ωdx_eq`** (optional): relates `ωdx` to `ω.coeff` for downstream use.
 
-- **(0a) Transport via the maximal-atlas cocycle.** `affineLiftChart H h a` ∈
-  maximal atlas (proven), so ω's cocycle extends to relate `E_out` and
-  `affineLiftChart a`; `cX ω a` is then analytic on `(affineChartProjX a).target`
-  and equals `ω.coeff ⟦inl a⟧` transported. **Cleanest if** a "coeff satisfies the
-  cocycle against any maximal-atlas chart" lemma is cheap to state/prove from
-  `SatisfiesCotangentCocycle` + `affineLiftChart_mem_maximalAtlas`. *Likely the
-  right call.*
-- **(0b) Out-hypothesis restriction.** Mirror `hyperellipticForm_coeff_projX`:
-  carry `hQ : Quotient.out q = Sum.inl a` and only define `cX` there; supply
-  good witnesses downstream (cf. `quotient_out_of_zero_x`). Lighter to start, but
-  pushes the `Quotient.out` pain to P3/P4 (need *all* smooth-Y `a`, not just
-  isolated witnesses). *Avoid unless 0a balloons.*
-
-**Deliverable of P0:** a `def cX` + `cX_analyticOn` (analytic on the affine projX
-target) + `cX_eq` (relates `cX ω a` to `ω.coeff` so downstream can use it). Once
-P0 exists, P1–P4 are Codex-sized.
+**Deliverable of P0:** `def ωdx` + `ωdx_analyticAt` (local) + `ωdx_chart_indep`.
+The global `s : ℂ → ℂ` and its entire-ness are assembled in P3 from these local
+pieces. (Option 0b — `Quotient.out` hypothesis restriction — remains a fallback
+if even the local transition fights `Quotient.out`, but local analyticity should
+dodge it.)
 
 ## P1 — branch-point removability (Codex, after P0)
 
