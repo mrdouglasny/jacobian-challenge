@@ -7,7 +7,7 @@ Three Jacobian-Challenge attempts have been published on the Lean Zulip
 |---|---|---|---|---|---|
 | `mrdouglasny/jacobian-challenge` | Michael R Douglas | Apache 2.0 | 2026-04-19 | ~6,600 (own) + ~4,200 (vendored) | green, 0 sorry |
 | `rkirov/jacobian-claude` | Rado Kirov | Apache 2.0 (relicensed from MIT 2026-04-25) | 2026-04-21 | ~7,800 | green, 62 sorry |
-| `tangentstorm/JacobianChallenge` | Michal Wallace | (Apache 2.0 per his portfolio) | 2026-04-25 | ~2,400 | green, 24 sorry (challenge) + 11 (support) |
+| `tangentstorm/JacobianChallenge` | Michal Wallace | MIT (repo `LICENSE`; some files carry Apache-2.0 headers) | 2026-04-25 | ~2,400 → now much larger | green, 24 sorry (challenge) intact |
 
 This document records what this repository (`mrdouglasny/jacobian-challenge`)
 adopts from the other two attempts, what we considered and rejected, and
@@ -74,13 +74,33 @@ Two bridge files in [`Jacobians/Bridge/`](../Jacobians/Bridge/):
 
 ## From `tangentstorm/JacobianChallenge`
 
-**Adopted: nothing yet.** Tangentstorm's repo is at an earlier stage
-than ours (24 challenge `sorry`s open vs our 0; ~2.4 kLOC vs our
-~6.6 kLOC own + 4.2 kLOC vendored). His clean modular phase plan is
-admirable but he has not yet produced a self-contained mathematical
-result of the kind we'd lift.
+**Adopted: 6 modules (2026-06-02).** A faithfulness audit of his repo
+found the period/Stokes/trace core to be `:= 0`/`⊥`/`True` placeholder,
+*but* a set of analytic-infrastructure files are genuinely
+self-contained and real. We selected those whose transitive import
+closure is Mathlib-only (or within the set) and **decoupled from the
+placeholder layer**, vetted each, and vendored them under
+`Jacobians.Vendor.Wallace.*` (MIT; `vendor/wallace-jacobian-challenge/`).
 
-### Considered
+### Adopted (now in our build)
+
+| Module | LOC | Content | Vetting |
+|---|---|---|---|
+| `HolomorphicForms/HolomorphicMap.lean` | 1349 | holomorphic maps between Riemann surfaces; local k-fold ramification; weighted fiber conservation | `#print axioms` ⊆ {propext, Classical.choice, Quot.sound} |
+| `HolomorphicForms/VanishingOrder.lean` | 550 | manifold-level meromorphic order + chart-independence | clean (`#print axioms`) |
+| `HolomorphicForms/BranchedCover.lean` | ~330 | branched-cover data, `branchedDegree`, fiber-sum constancy. **Vacuous `ramificationIndexStub (_f)(_x) := 1` stripped on import** (caught by def-vetting) | clean (`#print axioms`) |
+| `HolomorphicForms/AnalyticLocalMapping.lean` | 247 | local k-fold / k-th-root biholomorphism | clean |
+| `HolomorphicForms/CotangentBundle.lean` | 114 | cotangent-space/fiber instances | clean |
+| `Periods/CurveIntegralSubpath.lean` | ~130 | curve-integral subpath lemmas over Mathlib `curveIntegral` | clean (`#print axioms`) |
+
+Every module is **sorry-free and axiom-free**; headline theorems were
+verified via `#print axioms` to depend only on the three standard Lean
+axioms (details in `vendor/wallace-jacobian-challenge/PROVENANCE.md`).
+Builds under our v4.30 pin (upstream is v4.31-rc1). Held as a reusable
+analytic library — especially for the meromorphic / branched-cover /
+genus-0 strands — not yet wired to discharge a specific project axiom.
+
+### Considered (not adopted)
 
 | Piece | Why not (yet) |
 |---|---|
