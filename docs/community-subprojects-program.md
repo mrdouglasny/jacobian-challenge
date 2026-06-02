@@ -99,7 +99,10 @@ Each catalog entry links its discharge doc; we already have a dozen such docs.
 4. **PR**: one subproject per PR, title `SP-NN: <name>`, body references the
    issue and pastes the `#print axioms` output. **DCO sign-off** (`Signed-off-by:`
    — `git commit -s`) certifies the contribution under the repo's Apache-2.0
-   license; lighter than a CLA, standard for agent-friendly projects.
+   license (the proposed default — see §6 Licensing). Because this program is
+   agent-driven, the PR template also asks for an **AI-contribution disclosure**
+   ("this contribution may be AI-assisted") and a provenance/no-known-infringement
+   attestation; see §6 for why.
 5. **Agent note** in CONTRIBUTING: "Point your agent at the issue — it is
    self-contained (frozen statement + discharge plan + reading list). Tell it the
    verification rules: validate with `lake build`/`lake env lean`, keep
@@ -161,14 +164,65 @@ real rather than a review-bottleneck mirage.
 - Cadence: announce **one curated batch** (~12–18) first; restock as they merge;
   post periodic "N subprojects merged, M open" updates to sustain momentum.
 
-## 6. Infrastructure to build (artifact checklist)
+## 6. Licensing, IP & AI provenance
 
-1. `CONTRIBUTING.md` — workflow §3 + verification rules + DCO + axiom hygiene.
+*Not legal advice — with a company (**Aletheai Inc**) and AI-agent contributions
+involved, route the final choice through counsel. This section frames the
+decision; see the project memory `community-program-licensing` for the running
+notes.*
+
+**Baseline (proposed default): DCO sign-off + Apache-2.0 inbound=outbound.** Each
+PR carries `Signed-off-by:` (`git commit -s`). This gives: (a) a documented
+contributor **certification** of right-to-submit; (b) the Apache-2.0 §3 **patent
+grant** from every contributor (a genuine protection, better than MIT/BSD); (c) a
+clean license to use/distribute. Proportionate for a community open-source track.
+
+**What DCO does NOT give.** No copyright **assignment** (contributors keep
+ownership — you get a license, not control); no **indemnification**; weak
+practical recourse against pseudonymous/agent contributors. It is *evidentiary*,
+not a shield. **So if Aletheai needs to own/control the IP, relicense, or take
+anything proprietary, DCO is insufficient → use a CLA** (broad grant +
+representations/warranties, possibly contributor indemnity), and separately
+clarify employee work-for-hire vs external contributions.
+
+**AI-provenance — the novel risk of this program.** Contributions are
+agent-generated ("point your agent at the issue"), so the human's DCO
+certification is only as reliable as the agent's training-data provenance
+(possible reproduction of copyrighted/GPL material), and purely AI-generated
+output may not be copyrightable (US Copyright Office guidance is unsettled).
+**The frozen-statement / CI gate checks correctness, NOT provenance** — it does
+nothing here. Mitigation: an explicit **AI-contribution policy** — a disclosure
+line + a provenance/no-known-infringement attestation in the PR template.
+
+**Mitigating factor (genuine, specific to us).** Contributions are **Lean
+mathematical proofs** — mathematical facts aren't copyrightable and Mathlib-style
+Lean is highly constrained expression, so third-party-IP risk is *materially
+lower* than for ordinary software. This may justify a lighter regime than code.
+
+**Three options to put in front of counsel:**
+- **(L1) DCO + AI-disclosure note** — lightest; community-grade; the default.
+- **(L2) Light CLA** — broad license grant + AI-provenance reps/warranties; low
+  friction, gives the company a grant and a paper trail.
+- **(L3) Full CLA / copyright assignment** — strongest IP control + indemnity;
+  highest friction (deters casual agent contributors).
+
+**Recommendation pending counsel:** **L1 for the public community track**, and
+escalate to **L2** for headline-adjacent contributions (those feeding the genus
+theorem) and for any Aletheai commercial use. Decide before going public.
+
+## 7. Infrastructure to build (artifact checklist)
+
+1. `CONTRIBUTING.md` — workflow §3 + verification rules + the §6 licensing/AI
+   policy (DCO sign-off, AI-contribution disclosure) + axiom hygiene.
 2. `SUBPROJECTS.md` — the catalog index (table: id, name, difficulty, status,
    deps, discharge-doc link).
 3. `.github/ISSUE_TEMPLATE/subproject.yml` — the §1 template as a form.
 4. `.github/PULL_REQUEST_TEMPLATE.md` — paste `#print axioms`, confirm
-   signature-unchanged, DCO checkbox.
+   signature-unchanged, DCO checkbox, **AI-contribution disclosure +
+   provenance/no-known-infringement attestation** (§6).
+8a. **Licensing decision artifact** — once L1/L2/L3 is chosen with counsel,
+   record it (a `LICENSING.md` or a CONTRIBUTING section) and the AI-contribution
+   policy text. *Blocks public announcement.*
 5. CI additions to `.github/workflows/`: axiom-diff job, no-new-sorry job,
    frozen-signature check. (A small Lean script that emits `#print axioms` +
    `#check @name` and a shell wrapper that diffs against expected.)
@@ -178,7 +232,7 @@ real rather than a review-bottleneck mirage.
 8. README "Contribute" section + a drafted Zulip announcement.
 9. Label set + Project board.
 
-## 7. Risks & mitigations
+## 8. Risks & mitigations
 
 | Risk | Mitigation |
 |------|-----------|
@@ -188,25 +242,31 @@ real rather than a review-bottleneck mirage.
 | Duplicate work | `/claim` + 7-day expiry; status labels; Project board |
 | Subprojects too big → stall | S/M/L discipline; split any L before publishing |
 | Maintainer review bottleneck | Automated gate filters first; keep SPs small; batch reviews |
-| Licensing ambiguity | DCO sign-off; Apache-2.0 stated in CONTRIBUTING |
+| Licensing ambiguity / company IP control | §6: DCO default, CLA (L2/L3) if Aletheai needs ownership/indemnity; counsel before public |
+| AI-provenance (training-data/copyrightability) | §6: AI-contribution disclosure + provenance attestation; lower risk as these are math proofs; CI gate does NOT cover this |
 | Dependency tangles | Publish dependency-ordered; gate Tier-C SPs on prerequisites |
 | Quality drift / convention rot | `#lint` in CI; mathlib-ready rules linked from each SP |
 
-## 8. Decisions for MRD (defaults proposed)
+## 9. Decisions for MRD (defaults proposed)
 
 - **PR base**: `main` directly (recommended) vs a `contrib` integration branch.
-- **License/CLA**: DCO sign-off (recommended) vs full CLA vs nothing.
+- **License/CLA** (§6): L1 DCO + AI-disclosure (recommended public default) vs
+  L2 light CLA (recommended for headline-adjacent / Aletheai commercial use) vs
+  L3 full CLA/assignment. **Counsel before going public**, given Aletheai +
+  AI-agent provenance. ✅ PR base = `main` directly (decided 2026-06-02).
 - **Zulip venue**: which stream/topic; whether to also cross-post to the agent/AI
   community.
 - **Claim mechanism**: comment-bot vs manual self-assign vs none (first-PR-wins).
 - **Comparator scope**: every merged SP vs only headline-adjacent (recommended).
 - **First batch size**: ~12–18 (recommended) and which SPs lead.
 
-## 9. Rollout sequence
+## 10. Rollout sequence
 
-1. Land the infrastructure (§6 items 1–6) in one PR.
+1. Land the infrastructure (§7 items 1–6) in one PR.
 2. Curate + check-in the first batch of frozen stubs (§2); open their issues.
-3. README "Contribute" section + Zulip announcement (§5).
+3. **Settle the §6 licensing/AI-policy decision with counsel** (item 8a) — gates
+   anything public.
 4. Run a **pilot** with 2–3 friendly contributors/agents on Tier-A SPs; fix
-   friction in CONTRIBUTING/CI.
-5. Public announcement of the full batch; restock + status updates on cadence.
+   friction in CONTRIBUTING/CI. (Internal/invited — lighter licensing exposure.)
+5. README "Contribute" section + Zulip announcement (§5) — **only after step 3**.
+6. Public batch; restock + status updates on cadence.
