@@ -148,6 +148,13 @@ noncomputable abbrev Jacobian (X : Type u) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] : Type u :=
   ULift.{u, 0} (JacobianAmbient X)
 
+/-- `ConnectedSpace` transfers through `ULift` (not provided by Mathlib). Used to
+expose `ConnectedSpace (Jacobian X)` from the connectedness of the underlying
+`ComplexTorus`. -/
+instance instConnectedSpaceULift {α : Type*} [TopologicalSpace α] [ConnectedSpace α] :
+    ConnectedSpace (ULift.{v} α) :=
+  (Homeomorph.ulift (X := α)).connectedSpace_iff.mpr ‹_›
+
 namespace Jacobian
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
@@ -165,6 +172,9 @@ noncomputable instance : T2Space (Jacobian X) :=
 
 noncomputable instance : CompactSpace (Jacobian X) :=
   inferInstanceAs (CompactSpace (ULift (JacobianAmbient X)))
+
+noncomputable instance : ConnectedSpace (Jacobian X) :=
+  inferInstanceAs (ConnectedSpace (ULift (JacobianAmbient X)))
 
 /-- ChartedSpace on `Jacobian X` via the ULift transfer. -/
 noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) :=

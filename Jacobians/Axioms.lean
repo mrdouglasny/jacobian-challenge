@@ -40,3 +40,4 @@ import Jacobians.Axioms.SerreDuality
 import Jacobians.Axioms.AbelTheorem
 import Jacobians.Axioms.BranchLocus
 import Jacobians.Axioms.PluckerFormula
+import Jacobians.Axioms.UniversalProperty

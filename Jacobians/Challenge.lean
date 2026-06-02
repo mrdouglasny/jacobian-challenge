@@ -99,6 +99,11 @@ instance : T2Space (Jacobian X) :=
 instance : CompactSpace (Jacobian X) :=
   inferInstanceAs (CompactSpace (Jacobians.Jacobian X))
 
+-- Prop (not one of Buzzard's required 7; needed by the Jacobian universal property
+-- `Jacobians.IsJacobian`, which models the torus as a compact *connected* Lie group)
+instance : ConnectedSpace (Jacobian X) :=
+  inferInstanceAs (ConnectedSpace (Jacobians.Jacobian X))
+
 -- data
 /-- The Jacobian of a compact Riemann surface is a complex manifold, of dimension
 equal to the genus of the surface. -/
