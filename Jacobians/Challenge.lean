@@ -1,4 +1,4 @@
-import Mathlib -- compiles with commit 8e3c989104daaa052921bf43de9eef0e1ac9fbf5 (15th April 2026)
+import Mathlib -- compiles with Mathlib v4.30.0 (c5ea00351c28e24afc9f0f84379aa41082b1188f, 26 May 2026)
 import Jacobians.Jacobian
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.Uniformization0
