@@ -244,6 +244,119 @@ theorem HyperellipticAffineInfinity.contMDiff_invol
     (HyperellipticAffine.invol (H := Hrev))
   exact HyperellipticAffine.contMDiff_invol
 
+/-! ## Lifted chart compatibility for the descended involution -/
+
+private lemma transition_mem_contDiffGroupoid {M : Type*} [TopologicalSpace M]
+    (c c' : OpenPartialHomeomorph M ℂ)
+    (hcc' : ContDiffOn ℂ ω
+      (((c.symm.trans c') : OpenPartialHomeomorph ℂ ℂ) : ℂ → ℂ)
+      ((c.symm.trans c').source))
+    (hc'c : ContDiffOn ℂ ω
+      (((c'.symm.trans c) : OpenPartialHomeomorph ℂ ℂ) : ℂ → ℂ)
+      ((c'.symm.trans c).source)) :
+    c.symm.trans c' ∈ contDiffGroupoid ω 𝓘(ℂ, ℂ) := by
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid]
+  constructor
+  · simpa only [contDiffPregroupoid, modelWithCornersSelf_coe,
+      modelWithCornersSelf_coe_symm, Set.preimage_id, Set.range_id, Set.inter_univ,
+      Function.comp_apply, id_eq] using hcc'
+  · simpa only [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm,
+      contDiffPregroupoid, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+      Set.preimage_id, Set.range_id, Set.inter_univ, Function.comp_apply, id_eq] using hc'c
+
+lemma HyperellipticEvenProj.affineLiftChart_mem_maximalAtlas
+    [hf : Fact (¬ Odd H.f.natDegree)] (a : HyperellipticAffine H) :
+    HyperellipticEvenProj.affineLiftChart H hf.out a ∈
+      IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+  rw [IsManifold.mem_maximalAtlas_iff, mem_maximalAtlas_iff]
+  intro e' he'
+  rcases he' with ⟨q, rfl⟩
+  unfold HyperellipticEvenProj.chartAt
+  rcases Quotient.out q with a' | b'
+  · constructor
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.affineLiftChart H hf.out a)
+        (HyperellipticEvenProj.affineLiftChart H hf.out a')
+        (HyperellipticEvenProj.affineLiftChart_compat_affineLiftChart H hf.out a a')
+        (HyperellipticEvenProj.affineLiftChart_compat_affineLiftChart H hf.out a' a)
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.affineLiftChart H hf.out a')
+        (HyperellipticEvenProj.affineLiftChart H hf.out a)
+        (HyperellipticEvenProj.affineLiftChart_compat_affineLiftChart H hf.out a' a)
+        (HyperellipticEvenProj.affineLiftChart_compat_affineLiftChart H hf.out a a')
+  · constructor
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.affineLiftChart H hf.out a)
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b')
+        (HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart H hf.out a b')
+        (HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart H hf.out b' a)
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b')
+        (HyperellipticEvenProj.affineLiftChart H hf.out a)
+        (HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart H hf.out b' a)
+        (HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart H hf.out a b')
+
+lemma HyperellipticEvenProj.infinityLiftChart_mem_maximalAtlas
+    [hf : Fact (¬ Odd H.f.natDegree)] (b : HyperellipticAffineInfinity H) :
+    HyperellipticEvenProj.infinityLiftChart H hf.out b ∈
+      IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+  rw [IsManifold.mem_maximalAtlas_iff, mem_maximalAtlas_iff]
+  intro e' he'
+  rcases he' with ⟨q, rfl⟩
+  unfold HyperellipticEvenProj.chartAt
+  rcases Quotient.out q with a' | b'
+  · constructor
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b)
+        (HyperellipticEvenProj.affineLiftChart H hf.out a')
+        (HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart H hf.out b a')
+        (HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart H hf.out a' b)
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.affineLiftChart H hf.out a')
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b)
+        (HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart H hf.out a' b)
+        (HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart H hf.out b a')
+  · constructor
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b)
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b')
+        (HyperellipticEvenProj.infinityLiftChart_compat_infinityLiftChart H hf.out b b')
+        (HyperellipticEvenProj.infinityLiftChart_compat_infinityLiftChart H hf.out b' b)
+    · exact transition_mem_contDiffGroupoid
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b')
+        (HyperellipticEvenProj.infinityLiftChart H hf.out b)
+        (HyperellipticEvenProj.infinityLiftChart_compat_infinityLiftChart H hf.out b' b)
+        (HyperellipticEvenProj.infinityLiftChart_compat_infinityLiftChart H hf.out b b')
+
+private lemma HyperellipticAffine.contDiffWithinAt_invol_writtenIn_affineChartAt
+    (a : HyperellipticAffine H) :
+    ContDiffWithinAt ℂ ω
+      (((HyperellipticAffine.affineChartAt (H := H) a.invol).extend 𝓘(ℂ, ℂ)) ∘
+        HyperellipticAffine.invol ∘
+          (((HyperellipticAffine.affineChartAt (H := H) a).extend 𝓘(ℂ, ℂ)).symm))
+      (Set.range 𝓘(ℂ, ℂ))
+      (((HyperellipticAffine.affineChartAt (H := H) a).extend 𝓘(ℂ, ℂ)) a) := by
+  let e := HyperellipticAffine.affineChartAt (H := H) a
+  let e' := HyperellipticAffine.affineChartAt (H := H) a.invol
+  have he : e ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticAffine H) := by
+    dsimp [e]
+    change chartAt ℂ a ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticAffine H)
+    exact IsManifold.chart_mem_maximalAtlas a
+  have he' : e' ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticAffine H) := by
+    dsimp [e']
+    change chartAt ℂ a.invol ∈
+      IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticAffine H)
+    exact IsManifold.chart_mem_maximalAtlas a.invol
+  have hx : a ∈ e.source := by
+    dsimp [e]
+    exact ChartedSpace.mem_chart_source a
+  have hy : HyperellipticAffine.invol a ∈ e'.source := by
+    dsimp [e']
+    exact ChartedSpace.mem_chart_source a.invol
+  have h := HyperellipticAffine.contMDiffAt_invol (H := H) a
+  rw [ContMDiffAt, contMDiffWithinAt_iff_of_mem_maximalAtlas he he' hx hy] at h
+  simpa only [e, e', Set.preimage_univ, Set.univ_inter] using h.2
+
 theorem hyperellipticEvenInvolPre_continuous (H : HyperellipticData) :
     Continuous (hyperellipticEvenInvolPre H) :=
   HyperellipticAffine.continuous_invol.sumMap HyperellipticAffineInfinity.continuous_invol
@@ -252,5 +365,110 @@ theorem hyperellipticEvenInvol_continuous (H : HyperellipticData) :
     Continuous (hyperellipticEvenInvol H) :=
   isQuotientMap_quotient_mk'.continuous_iff.mpr
     ((continuous_quotient_mk').comp (hyperellipticEvenInvolPre_continuous H))
+
+theorem hyperellipticEvenInvol_contMDiff (H : HyperellipticData)
+    [hf : Fact (¬ Odd H.f.natDegree)] :
+    ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (hyperellipticEvenInvol H) := by
+  intro q
+  induction q using Quotient.inductionOn with
+  | h p =>
+      rcases p with a | b
+      · let q : HyperellipticEvenProj H := Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+        let e := HyperellipticAffine.affineChartAt (H := H) a
+        let e' := HyperellipticAffine.affineChartAt (H := H) a.invol
+        let c := HyperellipticEvenProj.affineLiftChart H hf.out a
+        let c' := HyperellipticEvenProj.affineLiftChart H hf.out a.invol
+        have hc : c ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+          dsimp [c]
+          exact HyperellipticEvenProj.affineLiftChart_mem_maximalAtlas a
+        have hc' : c' ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+          dsimp [c']
+          exact HyperellipticEvenProj.affineLiftChart_mem_maximalAtlas a.invol
+        have hx : q ∈ c.source := by
+          dsimp [q, c, e, HyperellipticEvenProj.affineLiftChart]
+          exact ⟨a, ChartedSpace.mem_chart_source a, rfl⟩
+        have hy : hyperellipticEvenInvol H q ∈ c'.source := by
+          dsimp [q, c', e', HyperellipticEvenProj.affineLiftChart]
+          refine ⟨a.invol, ChartedSpace.mem_chart_source a.invol, ?_⟩
+          simp [HyperellipticEvenProj.proj, hyperellipticEvenInvolPre]
+        have hCoord := HyperellipticAffine.contDiffWithinAt_invol_writtenIn_affineChartAt
+          (H := H) a
+        have hFun :
+            ((c'.extend 𝓘(ℂ, ℂ)) ∘ hyperellipticEvenInvol H ∘
+                ((c.extend 𝓘(ℂ, ℂ)).symm)) =
+              ((e'.extend 𝓘(ℂ, ℂ)) ∘ HyperellipticAffine.invol ∘
+                ((e.extend 𝓘(ℂ, ℂ)).symm)) := by
+          funext z
+          simp only [c, c', e, e', HyperellipticEvenProj.affineLiftChart,
+            HyperellipticEvenProj.proj, OpenPartialHomeomorph.extend,
+            modelWithCornersSelf_partialEquiv, PartialEquiv.trans_refl,
+            OpenPartialHomeomorph.toFun_eq_coe, OpenPartialHomeomorph.coe_coe_symm,
+            Function.comp_apply, OpenPartialHomeomorph.lift_openEmbedding_symm,
+            OpenPartialHomeomorph.lift_openEmbedding_toFun, hyperellipticEvenInvol_mk,
+            hyperellipticEvenInvolPre, Sum.map_inl]
+          exact (HyperellipticEvenProj.proj_inl_injective H).extend_apply _ _ _
+        have hBase :
+            (c.extend 𝓘(ℂ, ℂ)) q = (e.extend 𝓘(ℂ, ℂ)) a := by
+          simp only [q, c, e, HyperellipticEvenProj.affineLiftChart,
+            OpenPartialHomeomorph.extend, modelWithCornersSelf_partialEquiv,
+            PartialEquiv.trans_refl, OpenPartialHomeomorph.toFun_eq_coe,
+            OpenPartialHomeomorph.lift_openEmbedding_toFun]
+          exact (HyperellipticEvenProj.proj_inl_injective H).extend_apply _ _ _
+        change ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (hyperellipticEvenInvol H) q
+        rw [ContMDiffAt, contMDiffWithinAt_iff_of_mem_maximalAtlas hc hc' hx hy]
+        constructor
+        · exact (hyperellipticEvenInvol_continuous H).continuousAt.continuousWithinAt
+        · simpa only [Set.preimage_univ, Set.univ_inter, hFun, hBase] using hCoord
+      · let Hrev := HyperellipticAffineInfinity.reverseData H hf.out
+        let q : HyperellipticEvenProj H := Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b)
+        let e := HyperellipticAffine.affineChartAt (H := Hrev) b
+        let e' := HyperellipticAffine.affineChartAt (H := Hrev)
+          (HyperellipticAffineInfinity.invol b)
+        let c := HyperellipticEvenProj.infinityLiftChart H hf.out b
+        let c' := HyperellipticEvenProj.infinityLiftChart H hf.out
+          (HyperellipticAffineInfinity.invol b)
+        have hc : c ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+          dsimp [c]
+          exact HyperellipticEvenProj.infinityLiftChart_mem_maximalAtlas b
+        have hc' : c' ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) := by
+          dsimp [c']
+          exact HyperellipticEvenProj.infinityLiftChart_mem_maximalAtlas
+            (HyperellipticAffineInfinity.invol b)
+        have hx : q ∈ c.source := by
+          dsimp [q, c, e, Hrev, HyperellipticEvenProj.infinityLiftChart]
+          exact ⟨b, ChartedSpace.mem_chart_source b, rfl⟩
+        have hy : hyperellipticEvenInvol H q ∈ c'.source := by
+          dsimp [q, c', e', Hrev, HyperellipticEvenProj.infinityLiftChart]
+          refine ⟨HyperellipticAffineInfinity.invol b,
+            ChartedSpace.mem_chart_source (HyperellipticAffineInfinity.invol b), ?_⟩
+          simp [HyperellipticEvenProj.proj, hyperellipticEvenInvolPre]
+        have hCoord := HyperellipticAffine.contDiffWithinAt_invol_writtenIn_affineChartAt
+          (H := Hrev) b
+        have hFun :
+            ((c'.extend 𝓘(ℂ, ℂ)) ∘ hyperellipticEvenInvol H ∘
+                ((c.extend 𝓘(ℂ, ℂ)).symm)) =
+              ((e'.extend 𝓘(ℂ, ℂ)) ∘ HyperellipticAffine.invol ∘
+                ((e.extend 𝓘(ℂ, ℂ)).symm)) := by
+          funext z
+          simp only [c, c', e, e', Hrev, HyperellipticEvenProj.infinityLiftChart,
+            HyperellipticEvenProj.proj, OpenPartialHomeomorph.extend,
+            modelWithCornersSelf_partialEquiv, PartialEquiv.trans_refl,
+            OpenPartialHomeomorph.toFun_eq_coe, OpenPartialHomeomorph.coe_coe_symm,
+            Function.comp_apply, OpenPartialHomeomorph.lift_openEmbedding_symm,
+            OpenPartialHomeomorph.lift_openEmbedding_toFun, hyperellipticEvenInvol_mk,
+            hyperellipticEvenInvolPre, Sum.map_inr]
+          exact (HyperellipticEvenProj.proj_inr_injective H).extend_apply _ _ _
+        have hBase :
+            (c.extend 𝓘(ℂ, ℂ)) q = (e.extend 𝓘(ℂ, ℂ)) b := by
+          simp only [q, c, e, Hrev, HyperellipticEvenProj.infinityLiftChart,
+            OpenPartialHomeomorph.extend, modelWithCornersSelf_partialEquiv,
+            PartialEquiv.trans_refl, OpenPartialHomeomorph.toFun_eq_coe,
+            OpenPartialHomeomorph.lift_openEmbedding_toFun]
+          exact (HyperellipticEvenProj.proj_inr_injective H).extend_apply _ _ _
+        change ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (hyperellipticEvenInvol H) q
+        rw [ContMDiffAt, contMDiffWithinAt_iff_of_mem_maximalAtlas hc hc' hx hy]
+        constructor
+        · exact (hyperellipticEvenInvol_continuous H).continuousAt.continuousWithinAt
+        · simpa only [Set.preimage_univ, Set.univ_inter, hFun, hBase] using hCoord
 
 end Jacobians.ProjectiveCurve
