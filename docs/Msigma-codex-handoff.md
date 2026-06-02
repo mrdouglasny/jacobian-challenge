@@ -114,9 +114,20 @@ task.** (If `IsManifold`-level `ContMDiff` proves painful, a usable
 intermediate is `MDifferentiable`, which is all the pullback needs.)
 
 ### Mσ.3 — concrete pullback `pullbackInvolution`
-Define WITHOUT the `pullbackOneForm` axiom, directly on the cocycle. Since σ is
-`x↦x` in projX coords (derivative 1), set, on the coefficient family,
-`(σ*ω).coeff q z := ω.coeff (σ q) z`. Prove this lands in
+
+> **➜ Executable recipe + correction: [`Msigma3-codex-plan.md`](Msigma3-codex-plan.md).**
+> **The naive `(σ*ω).coeff q z := ω.coeff (σq) z` is WRONG as a submodule
+> element** — it satisfies the cocycle only on smooth-Y (projX) charts; at branch
+> points σ's chart rep is `z↦−z` (derivative −1) and at ∞ σ swaps the two points.
+> Use the honest uniform formula `ω.coeff(σq, A_q z)·B_q z` with the σ-chart
+> derivative factor `B_q` (= 1 on projX, so it reduces to the naive formula
+> exactly where Mσ.4 consumes it). The plan pins the three submodule obligations
+> and the Mathlib lemmas (`AnalyticOnNhd.fderiv`, `fderiv_comp`,
+> `contDiffOn_omega_iff_analyticOn`).
+
+Define WITHOUT the `pullbackOneForm` axiom, directly on the cocycle. (Outdated
+sketch, superseded by the plan above: ~~Since σ is `x↦x` in projX coords
+(derivative 1), set `(σ*ω).coeff q z := ω.coeff (σ q) z`.~~) Prove this lands in
 `holomorphicOneFormSubmodule` (analyticity transfers since σ is a holomorphic
 chart iso fixing the coordinate; cocycle transfers via `σ`'s chart action;
 zero-off-target transfers). Package:
