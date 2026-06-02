@@ -1,9 +1,27 @@
-# Community subprojects program — distributed, agent-friendly contribution
+# Centauro — distributed, agent-friendly contribution to the Jacobian Challenge
+
+> **Centauro** — *a muster of human–AI centauri unconcealing the Jacobian
+> Challenge.*
 
 *Authored 2026-06-02. A plan to finish the Jacobian Challenge much faster by
 offering many small, self-contained subprojects that external contributors (and
 their AI agents) can pick up, complete, and submit as PRs, which we evaluate and
 merge. Solicit via the Lean Zulip and the GitHub repo.*
+
+**The name.** A *centaur* is the established term for a human+AI hybrid team
+(from "centaur chess"): human judgment riding AI proof-power. Each contributor —
+a person plus their agent — is one **Centauro**; the crowd of them is the
+**Centauri**, gathered in the **Muster** (the subproject catalog). *Aletheia*
+(ἀλήθεια, truth as *unconcealment*) is the goal: the Centauri unconceal hidden
+theorems. The naming system used below:
+
+| Thing | Name |
+|-------|------|
+| The program | **Centauro** |
+| A contributor (human + their agent) | a **Centauro**; the crowd, the **Centauri** |
+| The subproject catalog | **the Muster** (`MUSTER.md`) |
+| The AI meta-reviewer (Phase B, §4) | **Chiron** — the scholar-centaur who reads proofs so MRD doesn't |
+| A work unit | a **subproject** (`SP-NN`) |
 
 ## 0. Why this fits this repo unusually well
 
@@ -27,7 +45,7 @@ trivially detectable.
 
 ## 1. The subproject unit
 
-A **subproject** = one GitHub Issue + one row in [`SUBPROJECTS.md`], with a fixed
+A **subproject** = one GitHub Issue + one row in [`MUSTER.md`], with a fixed
 template. The non-negotiable field is the **frozen statement**.
 
 ```
@@ -132,7 +150,7 @@ Errors of the kind we actually hit (the σ* naive-formula being non-analytic; th
 "global-transport" framing) are caught **here**, by reasoning — not by code
 review. Front-loading this is what makes Phase B mechanical.
 
-**Phase B — PR acceptance (mechanical gate + an AI-reviewer meta-report; NO human
+**Phase B — PR acceptance (mechanical gate + a Chiron meta-report; NO human
 code review).**
 - **The machine gate IS the acceptance** (CI, on `lean.yml`):
   - `lake build` green;
@@ -144,17 +162,17 @@ code review).**
   - `#lint` clean; **`native_decide`/`decide`-of-goal banned** (grep).
   If green, the theorem MRD already vetted in Phase A is proved. That is the whole
   correctness argument — no proof reading needed.
-- **AI-reviewer** (a Claude/Codex agent, run automatically per PR) emits a
+- **Chiron** (the AI meta-reviewer — a Claude/Codex agent, run automatically per PR) emits a
   **structured meta-report** to MRD: a one-paragraph proof-strategy summary, the
   axiom footprint, and flagged smells (suspiciously trivial proof, non-vacuity
   spot-check, unusual/heavy imports, whether the hypotheses are actually used).
   MRD reads the **report**, not the code.
-- **MRD's decision** = {gate result} + {AI-reviewer report} → accept/reject. At no
+- **MRD's decision** = {gate result} + {Chiron's report} → accept/reject. At no
   point does he read the proof.
 - **Headline-adjacent** results (anything feeding the genus theorem) additionally
   get the kernel-replay comparator ([`COMPARATOR.md`]) before merge.
 
-**On merge:** update `SUBPROJECTS.md` → merged; if it discharged an axiom, update
+**On merge:** update `MUSTER.md` → merged; if it discharged an axiom, update
 `AXIOM_AUDIT.md` + README counts in the **same** PR (CI-enforced); credit the
 contributor (`Co-Authored-By` + `CONTRIBUTORS.md`).
 
@@ -167,12 +185,12 @@ how MRD works.
 
 **GitHub (the catalog is the product):**
 - README "**Contribute a subproject**" section: 3-line pitch, link to
-  `SUBPROJECTS.md` + `CONTRIBUTING.md`, and a one-paragraph "for agents" note.
+  `MUSTER.md` + `CONTRIBUTING.md`, and a one-paragraph "for agents" note.
 - Labels: `subproject`, `good-first-issue`, `difficulty:S|M|L`,
   `area:hyperelliptic|axiom|analysis|extension`, `status:open|claimed|in-review`.
 - A pinned tracking issue / GitHub **Project board** (columns Open → Claimed →
   In-review → Merged) auto-synced from labels.
-- Optional later: GitHub **Pages** rendering of `SUBPROJECTS.md` for a nicer
+- Optional later: GitHub **Pages** rendering of `MUSTER.md` for a nicer
   landing page.
 
 **Zulip (leanprover.zulipchat.com):**
@@ -237,7 +255,7 @@ theorem) and for any Aletheai commercial use. Decide before going public.
 
 1. `CONTRIBUTING.md` — workflow §3 + verification rules + the §6 licensing/AI
    policy (DCO sign-off, AI-contribution disclosure) + axiom hygiene.
-2. `SUBPROJECTS.md` — the catalog index (table: id, name, difficulty, status,
+2. `MUSTER.md` — the catalog index (table: id, name, difficulty, status,
    deps, discharge-doc link).
 3. `.github/ISSUE_TEMPLATE/subproject.yml` — the §1 template as a form.
 4. `.github/PULL_REQUEST_TEMPLATE.md` — paste `#print axioms`, confirm
@@ -250,7 +268,7 @@ theorem) and for any Aletheai commercial use. Decide before going public.
    frozen-signature check, `native_decide`/`decide`-of-goal grep ban. (A small
    Lean script that emits `#print axioms` + `#check @name` and a shell wrapper
    that diffs against expected.)
-5b. **AI-reviewer** (Phase B, §4): an agent invoked per PR that posts a
+5b. **Chiron** — the AI meta-reviewer (Phase B, §4): an agent invoked per PR that posts a
    **meta-report** comment — proof-strategy summary, axiom footprint, smell flags,
    non-vacuity spot-check. This is what MRD reads instead of the proof. (Reuse the
    Codex/Claude task runner; output a fixed template.)
@@ -269,7 +287,7 @@ theorem) and for any Aletheai commercial use. Decide before going public.
 |------|-----------|
 | Statement-gaming (weaken/trivialize) | Frozen stub checked in first; CI signature-equality check |
 | **Wrong/weak/vacuous frozen statement** (the one a gate can't catch) | **Phase-A statement vetting (§4): type-check stub + agent cross-vet for non-vacuity/generality + MRD meta-approval, before publishing** |
-| Maintainer can't/won't read proofs | Two-phase split (§4): judgment front-loaded to statement design; acceptance is machine gate + AI-reviewer meta-report |
+| Maintainer can't/won't read proofs | Two-phase split (§4): judgment front-loaded to statement design; acceptance is machine gate + Chiron meta-report |
 | Axiom-sneaking / hidden `sorry` | CI `#print axioms` diff vs Allowed; no-new-sorry scan |
 | `native_decide`/`decide` bridging math | Lint/grep ban in CI for headline-adjacent SPs; human checklist |
 | Duplicate work | `/claim` + 7-day expiry; status labels; Project board |
