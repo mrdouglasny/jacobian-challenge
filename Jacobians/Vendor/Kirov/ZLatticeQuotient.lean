@@ -71,7 +71,7 @@ theorem isOpenMap_mk : IsOpenMap (QuotientAddGroup.mk : E → E ⧸ Λ) :=
 /-- Charted space structure on `E ⧸ Λ` modelled on `E`, coming from the fact
 that the quotient map is a surjective local homeomorphism. -/
 noncomputable instance chartedSpaceQuotient : ChartedSpace E (E ⧸ Λ) :=
-  (isLocalHomeomorph_mk Λ).chartedSpace QuotientAddGroup.mk_surjective
+  (isLocalHomeomorph_mk Λ).chartedSpace' QuotientAddGroup.mk_surjective
 
 end CoveringMap
 

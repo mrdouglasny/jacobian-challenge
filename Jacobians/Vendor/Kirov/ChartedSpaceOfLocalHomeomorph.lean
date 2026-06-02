@@ -50,9 +50,15 @@ lemma eq_chartAtPreimage {f : X → Y} (hf : IsLocalHomeomorph f) (x : X) :
 
 /-- Charted space structure on `Y` induced by a surjective local
 homeomorphism `f : X → Y`. The chart at `y` is the inverse of a partial
-homeomorphism around a chosen preimage of `y`. -/
+homeomorphism around a chosen preimage of `y`.
+
+NOTE: Mathlib upstreamed an equivalent `IsLocalHomeomorph.chartedSpace` in
+v4.30.0, but it is built via `chartedSpaceOfRightInverse` and so has a different
+*definitional* `chartAt` (not `(chartAtPreimage …).symm`). Downstream proofs in
+`ZLatticeQuotient.lean` rely on this definitional shape, so the vendored Kirov
+version is kept under the name `chartedSpace'`. -/
 @[implicit_reducible]
-noncomputable def chartedSpace {f : X → Y} (hf : IsLocalHomeomorph f)
+noncomputable def chartedSpace' {f : X → Y} (hf : IsLocalHomeomorph f)
     (hs : Function.Surjective f) : ChartedSpace X Y where
   atlas := Set.range fun y : Y =>
     (chartAtPreimage hf (Classical.choose (hs y))).symm
