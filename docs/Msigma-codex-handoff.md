@@ -61,15 +61,14 @@ needed**).
 
 ### Mσ.2 — `σ` is `ContMDiff` (holomorphic)
 
-> **Status (2026-06-02): affine summands DONE; quotient descent scoped, not done.**
-> `HyperellipticAffine.contMDiff_invol` and `HyperellipticAffineInfinity.contMDiff_invol`
-> are proven (axiom-free) — the chart representative is `z↦z` (smoothLocusY) /
-> `z↦−z` (smoothLocusX). Remaining: `hyperellipticEvenInvol_contMDiff`.
->
-> **➜ Executable recipe: [`descent-codex-plan.md`](descent-codex-plan.md).** It
-> pins the exact Mathlib lemmas (`contMDiffWithinAt_iff_of_mem_maximalAtlas`,
-> `mem_maximalAtlas_iff`, `lift_openEmbedding_apply`/`_symm`) and the 3-step proof
-> skeleton (maximal-atlas route). Do that first; the prose below is background.
+> **Status (2026-06-02): Mσ.2 DONE — affine summands AND quotient descent.**
+> `HyperellipticAffine.contMDiff_invol` / `…AffineInfinity.contMDiff_invol` (chart
+> rep `z↦z` on smoothLocusY, `z↦−z` on smoothLocusX), and now
+> **`hyperellipticEvenInvol_contMDiff`** (Codex, via the maximal-atlas route in
+> [`descent-codex-plan.md`](descent-codex-plan.md)). Build green; axioms =
+> core 3 + `contDiffOn_symm_toOpenPartialHomeomorph` (affine IFT chart helper,
+> pre-existing) + the two cross-summand `…_compat_…` axioms (already in the
+> even-genus footprint, as scoped). **No new axioms.** Next: Mσ.3 below.
 >
 > **Corrected scoping for the descent:**
 > - **Do NOT require it axiom-free.** EvenProj's smooth structure already rests
