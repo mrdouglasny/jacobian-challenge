@@ -75,15 +75,29 @@ seconds via `lean_run_code` or `lake build <Module>`.
 
 When opening a PR, base against `main`.
 
-## Vendored Kirov material
+## Vendored material
 
-Verbatim copies live under `vendor/kirov-jacobian-claude/` (outside the
-build root, not compiled). Modules ported into our build live under
+**Kirov** (`rkirov/jacobian-claude`, Apache 2.0). Verbatim copies live
+under `vendor/kirov-jacobian-claude/` (outside the build root, not
+compiled). Modules ported into our build live under
 `Jacobians/Vendor/Kirov/` with per-file Apache 2.0 attribution headers
 and namespace renamed to `Jacobians.Vendor.Kirov.*`. Bridge files in
 `Jacobians/Bridge/` connect our axiom layer to Kirov's real proofs.
-See `docs/cross-repo-adoption.md` for the full module list and
-adoption status.
+
+**Wallace** (`tangentstorm/JacobianChallenge`, MIT). Six self-contained
+Riemann-surface analytic modules under `Jacobians.Vendor.Wallace.*`
+(`HolomorphicMap`, `VanishingOrder`, `BranchedCover`,
+`AnalyticLocalMapping`, `CotangentBundle`, `CurveIntegralSubpath`), with
+per-file MIT attribution headers; upstream `LICENSE` + `PROVENANCE.md`
+vendored under `vendor/wallace-jacobian-challenge/`. All modules are
+**sorry-free and axiom-free** (headline theorems `#print axioms`-verified
+to depend only on the three standard Lean axioms); one vacuous
+`ramificationIndexStub := 1` was stripped on import. Selected only from
+the part of his repo decoupled from its placeholder period/Stokes/trace
+core — see the gitignored `commentary/` for that audit.
+
+See `docs/cross-repo-adoption.md` for the full module list and adoption
+status of both.
 
 ## Common gotchas
 

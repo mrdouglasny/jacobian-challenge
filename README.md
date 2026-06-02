@@ -10,6 +10,8 @@ Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining
 
 **Interface closed.** All 24 `sorry`s in `Challenge.lean` discharge as real `def`s and real `instance`s — no axiom stub at the Buzzard-API level. Functoriality identities (identity + composition for both `pullback` and `pushforward`) are derived **theorems**, not axioms.
 
+**Categorical pin (beyond the API).** Buzzard's API characterizes the Jacobian *operationally* (functoriality + degree + Abel injectivity); it never states the Albanese **universal property** that pins `(Jac X, aj)` up to unique isomorphism. We add it as a compiling, cross-model-vetted statement — `Jacobians.IsJacobian` in [`Jacobians/UniversalProperty.lean`](Jacobians/UniversalProperty.lean): `aj : X → J` to a complex torus, universal among pointed holomorphic maps to complex tori. Vetted by Gemini + Codex (→ minimal hypotheses `AddGroup`, `T2Space`); elaborates against v4.30. Proving Buzzard's concrete `Jacobian`/`ofCurve` *satisfy* it (categoricity) is the open next target.
+
 **Architecture.** Period-lattice construction, basis-free at the type level:
 
 - **Part A — `AbelianVariety/`**: `ComplexTorus V L := V ⧸ L` for `L : Submodule ℤ V` with `[IsZLattice ℝ L]`. Supplies all 7 typeclass instances Buzzard requires on `Jacobian X` (`AddCommGroup`, `TopologicalSpace`, `T2Space`, `CompactSpace`, `ChartedSpace V`, `IsManifold`, `LieAddGroup`), plus the auxiliary `IsTopologicalAddGroup` consumed by `LieAddGroup`. Axiom-free.
@@ -76,6 +78,13 @@ Layout:
 - [`Jacobians/Bridge/`](Jacobians/Bridge/) — `KirovHolomorphic.lean` (real `bridgeForm` + injectivity, derived `FiniteDimensional` instance) and `KirovLineIntegral.lean` (real `kirovBackedFunctional` + `chartLine` + endpoint lemmas; FTC theorem in flight).
 
 This is precisely the cooperation pattern Kirov suggested in the Zulip thread ("anyone can take my attempt and remix into theirs ... if going for more experimental purity"). The two repos remain independent attempts; we pull in his real proof rather than re-build it.
+
+## Cross-pollination from Wallace's analytic infrastructure
+
+From [Michal Wallace's (tangentstorm) attempt](https://github.com/tangentstorm/JacobianChallenge) (MIT) we vendored six **self-contained, sorry-free, axiom-free** Riemann-surface analytic modules under `Jacobians.Vendor.Wallace.*` (~2,900 LOC): `HolomorphicMap` (holomorphic maps between Riemann surfaces, local k-fold ramification, weighted fiber conservation), `VanishingOrder` (manifold-level meromorphic order + chart-independence), `BranchedCover` (branched-cover data + `branchedDegree`), `AnalyticLocalMapping`, `CotangentBundle`, and `CurveIntegralSubpath`. Selection criterion: transitive import closure Mathlib-only (or within the set) and **decoupled from the placeholder layer** in the rest of his repo. Each headline theorem was verified via `#print axioms` to depend only on `[propext, Classical.choice, Quot.sound]`; def-vetting caught and stripped a vacuous `ramificationIndexStub := 1` before import. Held as a reusable analytic library (meromorphic / branched-cover / genus-0 strands), not yet wired to retire a specific axiom.
+
+- [`vendor/wallace-jacobian-challenge/`](vendor/wallace-jacobian-challenge/) — upstream MIT `LICENSE` + [`PROVENANCE.md`](vendor/wallace-jacobian-challenge/PROVENANCE.md) (source commit `82349bc8`, vetting record, modifications). Outside the build root.
+- [`Jacobians/Vendor/Wallace/`](Jacobians/Vendor/Wallace/) — the six modules in our build under `Jacobians.Vendor.Wallace.*`, with per-file MIT attribution headers; mathematics unchanged apart from the stripped stub. See [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md).
 
 ## Response to Buzzard's diagnosis
 
