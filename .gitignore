@@ -7,3 +7,6 @@ lake-packages/
 *.hash
 .DS_Store
 .claude/
+
+# Local-only commentary / competitive analysis of third-party repos — not for push
+commentary/
