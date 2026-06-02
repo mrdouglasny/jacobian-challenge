@@ -21,7 +21,12 @@ theorems. The naming system used below:
 | A contributor (human + their agent) | a **Centauro**; the crowd, the **Centauri** |
 | The subproject catalog | **the Muster** (`MUSTER.md`) |
 | The AI meta-reviewer (Phase B, §4) | **Chiron** — the scholar-centaur who reads proofs so MRD doesn't |
-| A work unit | a **subproject** (`SP-NN`) |
+| **A unit of contribution** (frozen statement + discharge plan) | a **Quest** (`Q-NN`), drawn from the Muster |
+| The onboarding matcher (Centauro → a Quest) | **the Proposer** (tentatively *Pholus*, the hospitable centaur) — §2.1 |
+
+> **Terminology note.** The unit of contribution is a **Quest** (id `Q-NN`).
+> Older sections below still say "subproject / `SP-NN`" — being renamed to Quest;
+> the two are the same thing.
 
 ## 0. Why this fits this repo unusually well
 
@@ -103,6 +108,41 @@ Publish an initial batch of ~12–18, tiered. Sources already in-repo:
 each as one SP with a discharge sketch.
 
 Each catalog entry links its discharge doc; we already have a dozen such docs.
+
+### 2.1 The Proposer ("Pholus") — matching a Centauro to a Quest
+
+A **quasi-random matcher** that onboards an arriving contributor and hands them a
+well-suited, *ready* Quest from the Muster — so the Centauri spread across the
+work instead of colliding on the single "best" Quest, with some serendipity.
+
+**Elicit** (a 4-question intake — CLI prompts, a GitHub issue-form, or an
+agent asking in natural language):
+- **Strengths / area**: complex analysis (Liouville/growth), manifolds & charts,
+  algebra/polynomials, general Mathlib API, or "surprise me".
+- **Difficulty appetite**: S / M / L.
+- **Time budget**: an afternoon / a few days / open-ended.
+- **Flavor**: want a **Mathlib-upstreamable** lemma? bringing an **agent** (raises
+  context/size tolerance)?
+
+**Pool & filter**: Quests with `status:open`, **dependencies satisfied** (*ready*
+— never propose a blocked Quest), area-matching, difficulty ≤ appetite.
+
+**Quasi-random pick**: score each candidate by fit (area match × difficulty fit ×
+freshness), then **weighted / softmax sampling** with a temperature `τ` (τ→0 =
+greedy best-fit, τ↑ = more exploratory). Down-weight recently-proposed or claimed
+Quests (anti-collision jitter) so two Centauri arriving together get *different*
+Quests. Return the **top 1–3** with a one-line rationale + claim link.
+
+**Form factor**: a small `scripts/propose_quest.py` over the Muster metadata
+(seedable → reproducible), optionally wrapped by an agent for natural-language
+intake, and/or a GitHub **`/propose`** bot command. Pure function of
+{profile, Muster state, seed}.
+
+**Why quasi-random, not top-1**: load-spreading across the muster; serendipitous
+discovery of Quests a contributor wouldn't have filtered to; avoids a thundering
+herd on one Quest. *(Name: **Pholus**, the hospitable centaur who welcomed
+Heracles — the host who assigns the Quest, distinct from **Chiron** the reviewer.
+Or just "the Proposer".)*
 
 ## 3. Contributor workflow (→ `CONTRIBUTING.md`)
 
@@ -277,6 +317,9 @@ theorem) and for any Aletheai commercial use. Decide before going public.
    non-vacuity/generality, MRD meta-approval). Mirrors the axiom-vetting protocol.
 6. `scripts/check_subproject.sh` — the contributor-side self-verify (build +
    axioms + sorry-scan + signature).
+6b. **`scripts/propose_quest.py`** — the Proposer/"Pholus" (§2.1): profile intake
+   + ready-Quest filter + quasi-random weighted pick over Muster metadata;
+   optionally a `/propose` GitHub bot command.
 7. `CONTRIBUTORS.md` — attribution.
 8. README "Contribute" section + a drafted Zulip announcement.
 9. Label set + Project board.
@@ -290,7 +333,7 @@ theorem) and for any Aletheai commercial use. Decide before going public.
 | Maintainer can't/won't read proofs | Two-phase split (§4): judgment front-loaded to statement design; acceptance is machine gate + Chiron meta-report |
 | Axiom-sneaking / hidden `sorry` | CI `#print axioms` diff vs Allowed; no-new-sorry scan |
 | `native_decide`/`decide` bridging math | Lint/grep ban in CI for headline-adjacent SPs; human checklist |
-| Duplicate work | `/claim` + 7-day expiry; status labels; Project board |
+| Duplicate work / thundering herd on one Quest | `/claim` + 7-day expiry; status labels; the Proposer's quasi-random load-spreading (§2.1) |
 | Subprojects too big → stall | S/M/L discipline; split any L before publishing |
 | Maintainer review bottleneck | Automated gate filters first; keep SPs small; batch reviews |
 | Licensing ambiguity / company IP control | §6: DCO default, CLA (L2/L3) if Aletheai needs ownership/indemnity; counsel before public |
