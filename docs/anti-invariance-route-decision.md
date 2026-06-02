@@ -133,13 +133,17 @@ Where the **real** work concentrates (for the evaluator to pressure-test):
   function, and that it is clean to state without an explicit monodromy argument
   (e.g. just: on every overlap the two local definitions agree because swapping
   the sheet label permutes the two summands).
-- **Q2 (the crux — branch-point boundedness).** Each summand **blows up** like
-  `1/√f` at a branch point `x₀` (the projX↔projY transition derivative
-  `dy/dx = f'/(2√f) → ∞`). `s` is removable **only because the two `±1/√f`
-  singularities cancel** in the symmetric sum. This cancellation — via the projY
-  chart relation at the merged branch point (`q, σq → b`, σ fixes `b`) — is the
-  genuine technical content of D. Verify it actually cancels (sign/coefficient
-  bookkeeping), since the whole route rests on it.
+- **Q2 (the crux — branch-point boundedness). ✓ RESOLVED (Claude, 2026-06-02).**
+  Each summand blows up like `1/√f` at a branch point `x₀` (projX↔projY
+  transition derivative `dy/dx = f'/(2√f) → ∞`). With `h(y) := ω.coeff(b, y)`
+  (projY coeff at the merged branch point `b`, analytic), the cocycle gives
+  `coeff(q,x) = h(√f)·f'/(2√f)` and `coeff(σq,x) = h(−√f)·(−f'/(2√f))`, so
+  `s(x) = (f'/(2√f))·(h(√f) − h(−√f))`. The bracket is the **odd part**,
+  `h(y)−h(−y) = 2y·H(y²)` for analytic `H`, hence `h(√f)−h(−√f) = 2√f·H(f)` and
+  **`s(x) = f'(x)·H(f(x))` — the `√f` cancels exactly**, leaving `s` analytic and
+  single-valued near every branch point. The cancellation works, with a closed
+  form. This also settles Q1 (the closed form has no `√f`; equivalently the
+  `√f→−√f` monodromy swaps the two summands, so `s` is invariant).
 - **Q3 (∞ growth).** `s = O(1/x²)` at the two ∞ points (σ swaps them): confirm
   the ∞-chart computation gives this for the symmetric sum.
 - **Q4 (assembly choice).** Liouville directly on `s` (self-contained, re-walks
@@ -159,10 +163,23 @@ Where the **real** work concentrates (for the evaluator to pressure-test):
 
 ## 6. The decision
 
-**Recommendation: Route D** (symmetric-scalar direct anti-invariance), with the
-assembly framed as "`s` descends to `ℙ¹`; reuse `genus ℙ¹ = 0` if it shortens the
-branch/∞ bookkeeping, else bare Liouville." Rationale: least net infrastructure
-for this codebase, no new axioms, reuses L2 machinery, σ stays a point map.
+**DECISION (2026-06-02): Route D, validated.** The load-bearing step — the
+branch-point `±1/√f` cancellation (Q2) — checks out with a clean closed form
+`s = f'·H(f)` (see §4 Q2), which also settles single-valuedness (Q1). Assembly:
+**bare Liouville on `s`** (Q4) — `s` entire (branch points removable) + `→0` at ∞
+⇒ `s ≡ 0` via `differentiable_eq_polynomial_of_growth`; the `genus ℙ¹=0` packaging
+is not worth the extra ℙ¹-chart gluing. Rationale: least net infrastructure for
+this codebase, no new axioms, reuses L2 machinery, σ stays a point map.
+
+> Codex eval (`task-mpwdp6bq`) hit context-window exhaustion before delivering;
+> Q1/Q2/Q4 were resolved by Claude directly (the computation above). An
+> independent re-eval with a tighter reading list is optional, not blocking.
+
+**Riskiest remaining Lean step:** the cocycle bookkeeping that turns
+`coeff(q,x)` into `h(√f)·f'/(2√f)` (and the symmetric σq version) — i.e. invoking
+`SatisfiesCotangentCocycle` across the projX↔projY charts at a branch point with
+the correct `fderiv` of `y = √f(x)`. The √f-derivative pieces already exist in
+`AffineForm.lean` (`squareLocalHomeomorph_symm_*`); reuse them.
 
 **Asks of the evaluator (Codex):**
 (a) find any *mathematical* hole in D — above all **Q2 (the `±1/√f` cancellation
