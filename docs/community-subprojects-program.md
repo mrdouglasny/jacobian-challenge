@@ -109,36 +109,59 @@ Each catalog entry links its discharge doc; we already have a dozen such docs.
    `#print axioms` within the allowed set, never add a `sorry` or change the
    signature."
 
-## 4. Evaluation & acceptance (maintainer side)
+## 4. Evaluation & acceptance — built for "meta eval, not code review"
 
-**Automated gate (CI, must pass before human review):**
-- `lake build` green (existing `lean.yml`).
-- **Axiom-diff check**: a CI job runs `#print axioms` on the SP's declaration and
-  fails if it lists anything outside `[core 3] ∪ Allowed`. (Catches axiom-sneaking
-  and hidden `sorryAx`.)
-- **No-new-sorry/admit check**: diff scan; fail on added `sorry`/`admit`/`stop`.
-- **Frozen-signature check**: assert the declaration's *type* equals the frozen
-  one (compare against the stub on the tracking branch, or a checked-in
-  `#check @<name>` expected-type test). Defeats statement-weakening.
-- **Convention lint**: `#lint` clean (naming, simp-normal-form, unused vars).
+**Design constraint (MRD).** The maintainer evaluates at the **meta** level — is
+this the right statement? does the result look sound? accept/reject — and does
+**not** read Lean proofs line-by-line. The program is structured so this is safe,
+by splitting all judgment into two phases and moving the irreducible human
+judgment to the front.
 
-**Human review (only on CI-green PRs — small, fast):**
-- **Anti-gaming checklist**: signature unchanged ✓; no new axioms beyond Allowed
-  ✓; non-vacuity (the proof actually uses its hypotheses; spot-check that the
-  statement isn't trivially satisfiable) ✓; no `native_decide`/`decide` bridging
-  the math goal ✓; imports add no contradictory/heavy axiom ✓.
-- **Proof soundness & style**: skim the proof; mathlib-ready conventions; sensible
-  generality. Most of this is cheap because subprojects are small.
-- **Headline-adjacent results** (anything feeding the genus theorem): additionally
-  run the kernel-replay comparator per [`COMPARATOR.md`] before merge.
+**Phase A — statement design (human-meta + agents, BEFORE the SP is published).**
+This is where the only failure a machine gate *cannot* catch lives: a **wrong,
+weak, or vacuous frozen statement** (CI will happily verify a correct proof of
+the wrong theorem). So each SP's frozen statement is, before publishing:
+- drafted with its discharge plan and **type-checked as a `sorry`-stub** (it
+  elaborates against the real API);
+- **cross-vetted** by a second agent (Gemini deep-think / Codex) for "matches the
+  intended math, right generality, **non-vacuous**, hypotheses sufficient" — the
+  exact protocol we already use for axioms (`AXIOM_MANAGEMENT.md`);
+- **meta-approved by MRD**, who reads the *statement* — a single signature, close
+  to ordinary math — never a proof.
+Errors of the kind we actually hit (the σ* naive-formula being non-analytic; the
+"global-transport" framing) are caught **here**, by reasoning — not by code
+review. Front-loading this is what makes Phase B mechanical.
 
-**On merge:** update `SUBPROJECTS.md` status → merged; if it discharged an axiom,
-update `AXIOM_AUDIT.md` + README counts in the **same** PR (enforced by review);
-credit the contributor (`Co-Authored-By` + a `CONTRIBUTORS.md` line).
+**Phase B — PR acceptance (mechanical gate + an AI-reviewer meta-report; NO human
+code review).**
+- **The machine gate IS the acceptance** (CI, on `lean.yml`):
+  - `lake build` green;
+  - **axiom-diff**: `#print axioms <decl>` ⊆ `[core 3] ∪ Allowed` (catches
+    axiom-sneaking + hidden `sorryAx`);
+  - **no new `sorry`/`admit`** (diff scan);
+  - **frozen-signature byte-identical** to the Phase-A stub (defeats
+    statement-weakening);
+  - `#lint` clean; **`native_decide`/`decide`-of-goal banned** (grep).
+  If green, the theorem MRD already vetted in Phase A is proved. That is the whole
+  correctness argument — no proof reading needed.
+- **AI-reviewer** (a Claude/Codex agent, run automatically per PR) emits a
+  **structured meta-report** to MRD: a one-paragraph proof-strategy summary, the
+  axiom footprint, and flagged smells (suspiciously trivial proof, non-vacuity
+  spot-check, unusual/heavy imports, whether the hypotheses are actually used).
+  MRD reads the **report**, not the code.
+- **MRD's decision** = {gate result} + {AI-reviewer report} → accept/reject. At no
+  point does he read the proof.
+- **Headline-adjacent** results (anything feeding the genus theorem) additionally
+  get the kernel-replay comparator ([`COMPARATOR.md`]) before merge.
 
-The automated gate does ~90% of the filtering, so maintainer eval time per
-accepted PR is minutes, not hours — the property that makes "finish much faster"
-real rather than a review-bottleneck mirage.
+**On merge:** update `SUBPROJECTS.md` → merged; if it discharged an axiom, update
+`AXIOM_AUDIT.md` + README counts in the **same** PR (CI-enforced); credit the
+contributor (`Co-Authored-By` + `CONTRIBUTORS.md`).
+
+Net: the human spends judgment **once, on the statement** (Phase A), and then
+**reads meta-reports, not proofs** (Phase B). That is precisely what makes
+"finish much faster" real rather than a review-bottleneck mirage — and it matches
+how MRD works.
 
 ## 5. Solicitation
 
@@ -224,8 +247,16 @@ theorem) and for any Aletheai commercial use. Decide before going public.
    record it (a `LICENSING.md` or a CONTRIBUTING section) and the AI-contribution
    policy text. *Blocks public announcement.*
 5. CI additions to `.github/workflows/`: axiom-diff job, no-new-sorry job,
-   frozen-signature check. (A small Lean script that emits `#print axioms` +
-   `#check @name` and a shell wrapper that diffs against expected.)
+   frozen-signature check, `native_decide`/`decide`-of-goal grep ban. (A small
+   Lean script that emits `#print axioms` + `#check @name` and a shell wrapper
+   that diffs against expected.)
+5b. **AI-reviewer** (Phase B, §4): an agent invoked per PR that posts a
+   **meta-report** comment — proof-strategy summary, axiom footprint, smell flags,
+   non-vacuity spot-check. This is what MRD reads instead of the proof. (Reuse the
+   Codex/Claude task runner; output a fixed template.)
+5c. **Statement-vetting harness** (Phase A, §4): the checklist + cross-vet prompt
+   for freezing a new SP statement (type-check stub, agent cross-vet for
+   non-vacuity/generality, MRD meta-approval). Mirrors the axiom-vetting protocol.
 6. `scripts/check_subproject.sh` — the contributor-side self-verify (build +
    axioms + sorry-scan + signature).
 7. `CONTRIBUTORS.md` — attribution.
@@ -237,6 +268,8 @@ theorem) and for any Aletheai commercial use. Decide before going public.
 | Risk | Mitigation |
 |------|-----------|
 | Statement-gaming (weaken/trivialize) | Frozen stub checked in first; CI signature-equality check |
+| **Wrong/weak/vacuous frozen statement** (the one a gate can't catch) | **Phase-A statement vetting (§4): type-check stub + agent cross-vet for non-vacuity/generality + MRD meta-approval, before publishing** |
+| Maintainer can't/won't read proofs | Two-phase split (§4): judgment front-loaded to statement design; acceptance is machine gate + AI-reviewer meta-report |
 | Axiom-sneaking / hidden `sorry` | CI `#print axioms` diff vs Allowed; no-new-sorry scan |
 | `native_decide`/`decide` bridging math | Lint/grep ban in CI for headline-adjacent SPs; human checklist |
 | Duplicate work | `/claim` + 7-day expiry; status labels; Project board |
