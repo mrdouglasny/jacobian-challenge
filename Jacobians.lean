@@ -1,4 +1,5 @@
 import Jacobians.Challenge
+import Jacobians.UniversalProperty
 import Jacobians.AbelianVariety
 import Jacobians.Axioms
 import Jacobians.Jacobian
