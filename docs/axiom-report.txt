@@ -10,7 +10,6 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.pullbackOneForm,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.pullback' depends on axioms: [propext,
  Classical.choice,
@@ -18,7 +17,7 @@
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.pushforwardOneForm,
  RiemannSurface.loopIntegralToH1]
-'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_BranchLocus, Axioms.localOrder]
+'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_BranchLocus]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
 'Jacobian.ofCurve_self' depends on axioms: [propext,
  Classical.choice,
@@ -46,21 +45,16 @@
  Axioms.AX_pushforwardAmbient_preserves_lattice,
  Axioms.AX_pushforward_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
- Axioms.pullbackOneForm,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.pushforward_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_pullbackOneForm_id,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.pullbackOneForm,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.pushforward_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_pullbackOneForm_comp,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.pullbackOneForm,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.pullback_contMDiff' depends on axioms: [propext,
  Classical.choice,
@@ -92,8 +86,6 @@
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
  Axioms.AX_pushforward_pullback,
- Axioms.localOrder,
- Axioms.pullbackOneForm,
  Axioms.pushforwardOneForm,
  RiemannSurface.loopIntegralToH1]
 'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
