@@ -2,6 +2,8 @@
 
 Routing decisions for all **90 real axioms** across 27 files of the `Jacobians` lean_lib. One markdown plan-file per axiom in this directory (`docs/planning/`); this page is the index. **Every plan has been vetted by Gemini 3.1 Pro** (`gemini-3.1-pro-preview`, extended thinking; 2026-06-03) and the route + effort columns below reflect Gemini's corrections.
 
+> **Starting fresh?** Read [`PHASE_1_HANDOFF.md`](PHASE_1_HANDOFF.md) — a self-contained brief that scopes the first 4 discharges (Divisor cluster + AX_BranchLocus), names the toolchain, lists the cross-plan invariants, and gives a worker prompt template. ~4 focused days of work, axiom count 90 → 86.
+
 ## Vetting summary
 
 | Gemini verdict | Count |
