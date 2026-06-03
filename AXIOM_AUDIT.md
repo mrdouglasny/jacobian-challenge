@@ -10,17 +10,19 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 90** — **88** in our modules + **2** vendored Kirov
+**Active project axioms: 86** — **84** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 88 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 84 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
 → 93 when `localOrder` was discharged to a real `def` via the adopted Wallace
 `HolomorphicMap` module (2026-06-03); → 90 when `pullbackOneForm` and its
 identity/composition laws were transported through Kirov's pullback
-(2026-06-03).
+(2026-06-03); → 86 with Phase 1 — the Divisor cluster
+(`Divisor`/`instAddCommGroup`/`deg` → `FreeAbelianGroup`) and `AX_BranchLocus` → theorem
+(2026-06-04).
 
 ---
 
@@ -28,11 +30,11 @@ identity/composition laws were transported through Kirov's pullback
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (15 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (14 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (75 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (72 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -41,8 +43,8 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 15 | classical theorems, citable | high |
-| 2a — data-existence | 25 | "this function/object exists with spec S" | spec needs review |
+| 1 — textbook-standard | 14 | classical theorems, citable | high |
+| 2a — data-existence | 22 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -60,7 +62,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | Forster §17; Griffiths–Harris Ch. 1 |
 | `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:66` | Forster §21; Miranda Ch. VIII |
-| `AX_BranchLocus` | `Axioms/BranchLocus.lean:70` | degree / branch-locus finiteness, Miranda Ch. II |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
 | `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard) |
@@ -96,7 +97,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
 | `bridgePath` (+5: `_continuous`, `_chart_differentiable`, `_at_zero`, `_at_one`, `_lineIntegrable`) | `Bridge/KirovLineIntegral.lean:164,167,182,188,191,212` | path-selection for the Kirov line-integral bridge |
-| `Divisor`, `Divisor.instAddCommGroup`, `Divisor.deg`, `PrincipalDivisors`, `LineBundle`, `H0`(+`instAddCommGroup`,`instModule`), `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (13) | `RiemannSurface/LineBundle.lean:51–128` | line-bundle / sheaf-cohomology **type stubs** — form most in question |
+| `PrincipalDivisors`, `LineBundle`, `H0`(+`instAddCommGroup`,`instModule`), `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (10) | `RiemannSurface/LineBundle.lean:70–128` | line-bundle / sheaf-cohomology **type stubs** (the `Divisor` triple discharged in Phase 1) |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
 
@@ -185,6 +186,8 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` *(was UNSOUND)* | chart-transition symmetry from `inl_inr` | `EvenForm.lean` (`…_cocycle_inr_inl`) + `GeneralResults/ChartTransition.lean` |
 | `localOrder` *(2026-06-03)* | real `def` = `if f p = q then mapAnalyticOrderAt f p else 0`, using the adopted Wallace `HolomorphicMap` (`analyticOrderNatAt`); **faithfulness witness** `localOrder_pow` proves `localOrder (z↦zᵏ) 0 0 = k` (`#print axioms` ⊆ the 3 standard) | `Axioms/BranchLocus.lean` (`def` + `localOrder_pow`) |
 | `pullbackOneForm`; `AX_pullbackOneForm_id` / `_comp` *(2026-06-03)* | transported across `bridgeFormEquiv` from Kirov's real `pullbackForm`, `pullbackForm_id`, and `pullbackForm_comp` (`#print axioms` = standard 3) | `Bridge/KirovHolomorphicEquiv.lean` + `Axioms/AbelJacobiMap.lean` |
+| `Divisor`; `Divisor.instAddCommGroup`; `Divisor.deg` *(Phase 1, 2026-06-04)* | `abbrev Divisor X := FreeAbelianGroup X`; `AddCommGroup` via `inferInstanceAs`; `deg := FreeAbelianGroup.lift (fun _ => 1)`. Unblocks the 11 downstream sheaf-cohomology plans | `RiemannSurface/LineBundle.lean` |
+| `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -211,7 +214,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 88; add the 2 Vendor/Kirov axioms for the total 90.
+#   prints 84; add the 2 Vendor/Kirov axioms for the total 86.
 lake env lean <<'LEAN'
 import Jacobians
 open Lean
