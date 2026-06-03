@@ -10,15 +10,17 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 93** — **91** in our modules + **2** vendored Kirov
+**Active project axioms: 90** — **88** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 91 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 88 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
 → 93 when `localOrder` was discharged to a real `def` via the adopted Wallace
-`HolomorphicMap` module (2026-06-03).
+`HolomorphicMap` module (2026-06-03); → 90 when `pullbackOneForm` and its
+identity/composition laws were transported through Kirov's pullback
+(2026-06-03).
 
 ---
 
@@ -30,7 +32,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (78 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (75 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -40,8 +42,8 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
-| 2a — data-existence | 26 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 11 | "my construction has good property P" | **may mask a bad def** |
+| 2a — data-existence | 25 | "this function/object exists with spec S" | spec needs review |
+| 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
@@ -81,7 +83,7 @@ uses it (proven directly — see Recently discharged).
 ### 2a. Data-existence axioms — *the spec is the question*
 
 "This function/object exists satisfying spec S." Risk: the spec is vacuous
-or contradictory, or doesn't pin down the intended object. The four marked
+or contradictory, or doesn't pin down the intended object. The three marked
 🅒 have written construction plans in
 [`docs/construction-plans/`](docs/construction-plans/).
 
@@ -90,7 +92,6 @@ or contradictory, or doesn't pin down the intended object. The four marked
 | `pathIntegralBasepointFunctional` 🅒 | `Axioms/AbelJacobiMap.lean:96` | the path-integral functional; **opaque** (see `ofCurve` card) |
 | `AX_pathIntegral_local_antiderivative` | `Axioms/AbelJacobiMap.lean:114` | chart-local FTC binding the functional to the cocycle |
 | `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent |
-| `pullbackOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:130` | pullback of 1-forms |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
@@ -112,7 +113,6 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 | `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:667` | push∘pull = deg multiplication |
 | `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:298` | period-map naturality |
 | `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:312` | period-map naturality |
-| `AX_pullbackOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:158,165` | functoriality of pullback |
 | `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:178,185` | functoriality of trace |
 
 ### 2c. Atlas / structure axioms — *curve-specific constructions*
@@ -184,6 +184,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` *(was UNSOUND)* | real low-degree proof (S5 sub-cases) | `EvenForm.lean` (`…_cocycle_inl_inr`) |
 | `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` *(was UNSOUND)* | chart-transition symmetry from `inl_inr` | `EvenForm.lean` (`…_cocycle_inr_inl`) + `GeneralResults/ChartTransition.lean` |
 | `localOrder` *(2026-06-03)* | real `def` = `if f p = q then mapAnalyticOrderAt f p else 0`, using the adopted Wallace `HolomorphicMap` (`analyticOrderNatAt`); **faithfulness witness** `localOrder_pow` proves `localOrder (z↦zᵏ) 0 0 = k` (`#print axioms` ⊆ the 3 standard) | `Axioms/BranchLocus.lean` (`def` + `localOrder_pow`) |
+| `pullbackOneForm`; `AX_pullbackOneForm_id` / `_comp` *(2026-06-03)* | transported across `bridgeFormEquiv` from Kirov's real `pullbackForm`, `pullbackForm_id`, and `pullbackForm_comp` (`#print axioms` = standard 3) | `Bridge/KirovHolomorphicEquiv.lean` + `Axioms/AbelJacobiMap.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -210,7 +211,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 93; add the 2 Vendor/Kirov axioms for the total 95.
+#   prints 88; add the 2 Vendor/Kirov axioms for the total 90.
 lake env lean <<'LEAN'
 import Jacobians
 open Lean

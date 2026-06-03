@@ -40,6 +40,25 @@ jobs:
       - name: lake build
         run: lake build
 
+      - name: Axiom report in sync with the kernel
+        run: |
+          set -euo pipefail
+          lake env lean scripts/axiom_report.lean > axiom-report.regenerated.txt
+          if ! diff -u docs/axiom-report.txt axiom-report.regenerated.txt; then
+            echo "::error::docs/axiom-report.txt is out of sync with the kernel #print axioms output."
+            echo "::error::Regenerate and commit:  lake env lean scripts/axiom_report.lean > docs/axiom-report.txt"
+            {
+              echo "### ❌ Stale axiom report"
+              echo "\`docs/axiom-report.txt\` (cited by AXIOM_AUDIT.md / README as the machine-checked dependency record) differs from a fresh regeneration. Run:"
+              echo '```'
+              echo "lake env lean scripts/axiom_report.lean > docs/axiom-report.txt"
+              echo '```'
+              echo "and commit the result."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "### ✓ Axiom report matches the kernel" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Report sorry inventory
         if: always()
         run: |

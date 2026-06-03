@@ -22,6 +22,9 @@ previously top-level axioms.
   symmetric to `pushforwardImpl` via `pullbackAmbientLinear`.
 - `degreeImpl f hf : ℕ` — **def** via `AX_BranchLocus`
   (`Classical.choose` of the common fiber degree); 0 for constants.
+- `pullbackOneForm (f : X → Y) : HolomorphicOneForm Y →ₗ[ℂ]
+  HolomorphicOneForm X` — **def**, transported across the Kirov
+  holomorphic-1-form equivalence; feeds `pushforwardAmbientLinear`.
 
 Still axiomatic (smaller-grained than before; 2026-04-23 round-2
 refactor responded to Gemini review by adding the local-antiderivative
@@ -34,11 +37,6 @@ axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ign
   (in the chart at `P`) equals `form.coeff P (chart P)`. This binds
   `pathIntegralBasepointFunctional` to the 1-form cocycle data and
   prevents trivial-zero satisfaction of downstream smoothness claims.
-- `pullbackOneForm (f : X → Y) : HolomorphicOneForm Y →ₗ[ℂ] HolomorphicOneForm X`
-  — structured primitive replacing the former
-  `pushforwardAmbientLinear` axiom. `pushforwardAmbientLinear` is now
-  a real `def` derived by transporting `(pullbackOneForm f).dualMap`
-  through the basis `jacobianBasis`.
 - `pushforwardOneForm (f : X → Y) : HolomorphicOneForm X →ₗ[ℂ]
   HolomorphicOneForm Y` — the trace / pushforward of 1-forms along a
   finite cover. Analogously feeds `pullbackAmbientLinear` as a `def`.
@@ -46,7 +44,8 @@ axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ign
   `AX_pullbackAmbient_preserves_lattice` — still axioms; retire to
   theorems once period-map naturality is derived.
 - Property axioms (`AX_ofCurve_contMDiff`, `AX_ofCurve_inj`,
-  `AX_pushforward_contMDiff`, functoriality, `AX_pushforward_pullback`)
+  `AX_pushforward_contMDiff`, pushforward functoriality,
+  `AX_pushforward_pullback`)
   — properties of the defs, retire with the usual textbook proofs.
 - **`AX_jacobian_lieAddGroup`** is no longer an axiom (2026-04-23
   round-3): converted to a theorem via the ULift-smoothness lemmas
@@ -59,6 +58,7 @@ See `docs/formalization-plan.md` §7.
 -/
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.BranchLocus
+import Jacobians.Bridge.KirovHolomorphicEquiv
 
 namespace Jacobians.Axioms
 
@@ -67,7 +67,7 @@ open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface Jacobians.AbelianVariety
 
 /-! ### Primitive functional axioms: path-integral functional + local
-antiderivative + functorial primitives on 1-forms
+antiderivative + form-level primitives
 
 The axioms in this section are the **atomic classical facts** we
 axiomatize. Each is smaller-grained than the packaged "pushforward on
@@ -80,8 +80,10 @@ it to the chart-local 1-form coefficient.
 
 Similarly, pushforward/pullback on Jacobians factor through
 `pullbackOneForm` / `pushforwardOneForm` (pullback and trace of
-holomorphic 1-forms). The ambient linear maps and period-lattice
-preservation are then derived or re-expressed at the more atomic level.
+holomorphic 1-forms). Pullback is now transported from Kirov's
+cotangent-bundle-section model; pushforward remains the trace primitive.
+The ambient linear maps and period-lattice preservation are then derived
+or re-expressed at the more atomic level.
 -/
 
 /-- **Axiom.** The path-integral functional from `P₀` to `P`: given a
@@ -120,19 +122,20 @@ axiom AX_pathIntegral_local_antiderivative (X : Type*) [TopologicalSpace X]
       (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
       ((extChartAt 𝓘(ℂ) P) P)
 
-/-- **Axiom.** The pullback of holomorphic 1-forms along a holomorphic
-map `f : X → Y`, as a ℂ-linear map of `HolomorphicOneForm` modules.
+/-- The pullback of holomorphic 1-forms along a holomorphic map `f : X → Y`,
+as a ℂ-linear map of `HolomorphicOneForm` modules.
 
-Classical content: `(pullbackOneForm f) ω_Y = ω_Y ∘ df` on the cocycle
-data. Linearity is obvious; the fact that the result still satisfies
-the cocycle condition is the main content and uses holomorphicity of
-`f`. -/
-axiom pullbackOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
+This is transported across `Jacobians.Bridge.bridgeFormEquiv` from Kirov's
+cotangent-bundle-section pullback. -/
+noncomputable def pullbackOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
-    HolomorphicOneForm Y →ₗ[ℂ] HolomorphicOneForm X
+    HolomorphicOneForm Y →ₗ[ℂ] HolomorphicOneForm X :=
+  (Jacobians.Bridge.bridgeFormEquiv (X := X)).symm.toLinearMap.comp
+    ((Jacobians.Vendor.Kirov.pullbackForm f _hf).comp
+      (Jacobians.Bridge.bridgeFormEquiv (X := Y)).toLinearMap)
 
 /-- **Axiom.** The pushforward (trace) of holomorphic 1-forms along a
 non-constant holomorphic map `f : X → Y` between compact Riemann
@@ -147,22 +150,27 @@ axiom pushforwardOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     HolomorphicOneForm X →ₗ[ℂ] HolomorphicOneForm Y
 
-/-! ### Functoriality axioms on the form-level primitives
+/-! ### Functoriality on the form-level primitives
 
 Per Gemini 2026-04-23 review: "functoriality on Jacobians is free via
-contravariance of `Module.Dual`" — so we axiomatize functoriality at
-the form-level (atomic classical fact: pullback commutes with
-composition), and the Jacobian-level functoriality becomes derivable. -/
+contravariance of `Module.Dual`" — so we prove or state functoriality at
+the form-level. Pullback identity/composition are now theorems via Kirov
+transport; pushforward identity/composition remain trace axioms. The
+Jacobian-level functoriality then becomes derivable. -/
 
-/-- **Axiom.** Pullback of 1-forms preserves identity. -/
-axiom AX_pullbackOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pullback of 1-forms preserves identity. -/
+theorem AX_pullbackOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    pullbackOneForm (id : X → X) contMDiff_id = LinearMap.id
+    pullbackOneForm (id : X → X) contMDiff_id = LinearMap.id := by
+  unfold pullbackOneForm
+  rw [Jacobians.Vendor.Kirov.pullbackForm_id]
+  ext form
+  simp
 
-/-- **Axiom.** Pullback of 1-forms is contravariant under composition.
+/-- Pullback of 1-forms is contravariant under composition.
 Classical: `(g ∘ f)^* ω = f^* (g^* ω)`. -/
-axiom AX_pullbackOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
+theorem AX_pullbackOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
@@ -172,7 +180,11 @@ axiom AX_pullbackOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g) :
     pullbackOneForm (g ∘ f) (hg.comp hf) =
-      (pullbackOneForm f hf).comp (pullbackOneForm g hg)
+      (pullbackOneForm f hf).comp (pullbackOneForm g hg) := by
+  unfold pullbackOneForm
+  rw [Jacobians.Vendor.Kirov.pullbackForm_comp f hf g hg (hg.comp hf)]
+  ext form
+  simp [LinearMap.comp_apply]
 
 /-- **Axiom.** Pushforward (trace) of 1-forms preserves identity. -/
 axiom AX_pushforwardOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
