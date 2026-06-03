@@ -43,13 +43,16 @@ See `docs/formalization-plan.md` §7, discharge priority #6;
 Reference: Forster Ch. I §4; Mumford Vol I §II.2.
 -/
 import Jacobians.RiemannSurface.OneForm
+import Jacobians.Vendor.Wallace.HolomorphicForms.HolomorphicMap
 
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology
-open scoped ContDiff
+open scoped ContDiff Classical
 
-/-- **Opaque axiom.** The local order of the holomorphic map `f` at
+open Jacobians.Vendor.Wallace.HolomorphicForms
+
+/-- The local order (ramification multiplicity) of the holomorphic map `f` at
 point `p` above `q`:
 
     localOrder f p q = 0                 if f p ≠ q,
@@ -57,11 +60,38 @@ point `p` above `q`:
                                          like `z ↦ q + c·(z-p)^k` with
                                          `c ≠ 0`.
 
-Well-defined because non-constant holomorphic maps in dimension 1 have
-isolated zeros of their Taylor series. -/
-axiom localOrder {X Y : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
+**Discharged (2026-06-03)** from an opaque axiom to a real definition: when
+`f p = q` it is the analytic order of `f` at `p`,
+`Vendor.Wallace.HolomorphicForms.mapAnalyticOrderAt f p` (the chart-local
+`analyticOrderNatAt` of `f`, sorry-free in the adopted Wallace `HolomorphicMap`
+module — Forster Ch. I §4, Mumford Vol I §II.2). Well-defined because non-constant
+holomorphic maps in dimension 1 have isolated zeros of their Taylor series. -/
+noncomputable def localOrder {X Y : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] [TopologicalSpace Y] [ChartedSpace ℂ Y]
-    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (p : X) (q : Y) : ℕ
+    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (p : X) (q : Y) : ℕ :=
+  if f p = q then Jacobians.Vendor.Wallace.HolomorphicForms.mapAnalyticOrderAt f p else 0
+
+private theorem analyticOrderNatAt_pow_zero (k : ℕ) :
+    analyticOrderNatAt (fun z : ℂ => z ^ k) 0 = k := by
+  have heq : ((· - (0 : ℂ)) ^ k) = (fun z : ℂ => z ^ k) := by funext z; simp
+  have key : analyticOrderAt (fun z : ℂ => z ^ k) 0 = (k : ℕ∞) :=
+    heq ▸ analyticOrderAt_centeredMonomial
+  simp [analyticOrderNatAt, key]
+
+/-- **Faithfulness witness for `localOrder`.** The canonical `k`-fold cover
+`z ↦ zᵏ` has local order exactly `k` at the origin (`1` for an unramified `k = 1`,
+`≥ 2` for genuine ramification). This pins the discharged `def` to the intended
+ramification index on a concrete absolute case — the kind of non-vacuity check the
+kernel cannot supply for a definition. -/
+theorem localOrder_pow {k : ℕ} (hk : 0 < k) :
+    localOrder (fun z : ℂ => z ^ k) 0 0 = k := by
+  have hf0 : (fun z : ℂ => z ^ k) 0 = 0 := by simp [zero_pow hk.ne']
+  rw [localOrder, if_pos hf0]
+  have hmap : mapAnalyticOrderAt (fun z : ℂ => z ^ k) 0
+      = analyticOrderNatAt (fun z : ℂ => z ^ k) 0 := by
+    unfold mapAnalyticOrderAt chartLocalAt
+    simp [zero_pow hk.ne']
+  rw [hmap, analyticOrderNatAt_pow_zero]
 
 /-- **Axiom (BranchLocus).** For a non-constant holomorphic map between
 compact Riemann surfaces, there's a common degree `d` such that

@@ -10,13 +10,15 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 94** — **92** in our modules + **2** vendored Kirov
+**Active project axioms: 93** — **91** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 92 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 91 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
-universal-property stub (2026-06-02, unused — see the Universal-property section).
+universal-property stub (2026-06-02, unused — see the Universal-property section);
+→ 93 when `localOrder` was discharged to a real `def` via the adopted Wallace
+`HolomorphicMap` module (2026-06-03).
 
 ---
 
@@ -28,7 +30,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (79 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (78 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -38,7 +40,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
-| 2a — data-existence | 27 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 26 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 11 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -79,7 +81,7 @@ uses it (proven directly — see Recently discharged).
 ### 2a. Data-existence axioms — *the spec is the question*
 
 "This function/object exists satisfying spec S." Risk: the spec is vacuous
-or contradictory, or doesn't pin down the intended object. The five marked
+or contradictory, or doesn't pin down the intended object. The four marked
 🅒 have written construction plans in
 [`docs/construction-plans/`](docs/construction-plans/).
 
@@ -90,7 +92,6 @@ or contradictory, or doesn't pin down the intended object. The five marked
 | `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent |
 | `pullbackOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:130` | pullback of 1-forms |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
-| `localOrder` 🅒 | `Axioms/BranchLocus.lean:62` | local multiplicity of a holomorphic map |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
 | `bridgePath` (+5: `_continuous`, `_chart_differentiable`, `_at_zero`, `_at_one`, `_lineIntegrable`) | `Bridge/KirovLineIntegral.lean:164,167,182,188,191,212` | path-selection for the Kirov line-integral bridge |
@@ -182,6 +183,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | Liouville L2 **step 4** (growth ⇒ polynomial) | induction + Liouville + `dslope` | `GeneralResults/EntireGrowth.lean` (`differentiable_eq_polynomial_of_growth`) |
 | `hyperellipticEvenCoeff_cocycle_inl_inr_axiom` *(was UNSOUND)* | real low-degree proof (S5 sub-cases) | `EvenForm.lean` (`…_cocycle_inl_inr`) |
 | `hyperellipticEvenCoeff_cocycle_inr_inl_axiom` *(was UNSOUND)* | chart-transition symmetry from `inl_inr` | `EvenForm.lean` (`…_cocycle_inr_inl`) + `GeneralResults/ChartTransition.lean` |
+| `localOrder` *(2026-06-03)* | real `def` = `if f p = q then mapAnalyticOrderAt f p else 0`, using the adopted Wallace `HolomorphicMap` (`analyticOrderNatAt`); **faithfulness witness** `localOrder_pow` proves `localOrder (z↦zᵏ) 0 0 = k` (`#print axioms` ⊆ the 3 standard) | `Axioms/BranchLocus.lean` (`def` + `localOrder_pow`) |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -208,7 +210,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 94; add the 2 Vendor/Kirov axioms for the total 96.
+#   prints 93; add the 2 Vendor/Kirov axioms for the total 95.
 lake env lean <<'LEAN'
 import Jacobians
 open Lean
