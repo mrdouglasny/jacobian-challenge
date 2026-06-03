@@ -17,7 +17,7 @@
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.pushforwardOneForm,
  RiemannSurface.loopIntegralToH1]
-'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_BranchLocus]
+'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
 'Jacobian.ofCurve_self' depends on axioms: [propext,
  Classical.choice,
@@ -82,7 +82,6 @@
 'Jacobian.pushforward_pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_BranchLocus,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
  Axioms.AX_pushforward_pullback,
