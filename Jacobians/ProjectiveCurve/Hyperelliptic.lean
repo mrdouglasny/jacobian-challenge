@@ -65,14 +65,6 @@ attribute [instance] Hyperelliptic.instTopologicalSpace
 axiom Hyperelliptic.instT2Space (H : HyperellipticData) : T2Space (Hyperelliptic H)
 attribute [instance] Hyperelliptic.instT2Space
 
-axiom Hyperelliptic.instCompactSpace (H : HyperellipticData) :
-    CompactSpace (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instCompactSpace
-
-axiom Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
-    ConnectedSpace (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instConnectedSpace
-
 axiom Hyperelliptic.instNonempty (H : HyperellipticData) : Nonempty (Hyperelliptic H)
 attribute [instance] Hyperelliptic.instNonempty
 
@@ -98,6 +90,24 @@ homeomorphic to `HyperellipticEven H h`. The even target is now a real
 construction. -/
 axiom AX_Hyperelliptic_evenEquiv (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
     Hyperelliptic H ≃ₜ HyperellipticEven H h
+
+/-- `Hyperelliptic H` is compact: transport `CompactSpace` along the parity
+homeomorphism to the real `HyperellipticOdd`/`HyperellipticEven` case. -/
+instance Hyperelliptic.instCompactSpace (H : HyperellipticData) :
+    CompactSpace (Hyperelliptic H) := by
+  by_cases h : Odd H.f.natDegree
+  · exact (AX_Hyperelliptic_oddEquiv H h).symm.compactSpace
+  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    exact (AX_Hyperelliptic_evenEquiv H h).symm.compactSpace
+
+/-- `Hyperelliptic H` is connected: transport `ConnectedSpace` along the parity
+homeomorphism (`Homeomorph.connectedSpace_iff`; Mathlib has no `.connectedSpace`). -/
+instance Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
+    ConnectedSpace (Hyperelliptic H) := by
+  by_cases h : Odd H.f.natDegree
+  · exact (AX_Hyperelliptic_oddEquiv H h).connectedSpace_iff.mpr inferInstance
+  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    exact (AX_Hyperelliptic_evenEquiv H h).connectedSpace_iff.mpr inferInstance
 
 /-- **Axiom.** The genus of `y² = f(x)` matches the combinatorial
 formula `⌊(deg f - 1) / 2⌋`. -/
