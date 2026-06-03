@@ -2,6 +2,8 @@
 
 An interface-complete Lean 4 bridge to Kevin Buzzard's [Jacobian Challenge](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026): all 24 `sorry`s in `Challenge.lean` discharged as real `def`s and `instance`s, with the remaining mathematical content organized as classified axioms (textbook-citable classical theorems, function-existence axioms with construction plans, and a layered Liouville-hierarchy axiom system used by the headline genus theorem). Not a from-first-principles proof of Jacobian theory; a scaffold that closes Buzzard's exposed API and enumerates the work below it. Concrete headline theorems landed: `genus ProjectiveLine = 0`, `genus (Elliptic ω₁ ω₂) = 1`, and `genus (HyperellipticEvenProj H) = H.f.natDegree / 2 - 1`.
 
+> **Built on borrowed proofs — with attribution.** This repo vendors and compiles real Lean from two sibling Jacobian-Challenge attempts, each under its upstream license with per-file attribution headers and a vendored `LICENSE` + `PROVENANCE.md` (summary table at the [bottom](#vendored-sources--attribution); full record in [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md)): **[rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)** (Apache 2.0, ~5,800 LOC — Montel finite-dimensionality of holomorphic 1-forms, line integrals, ℤ-lattice/complex-torus quotient) and **[tangentstorm/JacobianChallenge](https://github.com/tangentstorm/JacobianChallenge)** (MIT, ~2,900 LOC — holomorphic maps between Riemann surfaces, meromorphic order, branched covers).
+
 ## The challenge
 
 Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining an API for the Jacobian of a compact Riemann surface, the Abel–Jacobi map, and pushforward / pullback functoriality along holomorphic maps. The design is adversarial: the API cannot be satisfied by any "hack" definition (e.g. `Jacobian := 0`) because `genus_eq_zero_iff_homeo` forces `genus` to be correct and `ofCurve_inj` forces Abel–Jacobi to be genuinely injective in positive genus. All underlying mathematics is classical (Abel 1829, Jacobi 1851); the challenge is to formalize it on top of current Mathlib (extending Mathlib would be a bonus, not a requirement).
@@ -192,6 +194,17 @@ lake build
 - [`docs/genus-theorem-discharge-plan.md`](docs/genus-theorem-discharge-plan.md) — 8-task plan (S1–S8) for the hyperelliptic genus theorems via the 1-form framework.
 - [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-discharge-plan.md) — plan for the last gap (Liouville L2/L3 = the canonical-differentials theorem): the L3⟸L2 reduction, L2 decomposition (L2-a..e), realistic estimate.
 - [`docs/task-21-discharge-plan.md`](docs/task-21-discharge-plan.md) — task #21 (retiring the unsound cocycle axioms), completed 2026-06-01.
+
+## Vendored sources & attribution
+
+We build on real Lean from two sibling Jacobian-Challenge attempts. Each is vendored under its **upstream** license, with per-file attribution headers, the upstream `LICENSE`, and a `PROVENANCE.md` recording the source commit and any modifications. Full adoption record (what we took, considered, and rejected): [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md).
+
+| Source | License | In our build | ~LOC | Mathematical content used |
+|--------|---------|--------------|-----:|---------------------------|
+| [`rkirov/jacobian-claude`](https://github.com/rkirov/jacobian-claude) | Apache 2.0 | `Jacobians.Vendor.Kirov.*` (13 files) | ~5,800 | Montel's theorem ⇒ finite-dimensionality of holomorphic 1-forms; line integrals (path speed, linearity, concat/reverse, chain rule); ℤ-lattice quotient `V ⧸ Λ` as a complex torus (`ChartedSpace` + `LieAddGroup`); the `HolomorphicForms` / genus-0 bridge. Attribution: [`vendor/kirov-jacobian-claude/`](vendor/kirov-jacobian-claude/). |
+| [`tangentstorm/JacobianChallenge`](https://github.com/tangentstorm/JacobianChallenge) | MIT | `Jacobians.Vendor.Wallace.*` (6 files) | ~2,900 | Holomorphic maps between Riemann surfaces (local k-fold ramification, weighted fiber conservation); manifold-level meromorphic order + chart-independence; branched-cover data + `branchedDegree`; local k-th-root biholomorphism; cotangent-space instances; curve-integral subpath lemmas. Attribution: [`vendor/wallace-jacobian-challenge/`](vendor/wallace-jacobian-challenge/). |
+
+These directly discharged project axioms — e.g. `AX_FiniteDimOneForms` (Kirov Montel), `localOrder` (Wallace `mapAnalyticOrderAt`), and the `pullbackOneForm` cluster (Kirov `pullbackForm` via the `bridgeForm` isomorphism). The two repos remain independent attempts; we import their real proofs rather than re-deriving them.
 
 ## License
 
