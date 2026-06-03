@@ -1,0 +1,1547 @@
+{
+  "nodes": [
+    {
+      "slug": "AX_AbelTheorem",
+      "src": "Jacobians/Axioms/AbelTheorem.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "revise",
+      "level": 7,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_AnalyticCycleBasis",
+      "src": "Jacobians/Axioms/AnalyticCycleBasis.lean",
+      "route": "needs-infra",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 3,
+      "leverage": 7
+    },
+    {
+      "slug": "AX_BranchLocus",
+      "src": "Jacobians/Axioms/BranchLocus.lean",
+      "route": "mathlib-now",
+      "effort": 4,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 3
+    },
+    {
+      "slug": "AX_Elliptic_H1_symplectic",
+      "src": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 7,
+      "verdict": "reject",
+      "level": 5,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_Elliptic_aLoop_analytic",
+      "src": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+      "route": "mathlib-now",
+      "effort": 3,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_Elliptic_bLoop_analytic",
+      "src": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+      "route": "mathlib-now",
+      "effort": 3,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_H1_ProjectiveLine_trivial",
+      "src": "Jacobians/ProjectiveCurve/Line/Witnesses.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_HyperellipticAffine_connected",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_HyperellipticForm_polynomial_decomposition",
+      "src": "Jacobians/Axioms/HyperellipticLiouville.lean",
+      "route": "genuine-textbook",
+      "effort": 5,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_HyperellipticOneForm_eq_form",
+      "src": "Jacobians/Axioms/HyperellipticLiouville.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_Hyperelliptic_evenEquiv",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 2,
+      "verdict": "accept",
+      "level": 6,
+      "leverage": 7
+    },
+    {
+      "slug": "AX_Hyperelliptic_genus",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 2,
+      "verdict": "reject",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_Hyperelliptic_oddEquiv",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "revise",
+      "level": 2,
+      "leverage": 7
+    },
+    {
+      "slug": "AX_IntersectionForm_alternating",
+      "src": "Jacobians/Axioms/IntersectionForm.lean",
+      "route": "needs-infra",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 2
+    },
+    {
+      "slug": "AX_IntersectionForm_perfect",
+      "src": "Jacobians/Axioms/IntersectionForm.lean",
+      "route": "needs-infra",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 3
+    },
+    {
+      "slug": "AX_PeriodLattice",
+      "src": "Jacobians/Axioms/PeriodLattice.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "accept",
+      "level": 5,
+      "leverage": 4
+    },
+    {
+      "slug": "AX_PlaneCurveAffine_connected",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "genuine-textbook",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_PlaneCurveAffine_noncompact",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_PlaneCurveAffine_nonempty",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "mathlib-now",
+      "effort": 5,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 2
+    },
+    {
+      "slug": "AX_PluckerFormula",
+      "src": "Jacobians/Axioms/PluckerFormula.lean",
+      "route": "genuine-textbook",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_RiemannBilinear",
+      "src": "Jacobians/Axioms/RiemannBilinear.lean",
+      "route": "mathlib-now",
+      "effort": 9,
+      "verdict": "revise",
+      "level": 4,
+      "leverage": 5
+    },
+    {
+      "slug": "AX_RiemannRoch",
+      "src": "Jacobians/Axioms/RiemannRoch.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 6,
+      "leverage": 5
+    },
+    {
+      "slug": "AX_SerreDuality",
+      "src": "Jacobians/Axioms/SerreDuality.lean",
+      "route": "mathlib-now",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 5,
+      "leverage": 4
+    },
+    {
+      "slug": "AX_curve_generates_jacobian",
+      "src": "Jacobians/Axioms/UniversalProperty.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 3,
+      "verdict": "reject",
+      "level": 8,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_genus_eq_zero_iff_homeo",
+      "src": "Jacobians/Axioms/Uniformization0.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 6,
+      "verdict": "reject",
+      "level": 7,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_ofCurve_contMDiff",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 7,
+      "verdict": "revise",
+      "level": 9,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_ofCurve_inj",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 9,
+      "verdict": "reject",
+      "level": 7,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_pathIntegral_local_antiderivative",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 9,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 2
+    },
+    {
+      "slug": "AX_pullbackAmbient_preserves_lattice",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 9,
+      "verdict": "reject",
+      "level": 6,
+      "leverage": 1
+    },
+    {
+      "slug": "AX_pullback_contMDiff",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_pushforwardAmbient_preserves_lattice",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 6,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_pushforwardOneForm_comp",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 9,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_pushforwardOneForm_id",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 3,
+      "verdict": "revise",
+      "level": 2,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_pushforward_contMDiff",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 5,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "AX_pushforward_pullback",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "genuine-textbook",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 0
+    },
+    {
+      "slug": "Divisor-deg",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 3,
+      "leverage": 3
+    },
+    {
+      "slug": "Divisor-instAddCommGroup",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 5
+    },
+    {
+      "slug": "Divisor",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 2,
+      "leverage": 11
+    },
+    {
+      "slug": "H0-instAddCommGroup",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 2
+    },
+    {
+      "slug": "H0-instModule",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 2,
+      "leverage": 1
+    },
+    {
+      "slug": "H0",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "reject",
+      "level": 4,
+      "leverage": 5
+    },
+    {
+      "slug": "H1-instAddCommGroup",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 5,
+      "leverage": 1
+    },
+    {
+      "slug": "H1-instModule",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 6,
+      "leverage": 0
+    },
+    {
+      "slug": "H1",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 2,
+      "verdict": "reject",
+      "level": 4,
+      "leverage": 6
+    },
+    {
+      "slug": "Hyperelliptic-instChartedSpace",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "needs-infra",
+      "effort": 3,
+      "verdict": "revise",
+      "level": 3,
+      "leverage": 2
+    },
+    {
+      "slug": "Hyperelliptic-instCompactSpace",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "Hyperelliptic-instConnectedSpace",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "Hyperelliptic-instIsManifold",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "revise",
+      "level": 4,
+      "leverage": 1
+    },
+    {
+      "slug": "Hyperelliptic-instNonempty",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "Hyperelliptic-instT2Space",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 7,
+      "leverage": 0
+    },
+    {
+      "slug": "Hyperelliptic-instTopologicalSpace",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "needs-infra",
+      "effort": 2,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 4
+    },
+    {
+      "slug": "Hyperelliptic",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+      "route": "needs-infra",
+      "effort": 5,
+      "verdict": "revise",
+      "level": 5,
+      "leverage": 10
+    },
+    {
+      "slug": "LineBundle-ofDivisor",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 4,
+      "leverage": 2
+    },
+    {
+      "slug": "LineBundle",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "reject",
+      "level": 3,
+      "leverage": 5
+    },
+    {
+      "slug": "PlaneCurve-instChartedSpace",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "PlaneCurve-instCompactSpace",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 6,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve-instConnectedSpace",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve-instIsManifold",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "genuine-textbook",
+      "effort": 9,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve-instNonempty",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve-instT2Space",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "needs-infra",
+      "effort": 5,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve-instTopologicalSpace",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "PlaneCurve",
+      "src": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 7
+    },
+    {
+      "slug": "PrincipalDivisors",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "needs-infra",
+      "effort": 2,
+      "verdict": "reject",
+      "level": 3,
+      "leverage": 3
+    },
+    {
+      "slug": "abelJacobiDiv",
+      "src": "Jacobians/Axioms/AbelTheorem.lean",
+      "route": "needs-infra",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 4,
+      "leverage": 1
+    },
+    {
+      "slug": "affineLiftChart_compat_infinityLiftChart",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean",
+      "route": "mathlib-now",
+      "effort": 7,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "affineLiftProjX_compat_infinityChart",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 3,
+      "verdict": "accept",
+      "level": 4,
+      "leverage": 1
+    },
+    {
+      "slug": "affineLiftProjY_compat_infinityChart",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 3,
+      "verdict": "revise",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "ambientPhi_ambientPsi_eq",
+      "src": "Jacobians/Vendor/Kirov/HolomorphicForms.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "bridgePath",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 5
+    },
+    {
+      "slug": "bridgePath_at_one",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "bridgePath_at_zero",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "bridgePath_chart_differentiable",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "bridgePath_continuous",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 2,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 0
+    },
+    {
+      "slug": "bridgePath_lineIntegrable",
+      "src": "Jacobians/Bridge/KirovLineIntegral.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 6,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 0
+    },
+    {
+      "slug": "canonicalDivisor",
+      "src": "Jacobians/RiemannSurface/LineBundle.lean",
+      "route": "needs-infra",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 4,
+      "leverage": 2
+    },
+    {
+      "slug": "contDiffOn_symm_toOpenPartialHomeomorph",
+      "src": "Jacobians/GeneralResults/InverseFunctionTheorem.lean",
+      "route": "mathlib-now",
+      "effort": 6,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "genus_eq_zero_iff_homeo",
+      "src": "Jacobians/Vendor/Kirov/Genus.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "revise",
+      "level": 8,
+      "leverage": 0
+    },
+    {
+      "slug": "infinityChart",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 7,
+      "verdict": "revise",
+      "level": 3,
+      "leverage": 6
+    },
+    {
+      "slug": "infinityChart_compat_affineLiftProjX",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 3,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "infinityChart_compat_affineLiftProjY",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 3,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "infinityChart_mem_source",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 1,
+      "verdict": "accept",
+      "level": 1,
+      "leverage": 1
+    },
+    {
+      "slug": "infinityInverseMap",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "reject",
+      "level": 2,
+      "leverage": 5
+    },
+    {
+      "slug": "infinityLiftChart_compat_affineLiftChart",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean",
+      "route": "mathlib-now",
+      "effort": 6,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "instPeriodLatticeDiscrete",
+      "src": "Jacobians/Axioms/PeriodLattice.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "revise",
+      "level": 6,
+      "leverage": 0
+    },
+    {
+      "slug": "intersectionForm",
+      "src": "Jacobians/Axioms/IntersectionForm.lean",
+      "route": "needs-infra",
+      "effort": 3,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 3
+    },
+    {
+      "slug": "loopIntegralToH1",
+      "src": "Jacobians/RiemannSurface/PathIntegral.lean",
+      "route": "provable-from-other-axioms",
+      "effort": 4,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 1
+    },
+    {
+      "slug": "pathIntegralBasepointFunctional",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 8,
+      "verdict": "reject",
+      "level": 8,
+      "leverage": 2
+    },
+    {
+      "slug": "polynomialLocalHomeomorph_no_critical_in_source",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean",
+      "route": "mathlib-now",
+      "effort": 1,
+      "verdict": "reject",
+      "level": 0,
+      "leverage": 0
+    },
+    {
+      "slug": "pushforwardOneForm",
+      "src": "Jacobians/Axioms/AbelJacobiMap.lean",
+      "route": "needs-infra",
+      "effort": 10,
+      "verdict": "reject",
+      "level": 1,
+      "leverage": 3
+    },
+    {
+      "slug": "squareLocalHomeomorph_zero_notMem_source",
+      "src": "Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean",
+      "route": "mathlib-now",
+      "effort": 2,
+      "verdict": "revise",
+      "level": 0,
+      "leverage": 0
+    }
+  ],
+  "edges": [
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "AX_PeriodLattice"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "AX_RiemannBilinear"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "AX_RiemannRoch"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "AX_SerreDuality"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "Divisor-deg"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "H0"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "H1"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "LineBundle"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "PrincipalDivisors"
+    },
+    {
+      "src": "AX_AbelTheorem",
+      "dst": "abelJacobiDiv"
+    },
+    {
+      "src": "AX_AnalyticCycleBasis",
+      "dst": "AX_IntersectionForm_alternating"
+    },
+    {
+      "src": "AX_AnalyticCycleBasis",
+      "dst": "AX_IntersectionForm_perfect"
+    },
+    {
+      "src": "AX_Elliptic_H1_symplectic",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_Elliptic_H1_symplectic",
+      "dst": "AX_IntersectionForm_alternating"
+    },
+    {
+      "src": "AX_Elliptic_H1_symplectic",
+      "dst": "AX_IntersectionForm_perfect"
+    },
+    {
+      "src": "AX_Elliptic_H1_symplectic",
+      "dst": "H1"
+    },
+    {
+      "src": "AX_Elliptic_H1_symplectic",
+      "dst": "intersectionForm"
+    },
+    {
+      "src": "AX_Elliptic_bLoop_analytic",
+      "dst": "AX_Elliptic_aLoop_analytic"
+    },
+    {
+      "src": "AX_HyperellipticOneForm_eq_form",
+      "dst": "AX_HyperellipticForm_polynomial_decomposition"
+    },
+    {
+      "src": "AX_Hyperelliptic_evenEquiv",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "AX_Hyperelliptic_genus",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "AX_Hyperelliptic_genus",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "AX_Hyperelliptic_genus",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "AX_Hyperelliptic_oddEquiv",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "AX_Hyperelliptic_oddEquiv",
+      "dst": "Hyperelliptic-instTopologicalSpace"
+    },
+    {
+      "src": "AX_IntersectionForm_alternating",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_IntersectionForm_alternating",
+      "dst": "AX_IntersectionForm_perfect"
+    },
+    {
+      "src": "AX_IntersectionForm_alternating",
+      "dst": "AX_RiemannBilinear"
+    },
+    {
+      "src": "AX_IntersectionForm_alternating",
+      "dst": "intersectionForm"
+    },
+    {
+      "src": "AX_IntersectionForm_perfect",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_IntersectionForm_perfect",
+      "dst": "AX_RiemannBilinear"
+    },
+    {
+      "src": "AX_IntersectionForm_perfect",
+      "dst": "intersectionForm"
+    },
+    {
+      "src": "AX_PeriodLattice",
+      "dst": "AX_RiemannBilinear"
+    },
+    {
+      "src": "AX_PlaneCurveAffine_noncompact",
+      "dst": "AX_PlaneCurveAffine_nonempty"
+    },
+    {
+      "src": "AX_RiemannBilinear",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_RiemannBilinear",
+      "dst": "loopIntegralToH1"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "AX_SerreDuality"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "Divisor"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "Divisor-deg"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "H0"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "H1"
+    },
+    {
+      "src": "AX_RiemannRoch",
+      "dst": "LineBundle-ofDivisor"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "AX_RiemannRoch"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "Divisor"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "H0"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "H1"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "LineBundle"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "PrincipalDivisors"
+    },
+    {
+      "src": "AX_SerreDuality",
+      "dst": "canonicalDivisor"
+    },
+    {
+      "src": "AX_curve_generates_jacobian",
+      "dst": "AX_AbelTheorem"
+    },
+    {
+      "src": "AX_curve_generates_jacobian",
+      "dst": "AX_RiemannRoch"
+    },
+    {
+      "src": "AX_curve_generates_jacobian",
+      "dst": "Divisor"
+    },
+    {
+      "src": "AX_genus_eq_zero_iff_homeo",
+      "dst": "AX_RiemannRoch"
+    },
+    {
+      "src": "AX_genus_eq_zero_iff_homeo",
+      "dst": "AX_SerreDuality"
+    },
+    {
+      "src": "AX_genus_eq_zero_iff_homeo",
+      "dst": "LineBundle-ofDivisor"
+    },
+    {
+      "src": "AX_genus_eq_zero_iff_homeo",
+      "dst": "canonicalDivisor"
+    },
+    {
+      "src": "AX_ofCurve_contMDiff",
+      "dst": "AX_pathIntegral_local_antiderivative"
+    },
+    {
+      "src": "AX_ofCurve_contMDiff",
+      "dst": "pathIntegralBasepointFunctional"
+    },
+    {
+      "src": "AX_ofCurve_inj",
+      "dst": "AX_RiemannRoch"
+    },
+    {
+      "src": "AX_ofCurve_inj",
+      "dst": "AX_SerreDuality"
+    },
+    {
+      "src": "AX_pathIntegral_local_antiderivative",
+      "dst": "pathIntegralBasepointFunctional"
+    },
+    {
+      "src": "AX_pullbackAmbient_preserves_lattice",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_pullbackAmbient_preserves_lattice",
+      "dst": "AX_BranchLocus"
+    },
+    {
+      "src": "AX_pullbackAmbient_preserves_lattice",
+      "dst": "AX_PeriodLattice"
+    },
+    {
+      "src": "AX_pullback_contMDiff",
+      "dst": "AX_pullbackAmbient_preserves_lattice"
+    },
+    {
+      "src": "AX_pushforwardAmbient_preserves_lattice",
+      "dst": "AX_AnalyticCycleBasis"
+    },
+    {
+      "src": "AX_pushforwardAmbient_preserves_lattice",
+      "dst": "AX_PeriodLattice"
+    },
+    {
+      "src": "AX_pushforwardOneForm_comp",
+      "dst": "pushforwardOneForm"
+    },
+    {
+      "src": "AX_pushforwardOneForm_id",
+      "dst": "pushforwardOneForm"
+    },
+    {
+      "src": "AX_pushforward_pullback",
+      "dst": "AX_BranchLocus"
+    },
+    {
+      "src": "AX_pushforward_pullback",
+      "dst": "pushforwardOneForm"
+    },
+    {
+      "src": "Divisor",
+      "dst": "Divisor-instAddCommGroup"
+    },
+    {
+      "src": "Divisor-deg",
+      "dst": "Divisor"
+    },
+    {
+      "src": "Divisor-deg",
+      "dst": "Divisor-instAddCommGroup"
+    },
+    {
+      "src": "Divisor-instAddCommGroup",
+      "dst": "Divisor"
+    },
+    {
+      "src": "H0",
+      "dst": "Divisor"
+    },
+    {
+      "src": "H0",
+      "dst": "Divisor-instAddCommGroup"
+    },
+    {
+      "src": "H0",
+      "dst": "H0-instAddCommGroup"
+    },
+    {
+      "src": "H0",
+      "dst": "H0-instModule"
+    },
+    {
+      "src": "H0",
+      "dst": "LineBundle"
+    },
+    {
+      "src": "H0-instAddCommGroup",
+      "dst": "H0"
+    },
+    {
+      "src": "H0-instModule",
+      "dst": "H0"
+    },
+    {
+      "src": "H0-instModule",
+      "dst": "H0-instAddCommGroup"
+    },
+    {
+      "src": "H1",
+      "dst": "Divisor"
+    },
+    {
+      "src": "H1",
+      "dst": "LineBundle"
+    },
+    {
+      "src": "H1-instAddCommGroup",
+      "dst": "H1"
+    },
+    {
+      "src": "H1-instModule",
+      "dst": "H1"
+    },
+    {
+      "src": "H1-instModule",
+      "dst": "H1-instAddCommGroup"
+    },
+    {
+      "src": "Hyperelliptic",
+      "dst": "Hyperelliptic-instChartedSpace"
+    },
+    {
+      "src": "Hyperelliptic",
+      "dst": "Hyperelliptic-instIsManifold"
+    },
+    {
+      "src": "Hyperelliptic-instChartedSpace",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instChartedSpace",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instChartedSpace",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instCompactSpace",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instCompactSpace",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instCompactSpace",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instCompactSpace",
+      "dst": "Hyperelliptic-instTopologicalSpace"
+    },
+    {
+      "src": "Hyperelliptic-instConnectedSpace",
+      "dst": "AX_HyperellipticAffine_connected"
+    },
+    {
+      "src": "Hyperelliptic-instConnectedSpace",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instConnectedSpace",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instConnectedSpace",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instConnectedSpace",
+      "dst": "Hyperelliptic-instTopologicalSpace"
+    },
+    {
+      "src": "Hyperelliptic-instIsManifold",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instIsManifold",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instIsManifold",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instIsManifold",
+      "dst": "Hyperelliptic-instChartedSpace"
+    },
+    {
+      "src": "Hyperelliptic-instNonempty",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instNonempty",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instNonempty",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instT2Space",
+      "dst": "AX_Hyperelliptic_evenEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instT2Space",
+      "dst": "AX_Hyperelliptic_oddEquiv"
+    },
+    {
+      "src": "Hyperelliptic-instT2Space",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "Hyperelliptic-instT2Space",
+      "dst": "Hyperelliptic-instTopologicalSpace"
+    },
+    {
+      "src": "Hyperelliptic-instTopologicalSpace",
+      "dst": "Hyperelliptic"
+    },
+    {
+      "src": "LineBundle",
+      "dst": "Divisor"
+    },
+    {
+      "src": "LineBundle-ofDivisor",
+      "dst": "LineBundle"
+    },
+    {
+      "src": "PlaneCurve-instChartedSpace",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instCompactSpace",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instConnectedSpace",
+      "dst": "AX_PlaneCurveAffine_connected"
+    },
+    {
+      "src": "PlaneCurve-instConnectedSpace",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instIsManifold",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instIsManifold",
+      "dst": "PlaneCurve-instChartedSpace"
+    },
+    {
+      "src": "PlaneCurve-instNonempty",
+      "dst": "AX_PlaneCurveAffine_nonempty"
+    },
+    {
+      "src": "PlaneCurve-instNonempty",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instT2Space",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PlaneCurve-instTopologicalSpace",
+      "dst": "PlaneCurve"
+    },
+    {
+      "src": "PrincipalDivisors",
+      "dst": "Divisor"
+    },
+    {
+      "src": "PrincipalDivisors",
+      "dst": "Divisor-instAddCommGroup"
+    },
+    {
+      "src": "abelJacobiDiv",
+      "dst": "Divisor"
+    },
+    {
+      "src": "abelJacobiDiv",
+      "dst": "Divisor-deg"
+    },
+    {
+      "src": "abelJacobiDiv",
+      "dst": "Divisor-instAddCommGroup"
+    },
+    {
+      "src": "affineLiftChart_compat_infinityLiftChart",
+      "dst": "infinityLiftChart_compat_affineLiftChart"
+    },
+    {
+      "src": "affineLiftProjX_compat_infinityChart",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "affineLiftProjX_compat_infinityChart",
+      "dst": "infinityInverseMap"
+    },
+    {
+      "src": "affineLiftProjY_compat_infinityChart",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "affineLiftProjY_compat_infinityChart",
+      "dst": "infinityInverseMap"
+    },
+    {
+      "src": "bridgePath_at_one",
+      "dst": "bridgePath"
+    },
+    {
+      "src": "bridgePath_at_zero",
+      "dst": "bridgePath"
+    },
+    {
+      "src": "bridgePath_chart_differentiable",
+      "dst": "bridgePath"
+    },
+    {
+      "src": "bridgePath_continuous",
+      "dst": "bridgePath"
+    },
+    {
+      "src": "bridgePath_lineIntegrable",
+      "dst": "bridgePath"
+    },
+    {
+      "src": "bridgePath_lineIntegrable",
+      "dst": "bridgePath_chart_differentiable"
+    },
+    {
+      "src": "canonicalDivisor",
+      "dst": "Divisor"
+    },
+    {
+      "src": "canonicalDivisor",
+      "dst": "PrincipalDivisors"
+    },
+    {
+      "src": "genus_eq_zero_iff_homeo",
+      "dst": "AX_genus_eq_zero_iff_homeo"
+    },
+    {
+      "src": "infinityChart",
+      "dst": "infinityInverseMap"
+    },
+    {
+      "src": "infinityChart_compat_affineLiftProjX",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "infinityChart_compat_affineLiftProjX",
+      "dst": "infinityInverseMap"
+    },
+    {
+      "src": "infinityChart_compat_affineLiftProjY",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "infinityChart_compat_affineLiftProjY",
+      "dst": "infinityInverseMap"
+    },
+    {
+      "src": "infinityChart_mem_source",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "affineLiftProjX_compat_infinityChart"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "affineLiftProjY_compat_infinityChart"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "infinityChart"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "infinityChart_compat_affineLiftProjX"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "infinityChart_compat_affineLiftProjY"
+    },
+    {
+      "src": "infinityInverseMap",
+      "dst": "infinityChart_mem_source"
+    },
+    {
+      "src": "instPeriodLatticeDiscrete",
+      "dst": "AX_PeriodLattice"
+    },
+    {
+      "src": "instPeriodLatticeDiscrete",
+      "dst": "AX_RiemannBilinear"
+    },
+    {
+      "src": "pathIntegralBasepointFunctional",
+      "dst": "AX_ofCurve_contMDiff"
+    },
+    {
+      "src": "pathIntegralBasepointFunctional",
+      "dst": "AX_ofCurve_inj"
+    },
+    {
+      "src": "pathIntegralBasepointFunctional",
+      "dst": "AX_pathIntegral_local_antiderivative"
+    },
+    {
+      "src": "pushforwardOneForm",
+      "dst": "AX_BranchLocus"
+    }
+  ],
+  "cycles": [
+    [
+      "Divisor-instAddCommGroup",
+      "Divisor"
+    ],
+    [
+      "H0-instAddCommGroup",
+      "H0-instModule",
+      "H0"
+    ],
+    [
+      "AX_SerreDuality",
+      "AX_RiemannRoch"
+    ],
+    [
+      "AX_IntersectionForm_alternating",
+      "AX_IntersectionForm_perfect",
+      "AX_AnalyticCycleBasis",
+      "AX_RiemannBilinear"
+    ],
+    [
+      "Hyperelliptic-instIsManifold",
+      "Hyperelliptic-instTopologicalSpace",
+      "AX_Hyperelliptic_oddEquiv",
+      "Hyperelliptic-instChartedSpace",
+      "Hyperelliptic",
+      "AX_Hyperelliptic_evenEquiv"
+    ],
+    [
+      "AX_pathIntegral_local_antiderivative",
+      "pathIntegralBasepointFunctional",
+      "AX_ofCurve_contMDiff"
+    ],
+    [
+      "infinityChart_compat_affineLiftProjY",
+      "affineLiftProjY_compat_infinityChart",
+      "infinityChart_compat_affineLiftProjX",
+      "infinityChart_mem_source",
+      "infinityInverseMap",
+      "infinityChart",
+      "affineLiftProjX_compat_infinityChart"
+    ]
+  ],
+  "leaves": [
+    "AX_BranchLocus",
+    "AX_Elliptic_aLoop_analytic",
+    "AX_H1_ProjectiveLine_trivial",
+    "AX_HyperellipticAffine_connected",
+    "AX_HyperellipticForm_polynomial_decomposition",
+    "AX_PlaneCurveAffine_connected",
+    "AX_PlaneCurveAffine_nonempty",
+    "AX_PluckerFormula",
+    "AX_pushforward_contMDiff",
+    "PlaneCurve",
+    "ambientPhi_ambientPsi_eq",
+    "bridgePath",
+    "contDiffOn_symm_toOpenPartialHomeomorph",
+    "infinityLiftChart_compat_affineLiftChart",
+    "intersectionForm",
+    "loopIntegralToH1",
+    "polynomialLocalHomeomorph_no_critical_in_source",
+    "squareLocalHomeomorph_zero_notMem_source"
+  ],
+  "orphan_mentions": {
+    "intersectionForm.md": 2,
+    "Mathlib.Analysis.Complex.OpenMapping": 1,
+    "Path.toHomologyClass": 1,
+    "FundamentalGroupoid.vanKampen": 1,
+    "HyperellipticData": 1,
+    "AX_IntersectionForm_nondeg": 1,
+    "LineBundle.lean": 1,
+    "INFRA_ExponentialSequence": 1,
+    "CauchyTheorem_local": 1,
+    "Jacobians.GeneralResults.transition_fderiv_mul": 1
+  }
+}
