@@ -8,7 +8,7 @@
 ```lean
 axiom H1.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
     Module ℂ (H1 L)
 attribute [instance] H1.instModule
 ```
@@ -29,7 +29,7 @@ attribute [instance] H1.instModule
    ```lean
    instance H1.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
        Module ℂ (H1 L) := inferInstance
    ```
    The `attribute [instance]` line at `:118` becomes redundant and should be deleted.
@@ -49,3 +49,5 @@ attribute [instance] H1.instModule
 **Risk / escalation triggers**
 - If the eventual `LineBundle` carrier exposes its first cohomology as an abstract `AddCommGroup` without a registered ℂ-module structure (likely if the abstract `Sheaf.H F 1 : Ab` API is used directly), `inferInstance` will fail; escalate to coordinate with [`LineBundle.md`](LineBundle.md) for an explicit `Module ℂ` build.
 - If typeclass search ordering causes `H1.instAddCommGroup` and `H1.instModule` to interact (one shadowing the other through definitional unfolding), pin both bodies with `inferInstanceAs` against the underlying `L.firstCohomology` carrier to disambiguate.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

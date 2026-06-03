@@ -34,7 +34,7 @@ axiom infinityChart_mem_source (H : HyperellipticData) (h : Odd H.f.natDegree) :
      ```
      citing `someRadius_pos : 0 < someRadius H h` (the positive-radius output from Step 3c of the `infinityInverseMap` recipe).
 
-3. **Pattern reference.** This mirrors the existing `affineChartProjX_mem_source` at `Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/AffineChart.lean:234` and `affineChartProjY_mem_source` at `:378` — both are short proofs that the chart contains its base point, both rely on a `ContDiffAt.mem_toOpenPartialHomeomorph_source` cite or a direct unfolding of the source set definition.
+3. **Pattern reference.** This mirrors the existing `affineChartProjX_mem_source` at `Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/AffineChart.lean:234` and `affineChartProjY_mem_source` at `:378` — both are short proofs that the chart contains its base point, both rely on a `ContDiffAt.mem_toPartialHomeomorph_source` cite or a direct unfolding of the source set definition.
 
 4. **Discharge.** In `InfinityChart.lean:61–63`, replace
    ```lean
@@ -57,3 +57,5 @@ axiom infinityChart_mem_source (H : HyperellipticData) (h : Odd H.f.natDegree) :
 **Risk / escalation triggers**
 - If the `infinityChart` recipe's final `source` formulation makes `∞ ∈ source` not literally trivial (e.g. requires showing the chosen radius `someRadius H h > 0`, and the radius helper lemma is not exported), **escalate** — the cleanup is in the `infinityChart` recipe's API, not here, and the right fix is to add the missing `@[simp]` or radius-positivity helper to `InfinityChart.lean` rather than to do real work inside this recipe.
 - If the recipe of `infinityChart` ends up defining `source := ∅` as a placeholder (e.g. while only partially discharged), this axiom *cannot* be proved as a `theorem` — escalate immediately rather than introducing a `sorry`.
+
+**Cross-plan patch (2026-06-03):** Namespace standardised on Mathlib's `PartialHomeomorph` (the stale `OpenPartialHomeomorph` references were hallucinated).

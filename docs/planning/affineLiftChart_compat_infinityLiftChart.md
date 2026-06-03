@@ -2,7 +2,7 @@
 
 **Location:** `Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean:243`
 **Route:** mathlib-now &nbsp;&nbsp; **Effort:** 7 &nbsp;&nbsp; **Est:** ~1.5 focused weeks, ~300–450 LOC, mostly in `Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean` plus possible helper extractions in `OddAtlas/AffineChart.lean` for $x \mapsto y(x)$ smoothness
-**Blocked by:** `infinityLiftChart_compat_affineLiftChart` (the symmetric direction; the two recipes share the same case-split skeleton and one supplies the chart-transition-derivative input to the other via `Jacobians.GeneralResults.transition_fderiv_mul`)
+**Blocked by:** none (the symmetric direction `infinityLiftChart_compat_affineLiftChart` is now a sibling, not a parent — see the cross-plan patch note below; both directions are discharged independently via 4-case algebra)
 
 **Statement (verbatim):**
 ```lean
@@ -99,7 +99,7 @@ theorem affineLiftChart_compat_infinityLiftChart
 
 **Risk / escalation triggers**
 - If the `x ↦ y(x)` smoothness derivation in the `(projX, projY)` case cannot be cleanly extracted from `affineChartProjX_compat_affineChartProjY` and requires invoking the implicit function theorem from scratch, escalate (as this would significantly expand the scope).
-- If the symmetric recipe `infinityLiftChart_compat_affineLiftChart` lands first and uses `transition_fderiv_mul` (`GeneralResults/ChartTransition.lean:35`) to derive *this* direction by symmetry, then this recipe collapses to a 5-line `exact`. Escalate to confirm the order of discharge.
+- If duplication with the symmetric direction `infinityLiftChart_compat_affineLiftChart` exceeds ~100 LOC of identical 4-case algebraic logic, escalate to consider factoring the shared rational/polynomial transition smoothness lemmas into a helper file (note: the previously hoped-for `transition_fderiv_mul` shortcut from the symmetric direction was retracted as mathematically circular, so both directions are discharged independently — see the cross-plan patch note below).
 
 ### Gemini critique addressed:
 - **Route & Effort corrected:** Reclassified from `provable-from-other-axioms` to `mathlib-now` as it relies on chaining existing Mathlib infrastructure and API bundling. Effort increased to 7 to reflect the careful extraction of branch smoothness lemmas.
@@ -109,3 +109,5 @@ theorem affineLiftChart_compat_infinityLiftChart
 
 ---
 **Vetting trail.** Critique: `_vetting/affineLiftChart_compat_infinityLiftChart.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Decoupled from the symmetric direction; the `transition_fderiv_mul` shortcut was retracted as circular, so this direction is now discharged independently via 4-case algebra.

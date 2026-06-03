@@ -8,11 +8,15 @@
 ```lean
 axiom loopIntegralToH1 {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) :
     H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)
 ```
 
 **Why it's an axiom right now:** The docstring (`PathIntegral.lean:90-100`) packages three classical subfacts into one axiom: (i) multi-chart path integration along piecewise-real-analytic loops (extending `pathIntegralOnChart` at `PathIntegral.lean:78-83`); (ii) homotopy invariance of `∫_γ ω` via Cauchy's theorem on chart disks + Stokes on the homotopy rectangle, which is what lets the integral descend to `H_1`; (iii) ℂ-linearity in `ω`. None of (i)–(iii) is presently formalized — `pathIntegralOnChart` is the only honest `def`. The H₁ target is `Additive (Abelianization (FundamentalGroup X x₀))` (`Homology.lean:41-42`), so the descent is `π₁ →* Multiplicative (ℂ-dual) → Abelianization → Additive`. Load-bearing for `periodMap` (`Periods.lean:39-43`), which currently has no other route.
+
+> **Canonical H1 type definition.** This plan (and its companion `Jacobians/RiemannSurface/Homology.lean:41-42`) fixes the canonical type
+> `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))`.
+> The `Additive` wrapper is required so that `H1` carries an `AddCommGroup` instance (and hence a `Module ℤ` instance), which downstream consumers like `Module.Basis (Fin n) ℤ (H1 _)` and `AddMonoidHom`-valued constructions depend on. **Any other plan that defines or constructs into `H1` must use the same `Additive` wrapper** — in particular, see the cross-plan patch in `AX_Elliptic_H1_symplectic.md` (2026-06-03), which aligned that recipe to this canonical signature.
 
 **Proof recipe**
 
@@ -98,3 +102,7 @@ The construction focuses strictly on the algebraic descent, assuming `pathIntegr
 
 ---
 **Vetting trail.** Critique: `_vetting/loopIntegralToH1.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** H1 type canonicalised to `Additive (Abelianization (FundamentalGroup X x₀))` so `Module ℤ` typeclasses elaborate.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

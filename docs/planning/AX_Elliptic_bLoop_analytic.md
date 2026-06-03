@@ -31,16 +31,18 @@ This is `mathlib-now` and structurally identical to `AX_Elliptic_aLoop_analytic`
 
 5. **Conclude analyticity.** The coercion `r ↦ (r:ℂ)` is exactly `Complex.ofRealAm`, which is an `ℝ`-linear isometry. Therefore, its analyticity is provided immediately by `ContinuousLinearMap.analyticAt`. Multiplication by `ω₂` and subtraction of `c` are handled by `AnalyticAt.mul_const` and `AnalyticAt.sub`. Transfer to the original pullback via `AnalyticAt.congr`.
 
-6. **Recommended refactor — shared helper.** Introduce a general lemma decoupled from the specific `Elliptic` generators:
+6. **Shared helper (canonical).** Introduce a general lemma decoupled from the specific `Elliptic` generators:
    ```lean
    private lemma analyticAt_torus_affine_arc {L : AddSubgroup ℂ} [DiscreteTopology L] [Rk2 L]
        (v : ℂ) (u : ℝ) (hu : u ∈ Set.Ioo (0:ℝ) 1) :
      AnalyticAt ℝ
        (fun r : ℝ =>
-         (extChartAt 𝓘(ℂ) ((QuotientAddGroup.mk' L : ℂ → _) ((u:ℂ) * v)))
+         (extChartAt 𝓘(ℂ, ℂ) ((QuotientAddGroup.mk' L : ℂ → _) ((u:ℂ) * v)))
          ((QuotientAddGroup.mk' L : ℂ → _) ((r:ℂ) * v))) u
    ```
    Place this in `ComplexTorus.lean` (or a helper file) and instantiate with `v := ω₁` for `aLoop` and `v := ω₂` for `bLoop`. This cleanly abstracts the manifold/chart logic away from the elliptic curve and halves total LOC vs. duplicating the proof.
+
+   **Note — shared between A-cycle and B-cycle plans:** Per `_vetting/CROSS_PLAN_CONSISTENCY.md` Finding 1, this helper is the canonical chart-local analytic fact used by **both** `AX_Elliptic_aLoop_analytic` (instantiating `v := ω₁`) and `AX_Elliptic_bLoop_analytic` (instantiating `v := ω₂`). The earlier `aLoop` proposal of a specialized `extChartAt_eq_sub_lift_lattice_offset` wrapper has been retired in favor of this generalized helper; both proofs invoke `analyticAt_torus_affine_arc` directly.
 
 7. **Replace `axiom` with `theorem`** at `Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean:90-91`. Signature unchanged; `bArc` (`Witnesses.lean:108-119`) and `bLoop` (`Witnesses.lean:143-160`) continue to consume it.
 
@@ -64,3 +66,7 @@ This is `mathlib-now` and structurally identical to `AX_Elliptic_aLoop_analytic`
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_Elliptic_bLoop_analytic.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Added an explicit note that the `analyticAt_torus_affine_arc` helper is shared between the A-cycle and B-cycle analyticity proofs, standardizing per `_vetting/CROSS_PLAN_CONSISTENCY.md` Finding 1.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

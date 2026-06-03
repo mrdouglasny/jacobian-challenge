@@ -12,10 +12,10 @@ fiber-sums of `localOrder` all equal `d`, and the branch locus is
 finite. -/
 axiom AX_BranchLocus {X Y : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X]
+    [IsManifold 𝓘(ℂ, ℂ) ω X]
     [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
-    [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
-    (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ, ℂ) ω Y]
+    (f : X → Y) (_hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f)
     (_hnc : ¬ ∃ c : Y, ∀ x : X, f x = c) :
     ∃ d : ℕ, 0 < d ∧
       (∀ q : Y, (∑' p : X, localOrder f p q) = d) ∧
@@ -28,9 +28,9 @@ axiom AX_BranchLocus {X Y : Type*} [TopologicalSpace X] [T2Space X]
 
 Following **Forster, *Lectures on Riemann Surfaces*, Ch. I §4 (Theorem 4.24, "the number of preimages, counted with multiplicities, is constant")** and **Miranda, *Algebraic Curves and Riemann Surfaces*, Ch. II §2 (Proposition 2.6 + the discrete-fiber consequences in §4.1)**:
 
-1. **Discharge non-constancy → finite-fiber.** The Wallace module already proves: `isHolomorphic_finite_fiber` (`Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean:648`) gives `(f ⁻¹' {y}).Finite` for every `y : Y` from `IsHolomorphic f` + non-constancy + compact preconnected source + T2 target. Project `ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f` to `IsHolomorphic` via `IsHolomorphic.of_contMDiff`-style constructors used throughout `HolomorphicMap.lean:1199–1366`; concretely the `weightedFiberConservation_of_contMDiff` proof already produces `finite_fiber : ∀ y, (f ⁻¹' {y}).Finite` from the same `ContMDiff` hypothesis, so this step is a name-extraction not a new proof.
+1. **Discharge non-constancy → finite-fiber.** The Wallace module already proves: `isHolomorphic_finite_fiber` (`Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean:648`) gives `(f ⁻¹' {y}).Finite` for every `y : Y` from `IsHolomorphic f` + non-constancy + compact preconnected source + T2 target. Project `ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f` to `IsHolomorphic` via `IsHolomorphic.of_contMDiff`-style constructors used throughout `HolomorphicMap.lean:1199–1366`; concretely the `weightedFiberConservation_of_contMDiff` proof already produces `finite_fiber : ∀ y, (f ⁻¹' {y}).Finite` from the same `ContMDiff` hypothesis, so this step is a name-extraction not a new proof.
 
-2. **Apply weighted-fiber conservation (the heart of the Open Mapping Theorem on manifolds in disguise).** Invoke `weightedFiberConservation_of_contMDiff` (`Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean:1199`). Its hypotheses are `[CompactSpace X] [T2Space X] [PreconnectedSpace X] [T2Space Y]` and `ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) f` — all derivable from the axiom signature (`ConnectedSpace → PreconnectedSpace` is `Mathlib`; `ω ≥ ⊤` so `hf.of_le le_top` strips analyticity down to `C^∞`). The conclusion is exactly: for every `y₀ : Y`, the function `Φ : Y → ℕ`, `Φ y := Finset.sum (finite_fiber y).toFinset (mapAnalyticOrderAt f)`, is **eventually equal** to `Φ y₀` near `y₀` — i.e. `Φ` is locally constant.
+2. **Apply weighted-fiber conservation (the heart of the Open Mapping Theorem on manifolds in disguise).** Invoke `weightedFiberConservation_of_contMDiff` (`Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean:1199`). Its hypotheses are `[CompactSpace X] [T2Space X] [PreconnectedSpace X] [T2Space Y]` and `ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (⊤ : WithTop ℕ∞) f` — all derivable from the axiom signature (`ConnectedSpace → PreconnectedSpace` is `Mathlib`; `ω ≥ ⊤` so `hf.of_le le_top` strips analyticity down to `C^∞`). The conclusion is exactly: for every `y₀ : Y`, the function `Φ : Y → ℕ`, `Φ y := Finset.sum (finite_fiber y).toFinset (mapAnalyticOrderAt f)`, is **eventually equal** to `Φ y₀` near `y₀` — i.e. `Φ` is locally constant.
 
 3. **Promote local-constancy to global constancy via `ConnectedSpace Y`.** Wrap `Φ` as `IsLocallyConstant Φ` (Mathlib `IsLocallyConstant.iff_eventually_const` / direct construction from Step 2). Then apply `IsLocallyConstant.apply_eq_of_isPreconnected` (`Mathlib/Topology/LocallyConstant/Basic.lean:326`) — or, more cleanly, package `Φ` as a `LocallyConstant Y ℕ` and use `LocallyConstant.apply_eq_of_preconnectedSpace` (`Mathlib/Topology/LocallyConstant/Basic.lean:330`) / `LocallyConstant.eq_const` (line 334), both of which need only `PreconnectedSpace Y` (immediate from `ConnectedSpace Y`). Define `d := Φ y₀` for any basepoint `y₀` (exists by `Nonempty Y`, which follows from `ConnectedSpace Y`).
 
@@ -53,10 +53,10 @@ Following **Forster, *Lectures on Riemann Surfaces*, Ch. I §4 (Theorem 4.24, "t
 **Next discrete deliverable.** **Step 3: ship a `weightedFiberSum_constant_of_contMDiff` lemma** in `Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean` (between lines 1366 and `end Compatibility`) that combines `weightedFiberConservation_of_contMDiff` (already there, line 1199) with `IsLocallyConstant.apply_eq_of_isPreconnected` (`Mathlib/Topology/LocallyConstant/Basic.lean:326`), giving the clean statement
 ```lean
 theorem weightedFiberSum_constant_of_contMDiff
-    [IsManifold 𝓘(ℂ) ω X] [IsManifold 𝓘(ℂ) ω Y]
+    [IsManifold 𝓘(ℂ, ℂ) ω X] [IsManifold 𝓘(ℂ, ℂ) ω Y]
     [CompactSpace X] [T2Space X] [ConnectedSpace X]
     [T2Space Y] [PreconnectedSpace Y]
-    {f : X → Y} (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) f)
+    {f : X → Y} (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (⊤ : WithTop ℕ∞) f)
     (hnc : ¬ ∃ y₀ : Y, ∀ x, f x = y₀) :
     ∃ d : ℕ, ∀ y : Y,
       Finset.sum (isHolomorphic_finite_fiber … hnc y).toFinset
@@ -86,3 +86,5 @@ This is ~40 LOC and is the only piece of project infrastructure missing for the 
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_BranchLocus.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

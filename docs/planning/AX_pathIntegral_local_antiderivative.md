@@ -8,12 +8,12 @@
 ```lean
 axiom AX_pathIntegral_local_antiderivative (X : Type*) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (form : HolomorphicOneForm X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (P₀ P : X) (form : HolomorphicOneForm X) :
     HasDerivAt
       (fun z : ℂ =>
-        pathIntegralBasepointFunctional X P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
-      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
-      ((extChartAt 𝓘(ℂ) P) P)
+        pathIntegralBasepointFunctional X P₀ ((extChartAt 𝓘(ℂ, ℂ) P).symm z) form)
+      (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
+      ((extChartAt 𝓘(ℂ, ℂ) P) P)
 ```
 
 **Why it's an axiom right now:** This is the Fundamental Theorem of Calculus for path integrals of holomorphic 1-forms, localised to a single chart at the upper endpoint. It binds `pathIntegralBasepointFunctional` to the cocycle-predicate content of `HolomorphicOneForm` (`Jacobians/RiemannSurface/OneForm.lean:118–142`), preventing the trivial-zero functional from silently satisfying downstream smoothness claims (`AX_ofCurve_contMDiff`) and injectivity (`AX_ofCurve_inj`). Per the docstring at lines 103–115, this axiom is paired with `pathIntegralBasepointFunctional` to make the pair load-bearing. The Lean realisation gap is the `sorry` in `Jacobians/Bridge/KirovLineIntegral.lean:357–364` (`kirovBackedFunctional_local_antiderivative`).
@@ -31,7 +31,7 @@ Mathematical content:
 
 Project-side discharge (Lean tactic plan):
 
-1. **Discharge `pathIntegralBasepointFunctional` first** to a `def` per `pathIntegralBasepointFunctional.md` (redirect to `Jacobians.Bridge.kirovBackedFunctional`). This unblocks the FTC statement.
+1. **Discharge `pathIntegralBasepointFunctional` first** to a `def` per `pathIntegralBasepointFunctional.md` (redirect to `Jacobians.Bridge.kirovBackedFunctional`). This unblocks the FTC statement. *(Confirmed canonical route per cross-plan patch 2026-06-03: the Kirov bridge is the unified path-integration backend; no parallel `pathIntegralAnalyticArc` exists.)*
 
 2. **Build missing infrastructure (`CauchyTheorem_local`).** Kirov's library needs local exactness/Cauchy's theorem for complex line integrals. Prove that for a holomorphic 1-form, the integral over any closed loop in a convex chart ball is zero, implying local path independence.
 
@@ -52,12 +52,12 @@ Project-side discharge (Lean tactic plan):
    ```lean
    theorem AX_pathIntegral_local_antiderivative (X : Type*) [TopologicalSpace X]
        [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (form : HolomorphicOneForm X) :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] (P₀ P : X) (form : HolomorphicOneForm X) :
        HasDerivAt
          (fun z : ℂ =>
-           pathIntegralBasepointFunctional X P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
-         (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
-         ((extChartAt 𝓘(ℂ) P) P) :=
+           pathIntegralBasepointFunctional X P₀ ((extChartAt 𝓘(ℂ, ℂ) P).symm z) form)
+         (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
+         ((extChartAt 𝓘(ℂ, ℂ) P) P) :=
      Jacobians.Bridge.kirovBackedFunctional_local_antiderivative P₀ P form
    ```
 
@@ -85,3 +85,7 @@ Project-side discharge (Lean tactic plan):
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_pathIntegral_local_antiderivative.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Path-integration backend unified on the Kirov bridge; scratch `pathIntegralAnalyticArc` route retired.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

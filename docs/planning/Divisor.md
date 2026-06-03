@@ -2,7 +2,7 @@
 
 **Location:** `Jacobians/RiemannSurface/LineBundle.lean:51`
 **Route:** mathlib-now &nbsp;&nbsp; **Effort:** 1 &nbsp;&nbsp; **Est:** < 15 minutes, ~5 LOC
-**Blocked by:** `Divisor.instAddCommGroup` (`Jacobians/RiemannSurface/LineBundle.lean:56`)
+**Blocked by:** *(none — this is the anchor; the `abbrev Divisor X := FreeAbelianGroup X` definition depends only on Mathlib's `FreeAbelianGroup`)*
 
 **Statement (verbatim):**
 ```lean
@@ -11,7 +11,7 @@ surface `X`. Classically: formal `ℤ`-combinations of points of `X`.
 Forms an `AddCommGroup` via the declared instance below. -/
 axiom Divisor (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Type
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Type
 ```
 
 **Why it's an axiom right now:** This is pure bookkeeping: divisors are classically formal `ℤ`-linear combinations of points, i.e. the free abelian group on the underlying set. The file docstring (`Jacobians/RiemannSurface/LineBundle.lean:20`) already names the planned encoding (`FreeAbelianGroup X`). It is left as `axiom` only because the file groups all line-bundle stubs together and `LineBundle`/`H¹` need genuine sheaf-cohomology infrastructure; `Divisor` itself is trivially dischargeable today via Mathlib's `FreeAbelianGroup`.
@@ -28,7 +28,7 @@ axiom Divisor (X : Type*) [TopologicalSpace X] [T2Space X]
    ```lean
    abbrev Divisor (X : Type u) [_ : TopologicalSpace X] [_ : T2Space X]
        [_ : CompactSpace X] [_ : ConnectedSpace X] [_ : ChartedSpace ℂ X]
-       [_ : IsManifold 𝓘(ℂ) ω X] : Type u := FreeAbelianGroup X
+       [_ : IsManifold 𝓘(ℂ, ℂ) ω X] : Type u := FreeAbelianGroup X
    ```
    *Note 1:* Using `abbrev` instead of `def` is strictly required here so Lean 4's typeclass resolution (e.g., finding `AddCommGroup`) fires transparently through the alias without additional boilerplate.
    *Note 2:* Because the RHS is purely algebraic (`FreeAbelianGroup X`), the geometric typeclasses passed to `Divisor` are unused. You must bind them with `_ :` to avoid Lean 4 linter errors.
@@ -60,5 +60,9 @@ axiom Divisor (X : Type*) [TopologicalSpace X] [T2Space X]
 - If raising the return universe from `Type` to `Type u` cascades into universe-polymorphism errors at `abelJacobiDiv` or in the `AbelJacobiMap.lean` quotient constructions (`Jacobians/Axioms/AbelJacobiMap.lean:317–460` uses `ULift` heavily), escalate: the fix may require coordinated universe annotations across `Divisor` / `LineBundle` / `Jacobian`.
 - If a downstream file previously pattern-matched on `Divisor X` as an opaque type and breaks due to `abbrev` revealing the `FreeAbelianGroup` structure, escalate to revert to `def` and manually implement all `AddCommGroup` boilerplate instances.
 
+**Cross-plan patch (2026-06-03):** Removed `Divisor.instAddCommGroup` from `Blocked by` to break the mutual-no-anchor cycle flagged in `_vetting/CROSS_PLAN_CONSISTENCY.md` Finding 3; the `abbrev Divisor X := FreeAbelianGroup X` is the true anchor and has no internal plan prerequisite.
+
 ---
 **Vetting trail.** Critique: `_vetting/Divisor.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

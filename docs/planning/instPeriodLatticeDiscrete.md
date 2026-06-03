@@ -15,7 +15,7 @@ This is one half of the data required by Mathlib's `IsZLattice`-based
 vector space is automatically discrete. -/
 axiom instPeriodLatticeDiscrete (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     DiscreteTopology (periodLatticeInBasis X x₀ b)
 ```
@@ -127,3 +127,5 @@ short corollaries.
 
 ---
 **Vetting trail.** Critique: `_vetting/instPeriodLatticeDiscrete.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

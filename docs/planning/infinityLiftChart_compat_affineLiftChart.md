@@ -2,7 +2,7 @@
 
 **Location:** `Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean:252`
 **Route:** mathlib-now &nbsp;&nbsp; **Effort:** 6 &nbsp;&nbsp; **Est:** ~1 focused week, ~200–300 LOC, entirely in `Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean`
-**Blocked by:** none
+**Blocked by:** none (and the symmetric plan `affineLiftChart_compat_infinityLiftChart` no longer depends on this one either — both directions are now siblings discharged independently via 4-case algebra; see the cross-plan patch note below)
 
 **Statement (verbatim):**
 ```lean
@@ -53,3 +53,5 @@ This is the symmetric direction of the transition between the affine and infinit
 
 ---
 **Vetting trail.** Critique: `_vetting/infinityLiftChart_compat_affineLiftChart.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Decoupled from the symmetric direction; the `transition_fderiv_mul` shortcut was retracted as circular, so this direction is now discharged independently via 4-case algebra.

@@ -10,7 +10,7 @@
 `deg D := ∑ n_P`. An `AddMonoidHom` `Divisor X →+ ℤ`. -/
 axiom Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ ℤ
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ ℤ
 ```
 
 **Why it's an axiom right now:** The degree map sums coefficients: `(∑ n_P · P) ↦ ∑ n_P`. As a universal-property construction it is exactly the lift of the constant function `(_ : X) ↦ (1 : ℤ)` along `FreeAbelianGroup.lift`. It is axiomatized only because `Divisor X` is opaque (`Jacobians/RiemannSurface/LineBundle.lean:51`); once `Divisor X = FreeAbelianGroup X` lands, the degree is a one-line application of Mathlib's universal lift.
@@ -33,7 +33,7 @@ axiom Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
    ```lean
    noncomputable def Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ ℤ :=
+       [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ ℤ :=
      FreeAbelianGroup.lift (fun _ : X => (1 : ℤ))
    ```
    `noncomputable` because `FreeAbelianGroup.lift` is noncomputable in Mathlib. The signature is unchanged.
@@ -54,3 +54,5 @@ axiom Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
 **Risk / escalation triggers**
 - If `Divisor` was sealed `@[irreducible]` in step 1 of [`Divisor.md`](Divisor.md), `FreeAbelianGroup.lift` will not synthesize on `Divisor X` until unsealed; use `unseal Divisor in` or escalate to drop the seal.
 - If a downstream consumer (e.g. `Jacobians/Axioms/RiemannRoch.lean`) was implicitly relying on `Divisor.deg` being opaque (so its `simp` set did not unfold), expect new `simp` lemmas to leak; if proofs break, the fix is to mark the new `def` `@[irreducible]` rather than the type. Escalate only if that workaround fails to restore downstream builds.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

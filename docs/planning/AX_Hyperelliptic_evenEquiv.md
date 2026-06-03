@@ -48,3 +48,7 @@ Mirror of `AX_Hyperelliptic_oddEquiv.md`, with the parity hypothesis flipped.
 - If `Hyperelliptic` cannot land as the parity-dispatched `def` (typeclass-on-`dite` issue re-triggers), this recipe is blocked at step 1; escalate to the `Hyperelliptic.md` recipe's `Sum`-encoded fallback and rewrite this discharge as the canonical injection-into-`inr` homeomorphism.
 - If a future refactor changes `HyperellipticEven H h := HyperellipticEvenProj H` to a fresh quotient (e.g. dropping the abbreviation in favor of a direct wrapper), revisit step 2 — the `Homeomorph.refl` becomes a non-trivial homeomorphism through that wrapper.
 - If `Hyperelliptic` adds an explicit parity argument, this homeomorphism becomes `rfl` directly; trivial but downstream signatures may need updating.
+
+**Note (signature pinning, 2026-06-03):** This axiom remains a topological `Homeomorph` (`≃ₜ`), *not* a biholomorphism. Cast-based homeomorphisms across the parity `dite` are already nontrivial; layering analytic structure on top here would over-couple this recipe with manifold infrastructure. Downstream consumers that need analytic transport (notably `AX_Hyperelliptic_genus`) must promote this `≃ₜ` to a biholomorphism *locally* at their use-site via a manifold-transport lemma — they may not assume an analytic upgrade lives in this base axiom.
+
+**Cross-plan patch (2026-06-03):** Equivalence signature pinned as Homeomorph (`≃ₜ`); `AX_Hyperelliptic_genus` promotes locally via manifold transport rather than changing this base signature.

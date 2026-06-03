@@ -4,12 +4,14 @@
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 10 &nbsp;&nbsp; **Est:** Multi-month epic (multi-year for full Mathlib upstreaming). Requires 1000s of LOC to build UCT mapping cones, cap products, orientability, fundamental classes, and finitely generated homology for compact manifolds.
 **Blocked by:** `intersectionForm` (and transitively `AX_AnalyticCycleBasis`, `AX_RiemannBilinear` — see `intersectionForm.md`). Used by `AX_IntersectionForm_nondeg` (theorem already in this file at `Jacobians/Axioms/IntersectionForm.lean:101-111`) and by `AX_AnalyticCycleBasis` (`Jacobians/Axioms/AnalyticCycleBasis.lean:257`, via the symplectic-basis classification).
 
+**Top-level theorem status:** This axiom remains a top-level statement and will be discharged as a top-level `theorem` built on the carrier `def intersectionForm` (provided by `intersectionForm.md`). It is **not** absorbed into a bundled typeclass; the companion-axiom plan structure is preserved because the property is more concrete and decomposable as its own theorem.
+
 **Statement (verbatim):**
 ```lean
 axiom AX_IntersectionForm_perfect
     {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) :
     Function.Bijective (intersectionForm x₀)
 ```
 
@@ -43,7 +45,7 @@ Because proving Poincaré Duality, UCT, and finite generation from scratch is an
    theorem AX_IntersectionForm_perfect
        {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) :
        Function.Bijective (intersectionForm x₀) := by
      -- Retrieve the AddEquivs from the factored-out axioms
      let PD := AX_PoincareDuality x₀
@@ -84,5 +86,9 @@ Because proving Poincaré Duality, UCT, and finite generation from scratch is an
 - **Route re-scoped via Sub-plans:** Factored out Poincaré Duality, UCT, and Finite Generation of Homology into their own formal sub-axioms, strictly bounding this file's scope to the algebraic UCT-to-Intersection-Form deduction as recommended.
 - **Lean script corrected:** Replaced `hEv.comp hPD` and `Function.Bijective_comp` with proper use of `AddEquiv.trans`, which correctly handles composition and trivializes the `.bijective` goal.
 
+**Cross-plan patch (2026-06-03):** Aligned with companion axioms: `intersectionForm` discharges only the carrier; `_alternating` / `_perfect` remain top-level theorems.
+
 ---
 **Vetting trail.** Critique: `_vetting/AX_IntersectionForm_perfect.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

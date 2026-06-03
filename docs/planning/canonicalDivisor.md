@@ -11,7 +11,7 @@ represented by a distinguished divisor class `K : Divisor X` up to
 linear equivalence. -/
 axiom canonicalDivisor (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X
 ```
 
 **Why it's an axiom right now:** Classically `K = div(ω)` for any nonzero meromorphic 1-form `ω` on `X`. Currently, this is stated as a `Type`-valued data axiom, which is problematic for definitional equality and typeclass inference. Discharging it requires immense missing Mathlib infrastructure: a robust API for meromorphic 1-forms (handling poles properly without pointwise junk values), the Identity Theorem to guarantee a finite number of zeros/poles on a compact surface, and the Riemann Existence Theorem (or Riemann-Roch) to guarantee a non-zero form actually exists.
@@ -61,3 +61,5 @@ axiom canonicalDivisor (X : Type*) [TopologicalSpace X] [T2Space X]
 
 ---
 **Vetting trail.** Critique: `_vetting/canonicalDivisor.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

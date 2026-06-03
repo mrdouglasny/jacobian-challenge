@@ -14,10 +14,10 @@ The forward map (going `HyperellipticOdd → ℂ`) is `(x, y) ↦ y / x^{g+1}`
 on the affine part where `x ≠ 0`, extended by `infty ↦ 0`. The inverse
 map is `infinityInverseMap` extended by `0 ↦ infty`. -/
 axiom infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    OpenPartialHomeomorph (HyperellipticOdd H h) ℂ
+    PartialHomeomorph (HyperellipticOdd H h) ℂ
 ```
 
-**Why it's an axiom right now:** The docstring (`InfinityChart.lean:51–57`) lays out both the forward map (`(x, y) ↦ y / x^{g+1}`, `infty ↦ 0`) and the inverse map (`infinityInverseMap` extended by `0 ↦ infty`) — but assembling them into a fully-bundled `OpenPartialHomeomorph` requires (i) the inverse map itself, which is currently axiomatized as `infinityInverseMap` at `InfinityChart.lean:48`, and (ii) the continuity of the forward `y / x^{g+1}` map at `∞` *as a function on `OnePoint (HyperellipticAffine H)`*, which is not packaged anywhere yet. Load-bearing pieces: (i) `infinityInverseMap` and its analytic data (`someRadius`, the `t = 0 ↦ ∞` extension); (ii) `OnePoint.continuous_iff_continuousAt_infty` (`.lake/packages/mathlib/Mathlib/Topology/Compactification/OnePoint/Basic.lean:479`) for verifying continuity of the forward map at the added point; (iii) `OnePoint.isOpenEmbedding_coe` (`.lake/packages/mathlib/Mathlib/Topology/Compactification/OnePoint/Basic.lean:272`) for pulling the affine-part formula through the embedding. This is the same OA2 "construct the `PartialHomeomorph` by hand" task flagged in the file header `InfinityChart.lean:24–26`.
+**Why it's an axiom right now:** The docstring (`InfinityChart.lean:51–57`) lays out both the forward map (`(x, y) ↦ y / x^{g+1}`, `infty ↦ 0`) and the inverse map (`infinityInverseMap` extended by `0 ↦ infty`) — but assembling them into a fully-bundled `PartialHomeomorph` requires (i) the inverse map itself, which is currently axiomatized as `infinityInverseMap` at `InfinityChart.lean:48`, and (ii) the continuity of the forward `y / x^{g+1}` map at `∞` *as a function on `OnePoint (HyperellipticAffine H)`*, which is not packaged anywhere yet. Load-bearing pieces: (i) `infinityInverseMap` and its analytic data (`someRadius`, the `t = 0 ↦ ∞` extension); (ii) `OnePoint.continuous_iff_continuousAt_infty` (`.lake/packages/mathlib/Mathlib/Topology/Compactification/OnePoint/Basic.lean:479`) for verifying continuity of the forward map at the added point; (iii) `OnePoint.isOpenEmbedding_coe` (`.lake/packages/mathlib/Mathlib/Topology/Compactification/OnePoint/Basic.lean:272`) for pulling the affine-part formula through the embedding. This is the same OA2 "construct the `PartialHomeomorph` by hand" task flagged in the file header `InfinityChart.lean:24–26`.
 
 **`Gemini critique addressed:`**
 - **Effort recalibration**: Bumped effort to 7 and LOC to ~400, recognizing the heavy topological filter work required for limits at infinity.
@@ -60,12 +60,12 @@ Follow `docs/hyperelliptic-odd-atlas-plan.md` §OA2 (lines 60–98): "* **Files.
 
 7. **Verify `Set.LeftInvOn` / `RightInvOn`.** Use `infinityInverseMap_x_eq`, `infinityInverseMap_y_eq` from `InfinityInverse.lean`: by construction `infinityForward (infinityBackward H h t) = t` for `0 < ‖t‖ < r`, and `infinityBackward H h (infinityForward p) = p` for $p$ in the affine sub-source (via formal series being mutually inverse, e.g. `FormalMultilinearSeries.leftInv_eq_rightInv` at `.lake/packages/mathlib/Mathlib/Analysis/Analytic/Inverse.lean:283`). Extend by $0 \leftrightarrow \infty$: trivial from the `if t = 0` branching in `infinityBackward`.
 
-8. **Bundle into `OpenPartialHomeomorph (HyperellipticOdd H h) ℂ`.** Mathlib's `OpenPartialHomeomorph` (`.lake/packages/mathlib/Mathlib/Topology/OpenPartialHomeomorph/Basic.lean`) requires: `toPartialEquiv`, `open_source`, `open_target`, `continuousOn_toFun`, `continuousOn_invFun`. Fill these from Steps 2–7.
+8. **Bundle into `PartialHomeomorph (HyperellipticOdd H h) ℂ`.** Mathlib's `PartialHomeomorph` (`.lake/packages/mathlib/Mathlib/Topology/PartialHomeomorph/Basic.lean`) requires: `toPartialEquiv`, `open_source`, `open_target`, `continuousOn_toFun`, `continuousOn_invFun`. Fill these from Steps 2–7.
 
 9. **Discharge.** In `InfinityChart.lean:58–59`, replace
    ```lean
    axiom infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) :
-       OpenPartialHomeomorph (HyperellipticOdd H h) ℂ
+       PartialHomeomorph (HyperellipticOdd H h) ℂ
    ```
    with the `noncomputable def infinityChart ... := { toPartialEquiv := ..., open_source := ..., open_target := ..., continuousOn_toFun := ..., continuousOn_invFun := ... }` body of Step 8. Same signature, no downstream type changes.
 
@@ -84,6 +84,8 @@ Follow `docs/hyperelliptic-odd-atlas-plan.md` §OA2 (lines 60–98): "* **Files.
 **Risk / escalation triggers**
 - If `infinityInverseMap`'s discharge produced a *non-uniform* radius (one depending on `‖H.f.leadingCoeff‖`), Step 4's `source` and `target` must thread that radius through cleanly; if it turns out the radius cannot be made `H`-uniform, **escalate** — the chart may need to take an extra `r` argument, changing the signature.
 - If establishing the algebraic cocompact limit bounding for $|y / x^{g+1}|$ requires rewriting significant parts of Mathlib's `Filter.cocompact` API over subsets of $\mathbb{C}^2$, **escalate** before writing >300 lines of general topology boilerplate.
-- If the proof requires changing the *target type* from `OpenPartialHomeomorph` to `PartialHomeomorph` (older Mathlib API), do **not** silently rewrite — the six dependent axioms (`infinityChart_mem_source`, `*_compat_*`) use `.source`, `.symm.trans`, and `.lift_openEmbedding` in ways that depend on the precise `OpenPartialHomeomorph` API. Escalate.
+- If the proof requires changing the *target type* from `PartialHomeomorph` to a different bundle (e.g. an older Mathlib API), do **not** silently rewrite — the six dependent axioms (`infinityChart_mem_source`, `*_compat_*`) use `.source`, `.symm.trans`, and `.lift_openEmbedding` in ways that depend on the precise `PartialHomeomorph` API. Escalate.
 ---
 **Vetting trail.** Critique: `_vetting/infinityChart.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Namespace standardised on Mathlib's `PartialHomeomorph` (the stale `OpenPartialHomeomorph` references were hallucinated).

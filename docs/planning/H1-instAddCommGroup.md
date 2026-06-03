@@ -8,7 +8,7 @@
 ```lean
 axiom H1.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
     AddCommGroup (H1 L)
 attribute [instance] H1.instAddCommGroup
 ```
@@ -29,7 +29,7 @@ attribute [instance] H1.instAddCommGroup
    ```lean
    instance H1.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
        AddCommGroup (H1 L) := inferInstance
    ```
    The `attribute [instance]` line at `:112` becomes redundant and should be deleted.
@@ -57,3 +57,5 @@ attribute [instance] H1.instAddCommGroup
 
 ---
 **Vetting trail.** Critique: `_vetting/H1-instAddCommGroup.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

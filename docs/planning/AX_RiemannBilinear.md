@@ -19,7 +19,7 @@ automatically symmetric and has positive-definite imaginary part —
 the content of Riemann's second bilinear relation. -/
 axiom AX_RiemannBilinear {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) :
     ∃ (b : AnalyticCycleBasis X x₀)
       (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
       (τ : SiegelUpperHalfSpace (genus X)),
@@ -211,3 +211,5 @@ manipulation in Steps 3–8.
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_RiemannBilinear.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

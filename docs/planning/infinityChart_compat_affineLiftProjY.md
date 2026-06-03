@@ -25,7 +25,7 @@ axiom infinityChart_compat_affineLiftProjY
 
 Follow `docs/hyperelliptic-odd-atlas-plan.md` §OA2 / OA3 (lines 105–115): "* `affineProjY × infinity` — composition of the above two." Mathematical reference: chain rule for `ContDiffOn` (`Mathlib.Analysis.Calculus.ContDiff.Basic` `ContDiffOn.comp`); rational-function analyticity (`Mathlib.Analysis.Calculus.ContDiff.Polynomial`).
 
-1. **Prerequisites.** Both `infinityChart` and `infinityInverseMap` real (per `docs/planning/infinityChart.md`, `docs/planning/infinityInverseMap.md`). Available API: `infinityInverseMap_analyticOn`, `infinityInverseMap_y_eq`, `someRadius`, `OpenPartialHomeomorph.lift_openEmbedding_apply` (`.lake/packages/mathlib/Mathlib/Topology/OpenPartialHomeomorph/Constructions.lean:388`), and `affineChartProjY` (`OddAtlas/AffineChart.lean:291`).
+1. **Prerequisites.** Both `infinityChart` and `infinityInverseMap` real (per `docs/planning/infinityChart.md`, `docs/planning/infinityInverseMap.md`). Available API: `infinityInverseMap_analyticOn`, `infinityInverseMap_y_eq`, `someRadius`, `PartialHomeomorph.lift_openEmbedding_apply` (`.lake/packages/mathlib/Mathlib/Topology/PartialHomeomorph/Constructions.lean:388`), and `affineChartProjY` (`OddAtlas/AffineChart.lean:291`).
 
 2. **Compute the transition explicitly.** Parallel to Step 2 of `infinityChart_compat_affineLiftProjX.md` but with `affineChartProjY` (which projects to `y`):
    ```lean
@@ -62,3 +62,5 @@ Follow `docs/hyperelliptic-odd-atlas-plan.md` §OA2 / OA3 (lines 105–115): "* 
 - If `infinityInverseMap_y_eq` from the `infinityInverseMap` recipe (Step 5 of that recipe is non-binding) does *not* produce the explicit form `α⁻¹ · t^{−(2g+1)} · ŷ(t)` cleanly, escalate to that recipe — the local fix here would be to inline the formula, which duplicates work and risks divergence with the X-direction proof.
 - The `Complex.cpow c (1/(2g+1 : ℂ))` choice in Step 4 picks a *specific* `(2g+1)`-th root of `c`; if that choice is incompatible with the choice made inside `infinityInverseMap` (Step 2 of that recipe), the formula in Step 2 here will be off by a `(2g+1)`-th root of unity, and Step 5's `ContDiffOn.congr` will fail. **Escalate** to coordinate the root choice between this recipe and the `infinityInverseMap` recipe before discharge.
 - Branch-point regularity. `affineChartProjY` is valid only on `smoothLocusX` (where `f'(x) ≠ 0`); if the recipe of `infinityChart` builds a source that intersects `smoothLocusY \ smoothLocusX` in a way that ignores branch-point regularity, the composite source may be empty for *some* `p`. This is acceptable (the chart compat is trivially `ContDiffOn ℂ ω _ ∅`), but if it happens for *all* `p ∈ smoothLocusX`, the `IsManifold` instance has no content at branch points — escalate before silently shipping.
+
+**Cross-plan patch (2026-06-03):** Namespace standardised on Mathlib's `PartialHomeomorph` (the stale `OpenPartialHomeomorph` references were hallucinated).

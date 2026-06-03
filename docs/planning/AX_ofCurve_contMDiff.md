@@ -8,7 +8,7 @@
 ```lean
 axiom AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P : X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (P : X) :
     ContMDiff 𝓘(ℂ, ℂ) (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
       (ofCurveImpl X P)
 ```
@@ -31,13 +31,13 @@ Project-side discharge:
 
 3. **Reduce to per-component smoothness.** Since the codomain is `Fin (genus X) → ℂ` with the product manifold structure, `ContMDiff` of a function into it is equivalent to `ContMDiff` of each component (Mathlib: `contMDiff_pi`). Each component is `fun Q => pathIntegralBasepointFunctional X P Q (jacobianBasis X i)`, i.e. the `i`-th basis form evaluated at the path integral.
 
-4. **Per-component, work in the chart at the upper endpoint `Q`.** A function `Y → ℂ` is `ContMDiff 𝓘(ℂ) 𝓘(ℂ, ℂ) ω` iff its chart-pullback `z ↦ f((φ_Q).symm z)` is analytic in `z` for each `Q`. By `AX_pathIntegral_local_antiderivative` (`Jacobians/Axioms/AbelJacobiMap.lean:116–123`), that chart-pullback has derivative `(jacobianBasis X i).coeff Q (φ_Q Q)` at `z = φ_Q Q` — a `HasDerivAt` statement.
+4. **Per-component, work in the chart at the upper endpoint `Q`.** A function `Y → ℂ` is `ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω` iff its chart-pullback `z ↦ f((φ_Q).symm z)` is analytic in `z` for each `Q`. By `AX_pathIntegral_local_antiderivative` (`Jacobians/Axioms/AbelJacobiMap.lean:116–123`), that chart-pullback has derivative `(jacobianBasis X i).coeff Q (φ_Q Q)` at `z = φ_Q Q` — a `HasDerivAt` statement.
 
 5. **Promote `HasDerivAt` at a single point to `AnalyticOn` on a chart-target neighbourhood.** This is the load-bearing step. Strategies:
    - **5a.** The `HasDerivAt` statement in the axiom (line 119–123) gives the derivative with respect to the *upper limit* `Q`. To get differentiability on the entire chart, we leave the basepoint `P` globally fixed and evaluate the FTC axiom at varying upper endpoints `Q'` inside the chart neighborhood. `IsHolomorphicOneFormCoeff` (`Jacobians/RiemannSurface/OneForm.lean:69–73`) provides analyticity of the `coeff` family on the whole chart target, so this procedure gives us a derivative `coeff ∘ φ` continuously on the chart target. We then use `Complex.analyticOn_of_differentiableOn` (Mathlib: `DifferentiableOn → AnalyticOn` on opens in ℂ via Morera/Goursat).
    - **5b.** Alternatively, use the Kirov-bridge realisation: if Route A of `pathIntegralBasepointFunctional.md` is taken (redirect to `Jacobians.Bridge.kirovBackedFunctional`), the functional unfolds to `Vendor.Kirov.lineIntegral ∘ bridgeForm`, and `Vendor.Kirov.lineIntegral`'s analyticity properties (look up in `Jacobians/Vendor/Kirov/LineIntegral.lean`) give the chart-pullback smoothness directly.
 
-6. **Combine.** Per-component analyticity on the chart target gives `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, ℂ) ω` per component. `contMDiff_pi` upgrades this to the product codomain. The constant subtraction + `QuotientAddGroup.mk'` + `ULift.up` finishes per step 2.
+6. **Combine.** Per-component analyticity on the chart target gives `ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω` per component. `contMDiff_pi` upgrades this to the product codomain. The constant subtraction + `QuotientAddGroup.mk'` + `ULift.up` finishes per step 2.
 
 7. **Lean tactic sketch:**
    ```lean
@@ -83,8 +83,10 @@ Project-side discharge:
 
 **Risk / escalation triggers**
 - The `HasDerivAt`-at-a-single-point → `AnalyticOn`-on-chart-target step (5a/5b) is the chief hidden complication. If Mathlib at this pin lacks a one-step `Complex.analyticOn_of_differentiableOn`, the project may need a vendored Morera-style helper — escalate before adding a new global axiom.
-- The chart-pullback equivalence (step 7) for `ContMDiffAt` on a charted space with `𝓘(ℂ)` model is delicate; if the project's existing examples (e.g., `Jacobians.Vendor.Kirov.pullbackForm` at `Jacobians/Vendor/Kirov/HolomorphicForms.lean:122–202`) use a non-trivial alternative pattern (`contMDiffAt_hom_bundle` at line 130), follow that pattern rather than inventing a new one. Be prepared to write a custom bridging lemma if Mathlib lacks the exact `contMDiffAt_iff_analyticAt_extChart` theorem for index `ω`.
+- The chart-pullback equivalence (step 7) for `ContMDiffAt` on a charted space with `𝓘(ℂ, ℂ)` model is delicate; if the project's existing examples (e.g., `Jacobians.Vendor.Kirov.pullbackForm` at `Jacobians/Vendor/Kirov/HolomorphicForms.lean:122–202`) use a non-trivial alternative pattern (`contMDiffAt_hom_bundle` at line 130), follow that pattern rather than inventing a new one. Be prepared to write a custom bridging lemma if Mathlib lacks the exact `contMDiffAt_iff_analyticAt_extChart` theorem for index `ω`.
 - If `AX_pathIntegral_local_antiderivative` is *not* yet discharged (still an axiom), this proof can still be written using the axiom form (does *not* reduce axiom count yet, but cleans the dependency graph). Note: in that intermediate state, axiom-count remains unchanged because we replace one axiom with another's hypothesis.
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_ofCurve_contMDiff.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

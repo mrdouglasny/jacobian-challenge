@@ -9,7 +9,7 @@
 /-- Divisors form an additive commutative group. -/
 axiom Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : AddCommGroup (Divisor X)
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : AddCommGroup (Divisor X)
 attribute [instance] Divisor.instAddCommGroup
 ```
 
@@ -19,14 +19,16 @@ attribute [instance] Divisor.instAddCommGroup
 
 1. Discharge prerequisite. Land [`Divisor.md`](Divisor.md): replace `axiom Divisor X` (`LineBundle.lean:51`) with `def Divisor X := FreeAbelianGroup X`.
 
-2. Replace the axiom with an instance. In `Jacobians/RiemannSurface/LineBundle.lean:56`, drop all the mathematically irrelevant topological and manifold typeclasses (which needlessly clutter inference caching; the group structure only depends on `X : Type*`). Replace the axiom block:
+2. Replace the axiom with an instance. In `Jacobians/RiemannSurface/LineBundle.lean:56`, retain the full set of topological and manifold instance binders required by the `Divisor X` signature (see `Divisor.md`; without them the return type `AddCommGroup (Divisor X)` will not elaborate). Replace the axiom block:
    ```lean
    axiom Divisor.instAddCommGroup {X : Type*} [...] : AddCommGroup (Divisor X)
    attribute [instance] Divisor.instAddCommGroup
    ```
    with:
    ```lean
-   instance Divisor.instAddCommGroup {X : Type*} : AddCommGroup (Divisor X) :=
+   instance Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
+       [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+       [IsManifold 𝓘(ℂ, ℂ) ω X] : AddCommGroup (Divisor X) :=
      inferInstanceAs (AddCommGroup (FreeAbelianGroup X))
    ```
    The `inferInstanceAs` succeeds because Mathlib's `FreeAbelianGroup.addCommGroup` (in `Mathlib.GroupTheory.FreeAbelianGroup`) is registered as an instance and `Divisor X` unfolds.
@@ -41,7 +43,6 @@ attribute [instance] Divisor.instAddCommGroup
 - `Jacobians/RiemannSurface/LineBundle.lean` — replace `axiom Divisor.instAddCommGroup` + the trailing `attribute [instance] Divisor.instAddCommGroup` (lines 56–59) with a single `instance Divisor.instAddCommGroup` definition (or remove it entirely if relying solely on `deriving AddCommGroup` at the definition site).
 
 **Gemini critique addressed:**
-- Removed the "junk binders" (manifold/topology typeclasses) from the proposed instance signature, as formal sums depend only on `X : Type*`.
 - Removed pseudocode references to a non-existent Lean 4 `unseal` command, replacing them with idiomatic advice to use `deriving AddCommGroup` directly on the definition if an opaque API is desired.
 
 **Acceptance**
@@ -54,5 +55,9 @@ attribute [instance] Divisor.instAddCommGroup
 - If `Divisor` ends up being marked `@[irreducible]` and the instance synthesis fails, escalate only if applying `deriving AddCommGroup` to the `Divisor` definition also fails.
 - If a future redesign turns `Divisor X` into a quotient or a sigma-type rather than `FreeAbelianGroup X`, this recipe needs to be rewritten with the actual `AddCommGroup` construction; escalate before changing the encoding.
 
+**Cross-plan patch (2026-06-03):** Restored the full 6-binder implicit instance context (`TopologicalSpace`, `T2Space`, `CompactSpace`, `ConnectedSpace`, `ChartedSpace ℂ`, `IsManifold 𝓘(ℂ, ℂ) ω`) on the `Divisor.instAddCommGroup` signature to match the `Divisor` abbrev binders, fixing the elaboration mismatch flagged in `_vetting/CROSS_PLAN_CONSISTENCY.md` Finding 4.
+
 ---
 **Vetting trail.** Critique: `_vetting/Divisor-instAddCommGroup.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

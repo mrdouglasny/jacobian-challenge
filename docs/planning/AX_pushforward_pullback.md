@@ -9,9 +9,9 @@
 /-- **Axiom.** The composition "pullback then pushforward" multiplies by degree. -/
 axiom AX_pushforward_pullback {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
-    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
+    [IsManifold 𝓘(ℂ, ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f)
     (P : Jacobian Y) :
     pushforwardImpl X Y f hf (pullbackImpl X Y f hf P) = (degreeImpl f hf) • P
 ```
@@ -49,10 +49,10 @@ Goal (target lemma, to be added either next to `pushforwardOneForm` in `Jacobian
 ```lean
 theorem oneForm_trace_pullback
     {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X]
     {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
-    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+    [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ, ℂ) ω Y]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f) :
     (pushforwardOneForm f hf).comp (pullbackOneForm f hf)
       = (degreeImpl f hf : ℂ) • LinearMap.id
 ```
@@ -96,7 +96,7 @@ Once layer (B)'s `oneForm_trace_pullback` is in hand, the Jacobian-level identit
 5. **Ambient-linear-map identity.** Show
    ```lean
    theorem pushforwardAmbientLinear_comp_pullbackAmbientLinear
-       (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+       (f : X → Y) (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f) :
      (pushforwardAmbientLinear f hf).comp (pullbackAmbientLinear f hf)
        = (degreeImpl f hf : ℂ) • LinearMap.id
    ```
@@ -157,3 +157,5 @@ Once layer (B)'s `oneForm_trace_pullback` is in hand, the Jacobian-level identit
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_pushforward_pullback.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.
