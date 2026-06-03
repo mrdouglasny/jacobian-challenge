@@ -1,8 +1,8 @@
 # `AX_ofCurve_inj` — discharge recipe
 
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:257`
-**Route:** needs-infra &nbsp;&nbsp; **Effort:** 9 &nbsp;&nbsp; **Est:** ~4–6 focused months for the full proof of Abel's theorem, with the immediate next infra step (Exponential Sheaf Sequence) being ~1–2 months, ~1000 LOC.
-**Blocked by:** `AX_RiemannRoch`, `AX_SerreDuality`, `INFRA_ExponentialSequence`
+**Route:** needs-infra &nbsp;&nbsp; **Effort:** 9 &nbsp;&nbsp; **Est:** Specialized to the `D = P − Q` case of `AX_AbelTheorem`; resource budget folds into the residue-and-period infrastructure already estimated there (~9–18 months, dominated by `MeromorphicForms` + `BoundaryStokes` + `PunctureLimits` + `Residues`).
+**Blocked by:** `AX_RiemannRoch`, `AX_SerreDuality`, `AX_RiemannBilinear`, `AX_AnalyticCycleBasis`, `AX_PeriodLattice`, and the new residue-infrastructure files `Jacobians/RiemannSurface/MeromorphicForms.lean`, `BoundaryStokes.lean`, `PunctureLimits.lean`, `Residues.lean` (all introduced in `AX_AbelTheorem.md`).
 
 **Statement (verbatim):**
 ```lean
@@ -10,31 +10,30 @@
 injective when `genus X > 0`. -/
 axiom AX_ofCurve_inj {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P : X) (_h : 0 < genus X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (P : X) (_h : 0 < genus X) :
     Function.Injective (ofCurveImpl X P)
 ```
 
-**Why it's an axiom right now:** This is the **point-level / curve side of Abel's theorem**: for a compact Riemann surface `X` of positive genus, the Abel-Jacobi map `P ↦ (∫_{P₀}^P ω_i)_i mod periods` is injective. Equivalently, two distinct points `P, Q ∈ X` are never linearly equivalent as degree-1 divisors, because `dim H⁰(X, O(P)) = 1`. This requires constructing a meromorphic function from analytic period data, bridging the analytic Jacobian and the algebraic Picard group. This construction is highly non-trivial and relies on missing infrastructure (the exponential sheaf sequence or differentials of the third kind).
+**Why it's an axiom right now:** This is the **point-level / curve side of Abel's theorem**: for a compact Riemann surface `X` of positive genus, the Abel-Jacobi map `P ↦ (∫_{P₀}^P ω_i)_i mod periods` is injective. Equivalently, two distinct points `P, Q ∈ X` are never linearly equivalent as degree-1 divisors, because `dim H⁰(X, O(P)) = 1`. The required step is to construct a meromorphic function from analytic period data, bridging the analytic Jacobian and the algebraic Picard group. The construction is the `D = P − Q` special case of the `⊆` direction of `AX_AbelTheorem` (Forster §21), so we discharge it as a corollary of that plan rather than via a parallel sheaf-cohomology infrastructure.
 
 **Proof recipe**
 
-Following Griffiths–Harris (Principles of Algebraic Geometry, Ch 2.7) and standard sheaf-theoretic approaches, we discharge this via the cohomological route, constructing the meromorphic function explicitly rather than misapplying bilinear relations to open chains.
+Per the cross-plan patch (2026-06-03), this recipe is now **consolidated onto the Forster residue + period-normalization route**, exactly the route used by `AX_AbelTheorem.md`. The previous Exponential Sheaf Sequence (EES) path is retired; see "Strategy change" below. The unified plan reuses the residue-theorem infrastructure (`MeromorphicForms.lean`, `BoundaryStokes.lean`, `PunctureLimits.lean`, `Residues.lean`) and the period-normalization machinery introduced in `AX_AbelTheorem.md`.
 
-1. **Unfold the injectivity hypothesis.** Suppose `ofCurveImpl X P₀ P = ofCurveImpl X P₀ Q` for distinct `P, Q ∈ X`. Unfolding `ofCurveImpl` (`Jacobians/Axioms/AbelJacobiMap.lean:229–233`), this implies the vector `(∫_Q^P ω_1, …, ∫_Q^P ω_g) ∈ ℂ^g` lies in the period lattice $\Lambda$. This means the analytic Abel-Jacobi map maps the degree-zero divisor $P - Q$ to $0 \in \mathbb{C}^g / \Lambda$.
-2. **Infrastructure prerequisites (Exponential Sheaf Sequence).** We require new bounded infrastructure: the short exact sequence of sheaves $0 \to \underline{\mathbb{Z}} \to \mathcal{O}_X \xrightarrow{\exp(2\pi i \cdot)} \mathcal{O}_X^\times \to 0$. By building the long exact sequence in cohomology, this yields the connecting homomorphism $H^1(X, \mathbb{Z}) \to H^1(X, \mathcal{O}_X) \to H^1(X, \mathcal{O}_X^\times)$.
-3. **Isomorphism of the Jacobian and Picard Group.** Relate the analytic Jacobian $J(X) = H^0(X, \Omega^1)^*/H_1(X, \mathbb{Z})$ isomorphically to the cohomology group $H^1(X, \mathcal{O}_X) / \text{im}(H^1(X, \mathbb{Z}))$. Under this identification, the exact sequence from Step 2 injects the Jacobian into $H^1(X, \mathcal{O}_X^\times)$, which is identified with the Picard group $\text{Pic}(X)$ of line bundles.
-4. **Construct the meromorphic function.** Because $P - Q$ maps to $0$ in $J(X)$, its image in $\text{Pic}(X)$ under the connecting homomorphism is the trivial line bundle. Therefore, the line bundle $\mathcal{O}_X(P - Q)$ is isomorphic to the trivial bundle $\mathcal{O}_X$. This isomorphism provides a global non-zero section of $\mathcal{O}_X(P - Q)$, which explicitly constitutes a global meromorphic function $g$ on $X$ with divisor precisely $P - Q$.
-5. **Use Riemann–Roch + Serre duality to bound `dim H⁰(X, O(P))`.** The function $g \in H^0(X, \mathcal{O}(P)) \setminus H^0(X, \mathcal{O})$ implies $h^0(\mathcal{O}(P)) \ge 2$. Cite `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:59`) applied to $\mathcal{O}(P)$:
+1. **Unfold the injectivity hypothesis as a degree-0 Abel-Jacobi vanishing.** Suppose `ofCurveImpl X P₀ P = ofCurveImpl X P₀ Q` for distinct `P, Q ∈ X`. Unfolding `ofCurveImpl` (`Jacobians/Axioms/AbelJacobiMap.lean:229–233`) and using `AX_ofCurve_self`, this is equivalent to the vector `(∫_Q^P ω_1, …, ∫_Q^P ω_g) ∈ ℂ^g` lying in the period lattice `Λ`. Equivalently, the degree-0 divisor `D := P − Q` satisfies `abelJacobiDivAt X P₀ D = 0` in `Jacobian X`. Choose a basepoint `P₀ ∉ {P, Q}` via the same pole-avoidance construction as `AX_AbelTheorem.md` Step 5 (the finite-set / open-dense complement argument). This invokes the explicit-basepoint variant `abelJacobiDivAt` introduced by the cross-plan patch to `abelJacobiDiv.md`.
+2. **Apply the `⊆` direction of `AX_AbelTheorem` to `D = P − Q`.** Once `AX_AbelTheorem` is discharged (or, during the staged build-up, once its Steps 3–6 are available as a private lemma `AbelInversion`), the hypothesis `abelJacobiDivAt X P₀ D = 0` produces a meromorphic function `g : X → ℂ ∪ {∞}` with `div g = D = P − Q`. The construction is precisely `g(P) := exp(∫_{P₀}^P ω̃_D)` where `ω̃_D` is the A-period-normalized third-kind differential with simple poles `+1` at `P` and `−1` at `Q` (Forster §21, Riemann–Roch + Serre duality applied to `𝒪(P + Q) ⊗ K_X`).
+3. **Riemann–Roch + Serre duality bound on `h⁰(𝒪(P))`.** With `g ∈ H⁰(X, 𝒪(P)) ∖ H⁰(X, 𝒪)` exhibited (since `div g + P = Q + (P − Q) + P = 2P ≥ 0` shows `g ∈ H⁰(𝒪(P))` and `g` is non-constant), we have `h⁰(𝒪(P)) ≥ 2`. Apply `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:59`) to `𝒪(P)`:
    ```
-   h⁰(O(P)) − h¹(O(P)) = deg(P) + 1 − g = 2 − g
+   h⁰(𝒪(P)) − h¹(𝒪(P)) = deg(P) + 1 − g = 2 − g
    ```
-   Apply `AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`) to identify $h^1(\mathcal{O}(P)) = h^0(K - P) \le h^0(K) - 1 = g - 1$ for genus $> 0$. This forces $h^0(\mathcal{O}(P)) \le 1$. The contradiction between $h^0(\mathcal{O}(P)) \ge 2$ (due to the existence of $g$) and $h^0(\mathcal{O}(P)) \le 1$ implies $P = Q$.
-6. **Replace `axiom` with `theorem`.** Execute the discharge in `Jacobians/Axioms/AbelJacobiMap.lean:257` by chaining the line bundle trivialization (from the EES infrastructure) with the Riemann-Roch dimension bound.
+   and `AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`) to identify `h¹(𝒪(P)) = h⁰(K − P) ≤ h⁰(K) − 1 = g − 1` for genus `> 0`. This forces `h⁰(𝒪(P)) ≤ 1`, contradicting `h⁰(𝒪(P)) ≥ 2`. Therefore `P = Q`.
+4. **Replace `axiom` with `theorem`.** Execute the discharge in `Jacobians/Axioms/AbelJacobiMap.lean:257`. The proof body is a corollary of the `⊆` direction of `AX_AbelTheorem` plus a 10-line `AX_RiemannRoch` / `AX_SerreDuality` numerology lemma.
+
+**Strategy change (Cross-plan patch 2026-06-03; supersedes the original EES recipe).** The earlier draft (now retired) extracted the meromorphic function `g` via the Exponential Sheaf Sequence `0 → ℤ_X → 𝒪_X → 𝒪_X^× → 0` and its connecting homomorphism to `Pic(X)`. That path is **disjoint** from the residue/period infrastructure built by `AX_AbelTheorem` and would require Mathlib-level sheaf cohomology for complex manifolds (Čech cohomology of holomorphic-sheaf data, plus the analytic-Jacobian ↔ `H¹(𝒪)/H¹(ℤ)` identification) that is multiple person-years downstream. The Forster route used by `AX_AbelTheorem.md` reaches the same conclusion through residue calculus and period normalization — infrastructure that is already partially specified and required regardless. Consolidating the two onto a single route saves an entire parallel infrastructure project. Steps 2–6 of `AX_AbelTheorem.md` are now reused with `D := P − Q`, and Step 3 above is the only `AX_ofCurve_inj`-specific tail.
 
 **Files touched**
-- `Jacobians/Axioms/AbelJacobiMap.lean` — replace `axiom AX_ofCurve_inj` (line 257) with `theorem`.
-- `Jacobians/RiemannSurface/ExponentialSequence.lean` *(new, infra)* — defines $0 \to \underline{\mathbb{Z}} \to \mathcal{O}_X \to \mathcal{O}_X^\times \to 0$ and computes the associated long exact sequence in cohomology.
-- `Jacobians/RiemannSurface/AbelTheorem.lean` *(new)* — ties the vanishing in the analytic Jacobian to the triviality of the line bundle $\mathcal{O}_X(P-Q)$, constructing the meromorphic function.
+- `Jacobians/Axioms/AbelJacobiMap.lean` — replace `axiom AX_ofCurve_inj` (line 257) with `theorem`; body is a thin corollary of `AX_AbelTheorem` plus a Riemann–Roch / Serre-duality numerology lemma.
+- *(Removed)* `Jacobians/RiemannSurface/ExponentialSequence.lean` and `Jacobians/RiemannSurface/AbelTheorem.lean` are **no longer introduced** by this plan; meromorphic-function extraction is delegated to the residue infrastructure introduced by `AX_AbelTheorem.md` (`MeromorphicForms.lean`, `BoundaryStokes.lean`, `PunctureLimits.lean`, `Residues.lean`).
 
 **Acceptance**
 - `lake build Jacobians.Axioms.AbelJacobiMap` succeeds.
@@ -42,17 +41,24 @@ Following Griffiths–Harris (Principles of Algebraic Geometry, Ch 2.7) and stan
 - `python3 gate.py --repo jacobian-challenge --build Jacobians` returns PASS; axiom count drops by 1.
 
 **Risk / escalation triggers**
-- **Sheaf cohomology mapping difficulty.** The translation from the analytic integration of paths (Abel-Jacobi map) to Čech cohomology classes in $H^1(X, \mathcal{O}_X)$ is technically demanding. If Mathlib's sheaf cohomology is not developed enough to prove this isomorphism for complex manifolds, escalate to a human to evaluate switching to the "differentials of the third kind" proof path.
-- **Sheaf-cohomology layer not landed.** Step 5's invocation of `AX_RiemannRoch` requires the `Divisor` / `LineBundle` types. Escalate if these are not formalized yet.
+- **`AX_AbelTheorem` slips or stalls.** This recipe is now a corollary of `AX_AbelTheorem`'s `⊆` direction; if that plan stalls on the residue infrastructure (`BoundaryStokes.lean`, `PunctureLimits.lean`, `Residues.lean`), `AX_ofCurve_inj` is automatically blocked. Escalate jointly.
+- **`abelJacobiDivAt` refactor in `abelJacobiDiv.md` not landed.** Step 1 uses the explicit-basepoint variant. Escalate if `abelJacobiDiv` is still defined only via `Classical.choice` at the point this recipe runs.
+- **`Divisor` / `LineBundle` layer not landed.** Step 3's invocation of `AX_RiemannRoch` and `AX_SerreDuality` requires the `Divisor` / `LineBundle` types. Escalate if these are not formalized yet.
+- **Mumford theta-divisor fallback.** If, against expectation, the residue infrastructure overshoots its budget while the Mumford theta route in `AX_AbelTheorem.md` becomes viable instead, switch this recipe to consume the Mumford-route lemma exporting `D → meromorphic g` rather than the Forster one — the Step 3 numerology tail is unchanged.
 
 ### Gemini critique addressed
-- Reclassified route to `needs-infra` and updated estimates to reflect the necessity of building bounded infrastructure (the Exponential Exact Sequence) rather than a trivial and faulty algebraic reduction.
+- Reclassified route to `needs-infra` and updated estimates to reflect the necessity of residue/period infrastructure (consumed from `AX_AbelTheorem.md`) rather than a trivial and faulty algebraic reduction.
 - Scrapped the logically flawed steps from the original recipe that treated an open 1-chain as a closed 1-cycle and misapplied Riemann's bilinear relations to non-closed paths.
-- Explicitly laid out the necessary cohomological construction of the meromorphic function $g$ via the EES connecting homomorphism to the Picard group, directly addressing the "circular reasoning" identified in the critique.
-- Appended a requirement for `INFRA_ExponentialSequence` as a discrete sub-plan, providing a viable path forward that maps to standard textbook proofs (e.g., Griffiths-Harris).
+- **Cross-plan patch (2026-06-03):** Replaced the Exponential Sheaf Sequence (EES) construction of the meromorphic function `g` with the Forster residue + A-period-normalization construction (`g = exp(∫ ω̃_D)`), aligning with `AX_AbelTheorem.md`. The earlier EES path required a multi-month sheaf-cohomology infrastructure disjoint from the residue infrastructure already required for `AX_AbelTheorem`; consolidating onto Forster eliminates the duplicated foundation.
 
 ## Sub-plans needed
-- `INFRA_ExponentialSequence.md` — The exact sequence of sheaves $0 \to \underline{\mathbb{Z}} \to \mathcal{O}_X \to \mathcal{O}_X^\times \to 0$ and the extraction of its connecting homomorphism mapping $H^1(\mathcal{O}) / H^1(\mathbb{Z}) \to \text{Pic}(X)$.
+- *(Retired)* `INFRA_ExponentialSequence.md` is **no longer a prerequisite** of this plan under the unified Forster strategy.
+- Consumes (does not introduce) the residue infrastructure from `AX_AbelTheorem.md`: `MeromorphicForms.lean`, `BoundaryStokes.lean`, `PunctureLimits.lean`, `Residues.lean`.
+- Consumes the explicit-basepoint variant `abelJacobiDivAt` from the revised `abelJacobiDiv.md`.
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_ofCurve_inj.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.
+
+**Cross-plan patch (2026-06-03):** Retired the Exponential Sheaf Sequence route and re-derived `AX_ofCurve_inj` as the `D = P − Q` corollary of `AX_AbelTheorem`'s Forster residue + period-normalization recipe, unifying both proofs on the residue/period infrastructure introduced by `AX_AbelTheorem.md`.

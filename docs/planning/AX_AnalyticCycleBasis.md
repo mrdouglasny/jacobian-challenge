@@ -14,7 +14,7 @@ Rating: Standard. Sources: SA (self-audit), scheduled for DT (deep
 think). -/
 axiom AX_AnalyticCycleBasis {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) :
     Nonempty (AnalyticCycleBasis X x₀)
 ```
 
@@ -86,3 +86,5 @@ Sub-steps (P1):
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_AnalyticCycleBasis.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

@@ -8,7 +8,7 @@
 ```lean
 axiom AX_pushforwardOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] :
     pushforwardOneForm (id : X → X) contMDiff_id = LinearMap.id
 ```
 
@@ -34,7 +34,7 @@ This is `needs-infra`. The theorem is heavily blocked by a major infrastructure 
    ```lean
    theorem AX_pushforwardOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] :
        pushforwardOneForm (id : X → X) contMDiff_id = LinearMap.id := by
      unfold pushforwardOneForm  -- after step 2, this unfolds to the trace def
      ext form
@@ -67,3 +67,5 @@ This is `needs-infra`. The theorem is heavily blocked by a major infrastructure 
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_pushforwardOneForm_id.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

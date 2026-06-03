@@ -7,7 +7,7 @@
 **Statement (verbatim):**
 ```lean
 axiom genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X] :
     genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1))
 ```
 
@@ -51,7 +51,7 @@ documented in `docs/planning/AX_genus_eq_zero_iff_homeo.md` for the main-tree ax
    ```lean
    theorem genus_eq_kirovGenus
        {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-       [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+       [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X] :
        Jacobians.RiemannSurface.genus X = Jacobians.Vendor.Kirov.genus X := by
      unfold Jacobians.RiemannSurface.genus Jacobians.Vendor.Kirov.genus
      exact (LinearEquiv.finrank_eq (bridgeFormEquiv (X := X))).symm
@@ -80,7 +80,7 @@ documented in `docs/planning/AX_genus_eq_zero_iff_homeo.md` for the main-tree ax
    theorem genus_eq_zero_iff_homeo
        {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
        [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] :
        Jacobians.Vendor.Kirov.genus X = 0 ↔
          Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) := by
      rw [← Jacobians.Bridge.genus_eq_kirovGenus (X := X)]
@@ -164,3 +164,5 @@ documented in `docs/planning/AX_genus_eq_zero_iff_homeo.md` for the main-tree ax
 
 ---
 **Vetting trail.** Critique: `_vetting/genus_eq_zero_iff_homeo.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

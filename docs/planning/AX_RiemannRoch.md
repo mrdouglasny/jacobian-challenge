@@ -15,7 +15,7 @@ finite-dimensional, which holds classically by compactness):
 Both sides cast to `ℤ` to avoid `Nat`-subtraction truncation. -/
 axiom AX_RiemannRoch {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X)
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (D : Divisor X)
     [_h0fd : FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
     [_h1fd : FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))] :
     (Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) : ℤ) -
@@ -85,3 +85,5 @@ The project should add two new `needs-infra` plans alongside this one. They are 
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_RiemannRoch.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

@@ -8,9 +8,9 @@
 ```lean
 axiom pushforwardOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
-    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+    [IsManifold 𝓘(ℂ, ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f) :
     HolomorphicOneForm X →ₗ[ℂ] HolomorphicOneForm Y
 ```
 
@@ -26,7 +26,7 @@ Textbook reference: Mumford Vol I §II.3 ("trace of meromorphic differentials");
 4. **Verify the `holomorphicOneFormSubmodule Y` membership** (`Jacobians/RiemannSurface/OneForm.lean:118–142`):
    - `IsHolomorphicOneFormCoeff`: verified by the extension in step 3.
    - `SatisfiesCotangentCocycle`: each fiberwise pullback satisfies it on `X`; pushed-forward, the cocycle on `Y` follows from chain rule + linearity of `fderiv` on $Y \setminus B$, and extends continuously to $B$.
-   - `IsZeroOffChartTarget`: trivial extension by zero off `(extChartAt 𝓘(ℂ) q).target`.
+   - `IsZeroOffChartTarget`: trivial extension by zero off `(extChartAt 𝓘(ℂ, ℂ) q).target`.
 5. **Constant-`f` branch.** If `∃ c, ∀ x, f x = c`, define `pushforwardOneForm f hf := 0` directly (no summation needed). The classical pushforward is zero for constants because `f'(p) = 0` everywhere.
 6. **ℂ-linearity in `ω`.** Define `pushforwardOneForm f hf : HolomorphicOneForm X →ₗ[ℂ] HolomorphicOneForm Y` via `LinearMap.mk'` on the coefficient construction; `map_add'` and `map_smul'` are direct on each fiberwise summand on $Y \setminus B$, which continuously extends.
 
@@ -57,3 +57,5 @@ Discrete sub-deliverable: **step 1 alone** (unramified trace defined rigorously 
 - `SymmetricProductsAnalytic.md` — Infrastructure for Newton sums and symmetric polynomials of local analytic functions to formalize roots-of-unity cancellation.
 ---
 **Vetting trail.** Critique: `_vetting/pushforwardOneForm.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

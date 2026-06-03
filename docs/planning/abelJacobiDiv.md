@@ -12,8 +12,24 @@ points to divisors. On a formal combination `∑ n_P · P`, evaluates to
 `P₀` is chosen via `Classical.arbitrary`. -/
 axiom abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ Jacobian X
 ```
+
+**Basepoint convention (revised; see cross-plan patch 2026-06-03).** The discharge below now takes the basepoint as an explicit parameter `(P₀ : X)` rather than fixing it via a global `Classical.choice ‹Nonempty X›`. This is required for compatibility with `AX_AbelTheorem`, whose `⊆` proof needs the basepoint to dynamically avoid `supp(D⁺) ∪ supp(D⁻)`. Concretely, we expose
+```lean
+noncomputable def abelJacobiDivAt (X : Type u) [...] (P₀ : X) : Divisor X →+ Jacobian X
+```
+and then define the parameter-free top-level
+```lean
+noncomputable def abelJacobiDiv (X : Type u) [...] : Divisor X →+ Jacobian X :=
+  abelJacobiDivAt X (Classical.choice ‹Nonempty X›)
+```
+purely as a back-compat shim for callers that do not care which basepoint is used (e.g. `AX_ofCurve_inj` statements that depend only on the kernel, which is basepoint-independent). The `AX_AbelTheorem` proof itself must call `abelJacobiDivAt X P₀` with a `P₀ ∉ supp D` selected per-divisor (see `AX_AbelTheorem.md` Step 5). A basepoint-independence lemma
+```lean
+lemma abelJacobiDivAt_independent (P₀ Q₀ : X) (D : Divisor X) (hD : Divisor.deg X D = 0) :
+    abelJacobiDivAt X P₀ D = abelJacobiDivAt X Q₀ D
+```
+will be needed to reconcile the two on degree-0 divisors; this is a straightforward telescoping argument (`ofCurveImpl X P₀ P - ofCurveImpl X Q₀ P = ofCurveImpl X P₀ Q₀` is independent of `P`, and contributes `(∑ n_P) · ofCurveImpl X P₀ Q₀ = 0` when `∑ n_P = 0`).
 
 **Why it's an axiom right now:** This is pure linear-algebraic data: the `ℤ`-linear extension of `ofCurveImpl X P₀ : X → Jacobian X` to formal `ℤ`-combinations of points. It is axiomatized only because `Divisor X` is itself an opaque axiom-stub at `LineBundle.lean:51`; once `Divisor X` is realized as `FreeAbelianGroup X` (its planned encoding per ROADMAP), the universal property of `FreeAbelianGroup` discharges this in a handful of lines. Nothing classical (no sheaf cohomology, no meromorphic functions) is needed — only the curve-side `ofCurveImpl` def already lives in `Jacobians/Axioms/AbelJacobiMap.lean:229`.
 
@@ -23,22 +39,27 @@ axiom abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
    ```lean
    def Divisor (X : Type*) [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] : Type := FreeAbelianGroup X
+       [IsManifold 𝓘(ℂ, ℂ) ω X] : Type := FreeAbelianGroup X
    ```
    Then `Divisor.instAddCommGroup` (`LineBundle.lean:56`) reduces to `FreeAbelianGroup.instAddCommGroup` from Mathlib (`Mathlib.GroupTheory.FreeAbelianGroup`) and `Divisor.deg` (`LineBundle.lean:63`) reduces to `FreeAbelianGroup.lift (fun _ => (1 : ℤ))`. These three are the prerequisite recipes [`Divisor.md`](Divisor.md), [`Divisor-instAddCommGroup.md`](Divisor-instAddCommGroup.md), [`Divisor-deg.md`](Divisor-deg.md).
 
-2. Pick a basepoint. Inside the definition body, extract a point using the provided `[Nonempty X]` typeclass:
+2. Take the basepoint as an explicit parameter. Per the cross-plan patch (2026-06-03), do **not** fix the basepoint by `Classical.choice` inside the definition. Instead, introduce the parameter-bearing form
    ```lean
-   let P₀ : X := Classical.choice ‹Nonempty X›
+   noncomputable def abelJacobiDivAt (X : Type u) [...] (P₀ : X) : Divisor X →+ Jacobian X
    ```
-   This realizes the recipe-induced basepoint conceptually named in the docstring without requiring a missing `[Inhabited X]` instance.
+   which takes the basepoint as an explicit argument. Callers needing pole avoidance (notably the `⊆` direction of `AX_AbelTheorem`) supply `P₀ ∉ supp D` directly. The legacy nullary form `abelJacobiDiv X` is retained only as a thin shim defined as `abelJacobiDivAt X (Classical.choice ‹Nonempty X›)` for callers that only inspect the kernel (kernel is basepoint-independent on degree-0 divisors).
 
 3. Define the underlying group hom via `FreeAbelianGroup.lift`. Recall that `FreeAbelianGroup.lift : (X → A) ≃ (FreeAbelianGroup X →+ A)` for any `AddCommGroup A` (Mathlib, `Mathlib.GroupTheory.FreeAbelianGroup.lift`). The `Jacobian X` carries `AddCommGroup` via the construction in `Jacobians/Jacobian/Construction.lean` (cited at `Jacobians/Axioms/AbelJacobiMap.lean:53`). Set:
    ```lean
+   noncomputable def abelJacobiDivAt (X : Type u) [TopologicalSpace X] [T2Space X]
+       [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+       [IsManifold 𝓘(ℂ, ℂ) ω X] (P₀ : X) : Divisor X →+ Jacobian X :=
+     FreeAbelianGroup.lift (fun P => ofCurveImpl X P₀ P)
+
    noncomputable def abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X :=
-     FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.choice ‹Nonempty X›) P)
+       [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ Jacobian X :=
+     abelJacobiDivAt X (Classical.choice ‹Nonempty X›)
    ```
    The `ofCurveImpl X P₀ P₀ = 0` already holds definitionally (proved as `AX_ofCurve_self` at `Jacobians/Axioms/AbelJacobiMap.lean:246`), so the docstring's "subtract `(∑ n_P) · ofCurveImpl P₀ P₀`" correction is automatic — the basepoint summand vanishes in the image, so the lift over `(P ↦ ofCurveImpl X P₀ P)` is already the docstring's stated map (the `(∑ n_P) · ofCurveImpl P₀ P₀` term is just `0`).
 
@@ -66,3 +87,7 @@ axiom abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
 
 ---
 **Vetting trail.** Critique: `_vetting/abelJacobiDiv.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Refactored `abelJacobiDiv` to expose an explicit-basepoint variant `abelJacobiDivAt X P₀` so `AX_AbelTheorem`'s `⊆` proof can choose `P₀ ∉ supp D`; the nullary `abelJacobiDiv X` is retained as a `Classical.choice`-backed shim plus a basepoint-independence lemma on degree-0 divisors.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

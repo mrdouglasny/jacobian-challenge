@@ -11,7 +11,7 @@ of meromorphic functions. Kernel of the divisor-to-Jacobian map
 (Abel's theorem). -/
 axiom PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : AddSubgroup (Divisor X)
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : AddSubgroup (Divisor X)
 ```
 
 **Why it's an axiom right now:** Three pieces are missing: (1) a project-level type `MeromorphicFunction X`, (2) a global total degree-zero finite divisor map based on `orderAt`, and (3) the principal-divisor map `div`. A direct proof of finiteness on compact manifolds requires the Identity Theorem, heavily increasing discharge effort unless bypassed structurally using classical logic.
@@ -38,7 +38,7 @@ axiom PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
    ```lean
    def PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] : AddSubgroup (Divisor X) :=
+       [IsManifold 𝓘(ℂ, ℂ) ω X] : AddSubgroup (Divisor X) :=
      AddSubgroup.closure (Set.range fun f : { f : MeromorphicFunction X // f.toFun ≠ 0 } =>
        MeromorphicFunction.div f.val)
    ```
@@ -63,3 +63,5 @@ axiom PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
 
 ---
 **Vetting trail.** Critique: `_vetting/PrincipalDivisors.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

@@ -60,5 +60,9 @@ axiom AX_Hyperelliptic_oddEquiv (H : HyperellipticData) (h : Odd H.f.natDegree) 
 - **Continuity fields added:** Explicitly included `continuous_toFun` and `continuous_invFun` requirements, demanding exact coordination with `Hyperelliptic.instTopologicalSpace`'s `dite` structure so the proofs are actually possible.
 - **Fallback clarified:** Updated the risk section to identify `Sum` as mathematically cleaner for Lean precisely because it sidesteps these `HEq` topological issues.
 
+**Note (signature pinning, 2026-06-03):** This axiom remains a topological `Homeomorph` (`≃ₜ`), *not* a biholomorphism. Cast-based homeomorphisms across the parity `dite` are already nontrivial; layering analytic structure on top here would over-couple this recipe with manifold infrastructure. Downstream consumers that need analytic transport (notably `AX_Hyperelliptic_genus`) must promote this `≃ₜ` to a biholomorphism *locally* at their use-site via a manifold-transport lemma — they may not assume an analytic upgrade lives in this base axiom.
+
 ---
 **Vetting trail.** Critique: `_vetting/AX_Hyperelliptic_oddEquiv.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Equivalence signature pinned as Homeomorph (`≃ₜ`); `AX_Hyperelliptic_genus` promotes locally via manifold transport rather than changing this base signature.

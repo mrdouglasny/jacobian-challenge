@@ -29,6 +29,8 @@ axiom Hyperelliptic (H : HyperellipticData) : Type
 - `Jacobians/ProjectiveCurve/Hyperelliptic.lean` — replace `axiom Hyperelliptic` (line 59) with `def Hyperelliptic` via `dite` on `Odd H.f.natDegree`; convert the five `axiom Hyperelliptic.instX` (lines 61–77) to real instances built by parity dispatch.
 - `docs/hyperelliptic-atlas-plan.md` — update status line once the type lands.
 
+**Note:** `Hyperelliptic-instTopologicalSpace` is subsumed here — Step 3 constructs that instance directly, so its standalone plan is an indexing stub only.
+
 **Acceptance**
 - `lake build Jacobians.ProjectiveCurve.Hyperelliptic` succeeds.
 - `#print axioms genus_Hyperelliptic_eq` (`Hyperelliptic.lean:109`) no longer lists `Hyperelliptic`.
@@ -41,3 +43,5 @@ axiom Hyperelliptic (H : HyperellipticData) : Type
 
 ---
 **Vetting trail.** Critique: `_vetting/Hyperelliptic.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Duplicate-effort resolved — `Hyperelliptic-instTopologicalSpace` is now an indexing stub pointing at `Hyperelliptic.md`'s Step 3.

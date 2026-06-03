@@ -15,7 +15,7 @@ combination of Riemann's bilinear relations with the rank computation
 period image into `AbelianVariety.ComplexTorus`. -/
 axiom AX_PeriodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     IsZLattice ℝ (periodLatticeInBasis X x₀ b)
 ```
@@ -149,3 +149,5 @@ files cite the shared lemma `periodLatticeInBasis_eq_span_v` (step 6).
   (`PeriodLattice.lean:58`) does not commute with the dual-basis evaluation
   as expected, escalate — the `periodMapInBasis` definition itself may need
   a reformulation before either axiom can be discharged.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

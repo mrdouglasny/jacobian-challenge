@@ -8,7 +8,7 @@
 ```lean
 axiom H0.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
     Module ℂ (H0 L)
 attribute [instance] H0.instModule
 ```
@@ -17,8 +17,8 @@ attribute [instance] H0.instModule
 
 **Proof recipe**
 
-1. Ensure the upstream `LineBundle` definition strictly targets `Sheaf (ModuleCat ℂ) X` (or is a proper `O_X`-module). It must not be merely a sheaf of abelian groups. This is a non-negotiable requirement for the complex geometry setup.
-2. When defining `H0 L`, do *not* use derived functors, `Ext` groups, or `Sheaf.H 0` machinery. Define it simply as the evaluation of the sheaf on the whole space: `(L.sheaf).val.obj (op ⊤)`. Because the sheaf is valued in `ModuleCat ℂ`, the `Module ℂ` instance on global sections is definitionally free.
+1. Per the `LineBundle` discharge, `LineBundle D` is the lightweight `PUnit` token and carries no sheaf data. The sheaf of sections used here must therefore be the `Sheaf (ModuleCat ℂ) X` constructed locally from the divisor `D` argument (already in scope as `{D : Divisor X}`), e.g. via `sheafOfDivisor D`. Sheaf data must NOT be projected off `L`.
+2. When defining `H0 L`, do *not* use derived functors, `Ext` groups, or `Sheaf.H 0` machinery. Define it simply as the evaluation of the divisor-derived sheaf on the whole space: `(sheafOfDivisor D).val.obj (op ⊤)`. Because the sheaf is valued in `ModuleCat ℂ`, the `Module ℂ` instance on global sections is definitionally free.
 3. Replace the axiom with an `instance` whose body is `inferInstance`. In `Jacobians/RiemannSurface/LineBundle.lean:96`, change:
    ```lean
    axiom H0.instModule {X : Type*} [...] (L : LineBundle D) :
@@ -29,7 +29,7 @@ attribute [instance] H0.instModule
    ```lean
    instance H0.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
+       [IsManifold 𝓘(ℂ, ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
        Module ℂ (H0 L) := inferInstance
    ```
    Delete the redundant `attribute [instance]` line at `:100`.
@@ -53,3 +53,7 @@ attribute [instance] H0.instModule
 
 ---
 **Vetting trail.** Critique: `_vetting/H0-instModule.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Refactored to not project `.sheaf` off the `PUnit`-token `LineBundle`; sheaf data is now built from the divisor `D` argument directly.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

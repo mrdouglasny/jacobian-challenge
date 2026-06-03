@@ -18,13 +18,13 @@ This discharge uses a hybrid strategy. First, we define `H1` purely algebraicall
 
 ### Phase 1 — Homology infrastructure (prereq)
 
-1. **Define `H1` and `Path.toHomologyClass`.** Rather than waiting on singular homology, define `H1 X x₀ := Abelianization (FundamentalGroup X x₀)`. Define `Path.toHomologyClass` by composing the standard quotient map from paths to `FundamentalGroup` with the quotient map to `Abelianization`. This addresses the TODOs referenced in `Jacobians/Axioms/AnalyticCycleBasis.lean:244-249`.
+1. **Define `H1` and `Path.toHomologyClass`.** Rather than waiting on singular homology, define `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))`. The `Additive` wrapper is essential: Mathlib's `Abelianization` yields a multiplicative `CommGroup`, but `Module ℤ` (required for `Module.Basis (Fin 2) ℤ (H1 _)` in step 4) strictly requires an `AddCommGroup`. The `Additive` wrapper supplies that `AddCommGroup` instance, letting all downstream `Module`/`Basis` typeclasses elaborate. Define `Path.toHomologyClass` by composing the standard quotient map from paths to `FundamentalGroup`, the quotient map to `Abelianization`, and `Additive.ofMul`. This matches the canonical type fixed by `loopIntegralToH1` (see `Jacobians/RiemannSurface/Homology.lean:41-42`) and addresses the TODOs referenced in `Jacobians/Axioms/AnalyticCycleBasis.lean:244-249`.
 2. **Covering-space description of `H1 (ℂ/Λ) 0`.** Use Mathlib's `Mathlib.Topology.Covering` API. For a complex torus `T = ℂ/Λ`, the universal cover is `ℂ` (simply connected), giving an isomorphism `FundamentalGroup T 0 ≃ Λ`. Since `Λ` is already abelian, the abelianization is trivial. Transport this through to prove `H1 T 0 ≃ Λ ≃ ℤ²` for `Λ = ℤω₁ + ℤω₂`. (Mathematical references for this canonical identification: Mumford, *Tata Lectures on Theta I*, Ch. II §2; Griffiths–Harris, *Principles of Algebraic Geometry*, Ch. 0 §4).
 
 ### Phase 2 — Discharge on `Elliptic` (post-infra)
 
 3. **Specialize `genus`.** `genus_Elliptic_eq_one` (`Jacobians/ProjectiveCurve/Elliptic/OneForm.lean:195`) gives `genus (Elliptic ω₁ ω₂ h) = 1`, so `2 * genus _ = 2` and `Fin (2 * genus _) ≃ Fin 2`. Use this `Equiv` (call it `e2`) to map the two loops into the indexed `loops` field.
-4. **`isBasis` field.** Construct a `Module.Basis (Fin 2) ℤ (H1 (Elliptic ω₁ ω₂ h) 0)`. The basis is the image of `(aLoop, bLoop)` under `Path.toHomologyClass`. Genuinely prove this is a basis by transporting `Pi.basisFun ℤ (Fin 2)` through the iso `H1 (Elliptic _) 0 ≃ ℤ²` established via covering spaces in Step 2. Use `Module.Basis.ofEquivFun` or `Module.Basis.map`.
+4. **`isBasis` field.** Construct a `Module.Basis (Fin 2) ℤ (H1 (Elliptic ω₁ ω₂ h) 0)`. Because `H1` is now `Additive (Abelianization (FundamentalGroup _ _))`, the requisite `AddCommGroup` and `Module ℤ` instances elaborate automatically (every `AddCommGroup` is canonically a `ℤ`-module via `AddCommGroup.toIntModule`). The basis is the image of `(aLoop, bLoop)` under `Path.toHomologyClass`. Genuinely prove this is a basis by transporting `Pi.basisFun ℤ (Fin 2)` through the iso `H1 (Elliptic _) 0 ≃ ℤ²` established via covering spaces in Step 2 — note that the iso is now an `AddEquiv` (between additive groups) rather than a `MulEquiv`, since the `Additive` wrapper is in play on the LHS. Use `Module.Basis.ofEquivFun` or `Module.Basis.map`.
 5. **Introduce Helper Axiom.** Because the global `intersectionForm` has no definitional equations, Lean cannot evaluate it. Introduce a tightly scoped helper axiom in `Witnesses.lean`:
    ```lean
    axiom AX_Elliptic_intersection_A_B : intersectionForm 0 (Path.toHomologyClass (aLoop ω₁ ω₂ h)) (Path.toHomologyClass (bLoop ω₁ ω₂ h)) = 1
@@ -52,9 +52,11 @@ This discharge uses a hybrid strategy. First, we define `H1` purely algebraicall
 
 ### Gemini critique addressed:
 - Reclassified the Route to a hybrid `needs-infra, provable-from-other-axioms` and adjusted the Estimate to reflect bounding the effort strictly to covering space theory.
-- Replaced the vague future "homology layer" with a formal and concrete definition: `H1 X x₀ := Abelianization (FundamentalGroup X x₀)`.
+- Replaced the vague future "homology layer" with a formal and concrete definition: `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` (the `Additive` wrapper is needed so the `Module ℤ` / `Basis` typeclasses elaborate; see Step 1).
 - Replaced the formally impossible goal of computing the opaque `intersectionForm` function by introducing a tightly scoped integer-equality helper axiom (`AX_Elliptic_intersection_A_B`).
 - Explicitly stated that `AX_IntersectionForm_alternating` will be used for the diagonal `⟨A, A⟩ = 0` and `⟨B, B⟩ = 0` cases in the symplectic field proof.
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_Elliptic_H1_symplectic.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** H1 type canonicalised to `Additive (Abelianization (FundamentalGroup X x₀))` so `Module ℤ` typeclasses elaborate.

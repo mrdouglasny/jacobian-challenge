@@ -8,13 +8,13 @@
 ```lean
 axiom AX_pushforwardOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [IsManifold 𝓘(ℂ, ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
-    [IsManifold 𝓘(ℂ) ω Y] {Z : Type w} [TopologicalSpace Z] [T2Space Z]
+    [IsManifold 𝓘(ℂ, ℂ) ω Y] {Z : Type w} [TopologicalSpace Z] [T2Space Z]
     [CompactSpace Z] [ConnectedSpace Z] [ChartedSpace ℂ Z]
-    [IsManifold 𝓘(ℂ) ω Z]
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
-    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g) :
+    [IsManifold 𝓘(ℂ, ℂ) ω Z]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f)
+    (g : Y → Z) (hg : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω g) :
     pushforwardOneForm (g ∘ f) (hg.comp hf) =
       (pushforwardOneForm g hg).comp (pushforwardOneForm f hf)
 ```
@@ -61,3 +61,5 @@ Textbook reference: Mumford Vol I §II.3 (functoriality of trace); Griffiths-Har
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_pushforwardOneForm_comp.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

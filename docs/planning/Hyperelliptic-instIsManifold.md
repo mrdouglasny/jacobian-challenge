@@ -11,7 +11,7 @@ axiom Hyperelliptic.instIsManifold (H : HyperellipticData) :
 attribute [instance] Hyperelliptic.instIsManifold
 ```
 
-**Why it's an axiom right now:** Per `docs/hyperelliptic-atlas-plan.md` §H4.2, the analytic structure requires all pairwise chart transitions in the atlas of `Hyperelliptic H` to lie in `contDiffGroupoid ω 𝓘(ℂ)`. On the even side `Hyperelliptic/EvenAtlas.lean:275-284` already produces `instance instIsManifold` via `isManifold_of_contDiffOn` + `chartAt_compat`, but it depends on two still-axiomatized cross-summand transitions (`affineLiftChart_compat_infinityLiftChart`, `infinityLiftChart_compat_affineLiftChart`, `EvenAtlas.lean:243-257`). On the odd side, the corresponding theorem does not yet exist: there is no `chartAt_compat` for `HyperellipticOdd` because four transitions through the infinity chart are still axioms (`OddAtlas/InfinityChart.lean:66-111`).
+**Why it's an axiom right now:** Per `docs/hyperelliptic-atlas-plan.md` §H4.2, the analytic structure requires all pairwise chart transitions in the atlas of `Hyperelliptic H` to lie in `contDiffGroupoid ω 𝓘(ℂ, ℂ)`. On the even side `Hyperelliptic/EvenAtlas.lean:275-284` already produces `instance instIsManifold` via `isManifold_of_contDiffOn` + `chartAt_compat`, but it depends on two still-axiomatized cross-summand transitions (`affineLiftChart_compat_infinityLiftChart`, `infinityLiftChart_compat_affineLiftChart`, `EvenAtlas.lean:243-257`). On the odd side, the corresponding theorem does not yet exist: there is no `chartAt_compat` for `HyperellipticOdd` because four transitions through the infinity chart are still axioms (`OddAtlas/InfinityChart.lean:66-111`).
 
 **Proof recipe**
 
@@ -72,3 +72,5 @@ Bounded infrastructure on top of `instChartedSpace`. Four sub-blocks; once they 
 
 ---
 **Vetting trail.** Critique: `_vetting/Hyperelliptic-instIsManifold.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

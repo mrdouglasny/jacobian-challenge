@@ -10,7 +10,7 @@
 divisors is exactly the subgroup of principal divisors. -/
 axiom AX_AbelTheorem {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] :
     (abelJacobiDiv X).ker = PrincipalDivisors X
 ```
 
@@ -88,9 +88,13 @@ Once these four files land, Step 1 in the recipe above is a genuine corollary, b
 - `python3 gate.py --repo jacobian-challenge --build Jacobians` returns PASS; axiom count drops by 1 (or by 2 if `abelJacobiDiv` is dischargeable in the same pass).
 
 **Risk / escalation triggers**
-- If building `Jacobians/RiemannSurface/BoundaryStokes.lean` requires changing the `ChartedSpace ℂ X` / `IsManifold 𝓘(ℂ) ω X` typeclass surface to add an *analytic-manifold-with-corners* refinement, escalate — this touches every axiom in the project.
+- If building `Jacobians/RiemannSurface/BoundaryStokes.lean` requires changing the `ChartedSpace ℂ X` / `IsManifold 𝓘(ℂ, ℂ) ω X` typeclass surface to add an *analytic-manifold-with-corners* refinement, escalate — this touches every axiom in the project.
 - If `AX_RiemannRoch` or `AX_RiemannBilinear` does not land first, **do not attempt Steps 3 or 4**; the `⊆` direction is genuinely blocked. Escalate immediately if scheduling pressure pushes this recipe ahead of either.
 - If the cumulative residue-infrastructure LOC overshoots ~3500 within the first 4–6 weeks of implementation work on `BoundaryStokes.lean`, escalate to consider the **Mumford theta route** instead — at that point the multivariable-theta cost may be comparable and the route is conceptually cleaner.
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_AbelTheorem.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Anchored two cross-plan alignments: (i) the `⊆` proof now consumes `abelJacobiDiv`'s explicit-basepoint variant `abelJacobiDivAt X P₀` (per the refactor in `abelJacobiDiv.md`) so the Step 5 pole-avoidance basepoint feeds through cleanly; and (ii) this Forster residue + period-normalization route is now the **unified Abel-Jacobi infrastructure** consumed by `AX_ofCurve_inj` as well, replacing its previous Exponential Sheaf Sequence plan.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

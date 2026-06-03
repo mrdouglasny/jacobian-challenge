@@ -12,6 +12,8 @@ axiom bridgePath (P₀ P : X) : ℝ → X
 
 **Why it's an axiom right now:** This is the structural path-selection axiom introduced by the Kirov path-integral bridge (`KirovLineIntegral.lean:23–44`, `:108–114`, `:156–161`). Our `pathIntegralBasepointFunctional` takes a pair of endpoints `(P₀, P)`, but Kirov's `lineIntegral` takes a parameterized path `γ : ℝ → X`; closing the gap requires a function `(P₀, P) ↦ (ℝ → X)` whose value is a smoothly concatenated path from `P₀` to `P`. The docstring at `:108–114` is explicit that `bridgePath` and `bridgePath_lineIntegrable` are the two load-bearing axioms. The existence of a continuous path follows from topological properties, but producing an everywhere-smooth representative requires manifold infrastructure currently missing in Mathlib (covers by convex chart balls and flat-at-endpoint reparameterizations).
 
+**Scope note (canonical Kirov-side input).** The multi-chart infrastructure built here — convex-chart-ball cover refinement, flat-at-endpoints reparameterization, smooth concatenation — is the *single canonical* path-selection input feeding `Jacobians.Bridge.kirovBackedFunctional`, which in turn backs `pathIntegralBasepointFunctional` (see `pathIntegralBasepointFunctional.md`). It is **not** a parallel project to a hypothetical scratch `pathIntegralAnalyticArc`; that scratch route has been retired.
+
 **Proof recipe**
 
 This recipe fulfills the bounded infrastructure requirement of proving that a connected topological manifold is smoothly path-connected (cf. **John M. Lee, *Introduction to Smooth Manifolds*, Proposition 2.15**). It builds `bridgePath` in multiple layers:
@@ -62,3 +64,5 @@ This recipe fulfills the bounded infrastructure requirement of proving that a co
 
 ---
 **Vetting trail.** Critique: `_vetting/bridgePath.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Path-integration backend unified on the Kirov bridge; scratch `pathIntegralAnalyticArc` route retired.

@@ -9,7 +9,7 @@
 /-- The line bundle `𝒪(D)` as an axiom-level constructor. -/
 axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : LineBundle D
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (D : Divisor X) : LineBundle D
 ```
 
 **Why it's an axiom right now:** Only because `LineBundle D` is an opaque axiom-type (`Jacobians/RiemannSurface/LineBundle.lean:77`). The architecture of this project explicitly uses `LineBundle D` as a phantom type / tag to pass the divisor `D` into the `H0` and `H1` axioms. Once `LineBundle D` becomes a real `def` (as `PUnit`), `LineBundle.ofDivisor D` is just a one-line constructor.
@@ -26,7 +26,7 @@ axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
    ```lean
    def LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : LineBundle D := PUnit.unit
+       [IsManifold 𝓘(ℂ, ℂ) ω X] (D : Divisor X) : LineBundle D := PUnit.unit
    ```
    No imports beyond what `LineBundle.lean` already pulls in. `PUnit.unit` is a Lean 4 core decl.
 
@@ -45,3 +45,5 @@ axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
 - If downstream theorems or definitions unexpectedly attempt to unfold `LineBundle.ofDivisor D` expecting mathematical sheaf/section data rather than a phantom type, escalate.
 ---
 **Vetting trail.** Critique: `_vetting/LineBundle-ofDivisor.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

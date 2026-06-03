@@ -14,28 +14,28 @@ axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
 
 ### `Gemini critique addressed:`
 - Reclassified route to `provable-from-other-axioms` and reduced effort to 2, as this axiom is solely the dispatch glue.
-- Upgraded the topological equivalence assumption to a strict biholomorphism requirement, correcting the mathematically invalid transport of the analytic $h^{1,0}$ genus.
+- ~~Upgraded the topological equivalence assumption to a strict biholomorphism requirement, correcting the mathematically invalid transport of the analytic $h^{1,0}$ genus.~~ **Superseded by 2026-06-03 cross-plan patch:** the base equivalence axioms remain `Homeomorph` (`≃ₜ`); analytic upgrade is performed *locally* at this use-site via a manifold-transport lemma, not by changing the base signatures (cast-based `Homeomorph`s are already hard enough, and burdening them with biholomorphism data would over-couple unrelated recipes).
 - Stripped all L2/L3 analytic proofs (polynomial decomposition and surjectivity) from this plan, delegating them to independent sub-plans.
 
 **Proof recipe**
 
-1. **Equivalence Upgrade:** Redefine `AX_Hyperelliptic_oddEquiv` (`Hyperelliptic.lean:93`) and `AX_Hyperelliptic_evenEquiv` (`Hyperelliptic.lean:99`) to be biholomorphisms instead of simple `Homeomorph`s. Initial logic and manifold parameters are validated. 
-2. **Analytic Transport:** Establish `genus_eq_of_biholomorph` in `Jacobians/RiemannSurface/Genus.lean:4`. Standard pullback processing applied via `LinearEquiv` on `HolomorphicOneForm`.
+1. **Local Analytic Promotion (manifold transport):** Keep `AX_Hyperelliptic_oddEquiv` and `AX_Hyperelliptic_evenEquiv` as `Homeomorph` (`≃ₜ`) — *do not* mutate their base signatures. Instead, build a small local lemma that promotes each branch's topological `≃ₜ` to an analytic equivalence at the manifold level. Concretely: construct the biholomorphism from `Homeomorph.refl`-style `Equiv.cast` plus Mathlib's manifold-equivalence transport (`ChartedSpace`/`IsManifold` compatibility along the parity-branch definitional equality), packaged as a local `genusPromote_odd` / `genusPromote_even` helper inside this file or `Jacobians/RiemannSurface/Genus.lean`. The cast lines up because `Hyperelliptic.instChartedSpace` / `Hyperelliptic.instIsManifold` themselves dispatch on the same `dite` over `Odd H.f.natDegree`, so the analytic structure is definitionally the existing one on `HyperellipticOdd`/`HyperellipticEven` after `dif_pos h` / `dif_neg h`.
+2. **Analytic Transport:** Establish `genus_eq_of_biholomorph` in `Jacobians/RiemannSurface/Genus.lean:4`. Standard pullback processing applied via `LinearEquiv` on `HolomorphicOneForm`. Consume the locally promoted biholomorphisms from step 1, *not* the base `≃ₜ` axioms directly.
 3. **Parity Dispatch:** Jump directly to the final transformation. Implement the dispatch logic:
    ```lean
    theorem AX_Hyperelliptic_genus (H : HyperellipticData) :
        genus (Hyperelliptic H) = H.genus := by
      by_cases h : Odd H.f.natDegree
-     · rw [genus_eq_of_biholomorph (AX_Hyperelliptic_oddEquiv H h)]
+     · rw [genus_eq_of_biholomorph (genusPromote_odd H h (AX_Hyperelliptic_oddEquiv H h))]
        exact genus_HyperellipticOdd_eq H h
-     · rw [genus_eq_of_biholomorph (AX_Hyperelliptic_evenEquiv H h)]
+     · rw [genus_eq_of_biholomorph (genusPromote_even H h (AX_Hyperelliptic_evenEquiv H h))]
        exact genus_HyperellipticEven_eq H
    ```
    Replace `axiom` with `theorem` in `Jacobians/ProjectiveCurve/Hyperelliptic.lean`.
 
 **Files touched**
-- `Jacobians/ProjectiveCurve/Hyperelliptic.lean` — upgrade parity equivalences to biholomorphisms; replace `AX_Hyperelliptic_genus` axiom with theorem.
-- `Jacobians/RiemannSurface/Genus.lean` — add `genus_eq_of_biholomorph`.
+- `Jacobians/ProjectiveCurve/Hyperelliptic.lean` — replace `AX_Hyperelliptic_genus` axiom with theorem. **Do not** change `AX_Hyperelliptic_oddEquiv` / `AX_Hyperelliptic_evenEquiv` signatures.
+- `Jacobians/RiemannSurface/Genus.lean` — add `genus_eq_of_biholomorph`, plus the local `genusPromote_odd` / `genusPromote_even` manifold-transport helpers that lift a `≃ₜ` to a biholomorphism along the parity `dite` branch.
 
 **Acceptance**
 - `lake build Jacobians.ProjectiveCurve.Hyperelliptic` succeeds.
@@ -52,3 +52,5 @@ axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_Hyperelliptic_genus.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Equivalence signature pinned as Homeomorph (`≃ₜ`); `AX_Hyperelliptic_genus` promotes locally via manifold transport rather than changing this base signature.

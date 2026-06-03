@@ -4,12 +4,14 @@
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 10 &nbsp;&nbsp; **Est:** ~2 focused months (multi-month, multi-contributor project for Mathlib algebraic topology)
 **Blocked by:** `intersectionForm` (and transitively `AX_AnalyticCycleBasis`, `AX_RiemannBilinear` — see `intersectionForm.md`). Independent of `AX_IntersectionForm_perfect`.
 
+**Top-level theorem status:** This axiom remains a top-level statement and will be discharged as a top-level `theorem` built on the carrier `def intersectionForm` (provided by `intersectionForm.md`). It is **not** absorbed into a bundled typeclass; the companion-axiom plan structure is preserved because the property is more concrete and decomposable as its own theorem.
+
 **Statement (verbatim):**
 ```lean
 axiom AX_IntersectionForm_alternating
     {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (a : H1 X x₀) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) (a : H1 X x₀) :
     intersectionForm x₀ a a = 0
 ```
 
@@ -51,5 +53,9 @@ This is deeply blocked on missing Mathlib infrastructure (`needs-infra`). It req
 - **Recipe Overhauled:** Removed fictional Lean pseudo-code and an invalid "optional shortcut." Replaced with a rigorous mathematical dependency tree outlining the specific topological and categorical steps needed.
 - **Bridging Gap Addressed:** Explicitly detailed the requirement to build machinery proving `H²(X; ℤ) ≅ ℤ` via UCT or Poincaré Duality, as resolving `2x=0` over cohomology is not a trivial `linarith`/`omega` arithmetic operation.
 
+**Cross-plan patch (2026-06-03):** Aligned with companion axioms: `intersectionForm` discharges only the carrier; `_alternating` / `_perfect` remain top-level theorems.
+
 ---
 **Vetting trail.** Critique: `_vetting/AX_IntersectionForm_alternating.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

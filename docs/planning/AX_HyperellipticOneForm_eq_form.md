@@ -45,7 +45,7 @@ This is the demo recipe shape: cite L2 + the cross-summand cocycles at `EvenForm
    The four-case dispatch is exactly the one already wired up at `EvenForm.lean:2211-2221`. This exhausts all chart pairs `(inl, inl)`, `(inl, inr)`, `(inr, inl)`, `(inr, inr)` *on the punctured chart targets*. The remaining hole — equality at the chart origin `z = 0` for branch and infinity charts — is closed in Step 6.
 
 6. **Extend across the chart origin by continuity (the boundary-point step).** This step closes the singleton hole `{0}` at every branch / infinity chart origin. For each `q` with `Quotient.out q = Sum.inr b` (or `Sum.inl a` with `a ∉ smoothLocusY`, the branch-point projY case):
-   - Both `form.coeff q` and `form'.coeff q` are `AnalyticOn ℂ` on the full chart target `T := (extChartAt 𝓘(ℂ) q).target` (from `IsHolomorphicOneFormCoeff`, `OneForm.lean:69-71`). In particular both are **continuous** on `T`, which contains `0` as an interior point.
+   - Both `form.coeff q` and `form'.coeff q` are `AnalyticOn ℂ` on the full chart target `T := (extChartAt 𝓘(ℂ, ℂ) q).target` (from `IsHolomorphicOneFormCoeff`, `OneForm.lean:69-71`). In particular both are **continuous** on `T`, which contains `0` as an interior point.
    - Steps 4–5 give `form.coeff q z = form'.coeff q z` for all `z ∈ T \ {0}`.
    - The punctured neighbourhood `T \ {0}` is dense in `T` near `0` (in fact `0` is in the closure of `T \ {0}` because `T` is open in `ℂ` and `{0}` has empty interior in `ℂ`).
    - Apply a continuity-extension lemma to extend the equality across `0`. Two compatible Mathlib routes:
@@ -87,7 +87,7 @@ theorem AX_HyperellipticOneForm_eq_form
         have h2 := form'.2.2.2 q z (by simpa [hOut] using hz)
         simp [h1, h2]
     · -- Branch-point projY case (Step 4 on punctured target + Step 6 at origin).
-      by_cases hz : z ∈ (extChartAt 𝓘(ℂ) q).target
+      by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target
       · -- Inside chart target. Split on z = 0 vs z ≠ 0.
         by_cases hz0 : z = 0
         · -- Step 6: boundary-point continuity extension.
@@ -101,7 +101,7 @@ theorem AX_HyperellipticOneForm_eq_form
         have h2 := form'.2.2.2 q z hz
         simp [h1, h2]
   · -- Infinity-summand case (Step 5 on punctured target + Step 6 at origin).
-    by_cases hz : z ∈ (extChartAt 𝓘(ℂ) q).target
+    by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target
     · by_cases hz0 : z = 0
       · subst hz0
         exact eq_at_origin_of_eqOn_punctured form form' q
@@ -135,3 +135,5 @@ The `eqOn_punctured_branch` / `eqOn_punctured_infty` helpers are the cocycle-hop
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_HyperellipticOneForm_eq_form.md`. Verdict: revise. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

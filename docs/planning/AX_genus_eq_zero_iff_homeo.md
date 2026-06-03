@@ -8,7 +8,7 @@
 ```lean
 axiom AX_genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] :
     genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1))
 ```
 
@@ -90,3 +90,5 @@ If splitting is not desired at this checkpoint, the recipe still requires `(⇐)
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_genus_eq_zero_iff_homeo.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

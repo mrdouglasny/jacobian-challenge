@@ -11,7 +11,7 @@ divisor `D` on `X`. Forms a rank-1 locally-free sheaf; we only expose
 the ℂ-vector spaces `H⁰` and `H¹` below. -/
 axiom LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : Type
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (D : Divisor X) : Type
 ```
 
 **Why it's an axiom right now:** It was likely left as an axiom alongside `H0` and `H1` before realizing that, within the current decoupled API design, `LineBundle D` acts purely as an index token. Because the API defines `H0 (L : LineBundle D)` and `H1 (L : LineBundle D)` as separate types, the bundle itself does not carry the data of its sections. A full sheaf-theoretic encoding (which would use Mathlib's existing `Mathlib.CategoryTheory.Sites.Sheaf` instantiated for complex manifolds) is explicitly deferred.
@@ -23,9 +23,10 @@ axiom LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
    ```lean
    def LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
        [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-       [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : Type := PUnit
+       [IsManifold 𝓘(ℂ, ℂ) ω X] (D : Divisor X) : Type := PUnit
    ```
 3. (Note for subsequent discharges: The mathematical structure of $\mathcal{O}(D)$, representing meromorphic functions $f$ such that $\text{div}(f) + D \ge 0$, belongs exclusively to the discharge plan for `H0`. Forster Ch. II §16 defines $\mathcal{O}(D)$ as a sheaf, but its global sections $\Gamma(X, \mathcal{O}(D))$ contain the bounded meromorphic functions.)
+   **Downstream consumer note.** Because `LineBundle D` is the lightweight `PUnit` token, the `L : LineBundle D` argument in `H0`/`H1`/`H0.instModule` carries no sheaf data. Downstream consumers MUST construct the sheaf of sections of $\mathcal{O}(D)$ locally from the divisor `D` argument (already in scope as `{D : Divisor X}`); they must NOT project a `.sheaf` field off `L`.
 4. Replace `axiom` with `def` in `Jacobians/RiemannSurface/LineBundle.lean`. Downstream definitions like `LineBundle.ofDivisor` (`LineBundle.lean:128`) trivially return `PUnit.unit`.
 
 **Gemini critique addressed:**
@@ -47,3 +48,7 @@ axiom LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
 
 ---
 **Vetting trail.** Critique: `_vetting/LineBundle.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Refactored to not project `.sheaf` off the `PUnit`-token `LineBundle`; sheaf data is now built from the divisor `D` argument directly.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

@@ -19,7 +19,7 @@ for `ambientPhi`. ~500-1000 lines to formalize.
 discharge: prove the same statement and replace this `axiom` with a
 `theorem`. See `vendor/kirov-jacobian-claude/HANDOFF.md`. -/
 axiom ambientPhi_ambientPsi_eq {gX gY : ℕ}
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (d : ℕ)
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω f) (d : ℕ)
     (y : Fin gY → ℂ) :
     ambientPhi (gX := gX) (gY := gY) f hf (ambientPsi f hf y) = (d : ℕ) • y
 ```
@@ -53,3 +53,5 @@ axiom ambientPhi_ambientPsi_eq {gX gY : ℕ}
 
 ---
 **Vetting trail.** Critique: `_vetting/ambientPhi_ambientPsi_eq.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.

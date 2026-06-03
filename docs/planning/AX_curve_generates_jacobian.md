@@ -2,13 +2,13 @@
 
 **Location:** `Jacobians/Axioms/UniversalProperty.lean:44`
 **Route:** provable-from-other-axioms &nbsp;&nbsp; **Effort:** 3 &nbsp;&nbsp; **Est:** ~1–2 focused weeks, ~150 LOC (relies heavily on existing Riemann-Roch and Abel theorem axioms)
-**Blocked by:** `Divisor`, `AX_RiemannRoch`, `AX_AbelTheorem`
+**Blocked by:** `Divisor`, `AX_RiemannRoch`, `AX_SerreDuality`, `AX_AbelTheorem`
 
 **Statement (verbatim):**
 ```lean
 axiom AX_curve_generates_jacobian {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (h : 0 < genus X) :
+    [IsManifold 𝓘(ℂ, ℂ) ω X] (x₀ : X) (h : 0 < genus X) :
     AddSubgroup.closure (Set.range (Jacobian.ofCurve x₀)) = ⊤
 ```
 
@@ -20,8 +20,10 @@ This is the classical **Jacobi inversion theorem**, realized here as a corollary
 
 1. **Reduce the goal to "every `[D] ∈ Jacobian X` is hit by some sum of `g` Abel–Jacobi images of points."** Unfold `AddSubgroup.closure_eq_top_iff` / `AddSubgroup.eq_top_iff`. Since `Jacobian.ofCurve x₀ P = abelJacobiDiv X ((P : Divisor X) - (x₀ : Divisor X))` once the `Divisor` stub lands (compose `ofCurveImpl` at `Jacobians/Axioms/AbelJacobiMap.lean:229` through `abelJacobiDiv` at `Jacobians/Axioms/AbelTheorem.lean:62`), it suffices to show every `j : Jacobian X` is `abelJacobiDiv X (∑ᵢ Pᵢ − g · x₀)` for some `P₁, …, P_g ∈ X`.
 
-2. **Lift to a divisor class and apply Riemann–Roch.** For an arbitrary base divisor `D₀` of degree `g` (e.g. `g · x₀`), pick any `j ∈ Jacobian X` and lift it to a divisor class `[E − D₀]` with `deg E = g` using `AX_AbelTheorem` (`Jacobians/Axioms/AbelTheorem.lean:69`). Apply `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:61-66`) to `E`:
-   `h⁰(O(E)) − h⁰(O(K − E)) = deg E + 1 − g = 1` (using `deg E = g`),
+2. **Lift to a divisor class and apply Riemann–Roch.** For an arbitrary base divisor `D₀` of degree `g` (e.g. `g · x₀`), pick any `j ∈ Jacobian X` and lift it to a divisor class `[E − D₀]` with `deg E = g` using `AX_AbelTheorem` (`Jacobians/Axioms/AbelTheorem.lean:69`). Apply `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:61-66`) to `E`, which is typed via `H¹`:
+   `h⁰(O(E)) − h¹(O(E)) = deg E + 1 − g = 1` (using `deg E = g`).
+   Bridge to the canonical formulation by applying `AX_SerreDuality` to convert `H¹(O(E))` to `Dual(H⁰(O(K − E)))`, yielding `h¹(O(E)) = h⁰(O(K − E))`. Substituting gives the standard dimension count
+   `h⁰(O(E)) − h⁰(O(K − E)) = 1`,
    so `h⁰(O(E)) ≥ 1`. Hence, there exists a non-zero global section $s \in H^0(X, O(E))$.
 
 3. **Section-to-divisor correspondence.** To formally conclude that the divisor class $|E|$ is non-empty, use the `Section -> Divisor` correspondence API (which must be built). Define $E' = \text{divisorOfSection}(s)$. Prove that the vanishing locus of a non-zero section gives an effective divisor ($E' \ge 0$) and that $E' \sim E$ (they are linearly equivalent). Because degree is invariant under linear equivalence, `deg E' = g`.
@@ -52,9 +54,13 @@ This is the classical **Jacobi inversion theorem**, realized here as a corollary
 
 ## Gemini critique addressed:
 - **Route and Effort revised:** Changed route to `provable-from-other-axioms` and dramatically lowered effort to 3 (from 8), acknowledging that the heavy lifting is delegated to `AX_RiemannRoch` and `AX_AbelTheorem`, making this a straightforward corollary rather than a from-scratch textbook undertaking.
-- **Removed irrelevant Serre Duality step:** Completely dropped the former Step 3 regarding the genericity and uniqueness of the effective divisor via Serre Duality, as it is mathematically irrelevant to proving that the Jacobian is *generated* by the curve (which only requires existence).
+- **Serre Duality role clarified:** `AX_SerreDuality` is required as a bridging step in the Riemann–Roch reduction (Step 2), since `AX_RiemannRoch` is typed via `H¹` and the dimension count uses `h⁰(O(K − E))`. The former Step 3 regarding genericity and uniqueness of the effective divisor was dropped (only existence is needed for generation), but the duality bridge itself is retained.
 - **Addressed Step 2's logical gap:** Explicitly planned for the missing `Section -> Divisor` infrastructure. The proof now properly maps the algebraic outcome $h^0(O(E)) \ge 1$ to a non-zero section, and uses a planned `divisorOfSection` API to construct the effective divisor $E' \sim E$, closing the formalization handwave.
 - **Genus 0 note:** Acknowledged in the docstring section that the `0 < genus X` assumption prevents a trivial case, though it is not strictly strictly required for the mathematics (but is maintained to preserve the exact required signature).
 
 ---
 **Vetting trail.** Critique: `_vetting/AX_curve_generates_jacobian.md`. Verdict: reject. Revised: 2026-06-03.
+
+**Cross-plan patch (2026-06-03):** Restored `AX_SerreDuality` as a prerequisite; the dimension reduction `h⁰(O(E)) − h⁰(O(K-E)) = …` requires Serre duality to bridge from `AX_RiemannRoch`'s `H¹` formulation.
+
+**Cross-plan patch (2026-06-03):** Standardised manifold-model-space notation to `𝓘(ℂ, ℂ)` (Mathlib's `modelWithCornersSelf ℂ ℂ`); the single-arg alias `𝓘(ℂ)` caused typeclass-unification failures between generic and concrete plans.
