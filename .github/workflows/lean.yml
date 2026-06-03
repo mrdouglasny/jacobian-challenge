@@ -59,10 +59,34 @@ jobs:
           fi
           echo "### ✓ Axiom report matches the kernel" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Report sorry inventory
+      - name: Sorries confined to known scaffolds (core stays sorry-free)
         if: always()
         run: |
-          echo "### Sorry inventory" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          grep -rn "sorry" Jacobians/ || echo "(no sorries found)" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          set -uo pipefail
+          # Files permitted to contain `sorry` — extension/bridge scaffolds, all OUTSIDE
+          # the core challenge. The invariant this guards: no `sorry` escapes into the
+          # core (Challenge API, Jacobian construction, curve witnesses, S1–S7 framework)
+          # or any new file. Counts within these files may fluctuate freely.
+          allow="Jacobians/Extensions/Hyperelliptic.lean
+          Jacobians/Extensions/AbelJacobi.lean
+          Jacobians/Bridge/KirovLineIntegral.lean
+          Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean"
+          pat='(:=|[[:space:]]by|=>|;|<;>)[[:space:]]*sorry\b|^[[:space:]]*sorry[[:space:]]*$'
+          allow_clean="$(echo "$allow" | sed 's/^[[:space:]]*//')"
+          fail=0
+          echo "### Sorry guard (file-level: core must stay sorry-free)" >> "$GITHUB_STEP_SUMMARY"
+          # File-level only — exact on *which* files carry a sorry. Per-declaration
+          # counts (authoritative) live in the README; a cheap grep over-counts
+          # proof-sketch lines, so we don't assert a total here.
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if grep -qxF "$f" <<< "$allow_clean"; then
+              echo "- \`$f\` — allowed scaffold" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "::error file=$f::sorry found outside the allowed scaffolds — the core must stay sorry-free. If this is a legitimate new scaffold, add it to the allowlist in .github/workflows/lean.yml."
+              echo "- ❌ \`$f\` — NOT allowed (sorry escaped the scaffolds)" >> "$GITHUB_STEP_SUMMARY"
+              fail=1
+            fi
+          done < <(grep -rIlE "$pat" Jacobians --include='*.lean' | grep -v /Vendor/ | sort)
+          [ "$fail" -eq 0 ] && echo "✓ every \`sorry\`-bearing file is an allowlisted scaffold; core is sorry-free." >> "$GITHUB_STEP_SUMMARY"
+          exit $fail
