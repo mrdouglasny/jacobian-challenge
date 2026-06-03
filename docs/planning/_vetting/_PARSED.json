@@ -1,0 +1,812 @@
+[
+  {
+    "slug": "AX_AbelTheorem",
+    "src_rel": "Jacobians/Axioms/AbelTheorem.lean",
+    "line": "66",
+    "route": "needs-infra",
+    "route_raw": "genuine-textbook (with substantial `needs-infra` substrate)",
+    "effort": 8,
+    "blocked_by": "abelJacobiDiv` (`Jacobians/Axioms/AbelTheorem.lean:60`), `PrincipalDivisors` (`Jacobians/RiemannSurface/LineBundle.lean:70`), `Divisor.deg` (`Jacobians/RiemannSurface/LineBundle.lean:63`), the sheaf-cohomology layer (`LineBundle`, `H0`, `H1` at `Jacobians/RiemannSurface/LineBundle.lean:77,85,104`), and downstream-axiom prerequisites `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:59`), `AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`), `AX_RiemannBilinear` (`Jacobians/Axioms/RiemannBilinear.lean:69`), `AX_AnalyticCycleBasis` (`Jacobians/Axioms/AnalyticCycleBasis.lean:257`), `AX_PeriodLattice` (`Jacobians/Axioms/PeriodLattice.lean:92`)."
+  },
+  {
+    "slug": "AX_AnalyticCycleBasis",
+    "src_rel": "Jacobians/Axioms/AnalyticCycleBasis.lean",
+    "line": "257",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 10,
+    "blocked_by": "AX_IntersectionForm_alternating`, `AX_IntersectionForm_perfect"
+  },
+  {
+    "slug": "AX_BranchLocus",
+    "src_rel": "Jacobians/Axioms/BranchLocus.lean",
+    "line": "100",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 4,
+    "blocked_by": "none (the supposed blocker \u2014 a manifold-level open mapping theorem \u2014 is already discharged inside `Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean` as `weightedFiberConservation_of_contMDiff` at line 1199, which uses Mathlib's complex `Mathlib.Analysis.Complex.OpenMapping` chart-by-chart and bypasses needing a free-standing manifold OMT)"
+  },
+  {
+    "slug": "AX_Elliptic_H1_symplectic",
+    "src_rel": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+    "line": "166",
+    "route": "provable-from-other-axioms",
+    "route_raw": "needs-infra, provable-from-other-axioms",
+    "effort": 7,
+    "blocked_by": "AX_IntersectionForm_alternating`, `AX_IntersectionForm_perfect`, `intersectionForm`, `AX_AnalyticCycleBasis` (the structure target itself); transitively the project's homology layer (`H1`, `Path.toHomologyClass`, the covering-space description of `\u03c0\u2081(\u2102/\u039b)`)"
+  },
+  {
+    "slug": "AX_Elliptic_aLoop_analytic",
+    "src_rel": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+    "line": "86",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 3,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "AX_Elliptic_bLoop_analytic",
+    "src_rel": "Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean",
+    "line": "90",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 3,
+    "blocked_by": "none (mirror of `AX_Elliptic_aLoop_analytic`, same ComplexTorus chart lemmas)"
+  },
+  {
+    "slug": "AX_H1_ProjectiveLine_trivial",
+    "src_rel": "Jacobians/ProjectiveCurve/Line/Witnesses.lean",
+    "line": "43",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "none (no other project axioms; the upstream gap is missing Mathlib infrastructure \u2014 `SimplyConnectedSpace (Metric.sphere (0 : EuclideanSpace \u211d (Fin 3)) 1)` is absent at the pin, and so is any usable `FundamentalGroupoid.vanKampen` lemma \u2014 both must be built in-repo, or upstreamed, before discharge is possible)"
+  },
+  {
+    "slug": "AX_HyperellipticAffine_connected",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean",
+    "line": "101",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "none (no other project axioms; the infra piece \u2014 path-connectedness of the affine variety `{y\u00b2 = f(x)}` \u2014 is purely topological and can be built directly from existing Mathlib + the squarefree hypothesis already carried by `HyperellipticData`)"
+  },
+  {
+    "slug": "AX_HyperellipticForm_polynomial_decomposition",
+    "src_rel": "Jacobians/Axioms/HyperellipticLiouville.lean",
+    "line": "215",
+    "route": "genuine-textbook",
+    "route_raw": "genuine-textbook",
+    "effort": 5,
+    "blocked_by": "none (L2 of the Liouville hierarchy; sub-step 4 already has the Mathlib-grade lemma in-tree)"
+  },
+  {
+    "slug": "AX_HyperellipticOneForm_eq_form",
+    "src_rel": "Jacobians/Axioms/HyperellipticLiouville.lean",
+    "line": "260",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "AX_HyperellipticForm_polynomial_decomposition` (Level 2)"
+  },
+  {
+    "slug": "AX_Hyperelliptic_evenEquiv",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "99",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 2,
+    "blocked_by": "Hyperelliptic"
+  },
+  {
+    "slug": "AX_Hyperelliptic_genus",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "104",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 2,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv"
+  },
+  {
+    "slug": "AX_Hyperelliptic_oddEquiv",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "93",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "Hyperelliptic`, `Hyperelliptic.instTopologicalSpace"
+  },
+  {
+    "slug": "AX_IntersectionForm_alternating",
+    "src_rel": "Jacobians/Axioms/IntersectionForm.lean",
+    "line": "66",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 10,
+    "blocked_by": "intersectionForm` (and transitively `AX_AnalyticCycleBasis`, `AX_RiemannBilinear` \u2014 see `intersectionForm.md`). Independent of `AX_IntersectionForm_perfect`."
+  },
+  {
+    "slug": "AX_IntersectionForm_perfect",
+    "src_rel": "Jacobians/Axioms/IntersectionForm.lean",
+    "line": "91",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 10,
+    "blocked_by": "intersectionForm` (and transitively `AX_AnalyticCycleBasis`, `AX_RiemannBilinear` \u2014 see `intersectionForm.md`). Used by `AX_IntersectionForm_nondeg` (theorem already in this file at `Jacobians/Axioms/IntersectionForm.lean:101-111`) and by `AX_AnalyticCycleBasis` (`Jacobians/Axioms/AnalyticCycleBasis.lean:257`, via the symplectic-basis classification)."
+  },
+  {
+    "slug": "AX_PeriodLattice",
+    "src_rel": "Jacobians/Axioms/PeriodLattice.lean",
+    "line": "92",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "AX_RiemannBilinear"
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_connected",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "113",
+    "route": "genuine-textbook",
+    "route_raw": "genuine-textbook",
+    "effort": 10,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_noncompact",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "121",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "AX_PlaneCurveAffine_nonempty"
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_nonempty",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "103",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 5,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "AX_PluckerFormula",
+    "src_rel": "Jacobians/Axioms/PluckerFormula.lean",
+    "line": "55",
+    "route": "genuine-textbook",
+    "route_raw": "genuine-textbook",
+    "effort": 8,
+    "blocked_by": "PlaneCurve"
+  },
+  {
+    "slug": "AX_RiemannBilinear",
+    "src_rel": "Jacobians/Axioms/RiemannBilinear.lean",
+    "line": "69",
+    "route": "mathlib-now",
+    "route_raw": "needs-infra (re-classified from ROADMAP's `mathlib-now [review]`; the load-bearing prerequisites \u2014 integration of `(1,1)",
+    "effort": 9,
+    "blocked_by": "AX_AnalyticCycleBasis`, `loopIntegralToH1` (used by `periodMap`), plus an unnamed Hodge-inner-product layer and a Stokes-on-Riemann-surfaces layer (neither yet exists as a project axiom)"
+  },
+  {
+    "slug": "AX_RiemannRoch",
+    "src_rel": "Jacobians/Axioms/RiemannRoch.lean",
+    "line": "59",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 10,
+    "blocked_by": "AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`); plus two `needs-infra` plans listed under \"Sub-plans needed\" below (\u010cech LES via Leray; Serre Finiteness for compact Riemann surfaces). Also still consumes the `LineBundle.lean` axiom stubs as concrete defs \u2014 `Divisor` (`Jacobians/RiemannSurface/LineBundle.lean:51`), `Divisor.deg` (line 63), `LineBundle.ofDivisor` (line 128), `H0` (line 85), `H1` (line 104)."
+  },
+  {
+    "slug": "AX_SerreDuality",
+    "src_rel": "Jacobians/Axioms/SerreDuality.lean",
+    "line": "54",
+    "route": "mathlib-now",
+    "route_raw": "needs-infra (reclassified from `mathlib-now [review]` per Gemini 3.1 Pro critique; not `genuine-textbook` either \u2014 the t",
+    "effort": 10,
+    "blocked_by": "LineBundle`, `H0`, `H1`, `Divisor`, `canonicalDivisor`, `PrincipalDivisors` (the entire sheaf-cohomology / line-bundle layer in `Jacobians/RiemannSurface/LineBundle.lean`), **plus** missing Mathlib infra: (i) integration of differential forms / Stokes on manifolds, (ii) Fr\u00e9chet-space topology on spaces of holomorphic sections, (iii) Cartan\u2013Serre finiteness (Schwartz's compact-perturbation lemma), (iv) Dolbeault complex on complex manifolds OR \u010cech cohomology with a usable Leray theorem for analytic sheaves. Paired infrastructurally with `AX_RiemannRoch` (`docs/planning/AX_RiemannRoch.md`) \u2014 both rest on the same sheaf-cohomology + analytic-topology layer; they must be planned together."
+  },
+  {
+    "slug": "AX_curve_generates_jacobian",
+    "src_rel": "Jacobians/Axioms/UniversalProperty.lean",
+    "line": "44",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 3,
+    "blocked_by": "Divisor`, `AX_RiemannRoch`, `AX_AbelTheorem"
+  },
+  {
+    "slug": "AX_genus_eq_zero_iff_homeo",
+    "src_rel": "Jacobians/Axioms/Uniformization0.lean",
+    "line": "55",
+    "route": "split",
+    "route_raw": "split \u2014 `(\u21d2)` is `provable-from-other-axioms`; `(\u21d0)` is `needs-infra`",
+    "effort": 6,
+    "blocked_by": "AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:59`), `AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`), plus the divisor / `H\u2070` / `H\u00b9` / `LineBundle.ofDivisor` / `canonicalDivisor` interface in `Jacobians/RiemannSurface/LineBundle.lean` (lines 51, 65, 85, 104, 123, 128). The `(\u21d0)` direction additionally requires De Rham cohomology / Hodge / Stokes on real 2-manifolds, none of which are present in this codebase or Mathlib at this pin."
+  },
+  {
+    "slug": "AX_ofCurve_contMDiff",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "238",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 7,
+    "blocked_by": "AX_pathIntegral_local_antiderivative` (`Jacobians/Axioms/AbelJacobiMap.lean:116`); transitively `pathIntegralBasepointFunctional`."
+  },
+  {
+    "slug": "AX_ofCurve_inj",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "257",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 9,
+    "blocked_by": "AX_RiemannRoch`, `AX_SerreDuality`, `INFRA_ExponentialSequence"
+  },
+  {
+    "slug": "AX_pathIntegral_local_antiderivative",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "116",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 9,
+    "blocked_by": "pathIntegralBasepointFunctional`, `CauchyTheorem_local"
+  },
+  {
+    "slug": "AX_pullbackAmbient_preserves_lattice",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "324",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 9,
+    "blocked_by": "AX_AnalyticCycleBasis`, `AX_PeriodLattice`, `AX_BranchLocus"
+  },
+  {
+    "slug": "AX_pullback_contMDiff",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "631",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "AX_pullbackAmbient_preserves_lattice"
+  },
+  {
+    "slug": "AX_pushforwardAmbient_preserves_lattice",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "310",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "AX_AnalyticCycleBasis`, `AX_PeriodLattice"
+  },
+  {
+    "slug": "AX_pushforwardOneForm_comp",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "197",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 9,
+    "blocked_by": "pushforwardOneForm`, Riemann Removable Singularity infrastructure"
+  },
+  {
+    "slug": "AX_pushforwardOneForm_id",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "190",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 3,
+    "blocked_by": "pushforwardOneForm` (this is a *characterising* property of that `def`; cannot become a theorem until the underlying `def` and its trace map API exist)."
+  },
+  {
+    "slug": "AX_pushforward_contMDiff",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "582",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 5,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "AX_pushforward_pullback",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "679",
+    "route": "genuine-textbook",
+    "route_raw": "genuine-textbook",
+    "effort": 8,
+    "blocked_by": "pushforwardOneForm` (`Jacobians/Axioms/AbelJacobiMap.lean:146`, currently axiomatic \u2014 must be a real `def` first), `AX_BranchLocus` (`Jacobians/Axioms/BranchLocus.lean:100`), and a project-side trace identity for `pushforwardOneForm \u2218 pullbackOneForm` (currently nowhere \u2014 see step 2 below). Transitively: the manifold-level Open Mapping Theorem / a Mathlib-or-bespoke Sard's lemma for non-constant holomorphic maps `X \u2192 Y` between compact Riemann surfaces (Mathlib v4.28 has Sard only for finite-dim real vector spaces, e.g. `Mathlib/MeasureTheory/Function/Jacobian.lean:598, 647` and the Hausdorff-dim version at `Mathlib/Topology/MetricSpace/HausdorffDimension.lean:560, 568` \u2014 none on manifolds)."
+  },
+  {
+    "slug": "Divisor-deg",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "63",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "Divisor`, `Divisor.instAddCommGroup` (`Jacobians/RiemannSurface/LineBundle.lean:51,56`)"
+  },
+  {
+    "slug": "Divisor-instAddCommGroup",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "56",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "Divisor` (`Jacobians/RiemannSurface/LineBundle.lean:51`)"
+  },
+  {
+    "slug": "Divisor",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "51",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "Divisor.instAddCommGroup` (`Jacobians/RiemannSurface/LineBundle.lean:56`)"
+  },
+  {
+    "slug": "H0-instAddCommGroup",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "90",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "H0` (`Jacobians/RiemannSurface/LineBundle.lean:85`)"
+  },
+  {
+    "slug": "H0-instModule",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "96",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "H0` (`Jacobians/RiemannSurface/LineBundle.lean:85`), `H0.instAddCommGroup` (`:90`)"
+  },
+  {
+    "slug": "H0",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "85",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "LineBundle` (`Jacobians/RiemannSurface/LineBundle.lean:77`), `Divisor` (`:51`), `Divisor.instAddCommGroup` (`:56`); enables `H0.instAddCommGroup` (`:90`), `H0.instModule` (`:96`)"
+  },
+  {
+    "slug": "H1-instAddCommGroup",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "108",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "H1` (`Jacobians/RiemannSurface/LineBundle.lean:104`)"
+  },
+  {
+    "slug": "H1-instModule",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "114",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "H1` (`Jacobians/RiemannSurface/LineBundle.lean:104`), `H1.instAddCommGroup` (`:108`)"
+  },
+  {
+    "slug": "H1",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "104",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 2,
+    "blocked_by": "LineBundle` (`Jacobians/RiemannSurface/LineBundle.lean:77`), `Divisor` (`:51`)"
+  },
+  {
+    "slug": "Hyperelliptic-instChartedSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "81",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 3,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv`, plus the atlas axioms listed below."
+  },
+  {
+    "slug": "Hyperelliptic-instCompactSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "68",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv`, `Hyperelliptic.instTopologicalSpace"
+  },
+  {
+    "slug": "Hyperelliptic-instConnectedSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "72",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv`, `Hyperelliptic.instTopologicalSpace`, `AX_HyperellipticAffine_connected` (transitively, through the odd branch)"
+  },
+  {
+    "slug": "Hyperelliptic-instIsManifold",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "87",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "Hyperelliptic`, `Hyperelliptic.instChartedSpace`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv`, plus the transition-compatibility axioms listed below."
+  },
+  {
+    "slug": "Hyperelliptic-instNonempty",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "76",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv"
+  },
+  {
+    "slug": "Hyperelliptic-instT2Space",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "65",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "Hyperelliptic`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv`, `Hyperelliptic.instTopologicalSpace"
+  },
+  {
+    "slug": "Hyperelliptic-instTopologicalSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "61",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 2,
+    "blocked_by": "Hyperelliptic"
+  },
+  {
+    "slug": "Hyperelliptic",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic.lean",
+    "line": "59",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 5,
+    "blocked_by": "Hyperelliptic.instChartedSpace`, `Hyperelliptic.instIsManifold"
+  },
+  {
+    "slug": "LineBundle-ofDivisor",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "128",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "LineBundle` (`Jacobians/RiemannSurface/LineBundle.lean:77`)"
+  },
+  {
+    "slug": "LineBundle",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "77",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "Divisor` (`Jacobians/RiemannSurface/LineBundle.lean:51`)"
+  },
+  {
+    "slug": "PlaneCurve-instChartedSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "181",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "PlaneCurve"
+  },
+  {
+    "slug": "PlaneCurve-instCompactSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "170",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 6,
+    "blocked_by": "PlaneCurve` (the type itself at `Jacobians/ProjectiveCurve/PlaneCurve.lean:161` is still axiomatic)"
+  },
+  {
+    "slug": "PlaneCurve-instConnectedSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "174",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "PlaneCurve`, `AX_PlaneCurveAffine_connected"
+  },
+  {
+    "slug": "PlaneCurve-instIsManifold",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "185",
+    "route": "genuine-textbook",
+    "route_raw": "genuine-textbook",
+    "effort": 9,
+    "blocked_by": "PlaneCurve`, `PlaneCurve.instChartedSpace"
+  },
+  {
+    "slug": "PlaneCurve-instNonempty",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "178",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "PlaneCurve`, `AX_PlaneCurveAffine_nonempty"
+  },
+  {
+    "slug": "PlaneCurve-instT2Space",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "167",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 5,
+    "blocked_by": "PlaneCurve"
+  },
+  {
+    "slug": "PlaneCurve-instTopologicalSpace",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "163",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "PlaneCurve"
+  },
+  {
+    "slug": "PlaneCurve",
+    "src_rel": "Jacobians/ProjectiveCurve/PlaneCurve.lean",
+    "line": "161",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "PrincipalDivisors",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "70",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 2,
+    "blocked_by": "Divisor`, `Divisor.instAddCommGroup` (`Jacobians/RiemannSurface/LineBundle.lean:51,56`), plus a project-internal meromorphic-function bundle on compact Riemann surfaces (does not yet exist as a top-level project decl; partial primitives in `Jacobians/Vendor/Wallace/HolomorphicForms/VanishingOrder.lean:90,104,342`)"
+  },
+  {
+    "slug": "abelJacobiDiv",
+    "src_rel": "Jacobians/Axioms/AbelTheorem.lean",
+    "line": "60",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 1,
+    "blocked_by": "Divisor`, `Divisor.instAddCommGroup`, `Divisor.deg` (`Jacobians/RiemannSurface/LineBundle.lean:51,56,63`)"
+  },
+  {
+    "slug": "affineLiftChart_compat_infinityLiftChart",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean",
+    "line": "243",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 7,
+    "blocked_by": "infinityLiftChart_compat_affineLiftChart` (the symmetric direction; the two recipes share the same case-split skeleton and one supplies the chart-transition-derivative input to the other via `Jacobians.GeneralResults.transition_fderiv_mul`)"
+  },
+  {
+    "slug": "affineLiftProjX_compat_infinityChart",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "78",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 3,
+    "blocked_by": "infinityChart`, `infinityInverseMap` (transitively)"
+  },
+  {
+    "slug": "affineLiftProjY_compat_infinityChart",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "102",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 3,
+    "blocked_by": "infinityChart`, `infinityInverseMap` (transitively)"
+  },
+  {
+    "slug": "ambientPhi_ambientPsi_eq",
+    "src_rel": "Jacobians/Vendor/Kirov/HolomorphicForms.lean",
+    "line": "340",
+    "route": "?",
+    "route_raw": "needs-deletion",
+    "effort": 1,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "bridgePath",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "164",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "none (this is the keystone \u2014 once it is a real `def`, the other five `bridgePath*` axioms in this file collapse to short derivations)"
+  },
+  {
+    "slug": "bridgePath_at_one",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "191",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "bridgePath"
+  },
+  {
+    "slug": "bridgePath_at_zero",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "188",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "bridgePath"
+  },
+  {
+    "slug": "bridgePath_chart_differentiable",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "182",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "bridgePath"
+  },
+  {
+    "slug": "bridgePath_continuous",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "167",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 2,
+    "blocked_by": "bridgePath"
+  },
+  {
+    "slug": "bridgePath_lineIntegrable",
+    "src_rel": "Jacobians/Bridge/KirovLineIntegral.lean",
+    "line": "212",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 6,
+    "blocked_by": "bridgePath_chart_differentiable` (and transitively `bridgePath`)"
+  },
+  {
+    "slug": "canonicalDivisor",
+    "src_rel": "Jacobians/RiemannSurface/LineBundle.lean",
+    "line": "123",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 10,
+    "blocked_by": "Divisor` (`Jacobians/RiemannSurface/LineBundle.lean:51`), `PrincipalDivisors` (`Jacobians/RiemannSurface/LineBundle.lean:70`), plus major missing Mathlib infrastructure for meromorphic sections of line bundles and the Identity Theorem."
+  },
+  {
+    "slug": "contDiffOn_symm_toOpenPartialHomeomorph",
+    "src_rel": "Jacobians/GeneralResults/InverseFunctionTheorem.lean",
+    "line": "9",
+    "route": "?",
+    "route_raw": "revise",
+    "effort": 6,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "genus_eq_zero_iff_homeo",
+    "src_rel": "Jacobians/Vendor/Kirov/Genus.lean",
+    "line": "94",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "AX_genus_eq_zero_iff_homeo` (main tree, `Jacobians/Axioms/Uniformization0.lean:55`)"
+  },
+  {
+    "slug": "infinityChart",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "58",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 7,
+    "blocked_by": "infinityInverseMap"
+  },
+  {
+    "slug": "infinityChart_compat_affineLiftProjX",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "66",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 3,
+    "blocked_by": "infinityChart`, `infinityInverseMap` (transitively)"
+  },
+  {
+    "slug": "infinityChart_compat_affineLiftProjY",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "90",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 3,
+    "blocked_by": "infinityChart`, `infinityInverseMap` (transitively)"
+  },
+  {
+    "slug": "infinityChart_mem_source",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "62",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 1,
+    "blocked_by": "infinityChart"
+  },
+  {
+    "slug": "infinityInverseMap",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/OddAtlas/InfinityChart.lean",
+    "line": "48",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "none (it is the *foundation* of the OA2 chart-at-infinity block; the other six OA2 axioms `infinityChart`, `infinityChart_mem_source`, `infinityChart_compat_affineLiftProjX`, `affineLiftProjX_compat_infinityChart`, `infinityChart_compat_affineLiftProjY`, `affineLiftProjY_compat_infinityChart` all reduce to this once it lands)"
+  },
+  {
+    "slug": "infinityLiftChart_compat_affineLiftChart",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/EvenAtlas.lean",
+    "line": "252",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 6,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "instPeriodLatticeDiscrete",
+    "src_rel": "Jacobians/Axioms/PeriodLattice.lean",
+    "line": "77",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "AX_RiemannBilinear`, `AX_PeriodLattice"
+  },
+  {
+    "slug": "intersectionForm",
+    "src_rel": "Jacobians/Axioms/IntersectionForm.lean",
+    "line": "59",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 3,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "loopIntegralToH1",
+    "src_rel": "Jacobians/RiemannSurface/PathIntegral.lean",
+    "line": "101",
+    "route": "provable-from-other-axioms",
+    "route_raw": "provable-from-other-axioms",
+    "effort": 4,
+    "blocked_by": "pathIntegralAnalyticArc, homotopyInvariance"
+  },
+  {
+    "slug": "pathIntegralBasepointFunctional",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "98",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 8,
+    "blocked_by": "none upstream (no other axiom in this repo blocks it); load-bearing for the *combination* with `AX_pathIntegral_local_antiderivative`, and downstream for `AX_ofCurve_contMDiff`, `AX_ofCurve_inj`, `ofCurveAmbient`, `ofCurveImpl`."
+  },
+  {
+    "slug": "polynomialLocalHomeomorph_no_critical_in_source",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean",
+    "line": "247",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 1,
+    "blocked_by": "none"
+  },
+  {
+    "slug": "pushforwardOneForm",
+    "src_rel": "Jacobians/Axioms/AbelJacobiMap.lean",
+    "line": "146",
+    "route": "needs-infra",
+    "route_raw": "needs-infra",
+    "effort": 10,
+    "blocked_by": "AX_BranchLocus` (`Jacobians/Axioms/BranchLocus.lean:100`); transitively depends on `localOrder` (`Jacobians/Axioms/BranchLocus.lean:69\u201372`, already a `def`)."
+  },
+  {
+    "slug": "squareLocalHomeomorph_zero_notMem_source",
+    "src_rel": "Jacobians/ProjectiveCurve/Hyperelliptic/AffineForm.lean",
+    "line": "66",
+    "route": "mathlib-now",
+    "route_raw": "mathlib-now",
+    "effort": 2,
+    "blocked_by": "none"
+  }
+]

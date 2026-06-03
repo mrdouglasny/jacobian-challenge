@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "AX_RiemannBilinear",
+    "verdict": "revise",
+    "duration_s": 32.5,
+    "output_chars": 3425
+  },
+  {
+    "slug": "AX_SerreDuality",
+    "verdict": "reject",
+    "duration_s": 32.3,
+    "output_chars": 4058
+  },
+  {
+    "slug": "AX_BranchLocus",
+    "verdict": "revise",
+    "duration_s": 70.1,
+    "output_chars": 3819
+  },
+  {
+    "slug": "AX_H1_ProjectiveLine_trivial",
+    "verdict": "revise",
+    "duration_s": 45.2,
+    "output_chars": 3460
+  },
+  {
+    "slug": "PlaneCurve-instCompactSpace",
+    "verdict": "revise",
+    "duration_s": 69.8,
+    "output_chars": 3279
+  },
+  {
+    "slug": "AX_RiemannRoch",
+    "verdict": "reject",
+    "duration_s": 40.0,
+    "output_chars": 3695
+  },
+  {
+    "slug": "AX_HyperellipticForm_polynomial_decomposition",
+    "verdict": "reject",
+    "duration_s": 170.6,
+    "output_chars": 4458
+  },
+  {
+    "slug": "AX_AbelTheorem",
+    "verdict": "revise",
+    "duration_s": 78.0,
+    "output_chars": 3661
+  },
+  {
+    "slug": "AX_HyperellipticOneForm_eq_form",
+    "verdict": "revise",
+    "duration_s": 92.9,
+    "output_chars": 2986
+  },
+  {
+    "slug": "AX_genus_eq_zero_iff_homeo",
+    "verdict": "reject",
+    "duration_s": 43.2,
+    "output_chars": 4154
+  },
+  {
+    "slug": "AX_pushforward_pullback",
+    "verdict": "reject",
+    "duration_s": 42.6,
+    "output_chars": 3306
+  },
+  {
+    "slug": "Divisor-deg",
+    "verdict": "accept",
+    "duration_s": 28.8,
+    "output_chars": 1917
+  }
+]
