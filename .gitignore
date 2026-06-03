@@ -10,3 +10,6 @@ lake-packages/
 
 # Local-only commentary / competitive analysis of third-party repos — not for push
 commentary/
+
+# CI: ephemeral regenerated axiom report (guard step)
+axiom-report.regenerated.txt
