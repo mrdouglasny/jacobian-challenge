@@ -9,10 +9,10 @@
 // docs/axiom-discharge-roadmap.md after it returns (the workflow sandbox
 // cannot write files itself).
 //
-// File list below was produced by lean-fleet/scan_fleet.py scoped to the
-// `Jacobians` lean_lib (matches count_axioms.sh scope). Regenerate if the
-// axiom set changes. NOTE: scan has a minor false-positive (a wrapped
-// signature word); agents mark such entries route="spurious".
+// File list below was produced by the fleet axiom scanner scoped to the
+// `Jacobians` lean_lib (matches count_axioms.sh scope). Regenerate per the
+// runbook if the axiom set changes. NOTE: the scan has a minor false-positive
+// (a wrapped signature word); agents mark such entries route="spurious".
 
 export const meta = {
   name: 'jc-axiom-discharge-plans',
@@ -23,8 +23,13 @@ export const meta = {
   ],
 }
 
-const REPO = '/Users/mdouglas/Documents/GitHub/jacobian-challenge'
-const CATALOGS = '/Users/mdouglas/Documents/GitHub/catalogs/ALL_LEMMAS.tsv'
+// ROOT = your local checkout root (the dir containing jacobian-challenge and
+// catalogs). Pass it at launch — the Workflow sandbox has no env/fs access:
+//   Workflow({ scriptPath: "scripts/axiom_discharge_plan.workflow.js",
+//              args: { root: "/absolute/path/to/your/checkout/root" } })
+const ROOT = (args && args.root) || 'SET-args.root-TO-YOUR-CHECKOUT-ROOT'
+const REPO = `${ROOT}/jacobian-challenge`
+const CATALOGS = `${ROOT}/catalogs/ALL_LEMMAS.tsv`
 
 const FILES = [
   "Jacobians/Axioms/AbelJacobiMap.lean",

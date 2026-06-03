@@ -4,19 +4,18 @@ Goal: generate a **dependency-ordered roadmap** for discharging every axiom in
 `jacobian-challenge` (99 axioms across 28 files, scoped to the `Jacobians`
 lean_lib). Output goes to `docs/axiom-discharge-roadmap.md`.
 
-This is set up to run from a **fresh Claude Code session in this repo** (e.g.
-your other account). It uses multi-agent orchestration, so you must opt in
-(say "use a workflow" / "ultracode", or just tell the agent to run the
-Workflow file below).
+This is set up to run from a **fresh Claude Code session in this repo**. It uses
+multi-agent orchestration, so you must opt in (say "use a workflow" /
+"ultracode", or just tell the agent to run the Workflow file below).
 
 ## What it does
 
-A 2-phase `Workflow`:
+A 2-phase `Workflow` (`scripts/axiom_discharge_plan.workflow.js`):
 
 1. **Plan** — ~28 read-only `Explore` agents, one per file. Each enumerates the
-   file's axioms, reads their docstrings + the `AXIOM_AUDIT.md` rows, greps
-   `~/Documents/GitHub/catalogs/ALL_LEMMAS.tsv`, checks Mathlib (leansearch /
-   loogle / local search), and emits a structured plan per axiom:
+   file's axioms, reads their docstrings + the `AXIOM_AUDIT.md` rows, greps the
+   cross-project proved-lemma index (`catalogs/ALL_LEMMAS.tsv`), checks Mathlib
+   (leansearch / loogle / local search), and emits a structured plan per axiom:
    `{ name, statement, why_axiomatized, route, findings, prereqs, blocked_by,
    effort, references }`.
 
@@ -35,21 +34,27 @@ only write is you saving the returned `roadmap` to disk afterward.
 
 From a Claude Code session in this repo, instruct the agent:
 
-> Run the workflow in `scripts/axiom_discharge_plan.workflow.js`, then write the
-> returned `roadmap` to `docs/axiom-discharge-roadmap.md`.
+> Run the workflow in `scripts/axiom_discharge_plan.workflow.js` with
+> `args.root` set to my local checkout root, then write the returned `roadmap`
+> to `docs/axiom-discharge-roadmap.md`.
 
 The agent should:
 
 ```
-// 1. launch (opt-in required — this spawns ~30 agents)
-Workflow({ scriptPath: "scripts/axiom_discharge_plan.workflow.js" })
+// 1. launch (opt-in required — this spawns ~30 agents).
+//    args.root = the dir that contains jacobian-challenge AND catalogs.
+Workflow({
+  scriptPath: "scripts/axiom_discharge_plan.workflow.js",
+  args: { root: "<absolute path to your checkout root>" }
+})
 // 2. when it returns { roadmap, real_count, files_done, plans }:
 //    Write docs/axiom-discharge-roadmap.md  <- roadmap
 //    (optionally also dump `plans` to docs/axiom-discharge-plans.json)
 ```
 
-The workflow **returns** the markdown; the sandbox can't write files, so the
-saving step is done by the launching agent after it returns.
+The workflow **returns** the markdown; the sandbox can't write files (no fs/env
+access), so both the path injection (`args.root`) and the saving step are done
+by the launching session.
 
 ## Cost / scale
 
@@ -57,27 +62,23 @@ saving step is done by the launching agent after it returns.
 real per-axiom math triage + search, so this is a non-trivial token spend — it
 was deliberately chosen over 99 single-axiom agents (one per file batches that
 file's axioms). Inherits the session model for the plan agents (use Opus for
-classification quality; downgrade to Sonnet in the script if you want to save
-tokens — set `model: 'sonnet'` on the plan `agent()` call).
+classification quality; set `model: 'sonnet'` on the plan `agent()` call to save
+tokens).
 
 ## Regenerating the file list
 
-The `FILES` array in the workflow script came from `lean-fleet`:
+The `FILES` array in the workflow script is every file containing an `axiom`,
+scoped to the `Jacobians` lean_lib. Regenerate self-contained:
 
 ```bash
-cd ~/Documents/GitHub/lean-fleet && python3 - <<'PY'
-import scan_fleet as sf, json, collections
-from pathlib import Path
-repo = Path("/Users/mdouglas/Documents/GitHub/jacobian-challenge")
-rows=[r for r in sf.scan_repo("jacobian-challenge",repo) if r["kind"]=="axiom"]
-print(json.dumps(sorted({r["path"] for r in rows})))
-PY
+cd <jacobian-challenge>            # repo root
+git grep -lE '^[[:space:]]*(private )?axiom ' -- 'Jacobians/**/*.lean' | sort
 ```
 
-(`lean-fleet` is the private orchestration repo: `mrdouglasny/lean-fleet`.)
-
 ## Notes
-- The scanner has a minor false-positive (a wrapped signature word read as an
+- Requires `catalogs/ALL_LEMMAS.tsv` present at `<root>/catalogs/` for the
+  cross-project lemma cross-check (skip those greps if absent).
+- The axiom scan has a minor false-positive (a wrapped signature word read as an
   axiom name); plan agents mark such entries `route: "spurious"` and the
   synthesis drops them.
 - This produces *plans*, not proofs. Discharging the `mathlib-now` /
