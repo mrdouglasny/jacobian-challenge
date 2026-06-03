@@ -8,6 +8,8 @@ An interface-complete Lean 4 bridge to Kevin Buzzard's [Jacobian Challenge](http
 
 Buzzard ships a single Lean file `Challenge.lean` with **24 `sorry`s**, defining an API for the Jacobian of a compact Riemann surface, the Abel–Jacobi map, and pushforward / pullback functoriality along holomorphic maps. The design is adversarial: the API cannot be satisfied by any "hack" definition (e.g. `Jacobian := 0`) because `genus_eq_zero_iff_homeo` forces `genus` to be correct and `ofCurve_inj` forces Abel–Jacobi to be genuinely injective in positive genus. All underlying mathematics is classical (Abel 1829, Jacobi 1851); the challenge is to formalize it on top of current Mathlib (extending Mathlib would be a bonus, not a requirement).
 
+**Proving targets validates the definitions.** The kernel checks *proofs*, never that a `def` *means* what it should — so a degenerate definition can compile. Buzzard's design defends against this by making any candidate `genus`/`Jacobian`/`ofCurve` clear independent obligations (`genus_eq_zero_iff_homeo`, `ofCurve_inj`) that a hack definition would fail. We push the idea further by adding **our own additional target** — the Albanese **universal property** (`Jacobians.IsJacobian`, [below](#how-this-repo-addresses-it)) — so the construction must satisfy *more* independent theorems, pinning it harder against degeneracy. The more genuine targets a definition is forced to prove, the more its meaning is validated.
+
 ## How this repo addresses it
 
 **Interface closed.** All 24 `sorry`s in `Challenge.lean` discharge as real `def`s and real `instance`s — no axiom stub at the Buzzard-API level. Functoriality identities (identity + composition for both `pullback` and `pushforward`) are derived **theorems**, not axioms.
@@ -126,7 +128,7 @@ _Verified snapshot with exact sorry/axiom counts and remote-sync state:_
 
 | | |
 |---|---|
-| Build | `lake build` green (8567 jobs, verified 2026-06-03); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). **90 axioms (88 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, Liouville Level 1, and pullback of holomorphic 1-forms are axiom-free |
+| Build | `lake build` green (8567 jobs, verified 2026-06-03); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **13 `sorry` total**, all outside the core (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2, `ProjectiveCurve/Hyperelliptic/AntiInvariance.lean` 1). **90 axioms (88 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, Liouville Level 1, and pullback of holomorphic 1-forms are axiom-free |
 | Foundation defs | 13/13 real (`Jacobian X`, all 7 typeclass instances, `ofCurve`, `pushforward`, `pullback`, `degree`) |
 | Property theorems derived | `ofCurve_self`, `pushforward_id_apply` / `_comp_apply`, `pullback_id_apply` / `_comp_apply`, `genus_ProjectiveLine_eq_zero` (axiom-free), `genus_Elliptic_eq_one` (axiom-free), **`genus_HyperellipticEven_eq` = `H.f.natDegree / 2 - 1`** (modulo Liouville L2/L3 only; the 2 unsound cocycle axioms were retired by task #21) |
 | Concrete real curve types | `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`, `HyperellipticEven` / `HyperellipticEvenProj` (two-chart pushout, full instance chain via `[Fact (¬ Odd ...)]`) |
@@ -134,6 +136,14 @@ _Verified snapshot with exact sorry/axiom counts and remote-sync state:_
 | Axiom-stubbed curve types | unified `Hyperelliptic` (pinned by `≃ₜ` to real cases), `PlaneCurve` |
 
 Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/challenge-annotated.md), [`docs/dependency-trace.md`](docs/dependency-trace.md).
+
+**On the remaining `sorry`s.** Our working discipline is sorry-free, and the **core challenge is** — Buzzard's `Challenge.lean` API, the `Jacobian X` construction, the concrete-curve witnesses, and the S1–S7 1-form framework all carry **zero `sorry`**. The 13 that remain are a deliberate, documented exception to that discipline: they live entirely *outside* the challenge proper.
+
+- **`Extensions/`** (10: `Hyperelliptic.lean` 6, `AbelJacobi.lean` 4) — *test theorems* that exercise the formalization **beyond** Buzzard's API (odd-degree hyperelliptic involution / Abel–Jacobi / period exercises), kept with inline proof sketches + classical references rather than closed; the even-degree side is already sorry-free.
+- **`Bridge/KirovLineIntegral.lean`** (2) — the FTC theorem and `bridgePath` smoothness, the not-yet-finished half of the Kirov line-integral bridge.
+- **`ProjectiveCurve/Hyperelliptic/AntiInvariance.lean`** (1) — the σ-anti-invariance step (a route-D obstruction).
+
+We leave them because closing the **core** was the goal: they are optional extensions or in-progress bridges, not load-bearing for the challenge API, the Jacobian construction, or the headline genus theorems.
 
 ## Resources used
 
