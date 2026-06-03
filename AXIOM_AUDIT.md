@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-01.*
+*Last updated 2026-06-03.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -14,8 +14,9 @@ machine-checked dependency of every headline:
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
 `^axiom ` also reports 92 once the 9 doc-comment example lines tagged
-`-- not-an-axiom` are excluded.) Down from 95: the two unsound cocycle
-axioms were retired by task #21 (2026-06-01).
+`-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
+unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
+universal-property stub (2026-06-02, unused — see the Universal-property section).
 
 ---
 
