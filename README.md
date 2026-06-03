@@ -140,7 +140,7 @@ _Verified snapshot with exact sorry/axiom counts and remote-sync state:_
 
 | | |
 |---|---|
-| Build | `lake build` green (8567 jobs, verified 2026-06-03); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **13 `sorry` total**, all outside the core (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2, `ProjectiveCurve/Hyperelliptic/AntiInvariance.lean` 1). **90 axioms (88 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, Liouville Level 1, and pullback of holomorphic 1-forms are axiom-free |
+| Build | `lake build` green (8567 jobs, verified 2026-06-03); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **13 `sorry` total**, all outside the core (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2, `ProjectiveCurve/Hyperelliptic/AntiInvariance.lean` 1). **86 axioms (84 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, Liouville Level 1, and pullback of holomorphic 1-forms are axiom-free |
 | Foundation defs | 13/13 real (`Jacobian X`, all 7 typeclass instances, `ofCurve`, `pushforward`, `pullback`, `degree`) |
 | Property theorems derived | `ofCurve_self`, `pushforward_id_apply` / `_comp_apply`, `pullback_id_apply` / `_comp_apply`, `genus_ProjectiveLine_eq_zero` (axiom-free), `genus_Elliptic_eq_one` (axiom-free), **`genus_HyperellipticEven_eq` = `H.f.natDegree / 2 - 1`** (modulo Liouville L2/L3 only; the 2 unsound cocycle axioms were retired by task #21) |
 | Concrete real curve types | `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`, `HyperellipticEven` / `HyperellipticEvenProj` (two-chart pushout, full instance chain via `[Fact (¬ Odd ...)]`) |
@@ -201,7 +201,7 @@ lake build
 
 ## Further documentation
 
-- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (90), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
+- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (86), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
 - [`docs/status-2026-05-31.md`](docs/status-2026-05-31.md) — current verified status snapshot (build, exact sorry/axiom inventory, open workstreams, remote-sync state).
 - [`docs/validation-plan.md`](docs/validation-plan.md) — how to judge the definitions and axioms before proving them: mechanical `#print axioms` guard, axiom taxonomy by validation risk, the prioritized validation backlog, and a human-readable contract + AI-modelable specification-first pipeline.
 - [`docs/contracts/`](docs/contracts/) — per-object contract cards (judge an object without reading its proofs): [`genus`](docs/contracts/genus.md) (validated on `Elliptic` from core axioms), [`ofCurve`](docs/contracts/ofCurve.md) (anti-hack property found opaque-blocked).
