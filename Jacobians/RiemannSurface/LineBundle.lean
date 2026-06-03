@@ -57,17 +57,18 @@ abbrev Divisor (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ, ℂ) ω X] : Type u := FreeAbelianGroup X
 
-/-- Divisors form an additive commutative group. -/
-axiom Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- Divisors form an additive commutative group (inherited from `FreeAbelianGroup`). -/
+instance Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : AddCommGroup (Divisor X)
-attribute [instance] Divisor.instAddCommGroup
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : AddCommGroup (Divisor X) :=
+  inferInstanceAs (AddCommGroup (FreeAbelianGroup X))
 
 /-- The degree of a divisor: for a formal combination `D = ∑ n_P · P`,
 `deg D := ∑ n_P`. An `AddMonoidHom` `Divisor X →+ ℤ`. -/
-axiom Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
+noncomputable def Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ ℤ
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ ℤ :=
+  FreeAbelianGroup.lift (fun _ : X => (1 : ℤ))
 
 /-- **Opaque axiom type.** The subgroup of principal divisors: divisors
 of meromorphic functions. Kernel of the divisor-to-Jacobian map
