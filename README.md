@@ -58,7 +58,7 @@ Discharge plan: [`docs/genus-theorem-discharge-plan.md`](docs/genus-theorem-disc
 **Axioms are classified, not hidden** ([`docs/dependency-trace.md`](docs/dependency-trace.md)):
 
 - **Classical-theorem axioms** (Riemann–Roch, Serre duality, Abel, Riemann bilinear, period-lattice discreteness, branch locus, uniformization): each a textbook citation. The right shape of axiom for a layered formalization. *Finite-dimensionality of holomorphic 1-forms is no longer in this list — see "Cross-pollination" below.*
-- **5 data-level function-existence axioms** (`pathIntegralBasepointFunctional`, `loopIntegralToH1`, `pullbackOneForm`, `pushforwardOneForm`, `localOrder`): each has a construction plan in [`docs/construction-plans/`](docs/construction-plans/) summing to ~5–6 weeks focused contributor work.
+- **3 data-level function-existence axioms** (`pathIntegralBasepointFunctional`, `loopIntegralToH1`, `pushforwardOneForm`): each has a construction plan in [`docs/construction-plans/`](docs/construction-plans/).
 - **Liouville hierarchy, Levels 2–3** (`AX_HyperellipticForm_polynomial_decomposition`, `AX_HyperellipticOneForm_eq_form` in [`Jacobians/Axioms/HyperellipticLiouville.lean`](Jacobians/Axioms/HyperellipticLiouville.lean)): used by `genus_HyperellipticEven_le`. Layered so each level discharges independently — **Level 1 (`liouville_compact_complex_manifold`) is now proven, axiom-free**; L2-step-4 (entire + polynomial growth ⇒ polynomial, [`differentiable_eq_polynomial_of_growth`](Jacobians/GeneralResults/EntireGrowth.lean)) is proven, axiom-free; and L3 is shown to reduce to L2 + cocycle propagation (`hyperellipticForm_coeff_projX`). The remaining L2 core (branch-point regularity + degree-at-∞) is the canonical-differentials theorem — scoped in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-discharge-plan.md).
 - **Cross-summand cocycle for the unified `EvenProj` 1-form framework — retired (task #21, 2026-06-01).** Both directions (`hyperellipticEvenCoeff_cocycle_inl_inr`, `…_inr_inl`) are now real, axiom-free theorems (the `inr_inl` direction via chart-transition symmetry, `GeneralResults/ChartTransition.lean`). These were the only *unsound* axioms in the repo; their retirement makes `genus_HyperellipticEven_eq` sound modulo Liouville L2/L3.
 - **Curve-atlas axioms** for unified `Hyperelliptic` and for `PlaneCurve`: proper axiomatizations of classical atlas constructions; discharge is substantial atlas work.
@@ -69,13 +69,14 @@ After [Rado Kirov's 3-day Claude Code attempt](https://github.com/rkirov/jacobia
 
 **Adoption results (axiom changes):**
 - ✅ **`AX_FiniteDimOneForms` retired.** A ℂ-linear bridge `bridgeForm : HolomorphicOneForm X →ₗ[ℂ] Vendor.Kirov.HolomorphicOneForms X` and its injectivity are now **real proofs** (no sorries, no structural axioms in the bridge file), so `FiniteDimensional ℂ (HolomorphicOneForm X)` derives from Kirov's Montel via `Module.Finite.of_injective`. The deep finite-dim content is genuinely Lean-checked, not asserted.
+- ✅ **`pullbackOneForm` retired.** `bridgeForm` is upgraded to `bridgeFormEquiv : HolomorphicOneForm X ≃ₗ[ℂ] Vendor.Kirov.HolomorphicOneForms X`, and pullback is transported from Kirov's real `pullbackForm`; the identity and composition laws are now theorems.
 - 🚧 **`pathIntegralBasepointFunctional` retirement in flight via `kirovBackedFunctional`** — see the Gap 2 paragraph below for current state. Linearity in the form is real; FTC theorem and `bridgePath` smooth-existence still open.
 
 Layout:
 
 - [`vendor/kirov-jacobian-claude/`](vendor/kirov-jacobian-claude/) — verbatim copy of Kirov's tree at upstream commit `7ce9e2e8` (Apache 2.0). Outside the build root. See [`PROVENANCE.md`](vendor/kirov-jacobian-claude/PROVENANCE.md) and [`HANDOFF.md`](vendor/kirov-jacobian-claude/HANDOFF.md).
 - [`Jacobians/Vendor/Kirov/`](Jacobians/Vendor/Kirov/) — six modules ported into our build under namespace `Jacobians.Vendor.Kirov.*` (`Genus`, `Montel.*`, `HolomorphicForms`, `LineIntegral`, `ChartedSpaceOfLocalHomeomorph`, `ZLatticeQuotient`), ~5,600 LOC total, with per-file Apache 2.0 attribution headers; mathematics unchanged. Two of Kirov's `:= sorry` declarations are stated as named `axiom`s (`genus_eq_zero_iff_homeo` for Uniformization; `ambientPhi_ambientPsi_eq` for the degree identity) for handoff.
-- [`Jacobians/Bridge/`](Jacobians/Bridge/) — `KirovHolomorphic.lean` (real `bridgeForm` + injectivity, derived `FiniteDimensional` instance) and `KirovLineIntegral.lean` (real `kirovBackedFunctional` + `chartLine` + endpoint lemmas; FTC theorem in flight).
+- [`Jacobians/Bridge/`](Jacobians/Bridge/) — `KirovHolomorphic.lean` (real `bridgeForm` + injectivity, derived `FiniteDimensional` instance), `KirovHolomorphicEquiv.lean` (real inverse/equivalence and pullback transport support), and `KirovLineIntegral.lean` (real `kirovBackedFunctional` + `chartLine` + endpoint lemmas; FTC theorem in flight).
 
 This is precisely the cooperation pattern Kirov suggested in the Zulip thread ("anyone can take my attempt and remix into theirs ... if going for more experimental purity"). The two repos remain independent attempts; we pull in his real proof rather than re-build it.
 
@@ -123,7 +124,7 @@ _Verified snapshot with exact sorry/axiom counts and remote-sync state:_
 
 | | |
 |---|---|
-| Build | `lake build` green (8378 jobs, verified 2026-05-31); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). **93 axioms (91 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, and Liouville Level 1 are axiom-free |
+| Build | `lake build` green (8567 jobs, verified 2026-06-03); zero `sorry` in `Challenge.lean`, the core construction, the concrete-curve witnesses, and the S1–S7 1-form framework; **12 `sorry` total**, all in three extension/bridge scaffolds (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Bridge/KirovLineIntegral.lean` 2). **90 axioms (88 ours + 2 vendored)**, kernel-verified and triaged in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); `genus ℙ¹ = 0`, `genus Elliptic = 1`, Liouville Level 1, and pullback of holomorphic 1-forms are axiom-free |
 | Foundation defs | 13/13 real (`Jacobian X`, all 7 typeclass instances, `ofCurve`, `pushforward`, `pullback`, `degree`) |
 | Property theorems derived | `ofCurve_self`, `pushforward_id_apply` / `_comp_apply`, `pullback_id_apply` / `_comp_apply`, `genus_ProjectiveLine_eq_zero` (axiom-free), `genus_Elliptic_eq_one` (axiom-free), **`genus_HyperellipticEven_eq` = `H.f.natDegree / 2 - 1`** (modulo Liouville L2/L3 only; the 2 unsound cocycle axioms were retired by task #21) |
 | Concrete real curve types | `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`, `HyperellipticEven` / `HyperellipticEvenProj` (two-chart pushout, full instance chain via `[Fact (¬ Odd ...)]`) |
@@ -162,7 +163,7 @@ Full axiom inventory and classification: [`docs/challenge-annotated.md`](docs/ch
 
 ## What this claim does and doesn't say
 
-We claim a **solid foundation with correct definitions** for Buzzard's challenge: the interface is closed with real constructions, genus-0 / genus-1 / hyperelliptic curves are populated as real types, and every remaining axiom is enumerated and classified. We do not claim a sorry-free end-to-end solution — the five data-level axioms and the ten classical-theorem citations remain, each with a discharge plan. Axioms have been LLM-vetted but not yet human-mathematician-reviewed; downstream theorems whose only non-Lean-proven content is a textbook-classical axiom should be read as "reduced to that classical input", not as "fully proven from Mathlib".
+We claim a **solid foundation with correct definitions** for Buzzard's challenge: the interface is closed with real constructions, genus-0 / genus-1 / hyperelliptic curves are populated as real types, and every remaining axiom is enumerated and classified. We do not claim a sorry-free end-to-end solution — the remaining data-level axioms and classical-theorem citations each have a discharge plan. Axioms have been LLM-vetted but not yet human-mathematician-reviewed; downstream theorems whose only non-Lean-proven content is a textbook-classical axiom should be read as "reduced to that classical input", not as "fully proven from Mathlib".
 
 ## Build
 
@@ -176,7 +177,7 @@ lake build
 
 ## Further documentation
 
-- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (93), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
+- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (90), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
 - [`docs/status-2026-05-31.md`](docs/status-2026-05-31.md) — current verified status snapshot (build, exact sorry/axiom inventory, open workstreams, remote-sync state).
 - [`docs/validation-plan.md`](docs/validation-plan.md) — how to judge the definitions and axioms before proving them: mechanical `#print axioms` guard, axiom taxonomy by validation risk, the prioritized validation backlog, and a human-readable contract + AI-modelable specification-first pipeline.
 - [`docs/contracts/`](docs/contracts/) — per-object contract cards (judge an object without reading its proofs): [`genus`](docs/contracts/genus.md) (validated on `Elliptic` from core axioms), [`ofCurve`](docs/contracts/ofCurve.md) (anti-hack property found opaque-blocked).
@@ -185,7 +186,7 @@ lake build
 - [`docs/challenge-filled.md`](docs/challenge-filled.md) — filled-in spec, every sorry resolved with its prerequisites inlined.
 - [`docs/challenge-annotated.md`](docs/challenge-annotated.md) — F/T classification of the 24 sorries.
 - [`docs/dependency-trace.md`](docs/dependency-trace.md) — transitive axiom audit.
-- [`docs/construction-plans/`](docs/construction-plans/) — discharge plans for the 5 data-level axioms.
+- [`docs/construction-plans/`](docs/construction-plans/) — discharge plans for the remaining data-level axioms.
 - [`docs/formalization-plan.md`](docs/formalization-plan.md) — construction-strategy rationale.
 - [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md) — what we take from `rkirov/jacobian-claude` and `tangentstorm/JacobianChallenge`, what we considered and didn't.
 - [`docs/genus-theorem-discharge-plan.md`](docs/genus-theorem-discharge-plan.md) — 8-task plan (S1–S8) for the hyperelliptic genus theorems via the 1-form framework.
