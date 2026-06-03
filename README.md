@@ -67,6 +67,18 @@ Discharge plan: [`docs/genus-theorem-discharge-plan.md`](docs/genus-theorem-disc
 - **Cross-summand cocycle for the unified `EvenProj` 1-form framework — retired (task #21, 2026-06-01).** Both directions (`hyperellipticEvenCoeff_cocycle_inl_inr`, `…_inr_inl`) are now real, axiom-free theorems (the `inr_inl` direction via chart-transition symmetry, `GeneralResults/ChartTransition.lean`). These were the only *unsound* axioms in the repo; their retirement makes `genus_HyperellipticEven_eq` sound modulo Liouville L2/L3.
 - **Curve-atlas axioms** for unified `Hyperelliptic` and for `PlaneCurve`: proper axiomatizations of classical atlas constructions; discharge is substantial atlas work.
 
+### Per-axiom discharge plans + Gemini 3.1 Pro vetting
+
+A complete per-axiom discharge plan lives in [`docs/planning/`](docs/planning/): one markdown file per axiom (90 total), every plan **vetted by Gemini 3.1 Pro** (`gemini-3.1-pro-preview`, extended thinking, 2026-06-03). Tally: **13 accept / 36 revise / 41 reject**; all 77 flagged plans rewritten in place per the critiques. A second Gemini pass on each route cluster surfaced **15 cross-plan inconsistencies** (Mathlib-decl drift, signature splits, mutual-no-anchor cycles, duplicate effort, stale prereqs), all 15 applied as patches across 60 plans.
+
+- [`docs/planning/ROADMAP.md`](docs/planning/ROADMAP.md) — the index. Summary by route, sections (`mathlib-now`, `provable-from-other-axioms`, `needs-infra`, `genuine-textbook`) ordered by effort, full per-axiom table by source location with Gemini's verdict on every row.
+- [`docs/planning/CROSS_DOC_ANALYSIS.md`](docs/planning/CROSS_DOC_ANALYSIS.md) — the dependency DAG over all 90 plans (164 internal edges, 18 leaves, 7 cycles with break strategies, top-15 fulcrum, Mermaid subgraphs, phased build sequence ordered by `(dep-depth, verdict, effort)`).
+- [`docs/planning/<axiom-name>.md`](docs/planning/) — 90 recipe files (statement → why-axiomatized → numbered proof recipe with `file:line` citations → files touched → acceptance criteria → escalation triggers), each with a `Gemini critique addressed:` subsection and `Vetting trail.` footer.
+- [`docs/planning/_vetting/`](docs/planning/_vetting/) — 90 referee-grade Gemini critiques (one per plan, ~3.5K chars each), four route-cluster cross-plan audits, raw-results JSON.
+- [`docs/planning/dependency-graph.json`](docs/planning/dependency-graph.json) — the raw graph artifact (nodes + edges + cycles + leaves + fulcrum scores) for tool consumption.
+
+The recommended Phase 1 starting cluster is the 13 `accept`-verdict plans that sit on validated dep chains: `bridgePath_at_{zero,one}`, `infinityChart_mem_source`, `Hyperelliptic.instCompactSpace`, `Divisor.deg`, etc. The highest-leverage move on the board is `Divisor` itself (unblocks 11 downstream plans for an effort-1 `FreeAbelianGroup X` discharge).
+
 ## Cross-pollination from Kirov's Montel theorem
 
 After [Rado Kirov's 3-day Claude Code attempt](https://github.com/rkirov/jacobian-claude) was relicensed to Apache 2.0 (2026-04-25, Lean Zulip `#Autoformalization > Jacobian challenge` msg #61), we adopted the strongest pieces of his work: a **real ~3,400 LOC proof of Montel's theorem** for holomorphic 1-forms (yielding `instance : FiniteDimensional ℂ HolomorphicOneForms X`), a sorry-free **`LineIntegral`** module (path speed via chart-local `fderiv`, line integral linearity, concat, reversal, the `pathSpeed_comp_eq_mfderiv` chain rule), and the sorry-free **`ZLatticeQuotient`** quotient-manifold infrastructure.
