@@ -45,12 +45,17 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-/-- **Opaque axiom type.** The group of divisors on a compact Riemann
-surface `X`. Classically: formal `ℤ`-combinations of points of `X`.
-Forms an `AddCommGroup` via the declared instance below. -/
-axiom Divisor (X : Type*) [TopologicalSpace X] [T2Space X]
+/-- The group of divisors on a compact Riemann surface `X`: formal
+`ℤ`-combinations of points of `X`, i.e. the free abelian group on the
+underlying set (Forster, *Lectures on Riemann Surfaces*, Ch. I §8). The
+geometric typeclasses are unused (the encoding is purely algebraic) but kept
+on the signature so downstream consumers elaborate unchanged.
+
+Discharged (2026-06-03, Phase 1) from an opaque axiom to `FreeAbelianGroup X`;
+`abbrev` so `AddCommGroup` resolves transparently through the alias. -/
+abbrev Divisor (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Type
+    [IsManifold 𝓘(ℂ, ℂ) ω X] : Type u := FreeAbelianGroup X
 
 /-- Divisors form an additive commutative group. -/
 axiom Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
