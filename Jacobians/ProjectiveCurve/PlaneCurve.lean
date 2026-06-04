@@ -97,27 +97,35 @@ instance : LocallyCompactSpace (PlaneCurveAffine H) := by
   have hclosed := isClosed_carrier H
   exact hclosed.isClosedEmbedding_subtypeVal.locallyCompactSpace
 
-/-- **Axiom (NOT VERIFIED).** For a smooth plane curve of degree `≥ 1`
-the affine patch is nonempty. Classical: `F` has at least one zero on
-`ℂ² × {1} ⊂ ℂ³ \ {0}` by projective algebraic geometry. -/
+/-! ### ⚠️ FLAGGED UNSOUND — the affine-patch axiom layer (2026-06-04 review)
+
+All three axioms below are **false as stated** for `PlaneCurveData` whose curve
+lies in the line at infinity `z = 0` — e.g. `F = z` (valid: `d = 1`, smooth, since
+`∇F = (0,0,1) ≠ 0`). Then the `z = 1` affine patch `{F(x,y,1) = 0} = ∅`, so it is
+**not** nonempty, **not** connected, and (being empty hence compact) **not**
+noncompact. They need a hypothesis on `PlaneCurveData` (the affine patch is
+nonempty / the curve `⊄ {z=0}` / `z ∤ F`) or to be conditioned on degree. **Do
+not build on these as-is.** Tracked in `AXIOM_AUDIT.md` §2d (Flagged). The
+`instNonempty` discharge that briefly relied on `_nonempty` has been reverted
+(see below). -/
+
+/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`; see the warning above). The
+affine patch is nonempty. *Needs a `PlaneCurveData` hypothesis ruling out the
+line at infinity.* -/
 axiom AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
     Nonempty (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
-/-- **Axiom (NOT VERIFIED).** For a smooth plane curve of degree `≥ 3`
-the affine patch is connected (irreducible variety in the classical
-topology). For `d = 1, 2` (line, conic), may be one or two connected
-components. This axiom is for `d ≥ 3`; callers at smaller degree
-should use the genus-0 `ProjectiveLine` directly. -/
+/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`, and for `d = 1, 2` per its own
+note; the axiom carries no degree hypothesis). The affine patch is connected. -/
 axiom AX_PlaneCurveAffine_connected (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_connected
 
-/-- **Axiom (NOT VERIFIED).** The affine patch is noncompact —
-projective curves are compact but their affine patches are not (the
-affine patch misses at least one point at infinity). -/
+/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`: the empty affine patch is
+compact, hence not noncompact). The affine patch is noncompact. -/
 axiom AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
     NoncompactSpace (PlaneCurveAffine H)
 
@@ -188,16 +196,16 @@ axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
-instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) := by
-  rcases (PlaneCurveAffine.AX_PlaneCurveAffine_nonempty H) with ⟨p⟩
-  let v : Fin 3 → ℂ := ![p.1.1, p.1.2, (1 : ℂ)]
-  have hv : v ≠ 0 := by
-    intro hv0
-    have hcoord : (1 : ℂ) = 0 := by
-      simpa [v] using congrFun hv0 (2 : Fin 3)
-    norm_num at hcoord
-  refine ⟨⟨Projectivization.mk ℂ v hv, ?_⟩⟩
-  exact ⟨v, hv, rfl, by simpa [v] using p.2⟩
+/-- **Axiom (re-instated 2026-06-04 after review).** `PlaneCurve H` is nonempty.
+This statement is TRUE — a positive-degree (`d ≥ 1`) homogeneous `F` over `ℂ`
+always has a nontrivial projective zero (restrict `F` to a line ⊂ ℙ² to get a
+nonconstant homogeneous binary form, which has a root). An earlier "discharge"
+proved it via `AX_PlaneCurveAffine_nonempty`, which is **FALSE** for `F = z` (see
+the flag above), so that proof was unsound and is reverted. Real proof
+(projective Nullstellensatz / line restriction) is a tracked follow-up — it must
+NOT route through the flagged affine axiom. -/
+axiom PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H)
+attribute [instance] PlaneCurve.instNonempty
 
 axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
     ChartedSpace ℂ (PlaneCurve H)
