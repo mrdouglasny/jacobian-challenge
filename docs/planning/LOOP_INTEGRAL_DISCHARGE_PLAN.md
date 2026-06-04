@@ -151,3 +151,20 @@ classically C¹/rectifiable — an honest strengthening of an existing axiom), O
 strengthen `AnalyticArc.is_analytic` to C¹-up-to-closure. Decide at wiring time;
 the cycle-basis option is cleaner. (Route C confirmed by user 2026-06-05; full
 homotopy invariance deferred.)
+
+### Route C integrability — design decision (2026-06-05)
+
+L1-c.4 localized the integrability need to a single hypothesis on `canonicalIntegrand`
+(the moving-center period integrand). A concrete `ellipticCycleBasis` exists, so a
+structure FIELD on `AnalyticCycleBasis` would force proving integrability for the
+explicit elliptic loops (invasive). Decision: a **separate narrowly-scoped axiom**
+`∀ (cb : AnalyticCycleBasis X x₀) i form, IntervalIntegrable (canonicalIntegrand (cb.loops i).arc form) volume 0 1` — classically trivial (piecewise-analytic loops
+are rectifiable), TRUE only for the nice cycle-basis loops (NOT arbitrary arcs,
+where a cusp could make it false), doesn't touch concrete builds, dischargeable
+later via stronger `AnalyticArc` regularity. Net: `loopIntegralToH1` (opaque) →
+real `def` via `constr` of genuine integrals; residual axiom is a trivial
+regularity fact, not a hidden homomorphism. Wiring after Route C step 1 (canonical
+arc integral + ℂ-linearity) lands:
+- `arcPeriodFunctional γ : forms →ₗ[ℂ] ℂ` (using the scoped integrability for map_add'),
+- `loopIntegralToH1 x₀ := (cb.isBasis.constr ℤ (fun i => arcPeriodFunctional (cb.loops i).arc)).toAddMonoidHom`,
+- rewire `periodMap`; verify `#print axioms periodMap/ofCurve` drop `loopIntegralToH1`.
