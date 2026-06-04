@@ -62,12 +62,6 @@ axiom Hyperelliptic.instTopologicalSpace (H : HyperellipticData) :
     TopologicalSpace (Hyperelliptic H)
 attribute [instance] Hyperelliptic.instTopologicalSpace
 
-axiom Hyperelliptic.instT2Space (H : HyperellipticData) : T2Space (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instT2Space
-
-axiom Hyperelliptic.instNonempty (H : HyperellipticData) : Nonempty (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instNonempty
-
 /-- **Axiom.** `ChartedSpace ℂ (Hyperelliptic H)` — the atlas
 construction. Atlas plan in `docs/hyperelliptic-atlas-plan.md`. -/
 axiom Hyperelliptic.instChartedSpace (H : HyperellipticData) :
@@ -108,6 +102,22 @@ instance Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
   · exact (AX_Hyperelliptic_oddEquiv H h).connectedSpace_iff.mpr inferInstance
   · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
     exact (AX_Hyperelliptic_evenEquiv H h).connectedSpace_iff.mpr inferInstance
+
+/-- `Hyperelliptic H` is Hausdorff, transported along the parity homeomorphism. -/
+instance Hyperelliptic.instT2Space (H : HyperellipticData) :
+    T2Space (Hyperelliptic H) := by
+  by_cases h : Odd H.f.natDegree
+  · exact (AX_Hyperelliptic_oddEquiv H h).symm.t2Space
+  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    exact (AX_Hyperelliptic_evenEquiv H h).symm.t2Space
+
+/-- `Hyperelliptic H` is nonempty, transported along the parity homeomorphism. -/
+instance Hyperelliptic.instNonempty (H : HyperellipticData) :
+    Nonempty (Hyperelliptic H) := by
+  by_cases h : Odd H.f.natDegree
+  · exact Nonempty.map (AX_Hyperelliptic_oddEquiv H h).symm inferInstance
+  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    exact Nonempty.map (AX_Hyperelliptic_evenEquiv H h).symm inferInstance
 
 /-- **Axiom.** The genus of `y² = f(x)` matches the combinatorial
 formula `⌊(deg f - 1) / 2⌋`. -/
