@@ -32,15 +32,14 @@ Three levels of integration:
 3. **Homotopy invariance**. `pathIntegralAnalyticArc` descends to
    `H_1 X x₀` — for `γ ∼ γ'` smoothly homotopic, the integrals agree.
    Classical proof: Cauchy's theorem on chart disks + Stokes on the
-   rectangle.
+   rectangle. The current homology-level period pairing is constructed
+   separately in `Jacobians.RiemannSurface.LoopIntegral` to avoid an
+   import cycle through canonical multi-chart integration.
 
 ## Status (2026-04-23)
 
 This module defines the **chart-local** integration (step 1) as a real
-Lean `def` using `intervalIntegral`. Steps 2 and 3 are TODOs — they
-require partition refinement machinery and Cauchy's theorem on
-chart-disks respectively. Once those land, `periodMap` retires from
-axiom-stub to a real def here.
+Lean `def` using `intervalIntegral`.
 
 ## References
 
@@ -82,25 +81,8 @@ noncomputable def pathIntegralOnChart
       derivWithin (fun s : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend s))
         (Set.Ioo (0 : ℝ) 1) r
 
-/-- **Axiom.** The period pairing: integration of a holomorphic 1-form
-along an element of `H_1(X, ℤ)`, as a ℂ-linear functional on
-`HolomorphicOneForm X`. This is the `H_1`-level period map, classically
-defined as `[γ] ↦ (ω ↦ ∫_γ ω)` where `γ` is any loop representative.
-
-The single-axiom packaging reflects that three subfacts travel
-together:
-  (i) path integration along analytic loops (`pathIntegralOnChart`-style
-      chart-local formulas extended by partition + cocycle to
-      multi-chart arcs);
-  (ii) homotopy invariance (Cauchy on chart disks + Stokes on
-      homotopy rectangle), so `∫_γ ω` depends only on `[γ] ∈ H_1`;
-  (iii) ℂ-linearity of `ω ↦ ∫_γ ω` (standard `intervalIntegral` facts).
-
-Retires to a `def` when `pathIntegralAnalyticArc` + homotopy invariance
-land as theorems. -/
-axiom loopIntegralToH1 {X : Type*} [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
-    H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)
+-- `loopIntegralToH1` lives in `Jacobians.RiemannSurface.LoopIntegral`.
+-- Keeping it out of this file avoids the import cycle through
+-- `CanonicalArcIntegral` and `MultiChartIntegral`.
 
 end Jacobians.RiemannSurface

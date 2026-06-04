@@ -66,9 +66,18 @@ path-independence content lives at the homology level in `loopIntegralToH1`, and
 a genuine FTC can only be stated on the quotient `ofCurve : X → ℂ^g/Λ`. Finally →
 **64** by **de-opaquing** `pathIntegralBasepointFunctional` from an axiom to a
 real `def` (`:= Bridge.kirovBackedFunctional`, itself standard-3 axiom-clean): a
-genuine line integral `∫_{bridgePath P₀ P}`. `ofCurve` is now a **computed** map
-whose only analytic axiom is the one honest `loopIntegralToH1` — its opacity, and
-the zero-functional degeneracy it hid, are gone (2026-06-04).
+genuine line integral `∫_{bridgePath P₀ P}`. `ofCurve` is now a **computed** map;
+the zero-functional degeneracy it hid is gone (2026-06-04). Finally, **`loopIntegralToH1`
+— the path-independence axiom — was DISCHARGED to a real `def` 2026-06-05** (count
+stays 64: −`loopIntegralToH1`, +`AX_cycleBasisLoop_integrable`): the period pairing
+is now `cb.isBasis.constr ℤ (∮ over the analytic cycle-basis loops)`, the integrals
+being the genuine L0–L1 multi-chart integral (chart-cocycle + partition-independence
+all **proven**, ~10 new modules). `periodMap`/`ofCurve` no longer list
+`loopIntegralToH1`; they rest on `AX_AnalyticCycleBasis` + `intersectionForm` (the
+symplectic cycle basis, already needed for the lattice) + the trivial
+`AX_cycleBasisLoop_integrable`. The deepest analytic gap is closed; only full
+homotopy invariance (representative-independence for *arbitrary* loops, not just the
+basis) remains as a deferred faithfulness upgrade.
 
 ---
 
@@ -134,7 +143,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent — **the** path-independence axiom (now `ofCurve`'s only analytic axiom, since `pathIntegralBasepointFunctional` was de-opaqued to a real `∫` def 2026-06-04). Honest discharge globalizes `Bridge/ContourDeformation.lean` (chart-local homotopy invariance) via homotopy-rectangle subdivision — see [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
+| `AX_cycleBasisLoop_integrable` | `RiemannSurface/LoopIntegral.lean:17` | the period integrand of each cycle-basis loop is `IntervalIntegrable` — classical regularity (piecewise-analytic loops are rectifiable), scoped to cycle-basis loops. The **only** residual axiom after `loopIntegralToH1` was **discharged to a real `def`** 2026-06-05 (`:= cb.isBasis.constr ℤ (∮ over cycle-basis loops)`, periods = genuine line integrals via the L0–L1 multi-chart integral). Dischargeable later by strengthening `AnalyticArc` regularity. See [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
