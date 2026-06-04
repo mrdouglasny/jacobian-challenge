@@ -580,24 +580,9 @@ theorem chartAt_comp_chartAt_symm_differentiableAt
   simpa [extChartAt_coe, extChartAt_coe_symm, modelWithCornersSelf_coe,
     modelWithCornersSelf_coe_symm, Function.comp_def] using hdR
 
--- TODO(layer 3 differentiability): upgrade the proved per-piece interior lemma
--- `PathChartBallSubdivision.chartFlatPath_chart_differentiableAt_of_mem_Ioo` to the
--- Kirov-side chart-local regularity statement for the extended global concatenation.
--- Remaining proof obligations:
--- * handle `Path.extend` at local endpoints, using `hasDerivAt_flatSegment_zero/_one`
---   against the constant extension outside `[0, 1]`;
--- * propagate that endpoint-flat statement through the recursive `Path.trans` joins;
--- * compose with the smooth chart transition from the subdivision chart to `chartAt` at
---   the current bridge-path point.
---
--- The remaining target shape is:
---
--- theorem bridgePathImpl_chart_differentiableAt
---     {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
---     [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (t : ℝ) :
---     DifferentiableAt ℝ
---       ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
---         (bridgePathImpl (X := X) P₀ P)) t
+-- TODO(breakpoints): remove the regularity hypothesis from
+-- `bridgePathImpl_chart_differentiableAt_of_regular` by proving the zero-velocity
+-- two-sided derivative glue at local endpoints and recursive `Path.trans` joins.
 
 lemma pathTrans_extend_eventuallyEq_left_of_lt_half
     {X : Type*} [TopologicalSpace X] {x y z : X}
@@ -651,6 +636,11 @@ lemma differentiableAt_comp_pathTrans_extend_right_of_half_lt
       simp [Function.comp_def, hu]
   exact hcomp.congr_of_eventuallyEq heq
 
+@[simp] lemma path_cast_extend_apply
+    {X : Type*} [TopologicalSpace X] {x y x' y' : X}
+    (γ : Path x y) (hx : x' = x) (hy : y' = y) (t : ℝ) :
+    (γ.cast hx hy).extend t = γ.extend t := rfl
+
 namespace PathChartBallSubdivision
 
 variable {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
@@ -686,7 +676,188 @@ lemma concatChartFlatPathAux_chart_differentiableAt_last_of_half_lt
       (f := (chartAt ℂ (S.chart (k + 1))).toFun) ht
       (S.chartFlatPath_chart_differentiableAt_of_mem_Ioo (k + 1) hs)
 
+omit [ConnectedSpace X] in
+/-- Parameters where a single extended chart-flat piece is away from its two glue endpoints. -/
+def flatPieceRegular (s : ℝ) : Prop :=
+  s < 0 ∨ s ∈ Set.Ioo (0 : ℝ) 1 ∨ 1 < s
+
+omit [ConnectedSpace X] in
+/-- Recursive non-breakpoint parameters for `concatChartFlatPathAux k`. -/
+def concatChartFlatPathAuxRegular : ℕ → ℝ → Prop
+  | 0, t => flatPieceRegular t
+  | k + 1, t =>
+      (t < 1 / 2 ∧ concatChartFlatPathAuxRegular k (2 * t)) ∨
+        (1 / 2 < t ∧ flatPieceRegular (2 * t - 1))
+
+omit [ConnectedSpace X] in
+lemma chartFlatPath_extend_eventually_mem_chart_source_of_regular
+    (n : ℕ) {s : ℝ} (hs : flatPieceRegular s) :
+    ∀ᶠ u in 𝓝 s,
+      (S.chartFlatPath n).extend u ∈ (chartAt ℂ (S.chart n)).source := by
+  rcases hs with hs | hs | hs
+  · filter_upwards [eventually_lt_nhds hs] with u hu
+    simpa [Path.extend_of_le_zero _ hu.le] using S.left_endpoint_mem_chart_source n
+  · filter_upwards [Icc_mem_nhds hs.1 hs.2] with u hu
+    have htarget := S.flatSegment_mem_chart_target n hu
+    have hsource :
+        (chartAt ℂ (S.chart n)).symm
+          (flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+            ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) u) ∈
+            (chartAt ℂ (S.chart n)).source :=
+      (chartAt ℂ (S.chart n)).map_target htarget
+    simpa [Path.extend_apply _ hu, chartFlatPath] using hsource
+  · filter_upwards [eventually_gt_nhds hs] with u hu
+    simpa [Path.extend_of_one_le _ hu.le] using S.right_endpoint_mem_chart_source n
+
+omit [ConnectedSpace X] in
+lemma chartFlatPath_chart_differentiableAt_of_regular
+    (n : ℕ) {s : ℝ} (hs : flatPieceRegular s) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) s := by
+  rcases hs with hs | hs | hs
+  · have heq :
+        ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[𝓝 s]
+          fun _ : ℝ => (chartAt ℂ (S.chart n)) (γ (S.t n)) := by
+      filter_upwards [eventually_lt_nhds hs] with u hu
+      simp [Path.extend_of_le_zero _ hu.le]
+    exact (differentiableAt_const _).congr_of_eventuallyEq heq
+  · exact S.chartFlatPath_chart_differentiableAt_of_mem_Ioo n hs
+  · have heq :
+        ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[𝓝 s]
+          fun _ : ℝ => (chartAt ℂ (S.chart n)) (γ (S.t (n + 1))) := by
+      filter_upwards [eventually_gt_nhds hs] with u hu
+      simp [Path.extend_of_one_le _ hu.le]
+    exact (differentiableAt_const _).congr_of_eventuallyEq heq
+
+omit [ConnectedSpace X] in
+lemma chartFlatPath_chartAt_current_differentiableAt_of_regular
+    [T2Space X] [IsManifold 𝓘(ℂ) ω X]
+    (n : ℕ) {s : ℝ} (hs : flatPieceRegular s) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.chartFlatPath n).extend s)).toFun ∘
+        (S.chartFlatPath n).extend) s := by
+  let x : X := (S.chartFlatPath n).extend s
+  let y : X := S.chart n
+  have hsource : x ∈ (chartAt ℂ y).source := by
+    simpa [x, y] using
+      (S.chartFlatPath_extend_eventually_mem_chart_source_of_regular n hs).self_of_nhds
+  have hz :
+      (chartAt ℂ y) x ∈ ((chartAt ℂ y).symm ≫ₕ chartAt ℂ x).source := by
+    rw [OpenPartialHomeomorph.trans_source]
+    constructor
+    · exact (chartAt ℂ y).map_source hsource
+    · simp [hsource, mem_chart_source ℂ x]
+  have houter :
+      DifferentiableAt ℝ
+        ((chartAt ℂ x).toFun ∘ (chartAt ℂ y).symm) ((chartAt ℂ y) x) :=
+    chartAt_comp_chartAt_symm_differentiableAt x y hz
+  have hfixed :
+      DifferentiableAt ℝ
+        ((chartAt ℂ y).toFun ∘ (S.chartFlatPath n).extend) s := by
+    simpa [y] using S.chartFlatPath_chart_differentiableAt_of_regular n hs
+  have hcomp :
+      DifferentiableAt ℝ
+        (((chartAt ℂ x).toFun ∘ (chartAt ℂ y).symm) ∘
+          ((chartAt ℂ y).toFun ∘ (S.chartFlatPath n).extend)) s :=
+    houter.comp s hfixed
+  have heq :
+      ((chartAt ℂ x).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[𝓝 s]
+        (((chartAt ℂ x).toFun ∘ (chartAt ℂ y).symm) ∘
+          ((chartAt ℂ y).toFun ∘ (S.chartFlatPath n).extend)) := by
+    filter_upwards [S.chartFlatPath_extend_eventually_mem_chart_source_of_regular n hs] with u hu
+    simp [Function.comp_def, (chartAt ℂ y).left_inv hu]
+  simpa [x] using hcomp.congr_of_eventuallyEq heq
+
+omit [ConnectedSpace X] in
+lemma concatChartFlatPathAux_chartAt_current_differentiableAt_of_regular
+    [T2Space X] [IsManifold 𝓘(ℂ) ω X]
+    (k : ℕ) {t : ℝ} (ht : concatChartFlatPathAuxRegular k t) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPathAux k).extend t)).toFun ∘
+        (S.concatChartFlatPathAux k).extend) t := by
+  induction k generalizing t with
+  | zero =>
+      simpa using S.chartFlatPath_chartAt_current_differentiableAt_of_regular 0 ht
+  | succ k ih =>
+      rcases ht with hleft | hright
+      · rcases hleft with ⟨ht_half, ht_regular⟩
+        have hcenter :
+            ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend t =
+              (S.concatChartFlatPathAux k).extend (2 * t) := by
+          exact
+            Path.extend_trans_of_le_half
+              (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1)) ht_half.le
+        have hrec :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.concatChartFlatPathAux k).extend (2 * t))).toFun ∘
+                (S.concatChartFlatPathAux k).extend) (2 * t) :=
+          ih ht_regular
+        have hrec' :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun ∘
+                (S.concatChartFlatPathAux k).extend) (2 * t) := by
+          simpa [hcenter] using hrec
+        simpa using
+          differentiableAt_comp_pathTrans_extend_left_of_lt_half
+            (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+            (f := (chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun)
+            ht_half hrec'
+      · rcases hright with ⟨ht_half, ht_regular⟩
+        have hcenter :
+            ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend t =
+              (S.chartFlatPath (k + 1)).extend (2 * t - 1) := by
+          exact
+            Path.extend_trans_of_half_le
+              (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1)) ht_half.le
+        have hpiece :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.chartFlatPath (k + 1)).extend (2 * t - 1))).toFun ∘
+                (S.chartFlatPath (k + 1)).extend) (2 * t - 1) :=
+          S.chartFlatPath_chartAt_current_differentiableAt_of_regular (k + 1) ht_regular
+        have hpiece' :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun ∘
+                (S.chartFlatPath (k + 1)).extend) (2 * t - 1) := by
+          simpa [hcenter] using hpiece
+        simpa using
+          differentiableAt_comp_pathTrans_extend_right_of_half_lt
+            (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+            (f := (chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun)
+            ht_half hpiece'
+
+omit [ConnectedSpace X] in
+lemma concatChartFlatPath_chartAt_current_differentiableAt_of_regular
+    [T2Space X] [IsManifold 𝓘(ℂ) ω X]
+    {t : ℝ} (ht : concatChartFlatPathAuxRegular S.lastIndex t) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPath).extend t)).toFun ∘
+        (S.concatChartFlatPath).extend) t := by
+  simpa [concatChartFlatPath] using
+    S.concatChartFlatPathAux_chartAt_current_differentiableAt_of_regular S.lastIndex ht
+
 end PathChartBallSubdivision
+
+/-- Recursive non-breakpoint parameters for the concrete bridge path. -/
+noncomputable def bridgePathImplRegular (P₀ P : X) (t : ℝ) : Prop :=
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  PathChartBallSubdivision.concatChartFlatPathAuxRegular S.lastIndex t
+
+theorem bridgePathImpl_chart_differentiableAt_of_regular
+    {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) {t : ℝ}
+    (ht : bridgePathImplRegular (X := X) P₀ P t) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
+        (bridgePathImpl (X := X) P₀ P)) t := by
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  change
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPath).extend t)).toFun ∘
+        (S.concatChartFlatPath).extend) t
+  change PathChartBallSubdivision.concatChartFlatPathAuxRegular S.lastIndex t at ht
+  exact S.concatChartFlatPath_chartAt_current_differentiableAt_of_regular ht
 
 end BridgePathImpl
 
@@ -701,3 +872,5 @@ theorem differentiableAt_of_hasDerivWithinAt_Iic_Ici
   exact (hasDerivWithinAt_univ.mp hu).differentiableAt
 
 end Jacobians.Bridge
+
+-- Bridge path differentiability completion work starts below.
