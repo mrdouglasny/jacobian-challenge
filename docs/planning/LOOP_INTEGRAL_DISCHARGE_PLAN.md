@@ -107,3 +107,32 @@ Bridge.kirovBackedFunctional` (a real `∫`), killing the zero-functional
 degeneracy with no FTC. Its path-dependence is then governed by the (eventually
 proven) `loopIntegralToH1`. Gated only on checking `ofCurve_contMDiff` does not
 silently need a functional-smoothness obligation.
+
+## Update 2026-06-05 — Route C (cycle-basis discharge; reframes L2/L3 as optional)
+
+`AnalyticCycleBasis` (`Axioms/AnalyticCycleBasis.lean`) already provides both
+explicit analytic loop reps `loops : Fin 2g → AnalyticLoop X x₀` **and**
+`isBasis : Module.Basis (Fin 2g) ℤ (H1 X x₀)`. So `loopIntegralToH1` can be
+discharged directly:
+
+```
+loopIntegralToH1 x₀ := (isBasis.constr ℤ (fun i => ∮_{loops i})).toAddMonoidHom
+```
+— define the period pairing by its (real line-integral) values on the cycle
+basis, extended ℤ-linearly. A linear map is determined by its basis values, and
+the true period pairing IS ℤ-linear on H₁, so this equals it. **Faithful**
+(periods are genuine integrals) and uses only **L1 + `AX_AnalyticCycleBasis`**
+(already in-system) — **no L2/L3 needed for the discharge.**
+
+Critical path (both Route C and the L3 route need it): **finish L1** — including
+`L1-c.4` partition-independence (so `pathIntegralAnalyticArc` is intrinsic, not
+`Classical.arbitrary`-dependent) and bundling it as a real `→ₗ[ℂ]` (prove the
+deriv-integrand `IntervalIntegrable` via continuity). Then:
+- **Route C (recommended):** `constr` wiring → `loopIntegralToH1` is a `def`,
+  −1 axiom, periods real. L2 (done) + L3 = a follow-on *faithfulness* theorem
+  (∮ representative-independent for all loops), optional.
+- **Route L3:** prove manifold homotopy invariance from `ContourDeformation` +
+  L2 grid — maximal faithfulness, much higher cost.
+
+Status: L0 ✅, L1-a/b/c.1/c.2/c.3 ✅, L1-c.4a (good partition) ✅, L2 ✅;
+L1-c.4 (partition independence) in flight; then Route C wiring.
