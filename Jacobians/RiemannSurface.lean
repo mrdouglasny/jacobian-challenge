@@ -18,6 +18,7 @@ import Jacobians.RiemannSurface.ChartPartition
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.MultiChartIntegral
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
