@@ -100,13 +100,19 @@ def sections_monotone (D : Divisor X) (p : X) : Prop :=
 These follow from `AX_RiemannRoch`/`AX_SerreDuality` *now*; a faithful `def`
 must keep them as theorems (they are necessary, not sufficient — hence §1/§3). -/
 
-/-- **B1 (Riemann–Roch).** `h⁰(D) − h¹(D) = deg D + 1 − g`. -/
-def riemannRoch (D : Divisor X)
-    [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
-    [FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))] : Prop :=
-  (Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) : ℤ) -
-      (Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) : ℤ)
-    = Divisor.deg X D + 1 - (genus X : ℤ)
+/-- **B1 (Riemann–Roch + finiteness).** `h⁰(D) − h¹(D) = deg D + 1 − g`, AND
+both spaces are finite-dimensional. The finiteness is **asserted, not assumed**:
+gating it behind `[FiniteDimensional …]` instances (as an earlier draft did) made
+the equation vacuously true for a degenerate definition with infinite-dimensional
+`H⁰`/`H¹` — a correct sheaf cohomology of a coherent sheaf on a compact manifold
+is always finite-dimensional (Cartan–Serre), so a faithful `def` must prove it.
+*(Loophole flagged by Gemini-3.1-Pro review, 2026-06-04.)* -/
+def riemannRoch (D : Divisor X) : Prop :=
+  FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))
+    ∧ FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))
+    ∧ (Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) : ℤ) -
+        (Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) : ℤ)
+      = Divisor.deg X D + 1 - (genus X : ℤ)
 
 /-- **B2 (Serre duality).** `H¹(𝒪(D)) ≅ H⁰(𝒪(K − D))^*`. -/
 def serreDuality (D : Divisor X) : Prop :=
@@ -133,6 +139,27 @@ open Jacobians.ProjectiveCurve in
 def projectiveLine_H1_vanishing (D : Divisor ProjectiveLine) : Prop :=
   -1 ≤ Divisor.deg ProjectiveLine D → Subsingleton (H1 (LineBundle.ofDivisor D))
 
+/-! ## §4. The deepest pin (documented target — needs manifold-meromorphic API)
+
+Gemini-3.1-Pro review (2026-06-04) identified the single most important *missing*
+pin: the dimension-counting tests above are all satisfiable, in principle, by an
+abstract ℂ-vector-space construction *disconnected from functions on `X`*. The
+genuine content of `H⁰(X, 𝒪(D))` is that it **is** the space of meromorphic
+functions `f` on `X` with `div f + D ≥ 0`:
+```
+∃ emb : H0 (𝒪 D) →ₗ[ℂ] (X → ℂ), Function.Injective emb ∧
+  ∀ s, MeromorphicOnManifold (emb s) ∧ ∀ x, -(coeff D x) ≤ orderAt (emb s) x
+```
+This is **not yet stateable faithfully**: Mathlib's `meromorphicOrderAt` is for
+functions on a normed field `𝕜 → E`, not on a manifold `X`; the chart-local
+meromorphic order (and the divisor-coefficient `coeff D x`) are exactly the
+`sheafOfDivisor` infrastructure a real `H0` discharge must build (see
+`docs/planning/PHASE_3_INFRA_PLAN.md` §A.3). So this pin is **part of the
+`sheafOfDivisor` milestone's own acceptance**: the build that defines `H0`
+faithfully will, in the same stroke, make this statement expressible and true.
+Recorded here as the binding final criterion — a discharge that proves §1–§3 but
+cannot exhibit this embedding is dimension-correct but *not* `𝒪(D)`. -/
+
 /-! ## The suite
 
 `SheafCohomologyFaithful` bundles the generic pins (quantified over every compact
@@ -148,6 +175,7 @@ def SheafCohomologyFaithful : Prop :=
         ∧ (∀ D : Divisor Y, noSections_of_negativeDegree Y D)
         ∧ (∀ D : Divisor Y, H1_vanishing_of_largeDegree Y D)
         ∧ (∀ (D : Divisor Y) (p : Y), sections_monotone Y D p)
+        ∧ (∀ D : Divisor Y, riemannRoch Y D)
         ∧ (∀ D : Divisor Y, serreDuality Y D))
     ∧ (∀ (p : Jacobians.ProjectiveCurve.ProjectiveLine) (n : ℕ),
         projectiveLine_H0_dim p n)
