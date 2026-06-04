@@ -599,6 +599,58 @@ theorem chartAt_comp_chartAt_symm_differentiableAt
 --       ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
 --         (bridgePathImpl (X := X) P₀ P)) t
 
+lemma pathTrans_extend_eventuallyEq_left_of_lt_half
+    {X : Type*} [TopologicalSpace X] {x y z : X}
+    (γ₁ : Path x y) (γ₂ : Path y z) {t : ℝ} (ht : t < 1 / 2) :
+    (fun u : ℝ => (γ₁.trans γ₂).extend u) =ᶠ[𝓝 t]
+      fun u : ℝ => γ₁.extend (2 * u) := by
+  filter_upwards [eventually_lt_nhds ht] with u hu
+  exact Path.extend_trans_of_le_half γ₁ γ₂ hu.le
+
+lemma pathTrans_extend_eventuallyEq_right_of_half_lt
+    {X : Type*} [TopologicalSpace X] {x y z : X}
+    (γ₁ : Path x y) (γ₂ : Path y z) {t : ℝ} (ht : 1 / 2 < t) :
+    (fun u : ℝ => (γ₁.trans γ₂).extend u) =ᶠ[𝓝 t]
+      fun u : ℝ => γ₂.extend (2 * u - 1) := by
+  filter_upwards [eventually_gt_nhds ht] with u hu
+  exact Path.extend_trans_of_half_le γ₁ γ₂ hu.le
+
+lemma differentiableAt_comp_pathTrans_extend_left_of_lt_half
+    {X E : Type*} [TopologicalSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {x y z : X} {f : X → E} (γ₁ : Path x y) (γ₂ : Path y z)
+    {t : ℝ} (ht : t < 1 / 2)
+    (hf : DifferentiableAt ℝ (f ∘ γ₁.extend) (2 * t)) :
+    DifferentiableAt ℝ (f ∘ (γ₁.trans γ₂).extend) t := by
+  have hscale : DifferentiableAt ℝ (fun u : ℝ => 2 * u) t := by
+    simpa using (differentiableAt_id.const_mul (2 : ℝ) : DifferentiableAt ℝ (fun u : ℝ => 2 * u) t)
+  have hcomp : DifferentiableAt ℝ ((f ∘ γ₁.extend) ∘ fun u : ℝ => 2 * u) t :=
+    hf.comp t hscale
+  have heq :
+      (f ∘ (γ₁.trans γ₂).extend) =ᶠ[𝓝 t]
+        ((f ∘ γ₁.extend) ∘ fun u : ℝ => 2 * u) :=
+    (pathTrans_extend_eventuallyEq_left_of_lt_half γ₁ γ₂ ht).mono fun u hu => by
+      simp [Function.comp_def, hu]
+  exact hcomp.congr_of_eventuallyEq heq
+
+lemma differentiableAt_comp_pathTrans_extend_right_of_half_lt
+    {X E : Type*} [TopologicalSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {x y z : X} {f : X → E} (γ₁ : Path x y) (γ₂ : Path y z)
+    {t : ℝ} (ht : 1 / 2 < t)
+    (hf : DifferentiableAt ℝ (f ∘ γ₂.extend) (2 * t - 1)) :
+    DifferentiableAt ℝ (f ∘ (γ₁.trans γ₂).extend) t := by
+  have hscale : DifferentiableAt ℝ (fun u : ℝ => 2 * u - 1) t := by
+    simpa using
+      ((differentiableAt_id.const_mul (2 : ℝ)).sub_const (1 : ℝ) :
+        DifferentiableAt ℝ (fun u : ℝ => 2 * u - 1) t)
+  have hcomp : DifferentiableAt ℝ ((f ∘ γ₂.extend) ∘ fun u : ℝ => 2 * u - 1) t :=
+    hf.comp t hscale
+  have heq :
+      (f ∘ (γ₁.trans γ₂).extend) =ᶠ[𝓝 t]
+        ((f ∘ γ₂.extend) ∘ fun u : ℝ => 2 * u - 1) :=
+    (pathTrans_extend_eventuallyEq_right_of_half_lt γ₁ γ₂ ht).mono fun u hu => by
+      simp [Function.comp_def, hu]
+  exact hcomp.congr_of_eventuallyEq heq
+
 end BridgePathImpl
 
 end Jacobians.Bridge
