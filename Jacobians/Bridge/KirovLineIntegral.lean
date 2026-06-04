@@ -78,32 +78,28 @@ After (this bridge, partial):
 
 The actual analytic content of `kirovBackedFunctional` itself —
 linearity in the form via `lineIntegral_add` / `lineIntegral_smul` — is
-**derived** from Kirov's `lineIntegral_*` theorems. **The FTC content
-remains open** (`kirovBackedFunctional_local_antiderivative := sorry`).
-A previous attempt closed it with a structural axiom that was just a
-relabelling of the original `AX_pathIntegral_local_antiderivative`;
-that was reverted. Honest derivation is the next sub-agent target.
+**derived** from Kirov's `lineIntegral_*` theorems.
+
+**The single-valued ℂ "FTC" (`kirovBackedFunctional_local_antiderivative`)
+was DELETED 2026-06-04: it is FALSE** on any genus ≥ 1 curve (it forces a
+global primitive of a holomorphic 1-form, hence zero periods — see the note at
+the end of this file, and `Axioms/AbelJacobiMap.lean`). It is **not** a
+to-be-discharged target. Path-independence lives honestly at the homology level
+(`RiemannSurface.loopIntegralToH1`); `kirovBackedFunctional` itself is a sound
+`def` and can de-opaque `pathIntegralBasepointFunctional` with no FTC.
 
 ## Status
 
-This file has **one open `sorry`** (the FTC theorem) plus six
-structural `bridgePath*` axioms.
+This file is **`sorry`-free** (`chartLine_FTC`, the *chart-line* FTC, is a real
+theorem; the false full-path FTC was deleted) plus six structural `bridgePath*`
+axioms.
 
-- `kirovBackedFunctional` (commit `eb580e8`) is **honestly constructed**
+- `kirovBackedFunctional` is **honestly constructed**
   from `bridgeForm` + `lineIntegral` + `bridgePath`; linearity is
   `LinearMap.map_add` / `LinearMap.map_smul` of `bridgeForm` followed
   by `lineIntegral_add` / `lineIntegral_smul` (the former under the
-  integrability axiom `bridgePath_lineIntegrable`). This is genuine
-  progress: the functional is a real composition of vendored Kirov
-  machinery, not just an existence claim.
-- `kirovBackedFunctional_local_antiderivative` is `sorry`. A previous
-  fill via a structural FTC axiom `bridgePath_local_antiderivative`
-  was reverted — that was a verbatim relabelling of the original FTC
-  axiom into the bridge namespace, not a derivation. The honest
-  derivation requires building a chart-line concatenation in
-  `bridgePath` and then chaining
-  `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` with FTC for
-  `intervalIntegral`. Tracked as the next sub-agent target.
+  integrability axiom `bridgePath_lineIntegrable`). The functional is a real
+  composition of vendored Kirov machinery, not an existence claim.
 
 Of the six remaining structural axioms in this file, only `bridgePath`
 and `bridgePath_lineIntegrable` are load-bearing in
@@ -126,17 +122,15 @@ endpoint/regularity axioms (`bridgePath_continuous`,
    - `bridgePath_lineIntegrable` — derived from continuity of the
      bridged form + continuity of `pathSpeed` (the latter requires
      upgrading `bridgePath_chart_differentiable` to a `C¹` hypothesis).
-   - `bridgePath_local_antiderivative` — derived from
-     `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` + `mfderiv_extChartAt_self`
-     + a chart-line concatenation construction (likely:
-     `bridgePath P₀ Q := concat (basePath P₀ P) (chartLine P Q)` for
-     `Q` near `P`, plus the FTC for `intervalIntegral` on the
-     chart-line piece).
+   (There is **no** `bridgePath_local_antiderivative` step: the single-valued
+   ℂ FTC is false — see the note at the end of this file. Path-independence is
+   discharged separately at the homology level, by globalizing
+   `Bridge/ContourDeformation.lean` into `RiemannSurface.loopIntegralToH1`.)
 4. In `Jacobians/Axioms/AbelJacobiMap.lean`, replace
    `axiom pathIntegralBasepointFunctional` with
    `noncomputable def pathIntegralBasepointFunctional :=
-      kirovBackedFunctional`, and the local-antiderivative axiom with
-   the theorem above.
+      kirovBackedFunctional` (de-opaque, no FTC). The former
+   local-antiderivative axiom is already deleted (was false).
 
 See `vendor/kirov-jacobian-claude/HANDOFF.md` for surrounding context.
 -/
@@ -1029,72 +1023,41 @@ noncomputable def kirovBackedFunctional (P₀ P : X) :
     rw [hBF]
     exact Jacobians.Vendor.Kirov.lineIntegral_smul c _ _
 
-/-- **Local-antiderivative property** — would discharge the FTC axiom
-`AX_pathIntegral_local_antiderivative` from
-`Jacobians/Axioms/AbelJacobiMap.lean`.
+/-! ## The single-valued ℂ FTC is FALSE — removed 2026-06-04
 
-**Status: open.** A previous attempt closed this `sorry` by introducing
-a structural axiom `bridgePath_local_antiderivative` that asserts the
-exact statement here for the chosen `bridgePath` — i.e., a verbatim
-relabelling of the original FTC axiom into the bridge namespace. That
-is **not real progress**: the deep mathematical content (the
-fundamental theorem of calculus for path integrals along a chosen path
-family) is still asserted, just under a new name. The relabelling
-commit was reverted; this `sorry` is intentionally left open.
-
-**The honest derivation route** uses Kirov's
-`Vendor.Kirov.pathSpeed_comp_eq_mfderiv` (chain rule for chart-local
-path speed under smooth composition), `mfderiv_extChartAt_self` (the
-chart's `mfderiv` at its centre point is identity), and the standard
-FTC for `intervalIntegral` applied to a chart-line concatenation:
+A former `theorem kirovBackedFunctional_local_antiderivative` (a `sorry`,
+the bridge-side mirror of `AX_pathIntegral_local_antiderivative`) asserted
 
 ```
-bridgePath P₀ ((extChartAt P).symm z)
-  = concat (bridgePath P₀ P) (chartLine P z)        -- conceptually
+HasDerivAt (fun z => kirovBackedFunctional P₀ ((extChartAt P).symm z) form)
+           (form.coeff P (φ P)) (φ P)        -- for every P
 ```
 
-so that the upper endpoint moves smoothly with `z` along the
-chart-line piece, and the FTC for that piece gives the chart-local
-coefficient sample.
+This is **false on any genus ≥ 1 curve.** `kirovBackedFunctional P₀ · form` is
+a single-valued `ℂ`-valued function of its endpoint; the statement, quantified
+over all `P`, makes it a *global primitive* of the holomorphic 1-form `form`,
+forcing every period `∮_γ form = 0` — contradicting nonzero periods (e.g.
+`genus_Elliptic = 1`). No chart-line-tail refinement of `bridgePath` can prove
+it; the obstruction is not a missing construction but the falsity of the goal.
+(A prior attempt "closed" the `sorry` by relabelling it as a fresh axiom; that
+was reverted. The deeper reason it cannot be discharged honestly is that it is
+false.)
 
-This requires building a chart-line concatenation construction in the
-`bridgePath` definition rather than declaring it abstractly via a
-single axiom. Once that holds the FTC becomes a derivation, not an
-assertion. -/
-theorem kirovBackedFunctional_local_antiderivative
-    (P₀ P : X) (form : HolomorphicOneForm X) :
-    HasDerivAt
-      (fun z : ℂ =>
-        kirovBackedFunctional (X := X) P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
-      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
-      ((extChartAt 𝓘(ℂ) P) P) := by
-  sorry
-
-/-! ## Replacement plan for `Axioms/AbelJacobiMap.lean`
-
-Once both `kirovBackedFunctional` and `kirovBackedFunctional_local_antiderivative`
-are filled in, the corresponding axioms in `AbelJacobiMap.lean` can be
-forwarded as follows (deferred to a follow-up commit):
-
-```lean
--- Replace `axiom pathIntegralBasepointFunctional ...` with:
-noncomputable def pathIntegralBasepointFunctional
-    (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
-    (P₀ P : X) : HolomorphicOneForm X →ₗ[ℂ] ℂ :=
-  Jacobians.Bridge.kirovBackedFunctional P₀ P
-
--- Replace `axiom AX_pathIntegral_local_antiderivative ...` with:
-theorem AX_pathIntegral_local_antiderivative
-    (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
-    (P₀ P : X) (form : HolomorphicOneForm X) : ... :=
-  Jacobians.Bridge.kirovBackedFunctional_local_antiderivative P₀ P form
-```
-
-That removes 2 of our biggest data-level axioms, replacing them with
-the 4 `bridgePath*` structural axioms in this file. Net axiom count
-goes UP by 2 in raw count, but the SHAPE is much better: each
-`bridgePath*` axiom is concrete and discharge-friendly. -/
+**The honest architecture:**
+* `kirovBackedFunctional` (the `def` above) is a fine, genuine line-integral
+  `def` — it can replace the *opaque* axiom `pathIntegralBasepointFunctional`
+  in `Axioms/AbelJacobiMap.lean`, de-opaquing `ofCurve` (killing the
+  zero-functional degeneracy) **with no FTC required.** That replacement is
+  sound; only the FTC theorem above was false.
+* Path-independence lives — correctly — at the **closed-loop / homology**
+  level, as the (true, standard) axiom
+  `Jacobians.RiemannSurface.loopIntegralToH1` (`∮_γ ω` depends only on
+  `[γ] ∈ H₁`). Its honest discharge globalizes the chart-local homotopy
+  invariance now in `Jacobians.Bridge.ContourDeformation`
+  (`contourDeformation1D_pathHomotopy_abstract`) via a homotopy-rectangle
+  subdivision. See `docs/planning/ABEL_JACOBI_DISCHARGE_PLAN.md`.
+* A genuine "FTC", if ever wanted, must be stated on the **quotient**
+  `ofCurve : X → ℂ^g/Λ` (manifold-differentiable; the period ambiguity is
+  locally constant), not on a single-valued ℂ lift. -/
 
 end Jacobians.Bridge
