@@ -51,6 +51,15 @@ structure PlaneCurveData where
   is nonzero. -/
   h_smooth : ∀ v : Fin 3 → ℂ, v ≠ 0 → F.val.eval v = 0 →
     (∃ i : Fin 3, (MvPolynomial.pderiv i F.val).eval v ≠ 0)
+  /-- Irreducibility: `{F = 0}` is an irreducible curve — the standard meaning of
+  a "smooth plane curve". Rules out reducible loci (e.g. `F = xy`, two lines)
+  whose affine patch can be disconnected. -/
+  h_irreducible : Irreducible F.val
+  /-- The curve is **not** the line at infinity `{z = 0}` (equivalently `z ∤ F`).
+  Together with irreducibility this guarantees the `z = 1` affine patch is
+  nonempty, connected, and noncompact — closing the `F = z` soundness hole
+  (where the patch is empty). The third variable `z` is `MvPolynomial.X 2`. -/
+  h_not_at_infinity : ¬ (MvPolynomial.X (2 : Fin 3) ∣ F.val)
 
 namespace PlaneCurveData
 
@@ -97,35 +106,39 @@ instance : LocallyCompactSpace (PlaneCurveAffine H) := by
   have hclosed := isClosed_carrier H
   exact hclosed.isClosedEmbedding_subtypeVal.locallyCompactSpace
 
-/-! ### ⚠️ FLAGGED UNSOUND — the affine-patch axiom layer (2026-06-04 review)
+/-! ### The affine-patch axiom layer — soundness restored 2026-06-04
 
-All three axioms below are **false as stated** for `PlaneCurveData` whose curve
-lies in the line at infinity `z = 0` — e.g. `F = z` (valid: `d = 1`, smooth, since
-`∇F = (0,0,1) ≠ 0`). Then the `z = 1` affine patch `{F(x,y,1) = 0} = ∅`, so it is
-**not** nonempty, **not** connected, and (being empty hence compact) **not**
-noncompact. They need a hypothesis on `PlaneCurveData` (the affine patch is
-nonempty / the curve `⊄ {z=0}` / `z ∤ F`) or to be conditioned on degree. **Do
-not build on these as-is.** Tracked in `AXIOM_AUDIT.md` §2d (Flagged). The
-`instNonempty` discharge that briefly relied on `_nonempty` has been reverted
-(see below). -/
+These three axioms were **false as stated** for a curve lying in the line at
+infinity `z = 0` (e.g. `F = z`: the `z = 1` patch `{F(x,y,1)=0} = ∅`, which is not
+nonempty, not connected, and — being compact — not noncompact). That hole is now
+closed at the **data** level: `PlaneCurveData` carries `h_irreducible` and
+`h_not_at_infinity` (`z ∤ F`). For irreducible `F` with `z ∤ F` the curve is not
+the line at infinity, it meets the `z = 1` chart, and (being a smooth irreducible
+projective curve minus finitely many points at infinity) its affine patch is
+genuinely nonempty, connected, and noncompact — so the statements below are
+**true** (still axioms = unproven, but sound). Non-vacuous: e.g. the smooth conic
+`F = x²+y²+z²` satisfies every field. -/
 
-/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`; see the warning above). The
-affine patch is nonempty. *Needs a `PlaneCurveData` hypothesis ruling out the
-line at infinity.* -/
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The `z = 1` affine patch is nonempty: an irreducible `F` with `z ∤ F` dehomogenises
+to a nonconstant `F(x,y,1)`, which has a zero over `ℂ`. -/
 axiom AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
     Nonempty (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
-/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`, and for `d = 1, 2` per its own
-note; the axiom carries no degree hypothesis). The affine patch is connected. -/
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The affine patch is connected: the projective curve is connected (irreducible),
+and removing the finitely many points at infinity leaves a connected real surface. -/
 axiom AX_PlaneCurveAffine_connected (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_connected
 
-/-- **Axiom — FLAGGED UNSOUND** (false for `F = z`: the empty affine patch is
-compact, hence not noncompact). The affine patch is noncompact. -/
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The affine patch is noncompact: by Bézout the degree-`d` curve meets `z = 0` in
+`≥ 1` point, so the affine patch is the compact projective curve minus a nonempty
+finite set. -/
 axiom AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
     NoncompactSpace (PlaneCurveAffine H)
 
