@@ -56,12 +56,12 @@ Jacobians/Bridge/KirovLineIntegral.lean	166	nc-def	bridgePath	39	used	bridgePath
 Jacobians/Bridge/KirovLineIntegral.lean	570	nc-def	chartLine	11	used	fun t => (extChartAt 𝓘(ℂ, ℂ) P).symm ((1 - t) • (extChartAt 	
 Jacobians/Bridge/KirovLineIntegral.lean	639	nc-def	kirovBackedFunctional	9	used	Jacobians.Vendor.Kirov.lineIntegral       (Jacobians.Bridge.	
 Jacobians/Bridge/KirovLineIntegral.lean	712	nc-def	pathIntegralBasepointFunctional	23	used	Jacobians.Bridge.kirovBackedFunctional P₀ P  -- Replace `axi	
-Jacobians/Challenge.lean	58	nc-def	genus	415	used	Jacobians.RiemannSurface.genus X  -- let X be a compact Riem	
+Jacobians/Challenge.lean	58	nc-def	genus	412	used	Jacobians.RiemannSurface.genus X  -- let X be a compact Riem	
 Jacobians/Challenge.lean	78	nc-def	Jacobian	202	used	Jacobians.Jacobian X  namespace Jacobian  -- data /-- The Ja	
 Jacobians/Challenge.lean	127	nc-def	ofCurve	19	used	Jacobians.Axioms.ofCurveImpl X P  lemma ofCurve_contMDiff (P	
-Jacobians/Challenge.lean	147	nc-def	pushforward	48	used	Jacobians.Axioms.pushforwardImpl X Y f hf  -- pushforward is	
+Jacobians/Challenge.lean	147	nc-def	pushforward	47	used	Jacobians.Axioms.pushforwardImpl X Y f hf  -- pushforward is	
 Jacobians/Challenge.lean	174	nc-def	pullback	94	used	Jacobians.Axioms.pullbackImpl X Y f hf  -- pullback is holom	
-Jacobians/Challenge.lean	196	nc-def	_root_.ContMDiff.degree	170	used	Jacobians.Axioms.degreeImpl f hf  lemma pushforward_pullback	
+Jacobians/Challenge.lean	196	nc-def	_root_.ContMDiff.degree	167	used	Jacobians.Axioms.degreeImpl f hf  lemma pushforward_pullback	
 Jacobians/Extensions/AbelJacobi.lean	207	def	fiberPoint	5	used	⟨(x₀, y₀), hxy⟩  /-- **Abel's theorem on the affine fiber di	
 Jacobians/Extensions/Hyperelliptic.lean	63	def	involution	33	used	by   refine ⟨(p.val.1, -p.val.2), ?_⟩   calc     (-p.val.2) 	
 Jacobians/Extensions/Hyperelliptic.lean	102	nc-def	hyperellipticDxOverY	2	used	by   -- Construct the cocycle (`coeff`, three predicates) ex	wrapper
@@ -69,7 +69,7 @@ Jacobians/Extensions/Hyperelliptic.lean	122	nc-def	hyperellipticBasisDifferentia
 Jacobians/Extensions/Hyperelliptic.lean	199	nc-def	hyperellipticInvolution	10	used	-- On the affine chart: send `⟨(x, y), hxy⟩` to `⟨(x, -y), n	
 Jacobians/Extensions/HyperellipticEven.lean	81	nc-def	hyperellipticEvenDxOverY	2	used	HyperellipticEvenProj.hyperellipticForm H 1  /-! ## Warm-up 	
 Jacobians/Extensions/HyperellipticEven.lean	98	nc-def	hyperellipticEvenBasisDifferential	3	used	HyperellipticEvenProj.hyperellipticForm H (Polynomial.X ^ k)	
-Jacobians/Jacobian/Construction.lean	103	structure	`chartedSpaceULift`.	274699	used		
+Jacobians/Jacobian/Construction.lean	103	structure	`chartedSpaceULift`.	274526	used		
 Jacobians/Jacobian/Construction.lean	123	nc-def	jacobianBasis	55	used	Module.finBasis ℂ (HolomorphicOneForm X)  /-- The concrete (	
 Jacobians/Jacobian/Construction.lean	154	instance	instConnectedSpaceULift	0	instance	(Homeomorph.ulift (X := α)).connectedSpace_iff.mpr ‹_›  name	
 Jacobians/ProjectiveCurve/Elliptic/OneForm.lean	15	nc-def	ellipticDz	21	used	⟨fun x z => Set.indicator (extChartAt 𝓘(ℂ, ℂ) x).target (fun	
@@ -89,7 +89,7 @@ Jacobians/ProjectiveCurve/Hyperelliptic/AffineInfinityForm.lean	37	nc-def	hypere
 Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean	31	abbrev	evenMk	4	used	Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)  /-- The	
 Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean	39	nc-def	omegaDx	3	used	fun x =>     form.coeff (evenMk a)         (extChartAt 𝓘(ℂ, 	
 Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	26	structure	HyperellipticData	194	used		
-Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	37	def	genus	415	used	(H.f.natDegree - 1) / 2  /-- **Faithfulness witness** for `g	
+Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	37	def	genus	412	used	(H.f.natDegree - 1) / 2  /-- **Faithfulness witness** for `g	
 Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	56	def	hasBranchAtInfinity	3	used	Odd H.f.natDegree  /-- **Faithfulness witness** for `hasBran	
 Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	70	def	HyperellipticAffine	523	used	{ p : ℂ × ℂ // p.2 ^ 2 = H.f.eval p.1 }  namespace Hyperelli	
 Jacobians/ProjectiveCurve/Hyperelliptic/Basic.lean	158	def	HyperellipticOdd	87	used	OnePoint (HyperellipticAffine H)  namespace HyperellipticOdd	
@@ -159,7 +159,7 @@ Jacobians/ProjectiveCurve/Line.lean	155	nc-def	chartAt	881	used	if p = (∞ : Pr
 Jacobians/ProjectiveCurve/Line.lean	279	nc-def	stereographic	1	used	onePointEquivSphereOfFinrankEq (ι := Fin 3) (V := ℂ) (by sim	near-orphan
 Jacobians/ProjectiveCurve/PlaneCurve.lean	37	structure	HomogeneousPoly	2	used		
 Jacobians/ProjectiveCurve/PlaneCurve.lean	44	structure	PlaneCurveData	22	used		
-Jacobians/ProjectiveCurve/PlaneCurve.lean	68	def	genus	415	used	(H.d - 1) * (H.d - 2) / 2  end PlaneCurveData  /-- **Affine 	
+Jacobians/ProjectiveCurve/PlaneCurve.lean	68	def	genus	412	used	(H.d - 1) * (H.d - 2) / 2  end PlaneCurveData  /-- **Affine 	
 Jacobians/ProjectiveCurve/PlaneCurve.lean	74	def	PlaneCurveAffine	12	used	{ p : ℂ × ℂ // H.F.val.eval ![p.1, p.2, (1 : ℂ)] = 0 }  name	
 Jacobians/ProjectiveCurve/PlaneCurve.lean	181	def	PlaneCurve	32	used	{ p : Projectivization ℂ (Fin 3 → ℂ) //     ∃ v : Fin 3 → ℂ,	
 Jacobians/ProjectiveCurve/PlaneCurve.lean	186	instance	PlaneCurve.instTopologicalSpace	6	instance	by   letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)	
@@ -167,7 +167,7 @@ Jacobians/RiemannSurface/AnalyticArc.lean	54	def	IsAnalyticArc	7	witness	∀ s �
 Jacobians/RiemannSurface/AnalyticArc.lean	70	structure	AnalyticArc	17	witness		
 Jacobians/RiemannSurface/AnalyticArc.lean	87	def	toFun	338	used	γ.extend t.val  lemma continuous_toFun (γ : AnalyticArc X) :	
 Jacobians/RiemannSurface/AnalyticArc.lean	95	structure	AnalyticLoop	7	witness		
-Jacobians/RiemannSurface/Genus.lean	39	nc-def	genus	415	used	Module.finrank ℂ (HolomorphicOneForm X)  end Jacobians.Riema	
+Jacobians/RiemannSurface/Genus.lean	39	nc-def	genus	412	used	Module.finrank ℂ (HolomorphicOneForm X)  end Jacobians.Riema	
 Jacobians/RiemannSurface/Homology.lean	41	abbrev	H1	58	used	Additive (Abelianization (FundamentalGroup X x₀))  namespace	
 Jacobians/RiemannSurface/LineBundle.lean	56	abbrev	Divisor	47	used	FreeAbelianGroup X  /-- Divisors form an additive commutativ	
 Jacobians/RiemannSurface/LineBundle.lean	61	instance	Divisor.instAddCommGroup	5	instance	inferInstanceAs (AddCommGroup (FreeAbelianGroup X))  /-- The	
@@ -195,12 +195,12 @@ Jacobians/UniversalProperty.lean	84	structure	IsJacobian	6	used
 Jacobians/Vendor/Kirov/ChartedSpaceOfLocalHomeomorph.lean	39	nc-def	chartAtPreimage	19	vendored	Classical.choose (hf x)  lemma mem_source_chartAtPreimage {f	
 Jacobians/Vendor/Kirov/ChartedSpaceOfLocalHomeomorph.lean	61	nc-def	chartedSpace'	2	vendored	Set.range fun y : Y =>     (chartAtPreimage hf (Classical.ch	
 Jacobians/Vendor/Kirov/Genus.lean	48	def	HolomorphicOneForms	289	vendored	ContMDiffSection 𝓘(ℂ) (ℂ →L[ℂ] ℂ) ω     (fun x : X => Tangen	
-Jacobians/Vendor/Kirov/Genus.lean	78	nc-def	genus	415	vendored	Module.finrank ℂ (Jacobians.Vendor.Kirov.HolomorphicOneForms	
-Jacobians/Vendor/Kirov/HolomorphicForms.lean	75	structure	via	300	vendored		
+Jacobians/Vendor/Kirov/Genus.lean	78	nc-def	genus	412	vendored	Module.finrank ℂ (Jacobians.Vendor.Kirov.HolomorphicOneForms	sorry-body
+Jacobians/Vendor/Kirov/HolomorphicForms.lean	75	structure	via	299	vendored		
 Jacobians/Vendor/Kirov/HolomorphicForms.lean	122	nc-def	pullbackForm	24	vendored	{ toFun := fun x : X =>         (α.toFun (g x)).comp (mfderi	
 Jacobians/Vendor/Kirov/HolomorphicForms.lean	258	nc-def	ambientIso	10	vendored	(Module.finBasisOfFinrankEq ℂ (HolomorphicOneForms X)     (f	
-Jacobians/Vendor/Kirov/HolomorphicForms.lean	272	nc-def	ambientPsi	22	vendored	by   classical   by_cases hX : gX = genus X   · by_cases hY 	
-Jacobians/Vendor/Kirov/HolomorphicForms.lean	291	nc-def	ambientPhi	14	vendored	LinearMap.toContinuousLinearMap     (LinearMap.toMatrix (Pi.	
+Jacobians/Vendor/Kirov/HolomorphicForms.lean	272	nc-def	ambientPsi	20	vendored	by   classical   by_cases hX : gX = genus X   · by_cases hY 	
+Jacobians/Vendor/Kirov/HolomorphicForms.lean	291	nc-def	ambientPhi	11	vendored	LinearMap.toContinuousLinearMap     (LinearMap.toMatrix (Pi.	
 Jacobians/Vendor/Kirov/LineIntegral.lean	68	nc-def	pathSpeed	122	vendored	fderiv ℝ ((chartAt (H := ℂ) (γ t)).toFun ∘ γ) t 1  /-- Line 	
 Jacobians/Vendor/Kirov/LineIntegral.lean	75	nc-def	lineIntegral	53	vendored	∫ t in (0 : ℝ)..1, α.toFun (γ t) (pathSpeed γ t)  /-! ### Ph	
 Jacobians/Vendor/Kirov/LineIntegral.lean	83	nc-def	lineIntegralVec	1	vendored	fun i => lineIntegral (forms i) γ  @[simp] theorem lineInteg	near-orphan
@@ -224,7 +224,7 @@ Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	73	nc-instance	chartedSpaceQuotient
 Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	92	instance	instCompactSpaceQuotient	0	vendored	by   rw [← isCompact_univ_iff,       ← Set.range_eq_univ.mpr	
 Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	248	nc-instance	instIsManifoldQuotient	0	vendored	by   refine isManifold_of_contDiffOn _ _ _ ?_   intro e e' h	
 Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	540	nc-instance	instLieAddGroupQuotient	0	vendored	contMDiff_add Λ   contMDiff_neg := contMDiff_neg Λ  end Mani	
-Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	570	def	pushforward	48	vendored	QuotientAddGroup.map _ _ Φ.toAddMonoidHom hΦ   map_zero' := 	
+Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	570	def	pushforward	47	vendored	QuotientAddGroup.map _ _ Φ.toAddMonoidHom hΦ   map_zero' := 	
 Jacobians/Vendor/Kirov/ZLatticeQuotient.lean	582	def	pullback	94	vendored	pushforward ΛY ΛX Ψ hΨ  /-- Headline: the degree identity `Φ	
 Jacobians/Vendor/Wallace/HolomorphicForms/BranchedCover.lean	71	structure	field	9	vendored		
 Jacobians/Vendor/Wallace/HolomorphicForms/BranchedCover.lean	76	structure	BranchedCoverData	25	vendored		
@@ -248,6 +248,6 @@ Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean	281	nc-def	cotange
 Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean	285	nc-instance	instChartedSpaceCotangentModelFiber	0	vendored	cotangentFiberIso.toHomeomorph.toOpenPartialHomeomorph.singl	
 Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean	290	nc-instance	instIsManifoldCotangentModelFiber	0	vendored	cotangentFiberIso.toHomeomorph.toOpenPartialHomeomorph.isMan	
 Jacobians/Vendor/Wallace/HolomorphicForms/HolomorphicMap.lean	296	nc-def	IsHolomorphicAt.localInverse	5	vendored	fun y => (chartAt ℂ p).symm     (hf.hasStrictDerivAt.localIn	
-Jacobians/Vendor/Wallace/HolomorphicForms/VanishingOrder.lean	80	structure	and	565	vendored		
+Jacobians/Vendor/Wallace/HolomorphicForms/VanishingOrder.lean	80	structure	and	563	vendored		
 Jacobians/Vendor/Wallace/HolomorphicForms/VanishingOrder.lean	90	def	MeromorphicAtX	8	vendored	MeromorphicAt (f ∘ (extChartAt 𝓘(ℂ) p).symm) (extChartAt 𝓘(ℂ	
 Jacobians/Vendor/Wallace/HolomorphicForms/VanishingOrder.lean	104	nc-def	orderAt	19	vendored	meromorphicOrderAt (f ∘ (extChartAt 𝓘(ℂ) p).symm) (extChartA	
