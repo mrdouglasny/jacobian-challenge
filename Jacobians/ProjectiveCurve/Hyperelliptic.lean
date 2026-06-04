@@ -11,6 +11,7 @@ Public wrapper for the hyperelliptic curve models.
 -/
 import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
+import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
 
 namespace Jacobians.ProjectiveCurve
@@ -47,43 +48,88 @@ instance (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
     Nonempty (HyperellipticEven H h) :=
   Jacobians.ProjectiveCurve.instNonemptyHyperellipticEvenProj H
 
-/-- **Axiom-stub.** The compactified hyperelliptic curve `y² = f(x)`,
-as a unified type. Routes conceptually to `HyperellipticOdd H h` in the
-odd case and to the now-real `HyperellipticEven H h` construction in
-the even case.
+/-- The branch data used to keep the unified carrier and its analytic
+instances definitionally synchronized through the parity dispatch. -/
+private structure HyperellipticModel where
+  carrier : Type
+  instTopologicalSpace : TopologicalSpace carrier
+  instChartedSpace : letI := instTopologicalSpace; ChartedSpace ℂ carrier
+  instIsManifold :
+    letI := instTopologicalSpace
+    letI := instChartedSpace
+    IsManifold 𝓘(ℂ, ℂ) ω carrier
 
-Because a unified real `def` via parity dispatch trips Lean's
-typeclass resolution on `dite` at the type level, we keep the unified
-type itself as an axiom whose intended content is pinned by the
-homeomorphism axioms below. -/
-axiom Hyperelliptic (H : HyperellipticData) : Type
+/-- The real parity dispatch behind the unified hyperelliptic type. The
+odd branch uses `HyperellipticOdd`; the even branch uses
+`HyperellipticEvenProj`, whose atlas carries the full analytic instance
+stack. -/
+private noncomputable def hyperellipticModel (H : HyperellipticData) :
+    HyperellipticModel :=
+  if h : Odd H.f.natDegree then
+    { carrier := HyperellipticOdd H h
+      instTopologicalSpace := inferInstance
+      instChartedSpace := inferInstance
+      instIsManifold := inferInstance }
+  else
+    letI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+    { carrier := HyperellipticEvenProj H
+      instTopologicalSpace := inferInstance
+      instChartedSpace := inferInstance
+      instIsManifold := inferInstance }
 
-axiom Hyperelliptic.instTopologicalSpace (H : HyperellipticData) :
-    TopologicalSpace (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instTopologicalSpace
+/-- The compactified hyperelliptic curve `y² = f(x)`, as a unified type. -/
+noncomputable def Hyperelliptic (H : HyperellipticData) : Type :=
+  (hyperellipticModel H).carrier
 
-/-- **Axiom.** `ChartedSpace ℂ (Hyperelliptic H)` — the atlas
-construction. Atlas plan in `docs/hyperelliptic-atlas-plan.md`. -/
-axiom Hyperelliptic.instChartedSpace (H : HyperellipticData) :
-    ChartedSpace ℂ (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instChartedSpace
+noncomputable instance Hyperelliptic.instTopologicalSpace (H : HyperellipticData) :
+    TopologicalSpace (Hyperelliptic H) :=
+  (hyperellipticModel H).instTopologicalSpace
 
-/-- **Axiom.** `IsManifold 𝓘(ℂ) ω (Hyperelliptic H)` — analyticity of
-chart transitions. Part of the atlas construction plan. -/
-axiom Hyperelliptic.instIsManifold (H : HyperellipticData) :
-    IsManifold 𝓘(ℂ, ℂ) ω (Hyperelliptic H)
-attribute [instance] Hyperelliptic.instIsManifold
+noncomputable instance Hyperelliptic.instChartedSpace (H : HyperellipticData) :
+    ChartedSpace ℂ (Hyperelliptic H) :=
+  (hyperellipticModel H).instChartedSpace
 
-/-- **Axiom.** For odd `deg f`, the unified `Hyperelliptic H` is
+noncomputable instance Hyperelliptic.instIsManifold (H : HyperellipticData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (Hyperelliptic H) :=
+  (hyperellipticModel H).instIsManifold
+
+/-- For odd `deg f`, the unified `Hyperelliptic H` is
 homeomorphic to `HyperellipticOdd H h`. -/
-axiom AX_Hyperelliptic_oddEquiv (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    Hyperelliptic H ≃ₜ HyperellipticOdd H h
+noncomputable def AX_Hyperelliptic_oddEquiv (H : HyperellipticData)
+    (h : Odd H.f.natDegree) : Hyperelliptic H ≃ₜ HyperellipticOdd H h := by
+  let branch : HyperellipticModel :=
+    { carrier := HyperellipticOdd H h
+      instTopologicalSpace := inferInstance
+      instChartedSpace := inferInstance
+      instIsManifold := inferInstance }
+  have hModel : hyperellipticModel H = branch := by
+    unfold hyperellipticModel branch
+    rw [dif_pos h]
+  unfold Hyperelliptic Hyperelliptic.instTopologicalSpace
+  change @Homeomorph (hyperellipticModel H).carrier (HyperellipticOdd H h)
+    (hyperellipticModel H).instTopologicalSpace inferInstance
+  rw [hModel]
+  exact Homeomorph.refl _
 
-/-- **Axiom.** For even `deg f`, the unified `Hyperelliptic H` is
+/-- For even `deg f`, the unified `Hyperelliptic H` is
 homeomorphic to `HyperellipticEven H h`. The even target is now a real
 construction. -/
-axiom AX_Hyperelliptic_evenEquiv (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    Hyperelliptic H ≃ₜ HyperellipticEven H h
+noncomputable def AX_Hyperelliptic_evenEquiv (H : HyperellipticData)
+    (h : ¬ Odd H.f.natDegree) : Hyperelliptic H ≃ₜ HyperellipticEven H h := by
+  haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+  let branch : HyperellipticModel :=
+    { carrier := HyperellipticEvenProj H
+      instTopologicalSpace := inferInstance
+      instChartedSpace := inferInstance
+      instIsManifold := inferInstance }
+  have hModel : hyperellipticModel H = branch := by
+    unfold hyperellipticModel branch
+    rw [dif_neg h]
+  unfold Hyperelliptic Hyperelliptic.instTopologicalSpace
+  change @Homeomorph (hyperellipticModel H).carrier (HyperellipticEven H h)
+    (hyperellipticModel H).instTopologicalSpace inferInstance
+  rw [hModel]
+  exact Homeomorph.refl _
 
 /-- `Hyperelliptic H` is compact: transport `CompactSpace` along the parity
 homeomorphism to the real `HyperellipticOdd`/`HyperellipticEven` case. -/
