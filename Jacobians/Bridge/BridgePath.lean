@@ -130,4 +130,60 @@ theorem continuous_flatReparamUnit : Continuous flatReparamUnit := by
   refine Continuous.subtype_mk ?_ _
   exact continuous_flatReparam.comp continuous_subtype_val
 
+/-! ## Flat affine segments -/
+
+section FlatSegment
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
+/-- The affine segment from `a` to `b`, reparameterized by `flatReparam`. -/
+def flatSegment (a b : E) (t : ℝ) : E :=
+  (1 - flatReparam t) • a + flatReparam t • b
+
+@[simp] theorem flatSegment_zero (a b : E) : flatSegment a b 0 = a := by
+  simp [flatSegment]
+
+@[simp] theorem flatSegment_one (a b : E) : flatSegment a b 1 = b := by
+  simp [flatSegment]
+
+/-- A flat affine segment is continuous. -/
+theorem continuous_flatSegment (a b : E) : Continuous (flatSegment a b) := by
+  unfold flatSegment
+  have hφ : Continuous flatReparam := continuous_flatReparam
+  fun_prop
+
+/-- A flat affine segment is differentiable. -/
+theorem differentiable_flatSegment (a b : E) : Differentiable ℝ (flatSegment a b) := by
+  unfold flatSegment
+  have hφ : Differentiable ℝ flatReparam := differentiable_flatReparam
+  fun_prop
+
+/-- A flat affine segment is `C^n` for every `n`. -/
+theorem contDiff_flatSegment (n : ℕ∞) (a b : E) : ContDiff ℝ n (flatSegment a b) := by
+  unfold flatSegment
+  have hφ : ContDiff ℝ n flatReparam := contDiff_flatReparam n
+  fun_prop
+
+/-- The flat affine segment has zero velocity at its left endpoint. -/
+theorem hasDerivAt_flatSegment_zero (a b : E) :
+    HasDerivAt (flatSegment a b) (0 : E) 0 := by
+  unfold flatSegment
+  have hleft : HasDerivAt (fun t : ℝ => 1 - flatReparam t) 0 0 := by
+    simpa using
+      HasDerivAt.sub (hasDerivAt_const (0 : ℝ) (1 : ℝ)) hasDerivAt_flatReparam_zero
+  simpa using
+    HasDerivAt.add (hleft.smul_const a) (hasDerivAt_flatReparam_zero.smul_const b)
+
+/-- The flat affine segment has zero velocity at its right endpoint. -/
+theorem hasDerivAt_flatSegment_one (a b : E) :
+    HasDerivAt (flatSegment a b) (0 : E) 1 := by
+  unfold flatSegment
+  have hleft : HasDerivAt (fun t : ℝ => 1 - flatReparam t) 0 1 := by
+    simpa using
+      HasDerivAt.sub (hasDerivAt_const (1 : ℝ) (1 : ℝ)) hasDerivAt_flatReparam_one
+  simpa using
+    HasDerivAt.add (hleft.smul_const a) (hasDerivAt_flatReparam_one.smul_const b)
+
+end FlatSegment
+
 end Jacobians.Bridge
