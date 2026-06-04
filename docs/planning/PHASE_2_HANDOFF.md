@@ -252,19 +252,19 @@ Beyond the general triggers in [`PHASE_1_HANDOFF.md`](PHASE_1_HANDOFF.md) §6:
 After Phase 2, axiom count is 78. The next-most-impactful clusters:
 
 - **Phase 3 — `bridgePath` and the Kirov line-integration layer** —
-  ✅ **mostly DONE (2026-06-04, branch `phase2-bridgepath`).** `bridgePath`
+  ✅ **DONE (2026-06-04, branch `phase2-bridgepath`).** `bridgePath`
   is now a real `def` backed by the new `Bridge/BridgePath.lean`
   smooth-path-connectedness infrastructure (~1450 LOC: flat-segment
   calculus → manifold path-source → Lebesgue chart-subdivision →
   `Path.trans` concatenation → unconditional chart-differentiability),
-  and the four derived structural axioms (`bridgePath_continuous`,
+  and **all five derived axioms** — `bridgePath_continuous`,
   `bridgePath_chart_differentiable`, `bridgePath_at_zero`,
-  `bridgePath_at_one`) collapsed to short derivations as predicted.
-  **Only `bridgePath_lineIntegrable` remains** (the integrand-continuity
-  fact — needs a continuity-of-`pathSpeed` lemma; tracked separately).
-  This took ~1 session via background Codex, not ~3 weeks. Still to
-  wire onward: `loopIntegralToH1` and `pathIntegralBasepointFunctional`
-  (per cross-plan Patch K). Axiom drop on this branch: 86 → 81.
+  `bridgePath_at_one`, and `bridgePath_lineIntegrable` (the
+  integrand-continuity fact, from continuity of `pathSpeed`) — are now
+  theorems. The **entire 6-axiom cluster is discharged.** This took ~1
+  session via background Codex, not ~3 weeks. Still to wire onward:
+  `loopIntegralToH1` and `pathIntegralBasepointFunctional` (per
+  cross-plan Patch K). Axiom drop on this branch: 86 → 80.
 - **Phase 4 — Hyperelliptic atlas** (`instChartedSpace` +
   `instIsManifold` + the IFT cluster). The work Phase 2 deliberately
   deferred. `needs-infra`, weeks-to-months, mostly in
