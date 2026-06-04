@@ -102,3 +102,18 @@
  ProjectiveCurve.HyperellipticAffine.squareLocalHomeomorph_zero_notMem_source,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]
+'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.ProjectiveCurve.Hyperelliptic.instChartedSpace' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ ProjectiveCurve.HyperellipticOdd.infinityChart,
+ ProjectiveCurve.HyperellipticOdd.infinityChart_mem_source]
+'Jacobians.ProjectiveCurve.PlaneCurve' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.PlaneCurve.instNonempty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ ProjectiveCurve.PlaneCurve.instNonempty]
