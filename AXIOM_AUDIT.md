@@ -10,10 +10,10 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 66** — **64** in our modules + **2** vendored Kirov
+**Active project axioms: 68** — **66** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 64 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 66 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
@@ -32,14 +32,25 @@ infrastructure (a connected complex 1-manifold is smoothly path-connected:
 flat-endpoint reparametrisation + chart-ball subdivision + smooth concatenation,
 ~1450 LOC; `_lineIntegrable` from continuity of `Vendor.Kirov.pathSpeed` ⇒
 `IntervalIntegrable`) (2026-06-04); → 66 with the **Phase-3 prerequisite-type
-discharges** (2026-06-04): the unified `Hyperelliptic` type became a real
-parity-dispatch `def` cascading to `instTopologicalSpace`/`instChartedSpace`/
-`instIsManifold` + `oddEquiv`/`evenEquiv` (6); `infinityInverseMap` (1); and
-`PlaneCurve` became a faithful `Projectivization`-subtype `def` cascading to
-`instTopologicalSpace`/`instNonempty` (3). The sheaf-cohomology faithfulness
+discharges** (2026-06-04, → 68 after the corrective review below): the unified
+`Hyperelliptic` type became a real parity-dispatch `def` cascading to
+`instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv`
+(6 — but **not** standard-3: the carrier is built through a bundled model so it
+transitively depends on the *sound, unproven* odd-`infinityChart` + even-atlas
+axioms; no NEW axioms introduced); and `PlaneCurve` became a faithful
+`Projectivization`-subtype `def` cascading to `instTopologicalSpace` (2). The
+sheaf-cohomology faithfulness
 suite [`SheafCohomologySpec.lean`](Jacobians/RiemannSurface/SheafCohomologySpec.lean)
 was added as the machine-checkable acceptance gate for the (still-axiomatized)
 `H0`/`H1`/`LineBundle` cluster — see [`docs/planning/PHASE_3_INFRA_PLAN.md`](docs/planning/PHASE_3_INFRA_PLAN.md).
+**Corrective review (2026-06-04, → 68):** kernel-checking the discharges surfaced
+three problems (reviewer-found). `infinityInverseMap` was reverted (its `def`
+picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
+`PlaneCurve.instNonempty` was reverted (it proved nonemptiness via the
+*false* `AX_PlaneCurveAffine_nonempty`) — both back to honest axioms (+2). The
+`PlaneCurveAffine` axiom layer was made sound by strengthening `PlaneCurveData`
+(`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` "standard-3" claim was
+corrected: its carrier transitively depends on the (sound) atlas axioms.
 
 ---
 
@@ -51,7 +62,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (52 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (54 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -63,7 +74,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 14 | classical theorems, citable | high |
 | 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 25 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
@@ -142,8 +153,8 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 3 affine props (type + `instTopologicalSpace`/`instNonempty` discharged Phase-3 Tier-1) | `ProjectiveCurve/PlaneCurve.lean` | 8 |
-| Odd-atlas infinity chart (`infinityChart`, 4 compat, `mem_source`; `infinityInverseMap` discharged Phase-3) | `…/OddAtlas/InfinityChart.lean` | 6 |
+| `PlaneCurve`: `instNonempty` + 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 3 affine props (type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instNonempty` reverted in review) | `ProjectiveCurve/PlaneCurve.lean` | 9 |
+| Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | Affine-form IFT-shape (`squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source`) | `…/Hyperelliptic/AffineForm.lean:66,222` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -207,9 +218,8 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 | **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
-| **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` by parity dispatch `if h : Odd … then HyperellipticOdd H h else HyperellipticEvenProj H`; the 3 data instances derive by case-split + `dif_pos/neg` (even branch via `Fact (¬Odd)`); the equivs become `Homeomorph`s from the type equality. Explicit instances match the head symbol, so the dite did not trip downstream typeclass synthesis. `#print axioms` = standard 3 | `ProjectiveCurve/Hyperelliptic.lean` |
-| `infinityInverseMap` *(Phase 3, 2026-06-04)* | real `def` for the odd-atlas inverse coordinate map at infinity | `…/OddAtlas/InfinityChart.lean` |
-| **PlaneCurve Tier-1** (3): `PlaneCurve`, `instTopologicalSpace`, `instNonempty` *(Phase 3, 2026-06-04)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via an existential-representative predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, rep-independent using `H.F.homogeneous`); topology from the subtype, nonempty from a projective solution. `instT2Space/instCompactSpace/instConnectedSpace` left as honest axioms (no synthesized `Projectivization` compact/T2 package in this pin). `#print axioms` = standard 3 | `ProjectiveCurve/PlaneCurve.lean` |
+| **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` by parity dispatch (odd `HyperellipticOdd`, even `HyperellipticEvenProj`) through a bundled `HyperellipticModel` (carrier + the 3 instances, kept defeq-synchronised); the equivs are `Homeomorph`s from the parity type-equality; the 4 prop instances transport through them. **Not standard-3** — because the model bundles the chart/manifold fields, `#print axioms Hyperelliptic` transitively lists the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms. This is a legitimate discharge (6 named axioms → `def`/instances, **no NEW axioms**; the dependencies are on the pre-existing atlas axioms). A fully standard-3 carrier needs unbundling, which fights Lean's dependent-`dite` defeq — tracked follow-up. | `ProjectiveCurve/Hyperelliptic.lean` |
+| **PlaneCurve Tier-1** (2): `PlaneCurve`, `instTopologicalSpace` *(Phase 3, 2026-06-04)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype. `#print axioms PlaneCurve` = standard 3. `instNonempty` (it had rested on the *false* `AX_PlaneCurveAffine_nonempty`), `instT2Space`/`instCompactSpace`/`instConnectedSpace`, the atlas, and the affine props remain honest axioms. *(`infinityInverseMap`'s Phase-3 discharge was reverted in review — arbitrary-root `def`.)* | `ProjectiveCurve/PlaneCurve.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
