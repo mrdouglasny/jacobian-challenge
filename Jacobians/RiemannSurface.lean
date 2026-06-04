@@ -25,6 +25,7 @@ import Jacobians.RiemannSurface.ArcChartDifferentiable
 import Jacobians.RiemannSurface.SegmentCenterIndependence
 import Jacobians.RiemannSurface.SegmentAdjacency
 import Jacobians.RiemannSurface.PartitionIndependence
+import Jacobians.RiemannSurface.CanonicalArcIntegral
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
