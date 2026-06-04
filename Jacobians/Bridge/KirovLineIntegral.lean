@@ -145,6 +145,7 @@ import Jacobians.RiemannSurface.OneForm
 import Jacobians.Vendor.Kirov.LineIntegral
 import Jacobians.Bridge.BridgePath
 import Jacobians.Bridge.KirovHolomorphic
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 namespace Jacobians.Bridge
 
@@ -802,6 +803,147 @@ private lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
     exact hr_sub (by simpa [a] using hball)
   exact bridgeForm_chartLine_integrand (X := X) P form z htarget
 
+private lemma hasDerivAt_mul_sub_of_continuousAt {f : ℂ → ℂ} {a : ℂ}
+    (hf : ContinuousAt f a) :
+    HasDerivAt (fun z : ℂ => f z * (z - a)) (f a) a := by
+  rw [hasDerivAt_iff_tendsto_slope]
+  have hslope :
+      (slope (fun z : ℂ => f z * (z - a)) a) =ᶠ[𝓝[≠] a] f := by
+    have hfun :
+        (fun z : ℂ => f z * (z - a)) = fun z : ℂ => (z - a) • f z := by
+      funext z
+      simp [smul_eq_mul, mul_comm]
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hne : a ≠ z := by
+      simpa [Set.mem_compl_iff, Set.mem_singleton_iff, eq_comm] using hz
+    rw [hfun]
+    exact slope_sub_smul f hne
+  exact Tendsto.congr' hslope.symm (hf.tendsto.mono_left nhdsWithin_le_nhds)
+
+private lemma chartLine_average_coeff_continuousAt
+    (P : X) (form : HolomorphicOneForm X) :
+    ContinuousAt
+      (fun z : ℂ =>
+        ∫ t in (0 : ℝ)..1,
+          form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z))
+      ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  have ha_target : a ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    simp [a]
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hcoeff_cont :
+      ContinuousOn (form.coeff P) (extChartAt 𝓘(ℂ, ℂ) P).target :=
+    (form.2.1 P).continuousOn
+  have hcoeff_at : ContinuousAt (form.coeff P) a := by
+    have hcoeff_an :
+        AnalyticAt ℂ (form.coeff P) a :=
+      (form.2.1 P).analyticAt (hOpen.mem_nhds ha_target)
+    exact hcoeff_an.continuousAt
+  rcases Metric.isOpen_iff.mp hOpen a ha_target with ⟨r, hr_pos, hr_sub⟩
+  let ρ : ℝ := r / 2
+  have hρ_pos : 0 < ρ := by
+    positivity
+  have hρ_lt_r : ρ < r := by
+    dsimp [ρ]
+    linarith
+  have hseg_target :
+      ∀ z ∈ Metric.closedBall a ρ, ∀ t ∈ Set.Icc (0 : ℝ) 1,
+        (1 - t) • a + t • z ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    intro z hz t ht
+    have hz_ball : z ∈ Metric.ball a r := by
+      have hdist_lt : dist z a < r := by
+        exact lt_of_le_of_lt (by simpa [Metric.mem_closedBall] using hz) hρ_lt_r
+      simpa [Metric.mem_ball] using hdist_lt
+    have hline :
+        (1 - t) • a + t • z ∈ segment ℝ a z := by
+      rw [← AffineMap.lineMap_apply_module]
+      exact lineMap_mem_segment ℝ a z ht
+    have hball : (1 - t) • a + t • z ∈ Metric.ball a r :=
+      segment_subset_ball (Metric.mem_ball_self hr_pos) hz_ball hline
+    exact hr_sub hball
+  have hprod_cont :
+      ContinuousOn
+        (fun p : ℂ × ℝ => form.coeff P ((1 - p.2) • a + p.2 • p.1))
+        (Metric.closedBall a ρ ×ˢ Set.Icc (0 : ℝ) 1) := by
+    have haff_cont :
+        Continuous fun p : ℂ × ℝ => (1 - p.2) • a + p.2 • p.1 := by
+      fun_prop
+    exact hcoeff_cont.comp haff_cont.continuousOn
+      (fun p hp => hseg_target p.1 hp.1 p.2 hp.2)
+  have hcompact :
+      IsCompact (Metric.closedBall a ρ ×ˢ Set.Icc (0 : ℝ) 1) :=
+    (isCompact_closedBall a ρ).prod isCompact_Icc
+  rcases hcompact.exists_bound_of_continuousOn hprod_cont with ⟨M, hM⟩
+  have hF_meas :
+      ∀ᶠ z in 𝓝 a,
+        AEStronglyMeasurable
+          (fun t : ℝ => form.coeff P ((1 - t) • a + t • z))
+          (MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) 1)) := by
+    filter_upwards [Metric.ball_mem_nhds a hρ_pos] with z hz
+    have hz_closed : z ∈ Metric.closedBall a ρ :=
+      Metric.ball_subset_closedBall hz
+    have hcont_t :
+        ContinuousOn
+          (fun t : ℝ => form.coeff P ((1 - t) • a + t • z))
+          (Set.Icc (0 : ℝ) 1) := by
+      have haff_cont : Continuous fun t : ℝ => (1 - t) • a + t • z := by
+        fun_prop
+      exact hcoeff_cont.comp haff_cont.continuousOn
+        (fun t ht => hseg_target z hz_closed t ht)
+    have huIoc_subset : Set.uIoc (0 : ℝ) 1 ⊆ Set.Icc (0 : ℝ) 1 := by
+      rw [Set.uIoc_of_le zero_le_one]
+      exact Set.Ioc_subset_Icc_self
+    exact hcont_t.aestronglyMeasurable_of_subset_isCompact
+      isCompact_Icc measurableSet_uIoc huIoc_subset
+  have h_bound :
+      ∀ᶠ z in 𝓝 a,
+        ∀ᵐ t ∂MeasureTheory.volume,
+          t ∈ Set.uIoc (0 : ℝ) 1 →
+            ‖form.coeff P ((1 - t) • a + t • z)‖ ≤ max M 0 := by
+    filter_upwards [Metric.ball_mem_nhds a hρ_pos] with z hz
+    have hz_closed : z ∈ Metric.closedBall a ρ :=
+      Metric.ball_subset_closedBall hz
+    filter_upwards with t
+    intro ht
+    have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := by
+      have htIoc : t ∈ Set.Ioc (0 : ℝ) 1 := by
+        simpa [Set.uIoc_of_le zero_le_one] using ht
+      exact Set.Ioc_subset_Icc_self htIoc
+    exact (hM (z, t) ⟨hz_closed, htIcc⟩).trans (le_max_left M 0)
+  have h_bound_int :
+      IntervalIntegrable (fun _ : ℝ => max M 0) MeasureTheory.volume (0 : ℝ) 1 := by
+    exact intervalIntegrable_const
+  have h_cont :
+      ∀ᵐ t ∂MeasureTheory.volume,
+        t ∈ Set.uIoc (0 : ℝ) 1 →
+          ContinuousAt
+            (fun z : ℂ => form.coeff P ((1 - t) • a + t • z)) a := by
+    filter_upwards with t
+    intro _ht
+    have hline_at : (1 - t) • a + t • a = a := by
+      rw [← add_smul]
+      ring_nf
+      simp
+    have haff_cont : ContinuousAt (fun z : ℂ => (1 - t) • a + t • z) a := by
+      fun_prop
+    have hcomp :
+        ContinuousAt
+          ((form.coeff P) ∘ fun z : ℂ => (1 - t) • a + t • z) a :=
+      ContinuousAt.comp_of_eq
+        (f := fun z : ℂ => (1 - t) • a + t • z)
+        (g := form.coeff P) (x := a) (y := a)
+        hcoeff_at haff_cont hline_at
+    simpa [Function.comp_def] using hcomp
+  simpa [a] using
+    (intervalIntegral.continuousAt_of_dominated_interval
+      (μ := MeasureTheory.volume)
+      (F := fun z : ℂ => fun t : ℝ =>
+        form.coeff P ((1 - t) • a + t • z))
+      (x₀ := a) (bound := fun _ : ℝ => max M 0)
+      (a := (0 : ℝ)) (b := 1) hF_meas h_bound h_bound_int h_cont)
+
 /-- **FTC for `chartLine`.** The line integral of `bridgeForm form` along
 the chart-line from `P` to `(extChartAt P).symm z` has derivative w.r.t.
 `z` equal to `form.coeff P ((extChartAt P) P)` at `z = (extChartAt P) P`.
@@ -825,7 +967,27 @@ theorem chartLine_FTC [Nonempty X] (P : X) (form : HolomorphicOneForm X) :
         (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
         ((extChartAt 𝓘(ℂ, ℂ) P) P) by
     exact hparam.congr_of_eventuallyEq hline
-  sorry
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  let I : ℂ → ℂ := fun z =>
+    ∫ t in (0 : ℝ)..1, form.coeff P ((1 - t) • a + t • z)
+  have hIcont : ContinuousAt I a := by
+    simpa [I, a] using chartLine_average_coeff_continuousAt (X := X) P form
+  have hIa : I a = form.coeff P a := by
+    calc
+      I a = ∫ _t in (0 : ℝ)..1, form.coeff P a := by
+        apply intervalIntegral.integral_congr
+        intro t _ht
+        change form.coeff P ((1 - t) • a + t • a) = form.coeff P a
+        congr 1
+        rw [← add_smul]
+        ring_nf
+        simp
+      _ = form.coeff P a := by
+        simp
+  have hder :
+      HasDerivAt (fun z : ℂ => I z * (z - a)) (form.coeff P a) a := by
+    simpa [hIa] using hasDerivAt_mul_sub_of_continuousAt hIcont
+  simpa [I, a] using hder
 
 /-! ## The bridge functional
 
