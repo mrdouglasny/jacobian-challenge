@@ -10,10 +10,14 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 76** — **74** in our modules + **2** vendored Kirov
-`:= sorry` declarations restated as named axioms. (Verified against the
+**Active project axioms: 66** — all **66** in our own modules. The vendored
+Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
+(`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
+(they had no references beyond their own declarations; the challenge uses the
+main-tree `AX_genus_eq_zero_iff_homeo`), matching the axiom-free Wallace vendor.
+(Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 74 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 66 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
@@ -31,7 +35,31 @@ discharged via the new `Bridge/BridgePath.lean` smooth-path-connectedness
 infrastructure (a connected complex 1-manifold is smoothly path-connected:
 flat-endpoint reparametrisation + chart-ball subdivision + smooth concatenation,
 ~1450 LOC; `_lineIntegrable` from continuity of `Vendor.Kirov.pathSpeed` ⇒
-`IntervalIntegrable`) (2026-06-04).
+`IntervalIntegrable`) (2026-06-04); → 66 with the **Phase-3 prerequisite-type
+discharges** (2026-06-04, → 68 after the corrective review below): the unified
+`Hyperelliptic` type became a real parity-dispatch `def` cascading to
+`instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv`
+(6 — the **carrier is standard-3** via a `Decidable.casesOn`-motive parity
+dispatch; only `instChartedSpace`/`instIsManifold` transport the sound,
+unproven odd-`infinityChart` + even-atlas axioms, where that dependency belongs;
+no NEW axioms introduced); and `PlaneCurve` became a faithful
+`Projectivization`-subtype `def` cascading to `instTopologicalSpace` (2). The
+sheaf-cohomology faithfulness
+suite [`SheafCohomologySpec.lean`](Jacobians/RiemannSurface/SheafCohomologySpec.lean)
+was added as the machine-checkable acceptance gate for the (still-axiomatized)
+`H0`/`H1`/`LineBundle` cluster — see [`docs/planning/PHASE_3_INFRA_PLAN.md`](docs/planning/PHASE_3_INFRA_PLAN.md).
+**Corrective review (2026-06-04, → 68):** kernel-checking the discharges surfaced
+three problems (reviewer-found). `infinityInverseMap` was reverted (its `def`
+picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
+`PlaneCurve.instNonempty` was reverted (it proved nonemptiness via the
+*false* `AX_PlaneCurveAffine_nonempty`) — both back to honest axioms (+2). The
+`PlaneCurveAffine` axiom layer was made sound by strengthening `PlaneCurveData`
+(`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` carrier was **unbundled**
+(pure `Decidable.casesOn` parity dispatch) so `#print axioms Hyperelliptic` is
+now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
+instances. Finally → **66** by deleting the 2 unused vendored Kirov handoff
+axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`), leaving the
+vendored subtree axiom-free (2026-06-04).
 
 ---
 
@@ -39,11 +67,11 @@ flat-endpoint reparametrisation + chart-ball subdivision + smooth concatenation,
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (14 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (12 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (62 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (54 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -52,10 +80,10 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 14 | classical theorems, citable | high |
+| 1 — textbook-standard | 12 | classical theorems, citable | high |
 | 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 35 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
@@ -79,8 +107,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
 | `AX_curve_generates_jacobian` | `Axioms/UniversalProperty.lean:44` | Mumford *Curves & their Jacobians*; Milne *AV* §I — *unused stub* (see Universal-property section) |
-| `Vendor.Kirov…genus_eq_zero_iff_homeo` | `Vendor/Kirov/Genus.lean:94` | uniformization (Kirov handoff) |
-| `Vendor.Kirov…ambientPhi_ambientPsi_eq` | `Vendor/Kirov/HolomorphicForms.lean:340` | degree identity (Kirov handoff) |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is still an axiom **only** for the
 abstract `genus_eq_zero_iff_homeo`; the concrete `genus ℙ¹ = 0` no longer
@@ -127,14 +153,15 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 ### 2c. Atlas / structure axioms — *curve-specific constructions*
 
 Real chart/manifold constructions for specific curves; classically true,
-discharge is substantial chart work. The unified `Hyperelliptic` and
-`PlaneCurve` types are axiomatized along with their 7 typeclass instances.
+discharge is substantial chart work. As of the Phase-3 batch (2026-06-04) the
+unified `Hyperelliptic` and `PlaneCurve` *types* are now real `def`s; what
+remains here is their **atlas/manifold** instances + the genus formula.
 
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
-| `Hyperelliptic` type + 3 instances (`instTopologicalSpace`/`instChartedSpace`/`instIsManifold`) + `oddEquiv`/`evenEquiv`/`genus` | `ProjectiveCurve/Hyperelliptic.lean:59–…` | 7 |
-| `PlaneCurve` type + 7 instances + 3 affine props | `ProjectiveCurve/PlaneCurve.lean:103–185` | 11 |
-| Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, mem_source) | `…/OddAtlas/InfinityChart.lean:48–102` | 7 |
+| `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
+| `PlaneCurve`: `instNonempty` + 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 3 affine props (type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instNonempty` reverted in review) | `ProjectiveCurve/PlaneCurve.lean` | 9 |
+| Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | Affine-form IFT-shape (`squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source`) | `…/Hyperelliptic/AffineForm.lean:66,222` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -198,6 +225,8 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 | **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
+| **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` as a pure parity dispatch `if h : Odd … then HyperellipticOdd H h else HyperellipticEvenProj H`; the instances are defined via `Decidable.casesOn` with an explicit motive (`carrierOf`/`topologicalSpaceOf`) so they reduce in lockstep with the carrier's `dite` (solving the dependent-`dite` defeq that defeats a naive `split`); the equivs are `Homeomorph`s and the 4 prop instances transport through them. **Kernel-verified:** `#print axioms Hyperelliptic` = the 3 standard (carrier is atlas-free), `instTopologicalSpace` standard-3, and `instChartedSpace`/`instIsManifold` correctly transport the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms — that is where the atlas dependency belongs. 6 named axioms → `def`/instances, **no NEW axioms**. | `ProjectiveCurve/Hyperelliptic.lean` |
+| **PlaneCurve Tier-1** (2): `PlaneCurve`, `instTopologicalSpace` *(Phase 3, 2026-06-04)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype. `#print axioms PlaneCurve` = standard 3. `instNonempty` (it had rested on the *false* `AX_PlaneCurveAffine_nonempty`), `instT2Space`/`instCompactSpace`/`instConnectedSpace`, the atlas, and the affine props remain honest axioms. *(`infinityInverseMap`'s Phase-3 discharge was reverted in review — arbitrary-root `def`.)* | `ProjectiveCurve/PlaneCurve.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -224,8 +253,9 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 80; add the 2 Vendor/Kirov axioms for the total 82.
-lake env lean <<'LEAN'
+#   prints 66 — the vendored Kirov subtree is now axiom-free, so 66 is the total.
+# (lean needs a file argument, so write the snippet then run it:)
+cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
 open Lean
 run_cmd do
@@ -240,6 +270,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 66
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

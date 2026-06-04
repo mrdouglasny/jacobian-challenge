@@ -51,6 +51,15 @@ structure PlaneCurveData where
   is nonzero. -/
   h_smooth : ∀ v : Fin 3 → ℂ, v ≠ 0 → F.val.eval v = 0 →
     (∃ i : Fin 3, (MvPolynomial.pderiv i F.val).eval v ≠ 0)
+  /-- Irreducibility: `{F = 0}` is an irreducible curve — the standard meaning of
+  a "smooth plane curve". Rules out reducible loci (e.g. `F = xy`, two lines)
+  whose affine patch can be disconnected. -/
+  h_irreducible : Irreducible F.val
+  /-- The curve is **not** the line at infinity `{z = 0}` (equivalently `z ∤ F`).
+  Together with irreducibility this guarantees the `z = 1` affine patch is
+  nonempty, connected, and noncompact — closing the `F = z` soundness hole
+  (where the patch is empty). The third variable `z` is `MvPolynomial.X 2`. -/
+  h_not_at_infinity : ¬ (MvPolynomial.X (2 : Fin 3) ∣ F.val)
 
 namespace PlaneCurveData
 
@@ -97,27 +106,39 @@ instance : LocallyCompactSpace (PlaneCurveAffine H) := by
   have hclosed := isClosed_carrier H
   exact hclosed.isClosedEmbedding_subtypeVal.locallyCompactSpace
 
-/-- **Axiom (NOT VERIFIED).** For a smooth plane curve of degree `≥ 1`
-the affine patch is nonempty. Classical: `F` has at least one zero on
-`ℂ² × {1} ⊂ ℂ³ \ {0}` by projective algebraic geometry. -/
+/-! ### The affine-patch axiom layer — soundness restored 2026-06-04
+
+These three axioms were **false as stated** for a curve lying in the line at
+infinity `z = 0` (e.g. `F = z`: the `z = 1` patch `{F(x,y,1)=0} = ∅`, which is not
+nonempty, not connected, and — being compact — not noncompact). That hole is now
+closed at the **data** level: `PlaneCurveData` carries `h_irreducible` and
+`h_not_at_infinity` (`z ∤ F`). For irreducible `F` with `z ∤ F` the curve is not
+the line at infinity, it meets the `z = 1` chart, and (being a smooth irreducible
+projective curve minus finitely many points at infinity) its affine patch is
+genuinely nonempty, connected, and noncompact — so the statements below are
+**true** (still axioms = unproven, but sound). Non-vacuous: e.g. the smooth conic
+`F = x²+y²+z²` satisfies every field. -/
+
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The `z = 1` affine patch is nonempty: an irreducible `F` with `z ∤ F` dehomogenises
+to a nonconstant `F(x,y,1)`, which has a zero over `ℂ`. -/
 axiom AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
     Nonempty (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
-/-- **Axiom (NOT VERIFIED).** For a smooth plane curve of degree `≥ 3`
-the affine patch is connected (irreducible variety in the classical
-topology). For `d = 1, 2` (line, conic), may be one or two connected
-components. This axiom is for `d ≥ 3`; callers at smaller degree
-should use the genus-0 `ProjectiveLine` directly. -/
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The affine patch is connected: the projective curve is connected (irreducible),
+and removing the finitely many points at infinity leaves a connected real surface. -/
 axiom AX_PlaneCurveAffine_connected (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurveAffine H)
 
 attribute [instance] AX_PlaneCurveAffine_connected
 
-/-- **Axiom (NOT VERIFIED).** The affine patch is noncompact —
-projective curves are compact but their affine patches are not (the
-affine patch misses at least one point at infinity). -/
+/-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
+The affine patch is noncompact: by Bézout the degree-`d` curve meets `z = 0` in
+`≥ 1` point, so the affine patch is the compact projective curve minus a nonempty
+finite set. -/
 axiom AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
     NoncompactSpace (PlaneCurveAffine H)
 
@@ -150,31 +171,52 @@ was topologically wrong for any `d ≥ 2`; Codex review 2026-04-23
 correctly flagged it. This version is the honest axiom-stub.
 -/
 
-/-- **Axiom-stub.** The smooth projective plane curve `{F = 0} ⊂ ℙ²`
-as a type.
+/-- The smooth projective plane curve `{F = 0} ⊂ ℙ²` as the projective
+zero-locus of `F`.
 
-Classical construction: glue three affine charts `z ≠ 0`, `y ≠ 0`,
-`x ≠ 0` along their pairwise overlaps. The resulting space is a
-compact, connected, Hausdorff complex 1-manifold of genus
-`(d - 1)(d - 2) / 2` (Plücker). Axiomatized with properly formulated
-typeclass instances until the three-chart pushout is constructed. -/
-axiom PlaneCurve (H : PlaneCurveData) : Type
+The vanishing predicate is phrased by existence of a nonzero homogeneous
+representative, so it is a predicate on projective points rather than on
+Lean's chosen `Projectivization.rep`. For the homogeneous polynomial
+`H.F`, this is the classical projective zero-locus. -/
+def PlaneCurve (H : PlaneCurveData) : Type :=
+  { p : Projectivization ℂ (Fin 3 → ℂ) //
+    ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
+      Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
 
-axiom PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
-    TopologicalSpace (PlaneCurve H)
-attribute [instance] PlaneCurve.instTopologicalSpace
+instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
+    TopologicalSpace (PlaneCurve H) := by
+  letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace
+      (Quotient (projectivizationSetoid ℂ (Fin 3 → ℂ))))
+  change TopologicalSpace
+    { p : Projectivization ℂ (Fin 3 → ℂ) //
+      ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
+        Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
+  infer_instance
 
+-- TODO: prove Hausdorffness for the quotient projective topology.
 axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
 attribute [instance] PlaneCurve.instT2Space
 
+-- TODO: prove compactness via the quotient of the unit sphere, or an explicit
+-- finite closed-polydisc projective cover.
 axiom PlaneCurve.instCompactSpace (H : PlaneCurveData) :
     CompactSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instCompactSpace
 
+-- TODO: prove connectedness from irreducibility/overlapping affine charts.
 axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
+/-- **Axiom (re-instated 2026-06-04 after review).** `PlaneCurve H` is nonempty.
+This statement is TRUE — a positive-degree (`d ≥ 1`) homogeneous `F` over `ℂ`
+always has a nontrivial projective zero (restrict `F` to a line ⊂ ℙ² to get a
+nonconstant homogeneous binary form, which has a root). An earlier "discharge"
+proved it via `AX_PlaneCurveAffine_nonempty`, which is **FALSE** for `F = z` (see
+the flag above), so that proof was unsound and is reverted. Real proof
+(projective Nullstellensatz / line restriction) is a tracked follow-up — it must
+NOT route through the flagged affine axiom. -/
 axiom PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H)
 attribute [instance] PlaneCurve.instNonempty
 

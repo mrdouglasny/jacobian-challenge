@@ -325,22 +325,12 @@ theorem ambientPsi_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpa
   rw [pullbackForm_comp f hf g hg hgf]
   simp [LinearMap.comp_apply]
 
-/-- **Ambient degree identity** (Forster §17 / Miranda §III.4).
-The composition `ambientPhi f hf ∘ ambientPsi f hf` equals
-multiplication by the degree `d`. In terms of forms: `f_* ∘ f^* = deg(f) • id`.
-
-Mathlib has no manifold-level degree theory for proper holomorphic maps.
-Real content requires a real `ContMDiff.degree` (via preimage counting
-at regular values) together with a real trace/pushforward construction
-for `ambientPhi`. ~500-1000 lines to formalize.
-
-**Stated as `axiom` for handoff** (was `:= sorry` in upstream). To
-discharge: prove the same statement and replace this `axiom` with a
-`theorem`. See `vendor/kirov-jacobian-claude/HANDOFF.md`. -/
-axiom ambientPhi_ambientPsi_eq {gX gY : ℕ}
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (d : ℕ)
-    (y : Fin gY → ℂ) :
-    ambientPhi (gX := gX) (gY := gY) f hf (ambientPsi f hf y) = (d : ℕ) • y
+-- NOTE (2026-06-04): the upstream handoff axiom `ambientPhi_ambientPsi_eq`
+-- (Kirov's `:= sorry` for the degree identity `f_* ∘ f^* = deg(f) • id`) was
+-- **removed from this port** — it had no references anywhere in the repo beyond
+-- its own declaration, so deleting it makes the vendored Kirov subtree
+-- axiom-free. The statement still lives in the pristine upstream copy under
+-- `vendor/kirov-jacobian-claude/`.
 
 /-- `ambientPhi id = id` — follows from `ambientPsi_id` via the transpose
 construction: transpose of identity matrix is identity. -/
