@@ -580,10 +580,6 @@ theorem chartAt_comp_chartAt_symm_differentiableAt
   simpa [extChartAt_coe, extChartAt_coe_symm, modelWithCornersSelf_coe,
     modelWithCornersSelf_coe_symm, Function.comp_def] using hdR
 
--- TODO(breakpoints): remove the regularity hypothesis from
--- `bridgePathImpl_chart_differentiableAt_of_regular` by proving the zero-velocity
--- two-sided derivative glue at local endpoints and recursive `Path.trans` joins.
-
 lemma pathTrans_extend_eventuallyEq_left_of_lt_half
     {X : Type*} [TopologicalSpace X] {x y z : X}
     (γ₁ : Path x y) (γ₂ : Path y z) {t : ℝ} (ht : t < 1 / 2) :
@@ -871,6 +867,571 @@ theorem differentiableAt_of_hasDerivWithinAt_Iic_Ici
   rw [Set.Iic_union_Ici] at hu
   exact (hasDerivWithinAt_univ.mp hu).differentiableAt
 
-end Jacobians.Bridge
+open scoped Manifold unitInterval Convex
 
--- Bridge path differentiability completion work starts below.
+namespace PathChartBallSubdivision
+
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {P₀ P : X} {γ : Path P₀ P}
+    (S : PathChartBallSubdivision γ)
+
+omit [T2Space X] [IsManifold 𝓘(ℂ) ω X] in
+lemma chartFlatPath_extend_mem_chart_source_of_mem_Icc
+    (n : ℕ) {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    (S.chartFlatPath n).extend s ∈ (chartAt ℂ (S.chart n)).source := by
+  rw [Path.extend_apply _ hs]
+  dsimp [chartFlatPath]
+  exact (chartAt ℂ (S.chart n)).map_target (S.flatSegment_mem_chart_target n hs)
+
+omit [T2Space X] [IsManifold 𝓘(ℂ) ω X] in
+lemma chartFlatPath_chart_transition_source_of_mem_Icc
+    (n : ℕ) {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    ((chartAt ℂ (S.chart n)) ((S.chartFlatPath n).extend s)) ∈
+      ((chartAt ℂ (S.chart n)).symm ≫ₕ
+        chartAt ℂ ((S.chartFlatPath n).extend s)).source := by
+  have hsrc := S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n hs
+  rw [OpenPartialHomeomorph.trans_source]
+  constructor
+  · exact (chartAt ℂ (S.chart n)).map_source hsrc
+  · simp [hsrc, mem_chart_source ℂ ((S.chartFlatPath n).extend s)]
+
+omit [T2Space X] [IsManifold 𝓘(ℂ) ω X] in
+lemma chartFlatPath_chart_hasDerivWithinAt_zero (n : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend)
+      (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+  let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+  let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+  have hflat : HasDerivWithinAt (flatSegment a b) (0 : ℂ) (Set.Ici (0 : ℝ)) 0 :=
+    (hasDerivAt_flatSegment_zero a b).hasDerivWithinAt
+  refine hflat.congr_of_eventuallyEq ?heq ?hx
+  · filter_upwards [self_mem_nhdsWithin,
+      (eventually_lt_nhds (show (0 : ℝ) < 1 by norm_num)).filter_mono
+        nhdsWithin_le_nhds] with u hu0 hu1
+    dsimp only [Function.comp_apply]
+    rw [Path.extend_apply _ ⟨hu0, hu1.le⟩]
+    exact (chartAt ℂ (S.chart n)).right_inv
+      (S.flatSegment_mem_chart_target n ⟨hu0, hu1.le⟩)
+  · dsimp only [Function.comp_apply]
+    simp [a, b]
+
+omit [T2Space X] [IsManifold 𝓘(ℂ) ω X] in
+lemma chartFlatPath_chart_hasDerivWithinAt_one (n : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend)
+      (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+  let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+  let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+  have hflat : HasDerivWithinAt (flatSegment a b) (0 : ℂ) (Set.Iic (1 : ℝ)) 1 :=
+    (hasDerivAt_flatSegment_one a b).hasDerivWithinAt
+  refine hflat.congr_of_eventuallyEq ?heq ?hx
+  · filter_upwards [self_mem_nhdsWithin,
+      (eventually_gt_nhds (show (0 : ℝ) < 1 by norm_num)).filter_mono
+        nhdsWithin_le_nhds] with u hu1 hu0
+    dsimp only [Function.comp_apply]
+    rw [Path.extend_apply _ ⟨hu0.le, hu1⟩]
+    exact (chartAt ℂ (S.chart n)).right_inv
+      (S.flatSegment_mem_chart_target n ⟨hu0.le, hu1⟩)
+  · dsimp only [Function.comp_apply]
+    simp [a, b]
+
+lemma chartFlatPath_chartAt_left_hasDerivWithinAt_zero (n : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (γ (S.t n))).toFun ∘ (S.chartFlatPath n).extend)
+      (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+  have hcoord := S.chartFlatPath_chart_hasDerivWithinAt_zero n
+  have hz :=
+    S.chartFlatPath_chart_transition_source_of_mem_Icc n
+      (s := 0) ⟨le_rfl, zero_le_one⟩
+  have hz' :
+      ((chartAt ℂ (S.chart n)) (γ (S.t n))) ∈
+        ((chartAt ℂ (S.chart n)).symm ≫ₕ chartAt ℂ (γ (S.t n))).source := by
+    simpa [Path.extend_zero] using hz
+  have houter :
+      DifferentiableAt ℝ
+        ((chartAt ℂ (γ (S.t n))).toFun ∘ (chartAt ℂ (S.chart n)).symm)
+        (((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) 0) := by
+    simpa using
+      chartAt_comp_chartAt_symm_differentiableAt
+        (γ (S.t n)) (S.chart n) hz'
+  have hcomp := houter.hasFDerivAt.comp_hasDerivWithinAt 0 hcoord
+  have hcomp0 :
+      HasDerivWithinAt
+        (((chartAt ℂ (γ (S.t n))).toFun ∘ (chartAt ℂ (S.chart n)).symm) ∘
+          ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend))
+        (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+    simpa using hcomp
+  have heq :
+      ((chartAt ℂ (γ (S.t n))).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[
+          𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)]
+        (((chartAt ℂ (γ (S.t n))).toFun ∘ (chartAt ℂ (S.chart n)).symm) ∘
+          ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend)) := by
+    filter_upwards [self_mem_nhdsWithin,
+      (eventually_lt_nhds (show (0 : ℝ) < 1 by norm_num)).filter_mono
+        nhdsWithin_le_nhds] with u hu0 hu1
+    dsimp only [Function.comp_apply]
+    rw [Path.extend_apply _ ⟨hu0, hu1.le⟩]
+    have hsrc :
+        (S.chartFlatPath n) ⟨u, ⟨hu0, hu1.le⟩⟩ ∈ (chartAt ℂ (S.chart n)).source := by
+      simpa [Path.extend_apply _ ⟨hu0, hu1.le⟩] using
+        S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n ⟨hu0, hu1.le⟩
+    simp [(chartAt ℂ (S.chart n)).left_inv hsrc]
+  exact hcomp0.congr_of_eventuallyEq heq (by
+    dsimp only [Function.comp_apply]
+    simp [(chartAt ℂ (S.chart n)).left_inv (S.left_endpoint_mem_chart_source n)])
+
+lemma chartFlatPath_chartAt_right_hasDerivWithinAt_one (n : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (S.chartFlatPath n).extend)
+      (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+  have hcoord := S.chartFlatPath_chart_hasDerivWithinAt_one n
+  have hz :=
+    S.chartFlatPath_chart_transition_source_of_mem_Icc n
+      (s := 1) ⟨zero_le_one, le_rfl⟩
+  have hz' :
+      ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) ∈
+        ((chartAt ℂ (S.chart n)).symm ≫ₕ chartAt ℂ (γ (S.t (n + 1)))).source := by
+    simpa [Path.extend_one] using hz
+  have houter :
+      DifferentiableAt ℝ
+        ((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (chartAt ℂ (S.chart n)).symm)
+        (((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) 1) := by
+    simpa using
+      chartAt_comp_chartAt_symm_differentiableAt
+        (γ (S.t (n + 1))) (S.chart n) hz'
+  have hcomp := houter.hasFDerivAt.comp_hasDerivWithinAt 1 hcoord
+  have hcomp0 :
+      HasDerivWithinAt
+        (((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (chartAt ℂ (S.chart n)).symm) ∘
+          ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend))
+        (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+    simpa using hcomp
+  have heq :
+      ((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[
+          𝓝[Set.Iic (1 : ℝ)] (1 : ℝ)]
+        (((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (chartAt ℂ (S.chart n)).symm) ∘
+          ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend)) := by
+    filter_upwards [self_mem_nhdsWithin,
+      (eventually_gt_nhds (show (0 : ℝ) < 1 by norm_num)).filter_mono
+        nhdsWithin_le_nhds] with u hu1 hu0
+    dsimp only [Function.comp_apply]
+    rw [Path.extend_apply _ ⟨hu0.le, hu1⟩]
+    have hsrc :
+        (S.chartFlatPath n) ⟨u, ⟨hu0.le, hu1⟩⟩ ∈ (chartAt ℂ (S.chart n)).source := by
+      simpa [Path.extend_apply _ ⟨hu0.le, hu1⟩] using
+        S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n ⟨hu0.le, hu1⟩
+    simp [(chartAt ℂ (S.chart n)).left_inv hsrc]
+  exact hcomp0.congr_of_eventuallyEq heq (by
+    dsimp only [Function.comp_apply]
+    simp [(chartAt ℂ (S.chart n)).left_inv (S.right_endpoint_mem_chart_source n)])
+
+lemma chartFlatPath_chartAt_current_differentiableAt
+    (n : ℕ) (s : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.chartFlatPath n).extend s)).toFun ∘
+        (S.chartFlatPath n).extend) s := by
+  by_cases hreg : flatPieceRegular s
+  · exact S.chartFlatPath_chartAt_current_differentiableAt_of_regular n hreg
+  · have hnot_left : ¬ s < 0 := by
+      intro hs
+      exact hreg (Or.inl hs)
+    have hnot_mid : ¬ s ∈ Set.Ioo (0 : ℝ) 1 := by
+      intro hs
+      exact hreg (Or.inr (Or.inl hs))
+    have hnot_right : ¬ 1 < s := by
+      intro hs
+      exact hreg (Or.inr (Or.inr hs))
+    have h0s : 0 ≤ s := le_of_not_gt hnot_left
+    have hs1 : s ≤ 1 := le_of_not_gt hnot_right
+    by_cases hs0 : s = 0
+    · subst s
+      have hleft :
+          HasDerivWithinAt
+            ((chartAt ℂ ((S.chartFlatPath n).extend 0)).toFun ∘
+              (S.chartFlatPath n).extend)
+            (0 : ℂ) (Set.Iic (0 : ℝ)) 0 := by
+        have hconst :
+            HasDerivWithinAt
+              (fun _ : ℝ => (chartAt ℂ (γ (S.t n))) (γ (S.t n)))
+              (0 : ℂ) (Set.Iic (0 : ℝ)) 0 :=
+          hasDerivWithinAt_const 0 (Set.Iic (0 : ℝ))
+            ((chartAt ℂ (γ (S.t n))) (γ (S.t n)))
+        have hleft' :
+            HasDerivWithinAt
+              ((chartAt ℂ (γ (S.t n))).toFun ∘ (S.chartFlatPath n).extend)
+              (0 : ℂ) (Set.Iic (0 : ℝ)) 0 := by
+          exact hconst.congr
+            (fun u hu => by
+              dsimp only [Function.comp_apply]
+              rw [Path.extend_of_le_zero _ hu]
+              rfl)
+            (by
+              dsimp only [Function.comp_apply]
+              simp)
+        simpa [Path.extend_zero] using hleft'
+      have hright :
+          HasDerivWithinAt
+            ((chartAt ℂ ((S.chartFlatPath n).extend 0)).toFun ∘
+              (S.chartFlatPath n).extend)
+            (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+        simpa [Path.extend_zero] using
+          S.chartFlatPath_chartAt_left_hasDerivWithinAt_zero n
+      exact differentiableAt_of_hasDerivWithinAt_Iic_Ici hleft hright
+    · have h0lt : 0 < s := lt_of_le_of_ne h0s (Ne.symm hs0)
+      have hs_not_lt_one : ¬ s < 1 := by
+        intro hslt
+        exact hnot_mid ⟨h0lt, hslt⟩
+      have hs1' : s = 1 := le_antisymm hs1 (le_of_not_gt hs_not_lt_one)
+      subst s
+      have hleft :
+          HasDerivWithinAt
+            ((chartAt ℂ ((S.chartFlatPath n).extend 1)).toFun ∘
+              (S.chartFlatPath n).extend)
+            (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+        simpa [Path.extend_one] using
+          S.chartFlatPath_chartAt_right_hasDerivWithinAt_one n
+      have hright :
+          HasDerivWithinAt
+            ((chartAt ℂ ((S.chartFlatPath n).extend 1)).toFun ∘
+              (S.chartFlatPath n).extend)
+            (0 : ℂ) (Set.Ici (1 : ℝ)) 1 := by
+        have hconst :
+            HasDerivWithinAt
+              (fun _ : ℝ => (chartAt ℂ (γ (S.t (n + 1)))) (γ (S.t (n + 1))))
+              (0 : ℂ) (Set.Ici (1 : ℝ)) 1 :=
+          hasDerivWithinAt_const 1 (Set.Ici (1 : ℝ))
+            ((chartAt ℂ (γ (S.t (n + 1)))) (γ (S.t (n + 1))))
+        have hright' :
+            HasDerivWithinAt
+              ((chartAt ℂ (γ (S.t (n + 1)))).toFun ∘ (S.chartFlatPath n).extend)
+              (0 : ℂ) (Set.Ici (1 : ℝ)) 1 := by
+          exact hconst.congr
+            (fun u hu => by
+              dsimp only [Function.comp_apply]
+              rw [Path.extend_of_one_le _ hu]
+              rfl)
+            (by
+              dsimp only [Function.comp_apply]
+              simp)
+        simpa [Path.extend_one] using hright'
+      exact differentiableAt_of_hasDerivWithinAt_Iic_Ici hleft hright
+
+lemma concatChartFlatPathAux_chartAt_left_hasDerivWithinAt_zero (k : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (γ (S.t 0))).toFun ∘ (S.concatChartFlatPathAux k).extend)
+      (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+  induction k with
+  | zero =>
+      simpa using S.chartFlatPath_chartAt_left_hasDerivWithinAt_zero 0
+  | succ k ih =>
+      have hscale :
+          HasDerivWithinAt (fun u : ℝ => 2 * u) (2 : ℝ) (Set.Ici (0 : ℝ)) 0 := by
+        simpa [id_eq] using
+          (((hasDerivAt_id (0 : ℝ)).const_mul (2 : ℝ)).hasDerivWithinAt
+            (s := Set.Ici (0 : ℝ)))
+      have hmaps :
+          Set.MapsTo (fun u : ℝ => 2 * u) (Set.Ici (0 : ℝ)) (Set.Ici (0 : ℝ)) := by
+        intro u hu
+        change (0 : ℝ) ≤ 2 * u
+        change (0 : ℝ) ≤ u at hu
+        linarith
+      have ih' :
+          HasDerivWithinAt
+            ((chartAt ℂ (γ (S.t 0))).toFun ∘ (S.concatChartFlatPathAux k).extend)
+            (0 : ℂ) (Set.Ici (0 : ℝ)) ((fun u : ℝ => 2 * u) 0) := by
+        norm_num
+        exact ih
+      have hscaled := ih'.scomp (0 : ℝ) hscale hmaps
+      have hscaled0 :
+          HasDerivWithinAt
+            (((chartAt ℂ (γ (S.t 0))).toFun ∘
+              (S.concatChartFlatPathAux k).extend) ∘ fun u : ℝ => 2 * u)
+            (0 : ℂ) (Set.Ici (0 : ℝ)) 0 := by
+        simpa using hscaled
+      have heq :
+          ((chartAt ℂ (γ (S.t 0))).toFun ∘
+            (S.concatChartFlatPathAux (k + 1)).extend) =ᶠ[
+              𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)]
+            (((chartAt ℂ (γ (S.t 0))).toFun ∘
+              (S.concatChartFlatPathAux k).extend) ∘ fun u : ℝ => 2 * u) := by
+        filter_upwards [self_mem_nhdsWithin,
+          (eventually_lt_nhds (show (0 : ℝ) < 1 / 2 by norm_num)).filter_mono
+            nhdsWithin_le_nhds] with u hu0 huhalf
+        dsimp only [Function.comp_apply]
+        rw [concatChartFlatPathAux_succ,
+          Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+            (S.chartFlatPath (k + 1)) huhalf.le]
+      exact hscaled0.congr_of_eventuallyEq heq (by
+        dsimp only [Function.comp_apply]
+        rw [concatChartFlatPathAux_succ,
+          Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+            (S.chartFlatPath (k + 1)) (by norm_num : (0 : ℝ) ≤ 1 / 2)]
+        )
+
+lemma concatChartFlatPathAux_chartAt_right_hasDerivWithinAt_one (k : ℕ) :
+    HasDerivWithinAt
+      ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘ (S.concatChartFlatPathAux k).extend)
+      (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+  induction k with
+  | zero =>
+      simpa using S.chartFlatPath_chartAt_right_hasDerivWithinAt_one 0
+  | succ k _ih =>
+      have hpiece := S.chartFlatPath_chartAt_right_hasDerivWithinAt_one (k + 1)
+      have hscale :
+          HasDerivWithinAt (fun u : ℝ => 2 * u - 1) (2 : ℝ) (Set.Iic (1 : ℝ)) 1 := by
+        simpa [id_eq] using
+          ((((hasDerivAt_id (1 : ℝ)).const_mul (2 : ℝ)).sub_const (1 : ℝ)).hasDerivWithinAt
+            (s := Set.Iic (1 : ℝ)))
+      have hmaps :
+          Set.MapsTo (fun u : ℝ => 2 * u - 1) (Set.Iic (1 : ℝ)) (Set.Iic (1 : ℝ)) := by
+        intro u hu
+        change 2 * u - 1 ≤ (1 : ℝ)
+        change u ≤ (1 : ℝ) at hu
+        linarith
+      have hpiece' :
+          HasDerivWithinAt
+            ((chartAt ℂ (γ (S.t (k + 2)))).toFun ∘
+              (S.chartFlatPath (k + 1)).extend)
+            (0 : ℂ) (Set.Iic (1 : ℝ)) ((fun u : ℝ => 2 * u - 1) 1) := by
+        norm_num
+        exact hpiece
+      have hscaled := hpiece'.scomp (1 : ℝ)
+        (h := fun u : ℝ => 2 * u - 1) hscale hmaps
+      have hscaled0 :
+          HasDerivWithinAt
+            (((chartAt ℂ (γ (S.t (k + 2)))).toFun ∘
+              (S.chartFlatPath (k + 1)).extend) ∘ fun u : ℝ => 2 * u - 1)
+            (0 : ℂ) (Set.Iic (1 : ℝ)) 1 := by
+        simpa using hscaled
+      have heq :
+          ((chartAt ℂ (γ (S.t (k + 2)))).toFun ∘
+            (S.concatChartFlatPathAux (k + 1)).extend) =ᶠ[
+              𝓝[Set.Iic (1 : ℝ)] (1 : ℝ)]
+            (((chartAt ℂ (γ (S.t (k + 2)))).toFun ∘
+              (S.chartFlatPath (k + 1)).extend) ∘ fun u : ℝ => 2 * u - 1) := by
+        filter_upwards [self_mem_nhdsWithin,
+          (eventually_gt_nhds (show (1 / 2 : ℝ) < 1 by norm_num)).filter_mono
+            nhdsWithin_le_nhds] with u hu1 huhalf
+        dsimp only [Function.comp_apply]
+        rw [concatChartFlatPathAux_succ,
+          Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
+            (S.chartFlatPath (k + 1)) huhalf.le]
+      exact hscaled0.congr_of_eventuallyEq heq (by
+        dsimp only [Function.comp_apply]
+        rw [concatChartFlatPathAux_succ,
+          Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
+            (S.chartFlatPath (k + 1)) (by norm_num : (1 / 2 : ℝ) ≤ 1)]
+        )
+
+lemma concatChartFlatPathAux_chartAt_current_differentiableAt
+    (k : ℕ) (t : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPathAux k).extend t)).toFun ∘
+        (S.concatChartFlatPathAux k).extend) t := by
+  induction k generalizing t with
+  | zero =>
+      simpa using S.chartFlatPath_chartAt_current_differentiableAt 0 t
+  | succ k ih =>
+      by_cases ht_left : t < 1 / 2
+      · have hcenter :
+            ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend t =
+              (S.concatChartFlatPathAux k).extend (2 * t) :=
+          Path.extend_trans_of_le_half
+            (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1)) ht_left.le
+        have hrec :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.concatChartFlatPathAux k).extend (2 * t))).toFun ∘
+                (S.concatChartFlatPathAux k).extend) (2 * t) :=
+          ih (2 * t)
+        have hrec' :
+            DifferentiableAt ℝ
+              ((chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun ∘
+                (S.concatChartFlatPathAux k).extend) (2 * t) := by
+          simpa [concatChartFlatPathAux_succ, hcenter] using hrec
+        simpa [concatChartFlatPathAux_succ] using
+          differentiableAt_comp_pathTrans_extend_left_of_lt_half
+            (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+            (f := (chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun)
+            ht_left hrec'
+      · by_cases ht_right : 1 / 2 < t
+        · have hcenter :
+              ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend t =
+                (S.chartFlatPath (k + 1)).extend (2 * t - 1) :=
+            Path.extend_trans_of_half_le
+              (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1)) ht_right.le
+          have hpiece :
+              DifferentiableAt ℝ
+                ((chartAt ℂ ((S.chartFlatPath (k + 1)).extend (2 * t - 1))).toFun ∘
+                  (S.chartFlatPath (k + 1)).extend) (2 * t - 1) :=
+            S.chartFlatPath_chartAt_current_differentiableAt (k + 1) (2 * t - 1)
+          have hpiece' :
+              DifferentiableAt ℝ
+                ((chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun ∘
+                  (S.chartFlatPath (k + 1)).extend) (2 * t - 1) := by
+            simpa [concatChartFlatPathAux_succ, hcenter] using hpiece
+          simpa [concatChartFlatPathAux_succ] using
+            differentiableAt_comp_pathTrans_extend_right_of_half_lt
+              (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+              (f := (chartAt ℂ ((S.concatChartFlatPathAux (k + 1)).extend t)).toFun)
+              ht_right hpiece'
+        · have ht : t = 1 / 2 := by linarith
+          subst t
+          have hmid :
+              (S.concatChartFlatPathAux (k + 1)).extend (1 / 2 : ℝ) =
+                γ (S.t (k + 1)) := by
+            rw [concatChartFlatPathAux_succ,
+              Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+                (S.chartFlatPath (k + 1)) (by norm_num : (1 / 2 : ℝ) ≤ 1 / 2)]
+            simp
+          have hleft_endpoint :=
+            S.concatChartFlatPathAux_chartAt_right_hasDerivWithinAt_one k
+          have hleft_scale :
+              HasDerivWithinAt (fun u : ℝ => 2 * u) (2 : ℝ)
+                (Set.Iic (1 / 2 : ℝ)) (1 / 2) := by
+            simpa [id_eq] using
+              (((hasDerivAt_id (1 / 2 : ℝ)).const_mul (2 : ℝ)).hasDerivWithinAt
+                (s := Set.Iic (1 / 2 : ℝ)))
+          have hleft_maps :
+              Set.MapsTo (fun u : ℝ => 2 * u) (Set.Iic (1 / 2 : ℝ)) (Set.Iic (1 : ℝ)) := by
+            intro u hu
+            change 2 * u ≤ (1 : ℝ)
+            change u ≤ (1 / 2 : ℝ) at hu
+            linarith
+          have hleft_endpoint' :
+              HasDerivWithinAt
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux k).extend)
+                (0 : ℂ) (Set.Iic (1 : ℝ)) ((fun u : ℝ => 2 * u) (1 / 2)) := by
+            norm_num
+            exact hleft_endpoint
+          have hleft_scaled := hleft_endpoint'.scomp (1 / 2 : ℝ) hleft_scale hleft_maps
+          have hleft_scaled0 :
+              HasDerivWithinAt
+                (((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux k).extend) ∘ fun u : ℝ => 2 * u)
+                (0 : ℂ) (Set.Iic (1 / 2 : ℝ)) (1 / 2) := by
+            simpa using hleft_scaled
+          have hleft :
+              HasDerivWithinAt
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux (k + 1)).extend)
+                (0 : ℂ) (Set.Iic (1 / 2 : ℝ)) (1 / 2) := by
+            have heq :
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux (k + 1)).extend) =ᶠ[
+                    𝓝[Set.Iic (1 / 2 : ℝ)] (1 / 2 : ℝ)]
+                  (((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                    (S.concatChartFlatPathAux k).extend) ∘ fun u : ℝ => 2 * u) := by
+              filter_upwards [self_mem_nhdsWithin] with u hu
+              dsimp only [Function.comp_apply]
+              rw [concatChartFlatPathAux_succ,
+                Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+                  (S.chartFlatPath (k + 1)) hu]
+            exact hleft_scaled0.congr_of_eventuallyEq heq (by
+              dsimp only [Function.comp_apply]
+              rw [concatChartFlatPathAux_succ,
+                Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+                  (S.chartFlatPath (k + 1)) (by norm_num : (1 / 2 : ℝ) ≤ 1 / 2)]
+              )
+          have hright_endpoint :=
+            S.chartFlatPath_chartAt_left_hasDerivWithinAt_zero (k + 1)
+          have hright_scale :
+              HasDerivWithinAt (fun u : ℝ => 2 * u - 1) (2 : ℝ)
+                (Set.Ici (1 / 2 : ℝ)) (1 / 2) := by
+            simpa [id_eq] using
+              ((((hasDerivAt_id (1 / 2 : ℝ)).const_mul (2 : ℝ)).sub_const
+                (1 : ℝ)).hasDerivWithinAt (s := Set.Ici (1 / 2 : ℝ)))
+          have hright_maps :
+              Set.MapsTo (fun u : ℝ => 2 * u - 1) (Set.Ici (1 / 2 : ℝ))
+                (Set.Ici (0 : ℝ)) := by
+            intro u hu
+            change (0 : ℝ) ≤ 2 * u - 1
+            change (1 / 2 : ℝ) ≤ u at hu
+            linarith
+          have hright_endpoint' :
+              HasDerivWithinAt
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.chartFlatPath (k + 1)).extend)
+                (0 : ℂ) (Set.Ici (0 : ℝ)) ((fun u : ℝ => 2 * u - 1) (1 / 2)) := by
+            norm_num
+            exact hright_endpoint
+          have hright_scaled := hright_endpoint'.scomp (1 / 2 : ℝ)
+            (h := fun u : ℝ => 2 * u - 1) hright_scale hright_maps
+          have hright_scaled0 :
+              HasDerivWithinAt
+                (((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.chartFlatPath (k + 1)).extend) ∘ fun u : ℝ => 2 * u - 1)
+                (0 : ℂ) (Set.Ici (1 / 2 : ℝ)) (1 / 2) := by
+            simpa using hright_scaled
+          have hright :
+              HasDerivWithinAt
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux (k + 1)).extend)
+                (0 : ℂ) (Set.Ici (1 / 2 : ℝ)) (1 / 2) := by
+            have heq :
+                ((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                  (S.concatChartFlatPathAux (k + 1)).extend) =ᶠ[
+                    𝓝[Set.Ici (1 / 2 : ℝ)] (1 / 2 : ℝ)]
+                  (((chartAt ℂ (γ (S.t (k + 1)))).toFun ∘
+                    (S.chartFlatPath (k + 1)).extend) ∘ fun u : ℝ => 2 * u - 1) := by
+              filter_upwards [self_mem_nhdsWithin] with u hu
+              dsimp only [Function.comp_apply]
+              rw [concatChartFlatPathAux_succ,
+                Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
+                  (S.chartFlatPath (k + 1)) hu]
+            exact hright_scaled0.congr_of_eventuallyEq heq (by
+              dsimp only [Function.comp_apply]
+              rw [concatChartFlatPathAux_succ,
+                Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
+                  (S.chartFlatPath (k + 1)) (by norm_num : (1 / 2 : ℝ) ≤ 1 / 2)]
+              )
+          have hdiff :=
+            differentiableAt_of_hasDerivWithinAt_Iic_Ici hleft hright
+          have hmidTrans :
+              ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend
+                  (1 / 2 : ℝ) =
+                γ (S.t (k + 1)) := by
+            simpa [concatChartFlatPathAux_succ] using hmid
+          change
+            DifferentiableAt ℝ
+              ((chartAt ℂ (((S.concatChartFlatPathAux k).trans
+                (S.chartFlatPath (k + 1))).extend (1 / 2 : ℝ))).toFun ∘
+                  ((S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1))).extend)
+              (1 / 2 : ℝ)
+          rw [hmidTrans]
+          simpa [concatChartFlatPathAux_succ] using hdiff
+
+lemma concatChartFlatPath_chartAt_current_differentiableAt (t : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPath).extend t)).toFun ∘
+        (S.concatChartFlatPath).extend) t := by
+  simpa [concatChartFlatPath] using
+    S.concatChartFlatPathAux_chartAt_current_differentiableAt S.lastIndex t
+
+end PathChartBallSubdivision
+
+theorem concatChartFlatPathAux_chart_differentiableAt
+    {X : Type*} [TopologicalSpace X] [T2Space X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X]
+    {P₀ P : X} (γ : Path P₀ P) (S : PathChartBallSubdivision γ) (k : ℕ) (t : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPathAux k).extend t)).toFun ∘
+        (S.concatChartFlatPathAux k).extend) t := by
+  exact S.concatChartFlatPathAux_chartAt_current_differentiableAt k t
+
+theorem bridgePathImpl_chart_differentiableAt
+    {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (t : ℝ) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
+        (bridgePathImpl (X := X) P₀ P)) t := by
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  change
+    DifferentiableAt ℝ
+      ((chartAt ℂ ((S.concatChartFlatPath).extend t)).toFun ∘
+        (S.concatChartFlatPath).extend) t
+  simpa [PathChartBallSubdivision.concatChartFlatPath] using
+    concatChartFlatPathAux_chart_differentiableAt γ S S.lastIndex t
+
+end Jacobians.Bridge
