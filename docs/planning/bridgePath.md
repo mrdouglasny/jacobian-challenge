@@ -1,5 +1,9 @@
 # `bridgePath` — discharge recipe
 
+
+> ✅ **DISCHARGED 2026-06-04** (branch `phase2-bridgepath`). Converted from `axiom` to a real `def`/`theorem` backed by `Jacobians/Bridge/BridgePath.lean` (smooth path-connectedness of a connected complex 1-manifold). See [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) → Recently discharged. The recipe below is retained as historical record.
+
+
 **Location:** `Jacobians/Bridge/KirovLineIntegral.lean:164`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 8 &nbsp;&nbsp; **Est:** ~3–4 focused weeks, ~800+ LOC, mostly a new helper file `Jacobians/Bridge/BridgePath.lean` plus infrastructure for convex charts and flat reparameterization
 **Blocked by:** none (this is the keystone — once it is a real `def`, the other five `bridgePath*` axioms in this file collapse to short derivations)

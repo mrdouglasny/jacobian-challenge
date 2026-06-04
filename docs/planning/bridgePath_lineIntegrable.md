@@ -1,5 +1,7 @@
 # `bridgePath_lineIntegrable` — discharge recipe
 
+> ✅ **DISCHARGED 2026-06-04** (branch `phase2-bridgepath`). Now a `theorem` in `Jacobians/Bridge/KirovLineIntegral.lean`: continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3). Completed the full 6-axiom bridgePath cluster. Recipe retained as historical record.
+
 **Location:** `Jacobians/Bridge/KirovLineIntegral.lean:212`
 **Route:** provable-from-other-axioms &nbsp;&nbsp; **Effort:** 6 &nbsp;&nbsp; **Est:** ~1 focused week, ~150–300 LOC, in `Jacobians/Bridge/BridgePath.lean`
 **Blocked by:** `bridgePath_chart_differentiable` (and transitively `bridgePath`)

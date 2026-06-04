@@ -143,11 +143,13 @@ See `vendor/kirov-jacobian-claude/HANDOFF.md` for surrounding context.
 
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Vendor.Kirov.LineIntegral
+import Jacobians.Bridge.BridgePath
 import Jacobians.Bridge.KirovHolomorphic
 
 namespace Jacobians.Bridge
 
 open scoped Manifold ContDiff Topology
+open MeasureTheory Filter
 open Jacobians.RiemannSurface
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
@@ -161,10 +163,12 @@ a connected (locally-)path-connected complex 1-manifold they all hold
 abstractly here and discharge them in a follow-up. -/
 
 /-- A chosen smooth path from `P₀` to `P` in `X`. -/
-axiom bridgePath (P₀ P : X) : ℝ → X
+noncomputable def bridgePath (P₀ P : X) : ℝ → X :=
+  bridgePathImpl P₀ P
 
 /-- The chosen path is continuous. -/
-axiom bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P)
+theorem bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P) := by
+  simpa only [bridgePath] using bridgePathImpl_continuous (X := X) P₀ P
 
 /-- The chosen path is `C¹` in chart pullbacks at every `t`.
 
@@ -179,16 +183,348 @@ Discharge plan: in a connected complex manifold, a path produced by
 relevant smoothing infra in `Topology.MetricSpace.LipschitzAddSubgroup`
 and friends; the exact statement we need is "every continuous path
 between two points is homotopic to a chart-local-`C¹` path"). -/
-axiom bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
+theorem bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
     DifferentiableAt ℝ
       ((chartAt (H := ℂ) (bridgePath (X := X) P₀ P t)).toFun ∘
-        (bridgePath (X := X) P₀ P)) t
+        (bridgePath (X := X) P₀ P)) t := by
+  simpa only [bridgePath] using
+    bridgePathImpl_chart_differentiableAt (X := X) P₀ P t
 
 /-- The chosen path starts at `P₀`. -/
-axiom bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀
+theorem bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀ := by
+  simpa only [bridgePath] using bridgePathImpl_at_zero (X := X) P₀ P
 
 /-- The chosen path ends at `P`. -/
-axiom bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P
+theorem bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P := by
+  simpa only [bridgePath] using bridgePathImpl_at_one (X := X) P₀ P
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- Fixed-chart chain rule for Kirov's moving-chart `pathSpeed`.
+
+Although `pathSpeed γ t` is expressed in the chart at `γ t`, applying the
+manifold derivative of a fixed chart `extChartAt x` recovers the ordinary
+real derivative of the fixed chart-coordinate path. -/
+theorem mfderiv_extChartAt_apply_pathSpeed
+    (x : X) (γ : ℝ → X) (t : ℝ)
+    (hγ_cont : ContinuousAt γ t)
+    (hγ_diff : DifferentiableAt ℝ ((chartAt (H := ℂ) (γ t)).toFun ∘ γ) t)
+    (hx : γ t ∈ (extChartAt 𝓘(ℂ, ℂ) x).source) :
+    mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) (γ t)
+        (Jacobians.Vendor.Kirov.pathSpeed γ t) =
+      fderiv ℝ ((extChartAt 𝓘(ℂ, ℂ) x).toFun ∘ γ) t 1 := by
+  set φ_X := chartAt (H := ℂ) (γ t) with hφ_X_def
+  set φ_Y := chartAt (H := ℂ) ((extChartAt 𝓘(ℂ, ℂ) x) (γ t)) with hφ_Y_def
+  set f_loc : ℂ → ℂ := fun z => φ_Y ((extChartAt 𝓘(ℂ, ℂ) x) (φ_X.symm z))
+    with hf_loc_def
+  set g_X : ℝ → ℂ := φ_X.toFun ∘ γ with hg_X_def
+  set g_Y : ℝ → ℂ := φ_Y.toFun ∘ ((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ) with hg_Y_def
+  have hγt_X : γ t ∈ φ_X.source := mem_chart_source ℂ (γ t)
+  have hγ_source : ∀ᶠ s in 𝓝 t, γ s ∈ φ_X.source :=
+    hγ_cont.eventually (φ_X.open_source.mem_nhds hγt_X)
+  have h_eq : g_Y =ᶠ[𝓝 t] f_loc ∘ g_X := by
+    filter_upwards [hγ_source] with s hs
+    simp only [hg_Y_def, hf_loc_def, hg_X_def, Function.comp_apply]
+    congr 2
+    exact (φ_X.left_inv hs).symm
+  have hf_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+      (extChartAt 𝓘(ℂ, ℂ) x) (γ t) := by
+    apply mdifferentiableAt_extChartAt
+    rwa [← extChartAt_source (I := 𝓘(ℂ, ℂ))]
+  have hf_loc_diff_ℂ : DifferentiableAt ℂ f_loc (g_X t) := by
+    have h1 := hf_mdiff.differentiableWithinAt_writtenInExtChartAt
+    rw [ModelWithCorners.range_eq_univ, differentiableWithinAt_univ] at h1
+    convert h1 using 2
+  have hf_loc_hasFD_ℂ : HasFDerivAt f_loc (fderiv ℂ f_loc (g_X t)) (g_X t) :=
+    hf_loc_diff_ℂ.hasFDerivAt
+  have hf_loc_hasFD_ℝ : HasFDerivAt f_loc
+      ((fderiv ℂ f_loc (g_X t)).restrictScalars ℝ) (g_X t) := by
+    rw [hasFDerivAt_iff_isLittleO_nhds_zero] at hf_loc_hasFD_ℂ ⊢
+    simp only [ContinuousLinearMap.coe_restrictScalars']
+    exact hf_loc_hasFD_ℂ
+  have hf_loc_diff_ℝ : DifferentiableAt ℝ f_loc (g_X t) :=
+    hf_loc_hasFD_ℝ.differentiableAt
+  have hf_loc_fderiv_ℝ : fderiv ℝ f_loc (g_X t) =
+      (fderiv ℂ f_loc (g_X t)).restrictScalars ℝ :=
+    hf_loc_hasFD_ℝ.fderiv
+  have h_chain : fderiv ℝ (f_loc ∘ g_X) t =
+      (fderiv ℝ f_loc (g_X t)).comp (fderiv ℝ g_X t) :=
+    fderiv_comp t hf_loc_diff_ℝ hγ_diff
+  have h_mfderiv : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) (γ t) =
+      fderiv ℂ f_loc (g_X t) := by
+    rw [hf_mdiff.mfderiv]
+    rw [ModelWithCorners.range_eq_univ, fderivWithin_univ]
+    congr 1
+  have h_gY : (chartAt (H := ℂ) (((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ) t)).toFun ∘
+      ((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ) = g_Y := rfl
+  have hspeed_comp :
+      Jacobians.Vendor.Kirov.pathSpeed ((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ) t =
+        mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) (γ t)
+          (Jacobians.Vendor.Kirov.pathSpeed γ t) := by
+    rw [h_mfderiv]
+    change fderiv ℝ ((chartAt (H := ℂ) (((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ) t)).toFun ∘
+        ((extChartAt 𝓘(ℂ, ℂ) x) ∘ γ)) t 1 =
+      fderiv ℂ f_loc (g_X t) (Jacobians.Vendor.Kirov.pathSpeed γ t)
+    rw [h_gY, h_eq.fderiv_eq, h_chain, ContinuousLinearMap.comp_apply,
+      hf_loc_fderiv_ℝ, ContinuousLinearMap.coe_restrictScalars']
+    rfl
+  rw [← hspeed_comp]
+  simp [Jacobians.Vendor.Kirov.pathSpeed]
+
+namespace PathChartBallSubdivision
+
+variable {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+/-- Integrability of the line-integrand on one flattened chart segment. -/
+theorem chartFlatPath_lineIntegrable (n : ℕ) (form : HolomorphicOneForm X) :
+    IntervalIntegrable
+      (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+        ((S.chartFlatPath n).extend t)
+        (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t))
+      MeasureTheory.volume 0 1 := by
+  let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+  let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+  let g : ℝ → ℂ := fun t => form.coeff (S.chart n) (flatSegment a b t) *
+    (fderiv ℝ (flatSegment a b) t (1 : ℝ))
+  have hcoeff : ContinuousOn (fun t : ℝ => form.coeff (S.chart n) (flatSegment a b t))
+      (Set.Icc (0 : ℝ) 1) := by
+    exact (form.2.1 (S.chart n)).continuousOn.comp
+      (continuous_flatSegment a b).continuousOn
+      (fun t ht => by simpa [a, b] using S.flatSegment_mem_chart_target n ht)
+  have hvel : Continuous (fun t : ℝ => fderiv ℝ (flatSegment a b) t (1 : ℝ)) := by
+    have hcd : ContDiff ℝ (1 : ℕ∞ω) (flatSegment a b) := contDiff_flatSegment 1 a b
+    have hpair : Continuous fun t : ℝ => (t, (1 : ℝ)) :=
+      Continuous.prodMk continuous_id continuous_const
+    simpa only [Function.comp_apply] using
+      (hcd.continuous_fderiv_apply (by norm_num : (1 : ℕ∞ω) ≠ 0)).comp
+        hpair
+  have hg_cont : ContinuousOn g (Set.Icc (0 : ℝ) 1) := by
+    exact hcoeff.mul hvel.continuousOn
+  have hg_int : IntervalIntegrable g MeasureTheory.volume 0 1 :=
+    ContinuousOn.intervalIntegrable_of_Icc zero_le_one hg_cont
+  refine hg_int.congr_ae ?_
+  filter_upwards
+    [ae_restrict_mem (measurableSet_uIoc (a := (0 : ℝ)) (b := 1)),
+      ae_restrict_of_ae
+        (by simp [ae_iff, measure_singleton] :
+          ∀ᵐ t : ℝ ∂MeasureTheory.volume, t ≠ 1)] with t htmem ht_ne_one
+  have htIoc : t ∈ Set.Ioc (0 : ℝ) 1 := by
+    simpa [Set.uIoc_of_le zero_le_one] using htmem
+  have ht : t ∈ Set.Ioo (0 : ℝ) 1 :=
+    ⟨htIoc.1, lt_of_le_of_ne htIoc.2 ht_ne_one⟩
+  let y : X := (S.chartFlatPath n).extend t
+  have hy_fixed : y ∈ (extChartAt 𝓘(ℂ, ℂ) (S.chart n)).source := by
+    simpa [y, extChartAt_source] using
+      S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n ⟨ht.1.le, ht.2.le⟩
+  have hy_self : y ∈ (extChartAt 𝓘(ℂ, ℂ) y).source := mem_extChartAt_source y
+  letI : Nonempty X := ⟨y⟩
+  have hswap : (Jacobians.Bridge.bridgeForm form).toFun y =
+      BridgeForm.rawCLM form (S.chart n) y := by
+    change BridgeForm.rawCLM form y y = BridgeForm.rawCLM form (S.chart n) y
+    exact BridgeForm.rawCLM_swap_chart form hy_self hy_fixed
+  have hspeed := mfderiv_extChartAt_apply_pathSpeed (x := S.chart n)
+    (γ := (S.chartFlatPath n).extend) (t := t)
+    ((Path.continuous_extend _).continuousAt)
+    (S.chartFlatPath_chartAt_current_differentiableAt n t)
+    hy_fixed
+  have heq_flat : ((extChartAt 𝓘(ℂ, ℂ) (S.chart n)).toFun ∘
+      (S.chartFlatPath n).extend) =ᶠ[𝓝 t] flatSegment a b := by
+    simpa [a, b, extChartAt_coe, modelWithCornersSelf_coe] using
+      S.chartFlatPath_chart_eventuallyEq_flatSegment_of_mem_Ioo n ht
+  have hfixed_deriv :
+      fderiv ℝ ((extChartAt 𝓘(ℂ, ℂ) (S.chart n)).toFun ∘
+          (S.chartFlatPath n).extend) t (1 : ℝ) =
+        fderiv ℝ (flatSegment a b) t (1 : ℝ) := by
+    exact congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq_flat.fderiv_eq
+  have hspeed_ext :
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) (S.chart n)) y)
+          (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t) =
+        fderiv ℝ (flatSegment a b) t (1 : ℝ) := by
+    simpa [y] using hspeed.trans hfixed_deriv
+  have hcoord_chart :
+      (chartAt ℂ (S.chart n)) y = flatSegment a b t := by
+    have hpt := (S.chartFlatPath_chart_eventuallyEq_flatSegment_of_mem_Ioo n ht).self_of_nhds
+    simpa [y, a, b] using hpt
+  have hcoord_ext :
+      (extChartAt 𝓘(ℂ, ℂ) (S.chart n)) y = flatSegment a b t := by
+    simpa [extChartAt_coe, modelWithCornersSelf_coe] using hcoord_chart
+  calc
+    g t = (Jacobians.Bridge.bridgeForm form).toFun y
+        (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t) := by
+      rw [hswap]
+      unfold BridgeForm.rawCLM
+      rw [hcoord_ext]
+      have happly :
+          (form.coeff (S.chart n) (flatSegment a b t) •
+              mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) (S.chart n)) y)
+              (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t) =
+            form.coeff (S.chart n) (flatSegment a b t) •
+              ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) (S.chart n)) y)
+                (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t)) := by
+        rfl
+      refine Eq.trans ?_ happly.symm
+      rw [hspeed_ext]
+      rfl
+    _ = (Jacobians.Bridge.bridgeForm form).toFun ((S.chartFlatPath n).extend t)
+        (Jacobians.Vendor.Kirov.pathSpeed ((S.chartFlatPath n).extend) t) := rfl
+
+end PathChartBallSubdivision
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
+lemma pathTrans_extend_eq_kirov_concat
+    {x y z : X} (γ₁ : Path x y) (γ₂ : Path y z) :
+    (fun t : ℝ => (γ₁.trans γ₂).extend t) =
+      Jacobians.Vendor.Kirov.concat γ₁.extend γ₂.extend := by
+  funext t
+  by_cases ht : t ≤ (1 / 2 : ℝ)
+  · rw [Jacobians.Vendor.Kirov.concat_apply_left γ₁.extend γ₂.extend ht]
+    exact Path.extend_trans_of_le_half γ₁ γ₂ ht
+  · rw [Jacobians.Vendor.Kirov.concat_apply_right γ₁.extend γ₂.extend ht]
+    exact Path.extend_trans_of_half_le γ₁ γ₂ (le_of_lt (not_le.mp ht))
+
+/-- Integrability of Kirov's line-integrand is preserved by binary path concatenation. -/
+theorem lineIntegrand_concat_intervalIntegrable
+    (α : Jacobians.Vendor.Kirov.HolomorphicOneForms X)
+    (γ₁ γ₂ : ℝ → X)
+    (hγ₁ : IntervalIntegrable
+      (fun t : ℝ => α.toFun (γ₁ t) (Jacobians.Vendor.Kirov.pathSpeed γ₁ t))
+      MeasureTheory.volume 0 1)
+    (hγ₂ : IntervalIntegrable
+      (fun t : ℝ => α.toFun (γ₂ t) (Jacobians.Vendor.Kirov.pathSpeed γ₂ t))
+      MeasureTheory.volume 0 1)
+    (hγ₁diff : ∀ t : ℝ,
+      DifferentiableAt ℝ ((chartAt (H := ℂ) (γ₁ t)).toFun ∘ γ₁) t)
+    (hγ₂diff : ∀ t : ℝ,
+      DifferentiableAt ℝ ((chartAt (H := ℂ) (γ₂ t)).toFun ∘ γ₂) t) :
+    IntervalIntegrable
+      (fun t : ℝ => α.toFun
+        (Jacobians.Vendor.Kirov.concat γ₁ γ₂ t)
+        (Jacobians.Vendor.Kirov.pathSpeed
+          (Jacobians.Vendor.Kirov.concat γ₁ γ₂) t))
+      MeasureTheory.volume 0 1 := by
+  let f₁ : ℝ → ℂ := fun t =>
+    α.toFun (γ₁ t) (Jacobians.Vendor.Kirov.pathSpeed γ₁ t)
+  let f₂ : ℝ → ℂ := fun t =>
+    α.toFun (γ₂ t) (Jacobians.Vendor.Kirov.pathSpeed γ₂ t)
+  let f : ℝ → ℂ := fun t =>
+    α.toFun (Jacobians.Vendor.Kirov.concat γ₁ γ₂ t)
+      (Jacobians.Vendor.Kirov.pathSpeed
+        (Jacobians.Vendor.Kirov.concat γ₁ γ₂) t)
+  have hleft_base : IntervalIntegrable (fun t : ℝ => f₁ (2 * t))
+      MeasureTheory.volume 0 (1 / 2 : ℝ) := by
+    simpa [f₁] using hγ₁.comp_mul_left (c := (2 : ℝ))
+  have hleft_scaled : IntervalIntegrable (fun t : ℝ => (2 : ℂ) * f₁ (2 * t))
+      MeasureTheory.volume 0 (1 / 2 : ℝ) :=
+    hleft_base.const_mul (2 : ℂ)
+  have hleft : IntervalIntegrable f MeasureTheory.volume 0 (1 / 2 : ℝ) := by
+    refine hleft_scaled.congr_ae ?_
+    filter_upwards
+      [ae_restrict_mem (measurableSet_uIoc (a := (0 : ℝ)) (b := (1 / 2 : ℝ))),
+        ae_restrict_of_ae
+          (by simp [ae_iff, measure_singleton] :
+            ∀ᵐ t : ℝ ∂MeasureTheory.volume, t ≠ (1 / 2 : ℝ))] with t htmem ht_ne_half
+    have htIoc : t ∈ Set.Ioc (0 : ℝ) (1 / 2 : ℝ) := by
+      simpa [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1 / 2)] using htmem
+    have htlt : t < (1 / 2 : ℝ) := lt_of_le_of_ne htIoc.2 ht_ne_half
+    have hspeed := Jacobians.Vendor.Kirov.pathSpeed_concat_left γ₁ γ₂ t htlt
+      (hγ₁diff (2 * t))
+    have hpoint := Jacobians.Vendor.Kirov.concat_apply_left γ₁ γ₂ htlt.le
+    calc
+      (2 : ℂ) * f₁ (2 * t)
+          = α.toFun (γ₁ (2 * t))
+              (2 * Jacobians.Vendor.Kirov.pathSpeed γ₁ (2 * t)) := by
+            dsimp [f₁]
+            exact ((α.toFun (γ₁ (2 * t))).map_smul (2 : ℂ)
+              (Jacobians.Vendor.Kirov.pathSpeed γ₁ (2 * t))).symm
+      _ = f t := by
+            dsimp [f]
+            rw [hpoint, hspeed]
+            rfl
+  have hright_mul : IntervalIntegrable (fun t : ℝ => f₂ (2 * t))
+      MeasureTheory.volume 0 (1 / 2 : ℝ) := by
+    simpa [f₂] using hγ₂.comp_mul_left (c := (2 : ℝ))
+  have hright_base : IntervalIntegrable (fun t : ℝ => f₂ (2 * t - 1))
+      MeasureTheory.volume (1 / 2 : ℝ) 1 := by
+    have htmp := hright_mul.comp_add_left (c := (-(1 / 2 : ℝ)))
+    convert htmp using 1
+    · ext t
+      congr 1
+      ring
+    · norm_num
+    · norm_num
+  have hright_scaled : IntervalIntegrable (fun t : ℝ => (2 : ℂ) * f₂ (2 * t - 1))
+      MeasureTheory.volume (1 / 2 : ℝ) 1 :=
+    hright_base.const_mul (2 : ℂ)
+  have hright : IntervalIntegrable f MeasureTheory.volume (1 / 2 : ℝ) 1 := by
+    refine hright_scaled.congr_ae ?_
+    filter_upwards
+      [ae_restrict_mem (measurableSet_uIoc (a := (1 / 2 : ℝ)) (b := 1))] with t htmem
+    have htIoc : t ∈ Set.Ioc (1 / 2 : ℝ) 1 := by
+      rwa [Set.uIoc_of_le (by norm_num : (1 / 2 : ℝ) ≤ 1)] at htmem
+    have hspeed := Jacobians.Vendor.Kirov.pathSpeed_concat_right γ₁ γ₂ t htIoc.1
+      (hγ₂diff (2 * t - 1))
+    have hpoint := Jacobians.Vendor.Kirov.concat_apply_right γ₁ γ₂ (not_le.mpr htIoc.1)
+    calc
+      (2 : ℂ) * f₂ (2 * t - 1)
+          = α.toFun (γ₂ (2 * t - 1))
+              (2 * Jacobians.Vendor.Kirov.pathSpeed γ₂ (2 * t - 1)) := by
+            dsimp [f₂]
+            exact ((α.toFun (γ₂ (2 * t - 1))).map_smul (2 : ℂ)
+              (Jacobians.Vendor.Kirov.pathSpeed γ₂ (2 * t - 1))).symm
+      _ = f t := by
+            dsimp [f]
+            rw [hpoint, hspeed]
+            rfl
+  exact hleft.trans hright
+
+namespace PathChartBallSubdivision
+
+variable {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+/-- Integrability of the line-integrand along the first `k + 1` concatenated flat pieces. -/
+theorem concatChartFlatPathAux_lineIntegrable (k : ℕ) (form : HolomorphicOneForm X) :
+    IntervalIntegrable
+      (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+        ((S.concatChartFlatPathAux k).extend t)
+        (Jacobians.Vendor.Kirov.pathSpeed ((S.concatChartFlatPathAux k).extend) t))
+      MeasureTheory.volume 0 1 := by
+  induction k with
+  | zero =>
+      simpa using S.chartFlatPath_lineIntegrable 0 form
+  | succ k ih =>
+      let γ₁ : ℝ → X := (S.concatChartFlatPathAux k).extend
+      let γ₂ : ℝ → X := (S.chartFlatPath (k + 1)).extend
+      have hpiece := S.chartFlatPath_lineIntegrable (k + 1) form
+      have hconcat := lineIntegrand_concat_intervalIntegrable
+        (α := Jacobians.Bridge.bridgeForm form) γ₁ γ₂ ih hpiece
+        (fun t => by
+          simpa [γ₁] using S.concatChartFlatPathAux_chartAt_current_differentiableAt k t)
+        (fun t => by
+          simpa [γ₂] using S.chartFlatPath_chartAt_current_differentiableAt (k + 1) t)
+      have hpath :
+          (fun t : ℝ => (S.concatChartFlatPathAux (k + 1)).extend t) =
+            Jacobians.Vendor.Kirov.concat γ₁ γ₂ := by
+        simpa [γ₁, γ₂, concatChartFlatPathAux_succ] using
+          pathTrans_extend_eq_kirov_concat
+            (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+      have hpath' :
+          (S.concatChartFlatPathAux (k + 1)).extend =
+            Jacobians.Vendor.Kirov.concat γ₁ γ₂ := by
+        funext t
+        exact congrFun hpath t
+      rw [hpath']
+      exact hconcat
+
+/-- Integrability of the line-integrand along the full chart-flat bridge path. -/
+theorem concatChartFlatPath_lineIntegrable (form : HolomorphicOneForm X) :
+    IntervalIntegrable
+      (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+        ((S.concatChartFlatPath).extend t)
+        (Jacobians.Vendor.Kirov.pathSpeed ((S.concatChartFlatPath).extend) t))
+      MeasureTheory.volume 0 1 := by
+  simpa [concatChartFlatPath] using
+    S.concatChartFlatPathAux_lineIntegrable S.lastIndex form
+
+end PathChartBallSubdivision
 
 /-- **Integrability of the bridged line-integrand** along the chosen path.
 
@@ -198,23 +534,25 @@ of `Vendor.Kirov.lineIntegral` along `γ := bridgePath P₀ P` is
 interval-integrable on `[0, 1]`.
 
 This is needed to invoke `Vendor.Kirov.lineIntegral_add`, which requires
-integrability hypotheses for both summands. In a `C¹` regime this would
-follow from continuity of the integrand (continuous image of a compact
-interval is bounded, hence integrable), but the
-`bridgePath_chart_differentiable` axiom only gives `DifferentiableAt`
-chart-locally — not continuous differentiability — so `pathSpeed γ`
-need not be continuous in `t` and the integrability has to be assumed
-separately.
-
-Discharge plan: produce `bridgePath` as a `C¹`-or-better chart-local
-path via `PathConnectedSpace.somePath` + smoothing. Then the integrand
-is continuous and this axiom becomes a derived theorem. -/
-axiom bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
+integrability hypotheses for both summands. The concrete bridge path is
+assembled from finitely many endpoint-flat chart segments: on each open
+segment, chart-swapping rewrites the integrand as a continuous fixed-chart
+expression, and the finitely many glue points are ignored by interval
+integrability. -/
+theorem bridgePath_lineIntegrable (P₀ P : X) (form : HolomorphicOneForm X) :
     IntervalIntegrable
       (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
         (bridgePath (X := X) P₀ P t)
         (Jacobians.Vendor.Kirov.pathSpeed (bridgePath (X := X) P₀ P) t))
-      MeasureTheory.volume 0 1
+      MeasureTheory.volume 0 1 := by
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  change IntervalIntegrable
+    (fun t : ℝ => (Jacobians.Bridge.bridgeForm form).toFun
+      ((S.concatChartFlatPath).extend t)
+      (Jacobians.Vendor.Kirov.pathSpeed ((S.concatChartFlatPath).extend) t))
+    MeasureTheory.volume 0 1
+  exact S.concatChartFlatPath_lineIntegrable form
 
 /-! ## ChartLine — concrete affine path in chart coordinates
 

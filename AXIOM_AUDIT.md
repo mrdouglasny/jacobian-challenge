@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-03.*
+*Last updated 2026-06-04.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,10 +10,10 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 82** — **80** in our modules + **2** vendored Kirov
+**Active project axioms: 76** — **74** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 80 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 74 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
@@ -24,7 +24,14 @@ identity/composition laws were transported through Kirov's pullback
 (`Divisor`/`instAddCommGroup`/`deg` → `FreeAbelianGroup`) and `AX_BranchLocus` → theorem
 (2026-06-04); → 82 with the Phase 2 accept-leaf cluster — 4 unified-`Hyperelliptic`
 instances (`instCompactSpace`/`instConnectedSpace`/`instT2Space`/`instNonempty`)
-discharged by parity dispatch through the `≃ₜ` equiv axioms (2026-06-04).
+discharged by parity dispatch through the `≃ₜ` equiv axioms (2026-06-04); → 76 with
+the **full 6-axiom bridgePath cluster** (`bridgePath` def +
+`_continuous`/`_chart_differentiable`/`_at_zero`/`_at_one`/`_lineIntegrable`)
+discharged via the new `Bridge/BridgePath.lean` smooth-path-connectedness
+infrastructure (a connected complex 1-manifold is smoothly path-connected:
+flat-endpoint reparametrisation + chart-ball subdivision + smooth concatenation,
+~1450 LOC; `_lineIntegrable` from continuity of `Vendor.Kirov.pathSpeed` ⇒
+`IntervalIntegrable`) (2026-06-04).
 
 ---
 
@@ -36,7 +43,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (68 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (62 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -46,7 +53,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 14 | classical theorems, citable | high |
-| 2a — data-existence | 22 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 35 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -98,7 +105,6 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
-| `bridgePath` (+5: `_continuous`, `_chart_differentiable`, `_at_zero`, `_at_one`, `_lineIntegrable`) | `Bridge/KirovLineIntegral.lean:164,167,182,188,191,212` | path-selection for the Kirov line-integral bridge |
 | `PrincipalDivisors`, `LineBundle`, `H0`(+`instAddCommGroup`,`instModule`), `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (10) | `RiemannSurface/LineBundle.lean:70–128` | line-bundle / sheaf-cohomology **type stubs** (the `Divisor` triple discharged in Phase 1) |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
@@ -191,6 +197,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `Divisor`; `Divisor.instAddCommGroup`; `Divisor.deg` *(Phase 1, 2026-06-04)* | `abbrev Divisor X := FreeAbelianGroup X`; `AddCommGroup` via `inferInstanceAs`; `deg := FreeAbelianGroup.lift (fun _ => 1)`. Unblocks the 11 downstream sheaf-cohomology plans | `RiemannSurface/LineBundle.lean` |
 | `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
+| **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`

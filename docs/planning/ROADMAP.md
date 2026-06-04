@@ -4,6 +4,11 @@ Routing decisions for all **90 real axioms** across 27 files of the `Jacobians` 
 
 > **Starting fresh?** Read [`PHASE_1_HANDOFF.md`](PHASE_1_HANDOFF.md) — a self-contained brief that scopes the first 4 discharges (Divisor cluster + AX_BranchLocus), names the toolchain, lists the cross-plan invariants, and gives a worker prompt template. ~4 focused days of work, axiom count 90 → 86.
 
+> ⚠️ **This page is a point-in-time routing plan (baseline 90 axioms, authored 2026-06-03), not a live status tracker.** The canonical, kernel-checked live count and per-axiom status are in [`AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) + [`axiom-report.txt`](../axiom-report.txt). **Discharged since authoring** (the route/verdict rows below are kept for historical record):
+> - **Phase 1** (2026-06-04): `Divisor` / `Divisor-instAddCommGroup` / `Divisor-deg`, `AX_BranchLocus` → 90 → 86.
+> - **bridgePath cluster — all 6** (2026-06-04, branch `phase2-bridgepath`): `bridgePath` (now a `def`), `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, **and `bridgePath_lineIntegrable`** → 86 → 80, via the new `Bridge/BridgePath.lean` smooth-path-connectedness infrastructure (`_lineIntegrable` from continuity of `pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable`). The entire cluster is discharged.
+> - **Hyperelliptic leaf instances** (branch `phase2-leaves`, PR #3): `Hyperelliptic.instCompactSpace` / `instConnectedSpace` / `instT2Space` / `instNonempty` discharged there (86 → 82); still listed as open *on this branch* since that PR is not yet merged. Counts compose at merge.
+
 ## Vetting summary
 
 | Gemini verdict | Count |
