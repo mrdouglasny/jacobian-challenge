@@ -548,8 +548,17 @@ theorem bridgePathImpl_continuous (P₀ P : X) :
   dsimp [bridgePathImpl]
   exact Path.continuous_extend _
 
--- TODO(layer 3 differentiability): prove the Kirov-side chart-local regularity statement
--- for `bridgePathImpl`.  The remaining target shape is:
+-- TODO(layer 3 differentiability): upgrade the proved per-piece interior lemma
+-- `PathChartBallSubdivision.chartFlatPath_chart_differentiableAt_of_mem_Ioo` to the
+-- Kirov-side chart-local regularity statement for the extended global concatenation.
+-- Remaining proof obligations:
+-- * handle `Path.extend` at local endpoints, using `hasDerivAt_flatSegment_zero/_one`
+--   against the constant extension outside `[0, 1]`;
+-- * propagate that endpoint-flat statement through the recursive `Path.trans` joins;
+-- * compose with the smooth chart transition from the subdivision chart to `chartAt` at
+--   the current bridge-path point.
+--
+-- The remaining target shape is:
 --
 -- theorem bridgePathImpl_chart_differentiableAt
 --     {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
@@ -557,9 +566,6 @@ theorem bridgePathImpl_continuous (P₀ P : X) :
 --     DifferentiableAt ℝ
 --       ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
 --         (bridgePathImpl (X := X) P₀ P)) t
---
--- The proof should combine the per-piece flat-coordinate derivative with the smooth chart
--- transition from each subdivision chart to `chartAt` at the current bridge-path point.
 
 end BridgePathImpl
 
