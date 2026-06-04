@@ -181,6 +181,18 @@ discharge that lowers the axiom count but cannot exhibit such a witness is a
 regression, not progress — it must be reviewed against
 [`DEFINITIONS_AUDIT.md`](../../DEFINITIONS_AUDIT.md) before merge.
 
+**The acceptance test is now machine-checkable.** For the sheaf-cohomology
+cluster specifically, the faithfulness gate is the suite in
+[`Jacobians/RiemannSurface/SheafCohomologySpec.lean`](../../Jacobians/RiemannSurface/SheafCohomologySpec.lean)
+— Buzzard's anti-degeneracy strategy applied one layer down: non-vacuity anchors
+(`H⁰(𝒪(0)) ≅ ℂ`, `H⁰=0` in negative degree, `H¹` vanishing), structural pins
+(canonical degree `2g−2`, `H⁰(K) ≅ ℂ^g`, section monotonicity), and **concrete
+ℙ¹ teeth** (`H⁰(𝒪(n·p)) ≅ ℂ^{n+1}`) that a token/degenerate definition provably
+fails. The statements compile against the current axiom API (well-formedness
+checked); a discharge of Cluster A is **accepted as faithful iff it turns
+`SheafCohomologySpec.SheafCohomologyFaithful` into a theorem.** Land the concrete
+§3 targets first — they are the discriminating ones.
+
 *A Gemini deep-think consult on the `Sheaf.H` viability / dimension-faithfulness
 was initiated (timed out at 5 min; interaction saved) — the §A.2 verdict is from
 direct Mathlib API inspection and stands on its own; revisit Gemini to
