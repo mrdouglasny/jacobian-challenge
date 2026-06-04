@@ -651,6 +651,43 @@ lemma differentiableAt_comp_pathTrans_extend_right_of_half_lt
       simp [Function.comp_def, hu]
   exact hcomp.congr_of_eventuallyEq heq
 
+namespace PathChartBallSubdivision
+
+variable {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+omit [ConnectedSpace X] in
+@[simp] theorem concatChartFlatPathAux_zero :
+    S.concatChartFlatPathAux 0 = S.chartFlatPath 0 := rfl
+
+omit [ConnectedSpace X] in
+@[simp] theorem concatChartFlatPathAux_succ (k : ℕ) :
+    S.concatChartFlatPathAux (k + 1) =
+      (S.concatChartFlatPathAux k).trans (S.chartFlatPath (k + 1)) := rfl
+
+omit [ConnectedSpace X] in
+lemma concatChartFlatPathAux_extend_eventuallyEq_last_of_half_lt
+    (k : ℕ) {t : ℝ} (ht : 1 / 2 < t) :
+    (fun u : ℝ => (S.concatChartFlatPathAux (k + 1)).extend u) =ᶠ[𝓝 t]
+      fun u : ℝ => (S.chartFlatPath (k + 1)).extend (2 * u - 1) := by
+  simpa using
+    pathTrans_extend_eventuallyEq_right_of_half_lt
+      (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1)) ht
+
+omit [ConnectedSpace X] in
+lemma concatChartFlatPathAux_chart_differentiableAt_last_of_half_lt
+    (k : ℕ) {t : ℝ} (ht : 1 / 2 < t)
+    (hs : 2 * t - 1 ∈ Set.Ioo (0 : ℝ) 1) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ (S.chart (k + 1))).toFun ∘
+        (S.concatChartFlatPathAux (k + 1)).extend) t := by
+  simpa using
+    differentiableAt_comp_pathTrans_extend_right_of_half_lt
+      (S.concatChartFlatPathAux k) (S.chartFlatPath (k + 1))
+      (f := (chartAt ℂ (S.chart (k + 1))).toFun) ht
+      (S.chartFlatPath_chart_differentiableAt_of_mem_Ioo (k + 1) hs)
+
+end PathChartBallSubdivision
+
 end BridgePathImpl
 
 end Jacobians.Bridge
