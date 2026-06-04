@@ -24,6 +24,8 @@ calculus input for smooth concatenation of chart-local straight segments.
 
 namespace Jacobians.Bridge
 
+open scoped Topology
+
 /-- The cubic "smoothstep" reparameterization used to flatten segment endpoints. -/
 def flatReparam (s : ℝ) : ℝ :=
   3 * s ^ 2 - 2 * s ^ 3
@@ -471,6 +473,29 @@ noncomputable def chartFlatPath (n : ℕ) :
     simpa using (chartAt ℂ (S.chart n)).left_inv (S.left_endpoint_mem_chart_source n)
   target' := by
     simpa using (chartAt ℂ (S.chart n)).left_inv (S.right_endpoint_mem_chart_source n)
+
+/-- In the interior of a local piece, its subdivision-chart coordinate is the flat segment. -/
+theorem chartFlatPath_chart_eventuallyEq_flatSegment_of_mem_Ioo (n : ℕ) {s : ℝ}
+    (hs : s ∈ Set.Ioo (0 : ℝ) 1) :
+    ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) =ᶠ[𝓝 s]
+      flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+        ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) := by
+  filter_upwards [Icc_mem_nhds hs.1 hs.2] with u hu
+  dsimp only [Function.comp_apply]
+  rw [Path.extend_apply _ hu]
+  exact (chartAt ℂ (S.chart n)).right_inv (S.flatSegment_mem_chart_target n hu)
+
+/-- Away from its endpoints, each local piece is differentiable in its subdivision chart. -/
+theorem chartFlatPath_chart_differentiableAt_of_mem_Ioo (n : ℕ) {s : ℝ}
+    (hs : s ∈ Set.Ioo (0 : ℝ) 1) :
+    DifferentiableAt ℝ
+      ((chartAt ℂ (S.chart n)).toFun ∘ (S.chartFlatPath n).extend) s := by
+  let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+  let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+  have hdiff : DifferentiableAt ℝ (flatSegment a b) s :=
+    (differentiable_flatSegment a b).differentiableAt
+  exact hdiff.congr_of_eventuallyEq
+    (S.chartFlatPath_chart_eventuallyEq_flatSegment_of_mem_Ioo n hs)
 
 /-- Concatenate the first `k + 1` chart-flat subdivision pieces. -/
 noncomputable def concatChartFlatPathAux (k : ℕ) :
