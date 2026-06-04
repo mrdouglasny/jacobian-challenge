@@ -143,6 +143,7 @@ See `vendor/kirov-jacobian-claude/HANDOFF.md` for surrounding context.
 
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Vendor.Kirov.LineIntegral
+import Jacobians.Bridge.BridgePath
 import Jacobians.Bridge.KirovHolomorphic
 
 namespace Jacobians.Bridge
@@ -161,10 +162,12 @@ a connected (locally-)path-connected complex 1-manifold they all hold
 abstractly here and discharge them in a follow-up. -/
 
 /-- A chosen smooth path from `P₀` to `P` in `X`. -/
-axiom bridgePath (P₀ P : X) : ℝ → X
+noncomputable def bridgePath (P₀ P : X) : ℝ → X :=
+  bridgePathImpl P₀ P
 
 /-- The chosen path is continuous. -/
-axiom bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P)
+theorem bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P) := by
+  simpa only [bridgePath] using bridgePathImpl_continuous (X := X) P₀ P
 
 /-- The chosen path is `C¹` in chart pullbacks at every `t`.
 
@@ -179,16 +182,20 @@ Discharge plan: in a connected complex manifold, a path produced by
 relevant smoothing infra in `Topology.MetricSpace.LipschitzAddSubgroup`
 and friends; the exact statement we need is "every continuous path
 between two points is homotopic to a chart-local-`C¹` path"). -/
-axiom bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
+theorem bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
     DifferentiableAt ℝ
       ((chartAt (H := ℂ) (bridgePath (X := X) P₀ P t)).toFun ∘
-        (bridgePath (X := X) P₀ P)) t
+        (bridgePath (X := X) P₀ P)) t := by
+  simpa only [bridgePath] using
+    bridgePathImpl_chart_differentiableAt (X := X) P₀ P t
 
 /-- The chosen path starts at `P₀`. -/
-axiom bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀
+theorem bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀ := by
+  simpa only [bridgePath] using bridgePathImpl_at_zero (X := X) P₀ P
 
 /-- The chosen path ends at `P`. -/
-axiom bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P
+theorem bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P := by
+  simpa only [bridgePath] using bridgePathImpl_at_one (X := X) P₀ P
 
 /-- **Integrability of the bridged line-integrand** along the chosen path.
 
