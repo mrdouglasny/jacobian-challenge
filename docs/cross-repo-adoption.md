@@ -29,8 +29,13 @@ why.
 | `ChartedSpaceOfLocalHomeomorph.lean` | upstream `Jacobians/ChartedSpaceOfLocalHomeomorph.lean` | 55 | Extends Mathlib's `IsLocalHomeomorph` namespace with a `ChartedSpace` constructor; helper for `ZLatticeQuotient`. |
 | `ZLatticeQuotient.lean` | upstream `Jacobians/ZLatticeQuotient.lean` | 740 | Compiled under namespace `Jacobians.Vendor.Kirov.ZLatticeQuotient`. Sorry-free. The quotient `V ⧸ Λ` for `Λ : Submodule ℤ V` with `[IsZLattice ℝ Λ]`: covering-map structure, `ChartedSpace` and `LieAddGroup` instance transfer. Candidate to replace the `ULift`-transfer workaround in `Jacobians/Jacobian/Construction.lean`. Not yet wired in. |
 
-**Total adopted**: ~5,600 LOC, 12 modules, 2 axioms (handed off in
-[`vendor/kirov-jacobian-claude/HANDOFF.md`](../vendor/kirov-jacobian-claude/HANDOFF.md)).
+**Total adopted**: ~5,600 LOC, 12 modules, **0 axioms** — the 2 upstream
+`:= sorry`-handoff axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`)
+were **deleted 2026-06-04** as unused (no references beyond their own
+declarations; the challenge uses the main-tree `AX_genus_eq_zero_iff_homeo`), so
+the vendored Kirov subtree is now axiom-free like Wallace. The statements remain
+in the pristine upstream copy under
+[`vendor/kirov-jacobian-claude/`](../vendor/kirov-jacobian-claude/).
 
 **Mathematical content unchanged.** The only modifications relative to
 upstream are:
@@ -42,9 +47,9 @@ upstream are:
    enclose the trailing `genus` / `genus_eq_zero_iff_homeo` decls (in
    upstream they live at root namespace; root collides with our
    `Challenge.lean`).
-4. The two `:= sorry` declarations converted to `axiom` form (same
-   fully-qualified name, same signature, no `:= sorry`) — keeps the
-   build axiom-clean and gives a named handoff target.
+4. The two `:= sorry` declarations were converted to `axiom` form on import,
+   then **deleted entirely 2026-06-04** once confirmed unused — the vendored
+   subtree carries no axioms.
 
 The full upstream tree (including modules we have not pulled into the
 build, design docs, and Kirov's own session log) is preserved verbatim

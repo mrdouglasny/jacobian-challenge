@@ -10,8 +10,12 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 68** — **66** in our modules + **2** vendored Kirov
-`:= sorry` declarations restated as named axioms. (Verified against the
+**Active project axioms: 66** — all **66** in our own modules. The vendored
+Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
+(`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
+(they had no references beyond their own declarations; the challenge uses the
+main-tree `AX_genus_eq_zero_iff_homeo`), matching the axiom-free Wallace vendor.
+(Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
 `^axiom ` also reports 66 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
@@ -53,7 +57,9 @@ picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
 (`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` carrier was **unbundled**
 (pure `Decidable.casesOn` parity dispatch) so `#print axioms Hyperelliptic` is
 now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
-instances.
+instances. Finally → **66** by deleting the 2 unused vendored Kirov handoff
+axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`), leaving the
+vendored subtree axiom-free (2026-06-04).
 
 ---
 
@@ -61,7 +67,7 @@ instances.
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (14 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (12 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
@@ -74,7 +80,7 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 14 | classical theorems, citable | high |
+| 1 — textbook-standard | 12 | classical theorems, citable | high |
 | 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
@@ -101,8 +107,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
 | `AX_curve_generates_jacobian` | `Axioms/UniversalProperty.lean:44` | Mumford *Curves & their Jacobians*; Milne *AV* §I — *unused stub* (see Universal-property section) |
-| `Vendor.Kirov…genus_eq_zero_iff_homeo` | `Vendor/Kirov/Genus.lean:94` | uniformization (Kirov handoff) |
-| `Vendor.Kirov…ambientPhi_ambientPsi_eq` | `Vendor/Kirov/HolomorphicForms.lean:340` | degree identity (Kirov handoff) |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is still an axiom **only** for the
 abstract `genus_eq_zero_iff_homeo`; the concrete `genus ℙ¹ = 0` no longer
@@ -249,7 +253,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 66; add the 2 Vendor/Kirov axioms for the total 68.
+#   prints 66 — the vendored Kirov subtree is now axiom-free, so 66 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians

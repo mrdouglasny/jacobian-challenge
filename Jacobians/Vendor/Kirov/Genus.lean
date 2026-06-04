@@ -79,20 +79,11 @@ noncomputable def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpa
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
   Module.finrank ℂ (Jacobians.Vendor.Kirov.HolomorphicOneForms X)
 
-/-- A compact Riemann surface has genus 0 iff it is homeomorphic to the sphere.
-This is the "anti-hack" constraint preventing `∀ X, genus X = 0`.
-
-**Classical result** (Forster §16.3: Uniformization theorem; Miranda §V): a
-compact Riemann surface of genus 0 is homeomorphic to the 2-sphere. Real
-proof would follow from Uniformization or Riemann–Roch (genus 0 ⇒ a
-non-constant meromorphic function with a single simple pole gives a
-biholomorphism X → ℂP¹ ≃ S²).
-
-**Stated as `axiom` for handoff** (was `:= sorry` in upstream). To
-discharge: prove the same statement and replace this `axiom` with a
-`theorem`. See `vendor/kirov-jacobian-claude/HANDOFF.md`. -/
-axiom genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
-    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1))
+-- NOTE (2026-06-04): the upstream handoff axiom `genus_eq_zero_iff_homeo`
+-- (Kirov's `:= sorry` for the genus-0 ⇔ sphere uniformization fact) was
+-- **removed from this port** — it was unused (the challenge's genus-zero result
+-- uses the main-tree `AX_genus_eq_zero_iff_homeo`, not this one), so deleting it
+-- makes the vendored Kirov subtree axiom-free. The statement still lives in the
+-- pristine upstream copy under `vendor/kirov-jacobian-claude/`.
 
 end Jacobians.Vendor.Kirov
