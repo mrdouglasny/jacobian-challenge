@@ -2,6 +2,9 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.Analysis.LocallyConvex.WithSeminorms
+import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.UnitInterval
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
@@ -185,5 +188,23 @@ theorem hasDerivAt_flatSegment_one (a b : E) :
     HasDerivAt.add (hleft.smul_const a) (hasDerivAt_flatReparam_one.smul_const b)
 
 end FlatSegment
+
+/-! ## Topological path source from complex charts -/
+
+section ManifoldPathSource
+
+variable {X : Type*} [TopologicalSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+
+/-- A connected space charted over `ℂ` is path connected. -/
+theorem complex_chartedSpace_pathConnectedSpace : PathConnectedSpace X := by
+  haveI : LocPathConnectedSpace X := ChartedSpace.locPathConnectedSpace (H := ℂ) (M := X)
+  exact pathConnectedSpace_iff_connectedSpace.mpr inferInstance
+
+/-- Any two points in a connected complex-charted space are joined by a bundled path. -/
+theorem exists_path (P₀ P : X) : Nonempty (Path P₀ P) := by
+  haveI : PathConnectedSpace X := complex_chartedSpace_pathConnectedSpace (X := X)
+  exact ⟨PathConnectedSpace.somePath P₀ P⟩
+
+end ManifoldPathSource
 
 end Jacobians.Bridge
