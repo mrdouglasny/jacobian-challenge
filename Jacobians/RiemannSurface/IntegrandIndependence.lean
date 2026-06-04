@@ -16,7 +16,7 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 
 /-- Chart transitions between two `extChartAt` charts are complex differentiable at
 points of the overlap. -/
-private lemma chartTransition_differentiableAt {p q : X} {z : ℂ}
+lemma chartTransition_differentiableAt {p q : X} {z : ℂ}
     (hz : z ∈ (extChartAt 𝓘(ℂ) p).target)
     (hq : (extChartAt 𝓘(ℂ) p).symm z ∈ (extChartAt 𝓘(ℂ) q).source) :
     DifferentiableAt ℂ ((extChartAt 𝓘(ℂ) q) ∘ (extChartAt 𝓘(ℂ) p).symm) z := by

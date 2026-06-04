@@ -20,6 +20,7 @@ import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MultiChartIntegral
 import Jacobians.RiemannSurface.IntegrandIndependence
+import Jacobians.RiemannSurface.ArcChartDifferentiable
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
