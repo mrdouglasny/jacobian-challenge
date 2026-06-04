@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 65** — all **65** in our own modules. The vendored
+**Active project axioms: 64** — all **64** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -57,14 +57,18 @@ picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
 now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
 instances. → **66** by deleting the 2 unused vendored Kirov handoff
 axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`), leaving the
-vendored subtree axiom-free. Finally → **65** by deleting the **false** dangling
+vendored subtree axiom-free. → **65** by deleting the **false** dangling
 axiom `AX_pathIntegral_local_antiderivative` (the single-valued ℂ "FTC" for the
 period functional): on any genus ≥ 1 curve it forces a global primitive of a
 holomorphic 1-form, hence zero periods — contradicting `genus_Elliptic = 1`. It
 was unused (0 headline dependents), an unsoundness landmine; the honest
 path-independence content lives at the homology level in `loopIntegralToH1`, and
-a genuine FTC can only be stated on the quotient `ofCurve : X → ℂ^g/Λ`
-(2026-06-04).
+a genuine FTC can only be stated on the quotient `ofCurve : X → ℂ^g/Λ`. Finally →
+**64** by **de-opaquing** `pathIntegralBasepointFunctional` from an axiom to a
+real `def` (`:= Bridge.kirovBackedFunctional`, itself standard-3 axiom-clean): a
+genuine line integral `∫_{bridgePath P₀ P}`. `ofCurve` is now a **computed** map
+whose only analytic axiom is the one honest `loopIntegralToH1` — its opacity, and
+the zero-functional degeneracy it hid, are gone (2026-06-04).
 
 ---
 
@@ -76,7 +80,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (54 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (52 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -86,7 +90,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 12 | classical theorems, citable | high |
-| 2a — data-existence | 15 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 14 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -130,8 +134,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `pathIntegralBasepointFunctional` 🅒 | `Axioms/AbelJacobiMap.lean:96` | the path-integral functional; **opaque** (see `ofCurve` card); de-opaque to `Bridge.kirovBackedFunctional` (a real `∫` def) — no FTC needed |
-| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent — **the** path-independence axiom; honest discharge globalizes `Bridge/ContourDeformation.lean` (chart-local homotopy invariance) via homotopy-rectangle subdivision |
+| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent — **the** path-independence axiom (now `ofCurve`'s only analytic axiom, since `pathIntegralBasepointFunctional` was de-opaqued to a real `∫` def 2026-06-04). Honest discharge globalizes `Bridge/ContourDeformation.lean` (chart-local homotopy invariance) via homotopy-rectangle subdivision — see [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
@@ -257,7 +260,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 65 — the vendored Kirov subtree is now axiom-free, so 65 is the total.
+#   prints 64 — the vendored Kirov subtree is now axiom-free, so 64 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -274,7 +277,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 65
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 64
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

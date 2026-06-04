@@ -58,6 +58,7 @@ See `docs/formalization-plan.md` §7.
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.BranchLocus
 import Jacobians.Bridge.KirovHolomorphicEquiv
+import Jacobians.Bridge.KirovLineIntegral
 
 namespace Jacobians.Axioms
 
@@ -89,20 +90,22 @@ The ambient linear maps and period-lattice preservation are then derived
 or re-expressed at the more atomic level.
 -/
 
-/-- **Axiom.** The path-integral functional from `P₀` to `P`: given a
-holomorphic 1-form `ω`, returns `∫_{P₀}^P ω ∈ ℂ`. Linear in `ω`. For
-two paths from `P₀` to `P`, the values differ by an element of the
-period lattice.
+/-- The path-integral functional from `P₀` to `P`: given a holomorphic 1-form
+`ω`, returns `∫_{P₀}^P ω ∈ ℂ`, linear in `ω`. For two paths from `P₀` to `P`
+the values differ by an element of the period lattice.
 
-Retires to a `def` via `Bridge.kirovBackedFunctional` (a real `∫` over
-`bridgePath`) — de-opaque, no FTC needed. As an *opaque* axiom it is too weak
-(the choice function could be trivial); concreteness, not a companion FTC, is
-what rules that out. (A former companion `AX_pathIntegral_local_antiderivative`
-was false and is deleted — see its note.) -/
-axiom pathIntegralBasepointFunctional (X : Type*) [TopologicalSpace X]
+**De-opaqued 2026-06-04** from an axiom to this real `def`: it is the genuine
+line integral `Bridge.kirovBackedFunctional` (`∫_{bridgePath P₀ P}`), itself
+standard-3 axiom-clean. This makes `ofCurve` a **computed** map and rules out the
+zero-functional degeneracy by *concreteness* — not by a companion FTC (the former
+`AX_pathIntegral_local_antiderivative` was false and is deleted; see its note).
+The path-dependence of the chosen `bridgePath` is absorbed by the period-lattice
+quotient in `ofCurveImpl`, governed by `RiemannSurface.loopIntegralToH1`. -/
+noncomputable def pathIntegralBasepointFunctional (X : Type*) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) :
-    HolomorphicOneForm X →ₗ[ℂ] ℂ
+    HolomorphicOneForm X →ₗ[ℂ] ℂ :=
+  Jacobians.Bridge.kirovBackedFunctional P₀ P
 
 /- **REMOVED 2026-06-04 — this axiom was FALSE.**
 

@@ -1,11 +1,7 @@
 'genus' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
 'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
-'Jacobian.ofCurve' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+'Jacobian.ofCurve' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
 'Jacobian.pushforward' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
@@ -19,16 +15,11 @@
  RiemannSurface.loopIntegralToH1]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
-'Jacobian.ofCurve_self' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_ofCurve_inj,
- Axioms.pathIntegralBasepointFunctional,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
  Classical.choice,
@@ -36,7 +27,6 @@
  Axioms.AX_PeriodLattice,
  Axioms.AX_ofCurve_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
- Axioms.pathIntegralBasepointFunctional,
  RiemannSurface.loopIntegralToH1]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
  Classical.choice,
