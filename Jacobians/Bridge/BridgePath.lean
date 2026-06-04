@@ -246,4 +246,238 @@ theorem segment_subset_chart_target_of_mem_ball (x : X) {r : ℝ}
 
 end ConvexChartBallStraightness
 
+/-! ## Chart-ball subdivision of a path -/
+
+section ChartBallSubdivision
+
+open Set
+open scoped Convex unitInterval
+
+variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X] {P₀ P : X}
+
+omit [ChartedSpace ℂ X] in
+/-- The image of a bundled path is compact. -/
+theorem isCompact_path_range (γ : Path P₀ P) : IsCompact (Set.range γ) := by
+  simpa [Set.image_univ] using (isCompact_univ.image (Path.continuous γ))
+
+/-- A chosen chart-target ball radius around the chart image of `x`. -/
+noncomputable def chartTargetBallRadius (x : X) : ℝ :=
+  Classical.choose (exists_ball_subset_chart_target x)
+
+/-- The chosen chart-target ball radius is positive. -/
+theorem chartTargetBallRadius_pos (x : X) : 0 < chartTargetBallRadius x :=
+  (Classical.choose_spec (exists_ball_subset_chart_target x)).1
+
+/-- The chosen chart-target ball is contained in the corresponding chart target. -/
+theorem chartTargetBall_subset_chart_target (x : X) :
+    Metric.ball ((chartAt ℂ x) x) (chartTargetBallRadius x) ⊆ (chartAt ℂ x).target :=
+  (Classical.choose_spec (exists_ball_subset_chart_target x)).2
+
+/-- The chart source restricted to the chosen coordinate ball around its center. -/
+def chartBallSource (x : X) : Set X :=
+  (chartAt ℂ x).source ∩
+    (chartAt ℂ x) ⁻¹' Metric.ball ((chartAt ℂ x) x) (chartTargetBallRadius x)
+
+/-- The chart-ball source is open in `X`. -/
+theorem isOpen_chartBallSource (x : X) : IsOpen (chartBallSource x) := by
+  exact (chartAt ℂ x).isOpen_inter_preimage Metric.isOpen_ball
+
+/-- The center of a chart-ball source lies in that chart-ball source. -/
+theorem mem_chartBallSource_self (x : X) : x ∈ chartBallSource x := by
+  constructor
+  · exact mem_chart_source ℂ x
+  · exact Metric.mem_ball_self (chartTargetBallRadius_pos x)
+
+/-- The pullback to the unit interval of a chart-ball source along a path. -/
+def pathChartBallCover (γ : Path P₀ P) (x : X) : Set unitInterval :=
+  γ ⁻¹' chartBallSource x
+
+/-- The chart-ball pullback cover consists of open subsets of the unit interval. -/
+theorem isOpen_pathChartBallCover (γ : Path P₀ P) (x : X) :
+    IsOpen (pathChartBallCover γ x) := by
+  exact (Path.continuous γ).isOpen_preimage _ (isOpen_chartBallSource x)
+
+/-- The chart-ball pullback cover covers the whole unit interval. -/
+theorem pathChartBallCover_univ_subset_iUnion (γ : Path P₀ P) :
+    Set.univ ⊆ ⋃ x : X, pathChartBallCover γ x := by
+  intro t _ht
+  exact Set.mem_iUnion.mpr ⟨γ t, mem_chartBallSource_self (γ t)⟩
+
+/--
+A monotone finite subdivision of a path by chart balls.
+
+Mathlib's interval-refinement lemma naturally returns a monotone sequence which is eventually `1`;
+`lastIndex` and `breakpoints` below provide the finite `Fin (N+1)` view.
+-/
+structure PathChartBallSubdivision (γ : Path P₀ P) where
+  /-- Breakpoints as a monotone sequence in the unit interval. -/
+  t : ℕ → unitInterval
+  /-- The first breakpoint is `0`. -/
+  t_zero : t 0 = 0
+  /-- Breakpoints are monotone. -/
+  monotone_t : Monotone t
+  /-- The sequence reaches `1` and then remains there. -/
+  eventually_one : ∃ n, ∀ m ≥ n, t m = 1
+  /-- A chart center assigned to each subinterval. -/
+  chart : ℕ → X
+  /-- Each adjacent subinterval maps into the assigned chart ball. -/
+  subinterval_subset_chartBall :
+    ∀ n, Set.Icc (t n) (t (n + 1)) ⊆ pathChartBallCover γ (chart n)
+
+/-- Every bundled path has a chart-ball subdivision. -/
+theorem exists_pathChartBallSubdivision (γ : Path P₀ P) :
+    Nonempty (PathChartBallSubdivision γ) := by
+  rcases exists_monotone_Icc_subset_open_cover_unitInterval
+      (c := pathChartBallCover γ)
+      (isOpen_pathChartBallCover γ)
+      (pathChartBallCover_univ_subset_iUnion γ) with
+    ⟨t, ht0, hmono, heventually, hlocal⟩
+  choose chart hchart using hlocal
+  exact ⟨{
+    t := t
+    t_zero := ht0
+    monotone_t := hmono
+    eventually_one := heventually
+    chart := chart
+    subinterval_subset_chartBall := hchart }⟩
+
+namespace PathChartBallSubdivision
+
+variable {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+/-- The first index at which the subdivision has reached `1`. -/
+noncomputable def lastIndex (S : PathChartBallSubdivision γ) : ℕ := by
+  classical exact Nat.find S.eventually_one
+
+/-- All breakpoints after `lastIndex` are equal to `1`. -/
+theorem eq_one_of_lastIndex_le (S : PathChartBallSubdivision γ) {m : ℕ}
+    (hm : S.lastIndex ≤ m) : S.t m = 1 := by
+  classical
+  exact (Nat.find_spec S.eventually_one) m hm
+
+@[simp] theorem t_lastIndex (S : PathChartBallSubdivision γ) :
+    S.t S.lastIndex = 1 := by
+  exact S.eq_one_of_lastIndex_le le_rfl
+
+/-- The finite `Fin (N+1)` view of the subdivision breakpoints. -/
+def breakpoints (S : PathChartBallSubdivision γ) : Fin (S.lastIndex + 1) → unitInterval :=
+  fun i => S.t i
+
+@[simp] theorem breakpoints_zero (S : PathChartBallSubdivision γ) :
+    S.breakpoints ⟨0, Nat.succ_pos S.lastIndex⟩ = 0 := by
+  exact S.t_zero
+
+@[simp] theorem breakpoints_last (S : PathChartBallSubdivision γ) :
+    S.breakpoints ⟨S.lastIndex, Nat.lt_succ_self S.lastIndex⟩ = 1 := by
+  exact S.t_lastIndex
+
+/-- On each subdivision interval, the path lies in the assigned chart source. -/
+theorem subinterval_subset_chart_source (n : ℕ) :
+    Set.Icc (S.t n) (S.t (n + 1)) ⊆ γ ⁻¹' (chartAt ℂ (S.chart n)).source := by
+  intro u hu
+  exact (S.subinterval_subset_chartBall n hu).1
+
+/-- On each subdivision interval, the path lies in the assigned chart coordinate ball. -/
+theorem subinterval_subset_chart_ball (n : ℕ) :
+    Set.Icc (S.t n) (S.t (n + 1)) ⊆
+      {u : unitInterval |
+        (chartAt ℂ (S.chart n)) (γ u) ∈
+          Metric.ball ((chartAt ℂ (S.chart n)) (S.chart n))
+            (chartTargetBallRadius (S.chart n))} := by
+  intro u hu
+  exact (S.subinterval_subset_chartBall n hu).2
+
+/-- The left endpoint of a subdivision interval lies in the assigned chart source. -/
+theorem left_endpoint_mem_chart_source (n : ℕ) :
+    γ (S.t n) ∈ (chartAt ℂ (S.chart n)).source := by
+  exact S.subinterval_subset_chart_source n ⟨le_rfl, S.monotone_t (Nat.le_succ n)⟩
+
+/-- The right endpoint of a subdivision interval lies in the assigned chart source. -/
+theorem right_endpoint_mem_chart_source (n : ℕ) :
+    γ (S.t (n + 1)) ∈ (chartAt ℂ (S.chart n)).source := by
+  exact S.subinterval_subset_chart_source n ⟨S.monotone_t (Nat.le_succ n), le_rfl⟩
+
+/-- The chart image of the left endpoint lies in the assigned chart coordinate ball. -/
+theorem left_endpoint_mem_chart_ball (n : ℕ) :
+    (chartAt ℂ (S.chart n)) (γ (S.t n)) ∈
+      Metric.ball ((chartAt ℂ (S.chart n)) (S.chart n))
+        (chartTargetBallRadius (S.chart n)) := by
+  exact S.subinterval_subset_chart_ball n ⟨le_rfl, S.monotone_t (Nat.le_succ n)⟩
+
+/-- The chart image of the right endpoint lies in the assigned chart coordinate ball. -/
+theorem right_endpoint_mem_chart_ball (n : ℕ) :
+    (chartAt ℂ (S.chart n)) (γ (S.t (n + 1))) ∈
+      Metric.ball ((chartAt ℂ (S.chart n)) (S.chart n))
+        (chartTargetBallRadius (S.chart n)) := by
+  exact S.subinterval_subset_chart_ball n ⟨S.monotone_t (Nat.le_succ n), le_rfl⟩
+
+end PathChartBallSubdivision
+
+end ChartBallSubdivision
+
+/-! ## Chart-local flat replacement on one subdivision interval -/
+
+section ChartLocalFlatReplacement
+
+open scoped Convex unitInterval
+
+variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X] {P₀ P : X}
+
+/-- A flat affine segment is a point of the closed segment between its endpoints. -/
+theorem flatSegment_mem_segment {a b : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1) :
+    flatSegment a b t ∈ [a -[ℝ] b] := by
+  rw [show flatSegment a b t = AffineMap.lineMap a b (flatReparam t) by
+    simp [flatSegment, AffineMap.lineMap_apply_module]]
+  exact lineMap_mem_segment ℝ a b (flatReparam_mem_Icc ht)
+
+namespace PathChartBallSubdivision
+
+variable {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+/-- The chart-coordinate flat segment for a subdivision interval stays in the chart target. -/
+theorem flatSegment_mem_chart_target (n : ℕ) {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+      ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) s ∈
+        (chartAt ℂ (S.chart n)).target := by
+  exact segment_subset_chart_target_of_mem_ball (S.chart n)
+    (chartTargetBall_subset_chart_target (S.chart n))
+    (S.left_endpoint_mem_chart_ball n)
+    (S.right_endpoint_mem_chart_ball n)
+    (flatSegment_mem_segment hs)
+
+/--
+The chart-local flat replacement path on the `n`th subdivision interval.
+
+This is the local piece that will be concatenated in the next layer. It is already continuous,
+endpoint-correct, and its coordinate representative is the previously proved flat affine segment.
+-/
+noncomputable def chartFlatPath (n : ℕ) :
+    Path (γ (S.t n)) (γ (S.t (n + 1))) where
+  toFun s := (chartAt ℂ (S.chart n)).symm
+    (flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+      ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) (s : ℝ))
+  continuous_toFun := by
+    have hflat : Continuous fun s : unitInterval =>
+        flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+          ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) (s : ℝ) :=
+      (continuous_flatSegment _ _).comp continuous_subtype_val
+    have htarget : ∀ s : unitInterval,
+        flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
+          ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) (s : ℝ) ∈
+            (chartAt ℂ (S.chart n)).target := fun s =>
+      S.flatSegment_mem_chart_target n s.2
+    exact (chartAt ℂ (S.chart n)).continuousOn_symm.comp_continuous hflat htarget
+  source' := by
+    simpa using (chartAt ℂ (S.chart n)).left_inv (S.left_endpoint_mem_chart_source n)
+  target' := by
+    simpa using (chartAt ℂ (S.chart n)).left_inv (S.right_endpoint_mem_chart_source n)
+
+-- TODO(layer 3 cont.): concatenate the finitely many `chartFlatPath` pieces into a single
+-- `bridgePathImpl P₀ P : ℝ → X`, then prove global continuity, endpoints, and chart-local
+-- differentiability at the joins using the endpoint-flat derivative lemmas above.
+
+end PathChartBallSubdivision
+
+end ChartLocalFlatReplacement
+
 end Jacobians.Bridge
