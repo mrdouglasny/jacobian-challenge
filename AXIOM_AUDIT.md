@@ -10,10 +10,10 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 86** — **84** in our modules + **2** vendored Kirov
+**Active project axioms: 82** — **80** in our modules + **2** vendored Kirov
 `:= sorry` declarations restated as named axioms. (Verified against the
 kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 84 once the 9 doc-comment example lines tagged
+`^axiom ` also reports 80 once the 9 doc-comment example lines tagged
 `-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
@@ -22,7 +22,9 @@ universal-property stub (2026-06-02, unused — see the Universal-property secti
 identity/composition laws were transported through Kirov's pullback
 (2026-06-03); → 86 with Phase 1 — the Divisor cluster
 (`Divisor`/`instAddCommGroup`/`deg` → `FreeAbelianGroup`) and `AX_BranchLocus` → theorem
-(2026-06-04).
+(2026-06-04); → 82 with the Phase 2 accept-leaf cluster — 4 unified-`Hyperelliptic`
+instances (`instCompactSpace`/`instConnectedSpace`/`instT2Space`/`instNonempty`)
+discharged by parity dispatch through the `≃ₜ` equiv axioms (2026-06-04).
 
 ---
 
@@ -34,7 +36,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (72 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (68 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -46,7 +48,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 14 | classical theorems, citable | high |
 | 2a — data-existence | 22 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 39 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 35 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
@@ -124,7 +126,7 @@ discharge is substantial chart work. The unified `Hyperelliptic` and
 
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
-| `Hyperelliptic` type + 7 instances + `oddEquiv`/`evenEquiv`/`genus` | `ProjectiveCurve/Hyperelliptic.lean:59–104` | 11 |
+| `Hyperelliptic` type + 3 instances (`instTopologicalSpace`/`instChartedSpace`/`instIsManifold`) + `oddEquiv`/`evenEquiv`/`genus` | `ProjectiveCurve/Hyperelliptic.lean:59–…` | 7 |
 | `PlaneCurve` type + 7 instances + 3 affine props | `ProjectiveCurve/PlaneCurve.lean:103–185` | 11 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, mem_source) | `…/OddAtlas/InfinityChart.lean:48–102` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
@@ -188,6 +190,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `pullbackOneForm`; `AX_pullbackOneForm_id` / `_comp` *(2026-06-03)* | transported across `bridgeFormEquiv` from Kirov's real `pullbackForm`, `pullbackForm_id`, and `pullbackForm_comp` (`#print axioms` = standard 3) | `Bridge/KirovHolomorphicEquiv.lean` + `Axioms/AbelJacobiMap.lean` |
 | `Divisor`; `Divisor.instAddCommGroup`; `Divisor.deg` *(Phase 1, 2026-06-04)* | `abbrev Divisor X := FreeAbelianGroup X`; `AddCommGroup` via `inferInstanceAs`; `deg := FreeAbelianGroup.lift (fun _ => 1)`. Unblocks the 11 downstream sheaf-cohomology plans | `RiemannSurface/LineBundle.lean` |
 | `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
+| `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -214,7 +217,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 84; add the 2 Vendor/Kirov axioms for the total 86.
+#   prints 80; add the 2 Vendor/Kirov axioms for the total 82.
 lake env lean <<'LEAN'
 import Jacobians
 open Lean
