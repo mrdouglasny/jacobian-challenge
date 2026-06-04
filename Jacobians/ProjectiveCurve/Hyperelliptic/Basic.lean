@@ -36,9 +36,31 @@ namespace HyperellipticData
 /-- The genus of a hyperelliptic curve: `g = ⌊(d - 1) / 2⌋`. -/
 def genus (H : HyperellipticData) : ℕ := (H.f.natDegree - 1) / 2
 
+/-- **Faithfulness witness** for `genus` (odd degree): for `deg f = 2g + 1`
+the genus is exactly `g`. Guards the `(d - 1) / 2` formula against an
+off-by-one. See `DEFINITIONS_AUDIT.md`. -/
+theorem genus_eq_of_natDegree_eq_two_mul_add_one
+    (H : HyperellipticData) (g : ℕ) (h : H.f.natDegree = 2 * g + 1) :
+    H.genus = g := by
+  unfold genus; rw [h]; omega
+
+/-- **Faithfulness witness** for `genus` (even degree): for `deg f = 2g + 2`
+the genus is exactly `g`. Together with the odd-degree witness this pins the
+combinatorial genus formula on both parities. -/
+theorem genus_eq_of_natDegree_eq_two_mul_add_two
+    (H : HyperellipticData) (g : ℕ) (h : H.f.natDegree = 2 * g + 2) :
+    H.genus = g := by
+  unfold genus; rw [h]; omega
+
 /-- The curve has a branch point at infinity iff `deg f` is odd. -/
 def hasBranchAtInfinity (H : HyperellipticData) : Bool :=
   Odd H.f.natDegree
+
+/-- **Faithfulness witness** for `hasBranchAtInfinity`: it is `true` exactly
+when `deg f` is odd (pins the otherwise-unused predicate to its docstring). -/
+theorem hasBranchAtInfinity_eq_true_iff (H : HyperellipticData) :
+    H.hasBranchAtInfinity = true ↔ Odd H.f.natDegree := by
+  simp [hasBranchAtInfinity]
 
 end HyperellipticData
 
