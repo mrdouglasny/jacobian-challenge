@@ -1,5 +1,9 @@
 # `bridgePath_continuous` — discharge recipe
 
+
+> ✅ **DISCHARGED 2026-06-04** (branch `phase2-bridgepath`). Converted from `axiom` to a real `def`/`theorem` backed by `Jacobians/Bridge/BridgePath.lean` (smooth path-connectedness of a connected complex 1-manifold). See [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) → Recently discharged. The recipe below is retained as historical record.
+
+
 **Location:** `Jacobians/Bridge/KirovLineIntegral.lean:167`
 **Route:** provable-from-other-axioms &nbsp;&nbsp; **Effort:** 2 &nbsp;&nbsp; **Est:** ~1 hour, ~5 LOC, in `Jacobians/Bridge/BridgePath.lean` (the new file created when `bridgePath` is discharged)
 **Blocked by:** `bridgePath`
