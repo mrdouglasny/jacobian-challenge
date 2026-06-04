@@ -690,4 +690,14 @@ end PathChartBallSubdivision
 
 end BridgePathImpl
 
+theorem differentiableAt_of_hasDerivWithinAt_Iic_Ici
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {f : ℝ → F} {f' : F} {x : ℝ}
+    (hl : HasDerivWithinAt f f' (Set.Iic x) x)
+    (hr : HasDerivWithinAt f f' (Set.Ici x) x) :
+    DifferentiableAt ℝ f x := by
+  have hu := hl.union hr
+  rw [Set.Iic_union_Ici] at hu
+  exact (hasDerivWithinAt_univ.mp hu).differentiableAt
+
 end Jacobians.Bridge
