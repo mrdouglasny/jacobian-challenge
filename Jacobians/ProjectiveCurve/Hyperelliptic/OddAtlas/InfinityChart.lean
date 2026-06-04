@@ -122,6 +122,21 @@ noncomputable def infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDeg
         rw [odd_natDegree_add_one_eq_two_mul_genus_add_one H h]
       _ = H.f.eval x := hEval
 
+/-- Forward infinity coordinate: `∞ ↦ 0` and `(x, y) ↦ y / x^(g+1)` on the
+affine locus. -/
+noncomputable def infinityForward (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    HyperellipticOdd H h → ℂ :=
+  OnePoint.rec 0 fun p : HyperellipticAffine H => p.val.2 / p.val.1 ^ (H.genus + 1)
+
+/-- Backward infinity coordinate as a total map: `0 ↦ ∞`, and nonzero values use
+the algebraic inverse map into the affine locus. -/
+noncomputable def infinityBackward (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    ℂ → HyperellipticOdd H h := fun t =>
+  if t = 0 then
+    ∞
+  else
+    ((infinityInverseMap H h t : HyperellipticAffine H) : OnePoint (HyperellipticAffine H))
+
 /-- The chart at infinity: `PartialHomeomorph (HyperellipticOdd H h) ℂ`
 sending a neighborhood of `OnePoint.infty` to a neighborhood of
 `0 ∈ ℂ`, with `OnePoint.infty ↦ 0`.
