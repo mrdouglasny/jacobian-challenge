@@ -150,33 +150,54 @@ was topologically wrong for any `d ≥ 2`; Codex review 2026-04-23
 correctly flagged it. This version is the honest axiom-stub.
 -/
 
-/-- **Axiom-stub.** The smooth projective plane curve `{F = 0} ⊂ ℙ²`
-as a type.
+/-- The smooth projective plane curve `{F = 0} ⊂ ℙ²` as the projective
+zero-locus of `F`.
 
-Classical construction: glue three affine charts `z ≠ 0`, `y ≠ 0`,
-`x ≠ 0` along their pairwise overlaps. The resulting space is a
-compact, connected, Hausdorff complex 1-manifold of genus
-`(d - 1)(d - 2) / 2` (Plücker). Axiomatized with properly formulated
-typeclass instances until the three-chart pushout is constructed. -/
-axiom PlaneCurve (H : PlaneCurveData) : Type
+The vanishing predicate is phrased by existence of a nonzero homogeneous
+representative, so it is a predicate on projective points rather than on
+Lean's chosen `Projectivization.rep`. For the homogeneous polynomial
+`H.F`, this is the classical projective zero-locus. -/
+def PlaneCurve (H : PlaneCurveData) : Type :=
+  { p : Projectivization ℂ (Fin 3 → ℂ) //
+    ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
+      Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
 
-axiom PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
-    TopologicalSpace (PlaneCurve H)
-attribute [instance] PlaneCurve.instTopologicalSpace
+instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
+    TopologicalSpace (PlaneCurve H) := by
+  letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace
+      (Quotient (projectivizationSetoid ℂ (Fin 3 → ℂ))))
+  change TopologicalSpace
+    { p : Projectivization ℂ (Fin 3 → ℂ) //
+      ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
+        Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
+  infer_instance
 
+-- TODO: prove Hausdorffness for the quotient projective topology.
 axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
 attribute [instance] PlaneCurve.instT2Space
 
+-- TODO: prove compactness via the quotient of the unit sphere, or an explicit
+-- finite closed-polydisc projective cover.
 axiom PlaneCurve.instCompactSpace (H : PlaneCurveData) :
     CompactSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instCompactSpace
 
+-- TODO: prove connectedness from irreducibility/overlapping affine charts.
 axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
-axiom PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H)
-attribute [instance] PlaneCurve.instNonempty
+instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) := by
+  rcases (PlaneCurveAffine.AX_PlaneCurveAffine_nonempty H) with ⟨p⟩
+  let v : Fin 3 → ℂ := ![p.1.1, p.1.2, (1 : ℂ)]
+  have hv : v ≠ 0 := by
+    intro hv0
+    have hcoord : (1 : ℂ) = 0 := by
+      simpa [v] using congrFun hv0 (2 : Fin 3)
+    norm_num at hcoord
+  refine ⟨⟨Projectivization.mk ℂ v hv, ?_⟩⟩
+  exact ⟨v, hv, rfl, by simpa [v] using p.2⟩
 
 axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
     ChartedSpace ℂ (PlaneCurve H)
