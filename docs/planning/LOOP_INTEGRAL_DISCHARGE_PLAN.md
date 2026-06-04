@@ -136,3 +136,18 @@ deriv-integrand `IntervalIntegrable` via continuity). Then:
 
 Status: L0 ✅, L1-a/b/c.1/c.2/c.3 ✅, L1-c.4a (good partition) ✅, L2 ✅;
 L1-c.4 (partition independence) in flight; then Route C wiring.
+
+### Route C wiring — integrability subtlety (2026-06-05)
+
+`AnalyticLoop` gives `.arc : AnalyticArc X`; `Module.Basis.constr` + `.toAddMonoidHom`
+make the wiring mechanical. The one real gap: bundling `form ↦ ∮_{loops i} form` as a
+real `→ₗ[ℂ]` needs the period integrand `IntervalIntegrable`, but `AnalyticArc` only
+guarantees `continuous'` + analyticity on OPEN gaps — the chart-derivative at
+`γ.partition` endpoints is uncontrolled, and good-partition cells END at those points
+(a continuous open-analytic arc can have non-integrable boundary derivative). So
+"integrable via continuity" is insufficient. Resolution (no homotopy invariance):
+add an integrability/regularity field to `AX_AnalyticCycleBasis` (its loops are
+classically C¹/rectifiable — an honest strengthening of an existing axiom), OR
+strengthen `AnalyticArc.is_analytic` to C¹-up-to-closure. Decide at wiring time;
+the cycle-basis option is cleaner. (Route C confirmed by user 2026-06-05; full
+homotopy invariance deferred.)
