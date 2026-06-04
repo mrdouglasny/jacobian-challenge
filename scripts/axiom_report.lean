@@ -55,6 +55,9 @@ open Jacobians Jacobian
 #print axioms Jacobians.ProjectiveCurve.Hyperelliptic
 #print axioms Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace
 #print axioms Jacobians.ProjectiveCurve.Hyperelliptic.instChartedSpace
+#print axioms Jacobians.ProjectiveCurve.Hyperelliptic.instIsManifold
+#print axioms Jacobians.ProjectiveCurve.AX_Hyperelliptic_oddEquiv
+#print axioms Jacobians.ProjectiveCurve.AX_Hyperelliptic_evenEquiv
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instNonempty
