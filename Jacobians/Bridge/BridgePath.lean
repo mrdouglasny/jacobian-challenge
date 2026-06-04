@@ -472,12 +472,70 @@ noncomputable def chartFlatPath (n : ℕ) :
   target' := by
     simpa using (chartAt ℂ (S.chart n)).left_inv (S.right_endpoint_mem_chart_source n)
 
--- TODO(layer 3 cont.): concatenate the finitely many `chartFlatPath` pieces into a single
--- `bridgePathImpl P₀ P : ℝ → X`, then prove global continuity, endpoints, and chart-local
--- differentiability at the joins using the endpoint-flat derivative lemmas above.
+/-- Concatenate the first `k + 1` chart-flat subdivision pieces. -/
+noncomputable def concatChartFlatPathAux (k : ℕ) :
+    Path (γ (S.t 0)) (γ (S.t (k + 1))) := by
+  induction k with
+  | zero =>
+      exact S.chartFlatPath 0
+  | succ k ih =>
+      exact ih.trans (S.chartFlatPath (k + 1))
+
+/-- The full chart-flat replacement path for a subdivision. -/
+noncomputable def concatChartFlatPath : Path P₀ P :=
+  (S.concatChartFlatPathAux S.lastIndex).cast
+    (by
+      simp [S.t_zero])
+    (by
+      have hlast : S.t (S.lastIndex + 1) = 1 :=
+        S.eq_one_of_lastIndex_le (Nat.le_succ S.lastIndex)
+      simp [hlast])
 
 end PathChartBallSubdivision
 
 end ChartLocalFlatReplacement
+
+/-! ## Global bridge-path implementation -/
+
+section BridgePathImpl
+
+open scoped Manifold
+
+variable {X : Type*} [TopologicalSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+
+/-- The concrete bridge path from `P₀` to `P`, extended constantly outside `[0, 1]`. -/
+noncomputable def bridgePathImpl (P₀ P : X) : ℝ → X :=
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  (S.concatChartFlatPath).extend
+
+@[simp] theorem bridgePathImpl_at_zero (P₀ P : X) :
+    bridgePathImpl (X := X) P₀ P 0 = P₀ := by
+  simp [bridgePathImpl]
+
+@[simp] theorem bridgePathImpl_at_one (P₀ P : X) :
+    bridgePathImpl (X := X) P₀ P 1 = P := by
+  simp [bridgePathImpl]
+
+/-- The concrete bridge path is continuous as a function on `ℝ`. -/
+theorem bridgePathImpl_continuous (P₀ P : X) :
+    Continuous (bridgePathImpl (X := X) P₀ P) := by
+  dsimp [bridgePathImpl]
+  exact Path.continuous_extend _
+
+-- TODO(layer 3 differentiability): prove the Kirov-side chart-local regularity statement
+-- for `bridgePathImpl`.  The remaining target shape is:
+--
+-- theorem bridgePathImpl_chart_differentiableAt
+--     {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
+--     [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (t : ℝ) :
+--     DifferentiableAt ℝ
+--       ((chartAt (H := ℂ) (bridgePathImpl (X := X) P₀ P t)).toFun ∘
+--         (bridgePathImpl (X := X) P₀ P)) t
+--
+-- The proof should combine the per-piece flat-coordinate derivative with the smooth chart
+-- transition from each subdivision chart to `chartAt` at the current bridge-path point.
+
+end BridgePathImpl
 
 end Jacobians.Bridge
