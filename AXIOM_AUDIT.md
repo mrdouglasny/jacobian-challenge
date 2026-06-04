@@ -35,9 +35,10 @@ flat-endpoint reparametrisation + chart-ball subdivision + smooth concatenation,
 discharges** (2026-06-04, → 68 after the corrective review below): the unified
 `Hyperelliptic` type became a real parity-dispatch `def` cascading to
 `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv`
-(6 — but **not** standard-3: the carrier is built through a bundled model so it
-transitively depends on the *sound, unproven* odd-`infinityChart` + even-atlas
-axioms; no NEW axioms introduced); and `PlaneCurve` became a faithful
+(6 — the **carrier is standard-3** via a `Decidable.casesOn`-motive parity
+dispatch; only `instChartedSpace`/`instIsManifold` transport the sound,
+unproven odd-`infinityChart` + even-atlas axioms, where that dependency belongs;
+no NEW axioms introduced); and `PlaneCurve` became a faithful
 `Projectivization`-subtype `def` cascading to `instTopologicalSpace` (2). The
 sheaf-cohomology faithfulness
 suite [`SheafCohomologySpec.lean`](Jacobians/RiemannSurface/SheafCohomologySpec.lean)
@@ -49,8 +50,10 @@ picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
 `PlaneCurve.instNonempty` was reverted (it proved nonemptiness via the
 *false* `AX_PlaneCurveAffine_nonempty`) — both back to honest axioms (+2). The
 `PlaneCurveAffine` axiom layer was made sound by strengthening `PlaneCurveData`
-(`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` "standard-3" claim was
-corrected: its carrier transitively depends on the (sound) atlas axioms.
+(`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` carrier was **unbundled**
+(pure `Decidable.casesOn` parity dispatch) so `#print axioms Hyperelliptic` is
+now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
+instances.
 
 ---
 
@@ -218,7 +221,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `AX_BranchLocus` *(Phase 1, 2026-06-04)* | `theorem` wiring Wallace `weightedFiberConservation_of_contMDiff` → local-to-global constancy (`LocallyConstant`) → `tsum` fiber-degree + finite branch locus via finite subcover (`#print axioms` = standard 3; vendored unmodified) | `Axioms/BranchLocus.lean` |
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 | **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
-| **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` by parity dispatch (odd `HyperellipticOdd`, even `HyperellipticEvenProj`) through a bundled `HyperellipticModel` (carrier + the 3 instances, kept defeq-synchronised); the equivs are `Homeomorph`s from the parity type-equality; the 4 prop instances transport through them. **Not standard-3** — because the model bundles the chart/manifold fields, `#print axioms Hyperelliptic` transitively lists the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms. This is a legitimate discharge (6 named axioms → `def`/instances, **no NEW axioms**; the dependencies are on the pre-existing atlas axioms). A fully standard-3 carrier needs unbundling, which fights Lean's dependent-`dite` defeq — tracked follow-up. | `ProjectiveCurve/Hyperelliptic.lean` |
+| **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` as a pure parity dispatch `if h : Odd … then HyperellipticOdd H h else HyperellipticEvenProj H`; the instances are defined via `Decidable.casesOn` with an explicit motive (`carrierOf`/`topologicalSpaceOf`) so they reduce in lockstep with the carrier's `dite` (solving the dependent-`dite` defeq that defeats a naive `split`); the equivs are `Homeomorph`s and the 4 prop instances transport through them. **Kernel-verified:** `#print axioms Hyperelliptic` = the 3 standard (carrier is atlas-free), `instTopologicalSpace` standard-3, and `instChartedSpace`/`instIsManifold` correctly transport the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms — that is where the atlas dependency belongs. 6 named axioms → `def`/instances, **no NEW axioms**. | `ProjectiveCurve/Hyperelliptic.lean` |
 | **PlaneCurve Tier-1** (2): `PlaneCurve`, `instTopologicalSpace` *(Phase 3, 2026-06-04)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype. `#print axioms PlaneCurve` = standard 3. `instNonempty` (it had rested on the *false* `AX_PlaneCurveAffine_nonempty`), `instT2Space`/`instCompactSpace`/`instConnectedSpace`, the atlas, and the affine props remain honest axioms. *(`infinityInverseMap`'s Phase-3 discharge was reverted in review — arbitrary-root `def`.)* | `ProjectiveCurve/PlaneCurve.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
