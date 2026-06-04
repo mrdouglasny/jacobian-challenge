@@ -6,6 +6,7 @@ import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.LocallyConvex.WithSeminorms
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Geometry.Manifold.ChartedSpace
+import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Topology.UnitInterval
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
@@ -24,7 +25,7 @@ calculus input for smooth concatenation of chart-local straight segments.
 
 namespace Jacobians.Bridge
 
-open scoped Topology
+open scoped Topology ContDiff
 
 /-- The cubic "smoothstep" reparameterization used to flatten segment endpoints. -/
 def flatReparam (s : ℝ) : ℝ :=
@@ -547,6 +548,37 @@ theorem bridgePathImpl_continuous (P₀ P : X) :
     Continuous (bridgePathImpl (X := X) P₀ P) := by
   dsimp [bridgePathImpl]
   exact Path.continuous_extend _
+
+/--
+Chart transitions between complex manifold charts are real-differentiable at points of their
+overlap.  This is the outer transition needed when the bridge path is first written in a fixed
+subdivision chart and then re-centered at the moving chart `chartAt ℂ (bridgePathImpl P₀ P t)`.
+-/
+theorem chartAt_comp_chartAt_symm_differentiableAt
+    {X : Type*} [TopologicalSpace X] [T2Space X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x y : X) {z : ℂ}
+    (hz : z ∈ ((chartAt ℂ y).symm ≫ₕ chartAt ℂ x).source) :
+    DifferentiableAt ℝ ((chartAt ℂ x).toFun ∘ (chartAt ℂ y).symm) z := by
+  have hmem : z ∈ ((extChartAt 𝓘(ℂ) y).symm ≫ extChartAt 𝓘(ℂ) x).source := by
+    simpa [ext_coord_change_source, modelWithCornersSelf_coe] using hz
+  have hcont :
+      ContDiffWithinAt ℂ ω
+        (extChartAt 𝓘(ℂ) x ∘ (extChartAt 𝓘(ℂ) y).symm)
+        (Set.range ((𝓘(ℂ) : ModelWithCorners ℂ ℂ ℂ) : ℂ → ℂ)) z :=
+    contDiffWithinAt_ext_coord_change (I := 𝓘(ℂ)) x y hmem
+  have hcontAt :
+      ContDiffAt ℂ ω
+        (extChartAt 𝓘(ℂ) x ∘ (extChartAt 𝓘(ℂ) y).symm) z := by
+    rw [← contDiffWithinAt_univ]
+    simpa [modelWithCornersSelf_coe] using hcont
+  have hdC : DifferentiableAt ℂ
+      (extChartAt 𝓘(ℂ) x ∘ (extChartAt 𝓘(ℂ) y).symm) z :=
+    hcontAt.differentiableAt (by simp)
+  have hdR : DifferentiableAt ℝ
+      (extChartAt 𝓘(ℂ) x ∘ (extChartAt 𝓘(ℂ) y).symm) z :=
+    hdC.restrictScalars ℝ
+  simpa [extChartAt_coe, extChartAt_coe_symm, modelWithCornersSelf_coe,
+    modelWithCornersSelf_coe_symm, Function.comp_def] using hdR
 
 -- TODO(layer 3 differentiability): upgrade the proved per-piece interior lemma
 -- `PathChartBallSubdivision.chartFlatPath_chart_differentiableAt_of_mem_Ioo` to the
