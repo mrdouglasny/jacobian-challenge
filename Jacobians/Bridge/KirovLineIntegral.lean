@@ -605,6 +605,203 @@ theorem extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
       (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
   exact (extChartAt 𝓘(ℂ, ℂ) P).right_inv hz
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
+private lemma chartLine_continuousAt_of_mem_target (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    ContinuousAt (chartLine (X := X) P z) t := by
+  let η : ℝ → ℂ := fun s =>
+    (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hsymm_cont :
+      ContinuousAt ((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) (η t) := by
+    exact (continuousOn_extChartAt_symm P).continuousAt
+      (hOpen.mem_nhds (by simpa [η] using hz))
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hcomp :
+      ContinuousAt (((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) ∘ η) t :=
+    hsymm_cont.comp hη_cont
+  change ContinuousAt
+    (fun s : ℝ =>
+      (extChartAt 𝓘(ℂ, ℂ) P).symm
+        ((1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z)) t
+  simpa [η, Function.comp_def] using hcomp
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+private lemma chartLine_current_chart_differentiableAt (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (chartLine (X := X) P z t)).toFun ∘
+        chartLine (X := X) P z) t := by
+  let w : ℂ := (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z
+  let y : X := chartLine (X := X) P z t
+  have hy_eq : y = (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+    simp [y, w, chartLine]
+  have htrans_diff_C : DifferentiableAt ℂ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w := by
+    have hsymm_mdiff_within : MDifferentiableWithinAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm (Set.range (𝓘(ℂ, ℂ))) w := by
+      simpa [w] using mdifferentiableWithinAt_extChartAt_symm hz
+    have hsymm_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+      have hrange :
+          (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+        ModelWithCorners.range_eq_univ _
+      rw [← mdifferentiableWithinAt_univ, ← hrange]
+      exact hsymm_mdiff_within
+    have hchart_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) y) ((extChartAt 𝓘(ℂ, ℂ) P).symm w) := by
+      apply mdifferentiableAt_extChartAt
+      rw [← extChartAt_source (I := 𝓘(ℂ, ℂ)), ← hy_eq]
+      exact mem_extChartAt_source y
+    exact (hchart_mdiff.comp w hsymm_mdiff).differentiableAt
+  have htrans_diff_R : DifferentiableAt ℝ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w :=
+    htrans_diff_C.restrictScalars ℝ
+  have haff : DifferentiableAt ℝ
+      (fun s : ℝ => (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z) t := by
+    fun_prop
+  have hcomp := htrans_diff_R.comp t haff
+  simpa [chartLine, y, w, extChartAt_coe, modelWithCornersSelf_coe,
+    Function.comp_def] using hcomp
+
+private lemma pathSpeed_extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    fderiv ℝ ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z)
+        t (1 : ℝ) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  let η : ℝ → ℂ := fun s => (1 - s) • a + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hη_target : ∀ᶠ s in 𝓝 t, η s ∈ (extChartAt 𝓘(ℂ, ℂ) P).target :=
+    hη_cont.eventually (hOpen.mem_nhds (by simpa [η, a] using hz))
+  have heq :
+      ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z) =ᶠ[𝓝 t]
+        η := by
+    filter_upwards [hη_target] with s hs
+    exact extChartAt_chartLine (X := X) P z (by simpa [η, a] using hs)
+  have hder : fderiv ℝ η t (1 : ℝ) = z - a := by
+    have hder' : HasDerivAt (fun s : ℝ => a + s • (z - a)) (z - a) t := by
+      simpa only [Pi.add_apply, zero_add, one_smul, id_eq] using
+        (hasDerivAt_const (x := t) (c := a)).add
+          ((hasDerivAt_id t).smul_const (z - a))
+    have hfun : (fun s : ℝ => (1 - s) • a + s • z) =
+        fun s : ℝ => a + s • (z - a) := by
+      funext s
+      rw [sub_smul, one_smul]
+      module
+    exact (hder'.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hfun)).deriv
+  simpa [a] using
+    (congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq.fderiv_eq).trans hder
+
+private lemma mfderiv_extChartAt_pathSpeed_chartLine [Nonempty X]
+    (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P)
+        (chartLine (X := X) P z t))
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  have hspeed := mfderiv_extChartAt_apply_pathSpeed (x := P)
+    (γ := chartLine (X := X) P z) (t := t)
+    (chartLine_continuousAt_of_mem_target (X := X) P z hz)
+    (chartLine_current_chart_differentiableAt (X := X) P z hz)
+    (by
+      have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+      simpa [chartLine] using hsrc)
+  exact hspeed.trans (pathSpeed_extChartAt_chartLine (X := X) P z hz)
+
+private lemma bridgeForm_chartLine_integrand [Nonempty X]
+    (P : X) (form : HolomorphicOneForm X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  let y : X := chartLine (X := X) P z t
+  have hy_self : y ∈ (extChartAt 𝓘(ℂ, ℂ) y).source := mem_extChartAt_source y
+  have hy_fixed : y ∈ (extChartAt 𝓘(ℂ, ℂ) P).source := by
+    have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+    simpa [y, chartLine] using hsrc
+  have hswap : (Jacobians.Bridge.bridgeForm form).toFun y =
+      BridgeForm.rawCLM form P y := by
+    change BridgeForm.rawCLM form y y = BridgeForm.rawCLM form P y
+    exact BridgeForm.rawCLM_swap_chart form hy_self hy_fixed
+  have hcoord :
+      (extChartAt 𝓘(ℂ, ℂ) P) y =
+        (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
+    simpa [y] using extChartAt_chartLine (X := X) P z hz
+  have hspeed :
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P) y)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+        z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+    simpa [y] using mfderiv_extChartAt_pathSpeed_chartLine (X := X) P z hz
+  calc
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)
+        = BridgeForm.rawCLM form P y
+            (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) := by
+          rw [hswap]
+    _ = form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+          unfold BridgeForm.rawCLM
+          rw [hcoord]
+          change form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) •
+              ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+                (extChartAt 𝓘(ℂ, ℂ) P) y)
+                (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)) =
+            form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+              (z - (extChartAt 𝓘(ℂ, ℂ) P) P)
+          rw [hspeed]
+          rfl
+
+private lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
+    (P : X) (form : HolomorphicOneForm X) :
+    (fun z : ℂ =>
+        Jacobians.Vendor.Kirov.lineIntegral (Jacobians.Bridge.bridgeForm form)
+          (chartLine (X := X) P z)) =ᶠ[𝓝 ((extChartAt 𝓘(ℂ, ℂ) P) P)]
+      (fun z : ℂ =>
+        ∫ t in (0 : ℝ)..1,
+          form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+            (z - (extChartAt 𝓘(ℂ, ℂ) P) P)) := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  have ha_target : a ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    simp [a]
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  rcases Metric.isOpen_iff.mp hOpen a ha_target with ⟨r, hr_pos, hr_sub⟩
+  filter_upwards [Metric.ball_mem_nhds a hr_pos] with z hz_ball
+  unfold Jacobians.Vendor.Kirov.lineIntegral
+  refine intervalIntegral.integral_congr (fun t ht => ?_)
+  have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := by
+    simpa [Set.uIcc_of_le zero_le_one] using ht
+  have hline :
+      (1 - t) • a + t • z ∈ segment ℝ a z := by
+    rw [← AffineMap.lineMap_apply_module]
+    exact lineMap_mem_segment ℝ a z htIcc
+  have htarget :
+      (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+        (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    have hball : (1 - t) • a + t • z ∈ Metric.ball a r :=
+      segment_subset_ball (Metric.mem_ball_self hr_pos) hz_ball hline
+    exact hr_sub (by simpa [a] using hball)
+  exact bridgeForm_chartLine_integrand (X := X) P form z htarget
+
 /-- **FTC for `chartLine`.** The line integral of `bridgeForm form` along
 the chart-line from `P` to `(extChartAt P).symm z` has derivative w.r.t.
 `z` equal to `form.coeff P ((extChartAt P) P)` at `z = (extChartAt P) P`.
@@ -618,6 +815,16 @@ theorem chartLine_FTC [Nonempty X] (P : X) (form : HolomorphicOneForm X) :
           (chartLine (X := X) P z))
       (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
       ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  have hline := lineIntegral_chartLine_eq_eventually (X := X) P form
+  suffices hparam :
+      HasDerivAt
+        (fun z : ℂ =>
+          ∫ t in (0 : ℝ)..1,
+            form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+              (z - (extChartAt 𝓘(ℂ, ℂ) P) P))
+        (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
+        ((extChartAt 𝓘(ℂ, ℂ) P) P) by
+    exact hparam.congr_of_eventuallyEq hline
   sorry
 
 /-! ## The bridge functional
