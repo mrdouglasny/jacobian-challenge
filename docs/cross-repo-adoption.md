@@ -22,15 +22,20 @@ why.
 
 | Module | Provenance file | LOC | Status in our build |
 |---|---|---|---|
-| `Genus.lean` | upstream `Jacobians/Genus.lean` | 95 | Compiled under namespace `Jacobians.Vendor.Kirov`. One `:= sorry` (`genus_eq_zero_iff_homeo`, Uniformization) converted to a named `axiom` for handoff. |
+| `Genus.lean` | upstream `Jacobians/Genus.lean` | 95 | Compiled under namespace `Jacobians.Vendor.Kirov`. **Axiom-free.** The upstream `:= sorry` (`genus_eq_zero_iff_homeo`, Uniformization) was named as an `axiom` on import, then **deleted 2026-06-04** as unused. |
 | `Montel.lean` + `Montel/{Cover,LocalRep,ChartNorm,SupNorm,Compactness,ChartTransition,Complete}.lean` | upstream `Jacobians/Montel*.lean` | ~3,400 | Compiled under namespace `Jacobians.Vendor.Kirov.Montel`. Real proof of compactness of holomorphic 1-forms (Arzelà–Ascoli + normal families, Ahlfors–Sario style) — the `closedBall_isCompact` step that was Kirov's "single structural sorry" is **closed** in his `7ce9e2e` commit. |
-| `HolomorphicForms.lean` | upstream `Jacobians/HolomorphicForms.lean` | 380 | Compiled under namespace `Jacobians.Vendor.Kirov`. Yields `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` from Montel, plus `pullbackForm`, `ambientPhi`, `ambientPsi`. One `:= sorry` (`ambientPhi_ambientPsi_eq`, degree identity) converted to named `axiom`. |
+| `HolomorphicForms.lean` | upstream `Jacobians/HolomorphicForms.lean` | 380 | Compiled under namespace `Jacobians.Vendor.Kirov`. **Axiom-free.** Yields `instance : FiniteDimensional ℂ (HolomorphicOneForms X)` from Montel, plus `pullbackForm`, `ambientPhi`, `ambientPsi`. The upstream `:= sorry` (`ambientPhi_ambientPsi_eq`, degree identity) was named as an `axiom` on import, then **deleted 2026-06-04** as unused. |
 | `LineIntegral.lean` | upstream `Jacobians/LineIntegral.lean` | 602 | Compiled under namespace `Jacobians.Vendor.Kirov`. Sorry-free upstream and after the port. Provides `pathSpeed`, `lineIntegral` with linearity (add/smul/zero/neg/const), reverse, concat, and the key chain-rule identity `pathSpeed_comp_eq_mfderiv`. Used by `Jacobians/Bridge/KirovLineIntegral.lean` to build `kirovBackedFunctional`. |
 | `ChartedSpaceOfLocalHomeomorph.lean` | upstream `Jacobians/ChartedSpaceOfLocalHomeomorph.lean` | 55 | Extends Mathlib's `IsLocalHomeomorph` namespace with a `ChartedSpace` constructor; helper for `ZLatticeQuotient`. |
 | `ZLatticeQuotient.lean` | upstream `Jacobians/ZLatticeQuotient.lean` | 740 | Compiled under namespace `Jacobians.Vendor.Kirov.ZLatticeQuotient`. Sorry-free. The quotient `V ⧸ Λ` for `Λ : Submodule ℤ V` with `[IsZLattice ℝ Λ]`: covering-map structure, `ChartedSpace` and `LieAddGroup` instance transfer. Candidate to replace the `ULift`-transfer workaround in `Jacobians/Jacobian/Construction.lean`. Not yet wired in. |
 
-**Total adopted**: ~5,600 LOC, 12 modules, 2 axioms (handed off in
-[`vendor/kirov-jacobian-claude/HANDOFF.md`](../vendor/kirov-jacobian-claude/HANDOFF.md)).
+**Total adopted**: ~5,600 LOC, 12 modules, **0 axioms** — the 2 upstream
+`:= sorry`-handoff axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`)
+were **deleted 2026-06-04** as unused (no references beyond their own
+declarations; the challenge uses the main-tree `AX_genus_eq_zero_iff_homeo`), so
+the vendored Kirov subtree is now axiom-free like Wallace. The statements remain
+in the pristine upstream copy under
+[`vendor/kirov-jacobian-claude/`](../vendor/kirov-jacobian-claude/).
 
 **Mathematical content unchanged.** The only modifications relative to
 upstream are:
@@ -42,9 +47,9 @@ upstream are:
    enclose the trailing `genus` / `genus_eq_zero_iff_homeo` decls (in
    upstream they live at root namespace; root collides with our
    `Challenge.lean`).
-4. The two `:= sorry` declarations converted to `axiom` form (same
-   fully-qualified name, same signature, no `:= sorry`) — keeps the
-   build axiom-clean and gives a named handoff target.
+4. The two `:= sorry` declarations were converted to `axiom` form on import,
+   then **deleted entirely 2026-06-04** once confirmed unused — the vendored
+   subtree carries no axioms.
 
 The full upstream tree (including modules we have not pulled into the
 build, design docs, and Kirov's own session log) is preserved verbatim
