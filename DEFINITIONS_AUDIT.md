@@ -58,6 +58,13 @@ is held in place):
 zero genuine orphans remain. The two rows still carrying an `orphan` red-flag are
 `aLoop`/`bLoop`, vetting-class `witness` — forward scaffolding, see below.)*
 
+> **Branch baseline.** These 229 counts are on `definition-audit` (off
+> `phase2-bridgepath`). They do **not** include the four `Hyperelliptic.inst*`
+> instance declarations added by the parallel `phase2-leaves` PR (#3). After that
+> branch lands, **rerun the scanner**: the total becomes **233** (instances 19 → 23).
+> The inventory is regenerable by design — treat the committed TSV as a snapshot,
+> not a frozen count.
+
 **Heuristic limits (stated honestly).** The red-flag scan only catches
 *single-token* trivial bodies; a structurally-degenerate body (`:= ⟨0, 0⟩`,
 `:= { f := 0 }`) would not trip it. The usage count is a name-match, so it can
