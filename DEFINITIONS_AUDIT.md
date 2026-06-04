@@ -1,6 +1,6 @@
 # Definitions audit — jacobian-challenge
 
-*Last updated 2026-06-04 (branch `definition-audit`, off `phase2-bridgepath`).*
+*Last updated 2026-06-04 (`main`, after merging PRs #3 / #4 / #5).*
 
 Companion to [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). Where the axiom audit tracks the
 *trust boundary we declare explicitly*, this document tracks the **silent** trust
@@ -48,22 +48,22 @@ is held in place):
 |---|--:|--:|
 | `used` | referenced by ≥2 sites; degeneracy would break a consumer | 137 |
 | `vendored` | under `Vendor/`; verified upstream + `#print axioms`-checked on import | 59 |
-| `instance` | typeclass instance; vetted by synthesis into the proofs that consume it | 19 |
+| `instance` | typeclass instance; vetted by synthesis into the proofs that consume it | 23 |
 | `witness` | terminal existence/concrete witness (`Witnesses.lean`, `*CycleBasis`, `*Loop`, `*Arc`); self-pinned by its own proof obligations | 13 |
 | `sorry` | body still contains `sorry` | 1 |
 | `orphan` | referenced nowhere; needs manual disposition | 0 |
-| **total** | | **229** |
+| **total** | | **233** |
 
 *(After this audit added witness lemmas: `hasBranchAtInfinity` moved `orphan → used`;
 zero genuine orphans remain. The two rows still carrying an `orphan` red-flag are
 `aLoop`/`bLoop`, vetting-class `witness` — forward scaffolding, see below.)*
 
-> **Branch baseline.** These 229 counts are on `definition-audit` (off
-> `phase2-bridgepath`). They do **not** include the four `Hyperelliptic.inst*`
-> instance declarations added by the parallel `phase2-leaves` PR (#3). After that
-> branch lands, **rerun the scanner**: the total becomes **233** (instances 19 → 23).
-> The inventory is regenerable by design — treat the committed TSV as a snapshot,
-> not a frozen count.
+> **Provenance.** Counts are on `main` after merging PRs #3 (Hyperelliptic leaf
+> instances), #4 (bridgePath cluster), and #5 (this audit). The four
+> `Hyperelliptic.inst*` instance declarations from #3 are included (instances
+> 19 → 23, total 229 → 233). The inventory is regenerable by design — treat the
+> committed TSV as a snapshot, not a frozen count; rerun
+> `python3 scripts/definition_inventory.py` after adding/removing declarations.
 
 **Heuristic limits (stated honestly).** The red-flag scan only catches
 *single-token* trivial bodies; a structurally-degenerate body (`:= ⟨0, 0⟩`,
@@ -74,7 +74,7 @@ The deeper guarantee comes from the **headline theorems** (below).
 
 ## Headline result
 
-- **Zero trivial-body placeholders** across all 229 declarations (`0`/`True`/`⊥`/…).
+- **Zero trivial-body placeholders** across all 233 declarations (`0`/`True`/`⊥`/…).
   Our definition layer is not syntactically degenerate.
 - **Zero genuine orphans** after this audit (the one found, `hasBranchAtInfinity`,
   was pinned with a witness lemma); one known `sorry`, dispositioned below.
