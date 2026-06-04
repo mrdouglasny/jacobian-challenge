@@ -31,12 +31,11 @@ refactor responded to Gemini review by adding the local-antiderivative
 axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 - `pathIntegralBasepointFunctional` — the functional
   `X → X → (HolomorphicOneForm X →ₗ[ℂ] ℂ)`, "integrate from `P₀` to
-  `P`". Now paired with:
-- `AX_pathIntegral_local_antiderivative` — Fundamental Theorem of
-  Calculus: the derivative of the functional w.r.t. upper endpoint
-  (in the chart at `P`) equals `form.coeff P (chart P)`. This binds
-  `pathIntegralBasepointFunctional` to the 1-form cocycle data and
-  prevents trivial-zero satisfaction of downstream smoothness claims.
+  `P`". Opaque; de-opaque to `Bridge.kirovBackedFunctional` (a real `∫`
+  `def`). (A former companion FTC axiom `AX_pathIntegral_local_antiderivative`
+  was DELETED 2026-06-04 — it was false; see the note where it stood. The
+  anti-degeneracy it was meant to provide comes instead from `kirovBackedFunctional`
+  being a genuine integral, provably nonzero on the `Elliptic` period witness.)
 - `pushforwardOneForm (f : X → Y) : HolomorphicOneForm X →ₗ[ℂ]
   HolomorphicOneForm Y` — the trace / pushforward of 1-forms along a
   finite cover. Analogously feeds `pullbackAmbientLinear` as a `def`.
@@ -74,9 +73,13 @@ axiomatize. Each is smaller-grained than the packaged "pushforward on
 Jacobians" or "Abel-Jacobi map" axioms they replace. Per external review
 (Gemini 2026-04-23), the single-functional axiom
 `pathIntegralBasepointFunctional` on its own is too weak — it can be
-satisfied by trivial maps disconnected from the 1-form cocycle — so it
-is paired here with `AX_pathIntegral_local_antiderivative`, which binds
-it to the chart-local 1-form coefficient.
+satisfied by trivial maps disconnected from the 1-form cocycle. The
+former remedy (a companion FTC axiom binding it to the chart coefficient)
+was **wrong**: that axiom (`AX_pathIntegral_local_antiderivative`) was
+false (it forced a global primitive — see its deletion note). The correct
+remedy is to make the functional **concrete** — `Bridge.kirovBackedFunctional`,
+a genuine line integral, provably nonzero on the `Elliptic` period witness —
+rather than to bind an opaque functional with a (false) FTC.
 
 Similarly, pushforward/pullback on Jacobians factor through
 `pullbackOneForm` / `pushforwardOneForm` (pullback and trace of
@@ -91,36 +94,39 @@ holomorphic 1-form `ω`, returns `∫_{P₀}^P ω ∈ ℂ`. Linear in `ω`. For
 two paths from `P₀` to `P`, the values differ by an element of the
 period lattice.
 
-Retires to a `def` once multi-chart path integration +
-`pathIntegralAnalyticArc` land. On its own this axiom is too weak
-(the choice function could be trivial); it is **load-bearing** only in
-combination with `AX_pathIntegral_local_antiderivative` below. -/
+Retires to a `def` via `Bridge.kirovBackedFunctional` (a real `∫` over
+`bridgePath`) — de-opaque, no FTC needed. As an *opaque* axiom it is too weak
+(the choice function could be trivial); concreteness, not a companion FTC, is
+what rules that out. (A former companion `AX_pathIntegral_local_antiderivative`
+was false and is deleted — see its note.) -/
 axiom pathIntegralBasepointFunctional (X : Type*) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) :
     HolomorphicOneForm X →ₗ[ℂ] ℂ
 
-/-- **Axiom.** Local antiderivative property: the derivative of the
-path integral w.r.t. the upper endpoint, viewed in the chart at `P`,
-equals the chart-local coefficient of the 1-form at `P`.
+/- **REMOVED 2026-06-04 — this axiom was FALSE.**
 
-Precisely: the scalar function `z ↦ (∫_{P₀}^{φ⁻¹(z)} ω)` has derivative
-`form.coeff P (φ(P))` at `z = φ(P)`, where `φ = extChartAt 𝓘(ℂ) P`.
+The former `AX_pathIntegral_local_antiderivative` asserted, for a
+*single-valued* `ℂ`-valued functional `H(Q) := pathIntegralBasepointFunctional
+X P₀ Q form`, that `z ↦ H((extChartAt P).symm z)` has derivative
+`form.coeff P (φ P)` at `z = φ P`, **for every `P`**. Quantified over all `P`,
+that makes `H : X → ℂ` complex-differentiable at every point with
+`mfderiv H = ω_form`, i.e. a *global primitive* of the holomorphic 1-form
+`form`. Then every period `∮_γ ω_form = ∮_γ dH = 0` — contradicting the
+existence of holomorphic 1-forms with nonzero periods on any genus `≥ 1`
+curve (e.g. `genus_Elliptic = 1`, `∮_{aLoop} ω₁ ≠ 0`). So the axiom asserted
+a falsehood and was an unsoundness landmine; it was *dangling* (no headline
+depended on it). It is deleted, not relabelled (a prior relabelling attempt
+was reverted — see `KirovLineIntegral.lean`).
 
-This is the Fundamental Theorem of Calculus for path integrals of
-1-forms, localised to one chart. It links
-`pathIntegralBasepointFunctional` to the cocycle-predicate content of
-`HolomorphicOneForm`, preventing the zero-functional (or any other
-trivial choice) from silently satisfying downstream smoothness /
-injectivity claims. -/
-axiom AX_pathIntegral_local_antiderivative (X : Type*) [TopologicalSpace X]
-    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) (form : HolomorphicOneForm X) :
-    HasDerivAt
-      (fun z : ℂ =>
-        pathIntegralBasepointFunctional X P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
-      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
-      ((extChartAt 𝓘(ℂ) P) P)
+The honest content: the Abel–Jacobi map is genuinely multivalued, landing in
+`ℂ^g/Λ` (`ofCurveImpl`, the quotient below). Path-independence enters at the
+**closed-loop / homology** level via the (true, standard) axiom
+`Jacobians.RiemannSurface.loopIntegralToH1` — `∮_γ ω` depends only on
+`[γ] ∈ H₁` — which is what makes the period lattice and `ofCurve` well-defined.
+A real local-antiderivative ("FTC") statement, if ever wanted, must be made at
+the quotient level (`ofCurve` is manifold-differentiable, the period ambiguity
+being locally constant), *not* on a single-valued ℂ lift. -/
 
 /-- The pullback of holomorphic 1-forms along a holomorphic map `f : X → Y`,
 as a ℂ-linear map of `HolomorphicOneForm` modules.

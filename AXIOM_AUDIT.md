@@ -10,15 +10,13 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 66** — all **66** in our own modules. The vendored
+**Active project axioms: 65** — all **65** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
 main-tree `AX_genus_eq_zero_iff_homeo`), matching the axiom-free Wallace vendor.
 (Verified against the
-kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 66 once the 9 doc-comment example lines tagged
-`-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
+kernel, not a text scan — see [Verification](#verification).) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
 → 93 when `localOrder` was discharged to a real `def` via the adopted Wallace
@@ -57,9 +55,16 @@ picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
 (`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` carrier was **unbundled**
 (pure `Decidable.casesOn` parity dispatch) so `#print axioms Hyperelliptic` is
 now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
-instances. Finally → **66** by deleting the 2 unused vendored Kirov handoff
+instances. → **66** by deleting the 2 unused vendored Kirov handoff
 axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`), leaving the
-vendored subtree axiom-free (2026-06-04).
+vendored subtree axiom-free. Finally → **65** by deleting the **false** dangling
+axiom `AX_pathIntegral_local_antiderivative` (the single-valued ℂ "FTC" for the
+period functional): on any genus ≥ 1 curve it forces a global primitive of a
+holomorphic 1-form, hence zero periods — contradicting `genus_Elliptic = 1`. It
+was unused (0 headline dependents), an unsoundness landmine; the honest
+path-independence content lives at the homology level in `loopIntegralToH1`, and
+a genuine FTC can only be stated on the quotient `ofCurve : X → ℂ^g/Λ`
+(2026-06-04).
 
 ---
 
@@ -81,7 +86,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 12 | classical theorems, citable | high |
-| 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 15 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -125,9 +130,8 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `pathIntegralBasepointFunctional` 🅒 | `Axioms/AbelJacobiMap.lean:96` | the path-integral functional; **opaque** (see `ofCurve` card) |
-| `AX_pathIntegral_local_antiderivative` | `Axioms/AbelJacobiMap.lean:114` | chart-local FTC binding the functional to the cocycle |
-| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent |
+| `pathIntegralBasepointFunctional` 🅒 | `Axioms/AbelJacobiMap.lean:96` | the path-integral functional; **opaque** (see `ofCurve` card); de-opaque to `Bridge.kirovBackedFunctional` (a real `∫` def) — no FTC needed |
+| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent — **the** path-independence axiom; honest discharge globalizes `Bridge/ContourDeformation.lean` (chart-local homotopy invariance) via homotopy-rectangle subdivision |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
@@ -253,7 +257,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 66 — the vendored Kirov subtree is now axiom-free, so 66 is the total.
+#   prints 65 — the vendored Kirov subtree is now axiom-free, so 65 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -270,7 +274,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 66
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 65
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
