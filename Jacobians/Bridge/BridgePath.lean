@@ -4,6 +4,7 @@ import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.LocallyConvex.WithSeminorms
+import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.UnitInterval
 import Mathlib.Tactic.Linarith
@@ -206,5 +207,43 @@ theorem exists_path (P₀ P : X) : Nonempty (Path P₀ P) := by
   exact ⟨PathConnectedSpace.somePath P₀ P⟩
 
 end ManifoldPathSource
+
+/-! ## Convex chart-ball straightness -/
+
+section ConvexChartBallStraightness
+
+open scoped Convex
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
+/-- A straight segment whose endpoints lie in a convex set stays in that set. -/
+theorem segment_subset_of_convex {U : Set E} (hU : Convex ℝ U) {z₀ z₁ : E}
+    (hz₀ : z₀ ∈ U) (hz₁ : z₁ ∈ U) :
+    [z₀ -[ℝ] z₁] ⊆ U :=
+  hU.segment_subset hz₀ hz₁
+
+/-- A straight segment whose endpoints lie in a metric ball stays in that ball. -/
+theorem segment_subset_ball {c z₀ z₁ : E} {r : ℝ}
+    (hz₀ : z₀ ∈ Metric.ball c r) (hz₁ : z₁ ∈ Metric.ball c r) :
+    [z₀ -[ℝ] z₁] ⊆ Metric.ball c r :=
+  (convex_ball c r).segment_subset hz₀ hz₁
+
+variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
+
+/-- The chart target contains a positive-radius ball around the image of its center. -/
+theorem exists_ball_subset_chart_target (x : X) :
+    ∃ r > 0, Metric.ball ((chartAt ℂ x) x) r ⊆ (chartAt ℂ x).target :=
+  Metric.isOpen_iff.mp (chartAt ℂ x).open_target ((chartAt ℂ x) x) (mem_chart_target ℂ x)
+
+/-- If a chart-target ball contains both endpoints, the whole segment stays in the chart target. -/
+theorem segment_subset_chart_target_of_mem_ball (x : X) {r : ℝ}
+    (hr : Metric.ball ((chartAt ℂ x) x) r ⊆ (chartAt ℂ x).target)
+    {z₀ z₁ : ℂ}
+    (hz₀ : z₀ ∈ Metric.ball ((chartAt ℂ x) x) r)
+    (hz₁ : z₁ ∈ Metric.ball ((chartAt ℂ x) x) r) :
+    [z₀ -[ℝ] z₁] ⊆ (chartAt ℂ x).target :=
+  (segment_subset_ball hz₀ hz₁).trans hr
+
+end ConvexChartBallStraightness
 
 end Jacobians.Bridge
