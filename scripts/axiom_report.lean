@@ -18,6 +18,8 @@ import Jacobians.Extensions.HyperellipticEven
 import Jacobians.ProjectiveCurve.Elliptic.OneForm
 import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.OneForm
+import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.PlaneCurve
 
 open Jacobians Jacobian
 
@@ -46,3 +48,13 @@ open Jacobians Jacobian
 #print axioms Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero
 #print axioms Jacobians.ProjectiveCurve.genus_Elliptic_eq_one
 #print axioms Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq
+
+-- Phase-3 prerequisite-type discharges: kernel evidence for the AXIOM_AUDIT
+-- "Recently discharged" claims. The carriers are standard-3 (no atlas axioms);
+-- the chart/manifold instances correctly transport the (sound) atlas axioms.
+#print axioms Jacobians.ProjectiveCurve.Hyperelliptic
+#print axioms Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace
+#print axioms Jacobians.ProjectiveCurve.Hyperelliptic.instChartedSpace
+#print axioms Jacobians.ProjectiveCurve.PlaneCurve
+#print axioms Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace
+#print axioms Jacobians.ProjectiveCurve.PlaneCurve.instNonempty
