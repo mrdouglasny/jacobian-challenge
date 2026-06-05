@@ -9,6 +9,7 @@ Content is split across six submodules:
 * `Jacobians.RiemannSurface.IntersectionForm` — Hurewicz + symplectic pairing
 * `Jacobians.RiemannSurface.Periods`       — period pairing + period matrix in `𝔥_g`
 * `Jacobians.RiemannSurface.Genus`         — `genus X := finrank ℂ (HolomorphicOneForm X)`
+* `Jacobians.RiemannSurface.GenusInvariance` — biholomorphism invariance of genus
 
 See `docs/formalization-plan.md` §4 for the design.
 -/
@@ -18,8 +19,10 @@ import Jacobians.RiemannSurface.ChartPartition
 import Jacobians.RiemannSurface.SquareSubdivision
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
+import Jacobians.RiemannSurface.GenusInvariance
 import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
+import Jacobians.RiemannSurface.MeromorphicToP1
 import Jacobians.RiemannSurface.MultiChartIntegral
 import Jacobians.RiemannSurface.IntegrandIndependence
 import Jacobians.RiemannSurface.ArcChartDifferentiable
