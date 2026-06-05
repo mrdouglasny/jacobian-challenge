@@ -482,17 +482,19 @@ private theorem quotient_mk_isCoveringMap {L : Submodule ℤ ℂ} [DiscreteTopol
   exact (AddSubgroup.isAddQuotientCoveringMap_of_comm L.toAddSubgroup
     DiscreteTopology.isDiscrete).isCoveringMap
 
-/-- A continuous real path in a complex torus whose coordinate expression is differentiable in
-the chart centered at each time has a differentiable lift to the universal covering space `ℂ`.
-The lifted derivative is the chart velocity. -/
-theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
+/-- Every continuous real path in a complex torus lifts continuously to the
+universal covering space `ℂ`. At any time where the moving-chart coordinate
+expression is differentiable, the lift is differentiable and its derivative is
+the chart velocity. -/
+theorem exists_lift_of_continuous_path {L : Submodule ℤ ℂ}
     [DiscreteTopology L] [IsZLattice ℝ L]
-    (g : ℝ → ComplexTorus ℂ L) (hg_cont : Continuous g)
-    (hg_diff : ∀ t, DifferentiableAt ℝ ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) :
+    (g : ℝ → ComplexTorus ℂ L) (hg_cont : Continuous g) :
     ∃ ghat : ℝ → ℂ,
+      Continuous ghat ∧
       (∀ u, (QuotientAddGroup.mk' L.toAddSubgroup (ghat u) : ComplexTorus ℂ L) = g u) ∧
-      (∀ t, DifferentiableAt ℝ ghat t) ∧
-      (∀ t, deriv ghat t = deriv ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) := by
+      (∀ t, DifferentiableAt ℝ ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t →
+        DifferentiableAt ℝ ghat t ∧
+          deriv ghat t = deriv ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) := by
   let q : ℂ → ComplexTorus ℂ L := QuotientAddGroup.mk' L.toAddSubgroup
   let f : C(ℝ, ComplexTorus ℂ L) := ⟨g, hg_cont⟩
   let e₀ : ℂ := liftPoint (L := L) (g 0)
@@ -504,8 +506,9 @@ theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
       (QuotientAddGroup.mk' L.toAddSubgroup (F u) : ComplexTorus ℂ L) = g u := by
     intro u
     simpa [q, f] using congr_fun hF.2 u
-  have h_diff : ∀ t, DifferentiableAt ℝ (F : ℝ → ℂ) t := by
-    intro t
+  refine ⟨F, F.continuous, h_lift, ?_⟩
+  intro t hg_diff_t
+  have h_diff_t : DifferentiableAt ℝ (F : ℝ → ℂ) t := by
     let p : ComplexTorus ℂ L := g t
     let c : ℂ := F t - liftPoint (L := L) p
     have hc_mem : liftPoint (L := L) p - F t ∈ (L.toAddSubgroup : Set ℂ) := by
@@ -565,13 +568,31 @@ theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
           abel
         _ = extChartAt 𝓘(ℂ, ℂ) p (g u) + c := by
           rw [hchart]
-    exact hEq.differentiableAt_iff.2 ((hg_diff t).add_const c)
-  refine ⟨F, h_lift, h_diff, ?_⟩
-  intro t
+    exact hEq.differentiableAt_iff.2 (hg_diff_t.add_const c)
+  refine ⟨h_diff_t, ?_⟩
   have hderiv :=
     extChartAt_quotient_mk_path_deriv (L := L) (p := g t) (g := (F : ℝ → ℂ)) t
-      (h_diff t) (by simpa using (h_lift t).symm)
+      h_diff_t (by simpa using (h_lift t).symm)
   simpa [Function.comp, h_lift] using hderiv.symm
+
+/-- A continuous real path in a complex torus whose coordinate expression is differentiable in
+the chart centered at each time has a differentiable lift to the universal covering space `ℂ`.
+The lifted derivative is the chart velocity. -/
+theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (g : ℝ → ComplexTorus ℂ L) (hg_cont : Continuous g)
+    (hg_diff : ∀ t, DifferentiableAt ℝ ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) :
+    ∃ ghat : ℝ → ℂ,
+      (∀ u, (QuotientAddGroup.mk' L.toAddSubgroup (ghat u) : ComplexTorus ℂ L) = g u) ∧
+      (∀ t, DifferentiableAt ℝ ghat t) ∧
+      (∀ t, deriv ghat t = deriv ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) := by
+  rcases exists_lift_of_continuous_path (L := L) g hg_cont with
+    ⟨ghat, _hghat_cont, h_lift, h_point⟩
+  refine ⟨ghat, h_lift, ?_, ?_⟩
+  · intro t
+    exact (h_point t (hg_diff t)).1
+  · intro t
+    exact (h_point t (hg_diff t)).2
 
 private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × V} :
     z ∈ (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ↔

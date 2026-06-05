@@ -99,6 +99,64 @@ theorem bridgePath_canonicalArcIntegral_ellipticDz_eq_lift_sub
     (a := (0 : ℝ)) (b := 1) (f := liftBP)
     (fun x _hx => hlift_diff x) hint_deriv
 
+/-- Along an analytic loop on an elliptic curve, the period of the invariant
+form `dz` belongs to the defining elliptic lattice. -/
+theorem analyticLoop_canonicalArcIntegral_ellipticDz_mem_lattice
+    {x0 : Elliptic ω₁ ω₂ h} (g : AnalyticLoop (Elliptic ω₁ ω₂ h) x0) :
+    canonicalArcIntegral g.arc (ellipticDz ω₁ ω₂ h) ∈ ellipticLattice ω₁ ω₂ h := by
+  let integrand : ℝ → ℂ := canonicalIntegrand g.arc (ellipticDz ω₁ ω₂ h)
+  rcases ComplexTorus.exists_lift_of_continuous_path
+      (L := ellipticLattice ω₁ ω₂ h)
+      (g := g.arc.extend) g.arc.continuous' with
+    ⟨liftLoop, hlift_cont, hlift_mk, hlift_point⟩
+  by_cases hint : IntervalIntegrable integrand MeasureTheory.volume 0 1
+  · have hperiod_eq :
+        canonicalArcIntegral g.arc (ellipticDz ω₁ ω₂ h) = liftLoop 1 - liftLoop 0 := by
+      have hFTC :
+          ∫ t in (0 : ℝ)..1, integrand t = liftLoop 1 - liftLoop 0 := by
+        refine MeasureTheory.integral_eq_of_hasDerivAt_off_countable_of_le
+          liftLoop integrand zero_le_one
+          (s := (g.arc.partition : Set ℝ))
+          g.arc.partition.countable_toSet hlift_cont.continuousOn ?_ hint
+        intro t ht
+        have ht01 : t ∈ Set.Ioo (0 : ℝ) 1 := ht.1
+        have ht_not_partition : t ∉ (g.arc.partition : Set ℝ) := ht.2
+        have hchart :
+            DifferentiableAt ℝ
+              ((extChartAt 𝓘(ℂ, ℂ) (g.arc.extend t)) ∘ g.arc.extend) t := by
+          simpa using (g.arc.is_analytic t ht01 ht_not_partition).differentiableAt
+        have hpoint := hlift_point t hchart
+        have hintegrand : integrand t = deriv liftLoop t := by
+          change canonicalIntegrand g.arc (ellipticDz ω₁ ω₂ h) t = deriv liftLoop t
+          rw [canonicalIntegrand]
+          rw [ellipticDz_coeff_chart_center]
+          rw [one_mul]
+          exact hpoint.2.symm
+        exact hpoint.1.hasDerivAt.congr_deriv hintegrand.symm
+      simpa [canonicalArcIntegral, integrand] using hFTC
+    have hmk_eq :
+        (QuotientAddGroup.mk' (ellipticLattice ω₁ ω₂ h).toAddSubgroup (liftLoop 1) :
+            ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)) =
+          QuotientAddGroup.mk' (ellipticLattice ω₁ ω₂ h).toAddSubgroup (liftLoop 0) := by
+      have hloop_eq :
+          (g.arc.extend 1 : ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)) =
+            (g.arc.extend 0 : ComplexTorus ℂ (ellipticLattice ω₁ ω₂ h)) := by
+        change (g.arc.extend 1 : Elliptic ω₁ ω₂ h) = g.arc.extend 0
+        exact g.end_eq.trans g.start_eq.symm
+      exact (hlift_mk 1).trans (hloop_eq.trans (hlift_mk 0).symm)
+    have hsub_mem :
+        liftLoop 1 - liftLoop 0 ∈ (ellipticLattice ω₁ ω₂ h).toAddSubgroup := by
+      exact (QuotientAddGroup.eq_iff_sub_mem (N := (ellipticLattice ω₁ ω₂ h).toAddSubgroup)).mp
+        (by simpa [Elliptic, QuotientAddGroup.mk'_apply] using hmk_eq)
+    rw [hperiod_eq]
+    simpa using hsub_mem
+  · have hzero : canonicalArcIntegral g.arc (ellipticDz ω₁ ω₂ h) = 0 := by
+      simpa [canonicalArcIntegral, integrand] using
+        (intervalIntegral.integral_undef (a := (0 : ℝ)) (b := 1)
+          (f := integrand) (μ := MeasureTheory.volume) hint)
+    rw [hzero]
+    exact Submodule.zero_mem _
+
 end EllipticOfCurveInj
 
 end Jacobians.ProjectiveCurve
