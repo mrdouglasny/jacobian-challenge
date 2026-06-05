@@ -224,8 +224,19 @@ theorem pathIntegralOverPartition_good_indep (γ : AnalyticArc X)
     (hint : IntervalIntegrable (canonicalIntegrand γ form)
       MeasureTheory.volume 0 1) :
     pathIntegralOverPartition γ P₁.toChartSubordinatePartition form =
-      pathIntegralOverPartition γ P₂.toChartSubordinatePartition form := by
+    pathIntegralOverPartition γ P₂.toChartSubordinatePartition form := by
   rw [pathIntegralOverGoodPartition_eq_canonicalIntegrand γ P₁ form hint,
     pathIntegralOverGoodPartition_eq_canonicalIntegrand γ P₂ form hint]
+
+/-- The fixed-partition integral over any good partition agrees with the
+raw moving-chart integral. -/
+theorem pathIntegralOverGoodPartition_eq_canonicalIntegrand_integral
+    (γ : AnalyticArc X) (P : GoodPartition γ)
+    (form : HolomorphicOneForm X)
+    (hint : IntervalIntegrable (canonicalIntegrand γ form)
+      MeasureTheory.volume 0 1) :
+    pathIntegralOverPartition γ P.toChartSubordinatePartition form =
+      ∫ r in (0 : ℝ)..1, canonicalIntegrand γ form r :=
+  pathIntegralOverGoodPartition_eq_canonicalIntegrand γ P form hint
 
 end Jacobians.RiemannSurface
