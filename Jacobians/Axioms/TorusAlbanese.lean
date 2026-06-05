@@ -318,6 +318,122 @@ axiom AX_period_functoriality {X : Type u} [TopologicalSpace X] [T2Space X]
     (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup ≤
       P.lattice.toAddSubgroup.comap (torusAmbientLinear f hf).toAddMonoidHom
 
+/-- Kirov's descended map is smooth when the source quotient is equipped with
+the project `ComplexTorus` atlas and the target quotient with Kirov's atlas. -/
+theorem complexTorus_pushforward_contMDiff_to_quotient {gX gY : ℕ}
+    (ΛX : Submodule ℤ (Fin gX → ℂ)) [DiscreteTopology ΛX] [IsZLattice ℝ ΛX]
+    (ΛY : Submodule ℤ (Fin gY → ℂ)) [DiscreteTopology ΛY] [IsZLattice ℝ ΛY]
+    (Φ : (Fin gX → ℂ) →L[ℂ] (Fin gY → ℂ))
+    (hΦ : ΛX.toAddSubgroup ≤ ΛY.toAddSubgroup.comap Φ.toAddMonoidHom) :
+    letI : ChartedSpace (Fin gX → ℂ)
+        (Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX) :=
+      Jacobians.AbelianVariety.ComplexTorus.instChartedSpace
+    ContMDiff 𝓘(ℂ, Fin gX → ℂ) 𝓘(ℂ, Fin gY → ℂ) ω
+      (fun q : Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX =>
+        (Vendor.Kirov.ZLatticeQuotient.pushforward ΛX ΛY Φ hΦ q :
+          (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup)) := by
+  letI : ChartedSpace (Fin gX → ℂ)
+      (Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX) :=
+    Jacobians.AbelianVariety.ComplexTorus.instChartedSpace
+  intro qX
+  let IX := 𝓘(ℂ, Fin gX → ℂ)
+  let IY := 𝓘(ℂ, Fin gY → ℂ)
+  set target_q := (Vendor.Kirov.ZLatticeQuotient.pushforward ΛX ΛY Φ hΦ qX :
+    (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) with htgt_def
+  set y_c := Classical.choose
+    (QuotientAddGroup.mk_surjective (s := ΛY.toAddSubgroup) target_q)
+  have hyc : QuotientAddGroup.mk y_c = target_q :=
+    Classical.choose_spec
+      (QuotientAddGroup.mk_surjective (s := ΛY.toAddSubgroup) target_q)
+  set R := IsLocalHomeomorph.chartAtPreimage
+    (Vendor.Kirov.ZLatticeQuotient.isLocalHomeomorph_mk ΛY.toAddSubgroup) y_c
+  have hR : (R : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) =
+      QuotientAddGroup.mk :=
+    (IsLocalHomeomorph.eq_chartAtPreimage
+      (Vendor.Kirov.ZLatticeQuotient.isLocalHomeomorph_mk ΛY.toAddSubgroup) y_c).symm
+  have hyc_mem : y_c ∈ R.source :=
+    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+  rw [contMDiffAt_iff]
+  refine ⟨?_, ?_⟩
+  · exact (continuous_quot_lift _
+      (QuotientAddGroup.continuous_mk.comp Φ.continuous)).continuousAt
+  · have hΦ_diff : ContDiff ℂ ω (Φ : (Fin gX → ℂ) → (Fin gY → ℂ)) := Φ.contDiff
+    have hR_sec := Vendor.Kirov.ZLatticeQuotient.contDiffOn_symm_mk
+      (𝕜 := ℂ) (n := ω) ΛY R hR
+    set x₀ := extChartAt IX qX qX with hx₀_def
+    have hqX_src : qX ∈ (extChartAt IX qX).source :=
+      mem_extChartAt_source qX
+    have hx₀_target : x₀ ∈ (extChartAt IX qX).target := by
+      rw [hx₀_def]
+      exact (extChartAt IX qX).map_source hqX_src
+    have hqX_mk :
+        (QuotientAddGroup.mk' ΛX.toAddSubgroup x₀ :
+          Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX) = qX := by
+      have hsymm :
+          (extChartAt IX qX).symm x₀ =
+            (QuotientAddGroup.mk' ΛX.toAddSubgroup x₀ :
+              Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX) :=
+        Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+          (L := ΛX) qX
+          ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+            (L := ΛX) qX).1 hx₀_target)
+      have hleft : (extChartAt IX qX).symm x₀ = qX := by
+        rw [hx₀_def]
+        exact (extChartAt IX qX).left_inv hqX_src
+      exact hsymm.symm.trans hleft
+    have hmem_img : Φ x₀ ∈
+        (QuotientAddGroup.mk : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) ⁻¹'
+          R.target := by
+      change QuotientAddGroup.mk (Φ x₀) ∈ R.target
+      have hmk : (QuotientAddGroup.mk (Φ x₀) :
+          (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) = target_q := by
+        rw [htgt_def, ← hqX_mk]
+        rfl
+      rw [hmk, ← hyc]
+      have hRy : R y_c = QuotientAddGroup.mk y_c := by rw [← hR]
+      rw [← hRy]
+      exact R.map_source hyc_mem
+    have hopen_R : IsOpen
+        ((QuotientAddGroup.mk : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) ⁻¹'
+          R.target) :=
+      QuotientAddGroup.continuous_mk.isOpen_preimage _ R.open_target
+    have hcomp_on : ContDiffOn ℂ ω
+        (fun x : Fin gX → ℂ => R.symm (QuotientAddGroup.mk (Φ x) :
+          (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup))
+        (Φ ⁻¹'
+          ((QuotientAddGroup.mk : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) ⁻¹'
+            R.target)) := by
+      apply hR_sec.comp hΦ_diff.contDiffOn
+      intro x hx; exact hx
+    have hopen_pre : IsOpen (Φ ⁻¹'
+        ((QuotientAddGroup.mk : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) ⁻¹'
+          R.target)) :=
+      Φ.continuous.isOpen_preimage _ hopen_R
+    have hkey : ContDiffAt ℂ ω
+        (fun x : Fin gX → ℂ => R.symm (QuotientAddGroup.mk (Φ x) :
+          (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup)) x₀ :=
+      hcomp_on.contDiffAt (hopen_pre.mem_nhds hmem_img)
+    simp only [modelWithCornersSelf_coe, Set.range_id]
+    rw [contDiffWithinAt_univ]
+    apply hkey.congr_of_eventuallyEq
+    filter_upwards [(isOpen_extChartAt_target (I := IX) qX).mem_nhds hx₀_target,
+      hopen_pre.mem_nhds hmem_img] with x hx_src _hx_pre
+    have hsymm :
+        (extChartAt IX qX).symm x =
+          (QuotientAddGroup.mk' ΛX.toAddSubgroup x :
+            Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX) :=
+      Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+        (L := ΛX) qX
+        ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+          (L := ΛX) qX).1 hx_src)
+    change R.symm
+        (Vendor.Kirov.ZLatticeQuotient.pushforward ΛX ΛY Φ hΦ
+          ((extChartAt IX qX).symm x)) =
+      R.symm (QuotientAddGroup.mk (Φ x) :
+        (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup)
+    rw [hsymm]
+    rfl
+
 /-- **Conditional fallback axiom.** A complex-linear, lattice-compatible lift
 descends to a holomorphic group homomorphism on quotient tori.
 
@@ -327,9 +443,9 @@ Strategy: prove smoothness locally after choosing branches of the universal
 covering maps; in those charts the descended map is exactly the original
 complex-linear map.
 
-Fallback vetted: Gemini + Codex 2026-06-02; used only when the direct E6 chart
-descent proof is unavailable. -/
-axiom AX_torus_descent_holo {X : Type u} [TopologicalSpace X] [T2Space X]
+The proof below packages that chart descent through Kirov's quotient-torus
+smoothness theorem, then composes with the presentation map `fromQuot`. -/
+theorem AX_torus_descent_holo {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
@@ -345,7 +461,28 @@ axiom AX_torus_descent_holo {X : Type u} [TopologicalSpace X] [T2Space X]
         P.fromQuot
           ((Vendor.Kirov.ZLatticeQuotient.pushforward
               (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X))
-              P.lattice L hL) z.down))
+              P.lattice L hL) z.down)) := by
+  classical
+  letI : DiscreteTopology P.lattice := P.lattice_discrete
+  letI : IsZLattice ℝ P.lattice := P.lattice_isZLattice
+  let ΛX := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  letI : ChartedSpace (Fin (RiemannSurface.genus X) → ℂ) (JacobianAmbient X) :=
+    Jacobians.AbelianVariety.ComplexTorus.instChartedSpace
+  have hpush :
+      ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ)
+        𝓘(ℂ, Fin m → ℂ) ω
+        (fun q : JacobianAmbient X =>
+          (Vendor.Kirov.ZLatticeQuotient.pushforward ΛX P.lattice L hL q :
+            (Fin m → ℂ) ⧸ P.lattice.toAddSubgroup)) :=
+    complexTorus_pushforward_contMDiff_to_quotient ΛX P.lattice L hL
+  have htotal :
+      ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ)
+        𝓘(ℂ, Fin m → ℂ) ω
+        (fun z : Jacobian X =>
+          P.fromQuot
+            ((Vendor.Kirov.ZLatticeQuotient.pushforward ΛX P.lattice L hL) z.down)) :=
+    P.fromQuot_holo.comp (hpush.comp (Jacobians.Jacobian.contMDiff_ulift_down (X := X)))
+  simpa [ΛX] using htotal
 
 /-- **Axiom.** The Abel-Jacobi image of a positive-genus curve generates its
 Jacobian as an abstract additive group.

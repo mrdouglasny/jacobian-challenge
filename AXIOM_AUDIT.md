@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 63** — all **63** in our own modules. The vendored
+**Active project axioms: 62** — all **62** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -117,6 +117,13 @@ axiom. Then → **63** by **de-opaquing** `H0` to the concrete
 `riemannRochSpace D` and replacing `H0.instAddCommGroup` / `H0.instModule` with
 instances inherited from the submodule carrier (2026-06-05). `LineBundle` and
 `LineBundle.ofDivisor` remain honest opaque placeholders; `H1` remains opaque.
+Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
+real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
+is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
+local-homeomorphism API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`), composed
+with `P.fromQuot_holo`; two `ComplexTorus` chart lemmas were de-privatized to
+support it. `#print axioms`-clean (standard-3 + the upstream period-lattice /
+cycle-basis axioms; no `sorryAx`, no self-reference).
 
 ---
 
@@ -167,7 +174,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
-| `AX_torus_descent_holo` | `Axioms/TorusAlbanese.lean:141` | quotient-manifold descent for covering maps |
 | `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is still an axiom **only** for the
@@ -265,12 +271,16 @@ future work.
 | `AX_torus_oneforms_dualCover` | **stated** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
-| `AX_torus_descent_holo` | **conditional fallback used for E6** — `Axioms/TorusAlbanese.lean:141`; lift/descent form only | Birkenhake–Lange Ch. 1; quotient-manifold descent |
+| `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
 
-The direct holomorphicity step (E6 in the plan) was blocked by a charted-space
-mismatch between `JacobianAmbient`'s `ComplexTorus` charts and Kirov's raw quotient
-charts, so the allowed lift/descent fallback `AX_torus_descent_holo` is in use.
-The "every abstract torus hom is holomorphic" form remains *false* (Codex-flagged).
+The direct holomorphicity step (E6 in the plan) was originally blocked by a
+charted-space mismatch between `JacobianAmbient`'s `ComplexTorus` charts and
+Kirov's raw quotient charts. That mismatch is now **resolved**: de-privatizing two
+`ComplexTorus` chart lemmas (`extChartAt_symm_eq_quotient_mk`,
+`mem_extChartAt_target_iff`) lets the descent be proved directly via Kirov's
+quotient local-homeomorphism API, so `AX_torus_descent_holo` is a real theorem —
+no fallback in use. The "every abstract torus hom is holomorphic" form remains
+*false* (Codex-flagged) and was never the form used.
 Step 0 (the `ConnectedSpace (Jacobian X)` instance needed
 for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 `Challenge.lean`).
@@ -279,6 +289,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_torus_descent_holo` *(2026-06-06)* | local-section route over Kirov's `ZLatticeQuotient` local-homeo API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`) composed with `P.fromQuot_holo`; helper `complexTorus_pushforward_contMDiff_to_quotient` | `Axioms/TorusAlbanese.lean` |
 | `AX_FiniteDimOneForms` | injective bridge to Kirov's Montel theorem | `Bridge/KirovHolomorphic.lean` |
 | `genus ℙ¹ = 0` *(via `AX_genus_eq_zero_iff_homeo`)* | direct chart-cocycle + Liouville ⇒ `HolomorphicOneForm ℙ¹` subsingleton | `ProjectiveCurve/Line/OneForm.lean` |
 | `AX_Liouville_compact_complex_manifold` (Liouville L1) | global max-modulus (`Complex.eqOn_…isMaxOn_norm`) + clopen connectedness | `Axioms/HyperellipticLiouville.lean` (`liouville_compact_complex_manifold`) |
