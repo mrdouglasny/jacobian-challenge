@@ -27,6 +27,13 @@ References: Griffiths-Harris, *Principles of Algebraic Geometry*, Ch. 2
 
 Note on the `ℕ`-division `/2`: `(d - 1)(d - 2)` is a product of consecutive
 integers and hence always even, so the truncated `ℕ` division is exact.
+
+Vetting trail. Statements vetted FAITHFUL by Gemini deep-think (2026-06-06):
+the low-degree corollaries are sound consequences of the master formula under
+`ℕ`-subtraction — `d = 1` gives `0 * 0 / 2 = 0` (a line, genus 0), `d = 2`
+gives `1 * 0 / 2 = 0` (a smooth conic ≅ ℙ¹, genus 0), `d = 3` gives
+`2 * 1 / 2 = 1` (elliptic), `d = 4` gives `3 * 2 / 2 = 3`; smoothness alone
+suffices for the low-degree cases (no hidden hypotheses beyond `hd`).
 -/
 
 noncomputable section
