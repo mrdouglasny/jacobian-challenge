@@ -25,6 +25,7 @@ Currently:
 -/
 import Jacobians.Bridge.ContourDeformation
 import Jacobians.Bridge.BridgePathArc
+import Jacobians.Bridge.KirovCanonicalEq
 import Jacobians.Bridge.KirovHolomorphic
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral
