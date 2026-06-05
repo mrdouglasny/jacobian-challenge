@@ -17,6 +17,7 @@ section API lands.
 -/
 
 open scoped Manifold ContDiff Topology
+open intervalIntegral MeasureTheory
 
 namespace Jacobians.Axioms
 
@@ -40,6 +41,9 @@ structure TorusPresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
   lattice_discrete : DiscreteTopology lattice
   lattice_isZLattice : IsZLattice ℝ lattice
   fromQuot : ((Fin m → ℂ) ⧸ lattice.toAddSubgroup) →+ A
+  liftCoord : A → (Fin m → ℂ)
+  fromQuot_liftCoord :
+    ∀ a : A, fromQuot (QuotientAddGroup.mk' lattice.toAddSubgroup (liftCoord a)) = a
   fromQuot_holo :
     letI : DiscreteTopology lattice := lattice_discrete
     letI : IsZLattice ℝ lattice := lattice_isZLattice
@@ -111,6 +115,22 @@ noncomputable def torusInvariantOneFormSection {m : ℕ} {A : Type v}
   have hzero : -a + a = (0 : A) := neg_add_cancel a
   rw [hzero]
   simp [zeroCoord]
+
+/-- Complex velocity of a real path in a torus chart, expressed in the target
+cover coordinates `Fin m → ℂ`. -/
+noncomputable def torusPathSpeed {m : ℕ} {A : Type v} [TopologicalSpace A]
+    [ChartedSpace (Fin m → ℂ) A] (γ : ℝ → A) (t : ℝ) : Fin m → ℂ :=
+  fderiv ℝ ((chartAt (H := Fin m → ℂ) (γ t)).toFun ∘ γ) t 1
+
+/-- The line integral of an invariant torus one-form along a real path in the
+target torus, computed in the target torus charts. -/
+noncomputable def torusLineIntegral {m : ℕ} {A : Type v}
+    [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (ell : TorusHolomorphicOneForm m A) (γ : ℝ → A) : ℂ :=
+  ∫ t in (0 : ℝ)..1,
+    (torusInvariantOneFormSection (A := A) ell).toFun (γ t) (torusPathSpeed γ t)
 
 /-- Pull back a torus cotangent section along a holomorphic map from a curve,
 landing in Kirov's curve one-form representation. -/
@@ -214,19 +234,52 @@ axiom AX_torus_oneforms_dualCover {m : ℕ} {A : Type*} [TopologicalSpace A]
     [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :
     TorusHolomorphicOneForm m A ≃ₗ[ℂ] Module.Dual ℂ (Fin m → ℂ)
 
+/-- Convert a linear integration functional on invariant torus forms into the
+corresponding universal-cover coordinate. -/
+noncomputable def torusAlbaneseCoordinateOfFunctional {m : ℕ} {A : Type v}
+    [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (I : TorusHolomorphicOneForm m A →ₗ[ℂ] ℂ) : Fin m → ℂ :=
+  (Module.evalEquiv ℂ (Fin m → ℂ)).symm
+    (((AX_torus_oneforms_dualCover (A := A)).symm.toLinearMap).dualMap I)
+
+/-- A torus presentation equipped with the textbook self-Albanese identity:
+integrating invariant one-forms from `0` to `a`, modulo periods, recovers `a`.
+
+The second path/function pair records the period ambiguity of the chosen
+zero-to-zero path; subtracting it leaves the same point in the quotient. -/
+structure TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
+    [T2Space A] [CompactSpace A] [ConnectedSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A]
+    [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] extends TorusPresentation m A where
+  liftCoord_eq_albanese :
+    ∀ {I I₀ : TorusHolomorphicOneForm m A →ₗ[ℂ] ℂ}
+      (γ γ₀ : ℝ → A) (a : A),
+      γ 0 = 0 → γ 1 = a → γ₀ 0 = 0 → γ₀ 1 = 0 →
+      (∀ ell, I ell = torusLineIntegral ell γ) →
+      (∀ ell, I₀ ell = torusLineIntegral ell γ₀) →
+      liftCoord a =
+        torusAlbaneseCoordinateOfFunctional (A := A) I -
+          torusAlbaneseCoordinateOfFunctional (A := A) I₀
+
 /-- **Axiom.** A complex torus is canonically recovered from its own
 Abel-Jacobi map.
 
 Reference: Birkenhake-Lange, *Complex Abelian Varieties*, Ch. 1.
 Strategy: integrate invariant one-forms from `0` to a point on the universal
 cover; the period ambiguity is exactly the lattice, so the resulting quotient
-map is a biholomorphic group isomorphism.
+map is a biholomorphic group isomorphism. The presentation payload states this
+as the self-Albanese identity: its coordinate lift is the invariant-form
+integration coordinate, and composing that coordinate class with `fromQuot` is
+the identity on `A`.
 
 Vetted: Gemini + Codex 2026-06-02. -/
 axiom AX_torus_self_albanese {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :
-    TorusPresentation m A
+    TorusSelfAlbanesePresentation m A
 
 /-- The cover-linear map induced by dualizing pullback of one-forms. -/
 noncomputable def torusAmbientLinear {X : Type u} [TopologicalSpace X] [T2Space X]
