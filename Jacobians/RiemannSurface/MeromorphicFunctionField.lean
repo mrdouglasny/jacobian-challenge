@@ -460,3 +460,21 @@ def divHom : MeromorphicFunctionField X →* Multiplicative (Divisor X) where
 end MeromorphicFunctionField
 
 end Jacobians.RiemannSurface
+
+namespace Jacobians.Axioms
+
+open scoped Manifold Topology ContDiff
+open Jacobians.RiemannSurface
+
+/-- The subgroup of principal divisors: divisors of nonzero global
+meromorphic functions. Kernel of the divisor-to-Jacobian map (Abel's theorem).
+
+This is the additive subgroup corresponding to the multiplicative range of
+`MeromorphicFunctionField.divHom`. -/
+def PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] : AddSubgroup (Divisor X) :=
+  Subgroup.toAddSubgroup'
+    (MonoidHom.range (MeromorphicFunctionField.divHom (X := X)))
+
+end Jacobians.Axioms

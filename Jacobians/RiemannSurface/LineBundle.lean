@@ -70,13 +70,6 @@ noncomputable def Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ ℤ :=
   FreeAbelianGroup.lift (fun _ : X => (1 : ℤ))
 
-/-- **Opaque axiom type.** The subgroup of principal divisors: divisors
-of meromorphic functions. Kernel of the divisor-to-Jacobian map
-(Abel's theorem). -/
-axiom PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : AddSubgroup (Divisor X)
-
 /-- **Opaque axiom type.** The line bundle `𝒪(D)` associated to a
 divisor `D` on `X`. Forms a rank-1 locally-free sheaf; we only expose
 the ℂ-vector spaces `H⁰` and `H¹` below. -/

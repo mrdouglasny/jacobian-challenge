@@ -38,14 +38,14 @@ Either route is a substantial independent project.
 ## History
 
 - 2026-04-23 (A6 in completion plan): promoted from doc-only using the
-  `Divisor / PrincipalDivisors / ofCurveImpl` stubs.
+  `Divisor / PrincipalDivisors / ofCurveImpl` layer.
 
 See `docs/formalization-plan.md` §7, discharge priority #10;
 `docs/completion-plan.md` workstream A6.
 Reference: Mumford Vol I §II.3.3–II.3.5; Forster Ch. III.
 -/
 import Jacobians.Axioms.AbelJacobiMap
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.MeromorphicFunctionField
 
 namespace Jacobians.Axioms
 
