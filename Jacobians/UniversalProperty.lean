@@ -1,4 +1,4 @@
-import Mathlib -- compiles with Mathlib v4.30.0
+import Jacobians.Axioms.TorusAlbanese
 
 /-!
 # The Jacobian / Albanese universal property
@@ -73,6 +73,9 @@ open scoped Manifold ContDiff Topology
 
 namespace Jacobians
 
+open Jacobians.Axioms
+open Jacobians.RiemannSurface
+
 /-- **The Jacobian / Albanese universal property.**
 
 `IsJacobian x₀ J aj` holds when `aj : X → J` is a holomorphic map from the
@@ -102,5 +105,92 @@ structure IsJacobian
       (f : X → A), ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f → f x₀ = 0 →
       ∃! φ : J →+ A, ContMDiff 𝓘(ℂ, Fin g → ℂ) 𝓘(ℂ, Fin m → ℂ) ω (φ : J → A) ∧
         ∀ x, f x = φ (aj x)
+
+/-! ## UP-1: existence of the descended homomorphism -/
+
+/-- The additive homomorphism produced by the E-row of the universal-property
+plan: dualize pullback of target torus one-forms, use period functoriality to
+descend to the Jacobian quotient, then map from the target torus presentation
+back to the abstract target `A`. -/
+noncomputable def jacobianUniversalPhi {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
+    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
+    Jacobian X →+ A :=
+  let P : TorusPresentation m A := AX_torus_self_albanese (A := A)
+  letI : DiscreteTopology P.lattice := P.lattice_discrete
+  letI : IsZLattice ℝ P.lattice := P.lattice_isZLattice
+  let ΛX := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  let L : (Fin (RiemannSurface.genus X) → ℂ) →ₗ[ℂ] (Fin m → ℂ) :=
+    torusAmbientLinear f hf
+  let Lc : (Fin (RiemannSurface.genus X) → ℂ) →L[ℂ] (Fin m → ℂ) :=
+    LinearMap.toContinuousLinearMap L
+  let hL : ΛX.toAddSubgroup ≤ P.lattice.toAddSubgroup.comap Lc.toAddMonoidHom := by
+    simpa [ΛX, L, Lc] using AX_period_functoriality P f hf
+  let qφ :
+      ((Fin (RiemannSurface.genus X) → ℂ) ⧸ ΛX.toAddSubgroup) →ₜ+
+        ((Fin m → ℂ) ⧸ P.lattice.toAddSubgroup) :=
+    Vendor.Kirov.ZLatticeQuotient.pushforward ΛX P.lattice Lc hL
+  { toFun := fun z => P.fromQuot (qφ z.down)
+    map_zero' := by
+      change P.fromQuot (qφ 0) = 0
+      exact (congrArg P.fromQuot (map_zero qφ)).trans (map_zero P.fromQuot)
+    map_add' := by
+      intro z w
+      change P.fromQuot (qφ (z.down + w.down)) =
+        P.fromQuot (qφ z.down) + P.fromQuot (qφ w.down)
+      exact (congrArg P.fromQuot (map_add qφ z.down w.down)).trans
+        (map_add P.fromQuot (qφ z.down) (qφ w.down)) }
+
+/-- The descended homomorphism in `jacobianUniversalPhi` is holomorphic. -/
+theorem jacobianUniversalPhi_holo {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
+    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
+    ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
+      (jacobianUniversalPhi f hf : Jacobian X → A) := by
+  classical
+  unfold jacobianUniversalPhi
+  dsimp only
+  let P : TorusPresentation m A := AX_torus_self_albanese (A := A)
+  letI : DiscreteTopology P.lattice := P.lattice_discrete
+  letI : IsZLattice ℝ P.lattice := P.lattice_isZLattice
+  let ΛX := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  let L : (Fin (RiemannSurface.genus X) → ℂ) →ₗ[ℂ] (Fin m → ℂ) :=
+    torusAmbientLinear f hf
+  let Lc : (Fin (RiemannSurface.genus X) → ℂ) →L[ℂ] (Fin m → ℂ) :=
+    LinearMap.toContinuousLinearMap L
+  let hL : ΛX.toAddSubgroup ≤ P.lattice.toAddSubgroup.comap Lc.toAddMonoidHom := by
+    simpa [ΛX, L, Lc] using AX_period_functoriality P f hf
+  let qφ :
+      ((Fin (RiemannSurface.genus X) → ℂ) ⧸ ΛX.toAddSubgroup) →ₜ+
+        ((Fin m → ℂ) ⧸ P.lattice.toAddSubgroup) :=
+    Vendor.Kirov.ZLatticeQuotient.pushforward ΛX P.lattice Lc hL
+  change ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
+    (fun z : Jacobian X => P.fromQuot (qφ z.down))
+  simpa [qφ, ΛX] using AX_torus_descent_holo P Lc hL
+
+/-- UP-1, E1-E6: existence of a holomorphic group homomorphism
+`Jacobian X →+ A` attached to a pointed holomorphic map `f : X → A`.
+
+This is only the homomorphism-existence part of the universal-property DAG.
+The factorization identity `f = φ ∘ ofCurve x₀` and uniqueness are the later
+F- and U-rows. -/
+theorem jacobianUniversal_phi_exists {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
+    ∀ {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A] [CompactSpace A]
+      [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+      [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      (f : X → A), ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f → f x₀ = 0 →
+      ∃ φ : Jacobian X →+ A,
+        ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
+          (φ : Jacobian X → A) := by
+  intro m A _ _ _ _ _ _ _ _ f hf _hbase
+  exact ⟨jacobianUniversalPhi f hf, jacobianUniversalPhi_holo f hf⟩
 
 end Jacobians
