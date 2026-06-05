@@ -1,4 +1,5 @@
 import Jacobians.Challenge
+import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Vendor.Kirov.ZLatticeQuotient
 import Mathlib.LinearAlgebra.Dual.Lemmas
 
@@ -45,21 +46,158 @@ structure TorusPresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
     ContMDiff 𝓘(ℂ, Fin m → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
       (fromQuot : ((Fin m → ℂ) ⧸ lattice.toAddSubgroup) → A)
 
-/-- The pullback of target-torus invariant forms along a pointed holomorphic
-map from a curve.
+/-- Kirov-style cotangent-bundle sections on a complex torus modelled on
+`Fin m → ℂ`. This local helper is the multivariable analogue needed only to
+realize invariant torus forms before pulling them back to a curve. -/
+abbrev TorusOneFormSection (m : ℕ) (A : Type*) [TopologicalSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] :=
+  ContMDiffSection 𝓘(ℂ, Fin m → ℂ) ((Fin m → ℂ) →L[ℂ] ℂ) ω
+    (fun a : A =>
+      TangentSpace 𝓘(ℂ, Fin m → ℂ) a →L[ℂ] (Bundle.Trivial A ℂ) a)
 
-This is a temporary glue definition while the repository has no multivariable
-holomorphic-one-form pullback API for `ChartedSpace (Fin m → ℂ)` targets. The
-period-functoriality axiom below is the load-bearing mathematical statement
-used by the quotient descent. -/
+/-- The invariant cotangent section on a torus attached to a cover-linear
+functional. At `a`, translate `a` back to `0` and evaluate the resulting tangent
+vector in the chart coordinates at the identity. -/
+noncomputable def torusInvariantOneFormSection {m : ℕ} {A : Type v}
+    [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (ell : TorusHolomorphicOneForm m A) :
+    TorusOneFormSection m A := by
+  classical
+  let I := 𝓘(ℂ, Fin m → ℂ)
+  haveI : IsManifold I 1 A :=
+    IsManifold.of_le (I := I) (M := A) (n := ω) (m := 1) (by simp)
+  let ellC : (Fin m → ℂ) →L[ℂ] ℂ :=
+    LinearMap.toContinuousLinearMap ell
+  let zeroCoord : TangentSpace I (0 : A) →L[ℂ] (Fin m → ℂ) :=
+    (trivializationAt (Fin m → ℂ) (TangentSpace I : A → Type _) (0 : A)).continuousLinearMapAt
+      ℂ (0 : A)
+  refine
+    { toFun := fun a =>
+        (ellC.comp zeroCoord).comp (mfderiv I I (fun y : A => -a + y) a)
+      contMDiff_toFun := ?_ }
+  intro a₀
+  rw [contMDiffAt_hom_bundle]
+  refine ⟨contMDiffAt_id, ?_⟩
+  have hF : ContMDiffAt (I.prod I) I ω (fun p : A × A => -p.1 + p.2) (a₀, a₀) := by
+    exact (contMDiffAt_fst.neg).add contMDiffAt_snd
+  have hD : ContMDiffAt I (𝓘(ℂ, (Fin m → ℂ) →L[ℂ] (Fin m → ℂ))) ω
+      (inTangentCoordinates I I id (fun a : A => -a + a)
+        (fun a => mfderiv I I (fun y : A => -a + y) a) a₀) a₀ := by
+    simpa [Function.uncurry] using
+      (ContMDiffAt.mfderiv (I := I) (I' := I) (n := ω) (m := ω)
+        (x₀ := a₀) (f := fun a y : A => -a + y) (g := id) hF
+        contMDiffAt_id (by simp))
+  have hEll : ContMDiffAt I (𝓘(ℂ, (Fin m → ℂ) →L[ℂ] ℂ)) ω
+      (fun _ : A => ellC) a₀ :=
+    contMDiffAt_const
+  have hComp : ContMDiffAt I (𝓘(ℂ, (Fin m → ℂ) →L[ℂ] ℂ)) ω
+      (fun a =>
+        ellC.comp
+          ((inTangentCoordinates I I id (fun a : A => -a + a)
+            (fun a => mfderiv I I (fun y : A => -a + y) a) a₀) a)) a₀ := by
+    exact hEll.clm_comp hD
+  apply hComp.congr_of_eventuallyEq
+  filter_upwards [
+      ((trivializationAt (Fin m → ℂ) (TangentSpace I : A → Type _) a₀).open_baseSet.mem_nhds
+        (mem_baseSet_trivializationAt (Fin m → ℂ) (TangentSpace I : A → Type _) a₀))]
+    with a _ha
+  apply ContinuousLinearMap.ext
+  intro v
+  simp only [inTangentCoordinates, ContinuousLinearMap.inCoordinates,
+    ContinuousLinearMap.comp_apply, Bundle.Trivial.fiberBundle_trivializationAt',
+    Bundle.Trivial.continuousLinearMapAt_trivialization, ContinuousLinearMap.id_apply, id_eq]
+  have hzero : -a + a = (0 : A) := neg_add_cancel a
+  rw [hzero]
+  simp [zeroCoord]
+
+/-- Pull back a torus cotangent section along a holomorphic map from a curve,
+landing in Kirov's curve one-form representation. -/
+noncomputable def torusPullbackKirovOneForm {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v}
+    [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
+    [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
+    TorusHolomorphicOneForm m A →ₗ[ℂ] Jacobians.Vendor.Kirov.HolomorphicOneForms X where
+  toFun ell := by
+    classical
+    let IX := 𝓘(ℂ)
+    let IA := 𝓘(ℂ, Fin m → ℂ)
+    haveI : IsManifold IA 1 A :=
+      IsManifold.of_le (I := IA) (M := A) (n := ω) (m := 1) (by simp)
+    let α : TorusOneFormSection m A := torusInvariantOneFormSection ell
+    refine
+      { toFun := fun x : X => (α.toFun (f x)).comp (mfderiv IX IA f x)
+        contMDiff_toFun := ?_ }
+    intro x₀
+    rw [contMDiffAt_hom_bundle]
+    refine ⟨contMDiffAt_id, ?_⟩
+    have hA : ContMDiffAt IX (𝓘(ℂ, (Fin m → ℂ) →L[ℂ] ℂ)) ω
+        (fun x =>
+          ContinuousLinearMap.inCoordinates
+            (Fin m → ℂ) (TangentSpace IA (M := A)) ℂ (Bundle.Trivial A ℂ)
+            (f x₀) (f x) (f x₀) (f x) (α.toFun (f x))) x₀ := by
+      have hα := α.contMDiff_toFun (f x₀)
+      rw [contMDiffAt_hom_bundle] at hα
+      obtain ⟨_, h⟩ := hα
+      exact h.comp x₀ (hf x₀)
+    have hB : ContMDiffAt IX (𝓘(ℂ, ℂ →L[ℂ] (Fin m → ℂ))) ω
+        (fun x =>
+          ContinuousLinearMap.inCoordinates
+            ℂ (TangentSpace IX (M := X)) (Fin m → ℂ) (TangentSpace IA (M := A))
+            x₀ x (f x₀) (f x) (mfderiv IX IA f x)) x₀ := by
+      exact (hf x₀).mfderiv_const (by simp)
+    have hcomp : ContMDiffAt IX (𝓘(ℂ, ℂ →L[ℂ] ℂ)) ω
+        (fun x =>
+          (ContinuousLinearMap.inCoordinates
+            (Fin m → ℂ) (TangentSpace IA (M := A)) ℂ (Bundle.Trivial A ℂ)
+            (f x₀) (f x) (f x₀) (f x) (α.toFun (f x))).comp
+          (ContinuousLinearMap.inCoordinates
+            ℂ (TangentSpace IX (M := X)) (Fin m → ℂ) (TangentSpace IA (M := A))
+            x₀ x (f x₀) (f x) (mfderiv IX IA f x))) x₀ :=
+      hA.clm_comp hB
+    apply hcomp.congr_of_eventuallyEq
+    filter_upwards [
+        ((trivializationAt ℂ (TangentSpace IX (M := X)) x₀).open_baseSet.mem_nhds
+          (mem_baseSet_trivializationAt ℂ _ x₀)),
+        (hf.continuous.continuousAt.preimage_mem_nhds
+          ((trivializationAt (Fin m → ℂ) (TangentSpace IA (M := A)) (f x₀)).open_baseSet.mem_nhds
+            (mem_baseSet_trivializationAt (Fin m → ℂ) _ (f x₀))))]
+      with x _hx_TS_X hx_TS_A
+    apply ContinuousLinearMap.ext
+    intro v
+    simp only [ContinuousLinearMap.inCoordinates, ContinuousLinearMap.comp_apply,
+      Bundle.Trivial.fiberBundle_trivializationAt',
+      Bundle.Trivial.continuousLinearMapAt_trivialization, ContinuousLinearMap.id_apply]
+    rw [Bundle.Trivialization.symmL_continuousLinearMapAt _ hx_TS_A]
+  map_add' ell₁ ell₂ := by
+    apply ContMDiffSection.ext
+    intro x
+    apply ContinuousLinearMap.ext
+    intro v
+    rfl
+  map_smul' c ell := by
+    apply ContMDiffSection.ext
+    intro x
+    apply ContinuousLinearMap.ext
+    intro v
+    rfl
+
+/-- The pullback of target-torus invariant forms along a pointed holomorphic
+map from a curve, transported from the Kirov cotangent-section representation
+to the repository's cocycle `HolomorphicOneForm` representation. -/
 noncomputable def torusPullbackOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
-    (_f : X → A) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω _f) :
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
     TorusHolomorphicOneForm m A →ₗ[ℂ] HolomorphicOneForm X :=
-  0
+  (Jacobians.Bridge.bridgeFormEquiv (X := X)).symm.toLinearMap.comp
+    (torusPullbackKirovOneForm f hf)
 
 /-- **Axiom.** Invariant holomorphic one-forms on a complex torus are the
 dual of its universal cover.
