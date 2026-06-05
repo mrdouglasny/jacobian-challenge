@@ -233,7 +233,7 @@ lake build
 
 ## Further documentation
 
-- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (66), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
+- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — **canonical axiom audit** (top-level): kernel-verified count (62), triaged into Class 1 (standard/textbook) and Class 2 (form/proof unclear), per-axiom File:Line + ratings, flagged axioms, recently-discharged table.
 - [`docs/status-2026-05-31.md`](docs/status-2026-05-31.md) — current verified status snapshot (build, exact sorry/axiom inventory, open workstreams, remote-sync state).
 - [`docs/validation-plan.md`](docs/validation-plan.md) — how to judge the definitions and axioms before proving them: mechanical `#print axioms` guard, axiom taxonomy by validation risk, the prioritized validation backlog, and a human-readable contract + AI-modelable specification-first pipeline.
 - [`docs/contracts/`](docs/contracts/) — per-object contract cards (judge an object without reading its proofs): [`genus`](docs/contracts/genus.md) (validated on `Elliptic` from core axioms), [`ofCurve`](docs/contracts/ofCurve.md) (anti-hack property found opaque-blocked).

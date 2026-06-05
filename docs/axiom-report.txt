@@ -43,8 +43,9 @@
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AbelTheorem,
  Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_ofCurve_inj,
+ Axioms.AX_Period_Triangle,
  Axioms.intersectionForm,
  RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,

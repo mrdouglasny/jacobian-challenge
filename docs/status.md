@@ -12,7 +12,7 @@ _Last full rewrite: 2026-04-23. Header refreshed: 2026-04-29._
 >
 > For the **current** state, see:
 > * [`docs/status-2026-06-06.md`](status-2026-06-06.md) — the current
->   verified snapshot (63 axioms, build green at 8597 jobs; general Abel
+>   verified snapshot (62 axioms, build green at 8597 jobs; general Abel
 >   injectivity now a theorem, Albanese categoricity proved, the RR/Serre/
 >   Plücker anchor layer). **Start here.**
 > * [`docs/status-2026-05-31.md`](status-2026-05-31.md) — prior snapshot
