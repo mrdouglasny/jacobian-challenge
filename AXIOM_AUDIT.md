@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 64** — all **64** in our own modules. The vendored
+**Active project axioms: 63** — all **63** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -85,6 +85,13 @@ H₁ class. The deepest analytic gap is closed; only full homotopy invariance
 (representative-independence for *arbitrary* loops, not just the basis) remains as a
 deferred faithfulness upgrade.
 
+Then → **63** by **de-opaquing** `abelJacobiDiv` from an axiom to a real `def`
+(`:= FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)`, 2026-06-05):
+the divisor-level Abel–Jacobi map is now the genuine linear extension of `ofCurveImpl`.
+`AX_AbelTheorem` (kernel = principal divisors) stays the textbook axiom, now stated about
+the concrete map. Foundation for deriving the general `AX_ofCurve_inj` (Abel injectivity,
+genus > 0) — see [`docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md`](docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md).
+
 ---
 
 ## Triage
@@ -95,7 +102,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (52 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (51 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -105,7 +112,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 12 | classical theorems, citable | high |
-| 2a — data-existence | 14 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 13 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -152,7 +159,6 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `AX_cycleBasisLoop_integrable` | `RiemannSurface/LoopIntegral.lean:17` | the period integrand of each cycle-basis loop is `IntervalIntegrable` — classical regularity (piecewise-analytic loops are rectifiable), scoped to cycle-basis loops. The **only** residual axiom after `loopIntegralToH1` was **discharged to a real `def`** 2026-06-05 (`:= cb.isBasis.constr ℤ (∮ over cycle-basis loops)`, periods = genuine line integrals via the L0–L1 multi-chart integral). Dischargeable later by strengthening `AnalyticArc` regularity. See [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
-| `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
 | `PrincipalDivisors`, `LineBundle`, `H0`(+`instAddCommGroup`,`instModule`), `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (10) | `RiemannSurface/LineBundle.lean:70–128` | line-bundle / sheaf-cohomology **type stubs** (the `Divisor` triple discharged in Phase 1) |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
@@ -275,7 +281,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 64 — the vendored Kirov subtree is now axiom-free, so 64 is the total.
+#   prints 63 — the vendored Kirov subtree is now axiom-free, so 63 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -292,7 +298,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 64
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 63
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
