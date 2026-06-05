@@ -31,11 +31,13 @@ refactor responded to Gemini review by adding the local-antiderivative
 axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 - `pathIntegralBasepointFunctional` — the functional
   `X → X → (HolomorphicOneForm X →ₗ[ℂ] ℂ)`, "integrate from `P₀` to
-  `P`". Opaque; de-opaque to `Bridge.kirovBackedFunctional` (a real `∫`
-  `def`). (A former companion FTC axiom `AX_pathIntegral_local_antiderivative`
+  `P`". De-opaqued to `canonicalArcIntegral (Bridge.bridgePathArc P₀ P)`;
+  linearity is transported from `Bridge.kirovBackedFunctional` via the bridge
+  equality to keep the computed values identical. (A former companion FTC axiom
+  `AX_pathIntegral_local_antiderivative`
   was DELETED 2026-06-04 — it was false; see the note where it stood. The
-  anti-degeneracy it was meant to provide comes instead from `kirovBackedFunctional`
-  being a genuine integral, provably nonzero on the `Elliptic` period witness.)
+  anti-degeneracy it was meant to provide comes instead from the concrete integral
+  being genuine, provably nonzero on the `Elliptic` period witness.)
 - `pushforwardOneForm (f : X → Y) : HolomorphicOneForm X →ₗ[ℂ]
   HolomorphicOneForm Y` — the trace / pushforward of 1-forms along a
   finite cover. Analogously feeds `pullbackAmbientLinear` as a `def`.
@@ -58,7 +60,7 @@ See `docs/formalization-plan.md` §7.
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.BranchLocus
 import Jacobians.Bridge.KirovHolomorphicEquiv
-import Jacobians.Bridge.KirovLineIntegral
+import Jacobians.Bridge.KirovCanonicalEq
 
 namespace Jacobians.Axioms
 
@@ -78,9 +80,10 @@ satisfied by trivial maps disconnected from the 1-form cocycle. The
 former remedy (a companion FTC axiom binding it to the chart coefficient)
 was **wrong**: that axiom (`AX_pathIntegral_local_antiderivative`) was
 false (it forced a global primitive — see its deletion note). The correct
-remedy is to make the functional **concrete** — `Bridge.kirovBackedFunctional`,
-a genuine line integral, provably nonzero on the `Elliptic` period witness —
-rather than to bind an opaque functional with a (false) FTC.
+remedy is to make the functional **concrete** — the canonical moving-chart
+arc integral over `Bridge.bridgePathArc P₀ P`, pointwise equal to
+`Bridge.kirovBackedFunctional` — rather than to bind an opaque functional
+with a (false) FTC.
 
 Similarly, pushforward/pullback on Jacobians factor through
 `pullbackOneForm` / `pushforwardOneForm` (pullback and trace of
@@ -94,18 +97,38 @@ or re-expressed at the more atomic level.
 `ω`, returns `∫_{P₀}^P ω ∈ ℂ`, linear in `ω`. For two paths from `P₀` to `P`
 the values differ by an element of the period lattice.
 
-**De-opaqued 2026-06-04** from an axiom to this real `def`: it is the genuine
-line integral `Bridge.kirovBackedFunctional` (`∫_{bridgePath P₀ P}`), itself
-standard-3 axiom-clean. This makes `ofCurve` a **computed** map and rules out the
-zero-functional degeneracy by *concreteness* — not by a companion FTC (the former
+**De-opaqued 2026-06-04** from an axiom to this real `def`, then re-based onto
+the canonical moving-chart arc integral in U3: it computes
+`canonicalArcIntegral (Bridge.bridgePathArc P₀ P)`. Linearity is borrowed from
+`Bridge.kirovBackedFunctional` through
+`Bridge.kirovBackedFunctional_eq_canonicalArcIntegral`, so the values remain
+pointwise equal to the previous Kirov-backed definition while the `ofCurve`
+chain now routes through `canonicalArcIntegral` / `bridgePathArc`. This makes
+`ofCurve` a **computed** map and rules out the zero-functional degeneracy by
+*concreteness* — not by a companion FTC (the former
 `AX_pathIntegral_local_antiderivative` was false and is deleted; see its note).
 The path-dependence of the chosen `bridgePath` is absorbed by the period-lattice
 quotient in `ofCurveImpl`, governed by `RiemannSurface.loopIntegralToH1`. -/
 noncomputable def pathIntegralBasepointFunctional (X : Type*) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P₀ P : X) :
-    HolomorphicOneForm X →ₗ[ℂ] ℂ :=
-  Jacobians.Bridge.kirovBackedFunctional P₀ P
+    HolomorphicOneForm X →ₗ[ℂ] ℂ where
+  toFun form :=
+    canonicalArcIntegral (Jacobians.Bridge.bridgePathArc P₀ P) form
+  map_add' form₁ form₂ := by
+    rw [← Jacobians.Bridge.kirovBackedFunctional_eq_canonicalArcIntegral
+        (X := X) P₀ P (form₁ + form₂),
+      ← Jacobians.Bridge.kirovBackedFunctional_eq_canonicalArcIntegral
+        (X := X) P₀ P form₁,
+      ← Jacobians.Bridge.kirovBackedFunctional_eq_canonicalArcIntegral
+        (X := X) P₀ P form₂]
+    exact (Jacobians.Bridge.kirovBackedFunctional P₀ P).map_add' form₁ form₂
+  map_smul' c form := by
+    rw [← Jacobians.Bridge.kirovBackedFunctional_eq_canonicalArcIntegral
+        (X := X) P₀ P (c • form),
+      ← Jacobians.Bridge.kirovBackedFunctional_eq_canonicalArcIntegral
+        (X := X) P₀ P form]
+    exact (Jacobians.Bridge.kirovBackedFunctional P₀ P).map_smul' c form
 
 /- **REMOVED 2026-06-04 — this axiom was FALSE.**
 
