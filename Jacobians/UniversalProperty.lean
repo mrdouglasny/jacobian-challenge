@@ -40,13 +40,19 @@ curve (where Albanese = Jacobian).
   `φ 0 = 0` is free from `AddMonoidHom`, so the factorization is automatically
   pointed.
 
-The open goal `IsJacobian x₀ (Jacobian X) (ofCurve x₀)` — that Buzzard's concrete
+The goal `IsJacobian x₀ (Jacobian X) (ofCurve x₀)` — that Buzzard's concrete
 `Jacobian`/`ofCurve` satisfy this property — is the categoricity theorem that
-would close the def-degeneracy gap categorically; it is not proved here. The proof
+closes the def-degeneracy gap categorically. **It is PROVED below as
+`ofCurve_isJacobian` (2026-06-05):** for genus > 0, every pointed holomorphic
+`f : X → A` to a complex torus factors uniquely through `ofCurve` by a
+holomorphic group hom (genuine `∃!`). The `ConnectedSpace (Jacobian X)`
+prerequisite is supplied (a torus is connected); the proof rests on the vetted
+torus axioms `AX_torus_oneforms_dualCover` / `AX_torus_self_albanese` /
+`AX_period_functoriality` + `AX_curve_generates_jacobian` (the descent
+smoothness `AX_torus_descent_holo` was itself discharged to a theorem
+2026-06-06), and is `#print axioms`-clean (no `sorryAx`). The original proof
 plan (lemma DAG, vetted-axiom leaves, effort) is in
-`docs/universal-property-proof-plan.md`. One prerequisite instance is still missing
-for the goal to typecheck: `ConnectedSpace (Jacobian X)` (true — a torus is
-connected — but not provided by Buzzard's API).
+`docs/universal-property-proof-plan.md`.
 
 ## Vetting
 

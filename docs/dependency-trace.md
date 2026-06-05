@@ -6,7 +6,7 @@ _Drafted 2026-04-23. Updated 2026-04-29; currency note 2026-06-06._
 > audit of foundation closure but predates the 2026-06-04/05 discharge push.
 > Read it alongside the current snapshot
 > [`status-2026-06-06.md`](status-2026-06-06.md) and the authoritative
-> [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md) (63 axioms, kernel-verified). Key
+> [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md) (62 axioms, kernel-verified). Key
 > changes since the rows below were written:
 > - **`loopIntegralToH1` is no longer an axiom** — discharged to a real `def`
 >   (the multi-chart line integral over the analytic cycle basis, 2026-06-05).
@@ -20,7 +20,7 @@ _Drafted 2026-04-23. Updated 2026-04-29; currency note 2026-06-06._
 > - **Albanese categoricity proved** (`ofCurve_isJacobian`) on 5 vetted torus
 >   axioms; **RR/Serre/Plücker anchor layer** added (vetted statements,
 >   deferred proofs).
-> - Net axiom count **93 → 63** over this window.
+> - Net axiom count **93 → 62** over this window.
 
 **Update note (2026-04-29):** since the original draft, two important
 changes:
