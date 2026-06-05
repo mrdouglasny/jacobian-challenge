@@ -102,4 +102,153 @@ theorem canonicalArcIntegral_eq_chartPrimitive_endpoint_sub
         g ((extChartAt 𝓘(ℂ) x₀) (γ.extend 0)) := by
           rfl
 
+/-- A chart together with a coordinate ball contained in its target. -/
+structure PathChartBall (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] where
+  p : X
+  c : ℂ
+  r : ℝ
+  ball_subset_target : Metric.ball c r ⊆ (extChartAt 𝓘(ℂ) p).target
+
+/-- The parameters whose path values lie in a fixed chart source and whose
+coordinates lie in the fixed coordinate ball. -/
+def pathChartBallSet (γ : C(unitInterval, X)) (B : PathChartBall X) :
+    Set unitInterval :=
+  {u | γ u ∈ (chartAt ℂ B.p).source ∧
+    (extChartAt 𝓘(ℂ) B.p) (γ u) ∈ Metric.ball B.c B.r}
+
+lemma isOpen_pathChartBallSet (γ : C(unitInterval, X)) (B : PathChartBall X) :
+    IsOpen (pathChartBallSet γ B) := by
+  have hopenX : IsOpen ((chartAt ℂ B.p).source ∩
+      (extChartAt 𝓘(ℂ) B.p) ⁻¹' Metric.ball B.c B.r) := by
+    exact isOpen_extChartAt_preimage (I := 𝓘(ℂ)) B.p Metric.isOpen_ball
+  simpa [pathChartBallSet, Set.preimage_inter] using hopenX.preimage γ.continuous
+
+lemma pathChartBallSet_cover (γ : C(unitInterval, X)) :
+    Set.univ ⊆ ⋃ B : PathChartBall X, pathChartBallSet γ B := by
+  intro u _hu
+  let p : X := γ u
+  let z : ℂ := (extChartAt 𝓘(ℂ) p) p
+  have hz_target : z ∈ (extChartAt 𝓘(ℂ) p).target := by
+    simp [z, p]
+  obtain ⟨r, hr_pos, hr_sub⟩ :=
+    (Metric.isOpen_iff.mp (isOpen_extChartAt_target (I := 𝓘(ℂ)) p)) z hz_target
+  let B : PathChartBall X :=
+    { p := p, c := z, r := r, ball_subset_target := hr_sub }
+  refine Set.mem_iUnion.2 ⟨B, ?_⟩
+  constructor
+  · simp [B, p]
+  · exact (show (extChartAt 𝓘(ℂ) B.p) (γ u) ∈ Metric.ball B.c B.r by
+      simpa [B, p, z] using (Metric.mem_ball_self (x := z) hr_pos))
+
+/-- A finite subdivision of a continuous path by chart-coordinate balls. -/
+structure PathChartBallSubdivision (γ : C(unitInterval, X)) where
+  n : ℕ
+  t : Fin (n + 1) → unitInterval
+  cellBall : Fin n → PathChartBall X
+  zero_eq : t 0 = 0
+  one_eq : t (Fin.last n) = 1
+  monotone_t : Monotone t
+  cell_subset :
+    ∀ i : Fin n, Set.Icc (t i.castSucc) (t i.succ) ⊆
+      pathChartBallSet γ (cellBall i)
+
+namespace PathChartBallSubdivision
+
+lemma left_mem_pathChartBallSet {γ : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γ) (i : Fin S.n) :
+    S.t i.castSucc ∈ pathChartBallSet γ (S.cellBall i) := by
+  exact S.cell_subset i ⟨le_rfl, S.monotone_t (Fin.castSucc_le_succ i)⟩
+
+lemma right_mem_pathChartBallSet {γ : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γ) (i : Fin S.n) :
+    S.t i.succ ∈ pathChartBallSet γ (S.cellBall i) := by
+  exact S.cell_subset i ⟨S.monotone_t (Fin.castSucc_le_succ i), le_rfl⟩
+
+lemma left_coord_mem_ball {γ : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γ) (i : Fin S.n) :
+    (extChartAt 𝓘(ℂ) (S.cellBall i).p) (γ (S.t i.castSucc)) ∈
+      Metric.ball (S.cellBall i).c (S.cellBall i).r :=
+  (S.left_mem_pathChartBallSet i).2
+
+lemma right_coord_mem_ball {γ : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γ) (i : Fin S.n) :
+    (extChartAt 𝓘(ℂ) (S.cellBall i).p) (γ (S.t i.succ)) ∈
+      Metric.ball (S.cellBall i).c (S.cellBall i).r :=
+  (S.right_mem_pathChartBallSet i).2
+
+end PathChartBallSubdivision
+
+lemma exists_pathChartBallSubdivision (γ : C(unitInterval, X)) :
+    Nonempty (PathChartBallSubdivision γ) := by
+  classical
+  obtain ⟨t, ht_zero, ht_mono, ⟨k, ht_eventually_one⟩, ht_sub⟩ :=
+    exists_monotone_Icc_subset_open_cover_unitInterval
+      (c := pathChartBallSet γ) (isOpen_pathChartBallSet γ) (pathChartBallSet_cover γ)
+  let N : ℕ := k + 1
+  let cellBall : Fin N → PathChartBall X := fun i => Classical.choose (ht_sub i.val)
+  refine ⟨⟨N, (fun i : Fin (N + 1) => t i.val), cellBall, ?_, ?_, ?_, ?_⟩⟩
+  · simpa using ht_zero
+  · have hlast : t N = 1 := ht_eventually_one N (Nat.le_succ k)
+    simpa [N, Fin.val_last] using hlast
+  · intro i j hij
+    exact ht_mono (Fin.val_le_of_le hij)
+  · intro i u hu
+    have hsub := Classical.choose_spec (ht_sub i.val)
+    have hu' : u ∈ Set.Icc (t i.val) (t (i.val + 1)) := by
+      constructor
+      · simpa [Fin.val_castSucc] using hu.1
+      · simpa [Fin.val_succ] using hu.2
+    exact hsub hu'
+
+noncomputable def chosenPathChartBallSubdivision (γ : C(unitInterval, X)) :
+    PathChartBallSubdivision γ :=
+  Classical.choice (exists_pathChartBallSubdivision γ)
+
+noncomputable def pathChartBallPrimitive (form : HolomorphicOneForm X)
+    (B : PathChartBall X) : ℂ → ℂ :=
+  Classical.choose (coeff_exists_primitive_on_ball_with_value form B.p
+    (xbase := B.c) (y := 0) B.ball_subset_target)
+
+lemma pathChartBallPrimitive_value (form : HolomorphicOneForm X) (B : PathChartBall X) :
+    pathChartBallPrimitive form B B.c = 0 := by
+  exact (Classical.choose_spec (coeff_exists_primitive_on_ball_with_value form B.p
+    (xbase := B.c) (y := 0) B.ball_subset_target)).1
+
+lemma pathChartBallPrimitive_hasDerivAt (form : HolomorphicOneForm X)
+    (B : PathChartBall X) :
+    ∀ z ∈ Metric.ball B.c B.r,
+      HasDerivAt (pathChartBallPrimitive form B) (form.coeff B.p z) z := by
+  exact (Classical.choose_spec (coeff_exists_primitive_on_ball_with_value form B.p
+    (xbase := B.c) (y := 0) B.ball_subset_target)).2
+
+/-- The endpoint-difference increment for one chart-ball cell of a continuous
+path subdivision. -/
+noncomputable def developingIncrement (form : HolomorphicOneForm X)
+    (γ : C(unitInterval, X)) (S : PathChartBallSubdivision γ) (i : Fin S.n) : ℂ :=
+  let B := S.cellBall i
+  let g := pathChartBallPrimitive form B
+  g ((extChartAt 𝓘(ℂ) B.p) (γ (S.t i.succ))) -
+    g ((extChartAt 𝓘(ℂ) B.p) (γ (S.t i.castSucc)))
+
+/-- The developing value associated to one chosen chart-ball subdivision. -/
+noncomputable def developingValueOfSubdivision (form : HolomorphicOneForm X)
+    (γ : C(unitInterval, X)) (S : PathChartBallSubdivision γ) : ℂ :=
+  ∑ i : Fin S.n, developingIncrement form γ S i
+
+/-- B2 definition layer: a choice-based developing value for an arbitrary
+continuous path, computed by summing chart-local primitive endpoint
+differences on a chart-ball subdivision. -/
+noncomputable def developingValue (x₀ : X) (form : HolomorphicOneForm X)
+    (γ : C(unitInterval, X)) : ℂ :=
+  (fun _ : X =>
+    developingValueOfSubdivision form γ (chosenPathChartBallSubdivision γ)) x₀
+
+/-- Refining a single primitive endpoint difference by an intermediate point
+telescopes algebraically. This is the local algebra used in the refinement
+part of B2 well-definedness. -/
+theorem chartPrimitive_endpoint_sub_split (g : ℂ → ℂ) (a m b : ℂ) :
+    g b - g a = (g m - g a) + (g b - g m) := by
+  abel
+
 end Jacobians.RiemannSurface
