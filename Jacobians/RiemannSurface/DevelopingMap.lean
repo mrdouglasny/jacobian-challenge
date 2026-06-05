@@ -244,11 +244,214 @@ noncomputable def developingValue (x₀ : X) (form : HolomorphicOneForm X)
   (fun _ : X =>
     developingValueOfSubdivision form γ (chosenPathChartBallSubdivision γ)) x₀
 
+/-- The continuous-map view of an analytic arc on the unit interval. -/
+def analyticArcToContinuousMap (γ : AnalyticArc X) : C(unitInterval, X) where
+  toFun := γ.toFun
+  continuous_toFun := γ.continuous_toFun
+
+@[simp]
+theorem analyticArcToContinuousMap_apply (γ : AnalyticArc X) (t : unitInterval) :
+    analyticArcToContinuousMap γ t = γ.extend (t : ℝ) :=
+  rfl
+
+@[simp]
+theorem analyticArcToContinuousMap_zero (γ : AnalyticArc X) :
+    analyticArcToContinuousMap γ 0 = γ.extend 0 :=
+  rfl
+
+@[simp]
+theorem analyticArcToContinuousMap_one (γ : AnalyticArc X) :
+    analyticArcToContinuousMap γ 1 = γ.extend 1 :=
+  rfl
+
 /-- Refining a single primitive endpoint difference by an intermediate point
 telescopes algebraically. This is the local algebra used in the refinement
 part of B2 well-definedness. -/
 theorem chartPrimitive_endpoint_sub_split (g : ℂ → ℂ) (a m b : ℂ) :
     g b - g a = (g m - g a) + (g b - g m) := by
   abel
+
+/-- Splitting a chart-ball primitive increment at an intermediate coordinate
+point is just the endpoint-difference telescoping identity. -/
+theorem pathChartBallPrimitive_endpoint_sub_split
+    (form : HolomorphicOneForm X) (B : PathChartBall X) (a m b : ℂ) :
+    pathChartBallPrimitive form B b - pathChartBallPrimitive form B a =
+      (pathChartBallPrimitive form B m - pathChartBallPrimitive form B a) +
+        (pathChartBallPrimitive form B b - pathChartBallPrimitive form B m) := by
+  exact chartPrimitive_endpoint_sub_split (pathChartBallPrimitive form B) a m b
+
+/-- If two chart balls use the same chart center, their chosen primitives differ
+by a constant on the intersection of the coordinate balls. Consequently their
+endpoint differences agree on that intersection. -/
+theorem pathChartBallPrimitive_endpoint_sub_eq_of_same_center
+    (form : HolomorphicOneForm X) {B₁ B₂ : PathChartBall X}
+    (hp : B₁.p = B₂.p) {a b : ℂ}
+    (ha₁ : a ∈ Metric.ball B₁.c B₁.r) (hb₁ : b ∈ Metric.ball B₁.c B₁.r)
+    (ha₂ : a ∈ Metric.ball B₂.c B₂.r) (hb₂ : b ∈ Metric.ball B₂.c B₂.r) :
+    pathChartBallPrimitive form B₁ b - pathChartBallPrimitive form B₁ a =
+      pathChartBallPrimitive form B₂ b - pathChartBallPrimitive form B₂ a := by
+  classical
+  let s : Set ℂ := Metric.ball B₁.c B₁.r ∩ Metric.ball B₂.c B₂.r
+  have hs_open : IsOpen s := Metric.isOpen_ball.inter Metric.isOpen_ball
+  have hs_preconnected : IsPreconnected s :=
+    ((convex_ball B₁.c B₁.r).inter (convex_ball B₂.c B₂.r)).isPreconnected
+  have hdiff₁ : DifferentiableOn ℂ (pathChartBallPrimitive form B₁) s := by
+    intro z hz
+    exact ((pathChartBallPrimitive_hasDerivAt form B₁) z hz.1).differentiableAt
+      |>.differentiableWithinAt
+  have hdiff₂ : DifferentiableOn ℂ (pathChartBallPrimitive form B₂) s := by
+    intro z hz
+    exact ((pathChartBallPrimitive_hasDerivAt form B₂) z hz.2).differentiableAt
+      |>.differentiableWithinAt
+  have hderiv_eq : s.EqOn (deriv (pathChartBallPrimitive form B₁))
+      (deriv (pathChartBallPrimitive form B₂)) := by
+    intro z hz
+    have h₁ := ((pathChartBallPrimitive_hasDerivAt form B₁) z hz.1).deriv
+    have h₂ := ((pathChartBallPrimitive_hasDerivAt form B₂) z hz.2).deriv
+    calc
+      deriv (pathChartBallPrimitive form B₁) z = form.coeff B₁.p z := h₁
+      _ = form.coeff B₂.p z := by rw [hp]
+      _ = deriv (pathChartBallPrimitive form B₂) z := h₂.symm
+  obtain ⟨C, hC⟩ :=
+    hs_open.exists_eq_add_of_deriv_eq hs_preconnected hdiff₁ hdiff₂ hderiv_eq
+  have ha : a ∈ s := ⟨ha₁, ha₂⟩
+  have hb : b ∈ s := ⟨hb₁, hb₂⟩
+  have hCa := hC ha
+  have hCb := hC hb
+  calc
+    pathChartBallPrimitive form B₁ b - pathChartBallPrimitive form B₁ a =
+        (pathChartBallPrimitive form B₂ b + C) -
+          (pathChartBallPrimitive form B₂ a + C) := by
+            rw [hCb, hCa]
+    _ = pathChartBallPrimitive form B₂ b - pathChartBallPrimitive form B₂ a := by
+      abel
+
+/-- Chart-transition form of the overlap-constant lemma.  On any open
+preconnected coordinate overlap `U` in the first chart whose transition image
+lies in the second chart ball, the primitive in the first chart and the
+primitive in the second chart pulled back by the transition differ by a
+constant. Hence their endpoint differences agree. -/
+theorem pathChartBallPrimitive_endpoint_sub_eq_on_preconnected_overlap
+    (form : HolomorphicOneForm X) (B₁ B₂ : PathChartBall X) {U : Set ℂ}
+    (hU_open : IsOpen U) (hU_preconnected : IsPreconnected U)
+    (hU_ball₁ : U ⊆ Metric.ball B₁.c B₁.r)
+    (hU_ball₂ : ∀ z ∈ U,
+      (extChartAt 𝓘(ℂ) B₁.p).symm z ∈ (extChartAt 𝓘(ℂ) B₂.p).source ∧
+        (extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm z) ∈
+          Metric.ball B₂.c B₂.r)
+    {a b : ℂ} (ha : a ∈ U) (hb : b ∈ U) :
+    pathChartBallPrimitive form B₁ b - pathChartBallPrimitive form B₁ a =
+      pathChartBallPrimitive form B₂
+          ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm b)) -
+        pathChartBallPrimitive form B₂
+          ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm a)) := by
+  classical
+  let T : ℂ → ℂ := (extChartAt 𝓘(ℂ) B₂.p) ∘ (extChartAt 𝓘(ℂ) B₁.p).symm
+  let F₁ : ℂ → ℂ := pathChartBallPrimitive form B₁
+  let F₂ : ℂ → ℂ := fun z => pathChartBallPrimitive form B₂ (T z)
+  have hdiff₁ : DifferentiableOn ℂ F₁ U := by
+    intro z hz
+    exact ((pathChartBallPrimitive_hasDerivAt form B₁) z (hU_ball₁ hz)).differentiableAt
+      |>.differentiableWithinAt
+  have hdiff₂ : DifferentiableOn ℂ F₂ U := by
+    intro z hz
+    let d : ℂ := fderiv ℂ T z 1
+    have hz_target : z ∈ (extChartAt 𝓘(ℂ) B₁.p).target :=
+      B₁.ball_subset_target (hU_ball₁ hz)
+    have hTdiff : DifferentiableAt ℂ T z :=
+      chartTransition_differentiableAt (p := B₁.p) (q := B₂.p) hz_target
+        (hU_ball₂ z hz).1
+    have hTderiv : HasDerivAt T d z := by
+      simpa [d] using hTdiff.hasDerivAt
+    have hprim₂ : HasDerivAt (pathChartBallPrimitive form B₂)
+        (form.coeff B₂.p (T z)) (T z) := by
+      simpa [T] using
+        (pathChartBallPrimitive_hasDerivAt form B₂)
+          ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm z))
+          (hU_ball₂ z hz).2
+    exact (hprim₂.comp z hTderiv).differentiableAt.differentiableWithinAt
+  have hderiv_eq : U.EqOn (deriv F₁) (deriv F₂) := by
+    intro z hz
+    let d : ℂ := fderiv ℂ T z 1
+    have hz_target : z ∈ (extChartAt 𝓘(ℂ) B₁.p).target :=
+      B₁.ball_subset_target (hU_ball₁ hz)
+    have hTdiff : DifferentiableAt ℂ T z :=
+      chartTransition_differentiableAt (p := B₁.p) (q := B₂.p) hz_target
+        (hU_ball₂ z hz).1
+    have hTderiv : HasDerivAt T d z := by
+      simpa [d] using hTdiff.hasDerivAt
+    have hprim₁ : HasDerivAt F₁ (form.coeff B₁.p z) z := by
+      simpa [F₁] using (pathChartBallPrimitive_hasDerivAt form B₁) z (hU_ball₁ hz)
+    have hprim₂ : HasDerivAt (pathChartBallPrimitive form B₂)
+        (form.coeff B₂.p (T z)) (T z) := by
+      simpa [T] using
+        (pathChartBallPrimitive_hasDerivAt form B₂)
+          ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm z))
+          (hU_ball₂ z hz).2
+    have hcomp : HasDerivAt F₂ (form.coeff B₂.p (T z) * d) z := by
+      simpa [F₂] using hprim₂.comp z hTderiv
+    have hcocycle : form.coeff B₁.p z = form.coeff B₂.p (T z) * d := by
+      have hc := form.2.2.1 B₁.p B₂.p z hz_target (hU_ball₂ z hz).1
+      simpa [T, d, Function.comp_def] using hc
+    calc
+      deriv F₁ z = form.coeff B₁.p z := hprim₁.deriv
+      _ = form.coeff B₂.p (T z) * d := hcocycle
+      _ = deriv F₂ z := hcomp.deriv.symm
+  obtain ⟨C, hC⟩ :=
+    hU_open.exists_eq_add_of_deriv_eq hU_preconnected hdiff₁ hdiff₂ hderiv_eq
+  have hCa := hC ha
+  have hCb := hC hb
+  calc
+    pathChartBallPrimitive form B₁ b - pathChartBallPrimitive form B₁ a =
+        F₁ b - F₁ a := rfl
+    _ = (F₂ b + C) - (F₂ a + C) := by rw [hCb, hCa]
+    _ = F₂ b - F₂ a := by abel
+    _ =
+        pathChartBallPrimitive form B₂
+            ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm b)) -
+          pathChartBallPrimitive form B₂
+            ((extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm a)) := by
+        rfl
+
+/-- Endpoint-difference equality on a path segment when both endpoint
+coordinates in the first chart lie in one open preconnected overlap component
+whose transition image is contained in the second chart ball. -/
+theorem pathChartBallPrimitive_endpoint_sub_eq_at_path_points
+    (form : HolomorphicOneForm X) (γ : C(unitInterval, X)) (B₁ B₂ : PathChartBall X)
+    {U : Set ℂ}
+    (hU_open : IsOpen U) (hU_preconnected : IsPreconnected U)
+    (hU_ball₁ : U ⊆ Metric.ball B₁.c B₁.r)
+    (hU_ball₂ : ∀ z ∈ U,
+      (extChartAt 𝓘(ℂ) B₁.p).symm z ∈ (extChartAt 𝓘(ℂ) B₂.p).source ∧
+        (extChartAt 𝓘(ℂ) B₂.p) ((extChartAt 𝓘(ℂ) B₁.p).symm z) ∈
+          Metric.ball B₂.c B₂.r)
+    {u v : unitInterval}
+    (hu₁ : u ∈ pathChartBallSet γ B₁) (hv₁ : v ∈ pathChartBallSet γ B₁)
+    (huU : (extChartAt 𝓘(ℂ) B₁.p) (γ u) ∈ U)
+    (hvU : (extChartAt 𝓘(ℂ) B₁.p) (γ v) ∈ U) :
+    pathChartBallPrimitive form B₁ ((extChartAt 𝓘(ℂ) B₁.p) (γ v)) -
+        pathChartBallPrimitive form B₁ ((extChartAt 𝓘(ℂ) B₁.p) (γ u)) =
+      pathChartBallPrimitive form B₂ ((extChartAt 𝓘(ℂ) B₂.p) (γ v)) -
+        pathChartBallPrimitive form B₂ ((extChartAt 𝓘(ℂ) B₂.p) (γ u)) := by
+  have hbase :=
+    pathChartBallPrimitive_endpoint_sub_eq_on_preconnected_overlap
+      (form := form) (B₁ := B₁) (B₂ := B₂)
+      hU_open hU_preconnected hU_ball₁ hU_ball₂ huU hvU
+  have hu_source : γ u ∈ (extChartAt 𝓘(ℂ) B₁.p).source := by
+    simpa [extChartAt_source] using hu₁.1
+  have hv_source : γ v ∈ (extChartAt 𝓘(ℂ) B₁.p).source := by
+    simpa [extChartAt_source] using hv₁.1
+  have hu_transition :
+      (extChartAt 𝓘(ℂ) B₂.p)
+          ((extChartAt 𝓘(ℂ) B₁.p).symm ((extChartAt 𝓘(ℂ) B₁.p) (γ u))) =
+        (extChartAt 𝓘(ℂ) B₂.p) (γ u) := by
+    rw [(extChartAt 𝓘(ℂ) B₁.p).left_inv hu_source]
+  have hv_transition :
+      (extChartAt 𝓘(ℂ) B₂.p)
+          ((extChartAt 𝓘(ℂ) B₁.p).symm ((extChartAt 𝓘(ℂ) B₁.p) (γ v))) =
+        (extChartAt 𝓘(ℂ) B₂.p) (γ v) := by
+    rw [(extChartAt 𝓘(ℂ) B₁.p).left_inv hv_source]
+  rw [hu_transition, hv_transition] at hbase
+  exact hbase
 
 end Jacobians.RiemannSurface
