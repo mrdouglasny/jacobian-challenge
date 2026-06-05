@@ -17,6 +17,7 @@ import Jacobians.ProjectiveCurve.Elliptic
 import Jacobians.ProjectiveCurve.Elliptic.Genus
 import Jacobians.ProjectiveCurve.Elliptic.OneForm
 import Jacobians.ProjectiveCurve.Elliptic.Witnesses
+import Jacobians.ProjectiveCurve.Elliptic.Periods
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
