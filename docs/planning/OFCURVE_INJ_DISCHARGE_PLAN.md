@@ -22,7 +22,15 @@ axiom with a **theorem**, validated concretely on `Elliptic` first, then general
 - `Elliptic ω₁ ω₂ h := ℂ ⧸ Λ` (`ellipticLattice`); `ellipticDz` (the form `dz`, `coeff = 1`);
   `ellipticCycleBasis`; the L0–L1 multi-chart integral (`canonicalArcIntegral`).
 
-## Milestone E — the Elliptic witness (FIRST, concrete)
+## Milestone E — the Elliptic witness (FIRST, concrete) — ✅ DONE 2026-05-31
+
+**Closed:** `EllipticOfCurveInj.elliptic_ofCurve_injective` (commit `d4f6e82`).
+Axioms = standard-3 + `AX_AnalyticCycleBasis`, `intersectionForm`,
+`AX_cycleBasisLoop_integrable` (no new axiom, not even `AX_PeriodLattice`).
+Key: injectivity needs only `periodLatticeInBasis ⊆ c•Λ` (the ⊆ direction).
+Supporting lemmas landed: `exists_lift_of_continuous_path` (piecewise lift),
+`analyticLoop_canonicalArcIntegral_ellipticDz_mem_lattice` (commit `ad2510e`).
+General genus>1 now proceeds via [`G3_DISCHARGE_PLAN.md`](G3_DISCHARGE_PLAN.md).
 
 Prove `Function.Injective (ofCurveImpl (Elliptic ω₁ ω₂ h) P)` directly.
 
