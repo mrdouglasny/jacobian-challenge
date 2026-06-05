@@ -54,9 +54,8 @@ guaranteed to be well-defined in a neighborhood of `u`. -/
 def IsAnalyticArc (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (extend : ℝ → X) (partition : Finset ℝ) :
     Prop :=
-  ∀ s ∈ partition, ∀ t ∈ partition, s < t →
-    ∀ u ∈ Set.Ioo s t,
-      AnalyticAt ℝ (fun r : ℝ => (extChartAt 𝓘(ℂ) (extend u)) (extend r)) u
+  ∀ u ∈ Set.Ioo (0 : ℝ) 1, u ∉ (partition : Set ℝ) →
+    AnalyticAt ℝ (fun r : ℝ => (extChartAt 𝓘(ℂ) (extend u)) (extend r)) u
 
 /-- A piecewise-real-analytic arc in a complex 1-manifold `X`.
 

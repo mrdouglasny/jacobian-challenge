@@ -17,14 +17,26 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 private lemma chartSeg_derivWithin_eq_deriv (γ : AnalyticArc X) (p : X)
     {a b s t r : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition)
     (hst : s < t) (hgap : Set.Ioo a b ⊆ Set.Ioo s t)
+    (hgap_no : ∀ u ∈ γ.partition, u ∉ Set.Ioo s t)
     (hp : ∀ u ∈ Set.Ioo a b, γ.extend u ∈ (extChartAt 𝓘(ℂ) p).source)
     (hr : r ∈ Set.Ioo a b) :
     derivWithin (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u))
         (Set.Ioo a b) r =
       deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) r := by
+  have _hst : s < t := hst
+  have hrst : r ∈ Set.Ioo s t := hgap hr
+  have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
+    have hs01 := γ.partition_subset hs
+    have ht01 := γ.partition_subset ht
+    exact ⟨hs01.1.trans_lt hrst.1, hrst.2.trans_le ht01.2⟩
+  have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
+    intro hrmem
+    have hrmem' : r ∈ γ.partition := by
+      simpa using hrmem
+    exact (hgap_no r hrmem') hrst
   have _ : DifferentiableWithinAt ℝ
       (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) (Set.Ioo a b) r :=
-    arc_chart_differentiableWithinAt γ p hs ht hst (hgap hr) (hp r hr) (Set.Ioo a b)
+    arc_chart_differentiableWithinAt γ p hr01 hr_notmem (hp r hr) (Set.Ioo a b)
   exact derivWithin_of_isOpen isOpen_Ioo hr
 
 /-- On a forward-oriented subinterval lying in one analytic partition gap and
@@ -34,6 +46,7 @@ theorem pathIntegralOnChartSeg_eq_deriv (γ : AnalyticArc X) (p : X)
     (a b : ℝ) (form : HolomorphicOneForm X) (hab : a ≤ b)
     {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
     (hgap : Set.Ioo a b ⊆ Set.Ioo s t)
+    (hgap_no : ∀ u ∈ γ.partition, u ∉ Set.Ioo s t)
     (hp : ∀ r ∈ Set.Ioo a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source) :
     pathIntegralOnChartSeg γ p a b form =
       ∫ r in a..b,
@@ -47,7 +60,7 @@ theorem pathIntegralOnChartSeg_eq_deriv (γ : AnalyticArc X) (p : X)
         form.coeff p ((extChartAt 𝓘(ℂ) p) (γ.extend r)) *
           deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) r := by
     intro r hr
-    rw [chartSeg_derivWithin_eq_deriv γ p hs ht hst hgap hp hr]
+    rw [chartSeg_derivWithin_eq_deriv γ p hs ht hst hgap hgap_no hp hr]
   refine intervalIntegral.integral_congr_ae ?_
   rw [MeasureTheory.ae_uIoc_iff]
   constructor
@@ -70,6 +83,7 @@ theorem pathIntegralOnChartSeg_split (γ : AnalyticArc X) (p : X)
     {a c b : ℝ} (hac : a ≤ c) (hcb : c ≤ b) (form : HolomorphicOneForm X)
     {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
     (hgap : Set.Ioo a b ⊆ Set.Ioo s t)
+    (hgap_no : ∀ u ∈ γ.partition, u ∉ Set.Ioo s t)
     (hp : ∀ r ∈ Set.Ioo a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source)
     (hint : IntervalIntegrable
       (fun r : ℝ =>
@@ -103,15 +117,15 @@ theorem pathIntegralOnChartSeg_split (γ : AnalyticArc X) (p : X)
   have h_ab :
       pathIntegralOnChartSeg γ p a b form = ∫ r in a..b, F r := by
     simpa [F] using
-      pathIntegralOnChartSeg_eq_deriv γ p a b form hab hs ht hst hgap hp
+      pathIntegralOnChartSeg_eq_deriv γ p a b form hab hs ht hst hgap hgap_no hp
   have h_ac :
       pathIntegralOnChartSeg γ p a c form = ∫ r in a..c, F r := by
     simpa [F] using
-      pathIntegralOnChartSeg_eq_deriv γ p a c form hac hs ht hst hgap_ac hp_ac
+      pathIntegralOnChartSeg_eq_deriv γ p a c form hac hs ht hst hgap_ac hgap_no hp_ac
   have h_cb :
       pathIntegralOnChartSeg γ p c b form = ∫ r in c..b, F r := by
     simpa [F] using
-      pathIntegralOnChartSeg_eq_deriv γ p c b form hcb hs ht hst hgap_cb hp_cb
+      pathIntegralOnChartSeg_eq_deriv γ p c b form hcb hs ht hst hgap_cb hgap_no hp_cb
   calc
     pathIntegralOnChartSeg γ p a b form = ∫ r in a..b, F r := h_ab
     _ = (∫ r in a..c, F r) + ∫ r in c..b, F r :=

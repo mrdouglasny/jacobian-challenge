@@ -18,7 +18,8 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 gaps of the arc. -/
 structure GoodPartition (γ : AnalyticArc X) extends ChartSubordinatePartition γ where
   gap : ∀ i : Fin n, ∃ s ∈ γ.partition, ∃ u ∈ γ.partition,
-    s < u ∧ Set.Ioo (t i.castSucc) (t i.succ) ⊆ Set.Ioo s u
+    s < u ∧ Set.Ioo (t i.castSucc) (t i.succ) ⊆ Set.Ioo s u ∧
+      (∀ r ∈ γ.partition, r ∉ Set.Ioo s u)
 
 namespace GoodPartition
 
@@ -77,6 +78,7 @@ private lemma pathIntegralOnChartSeg_eq_canonicalIntegrand
     (form : HolomorphicOneForm X) (hab : a ≤ b)
     {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition)
     (hst : s < t) (hgap : Set.Ioo a b ⊆ Set.Ioo s t)
+    (hgap_no : ∀ r ∈ γ.partition, r ∉ Set.Ioo s t)
     (hp : ∀ r ∈ Set.Ioo a b,
       γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source) :
     pathIntegralOnChartSeg γ p a b form =
@@ -87,7 +89,7 @@ private lemma pathIntegralOnChartSeg_eq_canonicalIntegrand
   have h_deriv :
       pathIntegralOnChartSeg γ p a b form = ∫ r in a..b, Fp r := by
     simpa [Fp] using
-      pathIntegralOnChartSeg_eq_deriv γ p a b form hab hs ht hst hgap hp
+      pathIntegralOnChartSeg_eq_deriv γ p a b form hab hs ht hst hgap hgap_no hp
   have h_congr :
       (∫ r in a..b, Fp r) =
         ∫ r in a..b, canonicalIntegrand γ form r := by
@@ -104,8 +106,18 @@ private lemma pathIntegralOnChartSeg_eq_canonicalIntegrand
       have hdp : DifferentiableWithinAt ℝ
           (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u))
           (Set.Ioo a b) r :=
-        arc_chart_differentiableWithinAt γ p hs ht hst
-          (hgap hro) (hp r hro) (Set.Ioo a b)
+        have hrst : r ∈ Set.Ioo s t := hgap hro
+        have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
+          have hs01 := γ.partition_subset hs
+          have ht01 := γ.partition_subset ht
+          exact ⟨hs01.1.trans_lt hrst.1, hrst.2.trans_le ht01.2⟩
+        have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
+          intro hrmem
+          have hrmem' : r ∈ γ.partition := by
+            simpa using hrmem
+          exact (hgap_no r hrmem') hrst
+        arc_chart_differentiableWithinAt γ p hr01 hr_notmem
+          (hp r hro) (Set.Ioo a b)
       have hcenter := integrand_center_independent form γ p (γ.extend r)
         a b r (hp r hro) (mem_extChartAt_source (I := 𝓘(ℂ)) (γ.extend r))
         hdp hro
@@ -131,7 +143,7 @@ private lemma pathIntegralOverGoodPartition_eq_canonicalIntegrand
         ∫ r in (Q.t i.castSucc)..(Q.t i.succ),
           canonicalIntegrand γ form r := by
     intro i
-    rcases P.gap i with ⟨s, hs, t, ht, hst, hgap⟩
+    rcases P.gap i with ⟨s, hs, t, ht, hst, hgap, hgap_no⟩
     have hab : Q.t i.castSucc ≤ Q.t i.succ :=
       Q.t_mono (Fin.castSucc_le_succ i)
     have hp : ∀ r ∈ Set.Ioo (Q.t i.castSucc) (Q.t i.succ),
@@ -141,7 +153,7 @@ private lemma pathIntegralOverGoodPartition_eq_canonicalIntegrand
         ⟨le_of_lt hr.1, le_of_lt hr.2⟩
       simpa [extChartAt_source] using Q.mem_source i r hrcc
     exact pathIntegralOnChartSeg_eq_canonicalIntegrand γ (Q.p i)
-      (Q.t i.castSucc) (Q.t i.succ) form hab hs ht hst hgap hp
+      (Q.t i.castSucc) (Q.t i.succ) form hab hs ht hst hgap hgap_no hp
   have hsum_cells :
       (∑ i : Fin Q.n,
           ∫ r in (Q.t i.castSucc)..(Q.t i.succ),

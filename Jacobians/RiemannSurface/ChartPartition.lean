@@ -214,7 +214,8 @@ theorem exists_good_partition (gamma : AnalyticArc X) :
       (∀ i : Fin n, ∀ u ∈ Set.Icc (tau i.castSucc) (tau i.succ),
         gamma.extend u ∈ (chartAt ℂ (p i)).source) ∧
       (∀ i : Fin n, ∃ s ∈ gamma.partition, ∃ t ∈ gamma.partition,
-        s < t ∧ Set.Ioo (tau i.castSucc) (tau i.succ) ⊆ Set.Ioo s t) := by
+        s < t ∧ Set.Ioo (tau i.castSucc) (tau i.succ) ⊆ Set.Ioo s t ∧
+        (∀ r ∈ gamma.partition, r ∉ Set.Ioo s t)) := by
   classical
   obtain ⟨n0, t0, p0, ht_zero, ht_last, ht_mono, hmem⟩ :=
     exists_chart_subordinate_partition gamma
@@ -289,7 +290,9 @@ theorem exists_good_partition (gamma : AnalyticArc X) :
   · intro i
     rcases exists_partition_gap_of_refined_cell (part := gamma.partition) (Pset := Pset)
         hpart_subset hPsubset gamma.zero_mem gamma.one_mem hcard i with
-      ⟨s, hs, t, ht, hst, hsub, _hconsecutive⟩
-    exact ⟨s, hs, t, ht, hst, by simpa [tau] using hsub⟩
+      ⟨s, hs, t, ht, hst, hsub, hconsecutive⟩
+    refine ⟨s, hs, t, ht, hst, by simpa [tau] using hsub, ?_⟩
+    intro r hr hrt
+    exact hconsecutive r hr hrt
 
 end Jacobians.RiemannSurface
