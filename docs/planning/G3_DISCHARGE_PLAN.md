@@ -89,6 +89,18 @@ finrank/`h⁰` bookkeeping in the clean route.
 The opaque `H0`/`LineBundle`/`AX_RiemannRoch` interface is NOT on the G3 path.
 Leave those stubs untouched for now (they still serve `AX_SerreDuality` etc.).
 
+### ℙ¹ / conservation infra (scoped 2026-05-31)
+- `ProjectiveLine := OnePoint ℂ` (`Line.lean:38`) — Riemann sphere, pts `↑(z:ℂ)`
+  or `∞`; `ChartedSpace ℂ` (2 charts) + `IsManifold`. Maps via coe `ℂ→ℙ¹` and `w↦↑w⁻¹`.
+- **`genus ProjectiveLine = 0` ALREADY PROVEN, axiom-free** (`Line/Genus.lean:30`).
+  ⇒ C1c half-done; only genus-biholo-invariance remains.
+- Wallace `weightedFiberConservation_of_contMDiff` (`HolomorphicMap.lean:1199`):
+  for `f:X→Y` ContMDiff, nonconstant, finite fibers, `∀ᶠ y in 𝓝 y₀,
+  Σ_{fiber y} mapAnalyticOrderAt f = Σ_{fiber y₀} …` (LOCAL constancy). Upgrade to
+  GLOBAL via ℙ¹ connectedness (locally-const ℤ on connected ⇒ const).
+- `mapAnalyticOrderAt f p : ℕ` (`HolomorphicMap.lean:175`) — positive local mult.
+  **C0 crux:** match `mapAnalyticOrderAt (toP1 f)` to `orderAt p f` (pole ⇒ fiber ∞).
+
 ### Phase C — the genus obstruction (deep core; no RR)
 - **C0 [NEW, the tedious bridge].** `toP1 : MeromorphicFunctionField X → (X → ℙ¹(ℂ))`,
   `f ↦ f̂` holomorphic, gluing `f` (off poles) and `1/f` (off zeros), with local
