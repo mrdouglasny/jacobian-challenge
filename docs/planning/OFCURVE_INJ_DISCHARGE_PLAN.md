@@ -62,3 +62,25 @@ Riemann–Roch); E's genus-1 instance of G3 is the classical elliptic Liouville 
 Guardrail: no relabelling — `AX_ofCurve_inj` must become a *derived* theorem, and the
 Elliptic witness must be a genuine computation (not `ofCurve := id` dressed up). Review
 against `DEFINITIONS_AUDIT.md` before merge.
+
+## Unification (2026-06-05) — drop Kirov's lineIntegral, put ofCurve + periods on one integral
+
+Root cause of the E2/G1 block: `ofCurve` uses `kirovBackedFunctional` (Kirov `lineIntegral`
+over `bridgePath`) while the period lattice uses `canonicalArcIntegral` (the L0–L1 integral over
+analytic arcs) — two integrals, never reconciled. KEY: `bridgePath` is **piecewise-analytic**
+(built from `chartFlatPath` = `flatSegment` affine segments, analytic in charts), so it CAN be
+an `AnalyticArc` and `canonicalArcIntegral` applies. Unify on `canonicalArcIntegral`:
+
+- **U1** `bridgePathArc P₀ P : AnalyticArc X` — give `bridgePath` an `AnalyticArc` structure
+  (partition = subdivision breakpoints `S.breakpoints`; `is_analytic` on each gap from
+  `chartFlatPath` = flat affine in `S.chart n` + analytic chart-transition; infra
+  `chartFlatPath_chart_eventuallyEq_flatSegment` exists). *Foundational.*
+- **U2** re-base `pathIntegralBasepointFunctional := canonicalArcIntegral (bridgePathArc P₀ P)`
+  (replace `kirovBackedFunctional`).
+- **U3** `canonicalArcIntegral` concat/reverse API (Kirov had these; needed for the G1 cocycle).
+- **U4** retire `Kirov.lineIntegral` / `kirovBackedFunctional` usage in `ofCurve`. KEEP Kirov's
+  Montel finite-dimensionality + `bridgeForm` (they drive `FiniteDimOneForms`, separate).
+
+Result: `ofCurve` and the period lattice use ONE integral ⇒ the G1 cocycle, ofCurve-loops-∈-lattice,
+and (deferred) homotopy invariance all live in one framework. Then E2/G1 unblock; homotopy
+invariance becomes the single remaining analytic prerequisite for full path-independence.
