@@ -93,8 +93,19 @@ the concrete map. Foundation for deriving the general `AX_ofCurve_inj` (Abel inj
 genus > 0) — see [`docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md`](docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md).
 Then → **62** by **de-opaquing** `PrincipalDivisors` to the additive subgroup
 corresponding to `MeromorphicFunctionField.divHom.range` via `Subgroup.toAddSubgroup'`
-(2026-06-05). No new axiom was introduced; `AX_AbelTheorem` keeps the same statement
-against the real principal-divisor subgroup.
+(2026-06-05). No new axiom was introduced.
+
+**Faithfulness fix (2026-06-05, count unchanged at 62).** Statement-vetting (Gemini
+deep-think + self-audit) caught that, once `PrincipalDivisors` became the concrete
+`range divHom` (all degree-0), the bare-kernel form `ker abelJacobiDiv = PrincipalDivisors`
+is **false**: `abelJacobiDiv` sends the basepoint divisor `(arbitrary)` to `0`
+(`AX_ofCurve_self`), so that degree-1 divisor lies in the kernel but is not principal —
+a latent inconsistency (would become derivable once `deg(div f) = 0` lands). Fixed by
+restricting to degree-0 divisors, matching Abel's actual theorem `Div⁰/Principal ≃ Jac`
+and the axiom's own docstring:
+`(abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker = PrincipalDivisors X`. All consumers feed
+only degree-0 divisors (differences `(Q₁)−(Q₂)`), so nothing is lost; the elliptic
+witness does not depend on this axiom.
 
 ---
 
@@ -133,7 +144,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_RiemannRoch` | `Axioms/RiemannRoch.lean:59` | Forster §16; Miranda Ch. VI |
 | `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | Forster §17; Griffiths–Harris Ch. 1 |
 | `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
-| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:66` | Forster §21; Miranda Ch. VIII |
+| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
 | `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard) |
