@@ -22,6 +22,7 @@ import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.GenusInvariance
 import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
+import Jacobians.RiemannSurface.RiemannRochSpace
 import Jacobians.RiemannSurface.MeromorphicToP1
 import Jacobians.RiemannSurface.DegreeOneGenusZero
 import Jacobians.RiemannSurface.MultiChartIntegral
