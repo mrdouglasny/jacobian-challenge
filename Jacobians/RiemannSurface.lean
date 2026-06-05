@@ -25,6 +25,8 @@ import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
 import Jacobians.RiemannSurface.RiemannRochSpace
 import Jacobians.RiemannSurface.RiemannRochAPI
+import Jacobians.RiemannSurface.SerreDualityAPI
+import Jacobians.RiemannSurface.PluckerAPI
 import Jacobians.RiemannSurface.MeromorphicToP1
 import Jacobians.RiemannSurface.DegreeOneGenusZero
 import Jacobians.RiemannSurface.MultiChartIntegral
