@@ -3,7 +3,22 @@
 *Living synthesis of the three workstream plans
 ([`OFCURVE_INJ_DISCHARGE_PLAN`](OFCURVE_INJ_DISCHARGE_PLAN.md),
 [`G3_DISCHARGE_PLAN`](G3_DISCHARGE_PLAN.md),
-[`HOMOTOPY_INVARIANCE_PLAN`](HOMOTOPY_INVARIANCE_PLAN.md)). Last updated 2026-05-31.*
+[`HOMOTOPY_INVARIANCE_PLAN`](HOMOTOPY_INVARIANCE_PLAN.md)). Last updated 2026-06-06.*
+
+> ✅ **GOAL ACHIEVED (2026-06-05).** `AX_ofCurve_inj` is **retired**; general
+> positive-genus Abel injectivity is now the theorem `AX_ofCurve_inj` in
+> `Jacobians/Axioms/OfCurveInjective.lean` (kept name, now a `theorem`).
+> Resolution route: rather than completing the full homotopy-invariance chain
+> (branch A: HI-1→HI-4), we isolated the single analytic fact it needed —
+> basepoint-independence — as the **deep-think-vetted period 1-cocycle axiom
+> `AX_Period_Triangle`** (a one-for-one swap, `−AX_ofCurve_inj +AX_Period_
+> Triangle`). The genus obstruction (branch B: G3) and Abel's theorem are
+> both real, exactly as the DAG below shows. The branch-A homotopy-invariance
+> work (the developing map) is now **optional** — it would discharge
+> `AX_Period_Triangle` itself (well-definedness + base case done; bridge +
+> telescoping remain). `#print axioms` on the theorem: standard-3 +
+> `AX_AbelTheorem`, `AX_Period_Triangle`, `AX_AnalyticCycleBasis`,
+> `intersectionForm`, `AX_cycleBasisLoop_integrable` — no `sorryAx`.
 
 ## The goal
 
