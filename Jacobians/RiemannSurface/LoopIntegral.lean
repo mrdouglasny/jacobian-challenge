@@ -46,4 +46,20 @@ noncomputable def loopIntegralToH1 {X : Type*} [TopologicalSpace X] [T2Space X]
       arcPeriodFunctional (cb.loops i).arc
         (fun form => AX_cycleBasisLoop_integrable x₀ cb i form))).toAddMonoidHom
 
+/-- On the homology class of a chosen cycle-basis loop, `loopIntegralToH1`
+returns that loop's canonical period functional. -/
+theorem loopIntegralToH1_loop {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (i : Fin (2 * genus X)) :
+    let cb := Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)
+    loopIntegralToH1 x₀ (Jacobians.Axioms.loopToHomology (cb.loops i))
+      = arcPeriodFunctional (cb.loops i).arc
+          (fun form => AX_cycleBasisLoop_integrable x₀ cb i form) := by
+  let cb := Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)
+  change loopIntegralToH1 x₀ (Jacobians.Axioms.loopToHomology (cb.loops i))
+      = arcPeriodFunctional (cb.loops i).arc
+          (fun form => AX_cycleBasisLoop_integrable x₀ cb i form)
+  rw [← cb.loops_to_basis i]
+  simp [loopIntegralToH1, cb]
+
 end Jacobians.RiemannSurface

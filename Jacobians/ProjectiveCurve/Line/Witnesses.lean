@@ -85,7 +85,10 @@ noncomputable def projectiveLineCycleBasis (x₀ : ProjectiveLine) :
   refine
     { loops := fun _ => constLoop x₀
       isBasis := Module.Basis.empty _
+      loops_to_basis := ?_
       symplectic := ?_ }
+  · intro i
+    exact (‹IsEmpty (Fin (2 * genus ProjectiveLine))›.false i).elim
   intro i _
   exact (‹IsEmpty (Fin (genus ProjectiveLine))›.false i).elim
 

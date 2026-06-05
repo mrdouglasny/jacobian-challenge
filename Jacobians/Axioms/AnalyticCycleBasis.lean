@@ -207,6 +207,23 @@ noncomputable def βEmbed {X : Type*} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (i : Fin (genus X)) : Fin (2 * genus X) :=
   ⟨genus X + i.val, by have := i.isLt; omega⟩
 
+/-- The underlying topological path of an analytic loop. -/
+def loopToPath {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {x₀ : X} (loop : AnalyticLoop X x₀) : Path x₀ x₀ where
+  toFun := loop.arc.toFun
+  continuous_toFun := loop.arc.continuous_toFun
+  source' := by
+    simpa [AnalyticArc.toFun] using loop.start_eq
+  target' := by
+    simpa [AnalyticArc.toFun] using loop.end_eq
+
+/-- The first-homology class of an analytic loop (Hurewicz:
+loop ↦ [loop] ∈ H₁). -/
+noncomputable def loopToHomology {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {x₀ : X} (loop : AnalyticLoop X x₀) : H1 X x₀ :=
+  Additive.ofMul (Abelianization.of
+    (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk (loopToPath loop))))
+
 /-- The data of a piecewise-real-analytic **symplectic** ℤ-basis of
 `H_1(X, ℤ)` with each basis class represented by a specific
 piecewise-analytic loop.
@@ -222,12 +239,10 @@ structure AnalyticCycleBasis (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) where
   /-- The `2g` piecewise-real-analytic loops based at `x₀`. -/
   loops : Fin (2 * genus X) → AnalyticLoop X x₀
-  /-- Their homology classes form a ℤ-basis of `H_1(X, ℤ)`. For now we
-  ask only that *some* such basis exists; relating the basis element at
-  index `i` back to `loops i` (via a `Path.toHomologyClass`
-  construction that will live in `Jacobians/RiemannSurface/IntersectionForm.lean`)
-  is a downstream theorem, not part of this axiom. -/
+  /-- The ordered ℤ-basis of `H_1(X, ℤ)` represented by `loops`. -/
   isBasis : Module.Basis (Fin (2 * genus X)) ℤ (H1 X x₀)
+  /-- The basis vector at index `i` is the homology class of `loops i`. -/
+  loops_to_basis : ∀ i : Fin (2 * genus X), isBasis i = loopToHomology (loops i)
   /-- **Symplectic condition.** The basis decomposes into `α`-cycles
   (indices `0 .. genus X - 1`) and `β`-cycles (indices `genus X ..
   2 * genus X - 1`) via `αEmbed` / `βEmbed`. The intersection form has
@@ -240,13 +255,6 @@ structure AnalyticCycleBasis (X : Type*) [TopologicalSpace X] [T2Space X]
     ((intersectionForm x₀ (isBasis (βEmbed i))) (isBasis (βEmbed j)) = 0) ∧
     ((intersectionForm x₀ (isBasis (αEmbed i))) (isBasis (βEmbed j)) =
       (if i = j then (1 : ℤ) else 0))
-
--- TODO (loops_to_basis): a theorem
---   `loops_to_basis_eq (b : AnalyticCycleBasis X x₀) (i : Fin (2 * genus X)) :
---     b.isBasis i = Path.toHomologyClass ((b.loops i).arc.toFun ...)`
--- connecting the basis elements to the actual loops' homology classes.
--- Needs `Path.toHomologyClass` from the Hurewicz bridge (TODO in
--- `IntersectionForm.lean`).
 
 /-- **Axiom.** Every compact connected Riemann surface admits a
 piecewise-real-analytic symplectic ℤ-basis of `H_1(X, ℤ)`.
