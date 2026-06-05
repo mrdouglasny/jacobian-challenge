@@ -53,13 +53,14 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- **Axiom-stub (data).** The Abel-Jacobi map extended linearly from
+/-- The Abel-Jacobi map extended linearly from
 points to divisors. On a formal combination `∑ n_P · P`, evaluates to
 `∑ n_P · ofCurveImpl P₀ P - (∑ n_P) · ofCurveImpl P₀ P₀`; basepoint
 `P₀` is chosen via `Classical.arbitrary`. -/
-axiom abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
+noncomputable def abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X
+    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X :=
+  FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)
 
 /-- **Axiom (Abel's theorem).** The kernel of the Abel-Jacobi map on
 divisors is exactly the subgroup of principal divisors. -/
