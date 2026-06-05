@@ -1,92 +1,124 @@
 'genus' depends on axioms: [propext, Classical.choice, Quot.sound]
-'Jacobians.Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
-'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, RiemannSurface.loopIntegralToH1]
+'Jacobians.Jacobian' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
+'Jacobian' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.ofCurve' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pushforward' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
+ Axioms.intersectionForm,
  Axioms.pushforwardOneForm,
- RiemannSurface.loopIntegralToH1]
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
 'Jacobian.ofCurve_self' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_ofCurve_inj,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_PeriodLattice,
  Axioms.AX_ofCurve_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
- Axioms.pathIntegralBasepointFunctional,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_PeriodLattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
  Axioms.AX_pushforward_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pushforward_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pushforward_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- RiemannSurface.loopIntegralToH1]
+ Axioms.intersectionForm,
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pullback_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_PeriodLattice,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pullback_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
+ Axioms.intersectionForm,
  Axioms.pushforwardOneForm,
- RiemannSurface.loopIntegralToH1]
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pullback_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardOneForm_id,
+ Axioms.intersectionForm,
  Axioms.pushforwardOneForm,
- RiemannSurface.loopIntegralToH1]
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pullback_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardOneForm_comp,
+ Axioms.intersectionForm,
  Axioms.pushforwardOneForm,
- RiemannSurface.loopIntegralToH1]
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobian.pushforward_pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
  Axioms.AX_pushforward_pullback,
+ Axioms.intersectionForm,
  Axioms.pushforwardOneForm,
- RiemannSurface.loopIntegralToH1]
+ RiemannSurface.AX_cycleBasisLoop_integrable]
 'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero' depends on axioms: [propext,
  Classical.choice,

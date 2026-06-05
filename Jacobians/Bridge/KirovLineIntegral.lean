@@ -78,32 +78,28 @@ After (this bridge, partial):
 
 The actual analytic content of `kirovBackedFunctional` itself —
 linearity in the form via `lineIntegral_add` / `lineIntegral_smul` — is
-**derived** from Kirov's `lineIntegral_*` theorems. **The FTC content
-remains open** (`kirovBackedFunctional_local_antiderivative := sorry`).
-A previous attempt closed it with a structural axiom that was just a
-relabelling of the original `AX_pathIntegral_local_antiderivative`;
-that was reverted. Honest derivation is the next sub-agent target.
+**derived** from Kirov's `lineIntegral_*` theorems.
+
+**The single-valued ℂ "FTC" (`kirovBackedFunctional_local_antiderivative`)
+was DELETED 2026-06-04: it is FALSE** on any genus ≥ 1 curve (it forces a
+global primitive of a holomorphic 1-form, hence zero periods — see the note at
+the end of this file, and `Axioms/AbelJacobiMap.lean`). It is **not** a
+to-be-discharged target. Path-independence lives honestly at the homology level
+(`RiemannSurface.loopIntegralToH1`); `kirovBackedFunctional` itself is a sound
+`def` and can de-opaque `pathIntegralBasepointFunctional` with no FTC.
 
 ## Status
 
-This file has **one open `sorry`** (the FTC theorem) plus six
-structural `bridgePath*` axioms.
+This file is **`sorry`-free** (`chartLine_FTC`, the *chart-line* FTC, is a real
+theorem; the false full-path FTC was deleted) plus six structural `bridgePath*`
+axioms.
 
-- `kirovBackedFunctional` (commit `eb580e8`) is **honestly constructed**
+- `kirovBackedFunctional` is **honestly constructed**
   from `bridgeForm` + `lineIntegral` + `bridgePath`; linearity is
   `LinearMap.map_add` / `LinearMap.map_smul` of `bridgeForm` followed
   by `lineIntegral_add` / `lineIntegral_smul` (the former under the
-  integrability axiom `bridgePath_lineIntegrable`). This is genuine
-  progress: the functional is a real composition of vendored Kirov
-  machinery, not just an existence claim.
-- `kirovBackedFunctional_local_antiderivative` is `sorry`. A previous
-  fill via a structural FTC axiom `bridgePath_local_antiderivative`
-  was reverted — that was a verbatim relabelling of the original FTC
-  axiom into the bridge namespace, not a derivation. The honest
-  derivation requires building a chart-line concatenation in
-  `bridgePath` and then chaining
-  `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` with FTC for
-  `intervalIntegral`. Tracked as the next sub-agent target.
+  integrability axiom `bridgePath_lineIntegrable`). The functional is a real
+  composition of vendored Kirov machinery, not an existence claim.
 
 Of the six remaining structural axioms in this file, only `bridgePath`
 and `bridgePath_lineIntegrable` are load-bearing in
@@ -126,17 +122,15 @@ endpoint/regularity axioms (`bridgePath_continuous`,
    - `bridgePath_lineIntegrable` — derived from continuity of the
      bridged form + continuity of `pathSpeed` (the latter requires
      upgrading `bridgePath_chart_differentiable` to a `C¹` hypothesis).
-   - `bridgePath_local_antiderivative` — derived from
-     `Vendor.Kirov.pathSpeed_comp_eq_mfderiv` + `mfderiv_extChartAt_self`
-     + a chart-line concatenation construction (likely:
-     `bridgePath P₀ Q := concat (basePath P₀ P) (chartLine P Q)` for
-     `Q` near `P`, plus the FTC for `intervalIntegral` on the
-     chart-line piece).
+   (There is **no** `bridgePath_local_antiderivative` step: the single-valued
+   ℂ FTC is false — see the note at the end of this file. Path-independence is
+   discharged separately at the homology level, by globalizing
+   `Bridge/ContourDeformation.lean` into `RiemannSurface.loopIntegralToH1`.)
 4. In `Jacobians/Axioms/AbelJacobiMap.lean`, replace
    `axiom pathIntegralBasepointFunctional` with
    `noncomputable def pathIntegralBasepointFunctional :=
-      kirovBackedFunctional`, and the local-antiderivative axiom with
-   the theorem above.
+      kirovBackedFunctional` (de-opaque, no FTC). The former
+   local-antiderivative axiom is already deleted (was false).
 
 See `vendor/kirov-jacobian-claude/HANDOFF.md` for surrounding context.
 -/
@@ -145,6 +139,7 @@ import Jacobians.RiemannSurface.OneForm
 import Jacobians.Vendor.Kirov.LineIntegral
 import Jacobians.Bridge.BridgePath
 import Jacobians.Bridge.KirovHolomorphic
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 namespace Jacobians.Bridge
 
@@ -605,6 +600,344 @@ theorem extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
       (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
   exact (extChartAt 𝓘(ℂ, ℂ) P).right_inv hz
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
+private lemma chartLine_continuousAt_of_mem_target (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    ContinuousAt (chartLine (X := X) P z) t := by
+  let η : ℝ → ℂ := fun s =>
+    (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hsymm_cont :
+      ContinuousAt ((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) (η t) := by
+    exact (continuousOn_extChartAt_symm P).continuousAt
+      (hOpen.mem_nhds (by simpa [η] using hz))
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hcomp :
+      ContinuousAt (((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) ∘ η) t :=
+    hsymm_cont.comp hη_cont
+  change ContinuousAt
+    (fun s : ℝ =>
+      (extChartAt 𝓘(ℂ, ℂ) P).symm
+        ((1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z)) t
+  simpa [η, Function.comp_def] using hcomp
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+private lemma chartLine_current_chart_differentiableAt (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (chartLine (X := X) P z t)).toFun ∘
+        chartLine (X := X) P z) t := by
+  let w : ℂ := (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z
+  let y : X := chartLine (X := X) P z t
+  have hy_eq : y = (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+    simp [y, w, chartLine]
+  have htrans_diff_C : DifferentiableAt ℂ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w := by
+    have hsymm_mdiff_within : MDifferentiableWithinAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm (Set.range (𝓘(ℂ, ℂ))) w := by
+      simpa [w] using mdifferentiableWithinAt_extChartAt_symm hz
+    have hsymm_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+      have hrange :
+          (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+        ModelWithCorners.range_eq_univ _
+      rw [← mdifferentiableWithinAt_univ, ← hrange]
+      exact hsymm_mdiff_within
+    have hchart_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) y) ((extChartAt 𝓘(ℂ, ℂ) P).symm w) := by
+      apply mdifferentiableAt_extChartAt
+      rw [← extChartAt_source (I := 𝓘(ℂ, ℂ)), ← hy_eq]
+      exact mem_extChartAt_source y
+    exact (hchart_mdiff.comp w hsymm_mdiff).differentiableAt
+  have htrans_diff_R : DifferentiableAt ℝ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w :=
+    htrans_diff_C.restrictScalars ℝ
+  have haff : DifferentiableAt ℝ
+      (fun s : ℝ => (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z) t := by
+    fun_prop
+  have hcomp := htrans_diff_R.comp t haff
+  simpa [chartLine, y, w, extChartAt_coe, modelWithCornersSelf_coe,
+    Function.comp_def] using hcomp
+
+private lemma pathSpeed_extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    fderiv ℝ ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z)
+        t (1 : ℝ) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  let η : ℝ → ℂ := fun s => (1 - s) • a + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hη_target : ∀ᶠ s in 𝓝 t, η s ∈ (extChartAt 𝓘(ℂ, ℂ) P).target :=
+    hη_cont.eventually (hOpen.mem_nhds (by simpa [η, a] using hz))
+  have heq :
+      ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z) =ᶠ[𝓝 t]
+        η := by
+    filter_upwards [hη_target] with s hs
+    exact extChartAt_chartLine (X := X) P z (by simpa [η, a] using hs)
+  have hder : fderiv ℝ η t (1 : ℝ) = z - a := by
+    have hder' : HasDerivAt (fun s : ℝ => a + s • (z - a)) (z - a) t := by
+      simpa only [Pi.add_apply, zero_add, one_smul, id_eq] using
+        (hasDerivAt_const (x := t) (c := a)).add
+          ((hasDerivAt_id t).smul_const (z - a))
+    have hfun : (fun s : ℝ => (1 - s) • a + s • z) =
+        fun s : ℝ => a + s • (z - a) := by
+      funext s
+      rw [sub_smul, one_smul]
+      module
+    exact (hder'.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hfun)).deriv
+  simpa [a] using
+    (congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq.fderiv_eq).trans hder
+
+private lemma mfderiv_extChartAt_pathSpeed_chartLine [Nonempty X]
+    (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P)
+        (chartLine (X := X) P z t))
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  have hspeed := mfderiv_extChartAt_apply_pathSpeed (x := P)
+    (γ := chartLine (X := X) P z) (t := t)
+    (chartLine_continuousAt_of_mem_target (X := X) P z hz)
+    (chartLine_current_chart_differentiableAt (X := X) P z hz)
+    (by
+      have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+      simpa [chartLine] using hsrc)
+  exact hspeed.trans (pathSpeed_extChartAt_chartLine (X := X) P z hz)
+
+private lemma bridgeForm_chartLine_integrand [Nonempty X]
+    (P : X) (form : HolomorphicOneForm X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  let y : X := chartLine (X := X) P z t
+  have hy_self : y ∈ (extChartAt 𝓘(ℂ, ℂ) y).source := mem_extChartAt_source y
+  have hy_fixed : y ∈ (extChartAt 𝓘(ℂ, ℂ) P).source := by
+    have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+    simpa [y, chartLine] using hsrc
+  have hswap : (Jacobians.Bridge.bridgeForm form).toFun y =
+      BridgeForm.rawCLM form P y := by
+    change BridgeForm.rawCLM form y y = BridgeForm.rawCLM form P y
+    exact BridgeForm.rawCLM_swap_chart form hy_self hy_fixed
+  have hcoord :
+      (extChartAt 𝓘(ℂ, ℂ) P) y =
+        (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
+    simpa [y] using extChartAt_chartLine (X := X) P z hz
+  have hspeed :
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P) y)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+        z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+    simpa [y] using mfderiv_extChartAt_pathSpeed_chartLine (X := X) P z hz
+  calc
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)
+        = BridgeForm.rawCLM form P y
+            (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) := by
+          rw [hswap]
+    _ = form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+          unfold BridgeForm.rawCLM
+          rw [hcoord]
+          change form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) •
+              ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+                (extChartAt 𝓘(ℂ, ℂ) P) y)
+                (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)) =
+            form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+              (z - (extChartAt 𝓘(ℂ, ℂ) P) P)
+          rw [hspeed]
+          rfl
+
+private lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
+    (P : X) (form : HolomorphicOneForm X) :
+    (fun z : ℂ =>
+        Jacobians.Vendor.Kirov.lineIntegral (Jacobians.Bridge.bridgeForm form)
+          (chartLine (X := X) P z)) =ᶠ[𝓝 ((extChartAt 𝓘(ℂ, ℂ) P) P)]
+      (fun z : ℂ =>
+        ∫ t in (0 : ℝ)..1,
+          form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+            (z - (extChartAt 𝓘(ℂ, ℂ) P) P)) := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  have ha_target : a ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    simp [a]
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  rcases Metric.isOpen_iff.mp hOpen a ha_target with ⟨r, hr_pos, hr_sub⟩
+  filter_upwards [Metric.ball_mem_nhds a hr_pos] with z hz_ball
+  unfold Jacobians.Vendor.Kirov.lineIntegral
+  refine intervalIntegral.integral_congr (fun t ht => ?_)
+  have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := by
+    simpa [Set.uIcc_of_le zero_le_one] using ht
+  have hline :
+      (1 - t) • a + t • z ∈ segment ℝ a z := by
+    rw [← AffineMap.lineMap_apply_module]
+    exact lineMap_mem_segment ℝ a z htIcc
+  have htarget :
+      (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+        (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    have hball : (1 - t) • a + t • z ∈ Metric.ball a r :=
+      segment_subset_ball (Metric.mem_ball_self hr_pos) hz_ball hline
+    exact hr_sub (by simpa [a] using hball)
+  exact bridgeForm_chartLine_integrand (X := X) P form z htarget
+
+private lemma hasDerivAt_mul_sub_of_continuousAt {f : ℂ → ℂ} {a : ℂ}
+    (hf : ContinuousAt f a) :
+    HasDerivAt (fun z : ℂ => f z * (z - a)) (f a) a := by
+  rw [hasDerivAt_iff_tendsto_slope]
+  have hslope :
+      (slope (fun z : ℂ => f z * (z - a)) a) =ᶠ[𝓝[≠] a] f := by
+    have hfun :
+        (fun z : ℂ => f z * (z - a)) = fun z : ℂ => (z - a) • f z := by
+      funext z
+      simp [smul_eq_mul, mul_comm]
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hne : a ≠ z := by
+      simpa [Set.mem_compl_iff, Set.mem_singleton_iff, eq_comm] using hz
+    rw [hfun]
+    exact slope_sub_smul f hne
+  exact Tendsto.congr' hslope.symm (hf.tendsto.mono_left nhdsWithin_le_nhds)
+
+private lemma chartLine_average_coeff_continuousAt
+    (P : X) (form : HolomorphicOneForm X) :
+    ContinuousAt
+      (fun z : ℂ =>
+        ∫ t in (0 : ℝ)..1,
+          form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z))
+      ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  have ha_target : a ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    simp [a]
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hcoeff_cont :
+      ContinuousOn (form.coeff P) (extChartAt 𝓘(ℂ, ℂ) P).target :=
+    (form.2.1 P).continuousOn
+  have hcoeff_at : ContinuousAt (form.coeff P) a := by
+    have hcoeff_an :
+        AnalyticAt ℂ (form.coeff P) a :=
+      (form.2.1 P).analyticAt (hOpen.mem_nhds ha_target)
+    exact hcoeff_an.continuousAt
+  rcases Metric.isOpen_iff.mp hOpen a ha_target with ⟨r, hr_pos, hr_sub⟩
+  let ρ : ℝ := r / 2
+  have hρ_pos : 0 < ρ := by
+    positivity
+  have hρ_lt_r : ρ < r := by
+    dsimp [ρ]
+    linarith
+  have hseg_target :
+      ∀ z ∈ Metric.closedBall a ρ, ∀ t ∈ Set.Icc (0 : ℝ) 1,
+        (1 - t) • a + t • z ∈ (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    intro z hz t ht
+    have hz_ball : z ∈ Metric.ball a r := by
+      have hdist_lt : dist z a < r := by
+        exact lt_of_le_of_lt (by simpa [Metric.mem_closedBall] using hz) hρ_lt_r
+      simpa [Metric.mem_ball] using hdist_lt
+    have hline :
+        (1 - t) • a + t • z ∈ segment ℝ a z := by
+      rw [← AffineMap.lineMap_apply_module]
+      exact lineMap_mem_segment ℝ a z ht
+    have hball : (1 - t) • a + t • z ∈ Metric.ball a r :=
+      segment_subset_ball (Metric.mem_ball_self hr_pos) hz_ball hline
+    exact hr_sub hball
+  have hprod_cont :
+      ContinuousOn
+        (fun p : ℂ × ℝ => form.coeff P ((1 - p.2) • a + p.2 • p.1))
+        (Metric.closedBall a ρ ×ˢ Set.Icc (0 : ℝ) 1) := by
+    have haff_cont :
+        Continuous fun p : ℂ × ℝ => (1 - p.2) • a + p.2 • p.1 := by
+      fun_prop
+    exact hcoeff_cont.comp haff_cont.continuousOn
+      (fun p hp => hseg_target p.1 hp.1 p.2 hp.2)
+  have hcompact :
+      IsCompact (Metric.closedBall a ρ ×ˢ Set.Icc (0 : ℝ) 1) :=
+    (isCompact_closedBall a ρ).prod isCompact_Icc
+  rcases hcompact.exists_bound_of_continuousOn hprod_cont with ⟨M, hM⟩
+  have hF_meas :
+      ∀ᶠ z in 𝓝 a,
+        AEStronglyMeasurable
+          (fun t : ℝ => form.coeff P ((1 - t) • a + t • z))
+          (MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) 1)) := by
+    filter_upwards [Metric.ball_mem_nhds a hρ_pos] with z hz
+    have hz_closed : z ∈ Metric.closedBall a ρ :=
+      Metric.ball_subset_closedBall hz
+    have hcont_t :
+        ContinuousOn
+          (fun t : ℝ => form.coeff P ((1 - t) • a + t • z))
+          (Set.Icc (0 : ℝ) 1) := by
+      have haff_cont : Continuous fun t : ℝ => (1 - t) • a + t • z := by
+        fun_prop
+      exact hcoeff_cont.comp haff_cont.continuousOn
+        (fun t ht => hseg_target z hz_closed t ht)
+    have huIoc_subset : Set.uIoc (0 : ℝ) 1 ⊆ Set.Icc (0 : ℝ) 1 := by
+      rw [Set.uIoc_of_le zero_le_one]
+      exact Set.Ioc_subset_Icc_self
+    exact hcont_t.aestronglyMeasurable_of_subset_isCompact
+      isCompact_Icc measurableSet_uIoc huIoc_subset
+  have h_bound :
+      ∀ᶠ z in 𝓝 a,
+        ∀ᵐ t ∂MeasureTheory.volume,
+          t ∈ Set.uIoc (0 : ℝ) 1 →
+            ‖form.coeff P ((1 - t) • a + t • z)‖ ≤ max M 0 := by
+    filter_upwards [Metric.ball_mem_nhds a hρ_pos] with z hz
+    have hz_closed : z ∈ Metric.closedBall a ρ :=
+      Metric.ball_subset_closedBall hz
+    filter_upwards with t
+    intro ht
+    have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := by
+      have htIoc : t ∈ Set.Ioc (0 : ℝ) 1 := by
+        simpa [Set.uIoc_of_le zero_le_one] using ht
+      exact Set.Ioc_subset_Icc_self htIoc
+    exact (hM (z, t) ⟨hz_closed, htIcc⟩).trans (le_max_left M 0)
+  have h_bound_int :
+      IntervalIntegrable (fun _ : ℝ => max M 0) MeasureTheory.volume (0 : ℝ) 1 := by
+    exact intervalIntegrable_const
+  have h_cont :
+      ∀ᵐ t ∂MeasureTheory.volume,
+        t ∈ Set.uIoc (0 : ℝ) 1 →
+          ContinuousAt
+            (fun z : ℂ => form.coeff P ((1 - t) • a + t • z)) a := by
+    filter_upwards with t
+    intro _ht
+    have hline_at : (1 - t) • a + t • a = a := by
+      rw [← add_smul]
+      ring_nf
+      simp
+    have haff_cont : ContinuousAt (fun z : ℂ => (1 - t) • a + t • z) a := by
+      fun_prop
+    have hcomp :
+        ContinuousAt
+          ((form.coeff P) ∘ fun z : ℂ => (1 - t) • a + t • z) a :=
+      ContinuousAt.comp_of_eq
+        (f := fun z : ℂ => (1 - t) • a + t • z)
+        (g := form.coeff P) (x := a) (y := a)
+        hcoeff_at haff_cont hline_at
+    simpa [Function.comp_def] using hcomp
+  simpa [a] using
+    (intervalIntegral.continuousAt_of_dominated_interval
+      (μ := MeasureTheory.volume)
+      (F := fun z : ℂ => fun t : ℝ =>
+        form.coeff P ((1 - t) • a + t • z))
+      (x₀ := a) (bound := fun _ : ℝ => max M 0)
+      (a := (0 : ℝ)) (b := 1) hF_meas h_bound h_bound_int h_cont)
+
 /-- **FTC for `chartLine`.** The line integral of `bridgeForm form` along
 the chart-line from `P` to `(extChartAt P).symm z` has derivative w.r.t.
 `z` equal to `form.coeff P ((extChartAt P) P)` at `z = (extChartAt P) P`.
@@ -618,7 +951,37 @@ theorem chartLine_FTC [Nonempty X] (P : X) (form : HolomorphicOneForm X) :
           (chartLine (X := X) P z))
       (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
       ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
-  sorry
+  have hline := lineIntegral_chartLine_eq_eventually (X := X) P form
+  suffices hparam :
+      HasDerivAt
+        (fun z : ℂ =>
+          ∫ t in (0 : ℝ)..1,
+            form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+              (z - (extChartAt 𝓘(ℂ, ℂ) P) P))
+        (form.coeff P ((extChartAt 𝓘(ℂ, ℂ) P) P))
+        ((extChartAt 𝓘(ℂ, ℂ) P) P) by
+    exact hparam.congr_of_eventuallyEq hline
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  let I : ℂ → ℂ := fun z =>
+    ∫ t in (0 : ℝ)..1, form.coeff P ((1 - t) • a + t • z)
+  have hIcont : ContinuousAt I a := by
+    simpa [I, a] using chartLine_average_coeff_continuousAt (X := X) P form
+  have hIa : I a = form.coeff P a := by
+    calc
+      I a = ∫ _t in (0 : ℝ)..1, form.coeff P a := by
+        apply intervalIntegral.integral_congr
+        intro t _ht
+        change form.coeff P ((1 - t) • a + t • a) = form.coeff P a
+        congr 1
+        rw [← add_smul]
+        ring_nf
+        simp
+      _ = form.coeff P a := by
+        simp
+  have hder :
+      HasDerivAt (fun z : ℂ => I z * (z - a)) (form.coeff P a) a := by
+    simpa [hIa] using hasDerivAt_mul_sub_of_continuousAt hIcont
+  simpa [I, a] using hder
 
 /-! ## The bridge functional
 
@@ -660,72 +1023,41 @@ noncomputable def kirovBackedFunctional (P₀ P : X) :
     rw [hBF]
     exact Jacobians.Vendor.Kirov.lineIntegral_smul c _ _
 
-/-- **Local-antiderivative property** — would discharge the FTC axiom
-`AX_pathIntegral_local_antiderivative` from
-`Jacobians/Axioms/AbelJacobiMap.lean`.
+/-! ## The single-valued ℂ FTC is FALSE — removed 2026-06-04
 
-**Status: open.** A previous attempt closed this `sorry` by introducing
-a structural axiom `bridgePath_local_antiderivative` that asserts the
-exact statement here for the chosen `bridgePath` — i.e., a verbatim
-relabelling of the original FTC axiom into the bridge namespace. That
-is **not real progress**: the deep mathematical content (the
-fundamental theorem of calculus for path integrals along a chosen path
-family) is still asserted, just under a new name. The relabelling
-commit was reverted; this `sorry` is intentionally left open.
-
-**The honest derivation route** uses Kirov's
-`Vendor.Kirov.pathSpeed_comp_eq_mfderiv` (chain rule for chart-local
-path speed under smooth composition), `mfderiv_extChartAt_self` (the
-chart's `mfderiv` at its centre point is identity), and the standard
-FTC for `intervalIntegral` applied to a chart-line concatenation:
+A former `theorem kirovBackedFunctional_local_antiderivative` (a `sorry`,
+the bridge-side mirror of `AX_pathIntegral_local_antiderivative`) asserted
 
 ```
-bridgePath P₀ ((extChartAt P).symm z)
-  = concat (bridgePath P₀ P) (chartLine P z)        -- conceptually
+HasDerivAt (fun z => kirovBackedFunctional P₀ ((extChartAt P).symm z) form)
+           (form.coeff P (φ P)) (φ P)        -- for every P
 ```
 
-so that the upper endpoint moves smoothly with `z` along the
-chart-line piece, and the FTC for that piece gives the chart-local
-coefficient sample.
+This is **false on any genus ≥ 1 curve.** `kirovBackedFunctional P₀ · form` is
+a single-valued `ℂ`-valued function of its endpoint; the statement, quantified
+over all `P`, makes it a *global primitive* of the holomorphic 1-form `form`,
+forcing every period `∮_γ form = 0` — contradicting nonzero periods (e.g.
+`genus_Elliptic = 1`). No chart-line-tail refinement of `bridgePath` can prove
+it; the obstruction is not a missing construction but the falsity of the goal.
+(A prior attempt "closed" the `sorry` by relabelling it as a fresh axiom; that
+was reverted. The deeper reason it cannot be discharged honestly is that it is
+false.)
 
-This requires building a chart-line concatenation construction in the
-`bridgePath` definition rather than declaring it abstractly via a
-single axiom. Once that holds the FTC becomes a derivation, not an
-assertion. -/
-theorem kirovBackedFunctional_local_antiderivative
-    (P₀ P : X) (form : HolomorphicOneForm X) :
-    HasDerivAt
-      (fun z : ℂ =>
-        kirovBackedFunctional (X := X) P₀ ((extChartAt 𝓘(ℂ) P).symm z) form)
-      (form.coeff P ((extChartAt 𝓘(ℂ) P) P))
-      ((extChartAt 𝓘(ℂ) P) P) := by
-  sorry
-
-/-! ## Replacement plan for `Axioms/AbelJacobiMap.lean`
-
-Once both `kirovBackedFunctional` and `kirovBackedFunctional_local_antiderivative`
-are filled in, the corresponding axioms in `AbelJacobiMap.lean` can be
-forwarded as follows (deferred to a follow-up commit):
-
-```lean
--- Replace `axiom pathIntegralBasepointFunctional ...` with:
-noncomputable def pathIntegralBasepointFunctional
-    (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
-    (P₀ P : X) : HolomorphicOneForm X →ₗ[ℂ] ℂ :=
-  Jacobians.Bridge.kirovBackedFunctional P₀ P
-
--- Replace `axiom AX_pathIntegral_local_antiderivative ...` with:
-theorem AX_pathIntegral_local_antiderivative
-    (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
-    (P₀ P : X) (form : HolomorphicOneForm X) : ... :=
-  Jacobians.Bridge.kirovBackedFunctional_local_antiderivative P₀ P form
-```
-
-That removes 2 of our biggest data-level axioms, replacing them with
-the 4 `bridgePath*` structural axioms in this file. Net axiom count
-goes UP by 2 in raw count, but the SHAPE is much better: each
-`bridgePath*` axiom is concrete and discharge-friendly. -/
+**The honest architecture:**
+* `kirovBackedFunctional` (the `def` above) is a fine, genuine line-integral
+  `def` — it can replace the *opaque* axiom `pathIntegralBasepointFunctional`
+  in `Axioms/AbelJacobiMap.lean`, de-opaquing `ofCurve` (killing the
+  zero-functional degeneracy) **with no FTC required.** That replacement is
+  sound; only the FTC theorem above was false.
+* Path-independence lives — correctly — at the **closed-loop / homology**
+  level, as the (true, standard) axiom
+  `Jacobians.RiemannSurface.loopIntegralToH1` (`∮_γ ω` depends only on
+  `[γ] ∈ H₁`). Its honest discharge globalizes the chart-local homotopy
+  invariance now in `Jacobians.Bridge.ContourDeformation`
+  (`contourDeformation1D_pathHomotopy_abstract`) via a homotopy-rectangle
+  subdivision. See `docs/planning/ABEL_JACOBI_DISCHARGE_PLAN.md`.
+* A genuine "FTC", if ever wanted, must be stated on the **quotient**
+  `ofCurve : X → ℂ^g/Λ` (manifold-differentiable; the period ambiguity is
+  locally constant), not on a single-valued ℂ lift. -/
 
 end Jacobians.Bridge
