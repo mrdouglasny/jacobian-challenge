@@ -45,6 +45,33 @@ the cell-boundary integrals (interior edges cancel pairwise; the chart-transitio
 cocycle cancels by the proven integrand-independence). The boundary of the whole
 square = γ₁ − γ₂ (endpoints fixed). Standard but bookkeeping-heavy.
 
+### HI-1 alt (Route B) — disc primitives / primitive-covering (likely cleaner)
+
+*Prompted by K. Buzzard's 2026-06-05 "Jacobian challenge" Zulip note: a Riemann-
+surface expert pointed out you CAN integrate ω along any continuous path C —
+"write primitives for ω on small discs, cover the path so the primitives agree on
+overlaps, take the difference of endpoint − startpoint" — so no piecewise-linear/
+analytic approximation is needed.*
+
+This IS the analytic-continuation / covering-space definition, and it makes
+homotopy invariance nearly definitional:
+- ω holomorphic ⇒ locally exact (a primitive `f_U` on each chart disc; difference
+  of two primitives is locally constant). The sheaf of local primitives is a
+  **covering space** of `X` (the "period/primitive covering" `π : X̃ω → X`);
+  ∫_C ω = (lift of C to X̃ω at the end) − (at the start).
+- **Homotopy invariance = the homotopy-lifting property of a covering map** —
+  Mathlib already has this (`IsCoveringMap`, `existsUnique_continuousMap_lifts`,
+  homotopy lifting). NO square-subdivision telescoping.
+- **We already did the genus-1 instance:** `exists_lift_of_continuous_path` on
+  `ℂ/Λ` is exactly this — the lift is the global primitive, `liftBP 1 − liftBP 0`
+  the endpoint difference. Generalize from the quotient covering `ℂ → ℂ/Λ` to the
+  primitive covering of a general `(X, ω)`.
+- Cost: constructing `X̃ω` (espace étalé of the primitive sheaf) + showing
+  `IsCoveringMap` for a holomorphic ω. `exists_chart_subordinate_grid` still helps
+  build local sections. Compare against Route A before committing; Route B reuses
+  the elliptic covering-lift machinery and Mathlib covering theory, so it is the
+  preferred candidate to evaluate first.
+
 ### HI-2 — factor through H₁
 `canonicalArcIntegral` of a loop depends only on its homotopy class (HI-1) ⇒
 descends to π₁ ⇒ (commutators integrate to 0 by path-additivity = free) descends to
