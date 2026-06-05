@@ -3,7 +3,7 @@ Copyright (c) 2026 Michael R Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.Divisor
 import Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Algebra.FreeAbelianGroup.Finsupp
