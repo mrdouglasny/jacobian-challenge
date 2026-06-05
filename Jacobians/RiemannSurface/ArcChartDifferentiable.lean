@@ -16,8 +16,8 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 /-- An analytic arc is real-differentiable in any chart whose source contains the
 point, at interior points of an analyticity partition interval. -/
 theorem arc_chart_differentiableWithinAt (γ : AnalyticArc X) (p : X)
-    {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
-    {u : ℝ} (hu : u ∈ Set.Ioo s t)
+    {u : ℝ} (hu01 : u ∈ Set.Ioo (0 : ℝ) 1)
+    (hunotmem : u ∉ (γ.partition : Set ℝ))
     (hp : γ.extend u ∈ (extChartAt 𝓘(ℂ) p).source) (S : Set ℝ) :
     DifferentiableWithinAt ℝ
       (fun r : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend r)) S u := by
@@ -30,7 +30,7 @@ theorem arc_chart_differentiableWithinAt (γ : AnalyticArc X) (p : X)
     change γ.extend u ∈ (extChartAt 𝓘(ℂ) (γ.extend u)).source
     exact mem_extChartAt_source (γ.extend u)
   have hg_diff : DifferentiableAt ℝ g u := by
-    simpa [q, ψ, g] using (γ.is_analytic s hs t ht hst u hu).differentiableAt
+    simpa [q, ψ, g] using (γ.is_analytic u hu01 hunotmem).differentiableAt
   have hz : g u ∈ ψ.target := by
     simpa [g] using ψ.map_source hq_source
   have hsymm_z : ψ.symm (g u) = γ.extend u := by

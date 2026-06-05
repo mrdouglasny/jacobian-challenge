@@ -297,52 +297,134 @@ section BridgePathArcPartition
 
 variable {X : Type*} [TopologicalSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
 
+private noncomputable def concatChartFlatPathAuxPartition : ℕ → Finset ℝ
+  | 0 => {0, 1}
+  | k + 1 => (concatChartFlatPathAuxPartition k).image (fun r : ℝ => r / 2) ∪ {1 / 2, 1}
+
+private lemma concatChartFlatPathAuxPartition_subset (k : ℕ) :
+    ↑(concatChartFlatPathAuxPartition k) ⊆ Set.Icc (0 : ℝ) 1 := by
+  induction k with
+  | zero =>
+      intro r hr
+      have hr' : r = 0 ∨ r = 1 := by
+        simpa [concatChartFlatPathAuxPartition] using hr
+      rcases hr' with rfl | rfl <;> norm_num
+  | succ k ih =>
+      intro r hr
+      rw [concatChartFlatPathAuxPartition] at hr
+      rcases Finset.mem_union.mp hr with himg | hright
+      · rcases Finset.mem_image.mp himg with ⟨x, hx, rfl⟩
+        have hx01 := ih hx
+        constructor <;> nlinarith [hx01.1, hx01.2]
+      · have hright' : r = 1 / 2 ∨ r = 1 := by
+          simpa using hright
+        rcases hright' with rfl | rfl <;> norm_num
+
+private lemma concatChartFlatPathAuxPartition_zero_mem (k : ℕ) :
+    (0 : ℝ) ∈ concatChartFlatPathAuxPartition k := by
+  induction k with
+  | zero =>
+      simp [concatChartFlatPathAuxPartition]
+  | succ k ih =>
+      rw [concatChartFlatPathAuxPartition]
+      exact Finset.mem_union.mpr
+        (Or.inl (Finset.mem_image.mpr ⟨0, ih, by norm_num⟩))
+
+private lemma concatChartFlatPathAuxPartition_one_mem (k : ℕ) :
+    (1 : ℝ) ∈ concatChartFlatPathAuxPartition k := by
+  induction k with
+  | zero =>
+      simp [concatChartFlatPathAuxPartition]
+  | succ k _ =>
+      simp [concatChartFlatPathAuxPartition]
+
+private lemma concatChartFlatPathAuxRegular_of_mem_Ioo_not_mem_partition
+    (k : ℕ) {t : ℝ} (ht01 : t ∈ Set.Ioo (0 : ℝ) 1)
+    (htnot : t ∉ concatChartFlatPathAuxPartition k) :
+    PathChartBallSubdivision.concatChartFlatPathAuxRegular k t := by
+  induction k generalizing t with
+  | zero =>
+      exact Or.inr (Or.inl ht01)
+  | succ k ih =>
+      have ht_ne_half : t ≠ 1 / 2 := by
+        intro ht
+        apply htnot
+        subst t
+        simp [concatChartFlatPathAuxPartition]
+      rcases lt_or_gt_of_ne ht_ne_half with htlt | hthalf
+      · refine Or.inl ⟨htlt, ih ?_ ?_⟩
+        · constructor <;> nlinarith [ht01.1, htlt]
+        · intro hmem
+          apply htnot
+          have ht_image :
+              t ∈ (concatChartFlatPathAuxPartition k).image (fun r : ℝ => r / 2) := by
+            exact Finset.mem_image.mpr ⟨2 * t, hmem, by ring⟩
+          change t ∈ (concatChartFlatPathAuxPartition k).image (fun r : ℝ => r / 2) ∪
+            {1 / 2, 1}
+          exact Finset.mem_union.mpr (Or.inl ht_image)
+      · refine Or.inr ⟨hthalf, ?_⟩
+        exact Or.inr (Or.inl ⟨by nlinarith [hthalf], by nlinarith [ht01.2]⟩)
+
 /-- The finite breakpoint set obtained from the chosen bridge-path subdivision. -/
 noncomputable def bridgePathArcPartition (P₀ P : X) : Finset ℝ :=
   let γ : Path P₀ P := (exists_path P₀ P).some
   let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
-  Finset.image
-    (fun i : Fin (S.lastIndex + 1) => ((S.breakpoints i : unitInterval) : ℝ))
-    Finset.univ
+  concatChartFlatPathAuxPartition S.lastIndex
 
 theorem bridgePathArcPartition_subset (P₀ P : X) :
     ↑(bridgePathArcPartition (X := X) P₀ P) ⊆ Set.Icc (0 : ℝ) 1 := by
-  classical
   let γ : Path P₀ P := (exists_path P₀ P).some
   let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
-  change
-    ↑(Finset.image
-      (fun i : Fin (S.lastIndex + 1) => ((S.breakpoints i : unitInterval) : ℝ))
-      Finset.univ) ⊆ Set.Icc (0 : ℝ) 1
-  intro r hr
-  rcases Finset.mem_image.mp hr with ⟨i, _hi, rfl⟩
-  exact (S.breakpoints i).2
+  change ↑(concatChartFlatPathAuxPartition S.lastIndex) ⊆ Set.Icc (0 : ℝ) 1
+  exact concatChartFlatPathAuxPartition_subset S.lastIndex
 
 theorem bridgePathArcPartition_zero_mem (P₀ P : X) :
     (0 : ℝ) ∈ bridgePathArcPartition (X := X) P₀ P := by
-  classical
   let γ : Path P₀ P := (exists_path P₀ P).some
   let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
-  change
-    (0 : ℝ) ∈ Finset.image
-      (fun i : Fin (S.lastIndex + 1) => ((S.breakpoints i : unitInterval) : ℝ))
-      Finset.univ
-  refine Finset.mem_image.mpr ⟨⟨0, Nat.succ_pos S.lastIndex⟩, by simp, ?_⟩
-  exact congrArg Subtype.val (S.breakpoints_zero)
+  change (0 : ℝ) ∈ concatChartFlatPathAuxPartition S.lastIndex
+  exact concatChartFlatPathAuxPartition_zero_mem S.lastIndex
 
 theorem bridgePathArcPartition_one_mem (P₀ P : X) :
     (1 : ℝ) ∈ bridgePathArcPartition (X := X) P₀ P := by
-  classical
   let γ : Path P₀ P := (exists_path P₀ P).some
   let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
-  change
-    (1 : ℝ) ∈ Finset.image
-      (fun i : Fin (S.lastIndex + 1) => ((S.breakpoints i : unitInterval) : ℝ))
-      Finset.univ
-  refine Finset.mem_image.mpr
-    ⟨⟨S.lastIndex, Nat.lt_succ_self S.lastIndex⟩, by simp, ?_⟩
-  exact congrArg Subtype.val (S.breakpoints_last)
+  change (1 : ℝ) ∈ concatChartFlatPathAuxPartition S.lastIndex
+  exact concatChartFlatPathAuxPartition_one_mem S.lastIndex
+
+theorem bridgePathImplRegular_of_mem_Ioo_not_mem_bridgePathArcPartition
+    (P₀ P : X) {t : ℝ} (ht01 : t ∈ Set.Ioo (0 : ℝ) 1)
+    (htnot : t ∉ (bridgePathArcPartition (X := X) P₀ P : Set ℝ)) :
+    bridgePathImplRegular (X := X) P₀ P t := by
+  let γ : Path P₀ P := (exists_path P₀ P).some
+  let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+  change PathChartBallSubdivision.concatChartFlatPathAuxRegular S.lastIndex t
+  apply concatChartFlatPathAuxRegular_of_mem_Ioo_not_mem_partition S.lastIndex ht01
+  intro hmem
+  apply htnot
+  simpa [bridgePathArcPartition] using hmem
 
 end BridgePathArcPartition
+
+section BridgePathArc
+
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
+  [IsManifold 𝓘(ℂ) ω X]
+
+/-- The bridge path packaged as a piecewise-real-analytic arc. -/
+noncomputable def bridgePathArc (P₀ P : X) : AnalyticArc X where
+  extend := bridgePathImpl (X := X) P₀ P
+  continuous' := bridgePathImpl_continuous (X := X) P₀ P
+  partition := bridgePathArcPartition (X := X) P₀ P
+  partition_subset := bridgePathArcPartition_subset (X := X) P₀ P
+  zero_mem := bridgePathArcPartition_zero_mem (X := X) P₀ P
+  one_mem := bridgePathArcPartition_one_mem (X := X) P₀ P
+  is_analytic := by
+    intro u hu01 hunotmem
+    exact bridgePathImpl_extChartAt_current_analyticAt_of_regular (X := X) P₀ P
+      (bridgePathImplRegular_of_mem_Ioo_not_mem_bridgePathArcPartition
+        (X := X) P₀ P hu01 hunotmem)
+
+end BridgePathArc
 
 end Jacobians.Bridge
