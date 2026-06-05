@@ -19,6 +19,7 @@ import Jacobians.RiemannSurface.SquareSubdivision
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.MeromorphicFunctionField
 import Jacobians.RiemannSurface.MultiChartIntegral
 import Jacobians.RiemannSurface.IntegrandIndependence
 import Jacobians.RiemannSurface.ArcChartDifferentiable
