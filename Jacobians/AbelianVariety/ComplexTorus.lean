@@ -161,7 +161,9 @@ noncomputable instance : ChartedSpace V (ComplexTorus V L) where
     exact ⟨liftPoint (L := L) p, liftPoint_mem_chartTarget (L := L) p, liftPoint_spec (L := L) p⟩
   chart_mem_atlas p := ⟨p, rfl⟩
 
-private lemma extChartAt_symm_eq_quotient_mk (p : ComplexTorus V L) {z : V}
+/-- The inverse of a standard complex-torus chart is the quotient map on its
+target. -/
+theorem extChartAt_symm_eq_quotient_mk (p : ComplexTorus V L) {z : V}
     (hz : z ∈ chartTarget (L := L) p) :
     (extChartAt 𝓘(ℂ, V) p).symm z = QuotientAddGroup.mk' L.toAddSubgroup z := by
   have hx : QuotientAddGroup.mk' L.toAddSubgroup z ∈ (chartAt V p).source := by
@@ -256,7 +258,9 @@ private lemma liftPoint_neg_const_mem (p : ComplexTorus V L) :
     QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hq.symm)
   simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
 
-private lemma mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
+/-- Membership in the target of a complex-torus extended chart is membership in
+the corresponding standard quotient-chart target. -/
+theorem mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
     z ∈ (extChartAt 𝓘(ℂ, V) p).target ↔ z ∈ chartTarget (L := L) p := by
   rw [extChartAt_target]
   simpa [modelWithCornersSelf_coe_symm] using
