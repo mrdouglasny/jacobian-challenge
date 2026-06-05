@@ -1105,4 +1105,119 @@ theorem developingValue_eq_developingValueOfSubdivision
     developingValueOfSubdivision_eq_of_subdivisions form γ
       (chosenPathChartBallSubdivision γ) S
 
+/-- Local B2 bridge: for an analytic arc contained in one chart-coordinate
+ball, the developing value of its underlying continuous path is the canonical
+arc integral, under the same derivative and interval-integrability side
+conditions as the chart-primitive FTC lemma `B1`. -/
+theorem developingValue_analyticArcToContinuousMap_eq_canonicalArcIntegral_of_pathChartBall
+    (x₀ : X) (form : HolomorphicOneForm X) (γ : AnalyticArc X)
+    (B : PathChartBall X)
+    (hpath : ∀ u : unitInterval, u ∈ pathChartBallSet (analyticArcToContinuousMap γ) B)
+    (hchart_hasDeriv_right : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      HasDerivWithinAt
+        (fun u : ℝ => (extChartAt 𝓘(ℂ) B.p) (γ.extend u))
+        (deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) B.p) (γ.extend u)) t)
+        (Set.Ioi t) t)
+    (hintegrable : IntervalIntegrable
+      (fun t : ℝ =>
+        form.coeff B.p ((extChartAt 𝓘(ℂ) B.p) (γ.extend t)) *
+          deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) B.p) (γ.extend u)) t)
+      MeasureTheory.volume (0 : ℝ) 1) :
+    developingValue x₀ form (analyticArcToContinuousMap γ) =
+      canonicalArcIntegral γ form := by
+  classical
+  let τ : Fin (1 + 1) → unitInterval := fun i =>
+    if i = (0 : Fin (1 + 1)) then 0 else 1
+  let S : PathChartBallSubdivision (analyticArcToContinuousMap γ) :=
+    { n := 1
+      t := τ
+      cellBall := fun _ => B
+      zero_eq := by
+        simp [τ]
+      one_eq := by
+        simp [τ, Fin.last]
+      monotone_t := by
+        intro i j hij
+        fin_cases i <;> fin_cases j <;> simp [τ] at hij ⊢
+      cell_subset := by
+        intro i u _hu
+        exact hpath u }
+  have hdev :
+      developingValue x₀ form (analyticArcToContinuousMap γ) =
+        developingValueOfSubdivision form (analyticArcToContinuousMap γ) S :=
+    developingValue_eq_developingValueOfSubdivision x₀ form
+      (analyticArcToContinuousMap γ) S
+  have hsub :
+      developingValueOfSubdivision form (analyticArcToContinuousMap γ) S =
+        developingIncrement form (analyticArcToContinuousMap γ) S 0 := by
+    simp [developingValueOfSubdivision, S]
+  have hsource : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      γ.extend t ∈ (extChartAt 𝓘(ℂ) B.p).source := by
+    intro t ht
+    let u : unitInterval := ⟨t, ht⟩
+    have hu := hpath u
+    simpa [u, analyticArcToContinuousMap_apply, extChartAt_source] using hu.1
+  have hpath_ball : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (extChartAt 𝓘(ℂ) B.p) (γ.extend t) ∈ Metric.ball B.c B.r := by
+    intro t ht
+    let u : unitInterval := ⟨t, ht⟩
+    have hu := hpath u
+    simpa [u, analyticArcToContinuousMap_apply] using hu.2
+  have hcanon := canonicalArcIntegral_eq_chartPrimitive_endpoint_sub
+    (γ := γ) (form := form) (x₀ := B.p) (c := B.c) (r := B.r)
+    (g := pathChartBallPrimitive form B)
+    hsource hpath_ball (pathChartBallPrimitive_hasDerivAt form B)
+    hchart_hasDeriv_right hintegrable
+  have hinc :
+      developingIncrement form (analyticArcToContinuousMap γ) S 0 =
+        canonicalArcIntegral γ form := by
+    unfold developingIncrement
+    rw [hcanon]
+    simp [S, τ]
+  calc
+    developingValue x₀ form (analyticArcToContinuousMap γ) =
+        developingValueOfSubdivision form (analyticArcToContinuousMap γ) S := hdev
+    _ = developingIncrement form (analyticArcToContinuousMap γ) S 0 := hsub
+    _ = canonicalArcIntegral γ form := hinc
+
+/-- A continuous loop contained in one chart-coordinate ball has zero
+developing value: the one-cell subdivision evaluates to a single primitive
+endpoint difference with equal endpoints. -/
+theorem developingValue_eq_zero_of_loop_in_pathChartBall
+    (x₀ : X) (form : HolomorphicOneForm X) (γ : C(unitInterval, X))
+    (B : PathChartBall X)
+    (hloop : γ (0 : unitInterval) = γ (1 : unitInterval))
+    (himage : ∀ u : unitInterval, u ∈ pathChartBallSet γ B) :
+    developingValue x₀ form γ = 0 := by
+  classical
+  let τ : Fin (1 + 1) → unitInterval := fun i =>
+    if i = (0 : Fin (1 + 1)) then 0 else 1
+  let S : PathChartBallSubdivision γ :=
+    { n := 1
+      t := τ
+      cellBall := fun _ => B
+      zero_eq := by
+        simp [τ]
+      one_eq := by
+        simp [τ, Fin.last]
+      monotone_t := by
+        intro i j hij
+        fin_cases i <;> fin_cases j <;> simp [τ] at hij ⊢
+      cell_subset := by
+        intro i u _hu
+        exact himage u }
+  have hdev :
+      developingValue x₀ form γ = developingValueOfSubdivision form γ S :=
+    developingValue_eq_developingValueOfSubdivision x₀ form γ S
+  have hsub :
+      developingValueOfSubdivision form γ S = developingIncrement form γ S 0 := by
+    simp [developingValueOfSubdivision, S]
+  have hinc : developingIncrement form γ S 0 = 0 := by
+    unfold developingIncrement
+    simp [S, τ, hloop]
+  calc
+    developingValue x₀ form γ = developingValueOfSubdivision form γ S := hdev
+    _ = developingIncrement form γ S 0 := hsub
+    _ = 0 := hinc
+
 end Jacobians.RiemannSurface
