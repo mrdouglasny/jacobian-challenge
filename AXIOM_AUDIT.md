@@ -75,9 +75,15 @@ being the genuine L0–L1 multi-chart integral (chart-cocycle + partition-indepe
 all **proven**, ~10 new modules). `periodMap`/`ofCurve` no longer list
 `loopIntegralToH1`; they rest on `AX_AnalyticCycleBasis` + `intersectionForm` (the
 symplectic cycle basis, already needed for the lattice) + the trivial
-`AX_cycleBasisLoop_integrable`. The deepest analytic gap is closed; only full
-homotopy invariance (representative-independence for *arbitrary* loops, not just the
-basis) remains as a deferred faithfulness upgrade.
+`AX_cycleBasisLoop_integrable`. **Basis-faithfulness (PR #7 review fix):** the
+`AnalyticCycleBasis` structure gained a `loops_to_basis` field
+(`∀ i, isBasis i = loopToHomology (loops i)`, the Hurewicz loop→class tie) —
+honestly strengthening `AX_AnalyticCycleBasis`/`AX_Elliptic_H1_symplectic`, no new
+axiom — so `loopIntegralToH1_loop` proves `loopIntegralToH1 (loopToHomology (cb.loops i))
+= ∮_{cb.loops i}`: the pairing assigns each basis loop's **genuine period** to its
+H₁ class. The deepest analytic gap is closed; only full homotopy invariance
+(representative-independence for *arbitrary* loops, not just the basis) remains as a
+deferred faithfulness upgrade.
 
 ---
 
