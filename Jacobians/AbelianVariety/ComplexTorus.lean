@@ -476,6 +476,103 @@ theorem extChartAt_quotient_mk_path_deriv {L : Submodule ℤ ℂ}
     exact (hbase.const_add (liftPoint (L := L) p)).deriv
   exact hEq.deriv_eq.trans hderiv
 
+private theorem quotient_mk_isCoveringMap {L : Submodule ℤ ℂ} [DiscreteTopology L] :
+    IsCoveringMap (QuotientAddGroup.mk' L.toAddSubgroup : ℂ → ComplexTorus ℂ L) := by
+  haveI : DiscreteTopology L.toAddSubgroup := (inferInstance : DiscreteTopology L)
+  exact (AddSubgroup.isAddQuotientCoveringMap_of_comm L.toAddSubgroup
+    DiscreteTopology.isDiscrete).isCoveringMap
+
+/-- A continuous real path in a complex torus whose coordinate expression is differentiable in
+the chart centered at each time has a differentiable lift to the universal covering space `ℂ`.
+The lifted derivative is the chart velocity. -/
+theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
+    [DiscreteTopology L] [IsZLattice ℝ L]
+    (g : ℝ → ComplexTorus ℂ L) (hg_cont : Continuous g)
+    (hg_diff : ∀ t, DifferentiableAt ℝ ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) :
+    ∃ ghat : ℝ → ℂ,
+      (∀ u, (QuotientAddGroup.mk' L.toAddSubgroup (ghat u) : ComplexTorus ℂ L) = g u) ∧
+      (∀ t, DifferentiableAt ℝ ghat t) ∧
+      (∀ t, deriv ghat t = deriv ((extChartAt 𝓘(ℂ, ℂ) (g t)) ∘ g) t) := by
+  let q : ℂ → ComplexTorus ℂ L := QuotientAddGroup.mk' L.toAddSubgroup
+  let f : C(ℝ, ComplexTorus ℂ L) := ⟨g, hg_cont⟩
+  let e₀ : ℂ := liftPoint (L := L) (g 0)
+  have he₀ : q e₀ = f 0 := by
+    simpa [q, f, e₀] using liftPoint_spec (L := L) (g 0)
+  rcases (quotient_mk_isCoveringMap (L := L)).existsUnique_continuousMap_lifts f 0 e₀ he₀ with
+    ⟨F, hF, _hF_unique⟩
+  have h_lift : ∀ u,
+      (QuotientAddGroup.mk' L.toAddSubgroup (F u) : ComplexTorus ℂ L) = g u := by
+    intro u
+    simpa [q, f] using congr_fun hF.2 u
+  have h_diff : ∀ t, DifferentiableAt ℝ (F : ℝ → ℂ) t := by
+    intro t
+    let p : ComplexTorus ℂ L := g t
+    let c : ℂ := F t - liftPoint (L := L) p
+    have hc_mem : liftPoint (L := L) p - F t ∈ (L.toAddSubgroup : Set ℂ) := by
+      have hq :
+          QuotientAddGroup.mk' L.toAddSubgroup (liftPoint (L := L) p) =
+            QuotientAddGroup.mk' L.toAddSubgroup (F t) := by
+        exact (liftPoint_spec (L := L) p).trans (by simpa [p] using (h_lift t).symm)
+      have :
+          -(F t) + liftPoint (L := L) p ∈ (L.toAddSubgroup : Set ℂ) :=
+        QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hq.symm)
+      simpa [sub_eq_add_neg, add_comm] using this
+    have hnear :
+        ∀ᶠ u in 𝓝 t, F u - F t ∈ Metric.ball (0 : ℂ) (chartRadius (L := L)) := by
+      have hcont : ContinuousAt (fun u : ℝ => F u - F t) t :=
+        F.continuous.continuousAt.sub continuousAt_const
+      have hball : ∀ᶠ z in 𝓝 (0 : ℂ),
+          z ∈ Metric.ball (0 : ℂ) (chartRadius (L := L)) :=
+        Metric.ball_mem_nhds (0 : ℂ) (chartRadius_pos (L := L))
+      have hball' : ∀ᶠ z in 𝓝 (F t - F t),
+          z ∈ Metric.ball (0 : ℂ) (chartRadius (L := L)) := by
+        simpa using hball
+      exact hcont.eventually hball'
+    have hEq :
+        (F : ℝ → ℂ) =ᶠ[𝓝 t]
+          fun u : ℝ => extChartAt 𝓘(ℂ, ℂ) p (g u) + c := by
+      filter_upwards [hnear] with u hu
+      let δ : ℂ := F u - F t
+      have hz : liftPoint (L := L) p + δ ∈ chartTarget (L := L) p := by
+        exact ⟨δ, by simpa [δ] using hu, rfl⟩
+      have hmk :
+          QuotientAddGroup.mk' L.toAddSubgroup (F u) =
+            QuotientAddGroup.mk' L.toAddSubgroup (liftPoint (L := L) p + δ) := by
+        apply Quotient.sound'
+        rw [QuotientAddGroup.leftRel_apply]
+        have hrel :
+            -(F u) + (liftPoint (L := L) p + δ) = liftPoint (L := L) p - F t := by
+          simp only [δ, sub_eq_add_neg]
+          abel
+        simpa [hrel] using hc_mem
+      have hchart :
+          extChartAt 𝓘(ℂ, ℂ) p (g u) = liftPoint (L := L) p + δ := by
+        calc
+          extChartAt 𝓘(ℂ, ℂ) p (g u)
+              = extChartAt 𝓘(ℂ, ℂ) p
+                  ((QuotientAddGroup.mk' L.toAddSubgroup (F u) :
+                    ComplexTorus ℂ L)) := by
+                    rw [h_lift u]
+          _ = extChartAt 𝓘(ℂ, ℂ) p
+                ((QuotientAddGroup.mk' L.toAddSubgroup
+                  (liftPoint (L := L) p + δ) : ComplexTorus ℂ L)) := by
+                rw [hmk]
+          _ = liftPoint (L := L) p + δ :=
+                extChartAt_apply_quotient_mk (L := L) p hz
+      calc
+        F u = (liftPoint (L := L) p + δ) + c := by
+          simp only [δ, c, p, sub_eq_add_neg]
+          abel
+        _ = extChartAt 𝓘(ℂ, ℂ) p (g u) + c := by
+          rw [hchart]
+    exact hEq.differentiableAt_iff.2 ((hg_diff t).add_const c)
+  refine ⟨F, h_lift, h_diff, ?_⟩
+  intro t
+  have hderiv :=
+    extChartAt_quotient_mk_path_deriv (L := L) (p := g t) (g := (F : ℝ → ℂ)) t
+      (h_diff t) (by simpa using (h_lift t).symm)
+  simpa [Function.comp, h_lift] using hderiv.symm
+
 private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × V} :
     z ∈ (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ↔
       z.1 ∈ chartTarget (L := L) p ∧ z.2 ∈ chartTarget (L := L) q := by
