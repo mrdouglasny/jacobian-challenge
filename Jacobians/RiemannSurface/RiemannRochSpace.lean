@@ -12,8 +12,8 @@ This file anchors the textbook Riemann-Roch space attached to a divisor.  For
 Forster, *Lectures on Riemann Surfaces*, §16, this is
 `L(D) = H^0(X, O(D))`: meromorphic functions `f` satisfying `div(f) + D ≥ 0`.
 
-The bridge to the existing opaque `H0` API is deferred to a single theorem at
-the end of the file.
+The bridge to the `H0` API lives downstream in `LineBundle.lean`, where `H0`
+is definitionally identified with this space.
 -/
 
 noncomputable section
@@ -146,13 +146,5 @@ def riemannRochSpace (D : Divisor X) : Submodule ℂ (X → ℂ) where
       · intro p
         rw [orderAt_const_smul_of_ne_zero hc p f]
         exact hf_ord p
-
-/-- Deferred comparison between the existing opaque `H0` formulation and the
-real Riemann-Roch space `L(D) = H^0(X, O(D))` of Forster, *Lectures on Riemann
-Surfaces*, §16.  This is intentionally the only theorem in this file whose
-proof is still opaque. -/
-theorem H0_equiv_riemannRochSpace (D : Divisor X) :
-    Nonempty (H0 (LineBundle.ofDivisor D) ≃ₗ[ℂ] riemannRochSpace D) := by
-  sorry
 
 end Jacobians.RiemannSurface

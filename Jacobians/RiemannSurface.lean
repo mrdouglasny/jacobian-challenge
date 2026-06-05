@@ -20,6 +20,7 @@ import Jacobians.RiemannSurface.SquareSubdivision
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.GenusInvariance
+import Jacobians.RiemannSurface.Divisor
 import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
 import Jacobians.RiemannSurface.RiemannRochSpace
