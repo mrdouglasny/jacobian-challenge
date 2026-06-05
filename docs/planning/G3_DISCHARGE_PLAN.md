@@ -121,9 +121,28 @@ Leave those stubs untouched for now (they still serve `AX_SerreDuality` etc.).
 - **G3.** `(Q₁)−(Q₂) ∈ PrincipalDivisors` ⇒ `∃ f, div f = (Q₁)−(Q₂)` (D3) ⇒
   [C1 contrapositive, `genus>0`] `Q₁=Q₂` (else genus 0). No RR needed if C1
   used directly; RR/`h⁰` route is the textbook packaging.
-- **G1.** `ofCurveImpl P Q = abelJacobiDiv ((Q : Divisor) − (P))` from the
-  `FreeAbelianGroup.lift` defn of `abelJacobiDiv` (finish the `sorry`s in
-  `Extensions/AbelJacobi.lean`).
+- **G1 [REVISED 2026-05-31 — discovered blocker].** The assembly needs
+  `ofCurveImpl P₀ Q₁ = ofCurveImpl P₀ Q₂ ⇒ abelJacobiDiv ((Q₁)−(Q₂)) = 0`.
+  But `abelJacobiDiv := FreeAbelianGroup.lift (ofCurveImpl (Classical.arbitrary))`
+  uses the ARBITRARY basepoint, so this needs **basepoint-independence of the
+  degree-0 Abel difference**: `ofCurveImpl b Q₁ − ofCurveImpl b Q₂` independent
+  of `b` (the path-cocycle `∫_b^P − ∫_{b'}^P` const in `P` mod Λ). The elliptic
+  witness DODGED this via the explicit ℂ/Λ lift; general `X` cannot. NO such
+  lemma exists (`abelJacobiDiv` is the raw lift; `Periods.lean` TODO
+  `periodLattice_basepoint_eq` is the related, unproven helper).
+  **VERDICT (Gemini DT, 3m41s): NOT weaker — equivalent to homotopy invariance.**
+  The explicit bridge paths emit `Q`-dependent CONTRACTIBLE loops; "contractible
+  loop integrates to 0" IS Cauchy/Stokes. Commutators vanish by path-algebra
+  (homology is free) but null-homotopic loops do not — so basepoint-independence
+  cannot be gotten without homotopy invariance. The general assembly is BLOCKED
+  on parked Fork 1 unless axiomatized.
+  **Recommended factoring (Gemini):** add the minimal axiom
+  `AX_LoopIntegralInLattice (γ : loop) : [∫_γ ω] ∈ Λ` — turns basepoint-indep
+  into 5-line path algebra, cleanly isolates the deferred Cauchy/Stokes, and
+  becomes a corollary once Fork 1 is built. **Already a THEOREM for the elliptic
+  case** (`analyticLoop_canonicalArcIntegral_ellipticDz_mem_lattice`); axiom only
+  for general X. → MRD decision: add this axiom vs un-park Fork 1 vs leave
+  general assembly blocked. C0/C1 (genus obstruction) proceed + stand regardless.
 - **G-assemble.** `AX_ofCurve_inj` ⟶ theorem: G1 + `AX_AbelTheorem` + G3. Retire
   the `AX_ofCurve_inj` axiom. (Audit: −1 axiom.)
 
