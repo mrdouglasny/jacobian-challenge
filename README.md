@@ -67,6 +67,35 @@ Discharge plan: [`docs/genus-theorem-discharge-plan.md`](docs/genus-theorem-disc
 - **Cross-summand cocycle for the unified `EvenProj` 1-form framework — retired (task #21, 2026-06-01).** Both directions (`hyperellipticEvenCoeff_cocycle_inl_inr`, `…_inr_inl`) are now real, axiom-free theorems (the `inr_inl` direction via chart-transition symmetry, `GeneralResults/ChartTransition.lean`). These were the only *unsound* axioms in the repo; their retirement makes `genus_HyperellipticEven_eq` sound modulo Liouville L2/L3.
 - **Curve-atlas axioms** for unified `Hyperelliptic` and for `PlaneCurve`: proper axiomatizations of classical atlas constructions; discharge is substantial atlas work.
 
+### Axiom landscape — by topic and difficulty (63 axioms)
+
+The **63** remaining axioms (kernel-verified count, `AXIOM_AUDIT.md`) group into seven topics. Difficulty is the *discharge* difficulty, not the depth of the underlying mathematics: 🟢 mechanical / available in Mathlib today, 🟡 substantial but standard (a known Lean route exists), 🔴 research-grade — the genuine textbook theorems whose Lean proofs do not yet exist anywhere.
+
+| Topic | ~Count | Difficulty | What's in it |
+|-------|:------:|:----------:|--------------|
+| **Period / Hodge / homology core** | ~8 | 🔴🟡 | `AX_RiemannBilinear`, `AX_AnalyticCycleBasis`, `AX_IntersectionForm_{alternating,perfect}`, `intersectionForm`, `AX_PeriodLattice` / `instPeriodLatticeDiscrete`, **`AX_Period_Triangle`** (the period 1-cocycle, deep-think-vetted), `AX_cycleBasisLoop_integrable` (🟢 rectifiability). The Hodge-theoretic spine; period-triangle + bilinear are the hard ones. |
+| **Abel–Jacobi** | 1 | 🔴 | `AX_AbelTheorem` (degree-0 restricted). **`ofCurve_inj` is no longer here — it's a derived theorem** (`Axioms/OfCurveInjective.lean`), from `AX_Period_Triangle` + Abel + the genus obstruction. |
+| **Sheaf cohomology / RR / Serre / Plücker** | ~9 | 🔴 | `AX_RiemannRoch`, `AX_SerreDuality`, `AX_PluckerFormula`, and the opaque `LineBundle` / `H1` (+ its module instances) / `canonicalDivisor` / `ofDivisor` cluster (6). **`H0` left this list 2026-06-05** — de-opaqued to the real `riemannRochSpace D`. The deepest cluster; see *Anchor APIs* below. |
+| **Functoriality (pushforward/pullback)** | ~9 | 🟡 | `pushforwardOneForm` (data-level, has a construction plan), `AX_ofCurve_contMDiff`, `AX_{pushforward,pullback}_contMDiff`, `AX_pushforward_pullback`, `AX_{pushforward,pullback}Ambient_preserves_lattice`, `AX_pushforwardOneForm_id`/`_comp`. Standard smoothness/naturality facts. |
+| **Torus / Albanese universal property** | 5 | 🟡 | `AX_torus_oneforms_dualCover`, `AX_torus_self_albanese`, `AX_period_functoriality`, `AX_torus_descent_holo`, `AX_curve_generates_jacobian`. Underpin the **proved** categoricity theorem `ofCurve_isJacobian`; all Gemini+Codex-vetted. |
+| **Concrete curves (atlases & witnesses)** | ~26 | 🟢🟡 | The hyperelliptic odd-atlas infinity-chart cluster, even-atlas compatibility, affine-form IFT-shape axioms, `AX_HyperellipticAffine_connected`, `AX_Hyperelliptic_genus`, the `PlaneCurve` manifold/topology cluster, elliptic witnesses (3), `AX_H1_ProjectiveLine_trivial`, `AX_genus_eq_zero_iff_homeo`, `contDiffOn_symm_toOpenPartialHomeomorph`. Mostly mechanical atlas grind, much of it already in flight (Phase-2/Phase-3). |
+| **Liouville hierarchy L2 / L3** | 2 | 🔴 | `AX_HyperellipticForm_polynomial_decomposition` (L2), `AX_HyperellipticOneForm_eq_form` (L3) — the canonical-differentials theorem. Levels 1 + L2-step-4 are already *proven, axiom-free*. |
+
+Counts are approximate because the audit bundles some tightly-coupled clusters (e.g. the 6-axiom `LineBundle` group) into one row; the **63** total is exact. Full per-axiom table with `file:line` and ratings: [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md); per-axiom discharge plans below.
+
+### Anchor APIs for the deepest axioms
+
+For the 🔴 research-grade cluster (sheaf cohomology / Riemann–Roch / Serre / Plücker), the real risk is **formulation, not proof**: the Lean kernel checks that a proof is valid, never that a *statement means the right thing* — a degenerate or vacuous definition compiles just as happily as a faithful one. So before attempting any of these proofs we pin a **faithful, heavily-vetted API first**: real `def`s plus theorem *statements* with `sorry`-ed proofs, vetted across models (Gemini deep-think + Codex) against the textbook form (Forster §16–17, Griffiths–Harris Ch. 2, Miranda Ch. VI–VIII). The hard proofs come **last**, against a known-correct surface. Methodology + per-cluster formulations: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md).
+
+Concretely landed so far:
+
+- **`riemannRochSpace D`** ([`RiemannSurface/RiemannRochSpace.lean`](Jacobians/RiemannSurface/RiemannRochSpace.lean)) — the Riemann–Roch space `L(D) = { f meromorphic | div f + D ≥ 0 }` as a **genuine `ℂ`-`Submodule`** of `X → ℂ`, with real proofs of subspace closure (the ultrametric `orderAt(f+g) ≥ min` for `+`, `orderAt(c·f) = orderAt f` for `•`). Standard-3 clean, no `sorry`, no axiom — the meaning is *forced* by the construction, not asserted.
+- **`H0` de-opaqued** ([`RiemannSurface/LineBundle.lean`](Jacobians/RiemannSurface/LineBundle.lean)) — `H0 (𝒪(D)) := riemannRochSpace D`. This retired the three opaque `H0` axioms (type + its two module instances; **66 → 63**) and makes `AX_RiemannRoch`'s `finrank H0` a real dimension of a real space, not a number attached to an opaque type. `LineBundle` / `H1` stay honestly opaque so **Serre duality remains a checkable target** rather than being silently baked in.
+- **`RiemannRochAPI.lean`** — `h0 D := finrank ℂ (riemannRochSpace D)`, plus the vetted (`sorry`-ed) statements `canonicalDivisor_deg` (= 2g−2), `riemannRoch` (h⁰D − h⁰(K−D) = deg D + 1 − g), `h0_of_deg_gt`, `h0_point_eq_one_of_genus_pos` (the G3-relevant fact), `h0_zero`, `h0_canonical`, and `riemannRoch_consistent_with_AX` cross-checking the anchor against the opaque `AX_RiemannRoch`.
+- **Faithfulness gate** — [`RiemannSurface/SheafCohomologySpec.lean`](Jacobians/RiemannSurface/SheafCohomologySpec.lean) is a Buzzard-style acceptance suite (non-vacuity A1–A3, structural pins S1–S3, RR/Serre backbone B1–B2, ℙ¹ teeth C1–C2) that the anchored statements must satisfy — a machine-checkable guard against a degenerate definition slipping through.
+
+Still to anchor (statements only, proofs deferred): `SerreDualityAPI`, `PluckerAPI`.
+
 ### Per-axiom discharge plans + Gemini 3.1 Pro vetting
 
 A complete per-axiom discharge plan lives in [`docs/planning/`](docs/planning/): one markdown file per axiom (90 total), every plan **vetted by Gemini 3.1 Pro** (`gemini-3.1-pro-preview`, extended thinking, 2026-06-03). Tally: **13 accept / 36 revise / 41 reject**; all 77 flagged plans rewritten in place per the critiques. A second Gemini pass on each route cluster surfaced **15 cross-plan inconsistencies** (Mathlib-decl drift, signature splits, mutual-no-anchor cycles, duplicate effort, stale prereqs), all 15 applied as patches across 60 plans.
