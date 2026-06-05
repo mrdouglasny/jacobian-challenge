@@ -124,7 +124,7 @@ Holomorphicity of the Abel-Jacobi map. Classical: follows from the fact that pat
 
 ### §17. `lemma ofCurve_inj` — **T (deep)**
 
-Abel's theorem on the curve side: the Abel-Jacobi map is injective when `genus X > 0`. Classical. Multi-page proof via the Jacobi inversion theorem + Riemann theta. **Axiom-routed** (`AX_ofCurve_inj`). Forster Ch. III §21.
+Abel's theorem on the curve side: the Abel-Jacobi map is injective when `genus X > 0`. Classical. Forster Ch. III §21. **✓ derived theorem (2026-06-05)** — `AX_ofCurve_inj` is retired; now the theorem in `Jacobians/Axioms/OfCurveInjective.lean`, derived from `AX_Period_Triangle` (period 1-cocycle ⇒ basepoint-independence) + `AX_AbelTheorem` (degree-0) + the proven genus obstruction `principal_imp_eq_of_genus_pos`. Not via Jacobi inversion / Riemann theta — via the degree-1-map-forces-genus-0 route. Genus-1 witness `elliptic_ofCurve_injective` proved separately on `ℂ/Λ`.
 
 ### §18. `theorem pushforward_contMDiff` — **T (deep)**
 
