@@ -10,15 +10,13 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 66** — all **66** in our own modules. The vendored
+**Active project axioms: 64** — all **64** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
 main-tree `AX_genus_eq_zero_iff_homeo`), matching the axiom-free Wallace vendor.
 (Verified against the
-kernel, not a text scan — see [Verification](#verification). A text scan of
-`^axiom ` also reports 66 once the 9 doc-comment example lines tagged
-`-- not-an-axiom` are excluded.) History: 95 → 93 when task #21 retired the two
+kernel, not a text scan — see [Verification](#verification).) History: 95 → 93 when task #21 retired the two
 unsound cocycle axioms (2026-06-01); → 94 with the `AX_curve_generates_jacobian`
 universal-property stub (2026-06-02, unused — see the Universal-property section);
 → 93 when `localOrder` was discharged to a real `def` via the adopted Wallace
@@ -57,9 +55,35 @@ picked an *arbitrary* polynomial root, not the analytic branch at infinity) and
 (`h_irreducible` + `z ∤ F`). And the `Hyperelliptic` carrier was **unbundled**
 (pure `Decidable.casesOn` parity dispatch) so `#print axioms Hyperelliptic` is
 now genuinely standard-3 — the atlas dependency lives only in the chart/manifold
-instances. Finally → **66** by deleting the 2 unused vendored Kirov handoff
+instances. → **66** by deleting the 2 unused vendored Kirov handoff
 axioms (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`), leaving the
-vendored subtree axiom-free (2026-06-04).
+vendored subtree axiom-free. → **65** by deleting the **false** dangling
+axiom `AX_pathIntegral_local_antiderivative` (the single-valued ℂ "FTC" for the
+period functional): on any genus ≥ 1 curve it forces a global primitive of a
+holomorphic 1-form, hence zero periods — contradicting `genus_Elliptic = 1`. It
+was unused (0 headline dependents), an unsoundness landmine; the honest
+path-independence content lives at the homology level in `loopIntegralToH1`, and
+a genuine FTC can only be stated on the quotient `ofCurve : X → ℂ^g/Λ`. Finally →
+**64** by **de-opaquing** `pathIntegralBasepointFunctional` from an axiom to a
+real `def` (`:= Bridge.kirovBackedFunctional`, itself standard-3 axiom-clean): a
+genuine line integral `∫_{bridgePath P₀ P}`. `ofCurve` is now a **computed** map;
+the zero-functional degeneracy it hid is gone (2026-06-04). Finally, **`loopIntegralToH1`
+— the path-independence axiom — was DISCHARGED to a real `def` 2026-06-05** (count
+stays 64: −`loopIntegralToH1`, +`AX_cycleBasisLoop_integrable`): the period pairing
+is now `cb.isBasis.constr ℤ (∮ over the analytic cycle-basis loops)`, the integrals
+being the genuine L0–L1 multi-chart integral (chart-cocycle + partition-independence
+all **proven**, ~10 new modules). `periodMap`/`ofCurve` no longer list
+`loopIntegralToH1`; they rest on `AX_AnalyticCycleBasis` + `intersectionForm` (the
+symplectic cycle basis, already needed for the lattice) + the trivial
+`AX_cycleBasisLoop_integrable`. **Basis-faithfulness (PR #7 review fix):** the
+`AnalyticCycleBasis` structure gained a `loops_to_basis` field
+(`∀ i, isBasis i = loopToHomology (loops i)`, the Hurewicz loop→class tie) —
+honestly strengthening `AX_AnalyticCycleBasis`/`AX_Elliptic_H1_symplectic`, no new
+axiom — so `loopIntegralToH1_loop` proves `loopIntegralToH1 (loopToHomology (cb.loops i))
+= ∮_{cb.loops i}`: the pairing assigns each basis loop's **genuine period** to its
+H₁ class. The deepest analytic gap is closed; only full homotopy invariance
+(representative-independence for *arbitrary* loops, not just the basis) remains as a
+deferred faithfulness upgrade.
 
 ---
 
@@ -71,7 +95,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (54 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (52 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -81,7 +105,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 12 | classical theorems, citable | high |
-| 2a — data-existence | 16 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 14 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -125,9 +149,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `pathIntegralBasepointFunctional` 🅒 | `Axioms/AbelJacobiMap.lean:96` | the path-integral functional; **opaque** (see `ofCurve` card) |
-| `AX_pathIntegral_local_antiderivative` | `Axioms/AbelJacobiMap.lean:114` | chart-local FTC binding the functional to the cocycle |
-| `loopIntegralToH1` 🅒 | `RiemannSurface/PathIntegral.lean:101` | H₁-level period descent |
+| `AX_cycleBasisLoop_integrable` | `RiemannSurface/LoopIntegral.lean:17` | the period integrand of each cycle-basis loop is `IntervalIntegrable` — classical regularity (piecewise-analytic loops are rectifiable), scoped to cycle-basis loops. The **only** residual axiom after `loopIntegralToH1` was **discharged to a real `def`** 2026-06-05 (`:= cb.isBasis.constr ℤ (∮ over cycle-basis loops)`, periods = genuine line integrals via the L0–L1 multi-chart integral). Dischargeable later by strengthening `AnalyticArc` regularity. See [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
@@ -253,7 +275,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 66 — the vendored Kirov subtree is now axiom-free, so 66 is the total.
+#   prints 64 — the vendored Kirov subtree is now axiom-free, so 64 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -270,7 +292,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 66
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 64
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

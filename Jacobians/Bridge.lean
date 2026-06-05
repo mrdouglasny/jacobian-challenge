@@ -23,6 +23,7 @@ Currently:
   selection axioms (`bridgePath` + endpoint/smoothness facts).
   Currently scaffolded; both bridge body and FTC theorem are `sorry`.
 -/
+import Jacobians.Bridge.ContourDeformation
 import Jacobians.Bridge.KirovHolomorphic
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral
