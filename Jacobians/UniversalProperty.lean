@@ -193,4 +193,27 @@ theorem jacobianUniversal_phi_exists {X : Type u} [TopologicalSpace X] [T2Space 
   intro m A _ _ _ _ _ _ _ _ f hf _hbase
   exact ⟨jacobianUniversalPhi f hf, jacobianUniversalPhi_holo f hf⟩
 
+/-! ## UP-3: uniqueness of the descended homomorphism -/
+
+/-- UP-3, U1-U2: any two additive homomorphisms out of the Jacobian that agree
+on the Abel-Jacobi image of a positive-genus curve are equal. -/
+theorem jacobianUniversal_phi_unique {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (hg : 0 < RiemannSurface.genus X) :
+    ∀ {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A] [CompactSpace A]
+      [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+      [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      (f : X → A) (φ₁ φ₂ : Jacobian X →+ A),
+      (ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
+          (φ₁ : Jacobian X → A) ∧
+        ∀ x, f x = φ₁ (Jacobian.ofCurve x₀ x)) →
+      (ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
+          (φ₂ : Jacobian X → A) ∧
+        ∀ x, f x = φ₂ (Jacobian.ofCurve x₀ x)) →
+      φ₁ = φ₂ := by
+  intro m A _ _ _ _ _ _ _ _ f φ₁ φ₂ hφ₁ hφ₂
+  refine AddMonoidHom.eq_of_eqOn_dense (AX_curve_generates_jacobian x₀ hg) ?_
+  rintro _ ⟨x, rfl⟩
+  exact (hφ₁.2 x).symm.trans (hφ₂.2 x)
+
 end Jacobians
