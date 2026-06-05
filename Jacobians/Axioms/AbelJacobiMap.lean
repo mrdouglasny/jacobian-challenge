@@ -44,7 +44,7 @@ axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ign
 - `AX_pushforwardAmbient_preserves_lattice`,
   `AX_pullbackAmbient_preserves_lattice` — still axioms; retire to
   theorems once period-map naturality is derived.
-- Property axioms (`AX_ofCurve_contMDiff`, `AX_ofCurve_inj`,
+- Property axioms (`AX_ofCurve_contMDiff`,
   `AX_pushforward_contMDiff`, pushforward functoriality,
   `AX_pushforward_pullback`)
   — properties of the defs, retire with the usual textbook proofs.
@@ -153,6 +153,25 @@ The honest content: the Abel–Jacobi map is genuinely multivalued, landing in
 A real local-antiderivative ("FTC") statement, if ever wanted, must be made at
 the quotient level (`ofCurve` is manifold-differentiable, the period ambiguity
 being locally constant), *not* on a single-valued ℂ lift. -/
+
+/-- **Axiom (period 1-cocycle).** For any three points and piecewise-analytic arcs
+between them, the period of the closed 1-cycle `p_xz - p_xy - p_yz` lies in the
+period lattice. Minimal analytic content of homotopy invariance (Stokes for closed
+forms over 1-cycles); genus-1 instance PROVEN
+(`analyticLoop_..._mem_lattice`). Form B (triangle) chosen over the loop form
+after two deep-think passes (REFORMULATE verdict) to avoid arc-concat/reversal +
+cross-basepoint identification. Ref: Griffiths-Harris Ch.2; Forster §21. Vetted
+DT + external deep-think 2026-06-05. -/
+axiom AX_Period_Triangle {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    (x y z : X) (p_xy p_yz p_xz : AnalyticArc X)
+    (h_xy0 : p_xy.extend 0 = x) (h_xy1 : p_xy.extend 1 = y)
+    (h_yz0 : p_yz.extend 0 = y) (h_yz1 : p_yz.extend 1 = z)
+    (h_xz0 : p_xz.extend 0 = x) (h_xz1 : p_xz.extend 1 = z) :
+    (fun i => canonicalArcIntegral p_xz (jacobianBasis X i)
+            - (canonicalArcIntegral p_xy (jacobianBasis X i)
+             + canonicalArcIntegral p_yz (jacobianBasis X i)))
+      ∈ periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
 
 /-- The pullback of holomorphic 1-forms along a holomorphic map `f : X → Y`,
 as a ℂ-linear map of `HolomorphicOneForm` modules.
@@ -264,6 +283,65 @@ noncomputable def ofCurveImpl (X : Type u) [TopologicalSpace X] [T2Space X]
   fun P => ULift.up <|
     QuotientAddGroup.mk' _ (ofCurveAmbient X P₀ P - ofCurveAmbient X P₀ P₀)
 
+/-- The degree-zero Abel-Jacobi difference is independent of the chosen basepoint. -/
+theorem ofCurveImpl_basepoint_independent {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (b b' Q₁ Q₂ : X) :
+    ofCurveImpl X b Q₁ - ofCurveImpl X b Q₂ =
+      ofCurveImpl X b' Q₁ - ofCurveImpl X b' Q₂ := by
+  let Λ := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  have htri₁ := AX_Period_Triangle (X := X) (x := b') (y := b) (z := Q₁)
+    (p_xy := Jacobians.Bridge.bridgePathArc (X := X) b' b)
+    (p_yz := Jacobians.Bridge.bridgePathArc (X := X) b Q₁)
+    (p_xz := Jacobians.Bridge.bridgePathArc (X := X) b' Q₁)
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+  have htri₂ := AX_Period_Triangle (X := X) (x := b') (y := b) (z := Q₂)
+    (p_xy := Jacobians.Bridge.bridgePathArc (X := X) b' b)
+    (p_yz := Jacobians.Bridge.bridgePathArc (X := X) b Q₂)
+    (p_xz := Jacobians.Bridge.bridgePathArc (X := X) b' Q₂)
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+  have htri₁' :
+      (ofCurveAmbient X b' Q₁ - (ofCurveAmbient X b' b + ofCurveAmbient X b Q₁)) ∈ Λ := by
+    simpa [Λ, ofCurveAmbient, pathIntegralBasepointFunctional] using htri₁
+  have htri₂' :
+      (ofCurveAmbient X b' Q₂ - (ofCurveAmbient X b' b + ofCurveAmbient X b Q₂)) ∈ Λ := by
+    simpa [Λ, ofCurveAmbient, pathIntegralBasepointFunctional] using htri₂
+  have hmem :
+      ((ofCurveAmbient X b Q₁ - ofCurveAmbient X b Q₂) -
+        (ofCurveAmbient X b' Q₁ - ofCurveAmbient X b' Q₂)) ∈ Λ := by
+    have hsub := sub_mem htri₂' htri₁'
+    convert hsub using 1
+    ext i
+    simp only [Pi.add_apply, Pi.sub_apply]
+    abel
+  unfold ofCurveImpl
+  change ULift.up
+      ((QuotientAddGroup.mk' Λ.toAddSubgroup (ofCurveAmbient X b Q₁ - ofCurveAmbient X b b)) -
+        QuotientAddGroup.mk' Λ.toAddSubgroup (ofCurveAmbient X b Q₂ - ofCurveAmbient X b b)) =
+    ULift.up
+      ((QuotientAddGroup.mk' Λ.toAddSubgroup
+          (ofCurveAmbient X b' Q₁ - ofCurveAmbient X b' b')) -
+        QuotientAddGroup.mk' Λ.toAddSubgroup (ofCurveAmbient X b' Q₂ - ofCurveAmbient X b' b'))
+  apply congrArg ULift.up
+  rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.mk'_apply,
+    QuotientAddGroup.mk'_apply, QuotientAddGroup.mk'_apply]
+  rw [← QuotientAddGroup.mk_sub, ← QuotientAddGroup.mk_sub]
+  apply (QuotientAddGroup.eq_iff_sub_mem (N := Λ.toAddSubgroup)).mpr
+  convert hmem using 1
+  ext i
+  simp only [Pi.sub_apply]
+  abel
+
 /-! ### Properties of `ofCurveImpl` (axioms for now) -/
 
 /-- **Axiom.** The Abel-Jacobi map is smooth/holomorphic. -/
@@ -283,13 +361,6 @@ theorem AX_ofCurve_self {X : Type u} [TopologicalSpace X] [T2Space X]
   ext : 1
   simp
   rfl
-
-/-- **Axiom (= Abel's theorem, curve side).** The Abel-Jacobi map is
-injective when `genus X > 0`. -/
-axiom AX_ofCurve_inj {X : Type u} [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (P : X) (_h : 0 < genus X) :
-    Function.Injective (ofCurveImpl X P)
 
 /-! ### Ambient linear maps — derived from the form-level primitives -/
 

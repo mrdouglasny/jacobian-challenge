@@ -89,8 +89,9 @@ Then → **63** by **de-opaquing** `abelJacobiDiv` from an axiom to a real `def`
 (`:= FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)`, 2026-06-05):
 the divisor-level Abel–Jacobi map is now the genuine linear extension of `ofCurveImpl`.
 `AX_AbelTheorem` (kernel = principal divisors) stays the textbook axiom, now stated about
-the concrete map. Foundation for deriving the general `AX_ofCurve_inj` (Abel injectivity,
-genus > 0) — see [`docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md`](docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md).
+the concrete map. This is one input to the now-derived general `AX_ofCurve_inj`
+(Abel injectivity, genus > 0) — see
+[`docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md`](docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md).
 Then → **62** by **de-opaquing** `PrincipalDivisors` to the additive subgroup
 corresponding to `MeromorphicFunctionField.divHom.range` via `Subgroup.toAddSubgroup'`
 (2026-06-05). No new axiom was introduced.
@@ -120,7 +121,7 @@ axiom.
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (16 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (17 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
@@ -133,9 +134,9 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 16 | classical theorems, citable | high |
+| 1 — textbook-standard | 17 | classical theorems, citable | high |
 | 2a — data-existence | 12 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
+| 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
@@ -158,6 +159,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard) |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
+| `AX_Period_Triangle` | `Axioms/AbelJacobiMap.lean:165` | period 1-cocycle / Stokes for closed 1-cycles (Griffiths-Harris Ch. 2; Forster §21) |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
@@ -195,14 +197,17 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `AX_ofCurve_inj` | `Axioms/AbelJacobiMap.lean:245` | Buzzard's anti-`J=0` hack-blocker; **opaque-blocked** (see [`docs/contracts/ofCurve.md`](docs/contracts/ofCurve.md)) |
-| `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:226` | Abel–Jacobi smoothness |
-| `AX_pushforward_contMDiff` | `Axioms/AbelJacobiMap.lean:570` | pushforward smoothness |
-| `AX_pullback_contMDiff` | `Axioms/AbelJacobiMap.lean:619` | pullback smoothness |
-| `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:667` | push∘pull = deg multiplication |
-| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:298` | period-map naturality |
-| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:312` | period-map naturality |
-| `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:178,185` | functoriality of trace |
+| `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:348` | Abel–Jacobi smoothness |
+| `AX_pushforward_contMDiff` | `Axioms/AbelJacobiMap.lean:685` | pushforward smoothness |
+| `AX_pullback_contMDiff` | `Axioms/AbelJacobiMap.lean:734` | pullback smoothness |
+| `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication |
+| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:413` | period-map naturality |
+| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:427` | period-map naturality |
+| `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:241,248` | functoriality of trace |
+
+*Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
+`Axioms/OfCurveInjective.lean`, derived from `AX_Period_Triangle`,
+`AX_AbelTheorem`, and `principal_imp_eq_of_genus_pos`.
 
 ### 2c. Atlas / structure axioms — *curve-specific constructions*
 
