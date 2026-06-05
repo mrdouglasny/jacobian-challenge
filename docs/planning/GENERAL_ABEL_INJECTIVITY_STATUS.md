@@ -47,16 +47,19 @@ on the critical path.
 | B/D3 | `PrincipalDivisors := range divHom` (−1 axiom) | ✅ done | c463677 |
 | B/C1c | genus biholo-invariance (`genus_eq_of_biholo`) | ✅ done | eb09097 |
 | B/C1c | `genus ℙ¹ = 0` | ✅ pre-existing | Line/Genus.lean |
-| B/C0 | `toP1` + finite-fiber + nonconstant | ✅ partial | eb09097 |
-| B/C0 | `toP1_contMDiff` + `mapAnalyticOrderAt = |orderAt|` | 🔄 in flight | — |
-| B/C1 | degree-1 ⇒ genus 0 (assembly) | ⬜ todo | — |
-| B/G3 | `(Q₁)−(Q₂) principal ⇒ Q₁=Q₂` | ⬜ todo | — |
+| B/C0 | `toP1` + finite-fiber + nonconstant | ✅ done | eb09097 |
+| B/C0 | `toP1_contMDiff` + `mapAnalyticOrderAt = |orderAt|` | ✅ done | 09b8b3e |
+| B/C1 | `degreeOne_genus_zero` (degree-1 ⇒ genus 0) | ✅ done | 0767d22 |
+| B/G3 | `principal_imp_eq_of_genus_pos` ((Q₁)−(Q₂) principal ⇒ Q₁=Q₂) | ✅ **done** | 0767d22 |
 | A | chart-local Cauchy + subdivision | ✅ pre-existing | ContourDeformation, SquareSubdivision |
-| A/HI-0 | `canonicalArcIntegral ↔ curveIntegral` on chart cell | ⬜ todo | — |
-| A/HI-1 | global homotopy invariance (telescoping) | ⬜ todo (the core) | — |
+| A/HI-0 | `canonicalArcIntegral_eq_fixedChart_integral` (single-chart bridge) | ✅ done | 15156b0 |
+| A/HI-1 | global homotopy invariance (1a single-chart ∥ 1b telescoping) | 🔄 in flight | — |
 | A/HI-2,3 | factor through H₁ ⇒ loop integral ∈ Λ | ⬜ todo | — |
 | A/HI-4 | basepoint-independence (5-line) | ⬜ todo | — |
-| — | G-assemble: retire `AX_ofCurve_inj` (−1) | ⬜ todo | — |
+| — | G-assemble: retire `AX_ofCurve_inj` (−1) | ⬜ todo (needs ⊤↔ω `IsManifold.of_le` bridge) | — |
+
+**Workstream B (genus obstruction) is COMPLETE** (0767d22). Only workstream A
+(homotopy invariance) + the final assembly remain.
 
 ## Axiom ledger
 
@@ -88,3 +91,14 @@ de-opaque (`PrincipalDivisors`, `pathIntegralBasepointFunctional`,
 `loopIntegralToH1`, `abelJacobiDiv`) replaced an axiom with real content while
 keeping the consuming axiom statements (`AX_AbelTheorem`, etc.) verbatim —
 checked by `lake build` + kernel `#print axioms` (no `sorryAx`) on each.
+
+**Statement-vetting (2026-06-05).** A Gemini + self-audit pass on the new
+declarations found 4 faithful and 1 latent soundness bug — `AX_AbelTheorem`'s
+bare-kernel form, fixed to the degree-0 restriction (`ecc8f95`). A focused audit
+of the G3 chain (`degreeOne_genus_zero`, `principal_imp_eq_of_genus_pos`)
+confirmed it sound: **surjectivity of `toP1 f` onto ℙ¹ is a derived output** of
+the locally-constant-on-connected fiber-sum argument (no empty-fiber gap — a
+non-image point would force the sum to 0, contradicting global value 1); the
+bijective + local-mult-1 ⇒ biholomorphism step uses the genuine IFT local
+inverse; `ContMDiff ⊤` over the ℂ-model = holomorphic, so the smoothness
+exponent is faithful.
