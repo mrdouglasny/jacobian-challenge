@@ -27,6 +27,15 @@ rather than being baked into a definition.
 
 References: Forster, *Lectures on Riemann Surfaces*, section 17 (Serre duality);
 Griffiths-Harris, *Principles of Algebraic Geometry*, Ch. 1; Miranda, Ch. VI.
+
+Vetting trail. Statements vetted FAITHFUL by Gemini deep-think (2026-06-06):
+the `K - D` direction is the correct numerical shadow of
+`H1(O(D)) ≃ (H0(O(K - D)))ᵛ` (finite-dim ⇒ `finrank` of the dual equals
+`finrank`); the Serre-vanishing threshold `deg D > 2g - 2` is correct and the
+strictness is mandatory (`deg D = 2g - 2`, e.g. `D = K`, gives `h¹ = h⁰(0) =
+1`); casting to `ℤ` before subtracting in `h1_eq_zero_of_deg_gt` and
+`riemannRoch_h0_sub_h1` avoids the `ℕ`-subtraction floor (genus 0 ⇒ threshold
+`-2`, not `0`).
 -/
 
 noncomputable section
