@@ -94,7 +94,10 @@ Concretely landed so far:
 - **`RiemannRochAPI.lean`** — `h0 D := finrank ℂ (riemannRochSpace D)`, plus the vetted (`sorry`-ed) statements `canonicalDivisor_deg` (= 2g−2), `riemannRoch` (h⁰D − h⁰(K−D) = deg D + 1 − g), `h0_of_deg_gt`, `h0_point_eq_one_of_genus_pos` (the G3-relevant fact), `h0_zero`, `h0_canonical`, and `riemannRoch_consistent_with_AX` cross-checking the anchor against the opaque `AX_RiemannRoch`.
 - **Faithfulness gate** — [`RiemannSurface/SheafCohomologySpec.lean`](Jacobians/RiemannSurface/SheafCohomologySpec.lean) is a Buzzard-style acceptance suite (non-vacuity A1–A3, structural pins S1–S3, RR/Serre backbone B1–B2, ℙ¹ teeth C1–C2) that the anchored statements must satisfy — a machine-checkable guard against a degenerate definition slipping through.
 
-Still to anchor (statements only, proofs deferred): `SerreDualityAPI`, `PluckerAPI`.
+- **`SerreDualityAPI.lean`** — `h1 D := finrank ℂ (H1 (𝒪(D)))`, plus the dimension-form Serre duality `h1_eq_h0_canonical_sub` (h¹D = h⁰(K−D)), Serre vanishing `h1_eq_zero_of_deg_gt` (deg D > 2g−2 ⇒ h¹D = 0), and `riemannRoch_h0_sub_h1` cross-checking the `h⁰−h¹` form against the RR-API anchor. `H1` stays opaque; the duality is exposed as a numerical target, not baked in. Statements vetted, proofs `sorry`-ed.
+- **`PluckerAPI.lean`** — `plucker_genus` (a **real** theorem re-exporting `AX_PluckerFormula`: `genus (PlaneCurve H) = (d−1)(d−2)/2`) plus the low-degree teeth `plucker_genus_zero_of_deg_le_two` (lines/conics rational), `plucker_genus_cubic` (smooth cubic ⇒ g = 1), `plucker_genus_quartic` (smooth quartic ⇒ g = 3) as `sorry`-ed arithmetic specializations.
+
+All four research-grade clusters now have anchored statements; the deferred proofs (Čech/Dolbeault for RR/Serre, Bézout/adjunction for Plücker) are the last work, against a known-correct surface.
 
 ### Per-axiom discharge plans + Gemini 3.1 Pro vetting
 
