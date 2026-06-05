@@ -31,6 +31,7 @@ import Jacobians.RiemannSurface.SegmentCenterIndependence
 import Jacobians.RiemannSurface.SegmentAdjacency
 import Jacobians.RiemannSurface.PartitionIndependence
 import Jacobians.RiemannSurface.CanonicalArcIntegral
+import Jacobians.RiemannSurface.HomotopyInvariance
 import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
