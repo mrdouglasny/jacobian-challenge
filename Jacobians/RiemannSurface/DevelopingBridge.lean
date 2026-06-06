@@ -6,9 +6,12 @@ import Jacobians.RiemannSurface.DevelopingMap
 This file bridges the choice-based developing value to the canonical
 moving-chart arc integral over an explicit chart-ball subdivision.
 
-The analytic discharge intentionally remains explicit at the outer theorem:
-the selected subdivision must avoid the analytic partition on each open cell,
-and the fixed-chart integrands must be interval-integrable on the cells.
+The explicit subdivision lemma keeps the analytic side conditions available for
+reuse.  The public HI-0 bridge below discharges them from the strong analytic-arc
+integrability lemmas: the selected subdivision avoids the analytic partition,
+the canonical integrand is interval-integrable on `[0, 1]`, and the fixed-chart
+cell integrands inherit interval integrability from the canonical integrand by
+the cellwise chart-independence equality.
 -/
 
 noncomputable section
@@ -291,6 +294,92 @@ private lemma subdivisionCell_coord_mem_ball_of_mem_Icc
   have hu := S.cell_subset i hu_cell
   simpa [u, analyticArcToContinuousMap_apply] using hu.2
 
+private lemma subdivisionFixedChartIntegrand_eq_canonicalIntegrand_of_mem_Ioo
+    (form : HolomorphicOneForm X) (γ : AnalyticArc X)
+    (S : PathChartBallSubdivision (analyticArcToContinuousMap γ))
+    (i : Fin S.n)
+    (havoid : ∀ r ∈
+      Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i),
+        r ∉ (γ.partition : Set ℝ))
+    {r : ℝ}
+    (hr : r ∈ Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i)) :
+    subdivisionFixedChartIntegrand form γ S i r =
+      canonicalIntegrand γ form r := by
+  have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
+    exact ⟨(S.t i.castSucc).2.1.trans_lt hr.1,
+      hr.2.trans_le (S.t i.succ).2.2⟩
+  have hp : γ.extend r ∈ (extChartAt 𝓘(ℂ) (S.cellBall i).p).source := by
+    exact subdivisionCell_source_of_mem_Icc γ S i
+      ⟨le_of_lt hr.1, le_of_lt hr.2⟩
+  have hdp : DifferentiableWithinAt ℝ
+      (fun u : ℝ => (extChartAt 𝓘(ℂ) (S.cellBall i).p) (γ.extend u))
+      (Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i)) r :=
+    arc_chart_differentiableWithinAt γ (S.cellBall i).p
+      hr01 (havoid r hr) hp
+      (Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i))
+  have hcenter := integrand_center_independent form γ (S.cellBall i).p
+    (γ.extend r) (subdivisionCellLeft S i) (subdivisionCellRight S i) r
+    hp (mem_extChartAt_source (I := 𝓘(ℂ)) (γ.extend r)) hdp hr
+  simpa [subdivisionFixedChartIntegrand, canonicalIntegrand,
+    derivWithin_of_isOpen isOpen_Ioo hr] using hcenter
+
+private lemma subdivisionFixedChartIntegrand_eq_canonicalIntegrand_ae_of_cell
+    (form : HolomorphicOneForm X) (γ : AnalyticArc X)
+    (S : PathChartBallSubdivision (analyticArcToContinuousMap γ))
+    (i : Fin S.n)
+    (havoid : ∀ r ∈
+      Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i),
+        r ∉ (γ.partition : Set ℝ)) :
+    subdivisionFixedChartIntegrand form γ S i
+      =ᵐ[MeasureTheory.volume.restrict
+        (Set.uIoc (subdivisionCellLeft S i) (subdivisionCellRight S i))]
+      canonicalIntegrand γ form := by
+  have hle : subdivisionCellLeft S i ≤ subdivisionCellRight S i :=
+    subdivisionCell_left_le_right S i
+  rw [Filter.EventuallyEq]
+  rw [MeasureTheory.ae_restrict_iff' measurableSet_uIoc]
+  rw [MeasureTheory.ae_uIoc_iff]
+  constructor
+  · filter_upwards
+      [Ioo_ae_eq_Ioc
+        (a := subdivisionCellLeft S i) (b := subdivisionCellRight S i)
+        (μ := MeasureTheory.volume)]
+      with r hr_eq hr
+    exact subdivisionFixedChartIntegrand_eq_canonicalIntegrand_of_mem_Ioo
+      form γ S i havoid (by
+        change Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i) r
+        rw [hr_eq]
+        exact hr)
+  · filter_upwards with r hr
+    have h_empty :
+        Set.Ioc (subdivisionCellRight S i) (subdivisionCellLeft S i) =
+          (∅ : Set ℝ) :=
+      Set.Ioc_eq_empty (not_lt_of_ge hle)
+    rw [h_empty] at hr
+    exact False.elim hr
+
+private lemma subdivisionFixedChartIntegrand_intervalIntegrable_of_cell
+    (form : HolomorphicOneForm X) (γ : AnalyticArc X)
+    (S : PathChartBallSubdivision (analyticArcToContinuousMap γ))
+    (i : Fin S.n)
+    (havoid : ∀ r ∈
+      Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i),
+        r ∉ (γ.partition : Set ℝ))
+    (hcanonical_integrable : IntervalIntegrable (canonicalIntegrand γ form)
+      MeasureTheory.volume (0 : ℝ) 1) :
+    IntervalIntegrable (subdivisionFixedChartIntegrand form γ S i)
+      MeasureTheory.volume (subdivisionCellLeft S i)
+        (subdivisionCellRight S i) := by
+  have hcanonical_cell :
+      IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume
+        (subdivisionCellLeft S i) (subdivisionCellRight S i) :=
+    hcanonical_integrable.mono_set (Set.uIcc_subset_uIcc
+      (subdivisionCell_mem_uIcc S i.castSucc)
+      (subdivisionCell_mem_uIcc S i.succ))
+  exact hcanonical_cell.congr_ae
+    (subdivisionFixedChartIntegrand_eq_canonicalIntegrand_ae_of_cell
+      form γ S i havoid).symm
+
 /-- A chart-ball primitive endpoint increment equals the fixed-chart interval
 integral over the same cell, assuming the right-derivative and integrability
 side conditions needed by the interval FTC. -/
@@ -385,23 +474,8 @@ theorem fixedChart_intervalIntegral_eq_canonicalIntegrand_intervalIntegral_of_ce
       subdivisionFixedChartIntegrand form γ S i r =
         canonicalIntegrand γ form r := by
     intro r hr
-    have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
-      exact ⟨(S.t i.castSucc).2.1.trans_lt hr.1,
-        hr.2.trans_le (S.t i.succ).2.2⟩
-    have hp : γ.extend r ∈ (extChartAt 𝓘(ℂ) (S.cellBall i).p).source := by
-      exact subdivisionCell_source_of_mem_Icc γ S i
-        ⟨le_of_lt hr.1, le_of_lt hr.2⟩
-    have hdp : DifferentiableWithinAt ℝ
-        (fun u : ℝ => (extChartAt 𝓘(ℂ) (S.cellBall i).p) (γ.extend u))
-        (Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i)) r :=
-      arc_chart_differentiableWithinAt γ (S.cellBall i).p
-        hr01 (havoid r hr) hp
-        (Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i))
-    have hcenter := integrand_center_independent form γ (S.cellBall i).p
-      (γ.extend r) (subdivisionCellLeft S i) (subdivisionCellRight S i) r
-      hp (mem_extChartAt_source (I := 𝓘(ℂ)) (γ.extend r)) hdp hr
-    simpa [subdivisionFixedChartIntegrand, canonicalIntegrand,
-      derivWithin_of_isOpen isOpen_Ioo hr] using hcenter
+    exact subdivisionFixedChartIntegrand_eq_canonicalIntegrand_of_mem_Ioo
+      form γ S i havoid hr
   refine intervalIntegral.integral_congr_ae ?_
   rw [MeasureTheory.ae_uIoc_iff]
   constructor
@@ -578,5 +652,27 @@ theorem developingValue_eq_canonicalArcIntegral_of_partition_avoiding_subdivisio
     x₀ form γ S
     (pathChartBallSubdivision_hasDeriv_right_of_partition_avoiding γ S havoid)
     hfixed_integrable havoid hcanonical_integrable
+
+/-- HI-0 bridge: for every analytic arc, the choice-based developing value agrees
+with the canonical moving-chart arc integral.  The avoiding subdivision and both
+integrability hypotheses are discharged internally. -/
+theorem developingValue_eq_canonicalArcIntegral
+    (x₀ : X) (form : HolomorphicOneForm X) (γ : AnalyticArc X) :
+    developingValue x₀ form (analyticArcToContinuousMap γ) =
+      canonicalArcIntegral γ form := by
+  obtain ⟨S, havoid⟩ := exists_partition_avoiding_subdivision γ
+  have hcanonical_integrable :
+      IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume
+        (0 : ℝ) 1 :=
+    analyticArc_canonicalIntegrand_intervalIntegrable γ form
+  have hfixed_integrable : ∀ i : Fin S.n,
+      IntervalIntegrable (subdivisionFixedChartIntegrand form γ S i)
+        MeasureTheory.volume (subdivisionCellLeft S i)
+          (subdivisionCellRight S i) := by
+    intro i
+    exact subdivisionFixedChartIntegrand_intervalIntegrable_of_cell
+      form γ S i (havoid i) hcanonical_integrable
+  exact developingValue_eq_canonicalArcIntegral_of_partition_avoiding_subdivision
+    x₀ form γ S havoid hfixed_integrable hcanonical_integrable
 
 end Jacobians.RiemannSurface
