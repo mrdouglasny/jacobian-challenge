@@ -43,7 +43,7 @@ same commit that retires the axiom.
 
 ### HI-1 — homotopy invariance of `canonicalArcIntegral` (developing-value path algebra)
 - [x] A1. `devVal_symm` — `developingValue` of a reversed path = `−developingValue`   status: done   deps: []   note: committed 1b2c277
-- [~] A2. `devVal_trans` — `developingValue` of a concatenation = sum   status: in_progress   deps: []   note: workhorse; Codex cut off ~805s mid-proof, 346-line attempt uncommitted in working tree (6 errors @ 355–465); re-dispatched to finish
+- [~] A2. `devVal_trans` — `developingValue` of a concatenation = sum   status: in_progress   deps: []   note: workhorse; Codex stalled 3× on Fin.append/addCases. RESET to clean base (A1+A3). Gemini-3.1-pro un-stuck it: use Nat conditionals `if i.1 ≤ S₁.n` + omega (NOT Fin.append); blueprint `/tmp/A2_devVal_trans_blueprint.md` (scaleL/scaleR, S_trans, Fin.sum_univ_add split, devInc_castAdd/natAdd, j=0 boundary via same-chart γ₁1=b=γ₂0). Re-dispatched with this blueprint.
 - [x] A3. `devVal_refl` — `developingValue` of a constant path = `0`   status: done   deps: []   note: committed de784fa
 - [~] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)` from `developingValueOfSubdivision_eq_of_subdivisions`   status: in_progress   deps: [A2]   note: drafted alongside A2 (re-dispatched)
 - [~] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop `B·R·T⁻¹·L⁻¹` in one chart ⇒ 0 by the single-ball base case; split via A1/A2/A3)   status: in_progress   deps: [A1, A2, A3]   note: re-dispatched with A2/A4
