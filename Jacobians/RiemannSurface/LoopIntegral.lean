@@ -10,16 +10,17 @@ open scoped Manifold Topology
 open scoped ContDiff
 open intervalIntegral MeasureTheory
 
-/-- The period integrand of each (piecewise-analytic, rectifiable) cycle-basis
-loop is interval-integrable. Classical regularity; dischargeable later by
-strengthening `AnalyticArc`. Scoped to cycle-basis loops (false for arbitrary
-cusp-y arcs). -/
-axiom AX_cycleBasisLoop_integrable {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- The period integrand of each cycle-basis loop is interval-integrable.
+
+This was formerly an axiom scoped to cycle-basis loops; the strong
+`AnalyticArc` field now proves the statement for every analytic arc. -/
+theorem AX_cycleBasisLoop_integrable {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (cb : Jacobians.Axioms.AnalyticCycleBasis X x₀)
     (i : Fin (2 * genus X)) (form : HolomorphicOneForm X) :
-    IntervalIntegrable (canonicalIntegrand (cb.loops i).arc form) MeasureTheory.volume 0 1
+    IntervalIntegrable (canonicalIntegrand (cb.loops i).arc form) MeasureTheory.volume 0 1 :=
+  analyticArc_canonicalIntegrand_intervalIntegrable (cb.loops i).arc form
 
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]

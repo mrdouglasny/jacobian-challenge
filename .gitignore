@@ -16,3 +16,6 @@ axiom-report.regenerated.txt
 
 # Local reference PDFs (copyrighted — never commit)
 refs/
+
+# Gemini/MCP auto-generated query logs
+history/

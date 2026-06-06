@@ -1,6 +1,6 @@
 # Jacobians of Compact Riemann Surfaces
 
-A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **60 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
+A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **59 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
 
 > **What this is, honestly.** A scaffold that *closes Buzzard's interface* and proves real theorems on it, with the deep classical inputs isolated as a classified, discharge-planned axiom layer — **not** a from-first-principles proof of Jacobian theory. The axioms are LLM-authored and **have not had independent human-mathematician review**. See [Caveats](#caveats--read-before-relying-on-this) before relying on any result.
 
@@ -11,7 +11,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Build** | `lake build` green (8597 jobs) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 60, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 59, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 8 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
@@ -37,7 +37,7 @@ These are the genuine theorems — what a reader can trust the formalization to 
 
 The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` as a real computation through the period lattice — the strongest single piece of evidence that the construction is non-degenerate.
 
-## What it assumes — the 60 axioms
+## What it assumes — the 59 axioms
 
 Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into seven topics; difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
 
