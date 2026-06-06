@@ -12,7 +12,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
 | **Axioms** | 62, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
-| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 11 intentional anchor-statement deferrals |
+| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 9 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
 ## The challenge
@@ -51,7 +51,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 | Concrete curves (hyperelliptic / plane-curve atlases & witnesses) | ~26 | 🟢🟡 |
 | Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 2 | 🔴 |
 
-**Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)` as a ℂ-submodule, which de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`RiemannRochAPI` and `SerreDualityAPI` still carry their proof obligations** as the 11 deferred `sorry`s (the Riemann–Roch identity, Serre duality dimension form, etc.) — these are the genuine open targets. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
+**Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)`, a ℂ-submodule of the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero` — corrected from an earlier raw-`X→ℂ` version that was *degenerate*: it admitted germ-zero "spike" functions, so was infinite-dimensional with `finrank ≡ 0`; the compiled `germZero_ne_bot` witnesses that bug; this de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`RiemannRochAPI` and `SerreDualityAPI` still carry their proof obligations** as the 9 deferred `sorry`s (the Riemann–Roch identity, `h⁰(0)=1`/finite-dimensionality of `L(D)`, Serre vanishing) — these are the genuine open targets; over the corrected space they are true-but-unproven, where over the old degenerate space the dimension ones were false. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
 
 ## Caveats — read before relying on this
 
@@ -60,7 +60,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 - **Zero human-written Lean.** The Lean was written by Claude (Opus) with Codex rescue passes and Gemini axiom audits, directed by a mathematician on scope, the axiom-vs-proof boundary, and review of every landing.
 - **`sorry`s, in two honest categories** (the *core* — challenge API, Jacobian construction, curve witnesses, S1–S7 1-form framework — is `sorry`-free):
   - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Hyperelliptic/AntiInvariance.lean` 1).
-  - **11 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 3); `PluckerAPI` is now fully proved (the low-degree corollaries discharge by arithmetic from the real `plucker_genus`).
+  - **9 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 1). `PluckerAPI` is fully proved; in `SerreDualityAPI`, the dimension-form duality `h¹D = h⁰(K−D)` and the `h⁰−h¹` Riemann–Roch identity are now real proofs (from `AX_SerreDuality` / `AX_RiemannRoch`), leaving only Serre vanishing.
 
 ## How it's built
 
