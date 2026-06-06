@@ -650,6 +650,98 @@ theorem devVal_trans {a b c : X} (x₀ : X) (form : HolomorphicOneForm X)
         developingValue x₀ form ((γ₂ : Path b c) : C(unitInterval, X)) := by
       rw [← hγ₁, ← hγ₂]
 
+private theorem developingValue_subpath_eq_increment {a b : X}
+    (x₀ : X) (form : HolomorphicOneForm X) (γ : Path a b)
+    (S : PathChartBallSubdivision ((γ : Path a b) : C(unitInterval, X)))
+    (i : Fin S.n) :
+    developingValue x₀ form
+        (((γ.subpath (S.t i.castSucc) (S.t i.succ) :
+            Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) : C(unitInterval, X))) =
+      developingIncrement form ((γ : Path a b) : C(unitInterval, X)) S i := by
+  classical
+  let δ : Path (γ (S.t i.castSucc)) (γ (S.t i.succ)) :=
+    γ.subpath (S.t i.castSucc) (S.t i.succ)
+  let τ : Fin (1 + 1) → unitInterval := fun j =>
+    if j = (0 : Fin (1 + 1)) then 0 else 1
+  let Sseg : PathChartBallSubdivision ((δ : Path (γ (S.t i.castSucc))
+      (γ (S.t i.succ))) : C(unitInterval, X)) :=
+    { n := 1
+      t := τ
+      cellBall := fun _ => S.cellBall i
+      zero_eq := by
+        simp [τ]
+      one_eq := by
+        simp [τ, Fin.last]
+      monotone_t := by
+        intro j k hjk
+        fin_cases j <;> fin_cases k <;> simp [τ] at hjk ⊢
+      cell_subset := by
+        intro j u _hu
+        have hle : S.t i.castSucc ≤ S.t i.succ :=
+          S.monotone_t (Fin.castSucc_le_succ i)
+        have huI : Set.Icc.convexComb (S.t i.castSucc) (S.t i.succ) u ∈
+            Set.Icc (S.t i.castSucc) (S.t i.succ) :=
+          ⟨Set.Icc.le_convexComb hle u, Set.Icc.convexComb_le hle u⟩
+        have hbase := S.cell_subset i huI
+        simpa [pathChartBallSet, δ, Path.subpath] using hbase }
+  have hdev :
+      developingValue x₀ form
+          (((γ.subpath (S.t i.castSucc) (S.t i.succ) :
+              Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) : C(unitInterval, X))) =
+        developingValueOfSubdivision form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg := by
+    simpa [δ] using
+      developingValue_eq_developingValueOfSubdivision x₀ form
+        ((δ : Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) :
+          C(unitInterval, X)) Sseg
+  have hsub :
+      developingValueOfSubdivision form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg =
+        developingIncrement form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg 0 := by
+    simp [developingValueOfSubdivision, Sseg]
+  have hinc :
+      developingIncrement form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg 0 =
+        developingIncrement form ((γ : Path a b) : C(unitInterval, X)) S i := by
+    unfold developingIncrement
+    simp [Sseg, τ, δ, Path.subpath]
+  calc
+    developingValue x₀ form
+        (((γ.subpath (S.t i.castSucc) (S.t i.succ) :
+            Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) : C(unitInterval, X))) =
+        developingValueOfSubdivision form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg := hdev
+    _ = developingIncrement form ((δ : Path (γ (S.t i.castSucc))
+          (γ (S.t i.succ))) : C(unitInterval, X)) Sseg 0 := hsub
+    _ = developingIncrement form ((γ : Path a b) : C(unitInterval, X)) S i := hinc
+
+/-- A4: the developing value is the sum of the developing values on subdivision segments. -/
+theorem devVal_subdivision {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
+    (γ : Path a b)
+    (S : PathChartBallSubdivision ((γ : Path a b) : C(unitInterval, X))) :
+    developingValue x₀ form ((γ : Path a b) : C(unitInterval, X)) =
+      ∑ i : Fin S.n,
+        developingValue x₀ form
+          (((γ.subpath (S.t i.castSucc) (S.t i.succ) :
+              Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) : C(unitInterval, X))) := by
+  classical
+  have hdev :
+      developingValue x₀ form ((γ : Path a b) : C(unitInterval, X)) =
+        developingValueOfSubdivision form ((γ : Path a b) : C(unitInterval, X)) S :=
+    developingValue_eq_developingValueOfSubdivision x₀ form
+      ((γ : Path a b) : C(unitInterval, X)) S
+  calc
+    developingValue x₀ form ((γ : Path a b) : C(unitInterval, X)) =
+        developingValueOfSubdivision form ((γ : Path a b) : C(unitInterval, X)) S := hdev
+    _ = ∑ i : Fin S.n,
+        developingValue x₀ form
+          (((γ.subpath (S.t i.castSucc) (S.t i.succ) :
+              Path (γ (S.t i.castSucc)) (γ (S.t i.succ))) : C(unitInterval, X))) := by
+      unfold developingValueOfSubdivision
+      exact Finset.sum_congr rfl (fun i _ =>
+        (developingValue_subpath_eq_increment x₀ form γ S i).symm)
+
 /-- A5: a chart-contained cell boundary has equal sums of opposite developing values. -/
 theorem devVal_cell_eq {p q r s : X} (x₀ : X) (form : HolomorphicOneForm X)
     (B : Path p q) (R : Path q s) (T : Path r s) (L : Path p r)
@@ -685,7 +777,6 @@ theorem devVal_cell_eq {p q r s : X} (x₀ : X) (form : HolomorphicOneForm X)
     rw [devVal_trans x₀ form B R]
     rw [devVal_symm x₀ form T]
     rw [devVal_symm x₀ form L]
-    abel
   have hsum :
       ((developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
           developingValue x₀ form ((R : Path q s) : C(unitInterval, X))) +
