@@ -117,6 +117,14 @@ axiom. Then → **63** by **de-opaquing** `H0` to the concrete
 `riemannRochSpace D` and replacing `H0.instAddCommGroup` / `H0.instModule` with
 instances inherited from the submodule carrier (2026-06-05). `LineBundle` and
 `LineBundle.ofDivisor` remain honest opaque placeholders; `H1` remains opaque.
+**Faithfulness correction (2026-06-06, count unchanged):** `riemannRochSpace` was
+first defined over raw `X → ℂ`, which was *degenerate* — germ-zero "spike"
+functions made it infinite-dimensional (`finrank ≡ 0`). It is now a submodule of
+the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero`
+(`RiemannSurface/RiemannRochSpace.lean`), the genuine `L(D)`; `germZero_ne_bot`
+compiles the spike witness. `H0` still `:= riemannRochSpace D` (instances adapt;
+no axiom change). `h0_zero`/finite-dimensionality are now true-but-deferred sorries
+where they were previously false.
 Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
 real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
 is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
