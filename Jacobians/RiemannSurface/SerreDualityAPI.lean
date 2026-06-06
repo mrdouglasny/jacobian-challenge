@@ -70,7 +70,7 @@ noncomputable abbrev h1 (D : Divisor X) : ℕ :=
 `AX_SerreDuality : H1(O(D)) ≃ₗ[ℂ] (H0(O(K - D)))ᵛ`, using that a
 finite-dimensional space and its dual have the same dimension.  With `H0`
 de-opaqued to `riemannRochSpace`, the right-hand side is a genuine dimension of
-a concrete function space. -/
+the meromorphic germ quotient. -/
 theorem h1_eq_h0_canonical_sub (D : Divisor X) :
     h1 D = h0 (canonicalDivisor X - D) := by
   obtain ⟨e⟩ := AX_SerreDuality D
