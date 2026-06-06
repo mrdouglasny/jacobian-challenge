@@ -13,9 +13,11 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const body = pr.body || '';
-            const m = body.match(/Estimated human time:\**\s*`?\s*([^`\n]*?)\s*`?\s*$/im);
-            const val = m ? m[1].trim() : '';
-            const filled = val && !val.includes('___') && /\d/.test(val);
+            // Find the line containing the estimate; "filled" = it has a digit and
+            // not the `___` placeholder (robust to trailing notes after the value).
+            const m = body.match(/Estimated human time:[^\n]*/i);
+            const line = m ? m[0] : '';
+            const filled = /\d/.test(line) && !line.includes('___');
             const marker = '<!-- human-time-reminder -->';
             const { data: comments } = await github.rest.issues.listComments({
               ...context.repo, issue_number: pr.number });
