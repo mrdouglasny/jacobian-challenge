@@ -13,3 +13,6 @@ commentary/
 
 # CI: ephemeral regenerated axiom report (guard step)
 axiom-report.regenerated.txt
+
+# Local reference PDFs (copyrighted — never commit)
+refs/
