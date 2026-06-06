@@ -1,0 +1,20 @@
+# Code owners — owner-vetted files.
+#
+# These set the project's rules and trust boundary. GitHub requires a review from
+# the listed owner before a PR touching them can merge (when "Require review from
+# Code Owners" branch protection is on). Collaborators' agents may PROPOSE edits via
+# PR, but they do not merge without @mrdouglasny's review. See CLAUDE.md / AGENTS.md.
+
+# Agent + project rules
+/CLAUDE.md                              @mrdouglasny
+/AGENTS.md                              @mrdouglasny
+/.github/CODEOWNERS                     @mrdouglasny
+
+# CI / automation (the machine gates)
+/.github/                               @mrdouglasny
+
+# Axiom ledger + the soundness/consistency machinery
+/AXIOM_AUDIT.md                         @mrdouglasny
+/docs/axiom-report.txt                  @mrdouglasny
+/scripts/axiom_report.lean              @mrdouglasny
+/scripts/check_axiom_consistency.sh     @mrdouglasny

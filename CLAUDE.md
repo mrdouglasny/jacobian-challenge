@@ -128,3 +128,43 @@ status of both.
   for `h : ¬ Odd H.f.natDegree`. The `change` tactic accepts this, so
   the entire `HyperellipticAffine` atlas transfers to
   `HyperellipticAffineInfinity` with `change ... infer_instance`.
+
+## Axiom soundness — vet STRENGTHENING for satisfiability
+
+`#print axioms` / `lake build` / CI verify **typechecking and sorry-freeness only
+— they do NOT check whether an `axiom` is TRUE.** A *false* axiom typechecks and
+passes CI, silently making the kernel inconsistent.
+
+So when you introduce **or strengthen** an axiom, vet the new STATEMENT for
+**satisfiability** before relying on it — sketch an actual witness, or ask Gemini
+deep-think to check (a) typing, (b) strength, (c) non-vacuity, **(d) satisfiability**.
+"Stronger statement, same axiom count" is the dangerous case.
+
+Worked example (2026-06-06, pinned issue #82): strengthening `IsAnalyticArc` →
+`IsAnalyticArcStrong` over an arc's OWN `{0,1}` partition made the elliptic cycle
+witnesses **FALSE** — a single cell can't fit a whole non-contractible loop in one
+chart source (`ComplexTorus.chartRadius_inj`). CI passed; a manual verification
+pass + Gemini 3.1 Pro caught it. Fix: the refinement-based predicate
+(`docs/planning/STRENGTHEN_ANALYTICARC.md`).
+
+## Where major changes get discussed (community program)
+
+This is a multi-agent community project: collaborators' agents do most of the work
+under light human steering. We do **not** pre-discuss routine work — discharging an
+axiom, filling a `sorry`, a local refactor: just open a PR.
+
+But when a collaborator proposes a **major change** — rewriting a core definition,
+retiring/strengthening an axiom, or anything touching soundness or a shared
+interface — it needs a **place to be discussed before a large PR lands**. Open a
+**GitHub Discussion** (or a tracking issue) to propose + get agreement first; the
+implementing PR then links it. PRs that discharge a tracked axiom must link & close
+its tracker issue. (Pinned issue #82 is the running announcement / post-mortem log.)
+
+## Protected files (owner vetting required)
+
+These files set the rules and the trust boundary; they are **owner-vetted** via
+`.github/CODEOWNERS` (changes require @mrdouglasny review): `CLAUDE.md`,
+`AGENTS.md`, `.github/CODEOWNERS`, `.github/workflows/`, `AXIOM_AUDIT.md`,
+`scripts/axiom_report.lean`, `scripts/check_axiom_consistency.sh`, `docs/axiom-report.txt`.
+A collaborator's agent may *propose* edits to these via PR, but they do not merge
+without the owner's review. Do not try to weaken or bypass these guards.
