@@ -572,4 +572,29 @@ theorem oneForm_eq_hyperellipticForm_of_eqOn_chartTarget
       (hyperellipticForm H g : HyperellipticEvenProj H → ℂ → ℂ) q z
     rw [form.2.2.2 q z hz, (hyperellipticForm H g).2.2.2 q z hz]
 
+omit hf in
+/-- `H.f` is a nonzero polynomial. -/
+theorem hyperelliptic_f_ne_zero : H.f ≠ 0 := by
+  intro h
+  have hd := H.h_degree
+  rw [h, Polynomial.natDegree_zero] at hd
+  omega
+
+omit hf in
+/-- The roots of `H.f` are isolated: on a punctured neighbourhood of any point,
+`H.f.eval` is nonzero. This is the isolated-zeros input to the branch-point
+removable-singularity step of `liouvilleGlobalNumerator`'s differentiability
+(L2a). -/
+theorem eventually_eval_ne_zero_nhdsWithin (z₀ : ℂ) :
+    ∀ᶠ z in 𝓝[≠] z₀, H.f.eval z ≠ 0 := by
+  have hfin : {x : ℂ | H.f.IsRoot x}.Finite :=
+    Polynomial.finite_setOf_isRoot (hyperelliptic_f_ne_zero (H := H))
+  set R' : Set ℂ := {x : ℂ | H.f.IsRoot x} \ {z₀} with hR'
+  have hR'closed : IsClosed R' := (hfin.subset Set.diff_subset).isClosed
+  have hmem : R'ᶜ ∈ 𝓝 z₀ :=
+    hR'closed.isOpen_compl.mem_nhds (by simp [hR'])
+  filter_upwards [self_mem_nhdsWithin, mem_nhdsWithin_of_mem_nhds hmem] with z hz hzc
+  intro hzero
+  exact hzc ⟨hzero, hz⟩
+
 end Jacobians.ProjectiveCurve
