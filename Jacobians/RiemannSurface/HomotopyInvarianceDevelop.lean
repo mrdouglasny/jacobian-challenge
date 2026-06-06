@@ -402,6 +402,77 @@ lemma cellLoop_mem_pathChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a 
     exact L_edge_mem_pointChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
       Bcell hcell i j v
 
+lemma devVal_cell_rearrange {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) :
+    developingValue x₀ form
+        (((B_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+          Path ((H.eval (extGrid τ j)) (extGrid σ i))
+            ((H.eval (extGrid τ j)) (extGrid σ (i + 1)))) :
+          C(unitInterval, X)) -
+      developingValue x₀ form
+        (((T_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+          Path ((H.eval (extGrid τ (j + 1))) (extGrid σ i))
+            ((H.eval (extGrid τ (j + 1))) (extGrid σ (i + 1)))) :
+          C(unitInterval, X)) =
+      developingValue x₀ form
+        (((L_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+          Path ((H.eval (extGrid τ j)) (extGrid σ i))
+            ((H.eval (extGrid τ (j + 1))) (extGrid σ i))) :
+          C(unitInterval, X)) -
+      developingValue x₀ form
+        (((L_edge H (extGrid σ) (extGrid τ) (i.val + 1) j.val) :
+          Path ((H.eval (extGrid τ j)) (extGrid σ (i.val + 1)))
+            ((H.eval (extGrid τ (j + 1))) (extGrid σ (i.val + 1)))) :
+          C(unitInterval, X)) := by
+  have hboundary :=
+    cellLoop_mem_pathChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+      Bcell hcell i j
+  have hcell_eq :=
+    devVal_cell_eq (x₀ := x₀) (form := form)
+      (B := B_edge H (extGrid σ) (extGrid τ) i.val j.val)
+      (R := R_edge H (extGrid σ) (extGrid τ) i.val j.val)
+      (T := T_edge H (extGrid σ) (extGrid τ) i.val j.val)
+      (L := L_edge H (extGrid σ) (extGrid τ) i.val j.val)
+      (Bl := Bcell i j)
+      (by simpa [cellLoop] using hboundary)
+  let dB : ℂ := developingValue x₀ form
+    (((B_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+      Path ((H.eval (extGrid τ j)) (extGrid σ i))
+        ((H.eval (extGrid τ j)) (extGrid σ (i + 1)))) :
+      C(unitInterval, X))
+  let dR : ℂ := developingValue x₀ form
+    (((R_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+      Path ((H.eval (extGrid τ j)) (extGrid σ (i + 1)))
+        ((H.eval (extGrid τ (j + 1))) (extGrid σ (i + 1)))) :
+      C(unitInterval, X))
+  let dT : ℂ := developingValue x₀ form
+    (((T_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+      Path ((H.eval (extGrid τ (j + 1))) (extGrid σ i))
+        ((H.eval (extGrid τ (j + 1))) (extGrid σ (i + 1)))) :
+      C(unitInterval, X))
+  let dL : ℂ := developingValue x₀ form
+    (((L_edge H (extGrid σ) (extGrid τ) i.val j.val) :
+      Path ((H.eval (extGrid τ j)) (extGrid σ i))
+        ((H.eval (extGrid τ (j + 1))) (extGrid σ i))) :
+      C(unitInterval, X))
+  have hmove : dB - dT = dL - dR := by
+    have h := hcell_eq
+    change dB + dR = dT + dL at h
+    calc
+      dB - dT = (dB + dR) - dR - dT := by abel
+      _ = (dT + dL) - dR - dT := by rw [h]
+      _ = dL - dR := by abel
+  simpa [dB, dR, dT, dL, R_edge] using hmove
+
 /-- A path whose image is propositionally constant has zero developing value. -/
 lemma devVal_const_image_zero {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
     (γ : Path a b) (x : X) (hγ : ∀ u : unitInterval, γ u = x) :
