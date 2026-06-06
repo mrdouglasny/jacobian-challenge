@@ -20,21 +20,25 @@ G3_DISCHARGE_PLAN.md (G1 milestone, Gemini verdict).*
 > for continuous paths + its **well-definedness** (subdivision-independence); the
 > **base case** (loop inside one chart-ball ⇒ `developingValue = 0`); and
 > **single-chart** homotopy invariance. So HI-1 is *partially* done.
+> **2026-06-06 HI-0 update:** the hypothesis-free bridge
+> `developingValue_eq_canonicalArcIntegral` is now landed in
+> `RiemannSurface/DevelopingBridge.lean`.  The avoiding subdivision is chosen
+> internally, canonical integrability comes from the strong-arc lemma, and the
+> fixed-chart cell integrability hypotheses are discharged by cellwise
+> chart-independence against the canonical integrand.
 >
-> **The four pieces still missing** (scoped 2026-06-06; map to HI-0..HI-3 below):
-> 1. **Arc algebra** — `AnalyticArc` concat/reversal + `canonicalArcIntegral`
->    additivity (`∮_{α·β}=∮_α+∮_β`, `∮_{α⁻¹}=−∮_α`). NOT in repo; prerequisite to
->    even state the triangle as a loop. (Feeds HI-2/HI-4.)
-> 2. **General multi-chart bridge** `developingValue = canonicalArcIntegral` for
->    arbitrary arcs — the existing bridge is single-chart-ball with heavy
->    hypotheses; need telescoping over a subdivision. (= HI-0, the wiring crux.)
-> 3. **General (multi-chart) homotopy invariance** — single-chart version exists
+> **Already done:** HI-0 (above) and the **arc algebra** —
+> `AnalyticArc.reverse`/`.trans` + `canonicalArcIntegral_reverse`/`_trans`
+> (`∮_{α·β}=∮_α+∮_β`, `∮_{α⁻¹}=−∮_α`) in `RiemannSurface/ArcAlgebra.lean` (PR #12).
+>
+> **The two pieces still missing** (scoped 2026-06-06):
+> 1. **General (multi-chart) homotopy invariance** — single-chart version exists
 >    (strong `ContDiffOn`/`DiffContOnCl` hyps); the general one is unbuilt. (= HI-1.)
-> 4. **Lattice landing** `developingValue(loop) ∈ Λ` — the deepest piece, where
+> 2. **Lattice landing** `developingValue(loop) ∈ Λ` — the deepest piece, where
 >    homology enters (loop period = ℤ-combo of cycle-basis periods). (= HI-2+HI-3.)
 >
-> Honest estimate: ~weeks; pieces (3)/(4) may hit Mathlib gaps (general 2-var
-> homotopy regularity; π₁→H₁ on a manifold). This is the deepest analytic gap left.
+> Honest estimate: ~weeks; both may hit Mathlib gaps (general 2-var homotopy
+> regularity; π₁→H₁ on a manifold). This is the deepest analytic gap left.
 
 ## End goal
 
@@ -66,13 +70,13 @@ for all genus>0.
 
 ## What's missing — the global patching
 
-### HI-0 — API bridge (scope first)
-Pin the exact relation between the chart-local ℂ-integral `∫ᶜ … (curveIntegral)`
-and the global `canonicalArcIntegral` on `X` over a sub-arc lying in one chart.
-On a cell mapping into chart `c`, `canonicalArcIntegral (subarc) ω` should equal
-`∫ᶜ (c ∘ subarc) (holoOneForm (ω in chart c))` (the moving-center coeff·deriv
-reduces to the chart-local curve integral). This is "chart-additivity" (AnalyticArc
-docstring). May reuse `MultiChartIntegral` cocycle lemmas. CRUX of the wiring.
+### HI-0 — API bridge DONE (2026-06-06)
+`developingValue_eq_canonicalArcIntegral` now proves, without caller-supplied
+side conditions, that the choice-based developing value agrees with the canonical
+moving-chart arc integral for every `AnalyticArc X`.  The older explicit
+subdivision theorem remains available as a lemma, but the public bridge chooses
+an avoiding subdivision and discharges both integrability hypotheses from the
+strong-arc integrability lemmas plus the fixed-to-canonical cell equality.
 
 ### HI-1 — global homotopy invariance (the hard core)
 `canonicalArcIntegral_homotopy_invariant`: for paths/arcs `γ₁ γ₂ : a ⤳ b` on `X`
@@ -132,7 +136,7 @@ loop ⇒ `∫_{γ_Q} ∈ Λ` (HI-3) ⇒ `∫_b^P − ∫_{b'}^P ≡ −∫_{b'}^
 (G1 + AX_AbelTheorem + G3) retires `AX_ofCurve_inj` for all genus>0.
 
 ## Sequencing
-HI-0 (API bridge) → HI-1 (patching, the big one) → HI-2 → HI-3 → HI-4 → G-assemble.
+HI-0 (API bridge) DONE → HI-1 (patching, the big one) → HI-2 → HI-3 → HI-4 → G-assemble.
 HI-1 is the genuine effort; HI-2/3/4 are algebra once HI-1 lands. Runs parallel to
 the G3 genus-obstruction (C0/C1), which is independent.
 

@@ -39,6 +39,7 @@ import Jacobians.RiemannSurface.CanonicalArcIntegral
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.RiemannSurface.HomotopyInvariance
 import Jacobians.RiemannSurface.DevelopingMap
+import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
