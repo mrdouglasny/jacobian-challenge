@@ -247,7 +247,6 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | `PlaneCurve`: `instNonempty` + 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 3 affine props (type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instNonempty` reverted in review) | `ProjectiveCurve/PlaneCurve.lean` | 9 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
-| Affine-form IFT-shape (`squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source`) | `…/Hyperelliptic/AffineForm.lean:66,222` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
 | `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:9` | 1 |
 | Elliptic witnesses (`AX_Elliptic_aLoop_analytic`, `_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:87,97,173` | 3; the two loop-analytic witnesses were strengthened to `IsAnalyticArcStrong` 2026-06-06. Affine-in-chart justification recorded; **re-vet pending**. |
@@ -306,6 +305,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
 | `AX_cycleBasisLoop_integrable` *(2026-06-06)* | `analyticArc_canonicalIntegrand_intervalIntegrable` from strong per-cell analytic witnesses; cycle-basis loops are ordinary `AnalyticArc`s | `RiemannSurface/LoopIntegral.lean`, `RiemannSurface/PartitionIndependence.lean` |
+| `squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source` *(2026-06-06, PR #78)* | affine-form IFT-shape proved directly — square: distinct preimages collide under squaring ⇒ contradiction; polynomial: `ApproximatesLinearOn` / `HasFDerivAt` inverse-function argument | `ProjectiveCurve/Hyperelliptic/AffineForm.lean:66,280` |
 | `AX_torus_descent_holo` *(2026-06-06)* | local-section route over Kirov's `ZLatticeQuotient` local-homeo API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`) composed with `P.fromQuot_holo`; helper `complexTorus_pushforward_contMDiff_to_quotient` | `Axioms/TorusAlbanese.lean` |
 | `AX_FiniteDimOneForms` | injective bridge to Kirov's Montel theorem | `Bridge/KirovHolomorphic.lean` |
 | `genus ℙ¹ = 0` *(via `AX_genus_eq_zero_iff_homeo`)* | direct chart-cocycle + Liouville ⇒ `HolomorphicOneForm ℙ¹` subsingleton | `ProjectiveCurve/Line/OneForm.lean` |
