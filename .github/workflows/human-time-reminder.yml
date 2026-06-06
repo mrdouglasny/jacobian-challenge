@@ -1,0 +1,26 @@
+name: Human-time reminder
+on:
+  pull_request_target:
+    types: [opened, edited, ready_for_review, synchronize]
+permissions:
+  pull-requests: write
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const m = body.match(/Estimated human time:\**\s*`?\s*([^`\n]*?)\s*`?\s*$/im);
+            const val = m ? m[1].trim() : '';
+            const filled = val && !val.includes('___') && /\d/.test(val);
+            const marker = '<!-- human-time-reminder -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: pr.number });
+            const existing = comments.find(c => c.body.includes(marker));
+            if (!filled && !existing) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number,
+                body: `${marker}\n⏱️ **Reminder:** please fill in the **Estimated human time** field in the PR description — human time = reading code, thinking, interacting with agents, and reviewing (exclude setup, learning the codebase, and infra). A rough number is fine.` });
+            }
