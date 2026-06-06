@@ -632,4 +632,36 @@ lemma row_sum_eq {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
             rw [hL0, hLm, sub_self]
   exact sub_eq_zero.mp hsub
 
+lemma col_sum_eq {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j)) :
+    (∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i 0) =
+      ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i n := by
+  classical
+  let f : ℕ → ℂ := fun j =>
+    ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i j
+  have hstep : ∀ j : ℕ, j < n → f j = f (j + 1) := by
+    intro j hj
+    let jj : Fin n := ⟨j, hj⟩
+    have hrow := row_sum_eq x₀ form H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+      Bcell hcell jj
+    simpa [f, devTVal, T_edge, devBVal, jj] using hrow
+  have hsumzero : (∑ j ∈ Finset.range n, (f j - f (j + 1))) = 0 := by
+    refine Finset.sum_eq_zero ?_
+    intro j hj
+    rw [hstep j (Finset.mem_range.mp hj), sub_self]
+  have hsub : f 0 - f n = 0 := by
+    calc
+      f 0 - f n = ∑ j ∈ Finset.range n, (f j - f (j + 1)) := by
+        simpa using (Finset.sum_range_sub' f n).symm
+      _ = 0 := hsumzero
+  exact sub_eq_zero.mp hsub
+
 end Jacobians.RiemannSurface
