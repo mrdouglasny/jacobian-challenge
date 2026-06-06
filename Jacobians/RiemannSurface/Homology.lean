@@ -45,10 +45,10 @@ namespace H1
 
 variable {X : Type*} [TopologicalSpace X]
 
--- TODO (basepoint_independence): for path-connected `X` and `x₀, x₁ : X`,
--- there's a canonical `H1 X x₀ ≃+ H1 X x₁` via path-conjugation. This is
--- used in `periodLattice X` where we show the period-image lattice is
--- basepoint-independent.
+/-- Path-conjugation identifies the first homology groups defined from
+different basepoints. -/
+noncomputable def basepointEquiv {x₀ x₁ : X} (p : Path x₀ x₁) : H1 X x₀ ≃+ H1 X x₁ :=
+  MulEquiv.toAdditive (FundamentalGroup.fundamentalGroupMulEquivOfPath p).abelianizationCongr
 
 -- TODO (AX_H1FreeRank2g placeholder): for `X` compact, connected, of
 -- genus `g`, `H1 X x₀` is free abelian of rank `2g`. Axiomatized; not

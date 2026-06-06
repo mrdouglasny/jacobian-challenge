@@ -28,9 +28,11 @@ theorem pathIntegralOnChartSeg_center_independent
     (γ : AnalyticArc X) (p q : X) (a b : ℝ) (form : HolomorphicOneForm X)
     {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
     (hgap : Set.Ioo a b ⊆ Set.Ioo s t)
+    (hgap_no : ∀ u ∈ γ.partition, u ∉ Set.Ioo s t)
     (hp : ∀ r ∈ Set.Ioo a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source)
     (hq : ∀ r ∈ Set.Ioo a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) q).source) :
     pathIntegralOnChartSeg γ p a b form = pathIntegralOnChartSeg γ q a b form := by
+  have _hst : s < t := hst
   rcases le_or_gt a b with hab | hba
   · unfold pathIntegralOnChartSeg
     have h_pointwise : ∀ r ∈ Set.Ioo a b,
@@ -43,8 +45,18 @@ theorem pathIntegralOnChartSeg_center_independent
       intro r hr
       have hdp : DifferentiableWithinAt ℝ
           (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) (Set.Ioo a b) r :=
-        arc_chart_differentiableWithinAt γ p hs ht hst
-          (hgap hr) (hp r hr) (Set.Ioo a b)
+        have hrst : r ∈ Set.Ioo s t := hgap hr
+        have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
+          have hs01 := γ.partition_subset hs
+          have ht01 := γ.partition_subset ht
+          exact ⟨hs01.1.trans_lt hrst.1, hrst.2.trans_le ht01.2⟩
+        have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
+          intro hrmem
+          have hrmem' : r ∈ γ.partition := by
+            simpa using hrmem
+          exact (hgap_no r hrmem') hrst
+        arc_chart_differentiableWithinAt γ p hr01 hr_notmem
+          (hp r hr) (Set.Ioo a b)
       exact integrand_center_independent form γ p q a b r
         (hp r hr) (hq r hr) hdp hr
     refine intervalIntegral.integral_congr_ae ?_

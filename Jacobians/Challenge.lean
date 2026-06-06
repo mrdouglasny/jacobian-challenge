@@ -1,11 +1,11 @@
 import Mathlib -- compiles with Mathlib v4.30.0 (c5ea00351c28e24afc9f0f84379aa41082b1188f, 26 May 2026)
 import Jacobians.Jacobian
-import Jacobians.Axioms.AbelJacobiMap
+import Jacobians.Axioms.OfCurveInjective
 import Jacobians.Axioms.Uniformization0
--- ^ Our bridge. Fills all 24 Buzzard sorries via the named-axiom
+-- ^ Our bridge. Fills all 24 Buzzard sorries via the named theorem/axiom
 -- framework: `Jacobian` bridge through `ComplexTorus`, instances via
 -- ULift transfer, data defs (`ofCurve`,
--- pushforward, pullback, degree) and all 10 theorems axiom-stubbed
+-- pushforward, pullback, degree), with the remaining deep theorems routed
 -- against the classical Riemann-surface theory (PathIntegral,
 -- Abel-Jacobi, branch-locus degree formula, Uniformization for
 -- genus 0).

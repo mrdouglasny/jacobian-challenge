@@ -38,6 +38,7 @@ import Jacobians.Axioms.Uniformization0
 import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 import Jacobians.Axioms.AbelTheorem
+import Jacobians.Axioms.OfCurveInjective
 import Jacobians.Axioms.BranchLocus
 import Jacobians.Axioms.PluckerFormula
 import Jacobians.Axioms.UniversalProperty

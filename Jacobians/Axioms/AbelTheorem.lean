@@ -2,12 +2,25 @@
 `AX_AbelTheorem`: Abel's theorem on the kernel of the Abel-Jacobi
 map on divisors.
 
-**Statement (Lean, refined 2026-04-23).** There exists a ℤ-linear
+**Statement (Lean, refined 2026-04-23; degree-0 restriction added
+2026-06-05).** There exists a ℤ-linear
 `abelJacobiDiv : Divisor X →+ Jacobian X` extending the Abel-Jacobi
-map on points (via `ofCurveImpl`), and its kernel is exactly the
-subgroup of principal divisors:
+map on points (via `ofCurveImpl`), and on the **degree-zero** divisors
+its kernel is exactly the subgroup of principal divisors:
 
-    AddMonoidHom.ker abelJacobiDiv = PrincipalDivisors X.
+    AddMonoidHom.ker abelJacobiDiv ⊓ AddMonoidHom.ker (Divisor.deg X)
+      = PrincipalDivisors X.
+
+The degree-0 restriction is mathematically essential and was missing
+before: Abel's theorem is the statement `Div⁰(X) / Principal ≃ Jac(X)`,
+and principal divisors are always degree 0 (residue theorem). Without
+it the axiom is FALSE — `abelJacobiDiv` sends the basepoint divisor
+`(arbitrary)` to `0` (basepoint normalization, `AX_ofCurve_self`), so
+that degree-1 divisor sits in the bare kernel but is not principal.
+(Caught 2026-06-05 by statement-vetting after `PrincipalDivisors` was
+de-opaqued to `range divHom`, which made the bare-kernel form a latent
+inconsistency.) All consumers feed only degree-0 divisors (differences
+`(Q₁) − (Q₂)`), so the restriction loses nothing.
 
 ## Consequences
 
@@ -38,14 +51,14 @@ Either route is a substantial independent project.
 ## History
 
 - 2026-04-23 (A6 in completion plan): promoted from doc-only using the
-  `Divisor / PrincipalDivisors / ofCurveImpl` stubs.
+  `Divisor / PrincipalDivisors / ofCurveImpl` layer.
 
 See `docs/formalization-plan.md` §7, discharge priority #10;
 `docs/completion-plan.md` workstream A6.
 Reference: Mumford Vol I §II.3.3–II.3.5; Forster Ch. III.
 -/
 import Jacobians.Axioms.AbelJacobiMap
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.MeromorphicFunctionField
 
 namespace Jacobians.Axioms
 
@@ -53,19 +66,20 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- **Axiom-stub (data).** The Abel-Jacobi map extended linearly from
+/-- The Abel-Jacobi map extended linearly from
 points to divisors. On a formal combination `∑ n_P · P`, evaluates to
 `∑ n_P · ofCurveImpl P₀ P - (∑ n_P) · ofCurveImpl P₀ P₀`; basepoint
 `P₀` is chosen via `Classical.arbitrary`. -/
-axiom abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
+noncomputable def abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X
+    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X :=
+  FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)
 
 /-- **Axiom (Abel's theorem).** The kernel of the Abel-Jacobi map on
 divisors is exactly the subgroup of principal divisors. -/
 axiom AX_AbelTheorem {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    (abelJacobiDiv X).ker = PrincipalDivisors X
+    (abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker = PrincipalDivisors X
 
 end Jacobians.Axioms

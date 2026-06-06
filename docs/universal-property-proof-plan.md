@@ -23,6 +23,14 @@ theorem ofCurve_isJacobian {X : Type} [TopologicalSpace X] [T2Space X]
 `aj_holo` and `aj_base` are **already repo theorems** (`Jacobian.ofCurve_contMDiff`,
 `Jacobian.ofCurve_self`). All the work is the `universal` field.
 
+**Scope decision (MRD 2026-06-05):** the FIRM target is **`0 < genus X`** (matching
+Buzzard's `ofCurve_inj` convention). Existence + factorization (E/F rows) are
+genus-agnostic; only uniqueness (U1 = `AX_curve_generates_jacobian`, g≥1) needs it.
+genus = 0 is **probably easy** (Jacobian is a point; the only subtlety is that a
+holomorphic `ℙ¹ → torus` is constant ⇒ `f ≡ 0` for factorization). So: prove for
+all genus IF g=0 drops out cleanly; otherwise add the `0 < genus X` hypothesis and
+do NOT get blocked on g=0.
+
 ## Step 0 — prerequisites (mechanical)
 
 - **[done] Dimension fix.** The statement now models `J`/`A` on `Fin g → ℂ` /

@@ -58,7 +58,7 @@ noncomputable def constLoop (x₀ : ProjectiveLine) : AnalyticLoop ProjectiveLin
       zero_mem := by simp
       one_mem := by simp
       is_analytic := by
-        intro s _ t _ _ u _
+        intro u _ _
         exact analyticAt_const }
   start_eq := rfl
   end_eq := rfl

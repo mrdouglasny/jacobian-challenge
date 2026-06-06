@@ -24,6 +24,8 @@ Currently:
   Currently scaffolded; both bridge body and FTC theorem are `sorry`.
 -/
 import Jacobians.Bridge.ContourDeformation
+import Jacobians.Bridge.BridgePathArc
+import Jacobians.Bridge.KirovCanonicalEq
 import Jacobians.Bridge.KirovHolomorphic
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral

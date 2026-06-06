@@ -1,6 +1,26 @@
 # Dependency trace — foundation closure audit
 
-_Drafted 2026-04-23. Updated 2026-04-29._
+_Drafted 2026-04-23. Updated 2026-04-29; currency note 2026-06-06._
+
+> **Currency note (2026-06-06).** This trace is an accurate *historical*
+> audit of foundation closure but predates the 2026-06-04/05 discharge push.
+> Read it alongside the current snapshot
+> [`status-2026-06-06.md`](status-2026-06-06.md) and the authoritative
+> [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md) (62 axioms, kernel-verified). Key
+> changes since the rows below were written:
+> - **`loopIntegralToH1` is no longer an axiom** — discharged to a real `def`
+>   (the multi-chart line integral over the analytic cycle basis, 2026-06-05).
+> - **`AX_ofCurve_inj` is retired** — Abel injectivity on positive-genus
+>   curves is now the *theorem* `Axioms/OfCurveInjective.lean`, derived from
+>   the new `AX_Period_Triangle` (period 1-cocycle, deep-think-vetted) +
+>   `AX_AbelTheorem` + the proven genus obstruction.
+> - **`pathIntegralBasepointFunctional` → real `∫` def**;
+>   **`PrincipalDivisors` → `range divHom`**; **`H0` → `riemannRochSpace D`**
+>   (3 opaque H0 axioms retired).
+> - **Albanese categoricity proved** (`ofCurve_isJacobian`) on 5 vetted torus
+>   axioms; **RR/Serre/Plücker anchor layer** added (vetted statements,
+>   deferred proofs).
+> - Net axiom count **93 → 62** over this window.
 
 **Update note (2026-04-29):** since the original draft, two important
 changes:

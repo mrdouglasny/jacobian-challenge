@@ -63,14 +63,21 @@ jobs:
         if: always()
         run: |
           set -uo pipefail
-          # Files permitted to contain `sorry` — extension/bridge scaffolds, all OUTSIDE
-          # the core challenge. The invariant this guards: no `sorry` escapes into the
-          # core (Challenge API, Jacobian construction, curve witnesses, S1–S7 framework)
-          # or any new file. Counts within these files may fluctuate freely.
+          # Files permitted to contain `sorry`, in two categories, all OUTSIDE the
+          # core challenge. The invariant this guards: no `sorry` escapes into the
+          # core (Challenge API, Jacobian construction, curve witnesses, S1–S7 framework).
+          # Counts within these files may fluctuate freely.
+          #   (a) extension/bridge scaffolds — gap-layer holes;
+          #   (b) anchor-layer files — intentionally deferred proofs of Gemini-vetted
+          #       RR/Serre/Plücker statements (the value is the locked-down statement;
+          #       see README "Anchor APIs").
           allow="Jacobians/Extensions/Hyperelliptic.lean
           Jacobians/Extensions/AbelJacobi.lean
           Jacobians/Bridge/KirovLineIntegral.lean
-          Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean"
+          Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean
+          Jacobians/RiemannSurface/RiemannRochAPI.lean
+          Jacobians/RiemannSurface/SerreDualityAPI.lean
+          Jacobians/RiemannSurface/PluckerAPI.lean"
           pat='(:=|[[:space:]]by|=>|;|<;>)[[:space:]]*sorry\b|^[[:space:]]*sorry[[:space:]]*$'
           allow_clean="$(echo "$allow" | sed 's/^[[:space:]]*//')"
           fail=0
