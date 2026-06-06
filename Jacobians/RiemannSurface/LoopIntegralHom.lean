@@ -92,15 +92,13 @@ noncomputable def loopDevValH1Hom (x₀ : X) (form : HolomorphicOneForm X) :
   rw [← developingValue_eq_canonicalArcIntegral x₀ form loop.arc]
   rfl
 
-/-- Compatibility on the chosen analytic cycle-basis loops. -/
-theorem loopDevValH1Hom_cycleBasis_loop {X : Type*} [TopologicalSpace X]
-    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (i : Fin (2 * genus X))
-    (form : HolomorphicOneForm X) :
-    let cb := Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)
-    loopDevValH1Hom x₀ form (Jacobians.Axioms.loopToHomology (cb.loops i)) =
-      canonicalArcIntegral (cb.loops i).arc form := by
-  exact loopDevValH1Hom_loopToHomology x₀ form
-    ((Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)).loops i)
+/-- Compatibility for any indexed family of analytic loops, such as the loops
+in an analytic cycle basis. -/
+theorem loopDevValH1Hom_loopToHomology_apply {ι : Type*}
+    (x₀ : X) (form : HolomorphicOneForm X) (loops : ι → AnalyticLoop X x₀)
+    (i : ι) :
+    loopDevValH1Hom x₀ form (Jacobians.Axioms.loopToHomology (loops i)) =
+      canonicalArcIntegral (loops i).arc form :=
+  loopDevValH1Hom_loopToHomology x₀ form (loops i)
 
 end Jacobians.RiemannSurface

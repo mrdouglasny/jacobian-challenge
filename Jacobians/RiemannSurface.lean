@@ -42,6 +42,7 @@ import Jacobians.RiemannSurface.DevelopingMap
 import Jacobians.RiemannSurface.DevelopingValueAlgebra
 import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.HomotopyInvarianceDevelop
+import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
