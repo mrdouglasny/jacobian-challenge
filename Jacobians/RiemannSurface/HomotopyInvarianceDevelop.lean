@@ -770,4 +770,76 @@ private noncomputable def topRowSubdivision {m n : ℕ} {a b : X} {γ₁ γ₂ :
     have h := hcell i (lastCell n hn) u hx 1 hy
     simpa using h
 
+lemma developingValue_eq_bottom_row_sum {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (hn : 0 < n)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j)) :
+    developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) =
+      ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i 0 := by
+  classical
+  let S : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)) :=
+    bottomRowSubdivision H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono hn Bcell hcell
+  calc
+    developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) =
+        ∑ i : Fin S.n,
+          developingValue x₀ form
+            (((γ₁.subpath (S.t i.castSucc) (S.t i.succ) :
+                Path (γ₁ (S.t i.castSucc)) (γ₁ (S.t i.succ))) : C(unitInterval, X))) :=
+      devVal_subdivision x₀ form γ₁ S
+    _ = ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i 0 := by
+      rw [Finset.sum_fin_eq_sum_range]
+      refine Finset.sum_congr rfl ?_
+      intro k hk
+      have hklt : k < m := Finset.mem_range.mp hk
+      let i : Fin m := ⟨k, hklt⟩
+      dsimp [S, bottomRowSubdivision, devBVal, B_edge]
+      rw [dif_pos hklt]
+      apply congrArg (developingValue x₀ form)
+      ext u
+      simp [Path.subpath, extGrid_zero τ hτ0]
+      rfl
+
+lemma developingValue_eq_top_row_sum {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (hn : 0 < n)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j)) :
+    developingValue x₀ form ((γ₂ : Path a b) : C(unitInterval, X)) =
+      ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i n := by
+  classical
+  let S : PathChartBallSubdivision ((γ₂ : Path a b) : C(unitInterval, X)) :=
+    topRowSubdivision H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono hn Bcell hcell
+  calc
+    developingValue x₀ form ((γ₂ : Path a b) : C(unitInterval, X)) =
+        ∑ i : Fin S.n,
+          developingValue x₀ form
+            (((γ₂.subpath (S.t i.castSucc) (S.t i.succ) :
+                Path (γ₂ (S.t i.castSucc)) (γ₂ (S.t i.succ))) : C(unitInterval, X))) :=
+      devVal_subdivision x₀ form γ₂ S
+    _ = ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i n := by
+      rw [Finset.sum_fin_eq_sum_range]
+      refine Finset.sum_congr rfl ?_
+      intro k hk
+      have hklt : k < m := Finset.mem_range.mp hk
+      let i : Fin m := ⟨k, hklt⟩
+      dsimp [S, topRowSubdivision, devBVal, B_edge]
+      rw [dif_pos hklt]
+      apply congrArg (developingValue x₀ form)
+      ext u
+      simp [Path.subpath, extGrid_last τ hτ1]
+      rfl
+
 end Jacobians.RiemannSurface
