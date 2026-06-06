@@ -16,6 +16,7 @@ namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology
 open scoped ContDiff
+open scoped BigOperators
 open Set
 
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
@@ -272,6 +273,30 @@ def R_edge {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     Path ((H.eval (τu j)) (σu (i + 1))) ((H.eval (τu (j + 1))) (σu (i + 1))) :=
   L_edge H σu τu (i + 1) j
 
+noncomputable def devBVal {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X) (H : Path.Homotopy γ₁ γ₂)
+    (σu τu : ℕ → unitInterval) (i j : ℕ) : ℂ :=
+  developingValue x₀ form
+    (((B_edge H σu τu i j :
+      Path ((H.eval (τu j)) (σu i)) ((H.eval (τu j)) (σu (i + 1)))) :
+      C(unitInterval, X)))
+
+noncomputable def devTVal {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X) (H : Path.Homotopy γ₁ γ₂)
+    (σu τu : ℕ → unitInterval) (i j : ℕ) : ℂ :=
+  developingValue x₀ form
+    (((T_edge H σu τu i j :
+      Path ((H.eval (τu (j + 1))) (σu i)) ((H.eval (τu (j + 1))) (σu (i + 1)))) :
+      C(unitInterval, X)))
+
+noncomputable def devLVal {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X) (H : Path.Homotopy γ₁ γ₂)
+    (σu τu : ℕ → unitInterval) (i j : ℕ) : ℂ :=
+  developingValue x₀ form
+    (((L_edge H σu τu i j :
+      Path ((H.eval (τu j)) (σu i)) ((H.eval (τu (j + 1))) (σu i))) :
+      C(unitInterval, X)))
+
 /-- The oriented boundary loop of one homotopy grid cell. -/
 def cellLoop {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     (σu τu : ℕ → unitInterval) (i j : ℕ) :
@@ -473,6 +498,27 @@ lemma devVal_cell_rearrange {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
       _ = dL - dR := by abel
   simpa [dB, dR, dT, dL, R_edge] using hmove
 
+lemma devVal_cell_rearrange_nat {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i j : ℕ) (hi : i < m) (hj : j < n) :
+    devBVal x₀ form H (extGrid σ) (extGrid τ) i j -
+      devTVal x₀ form H (extGrid σ) (extGrid τ) i j =
+    devLVal x₀ form H (extGrid σ) (extGrid τ) i j -
+      devLVal x₀ form H (extGrid σ) (extGrid τ) (i + 1) j := by
+  let ii : Fin m := ⟨i, hi⟩
+  let jj : Fin n := ⟨j, hj⟩
+  simpa [devBVal, devTVal, devLVal, ii, jj] using
+    devVal_cell_rearrange x₀ form H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+      Bcell hcell ii jj
+
 /-- A path whose image is propositionally constant has zero developing value. -/
 lemma devVal_const_image_zero {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
     (γ : Path a b) (x : X) (hγ : ∀ u : unitInterval, γ u = x) :
@@ -520,5 +566,70 @@ lemma devVal_vertEdge_const_right {a b : X} {γ₁ γ₂ : Path a b}
   intro u
   change H (Set.Icc.convexComb y₁ y₂ u, (1 : unitInterval)) = b
   exact Path.Homotopy.target H (Set.Icc.convexComb y₁ y₂ u)
+
+lemma row_sum_eq {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X)
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (j : Fin n) :
+    (∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i j.val) =
+      ∑ i ∈ Finset.range m, devTVal x₀ form H (extGrid σ) (extGrid τ) i j.val := by
+  classical
+  have hsum :
+      (∑ i ∈ Finset.range m,
+        (devBVal x₀ form H (extGrid σ) (extGrid τ) i j.val -
+          devTVal x₀ form H (extGrid σ) (extGrid τ) i j.val)) =
+      ∑ i ∈ Finset.range m,
+        (devLVal x₀ form H (extGrid σ) (extGrid τ) i j.val -
+          devLVal x₀ form H (extGrid σ) (extGrid τ) (i + 1) j.val) := by
+    refine Finset.sum_congr rfl ?_
+    intro i hi
+    exact devVal_cell_rearrange_nat x₀ form H σ τ hσ0 hσ1 hσmono
+      hτ0 hτ1 hτmono Bcell hcell i j.val (Finset.mem_range.mp hi) j.isLt
+  have hL0 : devLVal x₀ form H (extGrid σ) (extGrid τ) 0 j.val = 0 := by
+    change developingValue x₀ form
+      (((vertEdge H (extGrid σ 0) (extGrid τ j.val) (extGrid τ (j.val + 1)) :
+        Path ((H.eval (extGrid τ j.val)) (extGrid σ 0))
+          ((H.eval (extGrid τ (j.val + 1))) (extGrid σ 0))) :
+        C(unitInterval, X))) = 0
+    rw [extGrid_zero σ hσ0]
+    exact
+      devVal_vertEdge_const_left x₀ form H (extGrid τ j.val) (extGrid τ (j.val + 1))
+  have hLm : devLVal x₀ form H (extGrid σ) (extGrid τ) m j.val = 0 := by
+    change developingValue x₀ form
+      (((vertEdge H (extGrid σ m) (extGrid τ j.val) (extGrid τ (j.val + 1)) :
+        Path ((H.eval (extGrid τ j.val)) (extGrid σ m))
+          ((H.eval (extGrid τ (j.val + 1))) (extGrid σ m))) :
+        C(unitInterval, X))) = 0
+    rw [extGrid_last σ hσ1]
+    exact
+      devVal_vertEdge_const_right x₀ form H (extGrid τ j.val) (extGrid τ (j.val + 1))
+  have hsub :
+      (∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i j.val) -
+        (∑ i ∈ Finset.range m, devTVal x₀ form H (extGrid σ) (extGrid τ) i j.val) = 0 := by
+    calc
+      (∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i j.val) -
+          (∑ i ∈ Finset.range m, devTVal x₀ form H (extGrid σ) (extGrid τ) i j.val) =
+          ∑ i ∈ Finset.range m,
+            (devBVal x₀ form H (extGrid σ) (extGrid τ) i j.val -
+              devTVal x₀ form H (extGrid σ) (extGrid τ) i j.val) := by
+            rw [Finset.sum_sub_distrib]
+      _ = ∑ i ∈ Finset.range m,
+            (devLVal x₀ form H (extGrid σ) (extGrid τ) i j.val -
+              devLVal x₀ form H (extGrid σ) (extGrid τ) (i + 1) j.val) := hsum
+      _ = devLVal x₀ form H (extGrid σ) (extGrid τ) 0 j.val -
+            devLVal x₀ form H (extGrid σ) (extGrid τ) m j.val := by
+            simpa using
+              (Finset.sum_range_sub'
+                (fun i => devLVal x₀ form H (extGrid σ) (extGrid τ) i j.val) m)
+      _ = 0 := by
+            rw [hL0, hLm, sub_self]
+  exact sub_eq_zero.mp hsub
 
 end Jacobians.RiemannSurface
