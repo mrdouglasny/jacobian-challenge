@@ -19,13 +19,17 @@ open Set
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace ℂ M] [IsManifold 𝓘(ℂ) ω M]
 
-private lemma chart_mdiff (q' : M) {p : M} (hp : p ∈ (extChartAt 𝓘(ℂ) q').source) :
+/-- The extended coordinate chart of a complex manifold is manifold-differentiable
+at every point of its source. -/
+theorem chart_mdiff (q' : M) {p : M} (hp : p ∈ (extChartAt 𝓘(ℂ) q').source) :
     MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) (⇑(extChartAt 𝓘(ℂ) q')) p := by
   have hsrc : p ∈ (chartAt ℂ q').source := by rw [← extChartAt_source 𝓘(ℂ)]; exact hp
   exact ((contMDiffOn_extChartAt (n := ω)).mdifferentiableOn WithTop.top_ne_zero _ hsrc).mdifferentiableAt
     (IsOpen.mem_nhds (chartAt ℂ q').open_source hsrc)
 
-private lemma chartsymm_mdiff (q : M) {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ) q).target) :
+/-- The inverse of an extended coordinate chart of a complex manifold is
+manifold-differentiable at every point of its target. -/
+theorem chartsymm_mdiff (q : M) {z : ℂ} (hz : z ∈ (extChartAt 𝓘(ℂ) q).target) :
     MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) (⇑(extChartAt 𝓘(ℂ) q).symm) z :=
   ((contMDiffOn_extChartAt_symm q).mdifferentiableOn WithTop.top_ne_zero _ hz).mdifferentiableAt
     (IsOpen.mem_nhds (isOpen_extChartAt_target q) hz)
