@@ -20,10 +20,15 @@ dimension) and the Serre-vanishing corollary `deg D > 2g - 2 ⇒ h1(D) = 0`,
 which is exactly what turns the `h0 - h1` Riemann-Roch identity into the
 effective `h0 = deg D + 1 - g`.
 
-All results here are vetted statement anchors. The proofs are intentionally
-deferred with `sorry`; the value is in the faithful, type-correct statements.
-`H1` is deliberately left opaque so Serre duality remains a checkable target
-rather than being baked into a definition.
+These are vetted statement anchors. `h1_eq_h0_canonical_sub` (the dimension-form
+duality) and `riemannRoch_h0_sub_h1` (the `h0 - h1` identity) are now **real
+proofs** — the former from `AX_SerreDuality` via `LinearEquiv.finrank_eq` +
+`Subspace.dual_finrank_eq`, the latter a re-export of `AX_RiemannRoch` once the
+finite-dimensionality instances are threaded through. Only Serre vanishing
+(`h1_eq_zero_of_deg_gt`) is still deferred with `sorry`: it bottoms out on the
+canonical degree `deg K = 2g - 2` and the residue theorem `deg(div f) = 0`,
+neither of which the repo proves yet. `H1` is deliberately left opaque so Serre
+duality remains a checkable target rather than being baked into a definition.
 
 References: Forster, *Lectures on Riemann Surfaces*, section 17 (Serre duality);
 Griffiths-Harris, *Principles of Algebraic Geometry*, Ch. 1; Miranda, Ch. VI.
@@ -68,7 +73,14 @@ de-opaqued to `riemannRochSpace`, the right-hand side is a genuine dimension of
 a concrete function space. -/
 theorem h1_eq_h0_canonical_sub (D : Divisor X) :
     h1 D = h0 (canonicalDivisor X - D) := by
-  sorry
+  obtain ⟨e⟩ := AX_SerreDuality D
+  calc h1 D
+      = Module.finrank ℂ
+          (Module.Dual ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D)))) :=
+        e.finrank_eq
+    _ = Module.finrank ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D))) :=
+        Subspace.dual_finrank_eq
+    _ = h0 (canonicalDivisor X - D) := rfl
 
 /-- Serre vanishing (Forster section 17; Miranda VI): for a divisor of degree
 exceeding `2g - 2`, the first cohomology vanishes, `h^1(D) = 0`.  Equivalent via
@@ -84,8 +96,10 @@ Riemann-Roch identity: combining `riemannRoch` (the `h^0(D) - h^0(K - D)` form
 in `RiemannRochAPI`) with `h1_eq_h0_canonical_sub` recovers the classical
 `h^0(D) - h^1(D) = deg D + 1 - g`.  This cross-checks the two anchors against
 each other. -/
-theorem riemannRoch_h0_sub_h1 (D : Divisor X) :
-    (h0 D : ℤ) - (h1 D : ℤ) = Divisor.deg X D + 1 - (genus X : ℤ) := by
-  sorry
+theorem riemannRoch_h0_sub_h1 (D : Divisor X)
+    [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
+    [FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))] :
+    (h0 D : ℤ) - (h1 D : ℤ) = Divisor.deg X D + 1 - (genus X : ℤ) :=
+  AX_RiemannRoch D
 
 end Jacobians.RiemannSurface
