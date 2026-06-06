@@ -201,6 +201,47 @@ lemma extGrid_castSucc_le_succ {m : ℕ} (σ : Fin (m + 1) → ℝ)
     extGrid_coe_succ σ hσ0 hσ1 hσmono i]
   exact hσmono (Fin.castSucc_le_succ i)
 
+lemma extGrid_left_mem_real_Icc {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) :
+    (extGrid σ i : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) := by
+  constructor
+  · rw [extGrid_coe_castSucc σ hσ0 hσ1 hσmono i]
+  · calc
+      (extGrid σ i : ℝ) = σ i.castSucc :=
+        extGrid_coe_castSucc σ hσ0 hσ1 hσmono i
+      _ ≤ σ i.succ := hσmono (Fin.castSucc_le_succ i)
+
+lemma extGrid_right_mem_real_Icc {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) :
+    (extGrid σ (i + 1) : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) := by
+  constructor
+  · calc
+      σ i.castSucc ≤ σ i.succ := hσmono (Fin.castSucc_le_succ i)
+      _ = (extGrid σ (i + 1) : ℝ) :=
+        (extGrid_coe_succ σ hσ0 hσ1 hσmono i).symm
+  · rw [extGrid_coe_succ σ hσ0 hσ1 hσmono i]
+
+lemma extGrid_convex_mem_real_Icc {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) (u : unitInterval) :
+    ((Set.Icc.convexComb (extGrid σ i) (extGrid σ (i + 1)) u : unitInterval) : ℝ) ∈
+      Set.Icc (σ i.castSucc) (σ i.succ) := by
+  have hle : extGrid σ i ≤ extGrid σ (i + 1) :=
+    extGrid_castSucc_le_succ σ hσ0 hσ1 hσmono i
+  let x : unitInterval := Set.Icc.convexComb (extGrid σ i) (extGrid σ (i + 1)) u
+  have hx : x ∈ Set.Icc (extGrid σ i) (extGrid σ (i + 1)) :=
+    ⟨Set.Icc.le_convexComb hle u, Set.Icc.convexComb_le hle u⟩
+  constructor
+  · calc
+      σ i.castSucc = (extGrid σ i : ℝ) :=
+        (extGrid_coe_castSucc σ hσ0 hσ1 hσmono i).symm
+      _ ≤ (x : ℝ) := hx.1
+  · calc
+      (x : ℝ) ≤ (extGrid σ (i + 1) : ℝ) := hx.2
+      _ = σ i.succ := extGrid_coe_succ σ hσ0 hσ1 hσmono i
+
 /-- Bottom horizontal edge of a homotopy grid cell. -/
 def B_edge {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     (σu τu : ℕ → unitInterval) (i j : ℕ) :
