@@ -379,6 +379,28 @@ theorem liouvilleProjXNumerator_eq_of_projX_overlap
   unfold liouvilleProjXNumerator
   rw [hCoeff, hAgree]
 
+/-- Algebraic sheet-swap helper for the Liouville numerator.
+
+If the form coefficient changes sign and the chosen square-root branch changes
+sign, then the product `coeff · y` is unchanged. The missing P1 input is the
+geometric coefficient anti-invariance hypothesis for arbitrary holomorphic
+forms. -/
+theorem liouvilleProjXNumerator_eq_of_neg_coeff_neg_branch
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a a' : HyperellipticAffine H)
+    (hpY : a ∈ smoothLocusY H) (hpY' : a' ∈ smoothLocusY H)
+    (q q' : HyperellipticEvenProj H)
+    {z : ℂ}
+    (hCoeff : form.coeff q z = -form.coeff q' z)
+    (hBranch :
+      (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) =
+        -(squareLocalHomeomorph (H := H) a' hpY').symm (H.f.eval z)) :
+    liouvilleProjXNumerator (H := H) form a hpY q z =
+      liouvilleProjXNumerator (H := H) form a' hpY' q' z := by
+  unfold liouvilleProjXNumerator
+  rw [hCoeff, hBranch]
+  ring
+
 /-- Sanity check against the existing explicit basis constructor: for
 `hyperellipticForm H g`, the local Liouville numerator is exactly `g.eval`. -/
 theorem liouvilleProjXNumerator_hyperellipticForm_eq
