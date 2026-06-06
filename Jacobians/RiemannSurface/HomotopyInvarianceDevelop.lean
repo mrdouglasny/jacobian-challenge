@@ -231,4 +231,52 @@ def R_edge {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     Path ((H.eval (τu j)) (σu (i + 1))) ((H.eval (τu (j + 1))) (σu (i + 1))) :=
   L_edge H σu τu (i + 1) j
 
+/-- A path whose image is propositionally constant has zero developing value. -/
+lemma devVal_const_image_zero {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
+    (γ : Path a b) (x : X) (hγ : ∀ u : unitInterval, γ u = x) :
+    developingValue x₀ form ((γ : Path a b) : C(unitInterval, X)) = 0 := by
+  classical
+  let z : ℂ := (extChartAt 𝓘(ℂ) x) x
+  have hz_target : z ∈ (extChartAt 𝓘(ℂ) x).target := by
+    simp [z]
+  obtain ⟨r, hr_pos, hr_sub⟩ :=
+    (Metric.isOpen_iff.mp (isOpen_extChartAt_target (I := 𝓘(ℂ)) x)) z hz_target
+  let B : PathChartBall X :=
+    { p := x, c := z, r := r, ball_subset_target := hr_sub }
+  refine developingValue_eq_zero_of_loop_in_pathChartBall
+    (x₀ := x₀) (form := form)
+    (γ := ((γ : Path a b) : C(unitInterval, X))) B ?_ ?_
+  · change γ (0 : unitInterval) = γ (1 : unitInterval)
+    rw [hγ 0, hγ 1]
+  · intro u
+    constructor
+    · simp [B, hγ u]
+    · exact (show (extChartAt 𝓘(ℂ) B.p)
+          (((γ : Path a b) : C(unitInterval, X)) u) ∈ Metric.ball B.c B.r by
+        simpa [B, z, hγ u] using (Metric.mem_ball_self (x := z) hr_pos))
+
+lemma devVal_vertEdge_const_left {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X) (H : Path.Homotopy γ₁ γ₂)
+    (y₁ y₂ : unitInterval) :
+    developingValue x₀ form
+      (((vertEdge H (0 : unitInterval) y₁ y₂ :
+          Path ((H.eval y₁) (0 : unitInterval)) ((H.eval y₂) (0 : unitInterval))) :
+        C(unitInterval, X))) = 0 := by
+  refine devVal_const_image_zero x₀ form (vertEdge H (0 : unitInterval) y₁ y₂) a ?_
+  intro u
+  change H (Set.Icc.convexComb y₁ y₂ u, (0 : unitInterval)) = a
+  exact Path.Homotopy.source H (Set.Icc.convexComb y₁ y₂ u)
+
+lemma devVal_vertEdge_const_right {a b : X} {γ₁ γ₂ : Path a b}
+    (x₀ : X) (form : HolomorphicOneForm X) (H : Path.Homotopy γ₁ γ₂)
+    (y₁ y₂ : unitInterval) :
+    developingValue x₀ form
+      (((vertEdge H (1 : unitInterval) y₁ y₂ :
+          Path ((H.eval y₁) (1 : unitInterval)) ((H.eval y₂) (1 : unitInterval))) :
+        C(unitInterval, X))) = 0 := by
+  refine devVal_const_image_zero x₀ form (vertEdge H (1 : unitInterval) y₁ y₂) b ?_
+  intro u
+  change H (Set.Icc.convexComb y₁ y₂ u, (1 : unitInterval)) = b
+  exact Path.Homotopy.target H (Set.Icc.convexComb y₁ y₂ u)
+
 end Jacobians.RiemannSurface
