@@ -1,5 +1,5 @@
 import Jacobians.Bridge.KirovLineIntegral
-import Jacobians.RiemannSurface.AnalyticArc
+import Jacobians.RiemannSurface.ArcAlgebra
 
 /-!
 # Analytic bridge-path helpers
@@ -274,6 +274,52 @@ lemma concatChartFlatPath_extChartAt_current_analyticAt_of_regular
 
 end PathChartBallSubdivision
 
+namespace PathChartBallSubdivision
+
+variable {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+omit [T2Space X] in
+/-- A single endpoint-flat chart segment packaged as a strong analytic arc. -/
+noncomputable def chartFlatAnalyticArc (n : ℕ) : AnalyticArc X where
+  extend := (S.chartFlatPath n).extend
+  continuous' := Path.continuous_extend _
+  partition := {0, 1}
+  partition_subset := by
+    intro r hr
+    simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
+      Set.mem_singleton_iff] at hr
+    rcases hr with rfl | rfl <;> simp
+  zero_mem := by simp
+  one_mem := by simp
+  is_analytic_strong := by
+    intro s hs t ht hst _hcons
+    have hs01 : s = 0 ∨ s = 1 := by simpa using hs
+    have ht01 : t = 0 ∨ t = 1 := by simpa using ht
+    rcases hs01 with rfl | rfl
+    · rcases ht01 with rfl | rfl
+      · exact False.elim (lt_irrefl (0 : ℝ) hst)
+      ·
+        let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+        let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+        refine ⟨S.chart n, Set.univ, flatSegment a b, isOpen_univ, ?_, ?_, ?_, ?_⟩
+        · intro r _
+          exact Set.mem_univ r
+        · intro r _
+          exact analyticAt_flatSegment a b r
+        · intro r hr
+          simpa [extChartAt_source] using
+            S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n hr
+        · intro r hr
+          rw [extChartAt_coe, modelWithCornersSelf_coe]
+          rw [Path.extend_apply _ hr]
+          exact (chartAt ℂ (S.chart n)).right_inv
+            (S.flatSegment_mem_chart_target n hr)
+    · rcases ht01 with rfl | rfl
+      · linarith
+      · exact False.elim (lt_irrefl (1 : ℝ) hst)
+
+end PathChartBallSubdivision
+
 /-- The concrete bridge path is analytic at regular, non-glue parameters. -/
 theorem bridgePathImpl_extChartAt_current_analyticAt_of_regular
     {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X] [ChartedSpace ℂ X]
@@ -337,6 +383,72 @@ private lemma concatChartFlatPathAuxPartition_one_mem (k : ℕ) :
       simp [concatChartFlatPathAuxPartition]
   | succ k _ =>
       simp [concatChartFlatPathAuxPartition]
+
+namespace PathChartBallSubdivision
+
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X]
+  [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+  {P₀ P : X} {γ : Path P₀ P} (S : PathChartBallSubdivision γ)
+
+/-- Recursive analytic-arc package for the first `k + 1` flattened bridge pieces. -/
+noncomputable def concatChartFlatPathAuxAnalyticArcData (k : ℕ) :
+    {η : AnalyticArc X //
+      η.extend 0 = γ (S.t 0) ∧
+      η.extend 1 = γ (S.t (k + 1)) ∧
+      η.partition = concatChartFlatPathAuxPartition k ∧
+      η.extend = (S.concatChartFlatPathAux k).extend} := by
+  induction k with
+  | zero =>
+      refine ⟨S.chartFlatAnalyticArc 0, ?_, ?_, ?_, ?_⟩
+      · simp [chartFlatAnalyticArc]
+      · simp [chartFlatAnalyticArc]
+      · simp [chartFlatAnalyticArc, concatChartFlatPathAuxPartition]
+      · rfl
+  | succ k ih =>
+      let η₁ : AnalyticArc X := ih.val
+      let η₂ : AnalyticArc X := S.chartFlatAnalyticArc (k + 1)
+      have hjoin : η₁.extend 1 = η₂.extend 0 := by
+        rw [ih.property.2.1]
+        simp [η₂, chartFlatAnalyticArc]
+      refine ⟨η₁.trans η₂ hjoin, ?_, ?_, ?_, ?_⟩
+      · simp [AnalyticArc.trans, η₁, ih.property.1]
+      · simp [AnalyticArc.trans, η₂, chartFlatAnalyticArc]
+        norm_num
+      ·
+        change (η₁.trans η₂ hjoin).partition = concatChartFlatPathAuxPartition (k + 1)
+        simp [AnalyticArc.trans, η₁, η₂, ih.property.2.2.1, chartFlatAnalyticArc,
+          concatChartFlatPathAuxPartition]
+      ·
+        funext r
+        change (η₁.trans η₂ hjoin).extend r = (S.concatChartFlatPathAux (k + 1)).extend r
+        by_cases hr : r ≤ (1 / 2 : ℝ)
+        · have hr' : r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr
+          rw [AnalyticArc.trans]
+          simp [hr', η₁, η₂, ih.property.2.2.2, chartFlatAnalyticArc,
+            concatChartFlatPathAux_succ,
+            Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
+              (S.chartFlatPath (k + 1)) hr]
+        · have hr' : ¬ r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr
+          have hhr : (1 / 2 : ℝ) ≤ r := le_of_lt (lt_of_not_ge hr)
+          rw [AnalyticArc.trans]
+          simp [hr', η₁, η₂, ih.property.2.2.2, chartFlatAnalyticArc,
+            concatChartFlatPathAux_succ,
+            Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
+              (S.chartFlatPath (k + 1)) hhr]
+
+/-- The analytic arc obtained by concatenating the first `k + 1` bridge pieces. -/
+noncomputable def concatChartFlatPathAuxAnalyticArc (k : ℕ) : AnalyticArc X :=
+  (S.concatChartFlatPathAuxAnalyticArcData k).val
+
+theorem concatChartFlatPathAuxAnalyticArc_partition (k : ℕ) :
+    (S.concatChartFlatPathAuxAnalyticArc k).partition = concatChartFlatPathAuxPartition k :=
+  (S.concatChartFlatPathAuxAnalyticArcData k).property.2.2.1
+
+theorem concatChartFlatPathAuxAnalyticArc_extend (k : ℕ) :
+    (S.concatChartFlatPathAuxAnalyticArc k).extend = (S.concatChartFlatPathAux k).extend :=
+  (S.concatChartFlatPathAuxAnalyticArcData k).property.2.2.2
+
+end PathChartBallSubdivision
 
 private lemma concatChartFlatPathAuxRegular_of_mem_Ioo_not_mem_partition
     (k : ℕ) {t : ℝ} (ht01 : t ∈ Set.Ioo (0 : ℝ) 1)
@@ -419,11 +531,20 @@ noncomputable def bridgePathArc (P₀ P : X) : AnalyticArc X where
   partition_subset := bridgePathArcPartition_subset (X := X) P₀ P
   zero_mem := bridgePathArcPartition_zero_mem (X := X) P₀ P
   one_mem := bridgePathArcPartition_one_mem (X := X) P₀ P
-  is_analytic := by
-    intro u hu01 hunotmem
-    exact bridgePathImpl_extChartAt_current_analyticAt_of_regular (X := X) P₀ P
-      (bridgePathImplRegular_of_mem_Ioo_not_mem_bridgePathArcPartition
-        (X := X) P₀ P hu01 hunotmem)
+  is_analytic_strong := by
+    let γ : Path P₀ P := (exists_path P₀ P).some
+    let S : PathChartBallSubdivision γ := (exists_pathChartBallSubdivision γ).some
+    let η : AnalyticArc X := S.concatChartFlatPathAuxAnalyticArc S.lastIndex
+    have hpart : η.partition = bridgePathArcPartition (X := X) P₀ P := by
+      dsimp [η, bridgePathArcPartition]
+      exact S.concatChartFlatPathAuxAnalyticArc_partition S.lastIndex
+    have hext : η.extend = bridgePathImpl (X := X) P₀ P := by
+      funext r
+      change (S.concatChartFlatPathAuxAnalyticArc S.lastIndex).extend r =
+        (S.concatChartFlatPath).extend r
+      rw [congrFun (S.concatChartFlatPathAuxAnalyticArc_extend S.lastIndex) r]
+      simp [PathChartBallSubdivision.concatChartFlatPath]
+    simpa [hpart, hext] using η.is_analytic_strong
 
 end BridgePathArc
 

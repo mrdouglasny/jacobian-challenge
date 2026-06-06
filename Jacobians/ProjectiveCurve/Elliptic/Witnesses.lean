@@ -22,8 +22,8 @@ Three Elliptic-specific axioms wrap the detailed classical facts that
 would require substantial covering-space / fundamental-group
 infrastructure to prove:
 
-* `AX_Elliptic_aLoop_analytic`: the A-cycle is `IsAnalyticArc`.
-* `AX_Elliptic_bLoop_analytic`: the B-cycle is `IsAnalyticArc`.
+* `AX_Elliptic_aLoop_analytic`: the A-cycle is `IsAnalyticArcStrong`.
+* `AX_Elliptic_bLoop_analytic`: the B-cycle is `IsAnalyticArcStrong`.
 * `AX_Elliptic_H1_symplectic`: their classes form a symplectic
   `Module.Basis (Fin 2) ℤ (H_1 (Elliptic _) _)` with the desired
   α/β pairing.
@@ -74,21 +74,28 @@ lemma continuous_bLoopExtend : Continuous (bLoopExtend ω₁ ω₂ h) := by
   exact continuous_quotient_mk'.comp
     (Complex.continuous_ofReal.mul continuous_const)
 
-/-- **Axiom.** The A-cycle is piecewise-real-analytic.
+/-- **Axiom.** The A-cycle is strongly piecewise-real-analytic.
 
 Classical: linear in `r`, hence real-analytic. The predicate
-`IsAnalyticArc` requires checking chart-local analyticity of
-`(extChartAt 𝓘(ℂ) (extend u)) ∘ extend` at every interior point of
-`{0, 1}` partition. Since ComplexTorus's charts have transition maps
-that are translations with `fderiv = 1`, the chart-pullback is a
-(locally) affine function of `r`, which is analytic. Full verification
-defers to detailed ComplexTorus atlas analysis. -/
-axiom AX_Elliptic_aLoop_analytic :
-    IsAnalyticArc (Elliptic ω₁ ω₂ h) (aLoopExtend ω₁ ω₂ h) {0, 1}
+`IsAnalyticArcStrong` requires a closed-cell chart witness. The expected
+verification uses the `{0, 1}` single cell: ComplexTorus charts are translations
+with `fderiv = 1`, so the chart-pullback of `r ↦ [r • ω₁]` is affine in `r`.
+Taking `U = Set.univ` and `f` equal to that affine map gives an entire witness,
+with `AnalyticOnNhd` trivial on `U`.
 
-/-- **Axiom.** The B-cycle is piecewise-real-analytic. -/
+(NOT VERIFIED — strengthened 2026-06-06, re-vet pending.) -/
+axiom AX_Elliptic_aLoop_analytic :
+    IsAnalyticArcStrong (Elliptic ω₁ ω₂ h) (aLoopExtend ω₁ ω₂ h) {0, 1}
+
+/-- **Axiom.** The B-cycle is strongly piecewise-real-analytic.
+
+Same strengthening as `AX_Elliptic_aLoop_analytic`: in ComplexTorus charts the
+pullback of `r ↦ [r • ω₂]` is affine in `r`, hence entire, so the strong
+closed-cell witness should be obtained with `U = Set.univ`.
+
+(NOT VERIFIED — strengthened 2026-06-06, re-vet pending.) -/
 axiom AX_Elliptic_bLoop_analytic :
-    IsAnalyticArc (Elliptic ω₁ ω₂ h) (bLoopExtend ω₁ ω₂ h) {0, 1}
+    IsAnalyticArcStrong (Elliptic ω₁ ω₂ h) (bLoopExtend ω₁ ω₂ h) {0, 1}
 
 /-- The A-cycle as an `AnalyticArc`. -/
 noncomputable def aArc : AnalyticArc (Elliptic ω₁ ω₂ h) where
@@ -102,7 +109,7 @@ noncomputable def aArc : AnalyticArc (Elliptic ω₁ ω₂ h) where
     rcases hr with rfl | rfl <;> simp
   zero_mem := by simp
   one_mem := by simp
-  is_analytic := AX_Elliptic_aLoop_analytic ω₁ ω₂ h
+  is_analytic_strong := AX_Elliptic_aLoop_analytic ω₁ ω₂ h
 
 /-- The B-cycle as an `AnalyticArc`. -/
 noncomputable def bArc : AnalyticArc (Elliptic ω₁ ω₂ h) where
@@ -116,7 +123,7 @@ noncomputable def bArc : AnalyticArc (Elliptic ω₁ ω₂ h) where
     rcases hr with rfl | rfl <;> simp
   zero_mem := by simp
   one_mem := by simp
-  is_analytic := AX_Elliptic_bLoop_analytic ω₁ ω₂ h
+  is_analytic_strong := AX_Elliptic_bLoop_analytic ω₁ ω₂ h
 
 /-- The A-cycle as an `AnalyticLoop` based at `0 : Elliptic`. Closed
 because `A(0) = [0] = 0 = [ω₁] = A(1)` (since `ω₁ ∈ Λ`). -/

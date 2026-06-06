@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-05.*
+*Last updated 2026-06-06.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 60** — all **60** in our own modules. The vendored
+**Active project axioms: 59** — all **59** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -69,13 +69,15 @@ real `def` (`:= Bridge.kirovBackedFunctional`, itself standard-3 axiom-clean): a
 genuine line integral `∫_{bridgePath P₀ P}`. `ofCurve` is now a **computed** map;
 the zero-functional degeneracy it hid is gone (2026-06-04). Finally, **`loopIntegralToH1`
 — the path-independence axiom — was DISCHARGED to a real `def` 2026-06-05** (count
-stays 64: −`loopIntegralToH1`, +`AX_cycleBasisLoop_integrable`): the period pairing
+stays 64: −`loopIntegralToH1`, +the then-axiomatized
+`AX_cycleBasisLoop_integrable`): the period pairing
 is now `cb.isBasis.constr ℤ (∮ over the analytic cycle-basis loops)`, the integrals
 being the genuine L0–L1 multi-chart integral (chart-cocycle + partition-independence
 all **proven**, ~10 new modules). `periodMap`/`ofCurve` no longer list
 `loopIntegralToH1`; they rest on `AX_AnalyticCycleBasis` + `intersectionForm` (the
-symplectic cycle basis, already needed for the lattice) + the trivial
-`AX_cycleBasisLoop_integrable`. **Basis-faithfulness (PR #7 review fix):** the
+symplectic cycle basis, already needed for the lattice) + the then-trivial
+integrability axiom, now proved — see Recently discharged. **Basis-faithfulness
+(PR #7 review fix):** the
 `AnalyticCycleBasis` structure gained a `loops_to_basis` field
 (`∀ i, isBasis i = loopToHomology (loops i)`, the Hurewicz loop→class tie) —
 honestly strengthening `AX_AnalyticCycleBasis`/`AX_Elliptic_H1_symplectic`, no new
@@ -135,6 +137,10 @@ local-homeomorphism API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`), compose
 with `P.fromQuot_holo`; two `ComplexTorus` chart lemmas were de-privatized to
 support it. `#print axioms`-clean (standard-3 + the upstream period-lattice /
 cycle-basis axioms; no `sorryAx`, no self-reference).
+Then → **59** by **proving `AX_cycleBasisLoop_integrable`** (2026-06-06) from the
+strengthened `AnalyticArc` regularity: strong cell witnesses give
+interval-integrability of canonical moving-chart integrands, and cycle-basis
+loop integrability is now a theorem.
 
 ---
 
@@ -146,7 +152,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (46 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (45 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -156,7 +162,7 @@ Per the review plan, axioms are split into two classes:
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 17 | classical theorems, citable | high |
-| 2a — data-existence | 9 | "this function/object exists with spec S" | spec needs review |
+| 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
@@ -204,7 +210,6 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `AX_cycleBasisLoop_integrable` | `RiemannSurface/LoopIntegral.lean:17` | the period integrand of each cycle-basis loop is `IntervalIntegrable` — classical regularity (piecewise-analytic loops are rectifiable), scoped to cycle-basis loops. The **only** residual axiom after `loopIntegralToH1` was **discharged to a real `def`** 2026-06-05 (`:= cb.isBasis.constr ℤ (∮ over cycle-basis loops)`, periods = genuine line integrals via the L0–L1 multi-chart integral). Dischargeable later by strengthening `AnalyticArc` regularity. See [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `LineBundle`, `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (6) | `RiemannSurface/LineBundle.lean:46–99` | line-bundle / sheaf-cohomology **type stubs**. `H0` is now `riemannRochSpace D` with inherited submodule instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
@@ -245,7 +250,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Affine-form IFT-shape (`squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source`) | `…/Hyperelliptic/AffineForm.lean:66,222` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
 | `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:9` | 1 |
-| Elliptic witnesses (`AX_Elliptic_aLoop_analytic`, `_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:86,90,166` | 3 |
+| Elliptic witnesses (`AX_Elliptic_aLoop_analytic`, `_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:87,97,173` | 3; the two loop-analytic witnesses were strengthened to `IsAnalyticArcStrong` 2026-06-06. Affine-in-chart justification recorded; **re-vet pending**. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
 ### 2d. Flagged — *true-but-unproven; needs end-to-end check*
@@ -300,6 +305,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_cycleBasisLoop_integrable` *(2026-06-06)* | `analyticArc_canonicalIntegrand_intervalIntegrable` from strong per-cell analytic witnesses; cycle-basis loops are ordinary `AnalyticArc`s | `RiemannSurface/LoopIntegral.lean`, `RiemannSurface/PartitionIndependence.lean` |
 | `AX_torus_descent_holo` *(2026-06-06)* | local-section route over Kirov's `ZLatticeQuotient` local-homeo API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`) composed with `P.fromQuot_holo`; helper `complexTorus_pushforward_contMDiff_to_quotient` | `Axioms/TorusAlbanese.lean` |
 | `AX_FiniteDimOneForms` | injective bridge to Kirov's Montel theorem | `Bridge/KirovHolomorphic.lean` |
 | `genus ℙ¹ = 0` *(via `AX_genus_eq_zero_iff_homeo`)* | direct chart-cocycle + Liouville ⇒ `HolomorphicOneForm ℙ¹` subsingleton | `ProjectiveCurve/Line/OneForm.lean` |
@@ -341,7 +347,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 60 — the vendored Kirov subtree is now axiom-free, so 60 is the total.
+#   prints 59 — the vendored Kirov subtree is now axiom-free, so 59 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -358,7 +364,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 60
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 59
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

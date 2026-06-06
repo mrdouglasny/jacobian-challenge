@@ -24,18 +24,29 @@ noncomputable def reverse (γ : AnalyticArc X) : AnalyticArc X where
     exact Finset.mem_image.mpr ⟨1, γ.one_mem, by norm_num⟩
   one_mem := by
     exact Finset.mem_image.mpr ⟨0, γ.zero_mem, by norm_num⟩
-  is_analytic := by
-    intro u hu hupart
-    have h₁u : 1 - u ∈ Set.Ioo (0 : ℝ) 1 := by
-      constructor <;> linarith [hu.1, hu.2]
-    have h₁u_part : 1 - u ∉ (γ.partition : Set ℝ) := by
-      intro hmem
-      apply hupart
-      refine Finset.mem_image.mpr ⟨1 - u, hmem, ?_⟩
-      ring
-    have han := γ.is_analytic (1 - u) h₁u h₁u_part
-    simpa [sub_sub_cancel] using
-      han.comp' (analyticAt_const.sub analyticAt_id)
+  is_analytic_strong := by
+    intro s hs t ht hst hcons
+    rcases Finset.mem_image.mp hs with ⟨a, ha, rfl⟩
+    rcases Finset.mem_image.mp ht with ⟨b, hb, rfl⟩
+    have hba : b < a := by linarith
+    have hcons' : ∀ r ∈ γ.partition, r ∉ Set.Ioo b a := by
+      intro r hr hri
+      exact hcons (1 - r) (Finset.mem_image.mpr ⟨r, hr, rfl⟩) (by
+        constructor <;> linarith [hri.1, hri.2])
+    obtain ⟨p, U₀, f₀, hU₀open, hIccU₀, hf₀, hsource₀, hcoinc₀⟩ :=
+      γ.is_analytic_strong b hb a ha hba hcons'
+    refine ⟨p, (fun r : ℝ => 1 - r) ⁻¹' U₀, fun r : ℝ => f₀ (1 - r), ?_, ?_, ?_, ?_, ?_⟩
+    · exact hU₀open.preimage (continuous_const.sub continuous_id)
+    · intro r hr
+      exact hIccU₀ ⟨by linarith [hr.2], by linarith [hr.1]⟩
+    · intro r hr
+      have hbase : AnalyticAt ℝ f₀ (1 - r) := hf₀ (1 - r) hr
+      simpa [Function.comp_def] using
+        hbase.comp' (analyticAt_const.sub analyticAt_id : AnalyticAt ℝ (fun x : ℝ => 1 - x) r)
+    · intro r hr
+      exact hsource₀ (1 - r) ⟨by linarith [hr.2], by linarith [hr.1]⟩
+    · intro r hr
+      exact hcoinc₀ (1 - r) ⟨by linarith [hr.2], by linarith [hr.1]⟩
 
 /-- Concatenate two analytic arcs with matching endpoint and start point. -/
 noncomputable def trans (γ₁ γ₂ : AnalyticArc X)
@@ -79,68 +90,124 @@ noncomputable def trans (γ₁ γ₂ : AnalyticArc X)
   one_mem := by
     exact Finset.mem_union.mpr
       (Or.inr (Finset.mem_image.mpr ⟨1, γ₂.one_mem, by norm_num⟩))
-  is_analytic := by
+  is_analytic_strong := by
     classical
-    intro u hu hupart
+    intro s hs t ht hst hcons
     have hhalf_mem :
         (1 / 2 : ℝ) ∈
           ((γ₁.partition.image (fun p : ℝ => p / 2) ∪
             γ₂.partition.image (fun p : ℝ => (p + 1) / 2)) : Finset ℝ) := by
       exact Finset.mem_union.mpr
         (Or.inl (Finset.mem_image.mpr ⟨1, γ₁.one_mem, by norm_num⟩))
-    have hu_ne_half : u ≠ (1 / 2 : ℝ) := by
-      intro hu_eq
-      apply hupart
-      simpa [hu_eq] using hhalf_mem
-    rcases lt_or_gt_of_ne hu_ne_half with hu_lt | hu_gt
-    · have h2u : 2 * u ∈ Set.Ioo (0 : ℝ) 1 := by
-        constructor <;> linarith [hu.1, hu_lt]
-      have h2u_part : 2 * u ∉ (γ₁.partition : Set ℝ) := by
-        intro hmem
-        apply hupart
-        exact Finset.mem_union.mpr
-          (Or.inl (Finset.mem_image.mpr ⟨2 * u, hmem, by ring⟩))
-      have han := γ₁.is_analytic (2 * u) h2u h2u_part
-      have haff : AnalyticAt ℝ (fun r : ℝ => 2 * r) u :=
-        analyticAt_const.mul analyticAt_id
-      have hcomp :
-          AnalyticAt ℝ
-            (fun r : ℝ =>
-              (extChartAt 𝓘(ℂ) (γ₁.extend (2 * u))) (γ₁.extend (2 * r))) u := by
-        simpa [Function.comp_def] using han.comp' haff
-      refine hcomp.congr ?_
-      filter_upwards [(isOpen_Iio.mem_nhds hu_lt)] with r hr
-      have hu_le : u ≤ (1 / 2 : ℝ) := le_of_lt hu_lt
-      have hr_le : r ≤ (1 / 2 : ℝ) := le_of_lt hr
-      have hu_le' : u ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hu_le
-      have hr_le' : r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr_le
-      simp [hu_le', hr_le']
-    · have h2u : 2 * u - 1 ∈ Set.Ioo (0 : ℝ) 1 := by
-        constructor <;> linarith [hu.2, hu_gt]
-      have h2u_part : 2 * u - 1 ∉ (γ₂.partition : Set ℝ) := by
-        intro hmem
-        apply hupart
-        exact Finset.mem_union.mpr
-          (Or.inr (Finset.mem_image.mpr ⟨2 * u - 1, hmem, by ring⟩))
-      have han := γ₂.is_analytic (2 * u - 1) h2u h2u_part
-      have haff : AnalyticAt ℝ (fun r : ℝ => 2 * r - 1) u :=
-        (analyticAt_const.mul analyticAt_id).sub analyticAt_const
-      have hcomp :
-          AnalyticAt ℝ
-            (fun r : ℝ =>
-              (extChartAt 𝓘(ℂ) (γ₂.extend (2 * u - 1)))
-                (γ₂.extend (2 * r - 1))) u := by
-        have hinner : (fun r : ℝ => 2 * r - 1) u = 2 * u - 1 := by
-          ring
+    have left_mem_of_le {x : ℝ}
+        (hx : x ∈ γ₁.partition.image (fun p : ℝ => p / 2) ∪
+          γ₂.partition.image (fun p : ℝ => (p + 1) / 2))
+        (hxle : x ≤ (1 / 2 : ℝ)) :
+        x ∈ γ₁.partition.image (fun p : ℝ => p / 2) := by
+      rcases Finset.mem_union.mp hx with hx₁ | hx₂
+      · exact hx₁
+      rcases Finset.mem_image.mp hx₂ with ⟨p, hp, rfl⟩
+      have hp01 := γ₂.partition_subset hp
+      have hp0 : p = 0 := by linarith [hp01.1, hxle]
+      subst p
+      exact Finset.mem_image.mpr ⟨1, γ₁.one_mem, by norm_num⟩
+    have right_mem_of_ge {x : ℝ}
+        (hx : x ∈ γ₁.partition.image (fun p : ℝ => p / 2) ∪
+          γ₂.partition.image (fun p : ℝ => (p + 1) / 2))
+        (hxge : (1 / 2 : ℝ) ≤ x) :
+        x ∈ γ₂.partition.image (fun p : ℝ => (p + 1) / 2) := by
+      rcases Finset.mem_union.mp hx with hx₁ | hx₂
+      · rcases Finset.mem_image.mp hx₁ with ⟨p, hp, rfl⟩
+        have hp01 := γ₁.partition_subset hp
+        have hp1 : p = 1 := by linarith [hp01.2, hxge]
+        subst p
+        exact Finset.mem_image.mpr ⟨0, γ₂.zero_mem, by norm_num⟩
+      · exact hx₂
+    rcases le_or_gt t (1 / 2 : ℝ) with ht_le_half | hhalf_lt_t
+    · have hs_le_half : s ≤ (1 / 2 : ℝ) := le_trans (le_of_lt hst) ht_le_half
+      rcases Finset.mem_image.mp (left_mem_of_le hs hs_le_half) with ⟨a, ha, hs_eq⟩
+      rcases Finset.mem_image.mp (left_mem_of_le ht ht_le_half) with ⟨b, hb, ht_eq⟩
+      subst s
+      subst t
+      have hab : a < b := by linarith
+      have hcons₁ : ∀ r ∈ γ₁.partition, r ∉ Set.Ioo a b := by
+        intro r hr hri
+        exact hcons (r / 2)
+          (Finset.mem_union.mpr (Or.inl (Finset.mem_image.mpr ⟨r, hr, rfl⟩))) (by
+            constructor <;> linarith [hri.1, hri.2])
+      obtain ⟨p, U₀, f₀, hU₀open, hIccU₀, hf₀, hsource₀, hcoinc₀⟩ :=
+        γ₁.is_analytic_strong a ha b hb hab hcons₁
+      refine ⟨p, (fun r : ℝ => 2 * r) ⁻¹' U₀, fun r : ℝ => f₀ (2 * r), ?_, ?_, ?_, ?_, ?_⟩
+      · exact hU₀open.preimage (continuous_const.mul continuous_id)
+      · intro r hr
+        exact hIccU₀ ⟨by linarith [hr.1], by linarith [hr.2]⟩
+      · intro r hr
+        have hbase : AnalyticAt ℝ f₀ (2 * r) := hf₀ (2 * r) hr
         simpa [Function.comp_def] using
-          han.comp_of_eq' haff hinner
-      refine hcomp.congr ?_
-      filter_upwards [(isOpen_Ioi.mem_nhds hu_gt)] with r hr
-      have hu_not_le : ¬u ≤ (1 / 2 : ℝ) := not_le.mpr hu_gt
-      have hr_not_le : ¬r ≤ (1 / 2 : ℝ) := not_le.mpr hr
-      have hu_not_le' : ¬u ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hu_not_le
-      have hr_not_le' : ¬r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr_not_le
-      simp [hu_not_le', hr_not_le']
+          hbase.comp' (analyticAt_const.mul analyticAt_id :
+            AnalyticAt ℝ (fun x : ℝ => 2 * x) r)
+      · intro r hr
+        have hr_le : r ≤ (1 / 2 : ℝ) := by linarith [hr.2, ht_le_half]
+        have hr_le' : r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr_le
+        simpa [hr_le'] using hsource₀ (2 * r) ⟨by linarith [hr.1], by linarith [hr.2]⟩
+      · intro r hr
+        have hr_le : r ≤ (1 / 2 : ℝ) := by linarith [hr.2, ht_le_half]
+        have hr_le' : r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr_le
+        simpa [hr_le'] using hcoinc₀ (2 * r) ⟨by linarith [hr.1], by linarith [hr.2]⟩
+    · have hhalf_le_s : (1 / 2 : ℝ) ≤ s := by
+        by_contra hs_not
+        have hs_lt_half : s < (1 / 2 : ℝ) := lt_of_not_ge hs_not
+        exact hcons (1 / 2) hhalf_mem ⟨hs_lt_half, hhalf_lt_t⟩
+      rcases Finset.mem_image.mp (right_mem_of_ge hs hhalf_le_s) with ⟨a, ha, hs_eq⟩
+      rcases Finset.mem_image.mp (right_mem_of_ge ht (le_trans hhalf_le_s (le_of_lt hst))) with
+        ⟨b, hb, ht_eq⟩
+      subst s
+      subst t
+      have hab : a < b := by linarith
+      have hcons₂ : ∀ r ∈ γ₂.partition, r ∉ Set.Ioo a b := by
+        intro r hr hri
+        exact hcons ((r + 1) / 2)
+          (Finset.mem_union.mpr (Or.inr (Finset.mem_image.mpr ⟨r, hr, rfl⟩))) (by
+            constructor <;> linarith [hri.1, hri.2])
+      obtain ⟨p, U₀, f₀, hU₀open, hIccU₀, hf₀, hsource₀, hcoinc₀⟩ :=
+        γ₂.is_analytic_strong a ha b hb hab hcons₂
+      refine ⟨p, (fun r : ℝ => 2 * r - 1) ⁻¹' U₀, fun r : ℝ => f₀ (2 * r - 1), ?_, ?_, ?_, ?_, ?_⟩
+      · exact hU₀open.preimage ((continuous_const.mul continuous_id).sub continuous_const)
+      · intro r hr
+        exact hIccU₀ ⟨by linarith [hr.1], by linarith [hr.2]⟩
+      · intro r hr
+        have hbase : AnalyticAt ℝ f₀ (2 * r - 1) := hf₀ (2 * r - 1) hr
+        have haff : AnalyticAt ℝ (fun x : ℝ => 2 * x - 1) r := by
+          fun_prop
+        have hinner : (fun x : ℝ => 2 * x - 1) r = 2 * r - 1 := by
+          ring
+        simpa [Function.comp_def] using hbase.comp_of_eq' haff hinner
+      · intro r hr
+        have hext :
+            (if r ≤ (2 : ℝ)⁻¹ then γ₁.extend (2 * r) else γ₂.extend (2 * r - 1)) =
+              γ₂.extend (2 * r - 1) := by
+          by_cases hrle : r ≤ (2 : ℝ)⁻¹
+          · have hr_eq : r = (1 / 2 : ℝ) := by
+              have hhalf_le_r : (1 / 2 : ℝ) ≤ r := by linarith [hr.1]
+              have hrle_half : r ≤ (1 / 2 : ℝ) := by simpa [one_div] using hrle
+              exact le_antisymm hrle_half hhalf_le_r
+            subst r
+            simp [h]
+          · simp [hrle]
+        simpa [hext] using hsource₀ (2 * r - 1) ⟨by linarith [hr.1], by linarith [hr.2]⟩
+      · intro r hr
+        have hext :
+            (if r ≤ (2 : ℝ)⁻¹ then γ₁.extend (2 * r) else γ₂.extend (2 * r - 1)) =
+              γ₂.extend (2 * r - 1) := by
+          by_cases hrle : r ≤ (2 : ℝ)⁻¹
+          · have hr_eq : r = (1 / 2 : ℝ) := by
+              have hhalf_le_r : (1 / 2 : ℝ) ≤ r := by linarith [hr.1]
+              have hrle_half : r ≤ (1 / 2 : ℝ) := by simpa [one_div] using hrle
+              exact le_antisymm hrle_half hhalf_le_r
+            subst r
+            simp [h]
+          · simp [hrle]
+        simpa [hext] using hcoinc₀ (2 * r - 1) ⟨by linarith [hr.1], by linarith [hr.2]⟩
 
 end AnalyticArc
 

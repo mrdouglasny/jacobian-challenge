@@ -1180,6 +1180,30 @@ theorem developingValue_analyticArcToContinuousMap_eq_canonicalArcIntegral_of_pa
     _ = developingIncrement form (analyticArcToContinuousMap γ) S 0 := hsub
     _ = canonicalArcIntegral γ form := hinc
 
+/-- Local B2 bridge with fixed-chart integrability discharged from the strong
+analytic-arc structure. The right-derivative hypothesis is still the FTC side
+condition of `canonicalArcIntegral_eq_chartPrimitive_endpoint_sub`. -/
+theorem developingValue_eq_canonicalArcIntegral_of_pathChartBall_autoIntegrable
+    (x₀ : X) (form : HolomorphicOneForm X) (γ : AnalyticArc X)
+    (B : PathChartBall X)
+    (hpath : ∀ u : unitInterval, u ∈ pathChartBallSet (analyticArcToContinuousMap γ) B)
+    (hchart_hasDeriv_right : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      HasDerivWithinAt
+        (fun u : ℝ => (extChartAt 𝓘(ℂ) B.p) (γ.extend u))
+        (deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) B.p) (γ.extend u)) t)
+        (Set.Ioi t) t) :
+    developingValue x₀ form (analyticArcToContinuousMap γ) =
+      canonicalArcIntegral γ form := by
+  have hsource : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      γ.extend t ∈ (extChartAt 𝓘(ℂ) B.p).source := by
+    intro t ht
+    let u : unitInterval := ⟨t, ht⟩
+    have hu := hpath u
+    simpa [u, analyticArcToContinuousMap_apply, extChartAt_source] using hu.1
+  exact developingValue_analyticArcToContinuousMap_eq_canonicalArcIntegral_of_pathChartBall
+    x₀ form γ B hpath hchart_hasDeriv_right
+    (analyticArc_fixedChartIntegrand_intervalIntegrable γ form B.p hsource)
+
 /-- A continuous loop contained in one chart-coordinate ball has zero
 developing value: the one-cell subdivision evaluates to a single primitive
 endpoint difference with equal endpoints. -/
