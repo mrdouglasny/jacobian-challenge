@@ -272,6 +272,136 @@ def R_edge {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     Path ((H.eval (τu j)) (σu (i + 1))) ((H.eval (τu (j + 1))) (σu (i + 1))) :=
   L_edge H σu τu (i + 1) j
 
+/-- The oriented boundary loop of one homotopy grid cell. -/
+def cellLoop {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
+    (σu τu : ℕ → unitInterval) (i j : ℕ) :
+    Path ((H.eval (τu j)) (σu i)) ((H.eval (τu j)) (σu i)) :=
+  (((B_edge H σu τu i j).trans (R_edge H σu τu i j)).trans
+    (T_edge H σu τu i j).symm).trans (L_edge H σu τu i j).symm
+
+private lemma B_edge_mem_pointChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) (u : unitInterval) :
+    B_edge H (extGrid σ) (extGrid τ) i.val j.val u ∈ pointChartBallSet (Bcell i j) := by
+  let x : unitInterval := Set.Icc.convexComb (extGrid σ i) (extGrid σ (i + 1)) u
+  have hx : (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) :=
+    extGrid_convex_mem_real_Icc σ hσ0 hσ1 hσmono i u
+  have hy : ((extGrid τ j : unitInterval) : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) :=
+    extGrid_left_mem_real_Icc τ hτ0 hτ1 hτmono j
+  have h := hcell i j x hx (extGrid τ j) hy
+  simpa [B_edge, Path.subpath, x] using h
+
+private lemma T_edge_mem_pointChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) (u : unitInterval) :
+    T_edge H (extGrid σ) (extGrid τ) i.val j.val u ∈ pointChartBallSet (Bcell i j) := by
+  let x : unitInterval := Set.Icc.convexComb (extGrid σ i) (extGrid σ (i + 1)) u
+  have hx : (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) :=
+    extGrid_convex_mem_real_Icc σ hσ0 hσ1 hσmono i u
+  have hy : ((extGrid τ (j + 1) : unitInterval) : ℝ) ∈
+      Set.Icc (τ j.castSucc) (τ j.succ) :=
+    extGrid_right_mem_real_Icc τ hτ0 hτ1 hτmono j
+  have h := hcell i j x hx (extGrid τ (j + 1)) hy
+  simpa [T_edge, B_edge, Path.subpath, x] using h
+
+private lemma L_edge_mem_pointChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) (u : unitInterval) :
+    L_edge H (extGrid σ) (extGrid τ) i.val j.val u ∈ pointChartBallSet (Bcell i j) := by
+  let y : unitInterval := Set.Icc.convexComb (extGrid τ j) (extGrid τ (j + 1)) u
+  have hx : ((extGrid σ i : unitInterval) : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) :=
+    extGrid_left_mem_real_Icc σ hσ0 hσ1 hσmono i
+  have hy : (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) :=
+    extGrid_convex_mem_real_Icc τ hτ0 hτ1 hτmono j u
+  have h := hcell i j (extGrid σ i) hx y hy
+  simpa [L_edge, vertEdge, Path.subpath, y] using h
+
+private lemma R_edge_mem_pointChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) (u : unitInterval) :
+    R_edge H (extGrid σ) (extGrid τ) i.val j.val u ∈ pointChartBallSet (Bcell i j) := by
+  let y : unitInterval := Set.Icc.convexComb (extGrid τ j) (extGrid τ (j + 1)) u
+  have hx : ((extGrid σ (i + 1) : unitInterval) : ℝ) ∈
+      Set.Icc (σ i.castSucc) (σ i.succ) :=
+    extGrid_right_mem_real_Icc σ hσ0 hσ1 hσmono i
+  have hy : (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) :=
+    extGrid_convex_mem_real_Icc τ hτ0 hτ1 hτmono j u
+  have h := hcell i j (extGrid σ (i + 1)) hx y hy
+  simpa [R_edge, L_edge, vertEdge, Path.subpath, y] using h
+
+lemma cellLoop_mem_pathChartBallSet {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j))
+    (i : Fin m) (j : Fin n) :
+    ∀ u : unitInterval,
+      u ∈ pathChartBallSet
+        ((cellLoop H (extGrid σ) (extGrid τ) i.val j.val :
+          Path ((H.eval (extGrid τ j)) (extGrid σ i))
+            ((H.eval (extGrid τ j)) (extGrid σ i))) : C(unitInterval, X))
+        (Bcell i j) := by
+  intro u
+  rw [pathChartBallSet_eq_preimage_pointChartBallSet]
+  change cellLoop H (extGrid σ) (extGrid τ) i.val j.val u ∈ pointChartBallSet (Bcell i j)
+  unfold cellLoop
+  have hmem :
+      cellLoop H (extGrid σ) (extGrid τ) i.val j.val u ∈
+        Set.range (cellLoop H (extGrid σ) (extGrid τ) i.val j.val) := ⟨u, rfl⟩
+  rw [cellLoop, Path.trans_range, Path.trans_range, Path.trans_range,
+    Path.symm_range, Path.symm_range] at hmem
+  rcases hmem with hprev | hL
+  · rcases hprev with hBR | hT
+    · rcases hBR with hB | hR
+      · rcases hB with ⟨v, hv⟩
+        rw [← hv]
+        exact B_edge_mem_pointChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+          Bcell hcell i j v
+      · rcases hR with ⟨v, hv⟩
+        rw [← hv]
+        exact R_edge_mem_pointChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+          Bcell hcell i j v
+    · rcases hT with ⟨v, hv⟩
+      rw [← hv]
+      exact T_edge_mem_pointChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+        Bcell hcell i j v
+  · rcases hL with ⟨v, hv⟩
+    rw [← hv]
+    exact L_edge_mem_pointChartBallSet H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+      Bcell hcell i j v
+
 /-- A path whose image is propositionally constant has zero developing value. -/
 lemma devVal_const_image_zero {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
     (γ : Path a b) (x : X) (hγ : ∀ u : unitInterval, γ u = x) :
