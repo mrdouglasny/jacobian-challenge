@@ -1,6 +1,6 @@
 # Jacobians of Compact Riemann Surfaces
 
-A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **59 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
+A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **58 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
 
 > **What this is, honestly.** A scaffold that *closes Buzzard's interface* and proves real theorems on it, with the deep classical inputs isolated as a classified, discharge-planned axiom layer — **not** a from-first-principles proof of Jacobian theory. The axioms are LLM-authored and **have not had independent human-mathematician review**. See [Caveats](#caveats--read-before-relying-on-this) before relying on any result.
 
@@ -8,10 +8,10 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 
 | | |
 |---|---|
-| **Build** | `lake build` green (8597 jobs) |
+| **Build** | `lake build Jacobians` green (8602 jobs) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 59, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 58, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 8 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
@@ -30,20 +30,20 @@ These are the genuine theorems — what a reader can trust the formalization to 
 | `genus ProjectiveLine = 0` | **axiom-free** (chart-cocycle + Liouville: 1-forms on ℙ¹ are a subsingleton) |
 | `genus (Elliptic ω₁ ω₂) = 1` | **axiom-free** (intrinsic Liouville on `ellipticDz`) |
 | `genus (HyperellipticEvenProj H) = H.f.natDegree / 2 − 1` | real proof, modulo the Liouville L2/L3 axioms only |
-| Abel–Jacobi **injective** for genus > 0 | **theorem** `AX_ofCurve_inj` (`Axioms/OfCurveInjective.lean`) — was an axiom, now derived from a period 1-cocycle axiom + Abel's theorem + a proven genus obstruction |
+| Abel–Jacobi **injective** for genus > 0 | **theorem** `AX_ofCurve_inj` (`Axioms/OfCurveInjective.lean`) — was an axiom, now derived from the proved period-triangle theorem + Abel's theorem + a proven genus obstruction |
 | Albanese **categoricity** `ofCurve_isJacobian` | **theorem** — the concrete `Jacobian`/`ofCurve` satisfy the universal property (`∃!` factorization through holomorphic group homs), pinning the Jacobian up to unique isomorphism |
 | Functoriality identities (`pushforward`/`pullback` id + comp) | derived **theorems**, not axioms |
 | `FiniteDimensional ℂ (HolomorphicOneForm X)` | derived from Kirov's real ~3,400-LOC Montel proof via an injective bridge |
 
 The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` as a real computation through the period lattice — the strongest single piece of evidence that the construction is non-degenerate.
 
-## What it assumes — the 59 axioms
+## What it assumes — the 58 axioms
 
 Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into seven topics; difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
 
 | Topic | ~Count | Difficulty |
 |-------|:------:|:----------:|
-| Period / Hodge / homology core (incl. the period 1-cocycle, Riemann bilinear) | ~8 | 🔴🟡 |
+| Period / Hodge / homology core (incl. Riemann bilinear and the period lattice) | ~7 | 🔴🟡 |
 | Abel–Jacobi (`AX_AbelTheorem`; `ofCurve_inj` is now a theorem) | 1 | 🔴 |
 | Sheaf cohomology / Riemann–Roch / Serre / Plücker (`H0` de-opaqued) | ~9 | 🔴 |
 | Functoriality (pushforward / pullback smoothness + naturality) | ~9 | 🟡 |

@@ -59,6 +59,8 @@ See `docs/formalization-plan.md` §7.
 -/
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.BranchLocus
+import Jacobians.RiemannSurface.LoopIntegralHom
+import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovCanonicalEq
 
@@ -154,7 +156,7 @@ A real local-antiderivative ("FTC") statement, if ever wanted, must be made at
 the quotient level (`ofCurve` is manifold-differentiable, the period ambiguity
 being locally constant), *not* on a single-valued ℂ lift. -/
 
-/-- **Axiom (period 1-cocycle).** For any three points and piecewise-analytic arcs
+/-- **Theorem (period 1-cocycle).** For any three points and piecewise-analytic arcs
 between them, the period of the closed 1-cycle `p_xz - p_xy - p_yz` lies in the
 period lattice. Minimal analytic content of homotopy invariance (Stokes for closed
 forms over 1-cycles); genus-1 instance PROVEN
@@ -162,7 +164,7 @@ forms over 1-cycles); genus-1 instance PROVEN
 after two deep-think passes (REFORMULATE verdict) to avoid arc-concat/reversal +
 cross-basepoint identification. Ref: Griffiths-Harris Ch.2; Forster §21. Vetted
 DT + external deep-think 2026-06-05. -/
-axiom AX_Period_Triangle {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+theorem AX_Period_Triangle {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     (x y z : X) (p_xy p_yz p_xz : AnalyticArc X)
     (h_xy0 : p_xy.extend 0 = x) (h_xy1 : p_xy.extend 1 = y)
@@ -171,7 +173,82 @@ axiom AX_Period_Triangle {X : Type u} [TopologicalSpace X] [T2Space X] [CompactS
     (fun i => canonicalArcIntegral p_xz (jacobianBasis X i)
             - (canonicalArcIntegral p_xy (jacobianBasis X i)
              + canonicalArcIntegral p_yz (jacobianBasis X i)))
-      ∈ periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+      ∈ periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X) := by
+  classical
+  let x₀ : X := Classical.arbitrary X
+  let b := jacobianBasis X
+  let p₀x : AnalyticArc X := Jacobians.Bridge.bridgePathArc (X := X) x₀ x
+  have hp₀x0 : p₀x.extend 0 = x₀ := by
+    simp [p₀x, Jacobians.Bridge.bridgePathArc]
+  have hp₀x1 : p₀x.extend 1 = x := by
+    simp [p₀x, Jacobians.Bridge.bridgePathArc]
+  have hxy_yz : p_xy.extend 1 = p_yz.extend 0 := by
+    rw [h_xy1, h_yz0]
+  let xy_yz : AnalyticArc X := p_xy.trans p_yz hxy_yz
+  have hxy_yz_xz :
+      xy_yz.extend 1 = p_xz.reverse.extend 0 := by
+    simp [xy_yz, h_yz1, h_xz1]
+  let tri : AnalyticArc X := xy_yz.trans p_xz.reverse hxy_yz_xz
+  have htri0 : tri.extend 0 = x := by
+    simp [tri, xy_yz, h_xy0]
+  have htri1 : tri.extend 1 = x := by
+    simp [tri, h_xz0]
+  have hp₀x_tri : p₀x.extend 1 = tri.extend 0 := by
+    rw [hp₀x1, htri0]
+  let p₀x_tri : AnalyticArc X := p₀x.trans tri hp₀x_tri
+  have hp₀x_tri_rev :
+      p₀x_tri.extend 1 = p₀x.reverse.extend 0 := by
+    simp [p₀x_tri, htri1, hp₀x1]
+  let closedArc : AnalyticArc X := p₀x_tri.trans p₀x.reverse hp₀x_tri_rev
+  let closedLoop : AnalyticLoop X x₀ :=
+    { arc := closedArc
+      start_eq := by
+        simp [closedArc, p₀x_tri, hp₀x0]
+      end_eq := by
+        simp [closedArc, hp₀x0] }
+  have hloop_mem :
+      (fun i => canonicalArcIntegral closedLoop.arc (b i)) ∈
+        periodLatticeInBasis X x₀ b :=
+    Jacobians.RiemannSurface.loop_canonicalArcIntegral_mem_periodLatticeInBasis
+      x₀ b closedLoop
+  have hneg :
+      -(fun i => canonicalArcIntegral closedLoop.arc (b i)) ∈
+        periodLatticeInBasis X x₀ b :=
+    Submodule.neg_mem _ hloop_mem
+  convert hneg using 1
+  ext i
+  have hint (γ : AnalyticArc X) :
+      IntervalIntegrable (canonicalIntegrand γ (b i)) MeasureTheory.volume 0 1 :=
+    analyticArc_canonicalIntegrand_intervalIntegrable γ (b i)
+  have hxyyz :
+      canonicalArcIntegral xy_yz (b i) =
+        canonicalArcIntegral p_xy (b i) + canonicalArcIntegral p_yz (b i) :=
+    canonicalArcIntegral_trans p_xy p_yz hxy_yz (b i) (hint p_xy) (hint p_yz)
+  have htri :
+      canonicalArcIntegral tri (b i) =
+        canonicalArcIntegral xy_yz (b i) + canonicalArcIntegral p_xz.reverse (b i) :=
+    canonicalArcIntegral_trans xy_yz p_xz.reverse hxy_yz_xz (b i)
+      (hint xy_yz) (hint p_xz.reverse)
+  have hp₀xtri :
+      canonicalArcIntegral p₀x_tri (b i) =
+        canonicalArcIntegral p₀x (b i) + canonicalArcIntegral tri (b i) :=
+    canonicalArcIntegral_trans p₀x tri hp₀x_tri (b i) (hint p₀x) (hint tri)
+  have hclosed :
+      canonicalArcIntegral closedArc (b i) =
+        canonicalArcIntegral p₀x_tri (b i) + canonicalArcIntegral p₀x.reverse (b i) :=
+    canonicalArcIntegral_trans p₀x_tri p₀x.reverse hp₀x_tri_rev (b i)
+      (hint p₀x_tri) (hint p₀x.reverse)
+  have hxzrev :
+      canonicalArcIntegral p_xz.reverse (b i) =
+        -canonicalArcIntegral p_xz (b i) :=
+    canonicalArcIntegral_reverse p_xz (b i)
+  have hp₀xrev :
+      canonicalArcIntegral p₀x.reverse (b i) =
+        -canonicalArcIntegral p₀x (b i) :=
+    canonicalArcIntegral_reverse p₀x (b i)
+  simp only [Pi.neg_apply]
+  rw [hclosed, hp₀xtri, htri, hxyyz, hxzrev, hp₀xrev]
+  ring
 
 /-- The pullback of holomorphic 1-forms along a holomorphic map `f : X → Y`,
 as a ℂ-linear map of `HolomorphicOneForm` modules.

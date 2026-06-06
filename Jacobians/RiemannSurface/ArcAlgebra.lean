@@ -274,6 +274,32 @@ noncomputable def trans (γ₁ γ₂ : AnalyticArc X)
 
 end AnalyticArc
 
+namespace AnalyticArc
+
+@[simp] theorem reverse_extend_zero (γ : AnalyticArc X) :
+    γ.reverse.extend 0 = γ.extend 1 := by
+  simp [reverse]
+
+@[simp] theorem reverse_extend_one (γ : AnalyticArc X) :
+    γ.reverse.extend 1 = γ.extend 0 := by
+  simp [reverse]
+
+@[simp] theorem trans_extend_zero (γ₁ γ₂ : AnalyticArc X)
+    (h : γ₁.extend 1 = γ₂.extend 0) :
+    (γ₁.trans γ₂ h).extend 0 = γ₁.extend 0 := by
+  simp [trans]
+
+@[simp] theorem trans_extend_one (γ₁ γ₂ : AnalyticArc X)
+    (h : γ₁.extend 1 = γ₂.extend 0) :
+    (γ₁.trans γ₂ h).extend 1 = γ₂.extend 1 := by
+  unfold trans
+  dsimp
+  have hnot : ¬(1 : ℝ) ≤ (1 / 2 : ℝ) := by norm_num
+  rw [if_neg hnot]
+  norm_num
+
+end AnalyticArc
+
 /-- Reversal negates the canonical moving-chart integrand after the
 substitution `r ↦ 1 - r`. -/
 theorem canonicalIntegrand_reverse (γ : AnalyticArc X)
