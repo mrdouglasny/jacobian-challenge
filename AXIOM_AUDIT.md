@@ -148,7 +148,7 @@ loop integrability is now a theorem.
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (17 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (16 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
@@ -161,10 +161,10 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 17 | classical theorems, citable | high |
+| 1 — textbook-standard | 16 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 25 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---

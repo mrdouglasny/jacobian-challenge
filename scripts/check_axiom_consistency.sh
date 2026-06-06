@@ -44,6 +44,19 @@ chk "AXIOM_AUDIT verification 'prints N'" "$(grep -oE 'prints [0-9]+ — the ven
 chk "AXIOM_AUDIT verification 'non-vendor): N'" "$(grep -oE 'non-vendor\): [0-9]+' AXIOM_AUDIT.md | grep -oE '[0-9]+' | head -1)"
 chk "README at-a-glance Axioms" "$(grep -oE '\*\*Axioms\*\* \| [0-9]+' README.md | grep -oE '[0-9]+' | head -1)"
 
-if [ "$fail" = 0 ]; then echo "✓ axiom count consistent across docs (= $N)"; else
-  echo "✗ axiom-count drift — reconcile AXIOM_AUDIT.md + README.md to the kernel count $N"; fi
+# 3. The AXIOM_AUDIT by-class breakdown table must SUM to the kernel count.
+#    Catches the drift where a discharge updates the header but not the per-class
+#    counts (e.g. #84 review: 2c still counted 2 discharged affine-form axioms).
+#    Parses the `| Class | Count | Nature | Trust |` table; sums column 2 (Count).
+breakdown=$(awk -F'|' '
+  /Class.*Count.*Nature.*Trust/ { f=1; next }
+  f && $0 ~ /^\|[-: ]+\|/        { next }
+  f && /^\|/                     { c=$3; gsub(/[^0-9]/,"",c); if (c!="") s+=c; next }
+  f && $0 !~ /^\|/               { f=0 }
+  END { print s+0 }
+' AXIOM_AUDIT.md)
+chk "AXIOM_AUDIT by-class breakdown sum" "$breakdown"
+
+if [ "$fail" = 0 ]; then echo "✓ axiom count consistent across docs + breakdown (= $N)"; else
+  echo "✗ axiom-count drift — reconcile AXIOM_AUDIT.md (header + by-class breakdown) + README.md to the kernel count $N"; fi
 exit $fail
