@@ -12,7 +12,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
 | **Axioms** | 62, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
-| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 11 intentional anchor-statement deferrals |
+| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 9 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
 ## The challenge
@@ -60,7 +60,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 - **Zero human-written Lean.** The Lean was written by Claude (Opus) with Codex rescue passes and Gemini axiom audits, directed by a mathematician on scope, the axiom-vs-proof boundary, and review of every landing.
 - **`sorry`s, in two honest categories** (the *core* — challenge API, Jacobian construction, curve witnesses, S1–S7 1-form framework — is `sorry`-free):
   - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Hyperelliptic/AntiInvariance.lean` 1).
-  - **11 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 3); `PluckerAPI` is now fully proved (the low-degree corollaries discharge by arithmetic from the real `plucker_genus`).
+  - **9 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 1). `PluckerAPI` is fully proved; in `SerreDualityAPI`, the dimension-form duality `h¹D = h⁰(K−D)` and the `h⁰−h¹` Riemann–Roch identity are now real proofs (from `AX_SerreDuality` / `AX_RiemannRoch`), leaving only Serre vanishing.
 
 ## How it's built
 
