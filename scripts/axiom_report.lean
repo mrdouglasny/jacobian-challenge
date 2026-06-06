@@ -20,6 +20,7 @@ import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.OneForm
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.PlaneCurve
+import Jacobians.RiemannSurface.RiemannRochAPI
 
 open Jacobians Jacobian
 
@@ -48,6 +49,8 @@ open Jacobians Jacobian
 #print axioms Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero
 #print axioms Jacobians.ProjectiveCurve.genus_Elliptic_eq_one
 #print axioms Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq
+-- `h⁰(0) = 1` over the corrected (germ-quotient) L(D): axiom-free faithfulness check.
+#print axioms Jacobians.RiemannSurface.h0_zero
 
 -- Phase-3 prerequisite-type discharges: kernel evidence for the AXIOM_AUDIT
 -- "Recently discharged" claims. The carriers are standard-3 (no atlas axioms);
