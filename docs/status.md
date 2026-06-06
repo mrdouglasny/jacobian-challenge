@@ -11,9 +11,12 @@ _Last full rewrite: 2026-04-23. Header refreshed: 2026-04-29._
 > all landed between 2026-04-26 and 2026-04-29.
 >
 > For the **current** state, see:
-> * [`docs/status-2026-05-31.md`](status-2026-05-31.md) — verified
->   snapshot with exact sorry (12) and axiom (106) counts, build
->   status, and remote-sync state. **Start here.**
+> * [`docs/status-2026-06-06.md`](status-2026-06-06.md) — the current
+>   verified snapshot (62 axioms, build green at 8597 jobs; general Abel
+>   injectivity now a theorem, Albanese categoricity proved, the RR/Serre/
+>   Plücker anchor layer). **Start here.**
+> * [`docs/status-2026-05-31.md`](status-2026-05-31.md) — prior snapshot
+>   (93 axioms), now superseded.
 > * [`README.md`](../README.md) — public-facing summary, current state
 >   table, axiom inventory.
 > * [`docs/genus-theorem-discharge-plan.md`](genus-theorem-discharge-plan.md)

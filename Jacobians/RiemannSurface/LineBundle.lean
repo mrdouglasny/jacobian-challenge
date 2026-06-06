@@ -6,22 +6,17 @@ cohomology on a compact Riemann surface.
 
 Supports the real (non-doc-only) statements of `AX_RiemannRoch`,
 `AX_SerreDuality`, `AX_AbelTheorem`. Each axiom needs to reference
-`Divisor X`, `LineBundle D`, `H⁰(X, L)`, `H¹(X, L)`, degree, and the
-canonical sheaf `Ω¹_X` — none of which are in Mathlib at this pin.
-
-We axiomatize these as **opaque types with ℂ-vector-space structure
-and a `Divisor.deg` map to ℤ**. Each axiom is a classical construction
-(divisors as formal ℤ-combinations of points; line bundles via the
-`𝒪(D)` correspondence; sheaf cohomology via Čech), well-known but not
-yet formalized.
+`LineBundle D`, `H⁰(X, L)`, `H¹(X, L)`, and the canonical sheaf `Ω¹_X`.
+`Divisor X` and `Divisor.deg` are real `FreeAbelianGroup` definitions in
+`RiemannSurface/Divisor.lean`; `H0` is now the concrete Riemann-Roch space
+`riemannRochSpace D`. The remaining opaque placeholders are the line bundle
+object itself, `H1`, the canonical divisor, and `LineBundle.ofDivisor`.
 
 ## Discharge route
 
-Eventual discharge: build `Divisor X` as a `FreeAbelianGroup` on `X`
-(Mathlib has this) plus a degree map. Line bundles: `𝒪(D) := sheaf of
-meromorphic functions `f` with `div f + D ≥ 0`` — needs meromorphic
-function theory on complex manifolds. Sheaf cohomology: either Čech
-(elementary) or derived functors (heavier).
+Eventual discharge for the remaining placeholders: line bundles as
+`𝒪(D) := sheaf of meromorphic functions f with div f + D ≥ 0`, and `H1`
+via Čech cohomology or derived functors.
 
 For the Jacobian Challenge specifically, the ℂ-dim of `H⁰` and `H¹` is
 what matters. Even `Divisor`'s full `FreeAbelianGroup` encoding is not
@@ -37,45 +32,13 @@ See `docs/completion-plan.md` workstream A4.
 Reference: Forster, *Lectures on Riemann Surfaces*, Ch. I §8 (divisors)
 + Ch. II §15-17 (line bundles + sheaves); Mumford Vol I §II.2.
 -/
-import Jacobians.RiemannSurface.Genus
+import Jacobians.RiemannSurface.RiemannRochSpace
 
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
-
-/-- The group of divisors on a compact Riemann surface `X`: formal
-`ℤ`-combinations of points of `X`, i.e. the free abelian group on the
-underlying set (Forster, *Lectures on Riemann Surfaces*, Ch. I §8). The
-geometric typeclasses are unused (the encoding is purely algebraic) but kept
-on the signature so downstream consumers elaborate unchanged.
-
-Discharged (2026-06-03, Phase 1) from an opaque axiom to `FreeAbelianGroup X`;
-`abbrev` so `AddCommGroup` resolves transparently through the alias. -/
-abbrev Divisor (X : Type u) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ, ℂ) ω X] : Type u := FreeAbelianGroup X
-
-/-- Divisors form an additive commutative group (inherited from `FreeAbelianGroup`). -/
-instance Divisor.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ, ℂ) ω X] : AddCommGroup (Divisor X) :=
-  inferInstanceAs (AddCommGroup (FreeAbelianGroup X))
-
-/-- The degree of a divisor: for a formal combination `D = ∑ n_P · P`,
-`deg D := ∑ n_P`. An `AddMonoidHom` `Divisor X →+ ℤ`. -/
-noncomputable def Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ, ℂ) ω X] : Divisor X →+ ℤ :=
-  FreeAbelianGroup.lift (fun _ : X => (1 : ℤ))
-
-/-- **Opaque axiom type.** The subgroup of principal divisors: divisors
-of meromorphic functions. Kernel of the divisor-to-Jacobian map
-(Abel's theorem). -/
-axiom PrincipalDivisors (X : Type*) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : AddSubgroup (Divisor X)
 
 /-- **Opaque axiom type.** The line bundle `𝒪(D)` associated to a
 divisor `D` on `X`. Forms a rank-1 locally-free sheaf; we only expose
@@ -84,26 +47,26 @@ axiom LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : Type
 
-/-- **Opaque axiom type.** The space of global sections `H⁰(X, L)` of a
-line bundle `L`. Classically: meromorphic functions `f` on `X` with
-`div f + D ≥ 0` (i.e. holomorphic away from divisor poles, with
-constrained orders). -/
-axiom H0 {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- The space of global sections `H⁰(X, L)` of a line bundle indexed by `D`,
+implemented as the concrete Riemann-Roch space `L(D)`. The line-bundle argument
+is intentionally ignored until `LineBundle` itself is de-opaqued. -/
+noncomputable def H0 {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) : Type
+    [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (_L : LineBundle D) : Type _ :=
+  riemannRochSpace D
 
 /-- `H⁰(X, L)` is a ℂ-vector space. -/
-axiom H0.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
+noncomputable instance H0.instAddCommGroup {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
-    AddCommGroup (H0 L)
-attribute [instance] H0.instAddCommGroup
+    AddCommGroup (H0 L) :=
+  inferInstanceAs (AddCommGroup (riemannRochSpace D))
 
-axiom H0.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
+noncomputable instance H0.instModule {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {D : Divisor X} (L : LineBundle D) :
-    Module ℂ (H0 L)
-attribute [instance] H0.instModule
+    Module ℂ (H0 L) :=
+  inferInstanceAs (Module ℂ (riemannRochSpace D))
 
 /-- **Opaque axiom type.** The first sheaf cohomology `H¹(X, L)` of a
 line bundle `L`. Classically: Čech cohomology over a Leray cover. -/
@@ -136,3 +99,19 @@ axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : LineBundle D
 
 end Jacobians.Axioms
+
+namespace Jacobians.RiemannSurface
+
+open scoped Manifold Topology ContDiff
+open Jacobians.Axioms
+
+variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+  [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
+
+/-- Since `H0 (LineBundle.ofDivisor D)` is definitionally `riemannRochSpace D`,
+the comparison is the identity linear equivalence. -/
+theorem H0_equiv_riemannRochSpace (D : Divisor X) :
+    Nonempty (H0 (LineBundle.ofDivisor D) ≃ₗ[ℂ] riemannRochSpace D) :=
+  ⟨LinearEquiv.refl ℂ (riemannRochSpace D)⟩
+
+end Jacobians.RiemannSurface

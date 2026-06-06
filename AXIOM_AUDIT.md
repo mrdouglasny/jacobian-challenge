@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-04.*
+*Last updated 2026-06-05.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 64** — all **64** in our own modules. The vendored
+**Active project axioms: 62** — all **62** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -85,17 +85,57 @@ H₁ class. The deepest analytic gap is closed; only full homotopy invariance
 (representative-independence for *arbitrary* loops, not just the basis) remains as a
 deferred faithfulness upgrade.
 
+Then → **63** by **de-opaquing** `abelJacobiDiv` from an axiom to a real `def`
+(`:= FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)`, 2026-06-05):
+the divisor-level Abel–Jacobi map is now the genuine linear extension of `ofCurveImpl`.
+`AX_AbelTheorem` (kernel = principal divisors) stays the textbook axiom, now stated about
+the concrete map. This is one input to the now-derived general `AX_ofCurve_inj`
+(Abel injectivity, genus > 0) — see
+[`docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md`](docs/planning/OFCURVE_INJ_DISCHARGE_PLAN.md).
+Then → **62** by **de-opaquing** `PrincipalDivisors` to the additive subgroup
+corresponding to `MeromorphicFunctionField.divHom.range` via `Subgroup.toAddSubgroup'`
+(2026-06-05). No new axiom was introduced.
+
+**Faithfulness fix (2026-06-05, count unchanged at 62).** Statement-vetting (Gemini
+deep-think + self-audit) caught that, once `PrincipalDivisors` became the concrete
+`range divHom` (all degree-0), the bare-kernel form `ker abelJacobiDiv = PrincipalDivisors`
+is **false**: `abelJacobiDiv` sends the basepoint divisor `(arbitrary)` to `0`
+(`AX_ofCurve_self`), so that degree-1 divisor lies in the kernel but is not principal —
+a latent inconsistency (would become derivable once `deg(div f) = 0` lands). Fixed by
+restricting to degree-0 divisors, matching Abel's actual theorem `Div⁰/Principal ≃ Jac`
+and the axiom's own docstring:
+`(abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker = PrincipalDivisors X`. All consumers feed
+only degree-0 divisors (differences `(Q₁)−(Q₂)`), so nothing is lost; the elliptic
+witness does not depend on this axiom.
+
+Then → **66** with the universal-property UP-0/UP-1 banked in
+`Axioms/TorusAlbanese.lean` (2026-06-05): `AX_torus_oneforms_dualCover`,
+`AX_torus_self_albanese`, `AX_period_functoriality`, and the conditional lift-form
+fallback `AX_torus_descent_holo` used for E6. The pre-existing
+`AX_curve_generates_jacobian` was moved into the new file, so it is not a net-new
+axiom. Then → **63** by **de-opaquing** `H0` to the concrete
+`riemannRochSpace D` and replacing `H0.instAddCommGroup` / `H0.instModule` with
+instances inherited from the submodule carrier (2026-06-05). `LineBundle` and
+`LineBundle.ofDivisor` remain honest opaque placeholders; `H1` remains opaque.
+Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
+real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
+is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
+local-homeomorphism API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`), composed
+with `P.fromQuot_holo`; two `ComplexTorus` chart lemmas were de-privatized to
+support it. `#print axioms`-clean (standard-3 + the upstream period-lattice /
+cycle-basis axioms; no `sorryAx`, no self-reference).
+
 ---
 
 ## Triage
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (12 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (17 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (52 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (46 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -104,9 +144,9 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 12 | classical theorems, citable | high |
-| 2a — data-existence | 14 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 9 | "my construction has good property P" | **may mask a bad def** |
+| 1 — textbook-standard | 17 | classical theorems, citable | high |
+| 2a — data-existence | 9 | "this function/object exists with spec S" | spec needs review |
+| 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 27 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
@@ -122,15 +162,19 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_RiemannRoch` | `Axioms/RiemannRoch.lean:59` | Forster §16; Miranda Ch. VI |
 | `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | Forster §17; Griffiths–Harris Ch. 1 |
 | `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
-| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:66` | Forster §21; Miranda Ch. VIII |
+| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
 | `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard) |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard) |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
+| `AX_Period_Triangle` | `Axioms/AbelJacobiMap.lean:165` | period 1-cocycle / Stokes for closed 1-cycles (Griffiths-Harris Ch. 2; Forster §21) |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
-| `AX_curve_generates_jacobian` | `Axioms/UniversalProperty.lean:44` | Mumford *Curves & their Jacobians*; Milne *AV* §I — *unused stub* (see Universal-property section) |
+| `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is still an axiom **only** for the
 abstract `genus_eq_zero_iff_homeo`; the concrete `genus ℙ¹ = 0` no longer
@@ -152,8 +196,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `AX_cycleBasisLoop_integrable` | `RiemannSurface/LoopIntegral.lean:17` | the period integrand of each cycle-basis loop is `IntervalIntegrable` — classical regularity (piecewise-analytic loops are rectifiable), scoped to cycle-basis loops. The **only** residual axiom after `loopIntegralToH1` was **discharged to a real `def`** 2026-06-05 (`:= cb.isBasis.constr ℤ (∮ over cycle-basis loops)`, periods = genuine line integrals via the L0–L1 multi-chart integral). Dischargeable later by strengthening `AnalyticArc` regularity. See [`docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md`](docs/planning/LOOP_INTEGRAL_DISCHARGE_PLAN.md) |
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
-| `abelJacobiDiv` | `Axioms/AbelTheorem.lean:60` | divisor-level Abel–Jacobi |
-| `PrincipalDivisors`, `LineBundle`, `H0`(+`instAddCommGroup`,`instModule`), `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (10) | `RiemannSurface/LineBundle.lean:70–128` | line-bundle / sheaf-cohomology **type stubs** (the `Divisor` triple discharged in Phase 1) |
+| `LineBundle`, `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (6) | `RiemannSurface/LineBundle.lean:46–99` | line-bundle / sheaf-cohomology **type stubs**. `H0` is now `riemannRochSpace D` with inherited submodule instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
 
@@ -163,14 +206,17 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `AX_ofCurve_inj` | `Axioms/AbelJacobiMap.lean:245` | Buzzard's anti-`J=0` hack-blocker; **opaque-blocked** (see [`docs/contracts/ofCurve.md`](docs/contracts/ofCurve.md)) |
-| `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:226` | Abel–Jacobi smoothness |
-| `AX_pushforward_contMDiff` | `Axioms/AbelJacobiMap.lean:570` | pushforward smoothness |
-| `AX_pullback_contMDiff` | `Axioms/AbelJacobiMap.lean:619` | pullback smoothness |
-| `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:667` | push∘pull = deg multiplication |
-| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:298` | period-map naturality |
-| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:312` | period-map naturality |
-| `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:178,185` | functoriality of trace |
+| `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:348` | Abel–Jacobi smoothness |
+| `AX_pushforward_contMDiff` | `Axioms/AbelJacobiMap.lean:685` | pushforward smoothness |
+| `AX_pullback_contMDiff` | `Axioms/AbelJacobiMap.lean:734` | pullback smoothness |
+| `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication |
+| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:413` | period-map naturality |
+| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:427` | period-map naturality |
+| `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:241,248` | functoriality of trace |
+
+*Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
+`Axioms/OfCurveInjective.lean`, derived from `AX_Period_Triangle`,
+`AX_AbelTheorem`, and `principal_imp_eq_of_genus_pos`.
 
 ### 2c. Atlas / structure axioms — *curve-specific constructions*
 
@@ -214,20 +260,28 @@ is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-dischar
 Deferred textbook leaves of [`docs/universal-property-proof-plan.md`] (proving
 `Jacobians.IsJacobian x₀ (Jacobian X) (ofCurve x₀)` — the categoricity theorem).
 All cross-model vetted **Gemini (gemini-3-pro-preview) + Codex, 2026-06-02**
-(`GR`+`CX`); ratings **Standard**/**Likely correct**. None is yet used by a
-theorem (so the headline-reachable axiom set is unchanged); they are forward debt.
+(`GR`+`CX`); ratings **Standard**/**Likely correct**. UP-0 and the E-row
+existence half (UP-1) are now used by
+`Jacobians.jacobianUniversal_phi_exists`; factorization and uniqueness remain
+future work.
 
 | Axiom | Status | Reference |
 |-------|--------|-----------|
-| `AX_curve_generates_jacobian` | **stated** — `Axioms/UniversalProperty.lean:44` (compiles; unused stub, +1 to the declared count) | Mumford; Milne *AV* §I |
-| `AX_torus_oneforms_dualCover` | **planned** — Lean form pending complex-torus 1-form ≅ cotangent API (Codex: Mathlib has `GroupLieAlgebra`/`addInvariantVectorField` scaffolding; the equiv is absent) | Birkenhake–Lange Ch. 1 |
-| `AX_torus_self_albanese` | **planned** — pending a torus-Albanese object | Birkenhake–Lange Ch. 1 |
-| `AX_period_functoriality` | **planned** — pending the singular/de-Rham period pairing + naturality (Codex: `curveIntegral` + `singularHomologyFunctor` exist; pairing absent) | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | **stated** — `Axioms/TorusAlbanese.lean:168` | Mumford; Milne *AV* §I |
+| `AX_torus_oneforms_dualCover` | **stated** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
+| `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
 
-The holomorphicity step (E6 in the plan) is **likely provable** from Mathlib
-(`LinearMap.toContinuousLinearMap` + `ZLatticeQuotient`), not axiomatized; the
-"every abstract torus hom is holomorphic" form is *false* (Codex-flagged) — use the
-ℂ-linear-lift form only. Step 0 (the `ConnectedSpace (Jacobian X)` instance needed
+The direct holomorphicity step (E6 in the plan) was originally blocked by a
+charted-space mismatch between `JacobianAmbient`'s `ComplexTorus` charts and
+Kirov's raw quotient charts. That mismatch is now **resolved**: de-privatizing two
+`ComplexTorus` chart lemmas (`extChartAt_symm_eq_quotient_mk`,
+`mem_extChartAt_target_iff`) lets the descent be proved directly via Kirov's
+quotient local-homeomorphism API, so `AX_torus_descent_holo` is a real theorem —
+no fallback in use. The "every abstract torus hom is holomorphic" form remains
+*false* (Codex-flagged) and was never the form used.
+Step 0 (the `ConnectedSpace (Jacobian X)` instance needed
 for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 `Challenge.lean`).
 
@@ -235,6 +289,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_torus_descent_holo` *(2026-06-06)* | local-section route over Kirov's `ZLatticeQuotient` local-homeo API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`) composed with `P.fromQuot_holo`; helper `complexTorus_pushforward_contMDiff_to_quotient` | `Axioms/TorusAlbanese.lean` |
 | `AX_FiniteDimOneForms` | injective bridge to Kirov's Montel theorem | `Bridge/KirovHolomorphic.lean` |
 | `genus ℙ¹ = 0` *(via `AX_genus_eq_zero_iff_homeo`)* | direct chart-cocycle + Liouville ⇒ `HolomorphicOneForm ℙ¹` subsingleton | `ProjectiveCurve/Line/OneForm.lean` |
 | `AX_Liouville_compact_complex_manifold` (Liouville L1) | global max-modulus (`Complex.eqOn_…isMaxOn_norm`) + clopen connectedness | `Axioms/HyperellipticLiouville.lean` (`liouville_compact_complex_manifold`) |
@@ -275,7 +330,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 64 — the vendored Kirov subtree is now axiom-free, so 64 is the total.
+#   prints 62 — the vendored Kirov subtree is now axiom-free, so 62 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -292,7 +347,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 64
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 62
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
