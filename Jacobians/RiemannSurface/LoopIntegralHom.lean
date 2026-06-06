@@ -84,4 +84,23 @@ noncomputable def loopDevValH1Hom (x₀ : X) (form : HolomorphicOneForm X) :
       (loopDevValHom x₀ form γ).toAdd :=
   rfl
 
+/-- Compatibility with the canonical arc integral for any analytic loop. -/
+@[simp] theorem loopDevValH1Hom_loopToHomology
+    (x₀ : X) (form : HolomorphicOneForm X) (loop : AnalyticLoop X x₀) :
+    loopDevValH1Hom x₀ form (Jacobians.Axioms.loopToHomology loop) =
+      canonicalArcIntegral loop.arc form := by
+  rw [← developingValue_eq_canonicalArcIntegral x₀ form loop.arc]
+  rfl
+
+/-- Compatibility on the chosen analytic cycle-basis loops. -/
+theorem loopDevValH1Hom_cycleBasis_loop {X : Type*} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (i : Fin (2 * genus X))
+    (form : HolomorphicOneForm X) :
+    let cb := Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)
+    loopDevValH1Hom x₀ form (Jacobians.Axioms.loopToHomology (cb.loops i)) =
+      canonicalArcIntegral (cb.loops i).arc form := by
+  exact loopDevValH1Hom_loopToHomology x₀ form
+    ((Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)).loops i)
+
 end Jacobians.RiemannSurface
