@@ -73,4 +73,15 @@ noncomputable def loopDevValHom (x₀ : X) (form : HolomorphicOneForm X) :
           loopDevValQuotient_mk, devVal_trans]
         simp [add_comm]
 
+/-- The developing value as an additive homomorphism on `H1`. -/
+noncomputable def loopDevValH1Hom (x₀ : X) (form : HolomorphicOneForm X) :
+    H1 X x₀ →+ ℂ :=
+  MonoidHom.toAdditiveLeft (Abelianization.lift (loopDevValHom x₀ form))
+
+@[simp] theorem loopDevValH1Hom_of (x₀ : X) (form : HolomorphicOneForm X)
+    (γ : FundamentalGroup X x₀) :
+    loopDevValH1Hom x₀ form (Additive.ofMul (Abelianization.of γ)) =
+      (loopDevValHom x₀ form γ).toAdd :=
+  rfl
+
 end Jacobians.RiemannSurface
