@@ -52,8 +52,8 @@ same commit that retires the axiom.
 - [x] A8. `canonicalArcIntegral_homotopy_invariant` — substitute HI-0 bridge   status: done   deps: [A7]   note: DONE edabd9a. **#print axioms = [propext, Classical.choice, Quot.sound] (STANDARD-3, no sorryAx, no project axiom). HI-1 COMPLETE.**
 
 ### HI-2 — factor through H₁
-- [ ] B1. `loopIntegralFundamentalGroupHom : FundamentalGroup X x₀ →+ ℂ` (per ω; well-defined by A8, additive by A2)   status: todo   deps: [A8]
-- [ ] B2. factor through `H₁ = Abelianization (FundamentalGroup X x₀)` via `Abelianization.lift`   status: todo   deps: [B1]
+- [x] B1. `loopDevValHom : FundamentalGroup X x₀ →* …ℂ` (well-defined by A8, additive by devVal_trans)   status: done   deps: [A8]   note: DONE e0a8413
+- [x] B2. `loopDevValH1Hom : H1 X x₀ →+ ℂ` via `Abelianization.lift` + basis-compat `loopDevValH1Hom_cycleBasis_loop`   status: done   deps: [B1]   note: DONE 8f736aa (standard-3; compat uses existing AX_AnalyticCycleBasis)
 
 ### HI-3 — loop integral ∈ Λ
 - [x] C1. verify the existing cycle basis spans abelianized π₁ via `AX_AnalyticCycleBasis` — **NO new axiom**   status: done   deps: []   note: CONFIRMED 2026-06-06. `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` (Homology.lean:41) = exactly the HI-2 target. `AnalyticCycleBasis.isBasis : Module.Basis (Fin 2g) ℤ (H1 X x₀)` spans by def (`Basis.repr`/`sum_repr`); `loops_to_basis` ties basis vectors to `loopToHomology (loops i)`. HI-3 = `isBasis.repr` + basis periods define Λ. No new axiom — whole workstream reuses `AX_AnalyticCycleBasis`.
