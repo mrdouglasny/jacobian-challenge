@@ -45,8 +45,8 @@ same commit that retires the axiom.
 - [x] A1. `devVal_symm` — `developingValue` of a reversed path = `−developingValue`   status: done   deps: []   note: committed 1b2c277
 - [x] A2. `devVal_trans` — `developingValue` of a concatenation = sum   status: done   deps: []   note: DONE 7117e9b (sorry-free, standard-3). Workhorse; stalled 4 Codex attempts on Fin.append. Cracked via Gemini-3.1-pro Nat-conditional `S_trans` glued subdivision (`if i.1 ≤ S₁.n` + omega) + `Fin.sum_univ_add` split + per-cell `devInc_castAdd/natAdd` (Path.trans_apply branches; j=0 shared-midpoint same-chart).
 - [x] A3. `devVal_refl` — `developingValue` of a constant path = `0`   status: done   deps: []   note: committed de784fa
-- [~] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)` from `developingValueOfSubdivision_eq_of_subdivisions`   status: in_progress   deps: [A2]   note: drafted alongside A2 (re-dispatched)
-- [~] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop `B·R·T⁻¹·L⁻¹` in one chart ⇒ 0 by the single-ball base case; split via A1/A2/A3)   status: in_progress   deps: [A1, A2, A3]   note: re-dispatched with A2/A4
+- [x] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)`   status: done   deps: [A2]   note: DONE c29753a (sorry-free, standard-3)
+- [x] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop in one chart ⇒ 0 via base case; split via A1/A2/A3)   status: done   deps: [A1, A2, A3]   note: DONE c29753a (sorry-free, standard-3)
 - [ ] A6. `devVal_strip_eq` — `Σᵢ devVal Bᵢ = Σᵢ devVal Tᵢ` (telescope A5 via `Finset.sum_range_sub`; `L₀,Lₘ` constant rel endpoints ⇒ 0). **Hardest lemma.**   status: todo   deps: [A5]
 - [ ] A7. `devVal_homotopy_invariant` — grid from `exists_chart_subordinate_grid` + 1-D row induction with A6   status: todo   deps: [A4, A6]
 - [ ] A8. `canonicalArcIntegral_homotopy_invariant` — substitute HI-0 bridge   status: todo   deps: [A7]
