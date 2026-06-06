@@ -5,6 +5,37 @@ and it's important"). Unlocks basepoint-independence ⇒ the GENERAL genus>1 Abe
 injectivity (with G3 genus-obstruction). See [[defer-homotopy-invariance]],
 G3_DISCHARGE_PLAN.md (G1 milestone, Gemini verdict).*
 
+> **Status update (2026-06-06).** The *downstream* goal — retiring `AX_ofCurve_inj`
+> (general genus>0 Abel injectivity) — is **DONE**, but via a deep-think-vetted
+> **axiom** `AX_Period_Triangle` (the triangle/1-cocycle form of HI-3), NOT by
+> completing the from-scratch homotopy-invariance proof. `AX_ofCurve_inj` is now a
+> `theorem` (`Axioms/OfCurveInjective.lean`). So **HI-4 + the G-assembly are
+> achieved; the open task is now to discharge `AX_Period_Triangle` axiom-free** —
+> which is exactly completing HI-1/HI-2/HI-3 (HI-0 below).
+>
+> **Progress since this plan was written:** the developing-map / disc-primitive
+> route (HI-1 Route B) was pursued and landed **sorry-free** in
+> `RiemannSurface/DevelopingMap.lean` (50 decls) + `HomotopyInvariance.lean`:
+> `canonicalArcIntegral = chartPrimitive endpoint-difference` (B1); `developingValue`
+> for continuous paths + its **well-definedness** (subdivision-independence); the
+> **base case** (loop inside one chart-ball ⇒ `developingValue = 0`); and
+> **single-chart** homotopy invariance. So HI-1 is *partially* done.
+>
+> **The four pieces still missing** (scoped 2026-06-06; map to HI-0..HI-3 below):
+> 1. **Arc algebra** — `AnalyticArc` concat/reversal + `canonicalArcIntegral`
+>    additivity (`∮_{α·β}=∮_α+∮_β`, `∮_{α⁻¹}=−∮_α`). NOT in repo; prerequisite to
+>    even state the triangle as a loop. (Feeds HI-2/HI-4.)
+> 2. **General multi-chart bridge** `developingValue = canonicalArcIntegral` for
+>    arbitrary arcs — the existing bridge is single-chart-ball with heavy
+>    hypotheses; need telescoping over a subdivision. (= HI-0, the wiring crux.)
+> 3. **General (multi-chart) homotopy invariance** — single-chart version exists
+>    (strong `ContDiffOn`/`DiffContOnCl` hyps); the general one is unbuilt. (= HI-1.)
+> 4. **Lattice landing** `developingValue(loop) ∈ Λ` — the deepest piece, where
+>    homology enters (loop period = ℤ-combo of cycle-basis periods). (= HI-2+HI-3.)
+>
+> Honest estimate: ~weeks; pieces (3)/(4) may hit Mathlib gaps (general 2-var
+> homotopy regularity; π₁→H₁ on a manifold). This is the deepest analytic gap left.
+
 ## End goal
 
 `loop_integral_mem_periodLattice` (general X): for any loop `γ` (based anywhere),
@@ -25,6 +56,13 @@ for all genus>0.
   proven chart-cocycle integrand independence + partition independence
   (`MultiChartIntegral`, `PartitionIndependence`). `H1 = Additive(Abelianization π₁)`;
   `H1.basepointEquiv`. Cycle basis spans H₁ (`AX_AnalyticCycleBasis`).
+- **`RiemannSurface/DevelopingMap.lean`** (50 decls, sorry-free) + **`HomotopyInvariance.lean`**
+  — the Route-B developing-map work that landed after this plan: `developingValue`
+  for continuous paths via chart-primitive endpoint increments, its
+  subdivision-independence (`developingValueOfSubdivision_eq_of_subdivisions`), the
+  single-ball base case (`developingValue_eq_zero_of_loop_in_pathChartBall`), the
+  single-ball bridge to `canonicalArcIntegral`, and single-chart HI
+  (`canonicalArcIntegral_homotopy_invariant_singleChart`). See the status banner.
 
 ## What's missing — the global patching
 
@@ -83,7 +121,11 @@ Any loop's H₁ class is a ℤ-combination of the cycle basis (`cb.isBasis` span
 `canonicalArcIntegral` is ℤ-linear in the class (HI-2); each basis loop's integral
 ∈ Λ by definition of `periodLatticeInBasis`. ⇒ `loop_integral_mem_periodLattice`.
 
-### HI-4 — basepoint-independence + retire the axiom
+### HI-4 — basepoint-independence + retire the axiom ✅ DONE (2026-06-05, via `AX_Period_Triangle`)
+*Achieved using the triangle axiom in place of HI-1/2/3: `ofCurveImpl_basepoint_independent`
++ `AX_ofCurve_inj` theorem in `Axioms/OfCurveInjective.lean`. The algebra below is exactly
+what landed; the open work is to discharge `AX_Period_Triangle` itself (= HI-1/2/3 above).*
+
 5-line path algebra (Gemini): `γ_Q := bridge(b,Q)·bridge(b',Q)⁻¹·bridge(b',b)` is a
 loop ⇒ `∫_{γ_Q} ∈ Λ` (HI-3) ⇒ `∫_b^P − ∫_{b'}^P ≡ −∫_{b'}^b (mod Λ)`, const in P ⇒
 `ofCurveImpl b Q₁ − ofCurveImpl b Q₂` basepoint-independent. Then the G3 assembly
