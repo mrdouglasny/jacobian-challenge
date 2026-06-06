@@ -45,7 +45,7 @@ noncomputable def affineProjXCoeff (g : Polynomial ℂ) (a : HyperellipticAffine
         ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
     else 0
 
-/-- **Narrow structural axiom.** The point `0 ∈ ℂ` is not in the
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). The point `0 ∈ ℂ` is not in the
 source of `squareLocalHomeomorph p hp`.
 
 This is the only piece of `squareLocalHomeomorph_symm_ne_zero` that
@@ -63,9 +63,42 @@ Discharge requires either:
   injective at `0` and any chart source containing both `0` and
   `p.val.2 ≠ 0` would witness this — which contradicts
   `OpenPartialHomeomorph.left_inv`. -/
-axiom squareLocalHomeomorph_zero_notMem_source
+theorem squareLocalHomeomorph_zero_notMem_source
     (p : HyperellipticAffine H) (hp : p ∈ smoothLocusY H) :
-    (0 : ℂ) ∉ (squareLocalHomeomorph (H := H) p hp).source
+    (0 : ℂ) ∉ (squareLocalHomeomorph (H := H) p hp).source := by
+  intro h0
+  set e := squareLocalHomeomorph (H := H) p hp with he
+  rcases (Metric.isOpen_iff.mp e.open_source) 0 h0 with ⟨ε, hεpos, hball⟩
+  have hεnonneg : 0 ≤ ε := le_of_lt hεpos
+  let z : ℂ := ((ε / 2 : ℝ) : ℂ)
+  have hz_ball : z ∈ Metric.ball (0 : ℂ) ε := by
+    rw [Metric.mem_ball, dist_eq_norm]
+    have hnorm : ‖z - 0‖ = ε / 2 := by
+      simp [z, hεnonneg]
+    rw [hnorm]
+    linarith
+  have hnegz_ball : -z ∈ Metric.ball (0 : ℂ) ε := by
+    rw [Metric.mem_ball, dist_eq_norm]
+    have hnorm : ‖-z - 0‖ = ε / 2 := by
+      simp [z, hεnonneg]
+    rw [hnorm]
+    linarith
+  have hz : z ∈ e.source := hball hz_ball
+  have hnegz : -z ∈ e.source := hball hnegz_ball
+  have hsq : e z = e (-z) := by
+    simp [e, squareLocalHomeomorph]
+  have hz_eq_neg : z = -z := by
+    calc
+      z = e.symm (e z) := (e.left_inv hz).symm
+      _ = e.symm (e (-z)) := by rw [hsq]
+      _ = -z := e.left_inv hnegz
+  have hz_ne_neg : z ≠ -z := by
+    intro hz_eq
+    have hz_eq' : ((ε / 2 : ℝ) : ℂ) = ((-(ε / 2) : ℝ) : ℂ) := by
+      simpa [z] using hz_eq
+    have hreal : (ε / 2 : ℝ) = -(ε / 2 : ℝ) := Complex.ofReal_injective hz_eq'
+    linarith
+  exact hz_ne_neg hz_eq_neg
 
 /-- The y-branch chosen by `squareLocalHomeomorph.symm` is non-zero on
 the projX chart target.
@@ -239,15 +272,60 @@ The chart-symm has `.val.1 = polynomialLocalHomeomorph.symm (y²)`
 (per `affineChartProjY_symm_apply_fst`).
 -/
 
-/-- **Narrow structural axiom.** No critical point of `x ↦ H.f.eval x`
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). No critical point of `x ↦ H.f.eval x`
 lies in the source of `polynomialLocalHomeomorph p hp`. Mirror of
 `squareLocalHomeomorph_zero_notMem_source`: the IFT-derived chart at
 `a.val.1` (where `f'(a.val.1) ≠ 0`) has a source bounded away from
 zeros of the derivative. -/
-axiom polynomialLocalHomeomorph_no_critical_in_source
+theorem polynomialLocalHomeomorph_no_critical_in_source
     (p : HyperellipticAffine H) (hp : p ∈ smoothLocusX H)
     {x : ℂ} (hx : x ∈ (polynomialLocalHomeomorph (H := H) p hp).source) :
-    H.f.derivative.eval x ≠ 0
+    H.f.derivative.eval x ≠ 0 := by
+  intro hcrit
+  let c : ℂ := H.f.derivative.eval p.val.1
+  let hc : c ≠ 0 := hp
+  let e' : ℂ ≃L[ℂ] ℂ := ContinuousLinearEquiv.smulLeft (Units.mk0 c hc)
+  let e := polynomialLocalHomeomorph (H := H) p hp
+  have hmap : ((e' : ℂ →L[ℂ] ℂ)) = ContinuousLinearMap.toSpanSingleton ℂ c := by
+    apply ContinuousLinearMap.ext
+    intro z
+    simp [e', c, ContinuousLinearMap.toSpanSingleton_apply, mul_comm]
+  have hf : HasFDerivAt (fun x : ℂ => H.f.eval x) (e' : ℂ →L[ℂ] ℂ) p.val.1 := by
+    simpa [hmap] using (Polynomial.hasDerivAt H.f p.val.1).hasFDerivAt
+  have happrox : ApproximatesLinearOn (fun x : ℂ => H.f.eval x) (e' : ℂ →L[ℂ] ℂ)
+      e.source (‖(e'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ / 2) := by
+    change ApproximatesLinearOn (fun x : ℂ => H.f.eval x) (e' : ℂ →L[ℂ] ℂ)
+      (((Polynomial.contDiff_aeval H.f ω).contDiffAt.toOpenPartialHomeomorph
+        (fun x : ℂ => H.f.eval x) hf (by simp)).source)
+      (‖(e'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ / 2)
+    exact (Classical.choose_spec (((Polynomial.contDiff_aeval H.f ω).contDiffAt.hasStrictFDerivAt'
+      hf (by simp)).approximates_deriv_on_open_nhds)).2.2
+  have hnbd : e.source ∈ 𝓝 x := e.open_source.mem_nhds (by simpa [e] using hx)
+  have hder : HasFDerivAt (fun y : ℂ => H.f.eval y - e' y)
+      (ContinuousLinearMap.toSpanSingleton ℂ (H.f.derivative.eval x) - (e' : ℂ →L[ℂ] ℂ)) x := by
+    exact (Polynomial.hasDerivAt H.f x).hasFDerivAt.sub (e' : ℂ →L[ℂ] ℂ).hasFDerivAt
+  have hlip : LipschitzOnWith (‖(e'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ / 2)
+      (fun y : ℂ => H.f.eval y - e' y) e.source := by
+    simpa [Pi.sub_apply] using happrox.lipschitzOnWith
+  have hle : ‖(ContinuousLinearMap.toSpanSingleton ℂ (H.f.derivative.eval x) - (e' : ℂ →L[ℂ] ℂ))‖ ≤
+      (‖(e'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ / 2 : ℝ) :=
+    hder.le_of_lipschitzOn hnbd hlip
+  have hder_eq : ContinuousLinearMap.toSpanSingleton ℂ (H.f.derivative.eval x) - (e' : ℂ →L[ℂ] ℂ) =
+      -(e' : ℂ →L[ℂ] ℂ) := by
+    apply ContinuousLinearMap.ext
+    intro z
+    simp [hcrit]
+  rw [hder_eq, norm_neg] at hle
+  have hlt : ((‖(e'.symm : ℂ →L[ℂ] ℂ)‖₊)⁻¹ / 2 : ℝ) < ‖(e' : ℂ →L[ℂ] ℂ)‖ := by
+    have hsymm_pos : (0 : ℝ) < ‖(e'.symm : ℂ →L[ℂ] ℂ)‖ := e'.norm_symm_pos
+    have hinv_le : (1 / ‖(e'.symm : ℂ →L[ℂ] ℂ)‖ : ℝ) ≤ ‖(e' : ℂ →L[ℂ] ℂ)‖ := by
+      rw [div_le_iff₀ hsymm_pos]
+      simpa [mul_comm] using e'.one_le_norm_mul_norm_symm
+    have hinv_pos : (0 : ℝ) < (1 / ‖(e'.symm : ℂ →L[ℂ] ℂ)‖) := one_div_pos.mpr hsymm_pos
+    have hhalf : (1 / ‖(e'.symm : ℂ →L[ℂ] ℂ)‖ / 2 : ℝ) <
+        1 / ‖(e'.symm : ℂ →L[ℂ] ℂ)‖ := half_lt_self hinv_pos
+    exact lt_of_lt_of_le (by simpa [NNReal.coe_inv, one_div] using hhalf) hinv_le
+  exact (not_lt_of_ge hle) hlt
 
 /-- The derivative `f'(x(z))` is nonzero on the projY chart target,
 where `x(z) = polynomialLocalHomeomorph.symm (z²)`.
