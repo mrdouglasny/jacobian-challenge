@@ -38,6 +38,7 @@ theorem exists_pathChartBall_subordinate_grid
     (hG : Continuous (fun z : unitInterval × unitInterval => G z.1 z.2)) :
     ∃ (m n : ℕ) (sigma : Fin (m + 1) → ℝ) (tau : Fin (n + 1) → ℝ)
       (B : Fin m → Fin n → PathChartBall X),
+      0 < m ∧ 0 < n ∧
       sigma 0 = 0 ∧ sigma (Fin.last m) = 1 ∧ Monotone sigma ∧
       tau 0 = 0 ∧ tau (Fin.last n) = 1 ∧ Monotone tau ∧
       ∀ i : Fin m, ∀ j : Fin n,
@@ -74,7 +75,9 @@ theorem exists_pathChartBall_subordinate_grid
   refine ⟨N, N, (fun i : Fin (N + 1) => (t i.val : ℝ)),
     (fun j : Fin (N + 1) => (t j.val : ℝ)),
     (fun i : Fin N => fun j : Fin N => Classical.choose (ht_sub i.val j.val)),
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact Nat.succ_pos k
+  · exact Nat.succ_pos k
   · simpa using congrArg Subtype.val ht_zero
   · have hlast : t N = 1 := ht_eventually_one N (Nat.le_succ k)
     simpa [N, Fin.val_last] using congrArg Subtype.val hlast
