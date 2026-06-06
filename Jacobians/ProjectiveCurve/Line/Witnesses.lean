@@ -58,17 +58,25 @@ noncomputable def constLoop (x₀ : ProjectiveLine) : AnalyticLoop ProjectiveLin
       zero_mem := by simp
       one_mem := by simp
       is_analytic_strong := by
-        intro s _ t _ _ _
-        refine ⟨x₀, Set.univ, fun _ : ℝ => (extChartAt 𝓘(ℂ) x₀) x₀, ?_, ?_, ?_, ?_, ?_⟩
-        · exact isOpen_univ
-        · intro r _
-          exact Set.mem_univ r
-        · intro r _
-          exact analyticAt_const
-        · intro r _
-          exact mem_extChartAt_source x₀
-        · intro r _
-          rfl }
+        intro a _ b _ hab _
+        refine ⟨{a, b}, by simp, by simp, ?_, ?_⟩
+        · intro r hr
+          simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
+            Set.mem_singleton_iff] at hr
+          rcases hr with rfl | rfl
+          · exact ⟨le_rfl, le_of_lt hab⟩
+          · exact ⟨le_of_lt hab, le_rfl⟩
+        · intro s _ t _ _ _
+          refine ⟨x₀, Set.univ, fun _ : ℝ => (extChartAt 𝓘(ℂ) x₀) x₀, ?_, ?_, ?_, ?_, ?_⟩
+          · exact isOpen_univ
+          · intro r _
+            exact Set.mem_univ r
+          · intro r _
+            exact analyticAt_const
+          · intro r _
+            exact mem_extChartAt_source x₀
+          · intro r _
+            rfl }
   start_eq := rfl
   end_eq := rfl
 

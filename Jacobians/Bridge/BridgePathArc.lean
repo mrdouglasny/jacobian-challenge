@@ -292,31 +292,44 @@ noncomputable def chartFlatAnalyticArc (n : ℕ) : AnalyticArc X where
   zero_mem := by simp
   one_mem := by simp
   is_analytic_strong := by
-    intro s hs t ht hst _hcons
-    have hs01 : s = 0 ∨ s = 1 := by simpa using hs
-    have ht01 : t = 0 ∨ t = 1 := by simpa using ht
-    rcases hs01 with rfl | rfl
-    · rcases ht01 with rfl | rfl
-      · exact False.elim (lt_irrefl (0 : ℝ) hst)
-      ·
-        let a : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
-        let b : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
-        refine ⟨S.chart n, Set.univ, flatSegment a b, isOpen_univ, ?_, ?_, ?_, ?_⟩
-        · intro r _
-          exact Set.mem_univ r
-        · intro r _
-          exact analyticAt_flatSegment a b r
+    intro a ha b hb hab _hcons
+    have ha01 : a = 0 ∨ a = 1 := by simpa using ha
+    have hb01 : b = 0 ∨ b = 1 := by simpa using hb
+    rcases ha01 with rfl | rfl
+    · rcases hb01 with rfl | rfl
+      · exact False.elim (lt_irrefl (0 : ℝ) hab)
+      · refine ⟨{0, 1}, by simp, by simp, ?_, ?_⟩
         · intro r hr
-          simpa [extChartAt_source] using
-            S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n hr
-        · intro r hr
-          rw [extChartAt_coe, modelWithCornersSelf_coe]
-          rw [Path.extend_apply _ hr]
-          exact (chartAt ℂ (S.chart n)).right_inv
-            (S.flatSegment_mem_chart_target n hr)
-    · rcases ht01 with rfl | rfl
+          simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
+            Set.mem_singleton_iff] at hr
+          rcases hr with rfl | rfl <;> simp
+        · intro s hs t ht hst _hτcons
+          have hs01 : s = 0 ∨ s = 1 := by simpa using hs
+          have ht01 : t = 0 ∨ t = 1 := by simpa using ht
+          rcases hs01 with rfl | rfl
+          · rcases ht01 with rfl | rfl
+            · exact False.elim (lt_irrefl (0 : ℝ) hst)
+            · let z₀ : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t n))
+              let z₁ : ℂ := (chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))
+              refine ⟨S.chart n, Set.univ, flatSegment z₀ z₁, isOpen_univ, ?_, ?_, ?_, ?_⟩
+              · intro r _
+                exact Set.mem_univ r
+              · intro r _
+                exact analyticAt_flatSegment z₀ z₁ r
+              · intro r hr
+                simpa [extChartAt_source] using
+                  S.chartFlatPath_extend_mem_chart_source_of_mem_Icc n hr.2
+              · intro r hr
+                rw [extChartAt_coe, modelWithCornersSelf_coe]
+                rw [Path.extend_apply _ hr.2]
+                exact (chartAt ℂ (S.chart n)).right_inv
+                  (S.flatSegment_mem_chart_target n hr.2)
+          · rcases ht01 with rfl | rfl
+            · linarith
+            · exact False.elim (lt_irrefl (1 : ℝ) hst)
+    · rcases hb01 with rfl | rfl
       · linarith
-      · exact False.elim (lt_irrefl (1 : ℝ) hst)
+      · exact False.elim (lt_irrefl (1 : ℝ) hab)
 
 end PathChartBallSubdivision
 

@@ -57,27 +57,30 @@ def IsAnalyticArc (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
   ∀ u ∈ Set.Ioo (0 : ℝ) 1, u ∉ (partition : Set ℝ) →
     AnalyticAt ℝ (fun r : ℝ => (extChartAt 𝓘(ℂ) (extend u)) (extend r)) u
 
-/-- **Strong predicate** (`IsAnalyticArcStrong`). On each *closed* cell `[s, t]`
-between consecutive partition points there is a fixed chart centre `p`, an open
+/-- **Strong predicate** (`IsAnalyticArcStrong`). On each *base* cell `[a, b]`
+between consecutive partition points there is a finite refinement `τ ⊆ [a, b]`;
+each refined closed cell `[s, t]` has a fixed chart centre `p`, an open
 `U ⊇ Icc s t`, and a function `f` real-analytic on `U` that *coincides with* the
-chart-pullback `(extChartAt p) ∘ extend` on the closed cell.
+chart-pullback `(extChartAt p) ∘ extend` on `U ∩ Icc a b`.
 
 The witness `f` is **decoupled** from the global `extend`: at a concatenation
 junction `extend` turns a corner, so `(extChartAt p) ∘ extend` is not itself
 analytic across the junction — but `f` analytically continues one piece's
-trajectory past it, and we only ask for agreement on the closed cell. This is
+trajectory past it, and we only ask for agreement inside the base cell. This is
 strong enough that the period integrand is continuous on each compact cell, hence
 interval-integrable (no `r²sin(1/r²)` pathology), while still implying the weak
 `IsAnalyticArc` (see `IsAnalyticArcStrong.toWeak`). -/
 def IsAnalyticArcStrong (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (extend : ℝ → X) (partition : Finset ℝ) :
+    [IsManifold 𝓘(ℂ) ω X] (extend : ℝ → X) (base_partition : Finset ℝ) :
     Prop :=
-  ∀ s ∈ partition, ∀ t ∈ partition, s < t →
-    (∀ r ∈ partition, r ∉ Set.Ioo s t) →
-    ∃ (p : X) (U : Set ℝ) (f : ℝ → ℂ),
-      IsOpen U ∧ Set.Icc s t ⊆ U ∧ AnalyticOnNhd ℝ f U ∧
-      (∀ r ∈ Set.Icc s t, extend r ∈ (extChartAt 𝓘(ℂ) p).source) ∧
-      (∀ r ∈ Set.Icc s t, (extChartAt 𝓘(ℂ) p) (extend r) = f r)
+  ∀ a ∈ base_partition, ∀ b ∈ base_partition, a < b →
+    (∀ r ∈ base_partition, r ∉ Set.Ioo a b) →
+      ∃ τ : Finset ℝ, a ∈ τ ∧ b ∈ τ ∧ (↑τ ⊆ Set.Icc a b) ∧
+        ∀ s ∈ τ, ∀ t ∈ τ, s < t → (∀ r ∈ τ, r ∉ Set.Ioo s t) →
+          ∃ (p : X) (U : Set ℝ) (f : ℝ → ℂ),
+            IsOpen U ∧ Set.Icc s t ⊆ U ∧ AnalyticOnNhd ℝ f U ∧
+            (∀ r ∈ U ∩ Set.Icc a b, extend r ∈ (extChartAt 𝓘(ℂ) p).source) ∧
+            (∀ r ∈ U ∩ Set.Icc a b, (extChartAt 𝓘(ℂ) p) (extend r) = f r)
 
 /-- Chart transitions between two `extChartAt` charts are real-analytic on their
 overlap. (Local copy of `Jacobians.Bridge.extChartAt_trans_analyticAt`, which is
@@ -129,6 +132,34 @@ lemma exists_consecutive_partition_pair {partition : Finset ℝ}
   · have : t ≤ r := Finset.min'_le _ r (Finset.mem_filter.2 ⟨hr, hgt⟩)
     exact absurd hrt (not_lt.2 this)
 
+/-- Given endpoints `a < u < b` in a finite refinement, choose consecutive
+refinement points whose closed cell contains `u`. If `u` is itself a refinement
+point, this chooses the cell starting at `u`. -/
+lemma exists_refinement_partition_pair {τ : Finset ℝ} {a b u : ℝ}
+    (ha : a ∈ τ) (hb : b ∈ τ) (hu : u ∈ Set.Ioo a b) :
+    ∃ s ∈ τ, ∃ t ∈ τ, s < t ∧ u ∈ Set.Icc s t ∧
+      (∀ r ∈ τ, r ∉ Set.Ioo s t) := by
+  classical
+  have hlow_ne : (τ.filter (fun r : ℝ => r ≤ u)).Nonempty :=
+    ⟨a, Finset.mem_filter.2 ⟨ha, le_of_lt hu.1⟩⟩
+  have hhigh_ne : (τ.filter (fun r : ℝ => u < r)).Nonempty :=
+    ⟨b, Finset.mem_filter.2 ⟨hb, hu.2⟩⟩
+  set s := (τ.filter (fun r : ℝ => r ≤ u)).max' hlow_ne with hs_def
+  set t := (τ.filter (fun r : ℝ => u < r)).min' hhigh_ne with ht_def
+  have hs_mem_filter : s ∈ τ.filter (fun r : ℝ => r ≤ u) := Finset.max'_mem _ _
+  have ht_mem_filter : t ∈ τ.filter (fun r : ℝ => u < r) := Finset.min'_mem _ _
+  have hs_mem : s ∈ τ := (Finset.mem_filter.1 hs_mem_filter).1
+  have ht_mem : t ∈ τ := (Finset.mem_filter.1 ht_mem_filter).1
+  have hs_le : s ≤ u := (Finset.mem_filter.1 hs_mem_filter).2
+  have ht_gt : u < t := (Finset.mem_filter.1 ht_mem_filter).2
+  refine ⟨s, hs_mem, t, ht_mem, lt_of_le_of_lt hs_le ht_gt, ⟨hs_le, le_of_lt ht_gt⟩, ?_⟩
+  intro r hr hri
+  rcases le_or_gt r u with hru | hur
+  · have : r ≤ s := Finset.le_max' _ r (Finset.mem_filter.2 ⟨hr, hru⟩)
+    exact absurd hri.1 (not_lt.2 this)
+  · have : t ≤ r := Finset.min'_le _ r (Finset.mem_filter.2 ⟨hr, hur⟩)
+    exact absurd hri.2 (not_lt.2 this)
+
 /-- The strong predicate implies the weak one. -/
 lemma IsAnalyticArcStrong.toWeak {X : Type*} [TopologicalSpace X]
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] {extend : ℝ → X}
@@ -136,17 +167,26 @@ lemma IsAnalyticArcStrong.toWeak {X : Type*} [TopologicalSpace X]
     (hstrong : IsAnalyticArcStrong X extend partition) :
     IsAnalyticArc X extend partition := by
   intro u hu hup
-  obtain ⟨s, hs, t, ht, hst, hu_cell, hcons⟩ :=
+  obtain ⟨a, ha, b, hb, hab, hu_base, hcons⟩ :=
     exists_consecutive_partition_pair h0 h1 hu hup
-  obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ := hstrong s hs t ht hst hcons
-  -- `Ioo s t` is an open neighbourhood of `u` on which the chart-pullback = `f`.
-  have hIoo_mem : Set.Ioo s t ∈ nhds u := IsOpen.mem_nhds isOpen_Ioo hu_cell
-  have hIcc_sub : Set.Ioo s t ⊆ Set.Icc s t := Set.Ioo_subset_Icc_self
+  obtain ⟨τ, haτ, hbτ, hτ_sub, hτ⟩ := hstrong a ha b hb hab hcons
+  obtain ⟨s, hsτ, t, htτ, hst, hu_cell, hτcons⟩ :=
+    exists_refinement_partition_pair haτ hbτ hu_base
+  obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ :=
+    hτ s hsτ t htτ hst hτcons
+  have huU : u ∈ U := hIccU hu_cell
+  have huBaseIcc : u ∈ Set.Icc a b := Set.Ioo_subset_Icc_self hu_base
+  have hbase_mem : Set.Icc a b ∈ nhds u :=
+    Filter.mem_of_superset (IsOpen.mem_nhds isOpen_Ioo hu_base) Set.Ioo_subset_Icc_self
+  have hlocal_mem : U ∩ Set.Icc a b ∈ nhds u :=
+    Filter.inter_mem (hUopen.mem_nhds huU) hbase_mem
   -- `f` is analytic at `u`.
-  have hfu : AnalyticAt ℝ f u := hfU u (hIccU (hIcc_sub hu_cell))
+  have hfu : AnalyticAt ℝ f u := hfU u huU
   -- the transition map `extChartAt (extend u) ∘ (extChartAt p).symm` is analytic at `f u`.
-  have hu_src : extend u ∈ (extChartAt 𝓘(ℂ) p).source := hsource u (hIcc_sub hu_cell)
-  have hfu_eq : f u = (extChartAt 𝓘(ℂ) p) (extend u) := (hcoinc u (hIcc_sub hu_cell)).symm
+  have hu_src : extend u ∈ (extChartAt 𝓘(ℂ) p).source :=
+    hsource u ⟨huU, huBaseIcc⟩
+  have hfu_eq : f u = (extChartAt 𝓘(ℂ) p) (extend u) :=
+    (hcoinc u ⟨huU, huBaseIcc⟩).symm
   have hz_tgt : f u ∈ (extChartAt 𝓘(ℂ) p).target := by
     rw [hfu_eq]; exact (extChartAt 𝓘(ℂ) p).map_source hu_src
   have hsymm_src : (extChartAt 𝓘(ℂ) p).symm (f u) ∈ (extChartAt 𝓘(ℂ) (extend u)).source := by
@@ -160,10 +200,9 @@ lemma IsAnalyticArcStrong.toWeak {X : Type*} [TopologicalSpace X]
       (((extChartAt 𝓘(ℂ) (extend u)) ∘ (extChartAt 𝓘(ℂ) p).symm) ∘ f) u :=
     htrans.comp hfu
   refine hcomp.congr ?_
-  filter_upwards [hIoo_mem] with r hr
-  have hr_icc : r ∈ Set.Icc s t := hIcc_sub hr
+  filter_upwards [hlocal_mem] with r hr
   simp only [Function.comp_apply]
-  rw [← hcoinc r hr_icc, (extChartAt 𝓘(ℂ) p).left_inv (hsource r hr_icc)]
+  rw [← hcoinc r hr, (extChartAt 𝓘(ℂ) p).left_inv (hsource r hr)]
 
 /-- A piecewise-real-analytic arc in a complex 1-manifold `X`.
 

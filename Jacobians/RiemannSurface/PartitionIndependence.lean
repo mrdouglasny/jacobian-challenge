@@ -50,65 +50,6 @@ noncomputable def canonicalIntegrand (γ : AnalyticArc X)
       deriv
         (fun u : ℝ => (extChartAt 𝓘(ℂ) (γ.extend r)) (γ.extend u)) r
 
-private lemma analyticArc_canonicalIntegrand_cell_intervalIntegrable
-    (γ : AnalyticArc X) (form : HolomorphicOneForm X)
-    {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
-    (hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo s t) :
-    IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume s t := by
-  obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ :=
-    γ.is_analytic_strong s hs t ht hst hcons
-  let G : ℝ → ℂ := fun r => form.coeff p (f r) * deriv f r
-  have hf_cont : ContinuousOn f (Set.Icc s t) :=
-    hfU.continuousOn.mono hIccU
-  have htarget : Set.MapsTo f (Set.Icc s t) (extChartAt 𝓘(ℂ) p).target := by
-    intro r hr
-    rw [← hcoinc r hr]
-    exact (extChartAt 𝓘(ℂ) p).map_source (hsource r hr)
-  have hcoeff_cont : ContinuousOn (fun r : ℝ => form.coeff p (f r)) (Set.Icc s t) :=
-    (form.2.1 p).continuousOn.comp hf_cont htarget
-  have hf_contDiff : ContDiffOn ℝ ∞ f U :=
-    hfU.analyticOn.contDiffOn hUopen.uniqueDiffOn
-  have hderiv_cont : ContinuousOn (deriv f) (Set.Icc s t) :=
-    (hf_contDiff.continuousOn_deriv_of_isOpen hUopen (by simp)).mono hIccU
-  have hG_cont : ContinuousOn G (Set.Icc s t) :=
-    hcoeff_cont.mul hderiv_cont
-  have hG_int : IntervalIntegrable G MeasureTheory.volume s t :=
-    hG_cont.intervalIntegrable_of_Icc hst.le
-  refine hG_int.congr_ae ?_
-  rw [Filter.EventuallyEq, Set.uIoc_of_le hst.le]
-  refine ae_restrict_of_ae_eq_of_ae_restrict Ioo_ae_eq_Ioc ?_
-  rw [ae_restrict_iff' measurableSet_Ioo]
-  exact Filter.Eventually.of_forall fun r hrst => by
-    have hricc : r ∈ Set.Icc s t := Set.Ioo_subset_Icc_self hrst
-    have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
-      have hs01 := γ.partition_subset hs
-      have ht01 := γ.partition_subset ht
-      exact ⟨hs01.1.trans_lt hrst.1, hrst.2.trans_le ht01.2⟩
-    have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
-      intro hrmem
-      exact hcons r (by simpa using hrmem) hrst
-    have hdp : DifferentiableWithinAt ℝ
-        (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) (Set.Ioo s t) r :=
-      arc_chart_differentiableWithinAt γ p hr01 hr_notmem (hsource r hricc) (Set.Ioo s t)
-    have hcenter := integrand_center_independent form γ p (γ.extend r) s t r
-      (hsource r hricc) (mem_extChartAt_source (I := 𝓘(ℂ)) (γ.extend r)) hdp hrst
-    have hcoord_eq : (chartAt ℂ p) (γ.extend r) = f r := by
-      simpa [extChartAt_coe, modelWithCornersSelf_coe] using hcoinc r hricc
-    have hfixed_eq :
-        (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) =ᶠ[𝓝 r] f := by
-      filter_upwards [IsOpen.mem_nhds isOpen_Ioo hrst] with u hu
-      simpa [extChartAt_coe, modelWithCornersSelf_coe] using
-        hcoinc u (Set.Ioo_subset_Icc_self hu)
-    have hderiv_eq :
-        deriv (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) r = deriv f r :=
-      hfixed_eq.deriv_eq
-    have hpoint :
-        form.coeff p ((extChartAt 𝓘(ℂ) p) (γ.extend r)) *
-            deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) r =
-          canonicalIntegrand γ form r := by
-      simpa [canonicalIntegrand, derivWithin_of_isOpen isOpen_Ioo hrst] using hcenter
-    simpa [G, hcoord_eq, hderiv_eq] using hpoint
-
 private lemma no_mem_between_orderEmb_succ (Pset : Finset ℝ) {m : ℕ}
     (hcard : Pset.card = m + 1) (i : Fin m) {x : ℝ}
     (hx : x ∈ Pset)
@@ -126,6 +67,167 @@ private lemma no_mem_between_orderEmb_succ (Pset : Finset ℝ) {m : ℕ}
   have hright_nat : j.val < i.val + 1 := by
     simpa [Fin.lt_def, Fin.val_succ] using hright
   omega
+
+private lemma analyticArc_canonicalIntegrand_refined_cell_intervalIntegrable
+    (γ : AnalyticArc X) (form : HolomorphicOneForm X)
+    {a b s t : ℝ} (ha : a ∈ γ.partition) (hb : b ∈ γ.partition) (_hab : a < b)
+    (hbase_cons : ∀ r ∈ γ.partition, r ∉ Set.Ioo a b)
+    (hst : s < t) (hcell_base : Set.Icc s t ⊆ Set.Icc a b)
+    {p : X} {U : Set ℝ} {f : ℝ → ℂ}
+    (hUopen : IsOpen U) (hIccU : Set.Icc s t ⊆ U) (hfU : AnalyticOnNhd ℝ f U)
+    (hsource : ∀ r ∈ U ∩ Set.Icc a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source)
+    (hcoinc : ∀ r ∈ U ∩ Set.Icc a b, (extChartAt 𝓘(ℂ) p) (γ.extend r) = f r) :
+    IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume s t := by
+  let G : ℝ → ℂ := fun r => form.coeff p (f r) * deriv f r
+  have hf_cont : ContinuousOn f (Set.Icc s t) :=
+    hfU.continuousOn.mono hIccU
+  have htarget : Set.MapsTo f (Set.Icc s t) (extChartAt 𝓘(ℂ) p).target := by
+    intro r hr
+    have hrU : r ∈ U ∩ Set.Icc a b := ⟨hIccU hr, hcell_base hr⟩
+    rw [← hcoinc r hrU]
+    exact (extChartAt 𝓘(ℂ) p).map_source (hsource r hrU)
+  have hcoeff_cont : ContinuousOn (fun r : ℝ => form.coeff p (f r)) (Set.Icc s t) :=
+    (form.2.1 p).continuousOn.comp hf_cont htarget
+  have hf_contDiff : ContDiffOn ℝ ∞ f U :=
+    hfU.analyticOn.contDiffOn hUopen.uniqueDiffOn
+  have hderiv_cont : ContinuousOn (deriv f) (Set.Icc s t) :=
+    (hf_contDiff.continuousOn_deriv_of_isOpen hUopen (by simp)).mono hIccU
+  have hG_cont : ContinuousOn G (Set.Icc s t) :=
+    hcoeff_cont.mul hderiv_cont
+  have hG_int : IntervalIntegrable G MeasureTheory.volume s t :=
+    hG_cont.intervalIntegrable_of_Icc hst.le
+  refine hG_int.congr_ae ?_
+  rw [Filter.EventuallyEq, Set.uIoc_of_le hst.le]
+  refine ae_restrict_of_ae_eq_of_ae_restrict Ioo_ae_eq_Ioc ?_
+  rw [ae_restrict_iff' measurableSet_Ioo]
+  exact Filter.Eventually.of_forall fun r hrst => by
+    have hricc : r ∈ Set.Icc s t := Set.Ioo_subset_Icc_self hrst
+    have hrbase : r ∈ Set.Icc a b := hcell_base hricc
+    have hsbase : a ≤ s := (hcell_base ⟨le_rfl, le_of_lt hst⟩).1
+    have htbase : t ≤ b := (hcell_base ⟨le_of_lt hst, le_rfl⟩).2
+    have hrU : r ∈ U ∩ Set.Icc a b := ⟨hIccU hricc, hrbase⟩
+    have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
+      have ha01 := γ.partition_subset ha
+      have hb01 := γ.partition_subset hb
+      exact ⟨ha01.1.trans_lt (lt_of_le_of_lt hsbase hrst.1),
+        (lt_of_lt_of_le hrst.2 htbase).trans_le hb01.2⟩
+    have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
+      intro hrmem
+      exact hbase_cons r (by simpa using hrmem)
+        ⟨lt_of_le_of_lt hsbase hrst.1, lt_of_lt_of_le hrst.2 htbase⟩
+    have hdp : DifferentiableWithinAt ℝ
+        (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) (Set.Ioo s t) r :=
+      arc_chart_differentiableWithinAt γ p hr01 hr_notmem (hsource r hrU) (Set.Ioo s t)
+    have hcenter := integrand_center_independent form γ p (γ.extend r) s t r
+      (hsource r hrU) (mem_extChartAt_source (I := 𝓘(ℂ)) (γ.extend r)) hdp hrst
+    have hcoord_eq : (chartAt ℂ p) (γ.extend r) = f r := by
+      simpa [extChartAt_coe, modelWithCornersSelf_coe] using hcoinc r hrU
+    have hfixed_eq :
+        (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) =ᶠ[𝓝 r] f := by
+      filter_upwards [IsOpen.mem_nhds isOpen_Ioo hrst] with u hu
+      have huicc : u ∈ Set.Icc s t := Set.Ioo_subset_Icc_self hu
+      simpa [extChartAt_coe, modelWithCornersSelf_coe] using
+        hcoinc u ⟨hIccU huicc, hcell_base huicc⟩
+    have hderiv_eq :
+        deriv (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) r = deriv f r :=
+      hfixed_eq.deriv_eq
+    have hpoint :
+        form.coeff p ((extChartAt 𝓘(ℂ) p) (γ.extend r)) *
+            deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) r =
+          canonicalIntegrand γ form r := by
+      simpa [canonicalIntegrand, derivWithin_of_isOpen isOpen_Ioo hrst] using hcenter
+    simpa [G, hcoord_eq, hderiv_eq] using hpoint
+
+private lemma analyticArc_canonicalIntegrand_cell_intervalIntegrable
+    (γ : AnalyticArc X) (form : HolomorphicOneForm X)
+    {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
+    (hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo s t) :
+    IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume s t := by
+  classical
+  obtain ⟨τ, hsτ, htτ, hτsub, hτ⟩ := γ.is_analytic_strong s hs t ht hst hcons
+  let Pset : Finset ℝ := τ
+  have hPsubset : ↑Pset ⊆ Set.Icc s t := by
+    simpa [Pset] using hτsub
+  have hzeroP : s ∈ Pset := by
+    simpa [Pset] using hsτ
+  have honeP : t ∈ Pset := by
+    simpa [Pset] using htτ
+  have hP_nonempty : Pset.Nonempty := ⟨s, hzeroP⟩
+  have hcard_pos : 0 < Pset.card := Finset.card_pos.mpr hP_nonempty
+  let n : Nat := Pset.card - 1
+  have hcard : Pset.card = n + 1 := by
+    have hsucc := Nat.succ_pred_eq_of_pos hcard_pos
+    simpa [n, Nat.pred_eq_sub_one, Nat.succ_eq_add_one] using hsucc.symm
+  let a : ℕ → ℝ :=
+    fun k => if h : k < n + 1 then Pset.orderEmbOfFin hcard ⟨k, h⟩ else s
+  have ha0 : a 0 = s := by
+    have hz : 0 < n + 1 := Nat.succ_pos n
+    change Pset.orderEmbOfFin hcard ⟨0, hz⟩ = s
+    calc
+      Pset.orderEmbOfFin hcard ⟨0, hz⟩ =
+          Pset.min' (Finset.card_pos.mp (hcard.symm ▸ hz)) := by
+        simpa using Finset.orderEmbOfFin_zero (s := Pset) hcard hz
+      _ = s := by
+        exact (Finset.min'_eq_iff Pset _ s).2
+          ⟨hzeroP, fun x hx => (hPsubset hx).1⟩
+  have haN : a n = t := by
+    have hn : n < n + 1 := Nat.lt_succ_self n
+    dsimp [a]
+    rw [dif_pos hn]
+    have hfin :
+        (⟨n, hn⟩ : Fin (n + 1)) = Fin.last n := by
+      ext
+      simp [Fin.last]
+    calc
+      Pset.orderEmbOfFin hcard ⟨n, hn⟩ =
+          Pset.orderEmbOfFin hcard (Fin.last n) := by rw [hfin]
+      _ = Pset.max' (Finset.card_pos.mp (hcard.symm ▸ Nat.succ_pos n)) := by
+        simpa [Fin.last, Nat.succ_eq_add_one] using
+          Finset.orderEmbOfFin_last (s := Pset) hcard (Nat.succ_pos n)
+      _ = t := by
+        exact (Finset.max'_eq_iff Pset _ t).2
+          ⟨honeP, fun x hx => (hPsubset hx).2⟩
+  have hcells : ∀ k < n,
+      IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume
+        (a k) (a (k + 1)) := by
+    intro k hk
+    let i : Fin n := ⟨k, hk⟩
+    have hk0 : k < n + 1 := Nat.lt_trans hk (Nat.lt_succ_self n)
+    have hk1 : k + 1 < n + 1 := Nat.succ_lt_succ hk
+    have hak : a k = Pset.orderEmbOfFin hcard i.castSucc := by
+      dsimp [a]
+      rw [dif_pos hk0]
+      rfl
+    have hak1 : a (k + 1) = Pset.orderEmbOfFin hcard i.succ := by
+      dsimp [a]
+      rw [dif_pos hk1]
+      rfl
+    have hs_mem : a k ∈ τ := by
+      rw [hak]
+      simpa [Pset]
+    have ht_mem : a (k + 1) ∈ τ := by
+      rw [hak1]
+      simpa [Pset]
+    have hst_cell : a k < a (k + 1) := by
+      rw [hak, hak1]
+      exact (Pset.orderEmbOfFin hcard).strictMono (by
+        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+    have hτcons : ∀ r ∈ τ, r ∉ Set.Ioo (a k) (a (k + 1)) := by
+      intro r hr hrt
+      rw [hak, hak1] at hrt
+      exact no_mem_between_orderEmb_succ Pset hcard i (by simpa [Pset] using hr) hrt
+    have hcell_base : Set.Icc (a k) (a (k + 1)) ⊆ Set.Icc s t := by
+      intro r hr
+      have hs_base := hτsub hs_mem
+      have ht_base := hτsub ht_mem
+      exact ⟨hs_base.1.trans hr.1, hr.2.trans ht_base.2⟩
+    obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ :=
+      hτ (a k) hs_mem (a (k + 1)) ht_mem hst_cell hτcons
+    exact analyticArc_canonicalIntegrand_refined_cell_intervalIntegrable γ form
+      hs ht hst hcons hst_cell hcell_base hUopen hIccU hfU hsource hcoinc
+  have hchain : IntervalIntegrable (canonicalIntegrand γ form) MeasureTheory.volume (a 0) (a n) :=
+    IntervalIntegrable.trans_iterate hcells
+  simpa [ha0, haN] using hchain
 
 /-- Strong analytic arcs have interval-integrable canonical moving-chart
 integrands on `[0, 1]`. -/
@@ -210,25 +312,29 @@ theorem analyticArc_canonicalIntegrand_intervalIntegrable
     IntervalIntegrable.trans_iterate hcells
   simpa [ha0, haN] using hchain
 
-private lemma analyticArc_fixedChartIntegrand_cell_intervalIntegrable
+private lemma analyticArc_fixedChartIntegrand_refined_cell_intervalIntegrable
     (γ : AnalyticArc X) (form : HolomorphicOneForm X) (q : X)
-    {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
-    (hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo s t)
-    (hqsource : ∀ r ∈ Set.Icc s t, γ.extend r ∈ (extChartAt 𝓘(ℂ) q).source) :
+    {a b s t : ℝ} (ha : a ∈ γ.partition) (hb : b ∈ γ.partition) (_hab : a < b)
+    (hbase_cons : ∀ r ∈ γ.partition, r ∉ Set.Ioo a b)
+    (hst : s < t) (hcell_base : Set.Icc s t ⊆ Set.Icc a b)
+    (hqsource : ∀ r ∈ Set.Icc a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) q).source)
+    {p : X} {U : Set ℝ} {f : ℝ → ℂ}
+    (hUopen : IsOpen U) (hIccU : Set.Icc s t ⊆ U) (hfU : AnalyticOnNhd ℝ f U)
+    (hsource : ∀ r ∈ U ∩ Set.Icc a b, γ.extend r ∈ (extChartAt 𝓘(ℂ) p).source)
+    (hcoinc : ∀ r ∈ U ∩ Set.Icc a b, (extChartAt 𝓘(ℂ) p) (γ.extend r) = f r) :
     IntervalIntegrable
       (fun r : ℝ =>
         form.coeff q ((extChartAt 𝓘(ℂ) q) (γ.extend r)) *
           deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) q) (γ.extend u)) r)
       MeasureTheory.volume s t := by
-  obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ :=
-    γ.is_analytic_strong s hs t ht hst hcons
   let G : ℝ → ℂ := fun r => form.coeff p (f r) * deriv f r
   have hf_cont : ContinuousOn f (Set.Icc s t) :=
     hfU.continuousOn.mono hIccU
   have htarget : Set.MapsTo f (Set.Icc s t) (extChartAt 𝓘(ℂ) p).target := by
     intro r hr
-    rw [← hcoinc r hr]
-    exact (extChartAt 𝓘(ℂ) p).map_source (hsource r hr)
+    have hrU : r ∈ U ∩ Set.Icc a b := ⟨hIccU hr, hcell_base hr⟩
+    rw [← hcoinc r hrU]
+    exact (extChartAt 𝓘(ℂ) p).map_source (hsource r hrU)
   have hcoeff_cont : ContinuousOn (fun r : ℝ => form.coeff p (f r)) (Set.Icc s t) :=
     (form.2.1 p).continuousOn.comp hf_cont htarget
   have hf_contDiff : ContDiffOn ℝ ∞ f U :=
@@ -245,25 +351,32 @@ private lemma analyticArc_fixedChartIntegrand_cell_intervalIntegrable
   rw [ae_restrict_iff' measurableSet_Ioo]
   exact Filter.Eventually.of_forall fun r hrst => by
     have hricc : r ∈ Set.Icc s t := Set.Ioo_subset_Icc_self hrst
+    have hrbase : r ∈ Set.Icc a b := hcell_base hricc
+    have hsbase : a ≤ s := (hcell_base ⟨le_rfl, le_of_lt hst⟩).1
+    have htbase : t ≤ b := (hcell_base ⟨le_of_lt hst, le_rfl⟩).2
+    have hrU : r ∈ U ∩ Set.Icc a b := ⟨hIccU hricc, hrbase⟩
     have hr01 : r ∈ Set.Ioo (0 : ℝ) 1 := by
-      have hs01 := γ.partition_subset hs
-      have ht01 := γ.partition_subset ht
-      exact ⟨hs01.1.trans_lt hrst.1, hrst.2.trans_le ht01.2⟩
+      have ha01 := γ.partition_subset ha
+      have hb01 := γ.partition_subset hb
+      exact ⟨ha01.1.trans_lt (lt_of_le_of_lt hsbase hrst.1),
+        (lt_of_lt_of_le hrst.2 htbase).trans_le hb01.2⟩
     have hr_notmem : r ∉ (γ.partition : Set ℝ) := by
       intro hrmem
-      exact hcons r (by simpa using hrmem) hrst
+      exact hbase_cons r (by simpa using hrmem)
+        ⟨lt_of_le_of_lt hsbase hrst.1, lt_of_lt_of_le hrst.2 htbase⟩
     have hdp : DifferentiableWithinAt ℝ
         (fun u : ℝ => (extChartAt 𝓘(ℂ) p) (γ.extend u)) (Set.Ioo s t) r :=
-      arc_chart_differentiableWithinAt γ p hr01 hr_notmem (hsource r hricc) (Set.Ioo s t)
+      arc_chart_differentiableWithinAt γ p hr01 hr_notmem (hsource r hrU) (Set.Ioo s t)
     have hcenter := integrand_center_independent form γ p q s t r
-      (hsource r hricc) (hqsource r hricc) hdp hrst
+      (hsource r hrU) (hqsource r hrbase) hdp hrst
     have hcoord_eq : (chartAt ℂ p) (γ.extend r) = f r := by
-      simpa [extChartAt_coe, modelWithCornersSelf_coe] using hcoinc r hricc
+      simpa [extChartAt_coe, modelWithCornersSelf_coe] using hcoinc r hrU
     have hfixed_eq :
         (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) =ᶠ[𝓝 r] f := by
       filter_upwards [IsOpen.mem_nhds isOpen_Ioo hrst] with u hu
+      have huicc : u ∈ Set.Icc s t := Set.Ioo_subset_Icc_self hu
       simpa [extChartAt_coe, modelWithCornersSelf_coe] using
-        hcoinc u (Set.Ioo_subset_Icc_self hu)
+        hcoinc u ⟨hIccU huicc, hcell_base huicc⟩
     have hderiv_eq :
         deriv (fun u : ℝ => (chartAt ℂ p) (γ.extend u)) r = deriv f r :=
       hfixed_eq.deriv_eq
@@ -274,6 +387,110 @@ private lemma analyticArc_fixedChartIntegrand_cell_intervalIntegrable
             deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) q) (γ.extend u)) r := by
       simpa [derivWithin_of_isOpen isOpen_Ioo hrst] using hcenter
     simpa [G, hcoord_eq, hderiv_eq] using hpoint
+
+private lemma analyticArc_fixedChartIntegrand_cell_intervalIntegrable
+    (γ : AnalyticArc X) (form : HolomorphicOneForm X) (q : X)
+    {s t : ℝ} (hs : s ∈ γ.partition) (ht : t ∈ γ.partition) (hst : s < t)
+    (hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo s t)
+    (hqsource : ∀ r ∈ Set.Icc s t, γ.extend r ∈ (extChartAt 𝓘(ℂ) q).source) :
+    IntervalIntegrable
+      (fun r : ℝ =>
+        form.coeff q ((extChartAt 𝓘(ℂ) q) (γ.extend r)) *
+          deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) q) (γ.extend u)) r)
+      MeasureTheory.volume s t := by
+  classical
+  obtain ⟨τ, hsτ, htτ, hτsub, hτ⟩ := γ.is_analytic_strong s hs t ht hst hcons
+  let Pset : Finset ℝ := τ
+  have hPsubset : ↑Pset ⊆ Set.Icc s t := by
+    simpa [Pset] using hτsub
+  have hzeroP : s ∈ Pset := by
+    simpa [Pset] using hsτ
+  have honeP : t ∈ Pset := by
+    simpa [Pset] using htτ
+  have hP_nonempty : Pset.Nonempty := ⟨s, hzeroP⟩
+  have hcard_pos : 0 < Pset.card := Finset.card_pos.mpr hP_nonempty
+  let n : Nat := Pset.card - 1
+  have hcard : Pset.card = n + 1 := by
+    have hsucc := Nat.succ_pred_eq_of_pos hcard_pos
+    simpa [n, Nat.pred_eq_sub_one, Nat.succ_eq_add_one] using hsucc.symm
+  let a : ℕ → ℝ :=
+    fun k => if h : k < n + 1 then Pset.orderEmbOfFin hcard ⟨k, h⟩ else s
+  have ha0 : a 0 = s := by
+    have hz : 0 < n + 1 := Nat.succ_pos n
+    change Pset.orderEmbOfFin hcard ⟨0, hz⟩ = s
+    calc
+      Pset.orderEmbOfFin hcard ⟨0, hz⟩ =
+          Pset.min' (Finset.card_pos.mp (hcard.symm ▸ hz)) := by
+        simpa using Finset.orderEmbOfFin_zero (s := Pset) hcard hz
+      _ = s := by
+        exact (Finset.min'_eq_iff Pset _ s).2
+          ⟨hzeroP, fun x hx => (hPsubset hx).1⟩
+  have haN : a n = t := by
+    have hn : n < n + 1 := Nat.lt_succ_self n
+    dsimp [a]
+    rw [dif_pos hn]
+    have hfin :
+        (⟨n, hn⟩ : Fin (n + 1)) = Fin.last n := by
+      ext
+      simp [Fin.last]
+    calc
+      Pset.orderEmbOfFin hcard ⟨n, hn⟩ =
+          Pset.orderEmbOfFin hcard (Fin.last n) := by rw [hfin]
+      _ = Pset.max' (Finset.card_pos.mp (hcard.symm ▸ Nat.succ_pos n)) := by
+        simpa [Fin.last, Nat.succ_eq_add_one] using
+          Finset.orderEmbOfFin_last (s := Pset) hcard (Nat.succ_pos n)
+      _ = t := by
+        exact (Finset.max'_eq_iff Pset _ t).2
+          ⟨honeP, fun x hx => (hPsubset hx).2⟩
+  have hcells : ∀ k < n,
+      IntervalIntegrable
+        (fun r : ℝ =>
+          form.coeff q ((extChartAt 𝓘(ℂ) q) (γ.extend r)) *
+            deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) q) (γ.extend u)) r)
+        MeasureTheory.volume (a k) (a (k + 1)) := by
+    intro k hk
+    let i : Fin n := ⟨k, hk⟩
+    have hk0 : k < n + 1 := Nat.lt_trans hk (Nat.lt_succ_self n)
+    have hk1 : k + 1 < n + 1 := Nat.succ_lt_succ hk
+    have hak : a k = Pset.orderEmbOfFin hcard i.castSucc := by
+      dsimp [a]
+      rw [dif_pos hk0]
+      rfl
+    have hak1 : a (k + 1) = Pset.orderEmbOfFin hcard i.succ := by
+      dsimp [a]
+      rw [dif_pos hk1]
+      rfl
+    have hs_mem : a k ∈ τ := by
+      rw [hak]
+      simpa [Pset]
+    have ht_mem : a (k + 1) ∈ τ := by
+      rw [hak1]
+      simpa [Pset]
+    have hst_cell : a k < a (k + 1) := by
+      rw [hak, hak1]
+      exact (Pset.orderEmbOfFin hcard).strictMono (by
+        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+    have hτcons : ∀ r ∈ τ, r ∉ Set.Ioo (a k) (a (k + 1)) := by
+      intro r hr hrt
+      rw [hak, hak1] at hrt
+      exact no_mem_between_orderEmb_succ Pset hcard i (by simpa [Pset] using hr) hrt
+    have hcell_base : Set.Icc (a k) (a (k + 1)) ⊆ Set.Icc s t := by
+      intro r hr
+      have hs_base := hτsub hs_mem
+      have ht_base := hτsub ht_mem
+      exact ⟨hs_base.1.trans hr.1, hr.2.trans ht_base.2⟩
+    obtain ⟨p, U, f, hUopen, hIccU, hfU, hsource, hcoinc⟩ :=
+      hτ (a k) hs_mem (a (k + 1)) ht_mem hst_cell hτcons
+    exact analyticArc_fixedChartIntegrand_refined_cell_intervalIntegrable γ form q
+      hs ht hst hcons hst_cell hcell_base hqsource hUopen hIccU hfU hsource hcoinc
+  have hchain :
+      IntervalIntegrable
+        (fun r : ℝ =>
+          form.coeff q ((extChartAt 𝓘(ℂ) q) (γ.extend r)) *
+            deriv (fun u : ℝ => (extChartAt 𝓘(ℂ) q) (γ.extend u)) r)
+        MeasureTheory.volume (a 0) (a n) :=
+    IntervalIntegrable.trans_iterate hcells
+  simpa [ha0, haN] using hchain
 
 /-- Strong analytic arcs have interval-integrable fixed-chart integrands on
 `[0, 1]`, provided the arc lies in the fixed chart source on `[0, 1]`. -/

@@ -76,24 +76,23 @@ lemma continuous_bLoopExtend : Continuous (bLoopExtend ω₁ ω₂ h) := by
 
 /-- **Axiom.** The A-cycle is strongly piecewise-real-analytic.
 
-Classical: linear in `r`, hence real-analytic. The predicate
-`IsAnalyticArcStrong` requires a closed-cell chart witness. The expected
-verification uses the `{0, 1}` single cell: ComplexTorus charts are translations
-with `fderiv = 1`, so the chart-pullback of `r ↦ [r • ω₁]` is affine in `r`.
-Taking `U = Set.univ` and `f` equal to that affine map gives an entire witness,
-with `AnalyticOnNhd` trivial on `U`.
+Classical: linear in `r`, hence real-analytic after refining the base cell
+`[0, 1]` into sufficiently short chart-local subsegments. For the corrected
+refinement-based `IsAnalyticArcStrong`, the `{0, 1}` base partition asks only for
+some finite refinement `τ`; each refined cell fits inside one ComplexTorus chart,
+where the chart-pullback of `r ↦ [r • ω₁]` is affine in `r`.
 
-(NOT VERIFIED — strengthened 2026-06-06, re-vet pending.) -/
+(NOT VERIFIED — refinement form, discharge to theorem is a follow-up.) -/
 axiom AX_Elliptic_aLoop_analytic :
     IsAnalyticArcStrong (Elliptic ω₁ ω₂ h) (aLoopExtend ω₁ ω₂ h) {0, 1}
 
 /-- **Axiom.** The B-cycle is strongly piecewise-real-analytic.
 
-Same strengthening as `AX_Elliptic_aLoop_analytic`: in ComplexTorus charts the
-pullback of `r ↦ [r • ω₂]` is affine in `r`, hence entire, so the strong
-closed-cell witness should be obtained with `U = Set.univ`.
+Same refinement-based strengthening as `AX_Elliptic_aLoop_analytic`: refine the
+base cell `[0, 1]` into chart-local subsegments. On each refined cell, the
+ComplexTorus chart-pullback of `r ↦ [r • ω₂]` is affine in `r`, hence analytic.
 
-(NOT VERIFIED — strengthened 2026-06-06, re-vet pending.) -/
+(NOT VERIFIED — refinement form, discharge to theorem is a follow-up.) -/
 axiom AX_Elliptic_bLoop_analytic :
     IsAnalyticArcStrong (Elliptic ω₁ ω₂ h) (bLoopExtend ω₁ ω₂ h) {0, 1}
 
