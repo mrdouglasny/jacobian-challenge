@@ -262,6 +262,32 @@ private noncomputable def S_trans {a b c : X}
   monotone_t := transSubdivisionT_mono γ₁ γ₂ S₁ S₂
   cell_subset := transSubdivision_cell_subset γ₁ γ₂ S₁ S₂
 
+private theorem trans_apply_scaleL {a b c : X}
+    (γ₁ : Path a b) (γ₂ : Path b c) (u : unitInterval) :
+    (γ₁.trans γ₂ : Path a c) (scaleL u) = γ₁ u := by
+  have hhalf : ((scaleL u : unitInterval) : ℝ) ≤ 1 / 2 := by
+    exact scaleL_le_half u
+  have h := Path.extend_trans_of_le_half γ₁ γ₂ (t := (scaleL u : ℝ)) hhalf
+  have hscale : 2 * ((scaleL u : unitInterval) : ℝ) = (u : ℝ) := by
+    simp [scaleL]
+    ring
+  rw [hscale, Path.extend_apply _ u.2] at h
+  rw [Path.extend_apply _ (scaleL u).2] at h
+  simpa [hscale] using h
+
+private theorem trans_apply_scaleR {a b c : X}
+    (γ₁ : Path a b) (γ₂ : Path b c) (u : unitInterval) :
+    (γ₁.trans γ₂ : Path a c) (scaleR u) = γ₂ u := by
+  have hhalf : (1 / 2 : ℝ) ≤ (scaleR u : unitInterval) := by
+    exact half_le_scaleR u
+  have h := Path.extend_trans_of_half_le γ₁ γ₂ (t := (scaleR u : ℝ)) hhalf
+  have hscale : 2 * ((scaleR u : unitInterval) : ℝ) - 1 = (u : ℝ) := by
+    simp [scaleR]
+    ring
+  rw [hscale, Path.extend_apply _ u.2] at h
+  rw [Path.extend_apply _ (scaleR u).2] at h
+  simpa [hscale] using h
+
 /-- A3: the developing value of a constant path is zero. -/
 theorem devVal_refl (x₀ : X) (form : HolomorphicOneForm X) (x : X) :
     developingValue x₀ form ((Path.refl x : Path x x) : C(unitInterval, X)) = 0 := by
@@ -378,5 +404,307 @@ theorem devVal_symm {a b : X} (x₀ : X) (form : HolomorphicOneForm X)
       simpa [R] using developingValueOfSubdivision_reversePathChartBallSubdivision form γ S
     _ = -developingValue x₀ form ((γ : Path a b) : C(unitInterval, X)) := by
       rw [hγ]
+
+private theorem devInc_castAdd {a b c : X}
+    (form : HolomorphicOneForm X) (γ₁ : Path a b) (γ₂ : Path b c)
+    (S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)))
+    (S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X)))
+    (i : Fin S₁.n) :
+    developingIncrement form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂) (Fin.castAdd S₂.n i) =
+      developingIncrement form ((γ₁ : Path a b) : C(unitInterval, X)) S₁ i := by
+  have hcell : (Fin.castAdd S₂.n i).val < S₁.n := by
+    exact i.isLt
+  have hleft : (Fin.castAdd S₂.n i).castSucc.val ≤ S₁.n := by
+    exact Nat.le_of_lt i.isLt
+  have hright : (Fin.castAdd S₂.n i).succ.val ≤ S₁.n := by
+    simpa [Fin.val_succ] using Nat.succ_le_of_lt i.isLt
+  have hidx_left_fin :
+      (⟨(Fin.castAdd S₂.n i).castSucc.val, by omega⟩ : Fin (S₁.n + 1)) =
+        i.castSucc := by
+    ext
+    rfl
+  have hidx_left :
+      S₁.t ⟨(Fin.castAdd S₂.n i).castSucc.val, by omega⟩ = S₁.t i.castSucc := by
+    exact congrArg S₁.t hidx_left_fin
+  have hidx_right_fin :
+      (⟨(Fin.castAdd S₂.n i).succ.val, by omega⟩ : Fin (S₁.n + 1)) =
+        i.succ := by
+    ext
+    simp [Fin.val_succ]
+  have hidx_right :
+      S₁.t ⟨(Fin.castAdd S₂.n i).succ.val, by omega⟩ = S₁.t i.succ := by
+    exact congrArg S₁.t hidx_right_fin
+  have hidx_left' :
+      S₁.t (⟨i.val, by omega⟩ : Fin (S₁.n + 1)) = S₁.t i.castSucc := by
+    have hfin : (⟨i.val, by omega⟩ : Fin (S₁.n + 1)) = i.castSucc := by
+      ext
+      rfl
+    exact congrArg S₁.t hfin
+  have hidx_right' :
+      S₁.t (⟨i.val + 1, by omega⟩ : Fin (S₁.n + 1)) = S₁.t i.succ := by
+    congr
+  unfold developingIncrement
+  simp [S_trans, transSubdivisionT, transSubdivisionCellBall, trans_apply_scaleL,
+    hidx_left', hidx_right']
+
+private theorem developingIncrement_trans_right_zero {a b c : X}
+    (form : HolomorphicOneForm X) (γ₁ : Path a b) (γ₂ : Path b c)
+    (S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)))
+    (S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X)))
+    (hS₂ : 0 < S₂.n) :
+    developingIncrement form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂)
+        (Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)) =
+      developingIncrement form ((γ₂ : Path b c) : C(unitInterval, X)) S₂
+        (⟨0, hS₂⟩ : Fin S₂.n) := by
+  have hcell :
+      ¬ (Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).val < S₁.n := by
+    simp
+  have hleft :
+      (Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).castSucc.val ≤ S₁.n := by
+    simp
+  have hright :
+      ¬ (Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).succ.val ≤ S₁.n := by
+    simp
+  have hidx_cell :
+      (⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).val - S₁.n,
+          by omega⟩ : Fin S₂.n) = ⟨0, hS₂⟩ := by
+    ext
+    simp
+  have hidx_left_fin :
+      (⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).castSucc.val,
+          by omega⟩ : Fin (S₁.n + 1)) = Fin.last S₁.n := by
+    ext
+    simp
+  have hidx_left :
+      S₁.t ⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).castSucc.val,
+          by omega⟩ = S₁.t (Fin.last S₁.n) := by
+    exact congrArg S₁.t hidx_left_fin
+  have hidx_right_fin :
+      (⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).succ.val - S₁.n,
+          by omega⟩ : Fin (S₂.n + 1)) = (⟨0, hS₂⟩ : Fin S₂.n).succ := by
+    ext
+    simp
+  have hidx_right :
+      S₂.t ⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).succ.val - S₁.n,
+          by omega⟩ = S₂.t (⟨0, hS₂⟩ : Fin S₂.n).succ := by
+    exact congrArg S₂.t hidx_right_fin
+  have hleft_path :
+      γ₁ (S₁.t ⟨(Fin.natAdd S₁.n (⟨0, hS₂⟩ : Fin S₂.n)).castSucc.val,
+          by omega⟩) = b := by
+    rw [hidx_left, S₁.one_eq]
+    exact γ₁.target
+  have hleft_path' :
+      γ₁ (S₁.t (⟨S₁.n, by omega⟩ : Fin (S₁.n + 1))) = b := by
+    have hlast : (⟨S₁.n, by omega⟩ : Fin (S₁.n + 1)) = Fin.last S₁.n := by
+      ext
+      simp
+    rw [hlast, S₁.one_eq]
+    exact γ₁.target
+  have hright_path' :
+      γ₂ (S₂.t (0 : Fin (S₂.n + 1))) = b := by
+    rw [S₂.zero_eq]
+    exact γ₂.source
+  unfold developingIncrement
+  simp [S_trans, transSubdivisionT, transSubdivisionCellBall, trans_apply_scaleL,
+    trans_apply_scaleR, hleft_path', hright_path']
+
+private theorem developingIncrement_trans_right_pos {a b c : X}
+    (form : HolomorphicOneForm X) (γ₁ : Path a b) (γ₂ : Path b c)
+    (S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)))
+    (S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X)))
+    (j : Fin S₂.n) (hj : j.val ≠ 0) :
+    developingIncrement form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂) (Fin.natAdd S₁.n j) =
+      developingIncrement form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ j := by
+  have hjpos : 0 < j.val := Nat.pos_of_ne_zero hj
+  have hcell : ¬ (Fin.natAdd S₁.n j).val < S₁.n := by
+    simp
+  have hleft : ¬ (Fin.natAdd S₁.n j).castSucc.val ≤ S₁.n := by
+    simp
+    omega
+  have hright : ¬ (Fin.natAdd S₁.n j).succ.val ≤ S₁.n := by
+    simp [Fin.val_succ]
+  have hidx_cell :
+      (⟨(Fin.natAdd S₁.n j).val - S₁.n, by omega⟩ : Fin S₂.n) = j := by
+    ext
+    simp
+  have hidx_left_fin :
+      (⟨(Fin.natAdd S₁.n j).castSucc.val - S₁.n,
+          by omega⟩ : Fin (S₂.n + 1)) = j.castSucc := by
+    ext
+    change S₁.n + j.val - S₁.n = j.val
+    omega
+  have hidx_left :
+      S₂.t ⟨(Fin.natAdd S₁.n j).castSucc.val - S₁.n,
+          by omega⟩ = S₂.t j.castSucc := by
+    exact congrArg S₂.t hidx_left_fin
+  have hidx_right_fin :
+      (⟨(Fin.natAdd S₁.n j).succ.val - S₁.n,
+          by omega⟩ : Fin (S₂.n + 1)) = j.succ := by
+    ext
+    change S₁.n + j.val + 1 - S₁.n = j.val + 1
+    omega
+  have hidx_right :
+      S₂.t ⟨(Fin.natAdd S₁.n j).succ.val - S₁.n,
+          by omega⟩ = S₂.t j.succ := by
+    exact congrArg S₂.t hidx_right_fin
+  have hidx_left' :
+      S₂.t (⟨j.val, by omega⟩ : Fin (S₂.n + 1)) = S₂.t j.castSucc := by
+    have hfin : (⟨j.val, by omega⟩ : Fin (S₂.n + 1)) = j.castSucc := by
+      ext
+      rfl
+    exact congrArg S₂.t hfin
+  have hidx_right' :
+      S₂.t (⟨S₁.n + j.val + 1 - S₁.n, by omega⟩ : Fin (S₂.n + 1)) =
+        S₂.t j.succ := by
+    have hfin :
+        (⟨S₁.n + j.val + 1 - S₁.n, by omega⟩ : Fin (S₂.n + 1)) = j.succ := by
+      ext
+      simp [Fin.val_succ]
+      omega
+    exact congrArg S₂.t hfin
+  unfold developingIncrement
+  simp [S_trans, transSubdivisionT, transSubdivisionCellBall, trans_apply_scaleR, hj,
+    hidx_left', hidx_right']
+
+private theorem devInc_natAdd {a b c : X}
+    (form : HolomorphicOneForm X) (γ₁ : Path a b) (γ₂ : Path b c)
+    (S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)))
+    (S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X)))
+    (j : Fin S₂.n) :
+    developingIncrement form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂) (Fin.natAdd S₁.n j) =
+      developingIncrement form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ j := by
+  by_cases hj : j.val = 0
+  · have hS₂ : 0 < S₂.n := by omega
+    have hj' : j = (⟨0, hS₂⟩ : Fin S₂.n) := by
+      ext
+      exact hj
+    subst j
+    exact developingIncrement_trans_right_zero form γ₁ γ₂ S₁ S₂ hS₂
+  · exact developingIncrement_trans_right_pos form γ₁ γ₂ S₁ S₂ j hj
+
+private theorem developingValueOfSubdivision_trans {a b c : X}
+    (form : HolomorphicOneForm X) (γ₁ : Path a b) (γ₂ : Path b c)
+    (S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)))
+    (S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X))) :
+    developingValueOfSubdivision form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂) =
+      developingValueOfSubdivision form ((γ₁ : Path a b) : C(unitInterval, X)) S₁ +
+        developingValueOfSubdivision form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ := by
+  classical
+  unfold developingValueOfSubdivision
+  change (∑ i : Fin (S₁.n + S₂.n),
+      developingIncrement form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X)))
+        (S_trans γ₁ γ₂ S₁ S₂) i) =
+    (∑ i : Fin S₁.n,
+      developingIncrement form ((γ₁ : Path a b) : C(unitInterval, X)) S₁ i) +
+    (∑ i : Fin S₂.n,
+      developingIncrement form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ i)
+  rw [Fin.sum_univ_add]
+  congr 1
+  · exact Finset.sum_congr rfl (fun i _ =>
+      devInc_castAdd form γ₁ γ₂ S₁ S₂ i)
+  · exact Finset.sum_congr rfl (fun j _ =>
+      devInc_natAdd form γ₁ γ₂ S₁ S₂ j)
+
+/-- A2: the developing value of a concatenated path is the sum of the values. -/
+theorem devVal_trans {a b c : X} (x₀ : X) (form : HolomorphicOneForm X)
+    (γ₁ : Path a b) (γ₂ : Path b c) :
+    developingValue x₀ form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) =
+      developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) +
+        developingValue x₀ form ((γ₂ : Path b c) : C(unitInterval, X)) := by
+  classical
+  let S₁ : PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)) :=
+    chosenPathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X))
+  let S₂ : PathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X)) :=
+    chosenPathChartBallSubdivision ((γ₂ : Path b c) : C(unitInterval, X))
+  let S : PathChartBallSubdivision (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) :=
+    S_trans γ₁ γ₂ S₁ S₂
+  have htrans :
+      developingValue x₀ form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) =
+        developingValueOfSubdivision form
+          (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) S :=
+    developingValue_eq_developingValueOfSubdivision x₀ form
+      (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) S
+  have hγ₁ :
+      developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) =
+        developingValueOfSubdivision form ((γ₁ : Path a b) : C(unitInterval, X)) S₁ :=
+    developingValue_eq_developingValueOfSubdivision x₀ form
+      ((γ₁ : Path a b) : C(unitInterval, X)) S₁
+  have hγ₂ :
+      developingValue x₀ form ((γ₂ : Path b c) : C(unitInterval, X)) =
+        developingValueOfSubdivision form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ :=
+    developingValue_eq_developingValueOfSubdivision x₀ form
+      ((γ₂ : Path b c) : C(unitInterval, X)) S₂
+  calc
+    developingValue x₀ form (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) =
+        developingValueOfSubdivision form
+          (((γ₁.trans γ₂ : Path a c) : C(unitInterval, X))) S := htrans
+    _ = developingValueOfSubdivision form ((γ₁ : Path a b) : C(unitInterval, X)) S₁ +
+        developingValueOfSubdivision form ((γ₂ : Path b c) : C(unitInterval, X)) S₂ := by
+      simpa [S] using developingValueOfSubdivision_trans form γ₁ γ₂ S₁ S₂
+    _ = developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) +
+        developingValue x₀ form ((γ₂ : Path b c) : C(unitInterval, X)) := by
+      rw [← hγ₁, ← hγ₂]
+
+/-- A5: a chart-contained cell boundary has equal sums of opposite developing values. -/
+theorem devVal_cell_eq {p q r s : X} (x₀ : X) (form : HolomorphicOneForm X)
+    (B : Path p q) (R : Path q s) (T : Path r s) (L : Path p r)
+    (Bl : PathChartBall X)
+    (himage : ∀ u : unitInterval,
+      u ∈ pathChartBallSet
+        ((((B.trans R).trans T.symm).trans L.symm : Path p p) : C(unitInterval, X)) Bl) :
+    developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
+        developingValue x₀ form ((R : Path q s) : C(unitInterval, X)) =
+      developingValue x₀ form ((T : Path r s) : C(unitInterval, X)) +
+        developingValue x₀ form ((L : Path p r) : C(unitInterval, X)) := by
+  classical
+  let loop : Path p p := ((B.trans R).trans T.symm).trans L.symm
+  have hloop : ((loop : Path p p) : C(unitInterval, X)) (0 : unitInterval) =
+      ((loop : Path p p) : C(unitInterval, X)) (1 : unitInterval) := by
+    simp [loop]
+  have hzero :
+      developingValue x₀ form ((loop : Path p p) : C(unitInterval, X)) = 0 := by
+    simpa [loop] using
+      developingValue_eq_zero_of_loop_in_pathChartBall
+        (x₀ := x₀) (form := form)
+        (γ := ((loop : Path p p) : C(unitInterval, X))) Bl hloop
+        (by simpa [loop] using himage)
+  have hsplit :
+      developingValue x₀ form ((loop : Path p p) : C(unitInterval, X)) =
+        ((developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
+            developingValue x₀ form ((R : Path q s) : C(unitInterval, X))) +
+          -developingValue x₀ form ((T : Path r s) : C(unitInterval, X))) +
+          -developingValue x₀ form ((L : Path p r) : C(unitInterval, X)) := by
+    simp only [loop]
+    rw [devVal_trans x₀ form ((B.trans R).trans T.symm) L.symm]
+    rw [devVal_trans x₀ form (B.trans R) T.symm]
+    rw [devVal_trans x₀ form B R]
+    rw [devVal_symm x₀ form T]
+    rw [devVal_symm x₀ form L]
+    abel
+  have hsum :
+      ((developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
+          developingValue x₀ form ((R : Path q s) : C(unitInterval, X))) +
+        -developingValue x₀ form ((T : Path r s) : C(unitInterval, X))) +
+        -developingValue x₀ form ((L : Path p r) : C(unitInterval, X)) = 0 := by
+    rw [← hsplit, hzero]
+  calc
+    developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
+        developingValue x₀ form ((R : Path q s) : C(unitInterval, X)) =
+        (developingValue x₀ form ((T : Path r s) : C(unitInterval, X)) +
+          developingValue x₀ form ((L : Path p r) : C(unitInterval, X))) +
+          (((developingValue x₀ form ((B : Path p q) : C(unitInterval, X)) +
+              developingValue x₀ form ((R : Path q s) : C(unitInterval, X))) +
+            -developingValue x₀ form ((T : Path r s) : C(unitInterval, X))) +
+            -developingValue x₀ form ((L : Path p r) : C(unitInterval, X))) := by
+          abel
+    _ = developingValue x₀ form ((T : Path r s) : C(unitInterval, X)) +
+        developingValue x₀ form ((L : Path p r) : C(unitInterval, X)) := by
+      rw [hsum]
+      abel
 
 end Jacobians.RiemannSurface
