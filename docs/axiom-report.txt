@@ -135,6 +135,7 @@
  ProjectiveCurve.HyperellipticAffine.squareLocalHomeomorph_zero_notMem_source,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]
+'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
  Classical.choice,
