@@ -47,9 +47,9 @@ same commit that retires the axiom.
 - [x] A3. `devVal_refl` — `developingValue` of a constant path = `0`   status: done   deps: []   note: committed de784fa
 - [x] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)`   status: done   deps: [A2]   note: DONE c29753a (sorry-free, standard-3)
 - [x] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop in one chart ⇒ 0 via base case; split via A1/A2/A3)   status: done   deps: [A1, A2, A3]   note: DONE c29753a (sorry-free, standard-3)
-- [ ] A6. `devVal_strip_eq` — `Σᵢ devVal Bᵢ = Σᵢ devVal Tᵢ` (telescope A5 via `Finset.sum_range_sub`; `L₀,Lₘ` constant rel endpoints ⇒ 0). **Hardest lemma.**   status: todo   deps: [A5]
-- [ ] A7. `devVal_homotopy_invariant` — grid from `exists_chart_subordinate_grid` + 1-D row induction with A6   status: todo   deps: [A4, A6]
-- [ ] A8. `canonicalArcIntegral_homotopy_invariant` — substitute HI-0 bridge   status: todo   deps: [A7]
+- [x] A6. `row_sum_eq` (devVal_strip_eq) — strip telescope via `Finset.sum_range_sub`   status: done   deps: [A5]   note: DONE a3bba88. Gemini-3.1-pro grid blueprint (extGrid ℕ-index, definitional edges, double sum_range_sub, IsCompact→subset_ball).
+- [x] A7. `developingValue_homotopy_invariance` — col telescope + grid assembly   status: done   deps: [A4, A6]   note: DONE 60c8ddb (col_sum_eq 2d6c630 + plumbing)
+- [x] A8. `canonicalArcIntegral_homotopy_invariant` — substitute HI-0 bridge   status: done   deps: [A7]   note: DONE edabd9a. **#print axioms = [propext, Classical.choice, Quot.sound] (STANDARD-3, no sorryAx, no project axiom). HI-1 COMPLETE.**
 
 ### HI-2 — factor through H₁
 - [ ] B1. `loopIntegralFundamentalGroupHom : FundamentalGroup X x₀ →+ ℂ` (per ω; well-defined by A8, additive by A2)   status: todo   deps: [A8]
