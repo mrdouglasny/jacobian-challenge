@@ -21,6 +21,92 @@ open Set
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]
 
+/-- The point-level chart-ball predicate underlying `pathChartBallSet`. -/
+def pointChartBallSet (B : PathChartBall X) : Set X :=
+  {x | x ∈ (chartAt ℂ B.p).source ∧
+    (extChartAt 𝓘(ℂ) B.p) x ∈ Metric.ball B.c B.r}
+
+lemma pathChartBallSet_eq_preimage_pointChartBallSet (γ : C(unitInterval, X))
+    (B : PathChartBall X) :
+    pathChartBallSet γ B = γ ⁻¹' pointChartBallSet B := by
+  rfl
+
+/-- Subdivide the square so that every cell maps into one chart-coordinate ball. -/
+theorem exists_pathChartBall_subordinate_grid
+    (G : unitInterval → unitInterval → X)
+    (hG : Continuous (fun z : unitInterval × unitInterval => G z.1 z.2)) :
+    ∃ (m n : ℕ) (sigma : Fin (m + 1) → ℝ) (tau : Fin (n + 1) → ℝ)
+      (B : Fin m → Fin n → PathChartBall X),
+      sigma 0 = 0 ∧ sigma (Fin.last m) = 1 ∧ Monotone sigma ∧
+      tau 0 = 0 ∧ tau (Fin.last n) = 1 ∧ Monotone tau ∧
+      ∀ i : Fin m, ∀ j : Fin n,
+        ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (sigma i.castSucc) (sigma i.succ) →
+        ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (tau j.castSucc) (tau j.succ) →
+          G x y ∈ pointChartBallSet (B i j) := by
+  classical
+  let c : PathChartBall X → Set (unitInterval × unitInterval) :=
+    fun B => {z | G z.1 z.2 ∈ pointChartBallSet B}
+  have hc_open : ∀ B, IsOpen (c B) := by
+    intro B
+    have hopenX : IsOpen ((chartAt ℂ B.p).source ∩
+        (extChartAt 𝓘(ℂ) B.p) ⁻¹' Metric.ball B.c B.r) := by
+      exact isOpen_extChartAt_preimage (I := 𝓘(ℂ)) B.p Metric.isOpen_ball
+    simpa [c, pointChartBallSet, Set.preimage_inter] using hopenX.preimage hG
+  have hc_cover : Set.univ ⊆ ⋃ B : PathChartBall X, c B := by
+    intro z _hz
+    let p : X := G z.1 z.2
+    let w : ℂ := (extChartAt 𝓘(ℂ) p) p
+    have hw_target : w ∈ (extChartAt 𝓘(ℂ) p).target := by
+      simp [w, p]
+    obtain ⟨r, hr_pos, hr_sub⟩ :=
+      (Metric.isOpen_iff.mp (isOpen_extChartAt_target (I := 𝓘(ℂ)) p)) w hw_target
+    let B : PathChartBall X :=
+      { p := p, c := w, r := r, ball_subset_target := hr_sub }
+    refine Set.mem_iUnion.2 ⟨B, ?_⟩
+    constructor
+    · simp [B, p]
+    · exact (show (extChartAt 𝓘(ℂ) B.p) (G z.1 z.2) ∈ Metric.ball B.c B.r by
+        simpa [B, p, w] using (Metric.mem_ball_self (x := w) hr_pos))
+  obtain ⟨t, ht_zero, ht_mono, ⟨k, ht_eventually_one⟩, ht_sub⟩ :=
+    exists_monotone_Icc_subset_open_cover_unitInterval_prod_self (c := c) hc_open hc_cover
+  let N : ℕ := k + 1
+  refine ⟨N, N, (fun i : Fin (N + 1) => (t i.val : ℝ)),
+    (fun j : Fin (N + 1) => (t j.val : ℝ)),
+    (fun i : Fin N => fun j : Fin N => Classical.choose (ht_sub i.val j.val)),
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simpa using congrArg Subtype.val ht_zero
+  · have hlast : t N = 1 := ht_eventually_one N (Nat.le_succ k)
+    simpa [N, Fin.val_last] using congrArg Subtype.val hlast
+  · intro i j hij
+    exact (ht_mono (Fin.val_le_of_le hij) : (t i.val : ℝ) ≤ (t j.val : ℝ))
+  · simpa using congrArg Subtype.val ht_zero
+  · have hlast : t N = 1 := ht_eventually_one N (Nat.le_succ k)
+    simpa [N, Fin.val_last] using congrArg Subtype.val hlast
+  · intro i j hij
+    exact (ht_mono (Fin.val_le_of_le hij) : (t i.val : ℝ) ≤ (t j.val : ℝ))
+  · intro i j x hx y hy
+    have hx_left : (t i.val : ℝ) ≤ (x : ℝ) := by
+      simpa [Fin.val_castSucc] using hx.1
+    have hx_right : (x : ℝ) ≤ (t (i.val + 1) : ℝ) := by
+      simpa [Fin.val_succ] using hx.2
+    have hy_left : (t j.val : ℝ) ≤ (y : ℝ) := by
+      simpa [Fin.val_castSucc] using hy.1
+    have hy_right : (y : ℝ) ≤ (t (j.val + 1) : ℝ) := by
+      simpa [Fin.val_succ] using hy.2
+    have hu : x ∈ Set.Icc (t i.val) (t (i.val + 1)) := by
+      constructor
+      · exact hx_left
+      · exact hx_right
+    have hv : y ∈ Set.Icc (t j.val) (t (j.val + 1)) := by
+      constructor
+      · exact hy_left
+      · exact hy_right
+    have huv :
+        (x, y) ∈ Set.Icc (t i.val) (t (i.val + 1)) ×ˢ
+          Set.Icc (t j.val) (t (j.val + 1)) := by
+      exact ⟨hu, hv⟩
+    exact Classical.choose_spec (ht_sub i.val j.val) huv
+
 /-- Clamp a real number to the unit interval. -/
 def clampToI (x : ℝ) : unitInterval :=
   ⟨max 0 (min 1 x), by
