@@ -297,6 +297,24 @@ theorem polynomial_decomposition_of_entire_growth
     rw [← hgEval z]
     exact hReadout a hpY q hQ hz
 
+/-- The L2 chart-local decomposition matches the canonical
+`hyperellipticForm` coefficient on every smooth-`Y` projX chart. -/
+theorem coeff_eq_hyperellipticForm_on_projX_of_decomposition
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1)
+    (hDecomp : ∀ (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+      (q : HyperellipticEvenProj H) (_hQ : Quotient.out q = Sum.inl a)
+      {z : ℂ} (_hz : z ∈ (affineChartProjX (H := H) a hpY).target),
+      form.coeff q z =
+        g.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inl a)
+    {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target) :
+    form.coeff q z = (hyperellipticForm H g).coeff q z := by
+  rw [hDecomp a hpY q hQ hz]
+  rw [hyperellipticForm_coeff_projX (H := H) hDeg hpY hQ hz]
+
 /-- If an arbitrary holomorphic form and a canonical hyperelliptic form agree
 on every preferred chart target, the off-target normalization in
 `HolomorphicOneForm` upgrades the chartwise equality to equality of forms. -/
