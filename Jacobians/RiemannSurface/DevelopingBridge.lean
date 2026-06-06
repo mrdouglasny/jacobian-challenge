@@ -52,6 +52,204 @@ def PathChartBallSubdivisionAvoidsPartition (γ : AnalyticArc X)
     Set.Ioo (subdivisionCellLeft S i) (subdivisionCellRight S i),
       r ∉ (γ.partition : Set ℝ)
 
+private lemma bridge_no_mem_between_orderEmb_succ_unitInterval
+    (Pset : Finset unitInterval) {m : ℕ}
+    (hcard : Pset.card = m + 1) (i : Fin m) {x : unitInterval}
+    (hx : x ∈ Pset)
+    (hbetween : Pset.orderEmbOfFin hcard i.castSucc < x ∧
+      x < Pset.orderEmbOfFin hcard i.succ) : False := by
+  have hxrange : x ∈ Set.range (Pset.orderEmbOfFin hcard) := by
+    simpa [Finset.range_orderEmbOfFin Pset hcard] using hx
+  rcases hxrange with ⟨j, rfl⟩
+  have hleft : i.castSucc < j :=
+    ((Pset.orderEmbOfFin hcard).lt_iff_lt).mp hbetween.1
+  have hright : j < i.succ :=
+    ((Pset.orderEmbOfFin hcard).lt_iff_lt).mp hbetween.2
+  have hleft_nat : i.val < j.val := by
+    simpa [Fin.lt_def, Fin.val_castSucc] using hleft
+  have hright_nat : j.val < i.val + 1 := by
+    simpa [Fin.lt_def, Fin.val_succ] using hright
+  omega
+
+private lemma bridge_exists_subdivision_cell_of_refined_cell {γc : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γc) {m : ℕ} {Pset : Finset unitInterval}
+    (hPbase : ∀ j : Fin (S.n + 1), S.t j ∈ Pset)
+    (hcard : Pset.card = m + 1) (i : Fin m) :
+    ∃ j : Fin S.n,
+      Set.Icc (Pset.orderEmbOfFin hcard i.castSucc)
+          (Pset.orderEmbOfFin hcard i.succ) ⊆
+        Set.Icc (S.t j.castSucc) (S.t j.succ) := by
+  classical
+  let a : unitInterval := Pset.orderEmbOfFin hcard i.castSucc
+  let b : unitInterval := Pset.orderEmbOfFin hcard i.succ
+  have ha_mem : a ∈ Pset := by
+    simp [a]
+  have hb_mem : b ∈ Pset := by
+    simp [b]
+  have ha0 : (0 : unitInterval) ≤ a := by
+    exact a.2.1
+  have hb1 : b ≤ (1 : unitInterval) := by
+    exact b.2.2
+  have hab_idx : i.castSucc < i.succ := by
+    simp [Fin.lt_def, Fin.val_castSucc, Fin.val_succ]
+  have hab : a < b :=
+    (Pset.orderEmbOfFin hcard).strictMono hab_idx
+  have hno_between : ∀ {x : unitInterval}, x ∈ Pset → ¬ (a < x ∧ x < b) := by
+    intro x hx hxbetween
+    exact bridge_no_mem_between_orderEmb_succ_unitInterval Pset hcard i hx
+      (by simpa [a, b] using hxbetween)
+  let J : Finset (Fin (S.n + 1)) := Finset.univ.filter (fun k => S.t k ≤ a)
+  have hJ_nonempty : J.Nonempty := by
+    refine ⟨0, ?_⟩
+    simp [J, S.zero_eq, ha0]
+  let k : Fin (S.n + 1) := J.max' hJ_nonempty
+  have hk_mem : k ∈ J := Finset.max'_mem J hJ_nonempty
+  have hk_t_le : S.t k ≤ a := (Finset.mem_filter.mp hk_mem).2
+  have hk_not_last : k ≠ Fin.last S.n := by
+    intro hk_last
+    have hk_eq_one : S.t k = 1 := by
+      simpa [hk_last] using S.one_eq
+    have hone_le_a : (1 : unitInterval) ≤ a := by
+      simpa [hk_eq_one] using hk_t_le
+    exact (lt_irrefl a) ((hab.trans_le hb1).trans_le hone_le_a)
+  have hk_val_lt : k.val < S.n := by
+    have hk_val_le : k.val ≤ S.n := by omega
+    have hk_val_ne : k.val ≠ S.n := by
+      intro hval
+      apply hk_not_last
+      exact Fin.ext hval
+    omega
+  let j : Fin S.n := ⟨k.val, hk_val_lt⟩
+  have hjk : j.castSucc = k := by
+    exact Fin.ext (by simp [j])
+  have hleft : S.t j.castSucc ≤ a := by
+    simpa [hjk] using hk_t_le
+  have hright : b ≤ S.t j.succ := by
+    by_contra hbnot
+    have ht_succ_lt_b : S.t j.succ < b := lt_of_not_ge hbnot
+    have hsucc_not_le_a : ¬ S.t j.succ ≤ a := by
+      intro hsucc_le_a
+      have hsucc_memJ : j.succ ∈ J := by
+        simp [J, hsucc_le_a]
+      have hsucc_le_k : j.succ ≤ k := Finset.le_max' J (j.succ) hsucc_memJ
+      have hsucc_val_le : (j.succ).val ≤ k.val := Fin.val_le_of_le hsucc_le_k
+      have hsucc_val_le' := hsucc_val_le
+      simp [j] at hsucc_val_le'
+    have ha_lt_tsucc : a < S.t j.succ := lt_of_not_ge hsucc_not_le_a
+    exact hno_between (hPbase j.succ) ⟨ha_lt_tsucc, ht_succ_lt_b⟩
+  refine ⟨j, ?_⟩
+  intro u hu
+  exact ⟨hleft.trans hu.1, hu.2.trans hright⟩
+
+private lemma bridge_orderEmb_zero_eq_of_mem {m : ℕ} {Pset : Finset unitInterval}
+    (hcard : Pset.card = m + 1) (hzeroP : (0 : unitInterval) ∈ Pset) :
+    Pset.orderEmbOfFin hcard 0 = 0 := by
+  have hz : 0 < m + 1 := Nat.succ_pos m
+  calc
+    Pset.orderEmbOfFin hcard 0 =
+        Pset.min' (Finset.card_pos.mp (hcard.symm ▸ hz)) := by
+      simpa using Finset.orderEmbOfFin_zero (s := Pset) hcard hz
+    _ = 0 := by
+      exact (Finset.min'_eq_iff Pset _ 0).2
+        ⟨hzeroP, fun x _hx => (show (0 : unitInterval) ≤ x from x.2.1)⟩
+
+private lemma bridge_orderEmb_last_eq_of_mem {m : ℕ} {Pset : Finset unitInterval}
+    (hcard : Pset.card = m + 1) (honeP : (1 : unitInterval) ∈ Pset) :
+    Pset.orderEmbOfFin hcard (Fin.last m) = 1 := by
+  have hz : 0 < m + 1 := Nat.succ_pos m
+  calc
+    Pset.orderEmbOfFin hcard (Fin.last m) =
+        Pset.max' (Finset.card_pos.mp (hcard.symm ▸ hz)) := by
+      simpa [Fin.last, Nat.succ_eq_add_one] using
+        Finset.orderEmbOfFin_last (s := Pset) hcard hz
+    _ = 1 := by
+      exact (Finset.max'_eq_iff Pset _ 1).2
+        ⟨honeP, fun x _hx => (show x ≤ (1 : unitInterval) from x.2.2)⟩
+
+private noncomputable def bridgeSubdivisionRefinedByFinset {γc : C(unitInterval, X)}
+    (S : PathChartBallSubdivision γc) (Pset : Finset unitInterval)
+    (hPbase : ∀ j : Fin (S.n + 1), S.t j ∈ Pset)
+    (hzeroP : (0 : unitInterval) ∈ Pset) (honeP : (1 : unitInterval) ∈ Pset)
+    {m : ℕ} (hcard : Pset.card = m + 1) : PathChartBallSubdivision γc := by
+  classical
+  let cell : Fin m → Fin S.n := fun i =>
+    Classical.choose (bridge_exists_subdivision_cell_of_refined_cell S hPbase hcard i)
+  refine
+    { n := m
+      t := fun i : Fin (m + 1) => Pset.orderEmbOfFin hcard i
+      cellBall := fun i : Fin m => S.cellBall (cell i)
+      zero_eq := ?_
+      one_eq := ?_
+      monotone_t := ?_
+      cell_subset := ?_ }
+  · exact bridge_orderEmb_zero_eq_of_mem hcard hzeroP
+  · exact bridge_orderEmb_last_eq_of_mem hcard honeP
+  · exact (Pset.orderEmbOfFin hcard).monotone
+  · intro i u hu
+    have hsub : Set.Icc (Pset.orderEmbOfFin hcard i.castSucc)
+          (Pset.orderEmbOfFin hcard i.succ) ⊆
+        Set.Icc (S.t (cell i).castSucc) (S.t (cell i).succ) :=
+      Classical.choose_spec (bridge_exists_subdivision_cell_of_refined_cell S hPbase hcard i)
+    exact S.cell_subset (cell i) (hsub hu)
+
+private noncomputable def analyticPartitionUnitInterval (γ : AnalyticArc X) :
+    Finset unitInterval :=
+  γ.partition.attach.image fun r => (⟨r.1, γ.partition_subset r.2⟩ : unitInterval)
+
+private lemma analyticPartitionUnitInterval_mem (γ : AnalyticArc X) {r : ℝ}
+    (hr : r ∈ γ.partition) :
+    (⟨r, γ.partition_subset hr⟩ : unitInterval) ∈
+      analyticPartitionUnitInterval γ := by
+  classical
+  refine Finset.mem_image.mpr ?_
+  exact ⟨⟨r, hr⟩, by simp⟩
+
+/-- Every analytic arc admits a chart-ball subdivision whose open cells avoid
+the analytic partition.  Start with any chart-ball subdivision, then refine its
+finite breakpoint set by adjoining the finitely many analytic partition points. -/
+theorem exists_partition_avoiding_subdivision (γ : AnalyticArc X) :
+    ∃ S : PathChartBallSubdivision (analyticArcToContinuousMap γ),
+      PathChartBallSubdivisionAvoidsPartition γ S := by
+  classical
+  obtain ⟨S₀⟩ := exists_pathChartBallSubdivision (analyticArcToContinuousMap γ)
+  let baseS : Finset unitInterval := Finset.image S₀.t Finset.univ
+  let partP : Finset unitInterval := analyticPartitionUnitInterval γ
+  let Pset : Finset unitInterval := baseS ∪ partP
+  have hSbase : ∀ j : Fin (S₀.n + 1), S₀.t j ∈ Pset := by
+    intro j
+    simp [Pset, baseS]
+  have hzeroP : (0 : unitInterval) ∈ Pset := by
+    have h : S₀.t 0 ∈ Pset := hSbase 0
+    simpa [S₀.zero_eq] using h
+  have honeP : (1 : unitInterval) ∈ Pset := by
+    have h : S₀.t (Fin.last S₀.n) ∈ Pset := hSbase (Fin.last S₀.n)
+    simpa [S₀.one_eq] using h
+  have hP_nonempty : Pset.Nonempty := ⟨0, hzeroP⟩
+  have hcard_pos : 0 < Pset.card := Finset.card_pos.mpr hP_nonempty
+  let m : ℕ := Pset.card - 1
+  have hcard : Pset.card = m + 1 := by
+    have hsucc := Nat.succ_pred_eq_of_pos hcard_pos
+    simpa [m, Nat.pred_eq_sub_one, Nat.succ_eq_add_one] using hsucc.symm
+  let S : PathChartBallSubdivision (analyticArcToContinuousMap γ) :=
+    bridgeSubdivisionRefinedByFinset S₀ Pset hSbase hzeroP honeP hcard
+  refine ⟨S, ?_⟩
+  intro i r hr hrpart
+  have hrpart_fin : r ∈ γ.partition := by
+    simpa using hrpart
+  let x : unitInterval := ⟨r, γ.partition_subset hrpart_fin⟩
+  have hx_part : x ∈ partP := by
+    simpa [x, partP] using analyticPartitionUnitInterval_mem γ hrpart_fin
+  have hxP : x ∈ Pset := by
+    simp [Pset, hx_part]
+  have hbetween : Pset.orderEmbOfFin hcard i.castSucc < x ∧
+      x < Pset.orderEmbOfFin hcard i.succ := by
+    constructor
+    · change ((Pset.orderEmbOfFin hcard i.castSucc : unitInterval) : ℝ) < (x : ℝ)
+      simpa [S, bridgeSubdivisionRefinedByFinset, subdivisionCellLeft, x] using hr.1
+    · change (x : ℝ) < ((Pset.orderEmbOfFin hcard i.succ : unitInterval) : ℝ)
+      simpa [S, bridgeSubdivisionRefinedByFinset, subdivisionCellRight, x] using hr.2
+  exact bridge_no_mem_between_orderEmb_succ_unitInterval Pset hcard i hxP hbetween
+
 private lemma subdivisionCell_left_le_right {γc : C(unitInterval, X)}
     (S : PathChartBallSubdivision γc) (i : Fin S.n) :
     subdivisionCellLeft S i ≤ subdivisionCellRight S i := by
