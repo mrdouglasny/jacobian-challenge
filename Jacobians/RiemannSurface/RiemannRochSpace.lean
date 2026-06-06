@@ -102,49 +102,228 @@ theorem orderAt_const_smul_of_ne_zero {c : ℂ} (hc : c ≠ 0) (p : X) (f : X �
       (g := fun _ : ℂ => c)
       (f := f ∘ (extChartAt 𝓘(ℂ) p).symm) hconst hc)
 
-/-- The Riemann-Roch space `L(D)` as a genuine complex subspace of functions:
+/-- Adding a function whose germ is zero at `p` does not change the Wallace order at `p`. -/
+theorem orderAt_add_of_orderAt_eq_top {f g : X → ℂ} {p : X}
+    (hg : orderAt p g = ⊤) :
+    orderAt p (f + g) = orderAt p f := by
+  unfold orderAt at hg ⊢
+  simpa [Function.comp_def, Pi.add_apply] using
+    (meromorphicOrderAt_add_of_top_right
+      (f₁ := f ∘ (extChartAt 𝓘(ℂ) p).symm)
+      (f₂ := g ∘ (extChartAt 𝓘(ℂ) p).symm)
+      (x := (extChartAt 𝓘(ℂ) p) p) hg)
+
+/-- Raw functions that are meromorphic at every point of `X`. -/
+def MeroFunctions (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X] :
+    Submodule ℂ (X → ℂ) where
+  carrier :=
+    { f : X → ℂ | ∀ p : X, MeromorphicAtX f p }
+  zero_mem' := by
+    exact meromorphicAtX_zero
+  add_mem' := by
+    intro f g hf hg p
+    exact (hf p).add (hg p)
+  smul_mem' := by
+    intro c f hf p
+    exact MeromorphicAtX.const_smul c (hf p)
+
+/-- Germ-zero global meromorphic functions: representatives whose order is `⊤` everywhere. -/
+def GermZero (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X] :
+    Submodule ℂ (MeroFunctions X) where
+  carrier :=
+    { f : MeroFunctions X | ∀ p : X, orderAt p (f : X → ℂ) = ⊤ }
+  zero_mem' := by
+    intro p
+    simpa using (orderAt_zero (X := X) p)
+  add_mem' := by
+    intro f g hf hg p
+    have hle :
+        (⊤ : WithTop ℤ) ≤ orderAt p ((f + g : MeroFunctions X) : X → ℂ) := by
+      simpa [hf p, hg p] using
+        (min_le_orderAt_add (f.property p) (g.property p))
+    exact top_le_iff.mp hle
+  smul_mem' := by
+    intro c f hf p
+    by_cases hc : c = 0
+    · subst c
+      simpa using (orderAt_zero (X := X) p)
+    · simpa [orderAt_const_smul_of_ne_zero hc p (f : X → ℂ)] using hf p
+
+/-- The additive vector space of meromorphic functions modulo germ-zero representatives. -/
+abbrev MeroField (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X] : Type u :=
+  MeroFunctions X ⧸ GermZero X
+
+theorem orderAt_eq_of_sub_mem_germZero {f g : MeroFunctions X}
+    (hfg : f - g ∈ GermZero X) (p : X) :
+    orderAt p (f : X → ℂ) = orderAt p (g : X → ℂ) := by
+  have htop : orderAt p ((f - g : MeroFunctions X) : X → ℂ) = ⊤ := hfg p
+  have horder :
+      orderAt p ((g : X → ℂ) + ((f - g : MeroFunctions X) : X → ℂ)) =
+        orderAt p (g : X → ℂ) :=
+    orderAt_add_of_orderAt_eq_top (f := (g : X → ℂ))
+      (g := ((f - g : MeroFunctions X) : X → ℂ)) htop
+  have hfun :
+      (g : X → ℂ) + ((f - g : MeroFunctions X) : X → ℂ) = (f : X → ℂ) := by
+    ext x
+    simp [sub_eq_add_neg, add_comm, add_left_comm]
+  simpa [hfun] using horder
+
+/-- Wallace order on the germ quotient. -/
+def orderAtField (p : X) : MeroField X → WithTop ℤ :=
+  Quotient.lift
+    (fun f : MeroFunctions X => orderAt p (f : X → ℂ))
+    (by
+      intro f g hfg
+      exact orderAt_eq_of_sub_mem_germZero
+        ((Submodule.quotientRel_def (p := GermZero X)).mp hfg) p)
+
+@[simp]
+theorem orderAtField_mk (p : X) (f : MeroFunctions X) :
+    orderAtField p (Submodule.Quotient.mk f : MeroField X) =
+      orderAt p (f : X → ℂ) :=
+  rfl
+
+theorem min_le_orderAtField_add (p : X) (F G : MeroField X) :
+    min (orderAtField p F) (orderAtField p G) ≤ orderAtField p (F + G) := by
+  refine Submodule.Quotient.induction_on (GermZero X) F ?_
+  intro f
+  refine Submodule.Quotient.induction_on (GermZero X) G ?_
+  intro g
+  simpa using (min_le_orderAt_add (f.property p) (g.property p))
+
+theorem orderAtField_const_smul_of_ne_zero {c : ℂ} (hc : c ≠ 0) (p : X)
+    (F : MeroField X) :
+    orderAtField p (c • F) = orderAtField p F := by
+  refine Submodule.Quotient.induction_on (GermZero X) F ?_
+  intro f
+  simpa using (orderAt_const_smul_of_ne_zero hc p (f : X → ℂ))
+
+/-- A raw point-spike function. It is nonzero as a function, but zero as a meromorphic germ. -/
+def pointSpike (p : X) : X → ℂ :=
+  by
+    classical
+    exact fun x => if x = p then 1 else 0
+
+theorem pointSpike_eventuallyEq_zero_chart (p q : X) :
+    (pointSpike p ∘ (chartAt ℂ q).symm) =ᶠ[𝓝[≠] (chartAt ℂ q q)] 0 := by
+  by_cases hq : q = p
+  · subst q
+    let e := chartAt ℂ p
+    have htarget : e.target ∈ 𝓝 (e p) := chart_target_mem_nhds ℂ p
+    filter_upwards [Filter.mem_inf_of_left htarget, self_mem_nhdsWithin] with z hz_target hz_ne
+    change pointSpike p (e.symm z) = 0
+    have hne : e.symm z ≠ p := by
+      intro hsymm
+      have hz_eq : z = e p := by
+        calc
+          z = e (e.symm z) := (e.right_inv hz_target).symm
+          _ = e p := by rw [hsymm]
+      exact hz_ne hz_eq
+    classical
+    simp [pointSpike, hne]
+  · have hcompl : ({p} : Set X)ᶜ ∈ 𝓝 q := compl_singleton_mem_nhds hq
+    have hzeroX : ∀ᶠ x in 𝓝 q, pointSpike p x = 0 :=
+      Filter.mem_of_superset hcompl (by
+        intro x hx
+        classical
+        have hxne : x ≠ p := by
+          simpa using hx
+        change (if x = p then (1 : ℂ) else 0) = 0
+        rw [if_neg hxne])
+    have hzeroChart :
+        ∀ᶠ z in 𝓝 (chartAt ℂ q q), pointSpike p ((chartAt ℂ q).symm z) = 0 := by
+      simpa using
+        (((chartAt ℂ q).eventually_nhds' (fun x => pointSpike p x = 0)
+          (mem_chart_source ℂ q)).2 hzeroX)
+    exact eventually_nhdsWithin_of_eventually_nhds hzeroChart
+
+theorem orderAt_pointSpike (p q : X) :
+    orderAt q (pointSpike p) = ⊤ := by
+  rw [orderAt_eq_chartAt]
+  exact meromorphicOrderAt_eq_top_iff.mpr (pointSpike_eventuallyEq_zero_chart p q)
+
+theorem meromorphicAtX_pointSpike (p q : X) :
+    MeromorphicAtX (pointSpike p) q := by
+  exact meromorphicAt_of_meromorphicOrderAt_ne_zero (by
+    change orderAt q (pointSpike p) ≠ 0
+    rw [orderAt_pointSpike]
+    simp)
+
+/-- The point-spike lies in the germ-zero submodule. -/
+theorem pointSpike_mem_germZero (p : X) :
+    (⟨pointSpike p, meromorphicAtX_pointSpike p⟩ : MeroFunctions X) ∈ GermZero X := by
+  intro q
+  exact orderAt_pointSpike p q
+
+/-- The point-spike is killed by the germ quotient. -/
+theorem pointSpike_mk_eq_zero (p : X) :
+    (Submodule.Quotient.mk
+      (⟨pointSpike p, meromorphicAtX_pointSpike p⟩ : MeroFunctions X) : MeroField X) = 0 :=
+  (Submodule.Quotient.mk_eq_zero (GermZero X)).2 (pointSpike_mem_germZero p)
+
+/-- The point-spike is not the zero raw function. -/
+theorem pointSpike_ne_zero (p : X) :
+    pointSpike p ≠ (0 : X → ℂ) := by
+  intro h
+  have hp := congr_fun h p
+  classical
+  simpa [pointSpike] using hp
+
+/-- `GermZero` is nontrivial as a submodule of raw meromorphic functions; this is why
+`MeroField` quotients by it before defining `L(D)`. -/
+theorem germZero_ne_bot (p : X) :
+    GermZero X ≠ (⊥ : Submodule ℂ (MeroFunctions X)) := by
+  intro hbot
+  have hmem : (⟨pointSpike p, meromorphicAtX_pointSpike p⟩ : MeroFunctions X) ∈
+      (⊥ : Submodule ℂ (MeroFunctions X)) := by
+    simpa [hbot] using pointSpike_mem_germZero (X := X) p
+  have hzero :
+      (⟨pointSpike p, meromorphicAtX_pointSpike p⟩ : MeroFunctions X) = 0 := by
+    simpa using hmem
+  apply pointSpike_ne_zero (X := X) p
+  exact congr_arg Subtype.val hzero
+
+/-- The Riemann-Roch space `L(D)` on the germ quotient:
 `L(D) = { f meromorphic on X | div(f) + D ≥ 0 } = H^0(X, O(D))` in the
 textbook notation of Forster, *Lectures on Riemann Surfaces*, §16.  With the
 Wallace convention, the condition is `ord_p(f) ≥ -coeff_p(D)` for every point,
-and the identically zero function is included because its order is `⊤`. -/
-def riemannRochSpace (D : Divisor X) : Submodule ℂ (X → ℂ) where
+and the zero germ is included because its order is `⊤`. -/
+def riemannRochSpace (D : Divisor X) : Submodule ℂ (MeroField X) where
   carrier :=
-    { f : X → ℂ |
-      (∀ p : X, MeromorphicAtX f p) ∧
-        ∀ p : X,
-          ((-(FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)) : ℤ) : WithTop ℤ) ≤
-            orderAt p f }
+    { F : MeroField X |
+      ∀ p : X,
+        ((-(FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)) : ℤ) : WithTop ℤ) ≤
+          orderAtField p F }
   zero_mem' := by
-    constructor
-    · exact meromorphicAtX_zero
-    · intro p
-      rw [orderAt_zero]
-      exact le_top
+    intro p
+    rw [show (0 : MeroField X) =
+        Submodule.Quotient.mk (0 : MeroFunctions X) from rfl, orderAtField_mk]
+    change
+      ((-(FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)) : ℤ) : WithTop ℤ) ≤
+        orderAt p (0 : X → ℂ)
+    rw [orderAt_zero]
+    exact le_top
   add_mem' := by
-    rintro f g ⟨hf_mer, hf_ord⟩ ⟨hg_mer, hg_ord⟩
-    constructor
-    · intro p
-      exact (hf_mer p).add (hg_mer p)
-    · intro p
-      exact (le_min (hf_ord p) (hg_ord p)).trans
-        (min_le_orderAt_add (hf_mer p) (hg_mer p))
+    intro F G hF hG p
+    exact (le_min (hF p) (hG p)).trans (min_le_orderAtField_add p F G)
   smul_mem' := by
-    rintro c f ⟨hf_mer, hf_ord⟩
+    intro c F hF
     by_cases hc : c = 0
     · subst c
-      constructor
-      · intro p
-        simpa using (meromorphicAtX_zero (X := X) p)
-      · intro p
-        simpa [Pi.smul_apply, orderAt_zero] using
-          (le_top :
-            ((-(FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)) : ℤ) : WithTop ℤ) ≤
-              (⊤ : WithTop ℤ))
-    · constructor
-      · intro p
-        exact MeromorphicAtX.const_smul c (hf_mer p)
-      · intro p
-        rw [orderAt_const_smul_of_ne_zero hc p f]
-        exact hf_ord p
+      intro p
+      rw [zero_smul]
+      rw [show (0 : MeroField X) =
+          Submodule.Quotient.mk (0 : MeroFunctions X) from rfl, orderAtField_mk]
+      change
+        ((-(FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)) : ℤ) : WithTop ℤ) ≤
+          orderAt p (0 : X → ℂ)
+      rw [orderAt_zero]
+      exact le_top
+    · intro p
+      rw [orderAtField_const_smul_of_ne_zero hc p F]
+      exact hF p
 
 end Jacobians.RiemannSurface

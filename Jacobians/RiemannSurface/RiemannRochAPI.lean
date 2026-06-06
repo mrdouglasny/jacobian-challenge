@@ -8,10 +8,10 @@ import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 
 /-!
-# Riemann-Roch API in terms of the concrete space `L(D)`
+# Riemann-Roch API in terms of the germ-quotient space `L(D)`
 
 This file states the textbook Riemann-Roch consequences directly for the
-function-space definition
+germ-quotient definition
 `riemannRochSpace D = L(D) = {f | div(f) + D >= 0}` from
 `Jacobians.RiemannSurface.RiemannRochSpace`.
 
@@ -38,7 +38,8 @@ variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
 /-- `h^0(D)` is the complex dimension of the concrete Riemann-Roch space
-`L(D) = H^0(X, O(D))`, as in Forster sections 16/17 and Miranda VI. The
+`L(D) = H^0(X, O(D))`, as in Forster sections 16/17 and Miranda VI. Its
+carrier is the meromorphic germ quotient, not raw functions. The
 finite-dimensionality assertion making this finrank semantically faithful is
 recorded separately in `riemannRochSpace_finiteDimensional`. -/
 noncomputable abbrev h0 (D : Divisor X) : ℕ :=
