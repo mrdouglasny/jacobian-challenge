@@ -27,17 +27,18 @@ G3_DISCHARGE_PLAN.md (G1 milestone, Gemini verdict).*
 > fixed-chart cell integrability hypotheses are discharged by cellwise
 > chart-independence against the canonical integrand.
 >
-> **The three pieces still missing** (scoped 2026-06-06; HI-0 is done):
-> 1. **Arc algebra** — `AnalyticArc` concat/reversal + `canonicalArcIntegral`
->    additivity (`∮_{α·β}=∮_α+∮_β`, `∮_{α⁻¹}=−∮_α`). NOT in repo; prerequisite to
->    even state the triangle as a loop. (Feeds HI-2/HI-4.)
-> 2. **General (multi-chart) homotopy invariance** — single-chart version exists
+> **Already done:** HI-0 (above) and the **arc algebra** —
+> `AnalyticArc.reverse`/`.trans` + `canonicalArcIntegral_reverse`/`_trans`
+> (`∮_{α·β}=∮_α+∮_β`, `∮_{α⁻¹}=−∮_α`) in `RiemannSurface/ArcAlgebra.lean` (PR #12).
+>
+> **The two pieces still missing** (scoped 2026-06-06):
+> 1. **General (multi-chart) homotopy invariance** — single-chart version exists
 >    (strong `ContDiffOn`/`DiffContOnCl` hyps); the general one is unbuilt. (= HI-1.)
-> 3. **Lattice landing** `developingValue(loop) ∈ Λ` — the deepest piece, where
+> 2. **Lattice landing** `developingValue(loop) ∈ Λ` — the deepest piece, where
 >    homology enters (loop period = ℤ-combo of cycle-basis periods). (= HI-2+HI-3.)
 >
-> Honest estimate: ~weeks; pieces (3)/(4) may hit Mathlib gaps (general 2-var
-> homotopy regularity; π₁→H₁ on a manifold). This is the deepest analytic gap left.
+> Honest estimate: ~weeks; both may hit Mathlib gaps (general 2-var homotopy
+> regularity; π₁→H₁ on a manifold). This is the deepest analytic gap left.
 
 ## End goal
 
