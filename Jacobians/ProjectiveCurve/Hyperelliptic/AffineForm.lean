@@ -63,9 +63,25 @@ Discharge requires either:
   injective at `0` and any chart source containing both `0` and
   `p.val.2 ≠ 0` would witness this — which contradicts
   `OpenPartialHomeomorph.left_inv`. -/
-axiom squareLocalHomeomorph_zero_notMem_source
+theorem squareLocalHomeomorph_zero_notMem_source
     (p : HyperellipticAffine H) (hp : p ∈ smoothLocusY H) :
-    (0 : ℂ) ∉ (squareLocalHomeomorph (H := H) p hp).source
+    (0 : ℂ) ∉ (squareLocalHomeomorph (H := H) p hp).source := by
+  intro h₀
+  let e := squareLocalHomeomorph p hp
+  obtain ⟨r, _, _⟩ := Metric.isOpen_iff.mp e.open_source _ h₀
+  let z := ((r / 2 : ℝ) : ℂ)
+  have : z ∈ Metric.ball 0 r := by
+    grind [Metric.mem_ball, dist_zero_right, Complex.norm_real, Real.norm_of_nonneg]
+  have : z ≠ -z := by
+    intro
+    have : (r / 2) = -(r / 2) := by grind [Complex.ofReal_injective, Complex.ofReal_neg]
+    grind
+  have (w : ℂ) : e w = w ^ 2 := by trivial
+  have : e z = e (-z) := by grind
+  have : e.symm (e z) = z := by grind [OpenPartialHomeomorph.left_inv]
+  have : e.symm (e (-z)) = -z := by grind [Metric.mem_ball, dist_zero_right, norm_neg,
+    OpenPartialHomeomorph.left_inv]
+  grind
 
 /-- The y-branch chosen by `squareLocalHomeomorph.symm` is non-zero on
 the projX chart target.
