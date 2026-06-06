@@ -21,7 +21,60 @@ So the bridge theorem is forced to *carry* `hfixed_integrable` / `hcanonical_int
 as undischargeable hypotheses, and `AX_cycleBasisLoop_integrable` exists purely to
 paper over this (its own docstring: *"can be retired by strengthening AnalyticArc"*).
 
-## The vetted strong predicate (decoupled `f`)
+## ⚠️ CORRECTION (2026-06-06, Gemini 3.1 Pro): predicate must be REFINEMENT-BASED
+
+The first implementation (per the §"vetted strong predicate" below) quantified the
+single-chart witness over the **arc's own** consecutive partition points. That is
+**unsound** for an arc whose partition is coarse relative to the chart atlas:
+e.g. the elliptic A-cycle `aLoopExtend r = [r·ω₁]` with partition `{0,1}` has ONE
+cell `[0,1]` = the whole non-contractible loop, which cannot fit in any single
+chart source (chart sources are injective images of convex balls = contractible).
+So `IsAnalyticArcStrong (Elliptic) (aLoopExtend) {0,1}` is a **FALSE** Prop —
+strengthening the witness axioms to it makes the development **inconsistent**.
+(Gemini-3.1-pro-vetted; confirmed against `ComplexTorus.chartRadius_inj`.)
+
+**Corrected predicate (FINAL — Gemini-3.1-pro-vetted, Candidate B with `U ∩ Icc a b`):**
+per *base* cell `[a,b]`, a refinement `τ ⊆ Icc a b` of that cell, with each refined
+cell carrying a single-chart witness whose coincidence/source hold on `U ∩ Icc a b`:
+
+```lean
+def IsAnalyticArcStrong (extend : ℝ → X) (base_partition : Finset ℝ) : Prop :=
+  ∀ a ∈ base_partition, ∀ b ∈ base_partition, a < b →
+    (∀ r ∈ base_partition, r ∉ Set.Ioo a b) →                 -- a,b consecutive (base corner pair)
+      ∃ τ : Finset ℝ, a ∈ τ ∧ b ∈ τ ∧ (↑τ ⊆ Set.Icc a b) ∧
+        ∀ s ∈ τ, ∀ t ∈ τ, s < t → (∀ r ∈ τ, r ∉ Set.Ioo s t) →   -- s,t consecutive in refinement
+          ∃ (p : X) (U : Set ℝ) (f : ℝ → ℂ),
+            IsOpen U ∧ Set.Icc s t ⊆ U ∧ AnalyticOnNhd ℝ f U ∧
+            (∀ r ∈ U ∩ Set.Icc a b, extend r ∈ (extChartAt 𝓘(ℂ) p).source) ∧
+            (∀ r ∈ U ∩ Set.Icc a b, (extChartAt 𝓘(ℂ) p) (extend r) = f r)
+```
+
+The `U ∩ Icc a b` is load-bearing: at an artificial τ-point (interior to `(a,b)`)
+it still contains a two-sided nbhd ⇒ two-sided `AnalyticAt`; at a base corner it
+clips to one-sided ⇒ the corner (and `trans` concatenation) stays sound.
+
+- **toWeak:** `u ∉ base_partition` ⇒ `u ∈ Ioo a b` for a base pair; take that base
+  cell's `τ` and the τ-cell `[s,t] ∋ u`; `U ∩ Icc a b` ⊇ a two-sided nbhd of `u`
+  (since `u` interior to `(a,b)`); coincidence there + `f` analytic ⇒ `AnalyticAt`
+  via the transition linchpin. Works whether or not `u ∈ τ`.
+- **Integrability:** per base cell, sum over τ-cells with `IntervalIntegrable.trans`;
+  each `[s,t] ⊆ U ∩ Icc a b` so `extend = f` on the whole closed cell, `f'`
+  continuous on compact `[s,t]` ⇒ `Continuous.intervalIntegrable`. Then sum base cells.
+- **Witnesses become PROVABLE (discharge, 59→57; can be a FOLLOW-UP):** base `{0,1}`,
+  `a=0,b=1`; Archimedean `N` with `|ω₁|/N < chartRadius`; `τ = {i/N}`; cell
+  `[i/N,(i+1)/N]` centred at `p = π((i+½)/N·ω₁)`; max dist `|ω₁|/2N < chartRadius`
+  ⇒ sub-segment ⊆ chart ball; `f = r ↦ r·ω₁ − c` (affine, entire). `ComplexTorus.lean`
+  already has sub-segment-fits-ball + local-analyticity lemmas. **Until discharged,
+  the witnesses stay axioms BUT of the new (TRUE) refinement statement** — sound,
+  marked `(NOT VERIFIED)`. Count stays 59 until the discharge lands.
+
+The §below describes the SUPERSEDED per-arc-cell form; kept for history. Everything
+downstream (toWeak shape, minimal-ripple `is_analytic` derived lemma, integrability
+plan, axiom retirement) carries over with `τ` inserted.
+
+---
+
+## The vetted strong predicate (decoupled `f`) — SUPERSEDED, see correction above
 
 Gemini caught a critical flaw in the naive fix: requiring
 `AnalyticOn (extChartAt p ∘ extend) U` on an **open** `U ⊇ Icc s t` is
