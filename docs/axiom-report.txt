@@ -131,8 +131,6 @@
  GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph,
  Axioms.HyperellipticLiouville.AX_HyperellipticOneForm_eq_form,
  ProjectiveCurve.HyperellipticAffine.AX_HyperellipticAffine_connected,
- ProjectiveCurve.HyperellipticAffine.polynomialLocalHomeomorph_no_critical_in_source,
- ProjectiveCurve.HyperellipticAffine.squareLocalHomeomorph_zero_notMem_source,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]

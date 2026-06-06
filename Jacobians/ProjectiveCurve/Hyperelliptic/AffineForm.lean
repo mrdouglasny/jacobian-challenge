@@ -45,7 +45,7 @@ noncomputable def affineProjXCoeff (g : Polynomial ℂ) (a : HyperellipticAffine
         ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
     else 0
 
-/-- **Narrow structural axiom.** The point `0 ∈ ℂ` is not in the
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). The point `0 ∈ ℂ` is not in the
 source of `squareLocalHomeomorph p hp`.
 
 This is the only piece of `squareLocalHomeomorph_symm_ne_zero` that
@@ -272,7 +272,7 @@ The chart-symm has `.val.1 = polynomialLocalHomeomorph.symm (y²)`
 (per `affineChartProjY_symm_apply_fst`).
 -/
 
-/-- **Narrow structural axiom.** No critical point of `x ↦ H.f.eval x`
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). No critical point of `x ↦ H.f.eval x`
 lies in the source of `polynomialLocalHomeomorph p hp`. Mirror of
 `squareLocalHomeomorph_zero_notMem_source`: the IFT-derived chart at
 `a.val.1` (where `f'(a.val.1) ≠ 0`) has a source bounded away from
