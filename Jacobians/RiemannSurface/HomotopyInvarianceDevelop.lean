@@ -726,8 +726,7 @@ private noncomputable def bottomRowSubdivision {m n : ℕ} {a b : X} {γ₁ γ�
           _ ≤ τ (⟨0, hn⟩ : Fin n).succ :=
             hτmono (Fin.zero_le _)
     have h := hcell i ⟨0, hn⟩ u hx 0 hy
-    simp at h ⊢
-    exact h
+    simpa using h
 
 private noncomputable def topRowSubdivision {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
     (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
