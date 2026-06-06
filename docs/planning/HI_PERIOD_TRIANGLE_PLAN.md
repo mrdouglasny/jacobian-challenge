@@ -42,11 +42,11 @@ same commit that retires the axiom.
 - [x] S0. Branch `hi-1-period-triangle` + this plan doc   status: done   deps: []
 
 ### HI-1 — homotopy invariance of `canonicalArcIntegral` (developing-value path algebra)
-- [ ] A1. `devVal_symm` — `developingValue` of a reversed path = `−developingValue`   status: todo   deps: []
-- [ ] A2. `devVal_trans` — `developingValue` of a concatenation = sum   status: todo   deps: []
-- [ ] A3. `devVal_refl` — `developingValue` of a constant path = `0`   status: todo   deps: []
-- [ ] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)` from `developingValueOfSubdivision_eq_of_subdivisions`   status: todo   deps: [A2]
-- [ ] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop `B·R·T⁻¹·L⁻¹` in one chart ⇒ 0 by the single-ball base case; split via A1/A2/A3)   status: todo   deps: [A1, A2, A3]
+- [~] A1. `devVal_symm` — `developingValue` of a reversed path = `−developingValue`   status: in_progress   deps: []   note: dispatched to Codex (A1–A5 foundation)
+- [~] A2. `devVal_trans` — `developingValue` of a concatenation = sum   status: in_progress   deps: []   note: dispatched to Codex; workhorse (subdivision-of-concat)
+- [~] A3. `devVal_refl` — `developingValue` of a constant path = `0`   status: in_progress   deps: []   note: dispatched to Codex
+- [~] A4. `devVal_subdivision` — `developingValue γ = Σ devVal(edge segment)` from `developingValueOfSubdivision_eq_of_subdivisions`   status: in_progress   deps: [A2]   note: dispatched to Codex
+- [~] A5. `devVal_cell_eq` — `devVal Bᵢ − devVal Tᵢ = devVal Lᵢ − devVal Lᵢ₊₁` (cell-boundary loop `B·R·T⁻¹·L⁻¹` in one chart ⇒ 0 by the single-ball base case; split via A1/A2/A3)   status: in_progress   deps: [A1, A2, A3]   note: dispatched to Codex
 - [ ] A6. `devVal_strip_eq` — `Σᵢ devVal Bᵢ = Σᵢ devVal Tᵢ` (telescope A5 via `Finset.sum_range_sub`; `L₀,Lₘ` constant rel endpoints ⇒ 0). **Hardest lemma.**   status: todo   deps: [A5]
 - [ ] A7. `devVal_homotopy_invariant` — grid from `exists_chart_subordinate_grid` + 1-D row induction with A6   status: todo   deps: [A4, A6]
 - [ ] A8. `canonicalArcIntegral_homotopy_invariant` — substitute HI-0 bridge   status: todo   deps: [A7]
