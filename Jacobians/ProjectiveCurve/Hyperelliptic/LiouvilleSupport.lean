@@ -297,4 +297,22 @@ theorem polynomial_decomposition_of_entire_growth
     rw [← hgEval z]
     exact hReadout a hpY q hQ hz
 
+/-- If an arbitrary holomorphic form and a canonical hyperelliptic form agree
+on every preferred chart target, the off-target normalization in
+`HolomorphicOneForm` upgrades the chartwise equality to equality of forms. -/
+theorem oneForm_eq_hyperellipticForm_of_eqOn_chartTarget
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (g : Polynomial ℂ)
+    (hCoeff : ∀ q : HyperellipticEvenProj H, ∀ z : ℂ,
+      z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target →
+        form.coeff q z = (hyperellipticForm H g).coeff q z) :
+    form = hyperellipticForm H g := by
+  apply HolomorphicOneForm.ext_of_coeff
+  funext q z
+  by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target
+  · exact hCoeff q z hz
+  · show (form : HyperellipticEvenProj H → ℂ → ℂ) q z =
+      (hyperellipticForm H g : HyperellipticEvenProj H → ℂ → ℂ) q z
+    rw [form.2.2.2 q z hz, (hyperellipticForm H g).2.2.2 q z hz]
+
 end Jacobians.ProjectiveCurve
