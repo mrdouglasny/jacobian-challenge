@@ -123,8 +123,11 @@ functions made it infinite-dimensional (`finrank ≡ 0`). It is now a submodule 
 the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero`
 (`RiemannSurface/RiemannRochSpace.lean`), the genuine `L(D)`; `germZero_ne_bot`
 compiles the spike witness. `H0` still `:= riemannRochSpace D` (instances adapt;
-no axiom change). `h0_zero`/finite-dimensionality are now true-but-deferred sorries
-where they were previously false.
+no axiom change). **`h0_zero` (h⁰(0)=1) is now PROVED axiom-free** over the corrected
+space (normal-form honest representative + Liouville ⇒ `L(0) ≃ ℂ`, `#print
+axioms`-clean, tracked in `docs/axiom-report.txt`) — the concrete check that the
+fix gives the right dimension (it was false over the old degenerate space). Only
+general `riemannRochSpace_finiteDimensional` and `h0_canonical` remain deferred.
 Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
 real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
 is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
