@@ -20,6 +20,25 @@ open Jacobians.ProjectiveCurve.HyperellipticEvenProj
 
 variable {H : HyperellipticData} [hf : Fact (¬ Odd H.f.natDegree)]
 
+/-- The affine branch point over a root `x` of `H.f`: `(x, 0)`. -/
+def liouvilleBranchPoint (x : ℂ) (hx : H.f.eval x = 0) : HyperellipticAffine H :=
+  ⟨(x, 0), by simp [hx]⟩
+
+omit hf in
+/-- At a branch point, squarefreeness gives `f'(x) ≠ 0`, so the `w = y`
+chart is valid. -/
+theorem liouvilleBranchPoint_mem_smoothLocusX {x : ℂ} (hx : H.f.eval x = 0) :
+    liouvilleBranchPoint (H := H) x hx ∈ smoothLocusX H := by
+  unfold liouvilleBranchPoint smoothLocusX
+  exact eval_derivative_ne_zero_of_eval_eq_zero H hx
+
+omit hf in
+/-- A branch point has `y = 0`, so it is not in the projX smooth-`Y` locus. -/
+theorem liouvilleBranchPoint_not_mem_smoothLocusY {x : ℂ} (hx : H.f.eval x = 0) :
+    liouvilleBranchPoint (H := H) x hx ∉ smoothLocusY H := by
+  intro hY
+  exact hY rfl
+
 /-- The local Liouville numerator on a smooth-`Y` projX chart:
 `form.coeff q z * y(z)`, where `y(z)` is the IFT branch of `sqrt (H.f.eval z)`.
 
@@ -159,6 +178,25 @@ theorem liouvilleProjYNumerator_analyticOn
       (affineChartProjY (H := H) a hpX).target := by
   exact (form_coeff_analyticOn_affineProjY_target form a hpX hpYn q hQ).mul
     (polynomialLocalHomeomorph_symm_sq_derivative_div_two_analyticOn (H := H) a hpX)
+
+/-- Branch-point specialization of `liouvilleProjYNumerator_analyticOn`.
+This is the local bounded/holomorphic expression supplied by the `w = y`
+coordinate at a root of `H.f`. -/
+theorem liouvilleBranchPoint_numerator_analyticOn
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {x : ℂ} (hx : H.f.eval x = 0)
+    (q : HyperellipticEvenProj H)
+    (hQ : Quotient.out q = Sum.inl (liouvilleBranchPoint (H := H) x hx)) :
+    AnalyticOn ℂ
+      (liouvilleProjYNumerator (H := H) form
+        (liouvilleBranchPoint (H := H) x hx)
+        (liouvilleBranchPoint_mem_smoothLocusX (H := H) hx) q)
+      (affineChartProjY (H := H) (liouvilleBranchPoint (H := H) x hx)
+        (liouvilleBranchPoint_mem_smoothLocusX (H := H) hx)).target := by
+  exact liouvilleProjYNumerator_analyticOn form
+    (liouvilleBranchPoint (H := H) x hx)
+    (liouvilleBranchPoint_mem_smoothLocusX (H := H) hx)
+    (liouvilleBranchPoint_not_mem_smoothLocusY (H := H) hx) q hQ
 
 /-- Dividing the local numerator by the nonzero chart branch recovers the chart
 coefficient. This is the local algebraic readout used in the final L2 assembly. -/
