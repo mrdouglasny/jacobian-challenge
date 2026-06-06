@@ -26,5 +26,6 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas.InfinityAffineChart
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
+import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport
 import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
 import Jacobians.ProjectiveCurve.PlaneCurve

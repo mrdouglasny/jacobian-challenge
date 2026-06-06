@@ -65,6 +65,7 @@ chart-overlap arguments.
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
+import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport
 import Jacobians.RiemannSurface
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
