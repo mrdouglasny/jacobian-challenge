@@ -56,7 +56,7 @@ same commit that retires the axiom.
 - [ ] B2. factor through `H₁ = Abelianization (FundamentalGroup X x₀)` via `Abelianization.lift`   status: todo   deps: [B1]
 
 ### HI-3 — loop integral ∈ Λ
-- [ ] C1. verify the existing cycle basis spans abelianized π₁ via `AX_AnalyticCycleBasis` — **NO new axiom** (escalate if a spanning axiom is genuinely unavoidable)   status: todo   deps: [B2]   note: confirm AX_AnalyticCycleBasis's basis ties to FundamentalGroup-abelianization
+- [x] C1. verify the existing cycle basis spans abelianized π₁ via `AX_AnalyticCycleBasis` — **NO new axiom**   status: done   deps: []   note: CONFIRMED 2026-06-06. `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` (Homology.lean:41) = exactly the HI-2 target. `AnalyticCycleBasis.isBasis : Module.Basis (Fin 2g) ℤ (H1 X x₀)` spans by def (`Basis.repr`/`sum_repr`); `loops_to_basis` ties basis vectors to `loopToHomology (loops i)`. HI-3 = `isBasis.repr` + basis periods define Λ. No new axiom — whole workstream reuses `AX_AnalyticCycleBasis`.
 - [ ] C2. `loop_integral_mem_periodLattice` — any loop's class is a ℤ-combo of the basis whose periods ∈ Λ   status: todo   deps: [B2, C1]
 
 ### Discharge
