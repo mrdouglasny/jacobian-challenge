@@ -842,4 +842,31 @@ lemma developingValue_eq_top_row_sum {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a
       simp [Path.subpath, extGrid_last τ hτ1]
       rfl
 
+/-- A7 final: the choice-based developing value is invariant under path homotopy. -/
+theorem developingValue_homotopy_invariance {a b : X} (x₀ : X)
+    (form : HolomorphicOneForm X) {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) :
+    developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) =
+      developingValue x₀ form ((γ₂ : Path a b) : C(unitInterval, X)) := by
+  classical
+  let G : unitInterval → unitInterval → X := fun x y => (H.eval y) x
+  have hG : Continuous (fun z : unitInterval × unitInterval => G z.1 z.2) := by
+    have hswap : Continuous (fun z : unitInterval × unitInterval => (z.2, z.1)) :=
+      continuous_snd.prodMk continuous_fst
+    simpa [G, Path.Homotopy.eval] using H.continuous_toFun.comp hswap
+  obtain ⟨m, n, σ, τ, Bcell, _hm, hn, hσ0, hσ1, hσmono,
+      hτ0, hτ1, hτmono, hcell⟩ :=
+    exists_pathChartBall_subordinate_grid (X := X) G hG
+  have hbottom := developingValue_eq_bottom_row_sum x₀ form H σ τ
+    hσ0 hσ1 hσmono hτ0 hτ1 hτmono hn Bcell hcell
+  have htop := developingValue_eq_top_row_sum x₀ form H σ τ
+    hσ0 hσ1 hσmono hτ0 hτ1 hτmono hn Bcell hcell
+  have hcols := col_sum_eq x₀ form H σ τ hσ0 hσ1 hσmono hτ0 hτ1 hτmono
+    Bcell hcell
+  calc
+    developingValue x₀ form ((γ₁ : Path a b) : C(unitInterval, X)) =
+        ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i 0 := hbottom
+    _ = ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i n := hcols
+    _ = developingValue x₀ form ((γ₂ : Path a b) : C(unitInterval, X)) := htop.symm
+
 end Jacobians.RiemannSurface
