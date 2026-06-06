@@ -213,6 +213,30 @@ proven, axiom-free lemma**: `differentiable_eq_polynomial_of_growth` in
 is constructing that entire extension and its growth exponent from the
 chart-cocycle data (steps 1–3) — the branch-point regularity and the
 degree-at-infinity bound. -/
+noncomputable def liouvilleGlobalNumerator
+    {H : HyperellipticData} [hf : Fact (¬ Odd H.f.natDegree)]
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) : ℂ → ℂ := by
+  classical
+  intro z
+  by_cases hz : H.f.eval z = 0
+  · let p := liouvilleBranchPoint (H := H) z hz
+    exact liouvilleProjYNumerator (H := H) form p
+      (liouvilleBranchPoint_mem_smoothLocusX (H := H) hz)
+      (HyperellipticEvenProj.proj H (Sum.inl p)) 0
+  · let y := Classical.choose (IsAlgClosed.exists_eq_mul_self (H.f.eval z))
+    have hy : H.f.eval z = y * y :=
+      Classical.choose_spec (IsAlgClosed.exists_eq_mul_self (H.f.eval z))
+    let a : HyperellipticAffine H := ⟨(z, y), by
+      change y ^ 2 = H.f.eval z
+      simpa [pow_two] using hy.symm⟩
+    have hpY : a ∈ HyperellipticAffine.smoothLocusY H := by
+      change y ≠ 0
+      intro hy0
+      apply hz
+      simpa [hy0] using hy
+    exact liouvilleProjXNumerator (H := H) form a hpY
+      (HyperellipticEvenProj.proj H (Sum.inl a)) z
+
 axiom AX_HyperellipticForm_polynomial_decomposition
     {H : HyperellipticData} [hf : Fact (¬ Odd H.f.natDegree)]
     (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
