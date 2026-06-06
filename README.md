@@ -102,6 +102,16 @@ We build on real Lean from two sibling Jacobian-Challenge attempts, each vendore
 
 Both vendored subtrees are **axiom-free**; their headline theorems `#print axioms`-verify to the three standard Lean axioms only.
 
+## Contributors & acknowledgments
+
+An agent-assisted community project. Contributions span code, vendored proofs, and the issue/triage layer that maps the open problems.
+
+- **[Michael R. Douglas](https://github.com/mrdouglasny)** — project lead.
+- **Jack McCarthy ([@Deicyde](https://github.com/Deicyde))** — the axiom-discharge issue tracker ([#77](https://github.com/mrdouglasny/jacobian-challenge/issues/77)) and the per-axiom tracking issues that structure the project's open-problem surface.
+- **Rado Kirov ([@rkirov](https://github.com/rkirov))** and **[@tangentstorm](https://github.com/tangentstorm)** — vendored Lean proofs (see [Vendored sources](#vendored-sources--attribution)).
+
+> GitHub's *Contributors* graph counts commits only; issue, review, and vendored-code contributions are credited here.
+
 ## Further reading
 
 - [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — canonical, kernel-verified axiom audit (per-axiom file:line, ratings, discharged table).
