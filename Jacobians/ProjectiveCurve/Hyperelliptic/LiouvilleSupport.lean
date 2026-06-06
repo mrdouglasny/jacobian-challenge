@@ -88,6 +88,18 @@ theorem liouvilleProjXNumerator_analyticOn
   exact (form_coeff_analyticOn_affineProjX_target form a hpY q hQ).mul
     (squareLocalHomeomorph_symm_eval_analyticOn (H := H) a hpY)
 
+/-- Pointwise form of `liouvilleProjXNumerator_analyticOn`, convenient when
+assembling a global numerator by local charts. -/
+theorem liouvilleProjXNumerator_analyticAt
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inl a)
+    {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target) :
+    AnalyticAt ℂ (liouvilleProjXNumerator (H := H) form a hpY q) z :=
+  AnalyticOn.analyticAt
+    ((affineChartProjX (H := H) a hpY).open_target.mem_nhds hz)
+    (liouvilleProjXNumerator_analyticOn form a hpY q hQ)
+
 omit hf in
 /-- The branch-chart factor `w ↦ f'(x(w)) / 2`, where
 `x(w) = polynomialLocalHomeomorph.symm (w ^ 2)`, is analytic on a projY chart. -/
@@ -197,6 +209,28 @@ theorem liouvilleBranchPoint_numerator_analyticOn
     (liouvilleBranchPoint (H := H) x hx)
     (liouvilleBranchPoint_mem_smoothLocusX (H := H) hx)
     (liouvilleBranchPoint_not_mem_smoothLocusY (H := H) hx) q hQ
+
+/-- Pointwise branch-chart analyticity at the branch coordinate `w = 0`. -/
+theorem liouvilleBranchPoint_numerator_analyticAt_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {x : ℂ} (hx : H.f.eval x = 0)
+    (q : HyperellipticEvenProj H)
+    (hQ : Quotient.out q = Sum.inl (liouvilleBranchPoint (H := H) x hx)) :
+    AnalyticAt ℂ
+      (liouvilleProjYNumerator (H := H) form
+        (liouvilleBranchPoint (H := H) x hx)
+        (liouvilleBranchPoint_mem_smoothLocusX (H := H) hx) q)
+      0 := by
+  let p := liouvilleBranchPoint (H := H) x hx
+  let hpX := liouvilleBranchPoint_mem_smoothLocusX (H := H) hx
+  have h0target : (0 : ℂ) ∈ (affineChartProjY (H := H) p hpX).target := by
+    have hsrc : p ∈ (affineChartProjY (H := H) p hpX).source :=
+      affineChartProjY_mem_source p hpX
+    have htarget := (affineChartProjY (H := H) p hpX).map_source hsrc
+    simpa [p, liouvilleBranchPoint] using htarget
+  exact AnalyticOn.analyticAt
+    ((affineChartProjY (H := H) p hpX).open_target.mem_nhds h0target)
+    (liouvilleBranchPoint_numerator_analyticOn form hx q hQ)
 
 /-- Dividing the local numerator by the nonzero chart branch recovers the chart
 coefficient. This is the local algebraic readout used in the final L2 assembly. -/
@@ -395,6 +429,78 @@ theorem even_natDegree_div_two_ge_two : 2 ≤ H.f.natDegree / 2 := by
     omega
   omega
 
+/-- If `G z / z^n` has a finite limit at infinity and `G` is continuous, then
+`G` satisfies a global polynomial growth bound of degree `n`.
+
+The compact set inserted in the proof includes `0`, so the division by `z^n`
+is only used where `z ≠ 0`; the compact part is bounded by continuity. -/
+theorem polynomial_growth_bound_of_tendsto_div_pow
+    (G : ℂ → ℂ) (n : ℕ) (c : ℂ)
+    (hGcont : Continuous G)
+    (hlim : Filter.Tendsto (fun z : ℂ => G z / z ^ n) (Filter.cocompact ℂ) (𝓝 c)) :
+    ∃ C : ℝ, ∀ z : ℂ, ‖G z‖ ≤ C * (1 + ‖z‖) ^ n := by
+  classical
+  let R : ℝ := ‖c‖ + 1
+  have hR_nonneg : 0 ≤ R := by
+    dsimp [R]
+    positivity
+  have hmem : (fun z : ℂ => G z / z ^ n) ⁻¹' Metric.closedBall c 1 ∈
+      Filter.cocompact ℂ :=
+    hlim (Metric.closedBall_mem_nhds c zero_lt_one)
+  rw [Filter.mem_cocompact] at hmem
+  obtain ⟨K₀, hK₀, hK₀sub⟩ := hmem
+  let K : Set ℂ := K₀ ∪ {0}
+  have hK : IsCompact K := hK₀.union isCompact_singleton
+  obtain ⟨M, hM⟩ := hK.exists_bound_of_continuousOn hGcont.continuousOn
+  let C : ℝ := max M R
+  have hC_nonneg : 0 ≤ C := le_trans hR_nonneg (le_max_right M R)
+  refine ⟨C, ?_⟩
+  intro z
+  have hpow_one : (1 : ℝ) ≤ (1 + ‖z‖) ^ n :=
+    one_le_pow₀ (by linarith [norm_nonneg z])
+  by_cases hzK : z ∈ K
+  · calc
+      ‖G z‖ ≤ M := hM z hzK
+      _ ≤ C := le_max_left M R
+      _ ≤ C * (1 + ‖z‖) ^ n := by
+        have := mul_le_mul_of_nonneg_left hpow_one hC_nonneg
+        simpa using this
+  · have hzK₀ : z ∉ K₀ := fun hz => hzK (Or.inl hz)
+    have hz0 : z ≠ 0 := by
+      intro hz
+      apply hzK
+      right
+      simp [hz]
+    have hzratio_mem :
+        G z / z ^ n ∈ Metric.closedBall c 1 := hK₀sub hzK₀
+    have hdist : dist (G z / z ^ n) c ≤ 1 := by
+      simpa [Metric.mem_closedBall] using hzratio_mem
+    have hratio : ‖G z / z ^ n‖ ≤ R := by
+      calc
+        ‖G z / z ^ n‖ = dist (G z / z ^ n) 0 := by
+          rw [dist_zero_right]
+        _ ≤ dist (G z / z ^ n) c + dist c 0 := dist_triangle _ _ _
+        _ ≤ 1 + ‖c‖ := by
+          rw [dist_zero_right]
+          linarith
+        _ = R := by
+          ring
+    have hzpow_ne : z ^ n ≠ 0 := pow_ne_zero n hz0
+    have hnorm_pow_le : ‖z‖ ^ n ≤ (1 + ‖z‖) ^ n :=
+      pow_le_pow_left₀ (norm_nonneg z) (by linarith [norm_nonneg z]) n
+    calc
+      ‖G z‖ = ‖(G z / z ^ n) * z ^ n‖ := by
+        rw [div_mul_cancel₀ _ hzpow_ne]
+      _ = ‖G z / z ^ n‖ * ‖z ^ n‖ := norm_mul _ _
+      _ ≤ R * ‖z ^ n‖ :=
+        mul_le_mul_of_nonneg_right hratio (norm_nonneg _)
+      _ = R * ‖z‖ ^ n := by
+        rw [norm_pow]
+      _ ≤ C * ‖z‖ ^ n :=
+        mul_le_mul_of_nonneg_right (le_max_right M R) (pow_nonneg (norm_nonneg z) n)
+      _ ≤ C * (1 + ‖z‖) ^ n :=
+        mul_le_mul_of_nonneg_left hnorm_pow_le hC_nonneg
+
 /-- **Liouville L2 assembly from the two hard analytic inputs.**
 
 If a global numerator `G : ℂ → ℂ` has already been constructed, is entire, has
@@ -462,7 +568,7 @@ theorem oneForm_eq_hyperellipticForm_of_eqOn_chartTarget
   funext q z
   by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target
   · exact hCoeff q z hz
-  · show (form : HyperellipticEvenProj H → ℂ → ℂ) q z =
+  · change (form : HyperellipticEvenProj H → ℂ → ℂ) q z =
       (hyperellipticForm H g : HyperellipticEvenProj H → ℂ → ℂ) q z
     rw [form.2.2.2 q z hz, (hyperellipticForm H g).2.2.2 q z hz]
 
