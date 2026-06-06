@@ -205,6 +205,15 @@ lemma extGrid_castSucc_le_succ {m : ℕ} (σ : Fin (m + 1) → ℝ)
     extGrid_coe_succ σ hσ0 hσ1 hσmono i]
   exact hσmono (Fin.castSucc_le_succ i)
 
+lemma extGrid_fin_monotone {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ) :
+    Monotone (fun k : Fin (m + 1) => extGrid σ k.val) := by
+  intro i j hij
+  change (extGrid σ i.val : ℝ) ≤ (extGrid σ j.val : ℝ)
+  rw [extGrid_coe_of_lt σ hσ0 hσ1 hσmono i.isLt,
+    extGrid_coe_of_lt σ hσ0 hσ1 hσmono j.isLt]
+  exact hσmono hij
+
 lemma extGrid_left_mem_real_Icc {m : ℕ} (σ : Fin (m + 1) → ℝ)
     (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
     (i : Fin m) :
@@ -666,5 +675,99 @@ lemma col_sum_eq {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
         simpa using (Finset.sum_range_sub' f n).symm
       _ = 0 := hsumzero
   exact sub_eq_zero.mp hsub
+
+/-- The last cell index below the top edge of a positive vertical grid. -/
+def lastCell (n : ℕ) (hn : 0 < n) : Fin n :=
+  ⟨n - 1, Nat.sub_lt hn zero_lt_one⟩
+
+private lemma lastCell_succ {n : ℕ} (hn : 0 < n) :
+    (lastCell n hn).succ = Fin.last n := by
+  ext
+  simp [lastCell]
+  omega
+
+private noncomputable def bottomRowSubdivision {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (hτ0 : τ 0 = 0) (_hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (hn : 0 < n)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j)) :
+    PathChartBallSubdivision ((γ₁ : Path a b) : C(unitInterval, X)) where
+  n := m
+  t := fun k : Fin (m + 1) => extGrid σ k.val
+  cellBall := fun i : Fin m => Bcell i ⟨0, hn⟩
+  zero_eq := extGrid_zero σ hσ0
+  one_eq := extGrid_last σ hσ1
+  monotone_t := extGrid_fin_monotone σ hσ0 hσ1 hσmono
+  cell_subset := by
+    intro i u hu
+    rw [pathChartBallSet_eq_preimage_pointChartBallSet]
+    change γ₁ u ∈ pointChartBallSet (Bcell i ⟨0, hn⟩)
+    have hx : (u : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) := by
+      constructor
+      · calc
+          σ i.castSucc = (extGrid σ i : ℝ) :=
+            (extGrid_coe_castSucc σ hσ0 hσ1 hσmono i).symm
+          _ ≤ (u : ℝ) := hu.1
+      · calc
+          (u : ℝ) ≤ (extGrid σ (i + 1) : ℝ) := hu.2
+          _ = σ i.succ := extGrid_coe_succ σ hσ0 hσ1 hσmono i
+    have hy : ((0 : unitInterval) : ℝ) ∈
+        Set.Icc (τ (⟨0, hn⟩ : Fin n).castSucc) (τ (⟨0, hn⟩ : Fin n).succ) := by
+      constructor
+      · simp [hτ0]
+      · calc
+          (0 : ℝ) = τ 0 := hτ0.symm
+          _ ≤ τ (⟨0, hn⟩ : Fin n).succ :=
+            hτmono (Fin.zero_le _)
+    have h := hcell i ⟨0, hn⟩ u hx 0 hy
+    simp at h ⊢
+    exact h
+
+private noncomputable def topRowSubdivision {m n : ℕ} {a b : X} {γ₁ γ₂ : Path a b}
+    (H : Path.Homotopy γ₁ γ₂) (σ : Fin (m + 1) → ℝ) (τ : Fin (n + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (_hτ0 : τ 0 = 0) (hτ1 : τ (Fin.last n) = 1) (hτmono : Monotone τ)
+    (hn : 0 < n)
+    (Bcell : Fin m → Fin n → PathChartBall X)
+    (hcell : ∀ i : Fin m, ∀ j : Fin n,
+      ∀ x : unitInterval, (x : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) →
+      ∀ y : unitInterval, (y : ℝ) ∈ Set.Icc (τ j.castSucc) (τ j.succ) →
+        (H.eval y) x ∈ pointChartBallSet (Bcell i j)) :
+    PathChartBallSubdivision ((γ₂ : Path a b) : C(unitInterval, X)) where
+  n := m
+  t := fun k : Fin (m + 1) => extGrid σ k.val
+  cellBall := fun i : Fin m => Bcell i (lastCell n hn)
+  zero_eq := extGrid_zero σ hσ0
+  one_eq := extGrid_last σ hσ1
+  monotone_t := extGrid_fin_monotone σ hσ0 hσ1 hσmono
+  cell_subset := by
+    intro i u hu
+    rw [pathChartBallSet_eq_preimage_pointChartBallSet]
+    change γ₂ u ∈ pointChartBallSet (Bcell i (lastCell n hn))
+    have hx : (u : ℝ) ∈ Set.Icc (σ i.castSucc) (σ i.succ) := by
+      constructor
+      · calc
+          σ i.castSucc = (extGrid σ i : ℝ) :=
+            (extGrid_coe_castSucc σ hσ0 hσ1 hσmono i).symm
+          _ ≤ (u : ℝ) := hu.1
+      · calc
+          (u : ℝ) ≤ (extGrid σ (i + 1) : ℝ) := hu.2
+          _ = σ i.succ := extGrid_coe_succ σ hσ0 hσ1 hσmono i
+    have hy : ((1 : unitInterval) : ℝ) ∈
+        Set.Icc (τ (lastCell n hn).castSucc) (τ (lastCell n hn).succ) := by
+      constructor
+      · calc
+          τ (lastCell n hn).castSucc ≤ τ (Fin.last n) :=
+            hτmono (Fin.le_last _)
+          _ = 1 := hτ1
+      · rw [lastCell_succ hn, hτ1]
+        exact le_rfl
+    have h := hcell i (lastCell n hn) u hx 1 hy
+    simpa using h
 
 end Jacobians.RiemannSurface
