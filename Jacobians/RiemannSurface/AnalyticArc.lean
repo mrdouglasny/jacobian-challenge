@@ -182,12 +182,20 @@ structure AnalyticArc (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
   partition_subset : ↑partition ⊆ Set.Icc (0 : ℝ) 1
   zero_mem : (0 : ℝ) ∈ partition
   one_mem : (1 : ℝ) ∈ partition
-  is_analytic : IsAnalyticArc X extend partition
+  is_analytic_strong : IsAnalyticArcStrong X extend partition
 
 namespace AnalyticArc
 
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]
+
+/-- The weak (pointwise, moving-chart) analyticity of an arc, derived from the
+strong field. Reproduces the former `is_analytic` *field* signature
+(`∀ u ∈ Ioo 0 1, u ∉ partition → AnalyticAt …`) as a lemma, so every downstream
+consumer that called `γ.is_analytic u h h` is unchanged. -/
+theorem is_analytic (γ : AnalyticArc X) :
+    IsAnalyticArc X γ.extend γ.partition :=
+  γ.is_analytic_strong.toWeak γ.zero_mem γ.one_mem
 
 /-- Evaluation of the arc at a point in `unitInterval`, ignoring the
 extension's out-of-range values. -/
