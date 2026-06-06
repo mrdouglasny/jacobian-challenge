@@ -154,6 +154,53 @@ lemma extGrid_succ {m : ℕ} (σ : Fin (m + 1) → ℝ) (i : Fin m) :
   rw [extGrid_of_lt σ (by simp)]
   congr
 
+lemma clampToI_coe_of_Icc {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
+    (clampToI x : ℝ) = x := by
+  simp [clampToI, hx.1, hx.2]
+
+lemma grid_value_mem_Icc {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (k : Fin (m + 1)) :
+    σ k ∈ Set.Icc (0 : ℝ) 1 := by
+  constructor
+  · calc
+      (0 : ℝ) = σ 0 := hσ0.symm
+      _ ≤ σ k := hσmono (Fin.zero_le k)
+  · calc
+      σ k ≤ σ (Fin.last m) := hσmono (Fin.le_last k)
+      _ = 1 := hσ1
+
+lemma extGrid_coe_of_lt {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    {k : ℕ} (hk : k < m + 1) :
+    (extGrid σ k : ℝ) = σ ⟨k, hk⟩ := by
+  rw [extGrid_of_lt σ hk]
+  exact clampToI_coe_of_Icc (grid_value_mem_Icc σ hσ0 hσ1 hσmono ⟨k, hk⟩)
+
+lemma extGrid_coe_castSucc {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) :
+    (extGrid σ i : ℝ) = σ i.castSucc := by
+  rw [extGrid_coe_of_lt σ hσ0 hσ1 hσmono
+    (Nat.lt_trans i.isLt (Nat.lt_succ_self m))]
+  congr
+
+lemma extGrid_coe_succ {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) :
+    (extGrid σ (i + 1) : ℝ) = σ i.succ := by
+  rw [extGrid_coe_of_lt σ hσ0 hσ1 hσmono (by simp)]
+  congr
+
+lemma extGrid_castSucc_le_succ {m : ℕ} (σ : Fin (m + 1) → ℝ)
+    (hσ0 : σ 0 = 0) (hσ1 : σ (Fin.last m) = 1) (hσmono : Monotone σ)
+    (i : Fin m) :
+    extGrid σ i ≤ extGrid σ (i + 1) := by
+  change (extGrid σ i : ℝ) ≤ (extGrid σ (i + 1) : ℝ)
+  rw [extGrid_coe_castSucc σ hσ0 hσ1 hσmono i,
+    extGrid_coe_succ σ hσ0 hσ1 hσmono i]
+  exact hσmono (Fin.castSucc_le_succ i)
+
 /-- Bottom horizontal edge of a homotopy grid cell. -/
 def B_edge {a b : X} {γ₁ γ₂ : Path a b} (H : Path.Homotopy γ₁ γ₂)
     (σu τu : ℕ → unitInterval) (i j : ℕ) :
