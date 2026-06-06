@@ -1,6 +1,7 @@
 import Jacobians.RiemannSurface.DevelopingValueAlgebra
 import Jacobians.RiemannSurface.SquareSubdivision
 import Jacobians.RiemannSurface.DevelopingBridge
+import Jacobians.RiemannSurface.HomotopyInvariance
 
 /-!
 # Homotopy invariance for developing values
@@ -868,5 +869,17 @@ theorem developingValue_homotopy_invariance {a b : X} (x₀ : X)
         ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i 0 := hbottom
     _ = ∑ i ∈ Finset.range m, devBVal x₀ form H (extGrid σ) (extGrid τ) i n := hcols
     _ = developingValue x₀ form ((γ₂ : Path a b) : C(unitInterval, X)) := htop.symm
+
+/-- A8: the canonical moving-chart arc integral is invariant under path homotopy. -/
+theorem canonicalArcIntegral_homotopy_invariant
+    (γ₁ γ₂ : AnalyticArc X) (form : HolomorphicOneForm X)
+    (hstart : γ₁.extend 0 = γ₂.extend 0) (hend : γ₁.extend 1 = γ₂.extend 1)
+    (H : (analyticArcToPath γ₁).Homotopy ((analyticArcToPath γ₂).cast hstart hend)) :
+    canonicalArcIntegral γ₁ form = canonicalArcIntegral γ₂ form := by
+  let x₀ : X := γ₁.extend 0
+  have hdev := developingValue_homotopy_invariance x₀ form H
+  rw [← developingValue_eq_canonicalArcIntegral x₀ form γ₁,
+    ← developingValue_eq_canonicalArcIntegral x₀ form γ₂]
+  simpa [analyticArcToPath, analyticArcToContinuousMap, Path.cast] using hdev
 
 end Jacobians.RiemannSurface
