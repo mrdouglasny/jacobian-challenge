@@ -58,18 +58,20 @@ theorem plucker_genus (H : PlaneCurveData) :
 `g = 0`.  Specialization of `plucker_genus`. -/
 theorem plucker_genus_zero_of_deg_le_two (H : PlaneCurveData) (hd : H.d ≤ 2) :
     genus (PlaneCurve H) = 0 := by
-  sorry
+  rw [plucker_genus]
+  have h2 : H.d - 2 = 0 := by omega
+  rw [h2, Nat.mul_zero, Nat.zero_div]
 
 /-- A smooth plane cubic (`d = 3`) is elliptic: `g = 1`.  Specialization of
 `plucker_genus`. -/
 theorem plucker_genus_cubic (H : PlaneCurveData) (hd : H.d = 3) :
     genus (PlaneCurve H) = 1 := by
-  sorry
+  rw [plucker_genus, hd]
 
 /-- A smooth plane quartic (`d = 4`) has genus `3`.  Specialization of
 `plucker_genus`. -/
 theorem plucker_genus_quartic (H : PlaneCurveData) (hd : H.d = 4) :
     genus (PlaneCurve H) = 3 := by
-  sorry
+  rw [plucker_genus, hd]
 
 end Jacobians.RiemannSurface
