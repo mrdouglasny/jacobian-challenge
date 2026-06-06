@@ -12,7 +12,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
 | **Axioms** | 62, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
-| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 14 intentional anchor-statement deferrals |
+| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 11 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
 ## The challenge
@@ -51,7 +51,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 | Concrete curves (hyperelliptic / plane-curve atlases & witnesses) | ~26 | 🟢🟡 |
 | Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 2 | 🔴 |
 
-**Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)` as a ℂ-submodule, which de-opaqued `H0`), `RiemannRochAPI`, `SerreDualityAPI`, `PluckerAPI`, all gated by the `SheafCohomologySpec` faithfulness suite. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
+**Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)` as a ℂ-submodule, which de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`RiemannRochAPI` and `SerreDualityAPI` still carry their proof obligations** as the 11 deferred `sorry`s (the Riemann–Roch identity, Serre duality dimension form, etc.) — these are the genuine open targets. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
 
 ## Caveats — read before relying on this
 
@@ -60,7 +60,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 - **Zero human-written Lean.** The Lean was written by Claude (Opus) with Codex rescue passes and Gemini axiom audits, directed by a mathematician on scope, the axiom-vs-proof boundary, and review of every landing.
 - **`sorry`s, in two honest categories** (the *core* — challenge API, Jacobian construction, curve witnesses, S1–S7 1-form framework — is `sorry`-free):
   - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Hyperelliptic/AntiInvariance.lean` 1).
-  - **14 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre/Plücker statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 3, `PluckerAPI` 3).
+  - **11 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 8, `SerreDualityAPI` 3); `PluckerAPI` is now fully proved (the low-degree corollaries discharge by arithmetic from the real `plucker_genus`).
 
 ## How it's built
 

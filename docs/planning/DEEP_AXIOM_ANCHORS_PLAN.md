@@ -53,8 +53,16 @@ become `finrank (riemannRochSpace D)` — a real dimension.
 ### 2. `SerreDualityAPI.lean`
 - Either keep `H1` opaque with `theorem serre : H1(𝒪(D)) ≃ₗ[ℂ] (riemannRochSpace (K−D))*` (sorry), OR **DEFINE** `H1 (𝒪(D)) := (riemannRochSpace (K−D)) →ₗ[ℂ] ℂ` (Serre-dual form) — making H1 real and Serre definitional, leaving RR (above) as the one sorry. **DECISION TO VET:** define-H1-by-Serre (clean, fewer axioms, but bakes Serre in) vs keep-H1-opaque-with-Serre-iso (keeps Serre as a checkable target). Recommend the latter for honesty unless we want H1 real.
 
-### 3. `PluckerAPI.lean`
-- `theorem plucker (H : PlaneCurveData) : genus (PlaneCurve H) = (H.d−1)*(H.d−2)/2` (sorry) — the smooth-plane-curve genus–degree formula. **VET:** the smoothness/irreducibility hypotheses on `PlaneCurveData` (a singular curve fails this); the `ℕ`-division `/2` is exact since `(d−1)(d−2)` is always even.
+### 3. `PluckerAPI.lean` — ✅ COMPLETE (2026-06-06)
+`plucker_genus` re-exports `AX_PluckerFormula` and the low-degree corollaries
+(`_zero_of_deg_le_two`, `_cubic`, `_quartic`) are proved by ℕ-arithmetic — the
+file is **sorry-free**. Plücker's anchor was thin: a single axiom with no
+intermediate proof obligations, so the API holds no deferred targets. Remaining
+Plücker work lives *below* the API: the formula axiom `AX_PluckerFormula`
+(Bézout/adjunction) and the `PlaneCurve` three-chart atlas — both still on the
+axiom list. (Original note retained: smoothness/irreducibility hypotheses on
+`PlaneCurveData` rule out singular curves; the `ℕ`-division `/2` is exact since
+`(d−1)(d−2)` is always even.)
 
 ### 4. Sheaf-cohomology faithfulness (mostly DONE)
 `SheafCohomologySpec.lean` already encodes the acceptance suite. Anchor work: turn
