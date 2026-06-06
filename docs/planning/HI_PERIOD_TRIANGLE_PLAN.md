@@ -57,11 +57,11 @@ same commit that retires the axiom.
 
 ### HI-3 — loop integral ∈ Λ
 - [x] C1. verify the existing cycle basis spans abelianized π₁ via `AX_AnalyticCycleBasis` — **NO new axiom**   status: done   deps: []   note: CONFIRMED 2026-06-06. `H1 X x₀ := Additive (Abelianization (FundamentalGroup X x₀))` (Homology.lean:41) = exactly the HI-2 target. `AnalyticCycleBasis.isBasis : Module.Basis (Fin 2g) ℤ (H1 X x₀)` spans by def (`Basis.repr`/`sum_repr`); `loops_to_basis` ties basis vectors to `loopToHomology (loops i)`. HI-3 = `isBasis.repr` + basis periods define Λ. No new axiom — whole workstream reuses `AX_AnalyticCycleBasis`.
-- [ ] C2. `loop_integral_mem_periodLattice` — any loop's class is a ℤ-combo of the basis whose periods ∈ Λ   status: todo   deps: [B2, C1]
+- [x] C2. `loop_integral_mem_periodLattice` — any loop's developing periods ∈ Λ   status: done   deps: [B2, C1]   note: DONE 0d05da2 + crux agreement dc98014 (loopDevValH1Hom = loopIntegralToH1 on spanning cycle basis)
 
 ### Discharge
-- [ ] D1. `AX_Period_Triangle` as a `theorem` — triangle = closed loop `(p_xy.trans p_yz).trans p_xz.symm` at x; integral ∈ Λ by C2 + arc algebra   status: todo   deps: [C2]
-- [ ] D2. retire the axiom; `#print axioms` verify (no sorryAx / no new axiom); update `AXIOM_AUDIT.md` (counts, by-class breakdown — guard enforces), README, golden report; PR   status: todo   deps: [D1]
+- [x] D1. `AX_Period_Triangle` as a `theorem` — triangle loop at x; integral ∈ Λ by C2 + HI-0 + devVal_trans/symm   status: done   deps: [C2]   note: DONE a594e2e
+- [x] D2. retire the axiom + reconcile counts (59→58)   status: done   deps: [D1]   note: DONE a594e2e + 7aac720. #print axioms ofCurve_inj: NO AX_Period_Triangle, NO sorryAx. Kernel 58. Guard green at 58. **AX_Period_Triangle DISCHARGED — whole HI workstream complete, no new axiom.**
 
 ## Sequencing
 A1–A3 are independent (parallelizable). A4 needs A2. A5 needs A1–A3. A6 needs A5
