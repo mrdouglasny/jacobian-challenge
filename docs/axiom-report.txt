@@ -39,7 +39,6 @@
  Quot.sound,
  Axioms.AX_AbelTheorem,
  Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_Period_Triangle,
  Axioms.intersectionForm]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
  Classical.choice,

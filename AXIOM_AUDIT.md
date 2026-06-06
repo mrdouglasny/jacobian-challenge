@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 59** — all **59** in our own modules. The vendored
+**Active project axioms: 58** — all **58** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -141,6 +141,14 @@ Then → **59** by **proving `AX_cycleBasisLoop_integrable`** (2026-06-06) from 
 strengthened `AnalyticArc` regularity: strong cell witnesses give
 interval-integrability of canonical moving-chart integrands, and cycle-basis
 loop integrability is now a theorem.
+Then → **58** by **proving `AX_Period_Triangle`** (2026-06-06): the triangle is
+closed by conjugating it to the Jacobian's chosen basepoint, the analytic-loop
+period vector lies in `periodLatticeInBasis` by the new
+`loopDevValH1Hom = loopIntegralToH1` agreement over `AX_AnalyticCycleBasis`, and
+the bridge path cancels against its reverse by the canonical-arc algebra.
+`#print axioms AX_Period_Triangle` now lists only standard-3 +
+`AX_AnalyticCycleBasis` + `intersectionForm`; no self-reference, no new axiom,
+and no `sorryAx`.
 
 ---
 
@@ -148,11 +156,11 @@ loop integrability is now a theorem.
 
 Per the review plan, axioms are split into two classes:
 
-- **Class 1 — standard form, textbook-proven** (16 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (15 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (45 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (43 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -161,7 +169,7 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 16 | classical theorems, citable | high |
+| 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 25 | curve-specific chart constructions | real but unverified |
@@ -186,7 +194,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard) |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
 | `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
-| `AX_Period_Triangle` | `Axioms/AbelJacobiMap.lean:165` | period 1-cocycle / Stokes for closed 1-cycles (Griffiths-Harris Ch. 2; Forster §21) |
 | `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
@@ -231,8 +238,8 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 | `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:241,248` | functoriality of trace |
 
 *Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
-`Axioms/OfCurveInjective.lean`, derived from `AX_Period_Triangle`,
-`AX_AbelTheorem`, and `principal_imp_eq_of_genus_pos`.
+`Axioms/OfCurveInjective.lean`, derived from the proved period-triangle theorem
+`AX_Period_Triangle`, `AX_AbelTheorem`, and `principal_imp_eq_of_genus_pos`.
 
 ### 2c. Atlas / structure axioms — *curve-specific constructions*
 
@@ -304,6 +311,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_Period_Triangle` *(2026-06-06)* | conjugate the triangle loop to `Classical.arbitrary X`; use `loopDevValH1Hom_eq_loopIntegralToH1_apply` + `loop_canonicalArcIntegral_mem_periodLatticeInBasis` from the analytic cycle basis; cancel bridge/reverse periods by `canonicalArcIntegral_trans`/`_reverse` | `Axioms/AbelJacobiMap.lean`, `RiemannSurface/LoopIntegralHom.lean`, `RiemannSurface/ArcAlgebra.lean` |
 | `AX_cycleBasisLoop_integrable` *(2026-06-06)* | `analyticArc_canonicalIntegrand_intervalIntegrable` from strong per-cell analytic witnesses; cycle-basis loops are ordinary `AnalyticArc`s | `RiemannSurface/LoopIntegral.lean`, `RiemannSurface/PartitionIndependence.lean` |
 | `squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source` *(2026-06-06, PR #78)* | affine-form IFT-shape proved directly — square: distinct preimages collide under squaring ⇒ contradiction; polynomial: `ApproximatesLinearOn` / `HasFDerivAt` inverse-function argument | `ProjectiveCurve/Hyperelliptic/AffineForm.lean:66,280` |
 | `AX_torus_descent_holo` *(2026-06-06)* | local-section route over Kirov's `ZLatticeQuotient` local-homeo API (`isLocalHomeomorph_mk` + `contDiffOn_symm_mk`) composed with `P.fromQuot_holo`; helper `complexTorus_pushforward_contMDiff_to_quotient` | `Axioms/TorusAlbanese.lean` |
@@ -347,7 +355,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 59 — the vendored Kirov subtree is now axiom-free, so 59 is the total.
+#   prints 58 — the vendored Kirov subtree is now axiom-free, so 58 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -364,7 +372,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 59
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 58
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
