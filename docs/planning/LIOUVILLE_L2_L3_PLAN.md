@@ -46,12 +46,11 @@ discharge commit. 58 → 56.
 
 ## Plan (status machine)
 - [x] S0. Branch + plan + claim #35/#36   status: done
-- [ ] L0. Scope: read `hyperellipticForm`, the cocycle lemmas, `squareLocalHomeomorph`, the projX
-  chart-coeff shape, `IsZeroOffChartTarget`; pin the exact `g` definition + the entire/growth goals.   status: todo   deps: []
+- [x] L0. Scope   status: done   deps: []   note: DONE. KEY: `hyperellipticEvenCoeff_cocycle_inr_inl` is ALREADY a theorem (EvenForm.lean:2165, from inl_inr by symmetry) — both cocycles real, L3a is DONE. projX coeff shape = `g.eval z / squareLocalHomeomorph.symm (f z)` (AffineForm.lean:45). hyperellipticForm: Form.lean:104. Core remaining = L2 (entire extension + growth). Step-4 lemma: `differentiable_eq_polynomial_of_growth (n)(g)(Differentiable)(C)(∀z,‖g z‖≤C(1+‖z‖)^n)`.
 - [ ] L2a. entire extension `g` (`Differentiable ℂ`) — branch-point + seam regularity   status: todo   deps: [L0]
 - [ ] L2b. polynomial growth bound `‖g z‖ ≤ C·(1+‖z‖)^(N/2−2)` (degree-at-∞)   status: todo   deps: [L0]
 - [ ] L2. assemble `AX_HyperellipticForm_polynomial_decomposition` via Step 4   status: todo   deps: [L2a, L2b]
-- [ ] L3a. cocycle `inr_inl` via swap from `inl_inr`   status: todo   deps: [L0]
+- [x] L3a. cocycle `inr_inl`   status: done   deps: [L0]   note: ALREADY a theorem (`hyperellipticEvenCoeff_cocycle_inr_inl`, EvenForm.lean:2165) — both cocycle axioms were retired earlier. No work needed.
 - [ ] L3. assemble `AX_HyperellipticOneForm_eq_form` (ω = hyperellipticForm H g)   status: todo   deps: [L2, L3a]
 - [ ] D. retire both axioms; `#print axioms` verify; reconcile counts 58→56; PR   status: todo   deps: [L2, L3]
 
