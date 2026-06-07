@@ -413,6 +413,47 @@ theorem extChartAt_quotient_mk_line_deriv {L : Submodule ℤ ℂ}
     exact (hbase.const_add (liftPoint (L := L) p)).deriv
   exact hEq.deriv_eq.trans hderiv
 
+theorem extChartAt_quotient_mk_line_analyticAt {L : Submodule ℤ ℂ}
+    [DiscreteTopology L] [IsZLattice ℝ L] (p : ComplexTorus ℂ L) (v : ℂ) (r : ℝ)
+    (hp : p = (QuotientAddGroup.mk' L.toAddSubgroup ((r : ℂ) * v) : ComplexTorus ℂ L)) :
+    AnalyticAt ℝ (fun u : ℝ ↦ extChartAt 𝓘(ℂ, ℂ) p
+      (QuotientAddGroup.mk' L.toAddSubgroup ((u : ℂ) * v))) r := by
+  let x := r * v
+  have h₁ : liftPoint p - x ∈ L.toAddSubgroup := by
+    have : QuotientAddGroup.mk' L.toAddSubgroup (liftPoint p) =
+        QuotientAddGroup.mk' L.toAddSubgroup x := by
+      simpa [x] using (liftPoint_spec (L := L) p).trans hp
+    have : -x + liftPoint p ∈ L.toAddSubgroup :=
+      QuotientAddGroup.leftRel_apply.mp (Quotient.exact' this.symm)
+    simpa [sub_eq_add_neg, add_comm] using this
+  have h₂ : ∀ᶠ u in 𝓝 r, ((u - r : ℝ) * v) ∈ Metric.ball 0 (chartRadius (L := L)) := by
+    have h₃ : ContinuousAt (fun u ↦ ((u - r : ℝ) * v)) r := by fun_prop
+    have : ∀ᶠ z in 𝓝 0, z ∈ Metric.ball (0 : ℂ) (chartRadius (L := L)) :=
+      Metric.ball_mem_nhds 0 (chartRadius_pos (L := L))
+    have : ∀ᶠ z in 𝓝 (((r - r : ℝ)) * v), z ∈ Metric.ball 0 (chartRadius (L := L)) := by
+      simp_all
+    exact h₃.eventually this
+  have : (fun u ↦ extChartAt 𝓘(ℂ, _) p (QuotientAddGroup.mk' L.toAddSubgroup (u * v))) =ᶠ[𝓝 r]
+      fun w ↦ liftPoint p + ((w - r : ℝ) * v) := by
+    filter_upwards [h₂] with u hu
+    let δ := (u - r : ℝ) * v
+    have h₄ : liftPoint p + δ ∈ chartTarget p := ⟨δ, by grind, by grind⟩
+    have : QuotientAddGroup.mk' L.toAddSubgroup (u * v) =
+        QuotientAddGroup.mk' L.toAddSubgroup (liftPoint p + δ) := by
+      apply Quotient.sound'
+      rw [QuotientAddGroup.leftRel_apply]
+      have : -(u * v) + (liftPoint p + δ) = liftPoint p - x := by grind [Complex.ofReal_sub]
+      simpa [this] using h₁
+    rw [this]
+    exact extChartAt_apply_quotient_mk p h₄
+  have : AnalyticAt ℝ (fun u ↦ liftPoint p + (u - r : ℝ) * v) r := by
+    have h₅ : AnalyticAt ℝ (· - r) r := analyticAt_id.sub analyticAt_const
+    have : AnalyticAt ℝ (Complex.ofRealCLM ∘ (· - r)) r :=
+      (Complex.ofRealCLM.analyticAt 0).comp_of_eq h₅ (by simp)
+    have : AnalyticAt ℝ (fun u ↦ ((u - r : ℝ) : ℂ)) r := by assumption
+    exact analyticAt_const.add (this.mul analyticAt_const)
+  grind [AnalyticAt.congr, Filter.EventuallyEq]
+
 /-- In the quotient chart centered at `p = [g t]`, the derivative of a lifted
 real path `u ↦ [g u]` is the derivative of the lift. -/
 theorem extChartAt_quotient_mk_path_deriv {L : Submodule ℤ ℂ}
