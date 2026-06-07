@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 49** — all **49** in our own modules. The vendored
+**Active project axioms: 48** — all **48** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -180,6 +180,13 @@ covering the projective curve by the compact unit-norm representative slice
 `planeCurveUnitZero` and the continuous surjection
 `planeCurveUnitZeroToPlaneCurve`.
 
+Then → **48** by **discharging `contDiffOn_symm_toOpenPartialHomeomorph`** (PR #99,
+2026-06-07): the narrow IFT gap is now a theorem. The original local-only form was
+too strong (smoothness at the basepoint alone doesn't control the whole target
+neighbourhood `toOpenPartialHomeomorph` selects); adding `(h_global : ContDiff ℂ ω f)`
+makes it true and provable, and the two odd-atlas call sites (`y²`, `H.f.eval x`)
+are polynomials that supply it for free. Was the sole class-2c IFT row.
+
 ---
 
 ## Triage
@@ -202,7 +209,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 20 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 19 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 
 ---
@@ -283,7 +290,6 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
-| `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:11` | 1 |
 | Elliptic witness (`AX_Elliptic_H1_symplectic`) | `…/Elliptic/Witnesses.lean:497` | 1; `AX_Elliptic_aLoop_analytic` (PR #86, 2026-06-06) and `AX_Elliptic_bLoop_analytic` (2026-06-07) were **discharged to theorems** via `extChartAt_quotient_mk_line_analyticAt`. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
@@ -381,7 +387,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 49 — the vendored Kirov subtree is now axiom-free, so 49 is the total.
+#   prints 48 — the vendored Kirov subtree is now axiom-free, so 48 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -398,7 +404,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 49
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 48
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
