@@ -289,6 +289,120 @@ theorem affCoeff_analyticOn_of_inr_of_mapsTo
   simpa [domain, hEq]
     using hProd
 
+/-- On an affine-to-infinity chart overlap, `affCoeff` is the same affine
+`x`-coordinate coefficient read through the cotangent cocycle. This is the
+`Quotient.out = inl` / `Quotient.out = inr` branch of the overlap comparison. -/
+theorem affCoeff_eq_of_overlap_inl_inr
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a a' : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {b : HyperellipticAffineInfinity H}
+    (hbY : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inl a)
+    (hQ' : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a')) = Sum.inr b)
+    {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target)
+    (hSrc : (affineLiftChart H hf.out a).symm z ∈
+      (infinityLiftChart H hf.out b).source) :
+    affCoeff (H := H) form a z = affCoeff (H := H) form a' z := by
+  classical
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  let q' : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a')
+  have hQq : Quotient.out q = Sum.inl a := by
+    simpa [q] using hQ
+  have hQq' : Quotient.out q' = Sum.inr b := by
+    simpa [q'] using hQ'
+  have hChQ : (_root_.chartAt ℂ q : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      affineLiftChart H hf.out a := by
+    change HyperellipticEvenProj.chartAt H hf.out q = _
+    unfold HyperellipticEvenProj.chartAt
+    rw [hQq]
+  have hChQ' : (_root_.chartAt ℂ q' : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) =
+      infinityLiftChart H hf.out b := by
+    change HyperellipticEvenProj.chartAt H hf.out q' = _
+    unfold HyperellipticEvenProj.chartAt
+    rw [hQq']
+  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target =
+      (affineChartProjX (H := H) a hpY).target := by
+    rw [extChartAt_target]
+    change ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
+      (affineChartProjX (H := H) a hpY).target
+    rw [hChQ]
+    change (affineLiftChart H hf.out a).target ∩ Set.range (id : ℂ → ℂ) =
+      (affineChartProjX (H := H) a hpY).target
+    rw [Set.range_id, Set.inter_univ]
+    simp [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+      affineChartAt, hpY]
+  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
+      ((affineLiftChart H hf.out a).symm : ℂ → HyperellipticEvenProj H) := by
+    funext w
+    change (_root_.chartAt ℂ q).symm w = (affineLiftChart H hf.out a).symm w
+    rw [hChQ]
+  have hExtCoe' : ((extChartAt 𝓘(ℂ, ℂ) q') : HyperellipticEvenProj H → ℂ) =
+      ((infinityLiftChart H hf.out b) : HyperellipticEvenProj H → ℂ) := by
+    funext w
+    change (_root_.chartAt ℂ q') w = (infinityLiftChart H hf.out b) w
+    rw [hChQ']
+  have hExtSrc' : (extChartAt 𝓘(ℂ, ℂ) q').source =
+      (infinityLiftChart H hf.out b).source := by
+    rw [extChartAt_source, hChQ']
+  have hzExt : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target := by
+    rwa [hExtTarget]
+  have hSrcExt : (extChartAt 𝓘(ℂ, ℂ) q).symm z ∈
+      (extChartAt 𝓘(ℂ, ℂ) q').source := by
+    rw [hExtSymm, hExtSrc']
+    exact hSrc
+  have hOverlap : z ∈ ((affineLiftChart H hf.out a).symm.trans
+      (infinityLiftChart H hf.out b)).source := by
+    refine ⟨?_, hSrc⟩
+    simpa [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+      affineChartAt, hpY] using hz
+  have hCoord : (extChartAt 𝓘(ℂ, ℂ) q')
+      ((extChartAt 𝓘(ℂ, ℂ) q).symm z) = z⁻¹ := by
+    rw [hExtCoe', hExtSymm]
+    exact HyperellipticEvenProj.chart_transition_eq_inv_X_U a hpY b hbY hOverlap
+  have hzNZ : z ≠ 0 := by
+    have hSrc_unwound : (affineLiftChart H hf.out a).symm z ∈
+        (infinityLiftChart H hf.out b).source := hSrc
+    simp only [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
+      OpenPartialHomeomorph.lift_openEmbedding_symm, affineLiftChart] at hSrc_unwound
+    rw [affineChartAt_of_mem_smoothLocusY a hpY] at hSrc_unwound
+    obtain ⟨bb, _hbb_src, hbb_eq⟩ := hSrc_unwound
+    have hbb_eq' : Quotient.mk (hyperellipticEvenSetoid H)
+        (Sum.inl ((affineChartProjX (H := H) a hpY).symm z)) =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bb) := hbb_eq.symm
+    obtain ⟨hxNZ, _hbb⟩ := proj_inl_eq_proj_inr_iff (H := H) hbb_eq'
+    rwa [affineChartProjX_symm_apply_fst (H := H) a hpY hz] at hxNZ
+  have hOverlapOpen : IsOpen ((affineLiftChart H hf.out a).symm.trans
+      (infinityLiftChart H hf.out b)).source :=
+    ((affineLiftChart H hf.out a).symm.trans (infinityLiftChart H hf.out b)).open_source
+  have hEqOn : (fun w : ℂ => (infinityLiftChart H hf.out b)
+        ((affineLiftChart H hf.out a).symm w)) =ᶠ[nhds z] (fun w => w⁻¹) := by
+    refine Filter.eventually_of_mem (hOverlapOpen.mem_nhds hOverlap) ?_
+    intro w hw
+    exact HyperellipticEvenProj.chart_transition_eq_inv_X_U a hpY b hbY hw
+  have hDeriv : fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) q') ∘
+        (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1 = -1 / z ^ 2 := by
+    rw [hExtCoe', hExtSymm]
+    change fderiv ℂ (fun w : ℂ => (infinityLiftChart H hf.out b)
+        ((affineLiftChart H hf.out a).symm w)) z 1 = -1 / z ^ 2
+    rw [Filter.EventuallyEq.fderiv_eq hEqOn]
+    rw [fderiv_inv_apply_one hzNZ]
+    field_simp [pow_ne_zero 2 hzNZ]
+  have hCocy := form.2.2.1 q q' z hzExt hSrcExt
+  have hCoeff : form.coeff q z = form.coeff q' (1 / z) * (-1 / z ^ 2) := by
+    unfold HolomorphicOneForm.coeff
+    rw [hCocy, hCoord, hDeriv]
+    simp [one_div]
+  have hAff : affCoeff (H := H) form a z = form.coeff q z := by
+    simp [affCoeff, q, hQq]
+  have hAff' : affCoeff (H := H) form a' z =
+      form.coeff q' (1 / z) * (-1 / z ^ 2) := by
+    simp [affCoeff, q', hQq']
+  rw [hAff, hAff', hCoeff]
+
 /-- Basepoint analyticity of the affine `x`-coefficient attached to a
 smooth-`Y` affine point.
 
