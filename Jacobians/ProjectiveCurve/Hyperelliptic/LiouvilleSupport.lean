@@ -8,6 +8,7 @@ smooth-`Y` projX chart the numerator `ω_x · y` is already a well-defined local
 analytic function.
 -/
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
+import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
 import Jacobians.GeneralResults.EntireGrowth
 
 namespace Jacobians.ProjectiveCurve
@@ -400,6 +401,154 @@ theorem liouvilleProjXNumerator_eq_of_neg_coeff_neg_branch
   unfold liouvilleProjXNumerator
   rw [hCoeff, hBranch]
   ring
+
+/-! ## Direct two-sheet coefficient sum -/
+
+omit hf in
+/-- The affine point `(z, y)` on the curve, where `y` is the globally chosen
+square root of `H.f.eval z`. This is only a sheet-choice device; all analytic
+statements below are formulated so they do not depend on continuity of this
+choice. -/
+noncomputable def liouvilleChosenAffinePoint (z : ℂ) : HyperellipticAffine H :=
+  ⟨(z, (exists_complex_sq_eq (H.f.eval z)).choose), by
+    simpa using (exists_complex_sq_eq (H.f.eval z)).choose_spec⟩
+
+omit hf in
+@[simp] lemma liouvilleChosenAffinePoint_fst (z : ℂ) :
+    (liouvilleChosenAffinePoint (H := H) z).val.1 = z := rfl
+
+omit hf in
+/-- The chosen affine point has square equal to the defining polynomial value. -/
+lemma liouvilleChosenAffinePoint_snd_sq (z : ℂ) :
+    (liouvilleChosenAffinePoint (H := H) z).val.2 ^ 2 = H.f.eval z := by
+  simpa using (liouvilleChosenAffinePoint (H := H) z).property
+
+omit hf in
+/-- Away from branch points, the chosen affine point lies in the smooth-`Y`
+locus. -/
+theorem liouvilleChosenAffinePoint_mem_smoothLocusY {z : ℂ}
+    (hz : H.f.eval z ≠ 0) :
+    liouvilleChosenAffinePoint (H := H) z ∈ smoothLocusY H := by
+  unfold smoothLocusY
+  intro hy
+  have hsq := liouvilleChosenAffinePoint_snd_sq (H := H) z
+  rw [hy] at hsq
+  exact hz (by simpa using hsq.symm)
+
+omit hf in
+/-- The base coordinate of the involuted chosen point is still `z`. -/
+@[simp] lemma liouvilleChosenAffinePoint_invol_fst (z : ℂ) :
+    ((liouvilleChosenAffinePoint (H := H) z).invol).val.1 = z := rfl
+
+/-- The fixed two-sheet coefficient sum for a pair of projective points. This is
+the local expression whose vanishing is exactly coefficient anti-invariance. -/
+noncomputable def liouvilleLocalSheetSum
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (q q' : HyperellipticEvenProj H) : ℂ → ℂ :=
+  fun z => form.coeff q z + form.coeff q' z
+
+/-- The global direct-route sheet sum, with an arbitrary branch value. The hard
+DR-B step is precisely to replace this arbitrary value by the removable limit
+and prove continuity at each branch point. -/
+noncomputable def liouvilleTwoSheetSum
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) : ℂ → ℂ := by
+  classical
+  exact fun z =>
+    if H.f.eval z = 0 then
+      0
+    else
+      let a := liouvilleChosenAffinePoint (H := H) z
+      let q := HyperellipticEvenProj.proj H (Sum.inl a)
+      let q' := HyperellipticEvenProj.proj H (Sum.inl a.invol)
+      form.coeff q z + form.coeff q' z
+
+@[simp] theorem liouvilleTwoSheetSum_of_eval_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z = 0) :
+    liouvilleTwoSheetSum (H := H) form z = 0 := by
+  simp [liouvilleTwoSheetSum, hz]
+
+theorem liouvilleTwoSheetSum_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleTwoSheetSum (H := H) form z =
+      form.coeff
+          (HyperellipticEvenProj.proj H
+            (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z +
+        form.coeff
+          (HyperellipticEvenProj.proj H
+            (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+  simp [liouvilleTwoSheetSum, hz]
+
+/-- On the common clean affine `x`-chart target for the two sheets, the fixed
+two-sheet coefficient sum is analytic. This is the kernel-clean DR-A local
+analyticity statement; global single-valuedness still requires the symmetric
+sheet-choice comparison, and branch continuity is DR-B. -/
+theorem liouvilleLocalSheetSum_analyticOn_inter_affineProjX
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (q q' : HyperellipticEvenProj H)
+    (hQ : Quotient.out q = Sum.inl a)
+    (hQ' : Quotient.out q' = Sum.inl a.invol) :
+    AnalyticOn ℂ (liouvilleLocalSheetSum (H := H) form q q')
+      ((affineChartProjX (H := H) a hpY).target ∩
+        (affineChartProjX (H := H) a.invol
+          (HyperellipticAffine.invol_mem_smoothLocusY a hpY)).target) := by
+  exact
+    ((form_coeff_analyticOn_affineProjX_target form a hpY q hQ).mono
+      Set.inter_subset_left).add
+    ((form_coeff_analyticOn_affineProjX_target form a.invol
+      (HyperellipticAffine.invol_mem_smoothLocusY a hpY) q' hQ').mono
+      Set.inter_subset_right)
+
+/-- Pointwise version of the local DR-A analyticity statement. -/
+theorem liouvilleLocalSheetSum_analyticAt_inter_affineProjX
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (q q' : HyperellipticEvenProj H)
+    (hQ : Quotient.out q = Sum.inl a)
+    (hQ' : Quotient.out q' = Sum.inl a.invol)
+    {z : ℂ}
+    (hz : z ∈ (affineChartProjX (H := H) a hpY).target ∩
+      (affineChartProjX (H := H) a.invol
+        (HyperellipticAffine.invol_mem_smoothLocusY a hpY)).target) :
+    AnalyticAt ℂ (liouvilleLocalSheetSum (H := H) form q q') z := by
+  have hOpen : IsOpen
+      ((affineChartProjX (H := H) a hpY).target ∩
+        (affineChartProjX (H := H) a.invol
+          (HyperellipticAffine.invol_mem_smoothLocusY a hpY)).target) :=
+    (affineChartProjX (H := H) a hpY).open_target.inter
+      (affineChartProjX (H := H) a.invol
+        (HyperellipticAffine.invol_mem_smoothLocusY a hpY)).open_target
+  exact AnalyticOn.analyticAt (hOpen.mem_nhds hz)
+    (liouvilleLocalSheetSum_analyticOn_inter_affineProjX form a hpY q q' hQ hQ')
+
+/-- The direct-route payoff at the algebraic level: if the local sheet sum
+vanishes at `z`, the two coefficients are negatives. -/
+theorem coeff_eq_neg_of_liouvilleLocalSheetSum_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (q q' : HyperellipticEvenProj H) {z : ℂ}
+    (hzero : liouvilleLocalSheetSum (H := H) form q q' z = 0) :
+    form.coeff q z = -form.coeff q' z := by
+  simpa [liouvilleLocalSheetSum, add_eq_zero_iff_eq_neg] using hzero
+
+/-- If the global direct-route scalar has been proved identically zero, then
+the chosen two sheets satisfy coefficient anti-invariance away from branch
+points. DR-B/DR-C/DR-D are the missing analytic inputs needed to produce
+`hzero`. -/
+theorem chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hzero : ∀ z, liouvilleTwoSheetSum (H := H) form z = 0)
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
+      -form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+  have hs := hzero z
+  rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hz] at hs
+  simpa [add_eq_zero_iff_eq_neg] using hs
 
 /-- Sanity check against the existing explicit basis constructor: for
 `hyperellipticForm H g`, the local Liouville numerator is exactly `g.eval`. -/
