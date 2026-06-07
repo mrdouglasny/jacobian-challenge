@@ -63,7 +63,7 @@ References:
   period lattice, Jacobian as compact complex torus.
 -/
 
-import Jacobians.Challenge
+import Jacobians
 import Jacobians.Extensions.Hyperelliptic
 import Jacobians.Extensions.HyperellipticEven
 import Jacobians.Axioms.AbelJacobiMap

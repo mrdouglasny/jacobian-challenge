@@ -44,7 +44,7 @@ Classical references (same as the odd case):
 See `docs/hyperelliptic-even-atlas-plan.md` for the full plan.
 -/
 
-import Jacobians.Challenge
+import Jacobians
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form

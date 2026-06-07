@@ -4,104 +4,22 @@
  Quot.sound,
  Axioms.AX_AnalyticCycleBasis,
  Axioms.intersectionForm]
-'Jacobian' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian.ofCurve' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian.pushforward' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
-'Jacobian.pullback' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
+'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.ofCurve' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pushforward' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pullback' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
-'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
-'Jacobian.ofCurve_self' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian.ofCurve_inj' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AbelTheorem,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
- Axioms.AX_ofCurve_contMDiff,
- Axioms.instPeriodLatticeDiscrete,
- Axioms.intersectionForm]
-'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.instPeriodLatticeDiscrete,
- Axioms.intersectionForm]
-'Jacobian.pushforward_id_apply' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
-'Jacobian.pushforward_comp_apply' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
-'Jacobian.pullback_contMDiff' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.instPeriodLatticeDiscrete,
- Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
-'Jacobian.pullback_id_apply' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pushforwardOneForm_id,
- Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
-'Jacobian.pullback_comp_apply' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pushforwardOneForm_comp,
- Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
-'Jacobian.pushforward_pullback' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.AX_pushforward_pullback,
- Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
+'genus_eq_zero_iff_homeo' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.ofCurve_inj' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'Jacobian.ofCurve_contMDiff' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'Jacobian.pushforward_contMDiff' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'Jacobian.pushforward_id_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pushforward_comp_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pullback_contMDiff' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'Jacobian.pullback_id_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pullback_comp_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.pushforward_pullback' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero' depends on axioms: [propext,
  Classical.choice,

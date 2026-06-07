@@ -1,4 +1,5 @@
-import Jacobians.Challenge
+import Jacobians.Jacobian.Construction
+import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Vendor.Kirov.ZLatticeQuotient
 import Mathlib.LinearAlgebra.Dual.Lemmas
@@ -21,6 +22,7 @@ open intervalIntegral MeasureTheory
 
 namespace Jacobians.Axioms
 
+open Jacobians
 open Jacobians.RiemannSurface
 
 /-- Placeholder for holomorphic one-forms on a complex torus modelled on
@@ -496,6 +498,6 @@ Vetted: Gemini + Codex 2026-06-02. -/
 axiom AX_curve_generates_jacobian {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (h : 0 < RiemannSurface.genus X) :
-    AddSubgroup.closure (Set.range (Jacobian.ofCurve x₀)) = ⊤
+    AddSubgroup.closure (Set.range (ofCurveImpl X x₀)) = ⊤
 
 end Jacobians.Axioms
