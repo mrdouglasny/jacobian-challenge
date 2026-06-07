@@ -621,20 +621,12 @@ axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
-/-- `PlaneCurve H` is nonempty (proved 2026-06-07, PR #99/#102).
-
-Lift an affine zero into projective space: `AX_PlaneCurveAffine_nonempty H` gives
-a point `(x, y)` of the `z = 1` affine patch lying on the curve, and `[x : y : 1]`
-is then a projective point on `PlaneCurve H` (the third coordinate is `1 ≠ 0`, so
-the representative is nonzero).
-
-Soundness note: routing through `AX_PlaneCurveAffine_nonempty` is legitimate here.
-An *earlier* discharge was reverted because, at that time, the affine-nonempty
-statement was a flagged axiom that was **FALSE** for `F = z` (issue #82). That
-hole has since been closed on both sides: `PlaneCurveData` was strengthened with
-`h_irreducible` + `z ∤ F` (so `F = z` is no longer a valid datum), and
-`AX_PlaneCurveAffine_nonempty` was **proved as a theorem** (PR #92, `#print axioms`
-standard-3). The affine witness is therefore sound, and so is this lift. -/
+/-- `PlaneCurve H` is nonempty.
+This is proved by lifting the (now-proven) affine-nonempty witness `(x, y)` from
+`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]` in `PlaneCurve H`.
+The historical soundness concern about the affine patch being empty for `F = z` (issue #82)
+is resolved at the data level: `PlaneCurveData` requires `h_not_at_infinity` (`z ∤ F`),
+making the affine nonempty axiom/theorem sound. -/
 instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) := by
   obtain ⟨⟨x, y⟩, hp⟩ := PlaneCurveAffine.AX_PlaneCurveAffine_nonempty H
   let v : Fin 3 → ℂ := ![x, y, 1]
