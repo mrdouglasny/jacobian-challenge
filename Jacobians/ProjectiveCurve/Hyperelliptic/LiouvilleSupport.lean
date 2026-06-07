@@ -755,9 +755,7 @@ noncomputable def liouvilleTwoSheetSum
       0
     else
       let a := liouvilleChosenAffinePoint (H := H) z
-      let q := HyperellipticEvenProj.proj H (Sum.inl a)
-      let q' := HyperellipticEvenProj.proj H (Sum.inl a.invol)
-      form.coeff q z + form.coeff q' z
+      affCoeff (H := H) form a z + affCoeff (H := H) form a.invol z
 
 @[simp] theorem liouvilleTwoSheetSum_of_eval_eq_zero
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
@@ -769,12 +767,8 @@ theorem liouvilleTwoSheetSum_of_eval_ne_zero
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
     {z : ℂ} (hz : H.f.eval z ≠ 0) :
     liouvilleTwoSheetSum (H := H) form z =
-      form.coeff
-          (HyperellipticEvenProj.proj H
-            (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z +
-        form.coeff
-          (HyperellipticEvenProj.proj H
-            (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+      affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z +
+        affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z := by
   simp [liouvilleTwoSheetSum, hz]
 
 /-- On the common clean affine `x`-chart target for the two sheets, the fixed
@@ -837,12 +831,8 @@ theorem chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
     (hzero : ∀ z, liouvilleTwoSheetSum (H := H) form z = 0)
     {z : ℂ} (hz : H.f.eval z ≠ 0) :
-    form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
-      -form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+    affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z =
+      -affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z := by
   have hs := hzero z
   rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hz] at hs
   simpa [add_eq_zero_iff_eq_neg] using hs
@@ -1195,12 +1185,8 @@ theorem chosen_coeff_eq_neg_of_analyticAt_off_roots_branch_tendsto_cocompact
     (h0 : Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
       (Filter.cocompact ℂ) (𝓝 0))
     {z : ℂ} (hz : H.f.eval z ≠ 0) :
-    form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
-      -form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z :=
+    affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z =
+      -affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z :=
   chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero (H := H) form
     (liouvilleTwoSheetSum_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact
       (H := H) form hAna hBranch h0)
@@ -1332,12 +1318,8 @@ theorem chosen_coeff_eq_neg_of_liouvilleTwoSheetSumRemovable_eq_zero
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
     (hzero : ∀ z, liouvilleTwoSheetSumRemovable (H := H) form z = 0)
     {z : ℂ} (hz : H.f.eval z ≠ 0) :
-    form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
-      -form.coeff
-        (HyperellipticEvenProj.proj H
-          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+    affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z =
+      -affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z := by
   have hs : liouvilleTwoSheetSum (H := H) form z = 0 :=
     liouvilleTwoSheetSum_eq_zero_of_removable_eq_zero (H := H) form hzero hz
   rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hz] at hs
