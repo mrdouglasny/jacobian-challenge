@@ -80,3 +80,20 @@ sorry-free, and `…DerivFactor`/`…ChartRep` encode the σ chart-derivative fa
      `DR_B_BRANCH_CONTINUITY_BLUEPRINT.md` w-cancellation).
    - **h0** `Tendsto s̃ cocompact (𝓝 0)` (DR-C ∞-decay).
    IN PROGRESS: Codex afd7ddaa8cd055d1c discharging the three.
+
+## ⛔ FOUNDATIONAL BLOCKER hit (2026-06-07) — the `Quotient.out` chart gap
+Discharging **hAna** (and earlier the pullback obligation-1) is blocked by a gap
+upstream of all the analytic content: `form.coeff (proj (inl a))` is the
+coefficient in `extChartAt (proj (inl a))`, i.e. the **`Quotient.out` canonical
+chart**. The even setoid glues `(x,y) ↔ (1/x, y/x^{g+1})` for **every `x ≠ 0`**
+(Even.lean:275), so for any affine point with `x ≠ 0` the class `{inl a, inr b}`
+has two reps and `Quotient.out` may return the **infinity rep** — then
+`form.coeff (proj inl a)` lives in the `u=1/x` coordinate, not the `x` coordinate,
+and the projX-chart analyticity lemmas (all gated on `hQ : Quotient.out q = inl a`)
+only fire at `x = 0` (`witnessZeroX`, Form.lean:389). So neither the global numerator
+nor the two-sheet sum can be shown analytic at generic `z` without a
+**chart-transfer / coeff-in-specified-chart layer** (express the coefficient via the
+affine chart transition, independent of `Quotient.out`, using the cotangent cocycle
+`form.2.2.1` + the cross-summand cocycles). This is the genuine remaining work —
+M0-level foundation, not the (built, green) analytic superstructure. **Surfaced to
+MRD for the approach.**
