@@ -616,14 +616,170 @@ instance PlaneCurve.instCompactSpace (H : PlaneCurveData) :
       rfl] at this
   grind
 
--- TODO: prove connectedness from irreducibility/overlapping affine charts.
-axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
-    ConnectedSpace (PlaneCurve H)
-attribute [instance] PlaneCurve.instConnectedSpace
+noncomputable def PlaneCurveAffine.toPlaneCurve (H : PlaneCurveData)
+    (p : PlaneCurveAffine H) : PlaneCurve H := by
+  let v : Fin 3 → ℂ := ![p.val.1, p.val.2, 1]
+  have hv : v ≠ 0 := by
+    intro h
+    have h2 : v 2 = 0 := congrFun h 2
+    exact one_ne_zero h2
+  refine ⟨Projectivization.mk ℂ v hv, v, hv, rfl, p.property⟩
+
+theorem continuous_toPlaneCurve (H : PlaneCurveData) :
+    Continuous (PlaneCurveAffine.toPlaneCurve H) := by
+  letI : Setoid { v : Fin 3 → ℂ // v ≠ 0 } := projectivizationSetoid ℂ (Fin 3 → ℂ)
+  letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace (Quotient (projectivizationSetoid ℂ _)))
+  apply Continuous.subtype_mk
+  refine continuous_quotient_mk'.comp ?_
+  apply Continuous.subtype_mk
+  refine continuous_pi (fun i => ?_)
+  fin_cases i
+  · exact continuous_subtype_val.fst
+  · exact continuous_subtype_val.snd
+  · exact continuous_const
+
+axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
+    ChartedSpace ℂ (PlaneCurve H)
+attribute [instance] PlaneCurve.instChartedSpace
+
+axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
+attribute [instance] PlaneCurve.instIsManifold
+
+lemma PlaneCurve_nhdsWithin_compl_singleton_neBot (H : PlaneCurveData) (x : PlaneCurve H) :
+    (nhdsWithin x {x}ᶜ).NeBot := by
+  let e := chartAt ℂ x
+  have hx : x ∈ e.source := mem_chart_source ℂ x
+  have h_map := e.map_nhdsWithin_preimage_eq hx {e x}ᶜ
+  have h_eq : nhdsWithin x (e ⁻¹' {e x}ᶜ) = nhdsWithin x {x}ᶜ := by
+    refine nhdsWithin_eq_nhdsWithin' (e.open_source.mem_nhds hx) ?_
+    ext y
+    simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_compl_iff, Set.mem_singleton_iff]
+    constructor
+    · rintro ⟨hy1, hy2⟩
+      refine ⟨?_, hy2⟩
+      intro h_eq
+      apply hy1
+      rw [h_eq]
+    · rintro ⟨hy1, hy2⟩
+      refine ⟨?_, hy2⟩
+      intro h_eq
+      apply hy1
+      exact e.injOn hy2 hx h_eq
+  rw [← h_eq]
+  rw [← Filter.map_neBot_iff e]
+  rw [h_map]
+  exact NormedField.nhdsNE_neBot (e x)
+
+/-- The subset of points at infinity on the projective curve. -/
+def InfinityPoints (H : PlaneCurveData) : Set (PlaneCurve H) :=
+  { p | ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0, Projectivization.mk ℂ v hv = p.1 ∧ v 2 = 0 }
+
+/-- **Axiom (NOT VERIFIED — sound).**
+The set of points at infinity on the projective curve is finite. -/
+axiom infinityPoints_finite (H : PlaneCurveData) :
+  (InfinityPoints H).Finite
+
+theorem range_toPlaneCurve_eq_compl_infinityPoints (H : PlaneCurveData) :
+    Set.range (PlaneCurveAffine.toPlaneCurve H) = (InfinityPoints H)ᶜ := by
+  ext p
+  simp only [Set.mem_range, Set.mem_compl_iff, InfinityPoints, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨q, rfl⟩ ⟨v, hv, h_mk, h_z⟩
+    have h_eq : Projectivization.mk ℂ v hv =
+      Projectivization.mk ℂ ![q.val.1, q.val.2, 1] (by
+        intro h
+        have h2 : ![q.val.1, q.val.2, 1] 2 = 0 := congrFun h 2
+        exact one_ne_zero h2) := by
+      exact h_mk
+    rw [Projectivization.mk_eq_mk_iff ℂ v ![q.val.1, q.val.2, 1] hv] at h_eq
+    rcases h_eq with ⟨a, ha⟩
+    have h2 : v 2 = (a : ℂ) := by
+      have h_eval := congrFun ha 2
+      change (a • ![q.val.1, q.val.2, 1]) 2 = v 2 at h_eval
+      rw [← h_eval]
+      change (a : ℂ) • (1 : ℂ) = (a : ℂ)
+      rw [smul_eq_mul, mul_one]
+    rw [h_z] at h2
+    have ha_zero : (a : ℂ) = 0 := by
+      simpa using h2.symm
+    exact a.ne_zero ha_zero
+  · intro hp
+    letI : Setoid { v : Fin 3 → ℂ // v ≠ 0 } := projectivizationSetoid ℂ (Fin 3 → ℂ)
+    obtain ⟨v, hv, h_mk, heval⟩ := p.2
+    have h_v2 : v 2 ≠ 0 := by
+      intro hz
+      apply hp
+      refine ⟨v, hv, h_mk, hz⟩
+    let c := (v 2)⁻¹
+    let w := c • v
+    have hw2 : w 2 = 1 := by
+      change c * v 2 = 1
+      exact inv_mul_cancel₀ h_v2
+    have heval_w : H.F.val.eval w = 0 := by
+      change H.F.val.eval (fun i => c * v i) = 0
+      rw [homogeneous_eval_smul H.F.homogeneous]
+      rw [heval, mul_zero]
+    have h_w_eq : w = ![w 0, w 1, 1] := by
+      ext i
+      fin_cases i
+      · rfl
+      · rfl
+      · exact hw2
+    have h_q_eval : H.F.val.eval ![w 0, w 1, (1 : ℂ)] = 0 := by
+      rw [← h_w_eq]
+      exact heval_w
+    let q : PlaneCurveAffine H := ⟨(w 0, w 1), h_q_eval⟩
+    refine ⟨q, ?_⟩
+    apply Subtype.ext
+    change Projectivization.mk ℂ ![w 0, w 1, 1] _ = p.val
+    have hw_nonzero : w ≠ 0 := by
+      intro h
+      have h2 : w 2 = 0 := congrFun h 2
+      rw [hw2] at h2
+      exact one_ne_zero h2
+    have h_mk_eq : Projectivization.mk ℂ ![w 0, w 1, 1] (h_w_eq ▸ hw_nonzero) =
+        Projectivization.mk ℂ w hw_nonzero := by
+      change Quotient.mk' (⟨![w 0, w 1, 1], h_w_eq ▸ hw_nonzero⟩ : {v : Fin 3 → ℂ // v ≠ 0}) =
+        Quotient.mk' (⟨w, hw_nonzero⟩ : {v : Fin 3 → ℂ // v ≠ 0})
+      congr 1
+      ext i
+      fin_cases i
+      · rfl
+      · rfl
+      · exact hw2.symm
+    rw [h_mk_eq]
+    rw [← h_mk]
+    rw [Projectivization.mk_eq_mk_iff ℂ w v hw_nonzero hv]
+    refine ⟨Units.mk0 c (inv_ne_zero h_v2), rfl⟩
+
+theorem dense_range_toPlaneCurve (H : PlaneCurveData) :
+    Dense (Set.range (PlaneCurveAffine.toPlaneCurve H)) := by
+  have h_ne : ∀ x : PlaneCurve H, (nhdsWithin x {x}ᶜ).NeBot :=
+    PlaneCurve_nhdsWithin_compl_singleton_neBot H
+  haveI : ∀ x : PlaneCurve H, (nhdsWithin x {x}ᶜ).NeBot := h_ne
+  rw [range_toPlaneCurve_eq_compl_infinityPoints H]
+  rw [Set.compl_eq_univ_diff]
+  exact Dense.diff_finite dense_univ (infinityPoints_finite H)
+
+instance PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
+    ConnectedSpace (PlaneCurve H) := by
+  have _hAff : ConnectedSpace (PlaneCurveAffine H) :=
+    PlaneCurveAffine.AX_PlaneCurveAffine_connected H
+  have hRange : IsConnected (Set.range (PlaneCurveAffine.toPlaneCurve H)) :=
+    isConnected_range (continuous_toPlaneCurve H)
+  have hDense : Dense (Set.range (PlaneCurveAffine.toPlaneCurve H)) :=
+    dense_range_toPlaneCurve H
+  have hUniv : IsConnected (Set.univ : Set (PlaneCurve H)) :=
+    hDense.closure_eq ▸ hRange.closure
+  exact connectedSpace_iff_univ.mpr hUniv
+
 
 /-- `PlaneCurve H` is nonempty.
 This is proved by lifting the (now-proven) affine-nonempty witness `(x, y)` from
-`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]` in `PlaneCurve H`.
+`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]`
+in `PlaneCurve H`.
 The historical soundness concern about the affine patch being empty for `F = z` (issue #82)
 is resolved at the data level: `PlaneCurveData` requires `h_not_at_infinity` (`z ∤ F`),
 making the affine nonempty axiom/theorem sound. -/
@@ -635,14 +791,6 @@ instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) 
     have h2 : v 2 = 0 := congrFun h 2
     exact one_ne_zero h2
   exact ⟨⟨Projectivization.mk ℂ v hv, v, hv, rfl, hp⟩⟩
-
-axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
-    ChartedSpace ℂ (PlaneCurve H)
-attribute [instance] PlaneCurve.instChartedSpace
-
-axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
-    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
-attribute [instance] PlaneCurve.instIsManifold
 
 -- TODO (genus_eq): `Jacobians.RiemannSurface.genus (PlaneCurve H) = H.genus`
 -- via the Plücker formula discharge.
