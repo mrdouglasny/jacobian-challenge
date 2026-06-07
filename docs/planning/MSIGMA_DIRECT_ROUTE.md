@@ -68,8 +68,15 @@ sorry-free, and `…DerivFactor`/`…ChartRep` encode the σ chart-derivative fa
    `liouvilleLocalSheetSum_analyticAt_inter_affineProjX` (s analytic off {f=0}),
    and the payoff bridge `chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero`
    (s≡0 ⇒ anti-invariance). Quotient.out rep issue worked around.
-2. **DR-B** branch-point continuity of `s` (the `w`-coordinate odd-zero
-   cancellation — the hard analytic lemma) ⇒ `s` entire via the banked engine.
-   IN PROGRESS (Codex a461fded4d3011e83); Gemini-3.1-pro blueprint on standby if it stalls.
-3. **DR-C** ∞-decay `s = O(1/z²)` ⇒ Tendsto 0 cocompact.
-4. **DR-D** Liouville ⇒ `s≡0` ⇒ anti-invariance identity (banked endgame) ⇒ P1.
+2. **DR-B/C/D scaffolding** ✅ DONE (Codex a53b64a/bec6e4a, green, sorry-free):
+   `liouvilleTwoSheetSumRemovable` (`s̃`, branch value = `Filter.limUnder` per the
+   blueprint), `…_differentiable_of_analyticAt_off_roots_and_branch_tendsto`
+   (∃-limit, NOT =0 — non-circular), `…_eq_zero_of_…_branch_tendsto_cocompact`,
+   and `chosen_coeff_eq_neg_of_liouvilleTwoSheetSumRemovable_eq_zero`. The
+   capstone `liouvilleTwoSheetSumRemovable_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact`
+   reduces anti-invariance to THREE analytic hypotheses, now the only open work:
+   - **hAna** `∀ z, f z≠0 → AnalyticAt s z` (DR-A largely has it — wire in).
+   - **hBranch** `∀ branch z, ∃ L, Tendsto s (𝓝[≠] z) (𝓝 L)` (THE HARD KERNEL —
+     `DR_B_BRANCH_CONTINUITY_BLUEPRINT.md` w-cancellation).
+   - **h0** `Tendsto s̃ cocompact (𝓝 0)` (DR-C ∞-decay).
+   IN PROGRESS: Codex afd7ddaa8cd055d1c discharging the three.
