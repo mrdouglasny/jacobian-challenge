@@ -8,15 +8,14 @@ import Jacobians.RiemannSurface.Cohomology.Repartitions
 /-!
 # Adelic first cohomology
 
-This first increment models `H¹(X, O(D))` by the ambient Weil-repartition
-quotient
+`H¹(X, O(D))` is modelled by the **sharp** Weil-repartition quotient
 
-`(X → MeroField X) / (𝔸_X(D) + K_X)`.
+`𝔸_X / (𝔸_X(D) + K_X)`,
 
-The intended sharper model quotients the repartition submodule itself by the
-bounded repartitions and diagonal principal repartitions.  The ambient quotient
-keeps the algebraic cohomology anchor simple and type-correct while the finite
-pole theorem for the diagonal map is still being supplied.
+i.e. the quotient of the repartition submodule `repartitions X` by the bounded
+repartitions `𝔸_X(D)` together with the diagonal principal repartitions `K_X`.
+The diagonal lands in `repartitions X` because a meromorphic function on a
+compact Riemann surface has finitely many poles (`diagonal_isRepartition`).
 -/
 
 noncomputable section
@@ -34,25 +33,32 @@ universe u
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
-/-- The relation submodule for the first adelic model:
-bounded repartitions plus principal diagonal repartitions. -/
-def adeleH1Relations (D : Divisor X) : Submodule ℂ (X → MeroField X) :=
-  repartitionsBounded D ⊔ LinearMap.range (diagonalRepartition (X := X))
+/-- The diagonal embedding `K_X ↪ 𝔸_X`, corestricted to the repartition
+submodule (valid by `diagonal_isRepartition`). -/
+def diagonalRepartitionRes : MeroField X →ₗ[ℂ] repartitions X :=
+  (diagonalRepartition (X := X)).codRestrict (repartitions X)
+    (fun f => diagonal_isRepartition f)
 
-/-- Adelic `H¹(X, O(D))` as a quotient by bounded and principal repartitions.
+/-- Bounded repartitions `𝔸_X(D)`, viewed as a submodule of `𝔸_X`. -/
+def repartitionsBoundedRes (D : Divisor X) : Submodule ℂ (repartitions X) :=
+  (repartitionsBounded D).comap (repartitions X).subtype
 
-This is the ambient-space scaffold for Weil/Serre repartition cohomology:
-`𝔸_X / (𝔸_X(D) + K_X)`, represented here inside `X → MeroField X`. -/
+/-- The relations submodule of `𝔸_X`: bounded repartitions plus principal
+(diagonal) repartitions. -/
+def adeleH1Relations (D : Divisor X) : Submodule ℂ (repartitions X) :=
+  repartitionsBoundedRes D ⊔ LinearMap.range (diagonalRepartitionRes (X := X))
+
+/-- Adelic `H¹(X, O(D))` as the **sharp** Weil quotient
+`𝔸_X / (𝔸_X(D) + K_X)`. -/
 def adeleH1 (D : Divisor X) : Type u :=
-  (X → MeroField X) ⧸ adeleH1Relations D
+  (repartitions X) ⧸ adeleH1Relations D
 
 instance adeleH1.instAddCommGroup (D : Divisor X) :
     AddCommGroup (adeleH1 D) :=
-  inferInstanceAs (AddCommGroup ((X → MeroField X) ⧸ adeleH1Relations D))
+  inferInstanceAs (AddCommGroup ((repartitions X) ⧸ adeleH1Relations D))
 
 instance adeleH1.instModule (D : Divisor X) :
     Module ℂ (adeleH1 D) :=
-  inferInstanceAs (Module ℂ ((X → MeroField X) ⧸ adeleH1Relations D))
+  inferInstanceAs (Module ℂ ((repartitions X) ⧸ adeleH1Relations D))
 
 end Jacobians.RiemannSurface
-

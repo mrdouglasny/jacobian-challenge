@@ -44,12 +44,15 @@ theorem adeleH1_finiteDim (D : Divisor X) :
     FiniteDimensional ℂ (adeleH1 D) := by
   sorry
 
-/-- Serre duality for the adelic cohomology anchor.  The divisor `K` is a
-placeholder for a canonical divisor; future work will replace it with a
-canonical-divisor construction and prove the isomorphism via the residue
-pairing on Weil repartitions. -/
-theorem serre_anchor (D : Divisor X) (K : Divisor X) :
-    Nonempty (adeleH1 D ≃ₗ[ℂ] Module.Dual ℂ (riemannRochSpace (K - D))) := by
+/-- Serre duality for the adelic cohomology anchor: there exists a canonical
+divisor `K` such that, for every `D`, `H¹(O(D)) ≅ H⁰(O(K − D))^*`. The `∃ K`
+captures "there is a dualizing/canonical divisor" — duality holds for that
+distinguished `K`, **not** for an arbitrary divisor. Future work replaces the
+existential with an explicit canonical-divisor construction (`div(ω)`) and proves
+the isomorphism via the residue pairing on Weil repartitions. -/
+theorem serre_anchor :
+    ∃ K : Divisor X, ∀ D : Divisor X,
+      Nonempty (adeleH1 D ≃ₗ[ℂ] Module.Dual ℂ (riemannRochSpace (K - D))) := by
   sorry
 
 end Jacobians.RiemannSurface
