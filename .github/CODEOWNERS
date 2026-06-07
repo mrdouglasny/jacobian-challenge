@@ -13,8 +13,11 @@
 # CI / automation (the machine gates)
 /.github/                               @mrdouglasny
 
-# Axiom ledger + the soundness/consistency machinery
-/AXIOM_AUDIT.md                         @mrdouglasny
-/docs/axiom-report.txt                  @mrdouglasny
+# The soundness/consistency machinery — the trust root CI relies on.
+# AXIOM_AUDIT.md and docs/axiom-report.txt are deliberately NOT listed:
+# axiom-report.txt is regenerated and diffed against the kernel by CI, so it
+# cannot diverge from the kernel without failing the build; AXIOM_AUDIT.md is
+# documentation with no kernel/CI soundness power. Protecting the generator and
+# checker below is what actually guards the axiom ledger.
 /scripts/axiom_report.lean              @mrdouglasny
 /scripts/check_axiom_consistency.sh     @mrdouglasny

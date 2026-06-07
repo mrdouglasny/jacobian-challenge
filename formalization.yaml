@@ -2,7 +2,7 @@
 # Describes the `main` branch state at HEAD 3ff3fa0 (PR #7 merged).
 # A CHALLENGE / scaffold repo: Buzzard's 24-sorry Jacobian-Challenge API is fully
 # closed with real defs/instances, and three concrete genus theorems are proved —
-# but the bulk of the deep mathematics sits behind ~64 classified, discharge-planned
+# but the bulk of the deep mathematics sits behind ~55 classified, discharge-planned
 # axioms (Riemann–Roch, Serre duality, Liouville L2/L3, …). "Reduced to classical
 # inputs", NOT a from-first-principles solution.
 version: "v0.3"
@@ -68,13 +68,14 @@ status:
     proof: the deep classical content (Riemann–Roch, Serre duality, Abel, Riemann
     bilinear, branch locus, uniformization, canonical-differentials via the
     Liouville L2/L3 hierarchy, plus curve-atlas and line-integral constructions)
-    remains as ~64 classified, discharge-planned axioms. genus(ℙ¹)=0 and
+    remains as ~55 classified, discharge-planned axioms. genus(ℙ¹)=0 and
     genus(Elliptic)=1 are axiom-free (Lean core only); genus(HyperellipticEven)
     reduces to the Liouville L2/L3 axioms. Vendors axiom-free Lean from
     rkirov/jacobian-claude (Apache-2.0) and tangentstorm/JacobianChallenge (MIT).
   sorry_count: 11           # build-warning count; all OUTSIDE the core/API
   sorry_in_definitions: 0
-  axioms:                   # ~64 active, kernel-verified (AXIOM_AUDIT.md); a representative selection:
+  axioms:                   # ~55 active, kernel-verified (AXIOM_AUDIT.md); a representative selection.
+                            # AX_pushforward_contMDiff / AX_pullback_contMDiff discharged to theorems (kernel-verified 58 → 56).
     - AX_RiemannRoch                              # Axioms/RiemannRoch.lean (classical)
     - AX_SerreDuality                             # Axioms/SerreDuality.lean (classical)
     - AX_AbelTheorem                              # Axioms/AbelTheorem.lean (classical)
@@ -86,7 +87,7 @@ status:
     - AX_HyperellipticForm_polynomial_decomposition  # Axioms/HyperellipticLiouville.lean (Liouville L2)
     - AX_HyperellipticOneForm_eq_form             # Axioms/HyperellipticLiouville.lean (Liouville L3)
     # + line-bundle/divisor, PlaneCurve atlas, unified-Hyperelliptic ≃ₜ, IFT, and
-    #   Jacobian-API property axioms — full set (~64) in AXIOM_AUDIT.md
+    #   Jacobian-API property axioms — full set (~55) in AXIOM_AUDIT.md
   main_results:
     - declaration: "Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero"
       file: "Jacobians/ProjectiveCurve/Line/Genus.lean"
@@ -128,6 +129,13 @@ automation:
         Auxiliary rescue passes (Jacobian functoriality derivations,
         HyperellipticEven T2/Compact proofs, affine cocycle equations) and axiom
         cross-review (README "Resources used"; docs/codex-review.md).
+    - method: "agent"
+      models: ["aristotle"]
+      framework: "Aristotle (Harmonic)"
+      prompting_notes: >
+        Automated theorem prover used as a proving agent (via the marathon
+        tooling): drafting and filling Lean proof bodies, with Claude Code
+        orchestrating prompts and integrating the results.
     - method: "other"
       models: ["gemini-3-pro"]
       framework: "Gemini (deep-think / chat)"
@@ -144,7 +152,7 @@ fidelity:
   divergences: >
     This is a CHALLENGE/scaffold repo, not a complete proof. The Buzzard API is
     closed with real defs/instances and functoriality identities are derived
-    theorems, but the deep mathematics is reduced to ~64 classified axioms with
+    theorems, but the deep mathematics is reduced to ~55 classified axioms with
     written discharge plans rather than proved. Three genus theorems are genuinely
     proved: genus(ℙ¹)=0 and genus(Elliptic)=1 from Lean core only,
     genus(HyperellipticEven) modulo the Liouville L2/L3 axioms. The Albanese
@@ -160,7 +168,7 @@ review:
     11 `sorry` total, all outside the core (Extensions/Hyperelliptic.lean 6,
     Extensions/AbelJacobi.lean 4, ProjectiveCurve/Hyperelliptic/AntiInvariance.lean 1);
     Challenge.lean, the core construction, and the concrete-curve witnesses are
-    sorry-free. ~64 active project axioms, kernel-verified and triaged in
+    sorry-free. ~55 active project axioms, kernel-verified and triaged in
     AXIOM_AUDIT.md; golden #print axioms trace in docs/axiom-report.txt confirms no
     sorryAx under any closed headline. The two formerly-unsound cocycle axioms were
     retired; the vendored Kirov + Wallace subtrees are axiom-free. LLM-cross-vetted

@@ -63,6 +63,7 @@ import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovCanonicalEq
+import Jacobians.Vendor.Kirov.ZLatticeQuotient
 
 namespace Jacobians.Axioms
 
@@ -758,14 +759,176 @@ These are properties of the real `def`s above. Each retires via a
 textbook proof once the corresponding analytic / branch-locus
 infrastructure lands. -/
 
-/-- **Axiom.** Pushforward on Jacobians is smooth. -/
-axiom AX_pushforward_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Smoothness engine for quotient-torus pushforward maps, using
+`ComplexTorus.instChartedSpace` on both source and target. The proof works
+at the chart level: after `contMDiffAt_iff`, it shows the chart composition
+`extChartAt ∘ fCT ∘ (extChartAt).symm` equals the affine map `Φ + c₀`
+(where `c₀` is a fixed lattice element) on a neighbourhood, which is smooth
+because `Φ` is a continuous linear map. -/
+private theorem complexTorus_pushforward_contMDiff_engine {gX gY : ℕ}
+    (ΛX : Submodule ℤ (Fin gX → ℂ)) [DiscreteTopology ΛX] [IsZLattice ℝ ΛX]
+    (ΛY : Submodule ℤ (Fin gY → ℂ)) [DiscreteTopology ΛY] [IsZLattice ℝ ΛY]
+    (Φ : (Fin gX → ℂ) →L[ℂ] (Fin gY → ℂ))
+    (hΦ : ΛX.toAddSubgroup ≤ ΛY.toAddSubgroup.comap Φ.toAddMonoidHom) :
+    let fCT : Jacobians.AbelianVariety.ComplexTorus (Fin gX → ℂ) ΛX →
+              Jacobians.AbelianVariety.ComplexTorus (Fin gY → ℂ) ΛY :=
+      fun q => Vendor.Kirov.ZLatticeQuotient.pushforward ΛX ΛY Φ hΦ q
+    ContMDiff 𝓘(ℂ, Fin gX → ℂ) 𝓘(ℂ, Fin gY → ℂ) ω fCT := by
+  intro fCT qX
+  let IX := 𝓘(ℂ, Fin gX → ℂ)
+  let IY := 𝓘(ℂ, Fin gY → ℂ)
+  set target_q : Jacobians.AbelianVariety.ComplexTorus (Fin gY → ℂ) ΛY :=
+    fCT qX with htgt_def
+  set x₀ := extChartAt IX qX qX
+  set y₀ := extChartAt IY target_q target_q
+  have hqX_src : qX ∈ (extChartAt IX qX).source := mem_extChartAt_source qX
+  have hx₀_tgt : x₀ ∈ (extChartAt IX qX).target :=
+    (extChartAt IX qX).map_source hqX_src
+  have htgt_src : target_q ∈ (extChartAt IY target_q).source :=
+    mem_extChartAt_source target_q
+  have hy₀_tgt : y₀ ∈ (extChartAt IY target_q).target :=
+    (extChartAt IY target_q).map_source htgt_src
+  have hx₀_mk :
+      (QuotientAddGroup.mk' ΛX.toAddSubgroup x₀ :
+        Jacobians.AbelianVariety.ComplexTorus _ ΛX) = qX :=
+    (Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+      (L := ΛX) qX
+      ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+        (L := ΛX) qX).1 hx₀_tgt)).symm.trans
+      ((extChartAt IX qX).left_inv hqX_src)
+  have hy₀_mk :
+      (QuotientAddGroup.mk' ΛY.toAddSubgroup y₀ :
+        Jacobians.AbelianVariety.ComplexTorus _ ΛY) = target_q :=
+    (Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+      (L := ΛY) target_q
+      ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+        (L := ΛY) target_q).1 hy₀_tgt)).symm.trans
+      ((extChartAt IY target_q).left_inv htgt_src)
+  have hfwd :
+      target_q = (QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x₀) :
+        Jacobians.AbelianVariety.ComplexTorus _ ΛY) := by
+    rw [htgt_def, ← hx₀_mk]; rfl
+  set c₀ := y₀ - Φ x₀
+  have hc₀_mem : c₀ ∈ ΛY.toAddSubgroup := by
+    have hmk_eq :
+        (QuotientAddGroup.mk' ΛY.toAddSubgroup y₀ :
+          Jacobians.AbelianVariety.ComplexTorus _ ΛY) =
+        QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x₀) := by
+      rw [hy₀_mk, hfwd]
+    rw [QuotientAddGroup.mk'_eq_mk'] at hmk_eq
+    obtain ⟨z, hz_mem, hz_eq⟩ := hmk_eq
+    have hc₀z : c₀ = -z := by
+      change y₀ - Φ x₀ = -z
+      have : y₀ = Φ x₀ + (-z) := by rw [← hz_eq]; abel
+      rw [this]; abel
+    rw [hc₀z]; exact AddSubgroup.neg_mem _ hz_mem
+  have hshift : ∀ x : Fin gX → ℂ,
+      (QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x + c₀) :
+        Jacobians.AbelianVariety.ComplexTorus _ ΛY) =
+      QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x) := by
+    intro x
+    apply Quotient.sound'
+    rw [QuotientAddGroup.leftRel_apply]
+    have : -(Φ x + c₀) + Φ x = -c₀ := by abel
+    rw [this]; exact AddSubgroup.neg_mem _ hc₀_mem
+  have hy₀_eq : y₀ = Φ x₀ + c₀ := by
+    change y₀ = Φ x₀ + (y₀ - Φ x₀); abel
+  have hopen_tgt :
+      IsOpen ((fun x => Φ x + c₀) ⁻¹' (extChartAt IY target_q).target) :=
+    (Φ.continuous.add continuous_const).isOpen_preimage _
+      (isOpen_extChartAt_target _)
+  have hmem_tgt :
+      x₀ ∈ (fun x => Φ x + c₀) ⁻¹' (extChartAt IY target_q).target := by
+    simp only [Set.mem_preimage]; rw [← hy₀_eq]; exact hy₀_tgt
+  rw [contMDiffAt_iff]
+  refine ⟨?_, ?_⟩
+  · exact (continuous_quot_lift _
+      (QuotientAddGroup.continuous_mk.comp Φ.continuous)).continuousAt
+  · simp only [modelWithCornersSelf_coe, Set.range_id]
+    rw [contDiffWithinAt_univ]
+    have hsmooth : ContDiffAt ℂ ω (fun x => Φ x + c₀) x₀ :=
+      Φ.contDiff.contDiffAt.add contDiffAt_const
+    apply hsmooth.congr_of_eventuallyEq
+    filter_upwards [(isOpen_extChartAt_target (I := IX) qX).mem_nhds
+        hx₀_tgt,
+      hopen_tgt.mem_nhds hmem_tgt] with x hx_src hx_tgt
+    have hsymm_x :
+        (extChartAt IX qX).symm x =
+          (QuotientAddGroup.mk' ΛX.toAddSubgroup x :
+            Jacobians.AbelianVariety.ComplexTorus _ ΛX) :=
+      Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+        (L := ΛX) qX
+        ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+          (L := ΛX) qX).1 hx_src)
+    have hsymm_y :
+        (extChartAt IY target_q).symm (Φ x + c₀) =
+          (QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x + c₀) :
+            Jacobians.AbelianVariety.ComplexTorus _ ΛY) :=
+      Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+        (L := ΛY) target_q
+        ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+          (L := ΛY) target_q).1 hx_tgt)
+    have hmk_fCT :
+        fCT ((extChartAt IX qX).symm x) =
+          (QuotientAddGroup.mk' ΛY.toAddSubgroup (Φ x) :
+            Jacobians.AbelianVariety.ComplexTorus _ ΛY) := by
+      rw [hsymm_x]; rfl
+    have hmk_eq :
+        fCT ((extChartAt IX qX).symm x) =
+          (extChartAt IY target_q).symm (Φ x + c₀) := by
+      rw [hmk_fCT, hsymm_y, hshift]
+    change (extChartAt IY target_q)
+        (fCT ((extChartAt IX qX).symm x)) = Φ x + c₀
+    rw [hmk_eq]
+    exact (extChartAt IY target_q).right_inv hx_tgt
+
+/-- Pushforward on Jacobians is smooth.
+
+Proved by composing `complexTorus_pushforward_contMDiff_engine`
+(the engine for complex-torus quotient maps using `ComplexTorus.instChartedSpace`)
+with the ULift transfer lemmas `contMDiff_ulift_up` / `contMDiff_ulift_down`,
+after showing that `pushforwardImpl` equals the Kirov pushforward up to `ULift`
+wrapping. -/
+theorem AX_pushforward_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
-      (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforwardImpl X Y f hf)
+      (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforwardImpl X Y f hf) := by
+  set ΛX := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  set ΛY := periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)
+  set Φ : (Fin (genus X) → ℂ) →L[ℂ] (Fin (genus Y) → ℂ) :=
+    LinearMap.toContinuousLinearMap (pushforwardAmbientLinear f hf)
+  have hsub : ΛX.toAddSubgroup ≤ ΛY.toAddSubgroup.comap Φ.toAddMonoidHom := by
+    intro v hv
+    exact AX_pushforwardAmbient_preserves_lattice f hf v hv
+  have hpush := complexTorus_pushforward_contMDiff_engine ΛX ΛY Φ hsub
+  -- Define the function with types matching JacobianAmbient
+  set fCT : JacobianAmbient X → JacobianAmbient Y := fun q =>
+    Vendor.Kirov.ZLatticeQuotient.pushforward ΛX ΛY Φ hsub q
+  have hbridge :
+      ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+        (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω
+        (fun z : Jacobian X => (ULift.up (fCT z.down) : Jacobian Y)) :=
+    Jacobians.Jacobian.contMDiff_ulift_up.comp
+      (hpush.comp Jacobians.Jacobian.contMDiff_ulift_down)
+  -- Show pushforwardImpl equals the ULift-wrapped fCT
+  -- Show pushforwardImpl equals the ULift-wrapped fCT
+  have h : ∀ z : Jacobian X,
+      pushforwardImpl X Y f hf z = (ULift.up (fCT z.down) : Jacobian Y) := by
+    intro ⟨w⟩
+    apply ULift.ext
+    refine QuotientAddGroup.induction_on w (fun v => ?_)
+    change (QuotientAddGroup.map ΛX.toAddSubgroup ΛY.toAddSubgroup
+        (pushforwardAmbientLinear f hf).toAddMonoidHom
+        (AX_pushforwardAmbient_preserves_lattice f hf))
+      (QuotientAddGroup.mk v) =
+      (QuotientAddGroup.map ΛX.toAddSubgroup ΛY.toAddSubgroup
+        Φ.toAddMonoidHom hsub)
+      (QuotientAddGroup.mk v)
+    simp [Φ]
+  exact hbridge.congr (fun z => (h z).symm)
 
 /-- Pushforward is the identity on identity. (Functoriality, part 1.) -/
 theorem AX_pushforward_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
@@ -807,14 +970,50 @@ theorem AX_pushforward_comp_apply
           (pushforwardAmbientLinear g hg) (AX_pushforwardAmbient_preserves_lattice g hg)
           hXZ P
 
-/-- **Axiom.** Pullback on Jacobians is smooth. -/
-axiom AX_pullback_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pullback on Jacobians is smooth.
+
+Symmetric to `AX_pushforward_contMDiff`: `pullbackImpl` is
+`jacobianHomOfAmbient Y X (pullbackAmbientLinear f hf) ...`, which has the
+same `QuotientAddGroup.map` shape as `Kirov.pushforward` with
+`Φ := pullbackAmbientLinear f hf`. -/
+theorem AX_pullback_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
-      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullbackImpl X Y f hf)
+      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullbackImpl X Y f hf) := by
+  set ΛX := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  set ΛY := periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)
+  set Φ : (Fin (genus Y) → ℂ) →L[ℂ] (Fin (genus X) → ℂ) :=
+    LinearMap.toContinuousLinearMap (pullbackAmbientLinear f hf)
+  have hsub : ΛY.toAddSubgroup ≤ ΛX.toAddSubgroup.comap Φ.toAddMonoidHom := by
+    intro v hv
+    exact AX_pullbackAmbient_preserves_lattice f hf v hv
+  have hpush := complexTorus_pushforward_contMDiff_engine ΛY ΛX Φ hsub
+  set fCT : JacobianAmbient Y → JacobianAmbient X := fun q =>
+    Vendor.Kirov.ZLatticeQuotient.pushforward ΛY ΛX Φ hsub q
+  have hbridge :
+      ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
+        (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
+        (fun z : Jacobian Y => (ULift.up (fCT z.down) : Jacobian X)) :=
+    Jacobians.Jacobian.contMDiff_ulift_up.comp
+      (hpush.comp Jacobians.Jacobian.contMDiff_ulift_down)
+  -- Show pullbackImpl equals the ULift-wrapped fCT
+  have h : ∀ z : Jacobian Y,
+      pullbackImpl X Y f hf z = (ULift.up (fCT z.down) : Jacobian X) := by
+    intro ⟨w⟩
+    apply ULift.ext
+    refine QuotientAddGroup.induction_on w (fun v => ?_)
+    change (QuotientAddGroup.map ΛY.toAddSubgroup ΛX.toAddSubgroup
+        (pullbackAmbientLinear f hf).toAddMonoidHom
+        (AX_pullbackAmbient_preserves_lattice f hf))
+      (QuotientAddGroup.mk v) =
+      (QuotientAddGroup.map ΛY.toAddSubgroup ΛX.toAddSubgroup
+        Φ.toAddMonoidHom hsub)
+      (QuotientAddGroup.mk v)
+    simp [Φ]
+  exact hbridge.congr (fun z => (h z).symm)
 
 /-- Pullback is the identity on identity. (Functoriality, part 1.) -/
 theorem AX_pullback_id_apply {X : Type u} [TopologicalSpace X] [T2Space X]
