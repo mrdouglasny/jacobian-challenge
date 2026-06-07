@@ -1,6 +1,6 @@
 # Jacobians of Compact Riemann Surfaces
 
-A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **58 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
+A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as **55 classified, audited axioms**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
 
 > **What this is, honestly.** A scaffold that *closes Buzzard's interface* and proves real theorems on it, with the deep classical inputs isolated as a classified, discharge-planned axiom layer — **not** a from-first-principles proof of Jacobian theory. The axioms are LLM-authored and **have not had independent human-mathematician review**. See [Caveats](#caveats--read-before-relying-on-this) before relying on any result.
 
@@ -37,7 +37,7 @@ These are the genuine theorems — what a reader can trust the formalization to 
 
 The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` as a real computation through the period lattice — the strongest single piece of evidence that the construction is non-degenerate.
 
-## What it assumes — the 58 axioms
+## What it assumes — the 55 axioms
 
 Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into seven topics; difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
 
