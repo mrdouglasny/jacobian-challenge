@@ -4290,4 +4290,52 @@ theorem squareLocalHomeomorph_symm_eval_invol_flip
     ← affineChartProjX_symm_apply_snd (H := H) a.invol hpYσ hzσT, hpair]
   simp [HyperellipticAffine.invol]
 
+/-- **L2.1b** The single-sheet numerator `G = affCoeff·√f` (raw form: `0` at
+branch points). Off-branch it is the chosen-sheet `affCoeff` times the `√f`
+branch; by σ-anti-invariance it is sheet-independent, hence well-defined. -/
+noncomputable def liouvilleNumeratorGRaw
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) : ℂ → ℂ := by
+  classical
+  exact fun z =>
+    if hz : H.f.eval z = 0 then
+      0
+    else
+      affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z *
+        (squareLocalHomeomorph (H := H) (liouvilleChosenAffinePoint (H := H) z)
+            (liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz)).symm
+          (H.f.eval z)
+
+@[simp] theorem liouvilleNumeratorGRaw_of_eval_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z = 0) :
+    liouvilleNumeratorGRaw (H := H) form z = 0 := by
+  simp [liouvilleNumeratorGRaw, hz]
+
+theorem liouvilleNumeratorGRaw_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleNumeratorGRaw (H := H) form z =
+      affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z *
+        (squareLocalHomeomorph (H := H) (liouvilleChosenAffinePoint (H := H) z)
+            (liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz)).symm
+          (H.f.eval z) := by
+  simp only [liouvilleNumeratorGRaw, dif_neg hz]
+
+/-- **L2.1b** The removable extension of the single-sheet numerator: the branch
+value is the punctured-neighbourhood limit (`Filter.limUnder`), making `G`
+continuous (and ultimately entire). Off-branch it agrees with the raw numerator. -/
+noncomputable def liouvilleNumeratorG
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) : ℂ → ℂ :=
+  fun z =>
+    if H.f.eval z = 0 then
+      Filter.limUnder (𝓝[≠] z) (liouvilleNumeratorGRaw (H := H) form)
+    else
+      liouvilleNumeratorGRaw (H := H) form z
+
+theorem liouvilleNumeratorG_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleNumeratorG (H := H) form z = liouvilleNumeratorGRaw (H := H) form z := by
+  simp [liouvilleNumeratorG, hz]
+
 end Jacobians.ProjectiveCurve
