@@ -39,6 +39,31 @@ Removable limit at branch points. KEY TOOLS: `dslope` + `Filter.map_map`.
   nonconstant) + locally `z_map w = z₀ ↔ w=0`), then `Filter.map_map` + `tendsto_def`
   transfers `Tendsto (s∘z_map)(𝓝[≠]0)` to `Tendsto s (𝓝[≠] z₀)`. `use (A 0/B' 0)`.
 
+## hBranch — PRECISE recipe (2026-06-07, full derivation + OddPartDslope)
+`OddPartDslope.lean` (`Jacobians/GeneralResults/`) ALREADY provides the cancellation:
+`analyticAt_dslope_oddPart (hh : AnalyticAt ℂ h 0) : AnalyticAt ℂ (dslope (fun w => h w − h (−w)) 0) 0`
+and `dslope_oddPart_of_ne (hw : w≠0) : dslope (fun w => h w − h (−w)) 0 w = (h w − h (−w))/w`.
+
+DERIVATION (worked out, exact): at branch z₀ (f z₀=0, f'≠0), projY w=y coord, z(w)=z₀+w²u(w),
+u(0)≠0, z'(w)=w·(2u(w)+w u'(w))=:w·B(w), B(0)=2u(0)≠0. Let h = the projY-chart coeff at the
+branch point. Then for the two sheets ±w over z (w=√f(z)):
+- `affCoeff(a) z = h(w)·(dw/dz) = h(w)/z'(w)`  (sheet +w),
+- `affCoeff(a.invol) z = h(−w)/z'(−w) = −h(−w)/z'(w)` (since z even in w ⇒ z'(−w)=−z'(w)).
+So `s(z) = (h(w)−h(−w))/z'(w) = [(h(w)−h(−w))/w]/B(w) = dslope(oddPart h)(w) / B(w)`.
+Numerator `AnalyticAt 0` (`analyticAt_dslope_oddPart`, h analytic at 0 = projY coeff at branch),
+denominator `B` analytic with `B 0 ≠ 0` ⇒ `dslope(oddPart h)/B` `ContinuousAt 0` ⇒
+`Tendsto (s∘z) (𝓝[≠]0) (𝓝 (dslope(oddPart h)0 / B 0))`. Push to z via `Filter.map_map` +
+`Filter.map z (𝓝[≠]0) = 𝓝[≠] z₀`. L = dslope(oddPart h)0 / B 0.
+
+THE ONE HARD STEP (`h_cancel`): the chart-transition `affCoeff(a) z = h(w)/z'(w)`. This is the
+cotangent cocycle `form.2.2.1` between the projX chart at `a=(z,w)` and the projY chart at the
+branch point (`liouvilleBranchPoint z₀`, ∈ smoothLocusX) — transition `z↔w`, deriv `dw/dz=1/z'(w)`.
+MIRROR the EXISTING projX↔projY cocycle proof in EvenForm.lean (`cocycle_inl_inr_smoothLocusY_smoothLocusXNotY`
+at ~:1399, or `…_smoothLocusXNotY_smoothLocusY` :1167) with `form.coeff` (general) instead of
+`hyperellipticEvenCoeff` — EXACTLY as `affCoeff_eq_of_overlap_inl_inr` mirrored the affine↔∞ one.
+The projY coeff `h = form.coeff(branch chart)`; `liouvilleProjYNumerator`/`liouvilleBranchPoint_numerator_analyticAt_zero`
+give its analyticity at w=0.
+
 ## Then (assembly — already-green capstone)
 `liouvilleTwoSheetSumRemovable_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact`
   hAna(=`liouvilleTwoSheetSum_analyticAt_off_roots`) hBranch h0 ⇒ `∀z, s̃ z = 0` ⇒
