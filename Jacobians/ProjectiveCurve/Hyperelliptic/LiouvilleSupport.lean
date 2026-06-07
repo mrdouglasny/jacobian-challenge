@@ -813,4 +813,100 @@ theorem eq_zero_of_differentiable_tendsto_zero_cocompact (g : ℂ → ℂ)
   have hzero : p.coeff 0 = 0 := tendsto_const_nhds_iff.mp h0
   exact fun z => by rw [hgc z, hzero]
 
+/-! ## Direct two-sheet conditional assembly -/
+
+/-- Continuity of the direct two-sheet sum from the exact branch-point
+punctured-limit obligation.  This isolates the hard DR-B kernel: since
+`liouvilleTwoSheetSum` is defined to be `0` at roots, the removable branch
+limit must tend to `0`, not just to an arbitrary finite value. -/
+theorem liouvilleTwoSheetSum_continuous_of_analyticAt_off_roots_and_branch_tendsto
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      Filter.Tendsto (liouvilleTwoSheetSum (H := H) form) (𝓝[≠] z) (𝓝 0)) :
+    Continuous (liouvilleTwoSheetSum (H := H) form) := by
+  rw [continuous_iff_continuousAt]
+  intro z
+  by_cases hz : H.f.eval z = 0
+  · rw [continuousAt_iff_punctured_nhds]
+    rw [liouvilleTwoSheetSum_of_eval_eq_zero (H := H) form hz]
+    exact hBranch z hz
+  · exact (hAna z hz).continuousAt
+
+/-- DR-B payoff once off-root analyticity and continuity are supplied: the
+banked removable-singularity engine makes the two-sheet sum entire. -/
+theorem liouvilleTwoSheetSum_differentiable_of_analyticAt_off_roots_and_continuous
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hCont : Continuous (liouvilleTwoSheetSum (H := H) form)) :
+    Differentiable ℂ (liouvilleTwoSheetSum (H := H) form) :=
+  differentiable_of_analyticAt_off_roots (H := H)
+    (liouvilleTwoSheetSum (H := H) form) hAna hCont
+
+/-- DR-B payoff packaged with the branch-limit obligation. -/
+theorem liouvilleTwoSheetSum_differentiable_of_analyticAt_off_roots_and_branch_tendsto
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      Filter.Tendsto (liouvilleTwoSheetSum (H := H) form) (𝓝[≠] z) (𝓝 0)) :
+    Differentiable ℂ (liouvilleTwoSheetSum (H := H) form) :=
+  liouvilleTwoSheetSum_differentiable_of_analyticAt_off_roots_and_continuous
+    (H := H) form hAna
+    (liouvilleTwoSheetSum_continuous_of_analyticAt_off_roots_and_branch_tendsto
+      (H := H) form hAna hBranch)
+
+/-- DR-D: once DR-B gives differentiability and DR-C gives decay at infinity,
+the banked Liouville endgame proves the direct two-sheet sum is identically
+zero. -/
+theorem liouvilleTwoSheetSum_eq_zero_of_differentiable_tendsto_zero_cocompact
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hdiff : Differentiable ℂ (liouvilleTwoSheetSum (H := H) form))
+    (h0 : Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+      (Filter.cocompact ℂ) (𝓝 0)) :
+    ∀ z, liouvilleTwoSheetSum (H := H) form z = 0 :=
+  eq_zero_of_differentiable_tendsto_zero_cocompact
+    (liouvilleTwoSheetSum (H := H) form) hdiff h0
+
+/-- Fully conditional DR-B/C/D endgame: off-root analyticity, branch
+punctured limits to the chosen root values, and cocompact decay imply
+`liouvilleTwoSheetSum ≡ 0`. -/
+theorem liouvilleTwoSheetSum_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      Filter.Tendsto (liouvilleTwoSheetSum (H := H) form) (𝓝[≠] z) (𝓝 0))
+    (h0 : Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+      (Filter.cocompact ℂ) (𝓝 0)) :
+    ∀ z, liouvilleTwoSheetSum (H := H) form z = 0 :=
+  liouvilleTwoSheetSum_eq_zero_of_differentiable_tendsto_zero_cocompact
+    (H := H) form
+    (liouvilleTwoSheetSum_differentiable_of_analyticAt_off_roots_and_branch_tendsto
+      (H := H) form hAna hBranch)
+    h0
+
+/-- Conditional anti-invariance payoff from the direct two-sheet route. -/
+theorem chosen_coeff_eq_neg_of_analyticAt_off_roots_branch_tendsto_cocompact
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      Filter.Tendsto (liouvilleTwoSheetSum (H := H) form) (𝓝[≠] z) (𝓝 0))
+    (h0 : Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+      (Filter.cocompact ℂ) (𝓝 0))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
+      -form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z :=
+  chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero (H := H) form
+    (liouvilleTwoSheetSum_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact
+      (H := H) form hAna hBranch h0)
+    hz
+
 end Jacobians.ProjectiveCurve
