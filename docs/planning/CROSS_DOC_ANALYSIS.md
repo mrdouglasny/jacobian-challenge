@@ -47,7 +47,7 @@ bug in a high-leverage plan propagates the most damage.
 **Cycle 3** (2 nodes): [`AX_SerreDuality`](AX_SerreDuality.md), [`AX_RiemannRoch`](AX_RiemannRoch.md)
 **Cycle 4** (4 nodes): [`AX_IntersectionForm_alternating`](AX_IntersectionForm_alternating.md), [`AX_IntersectionForm_perfect`](AX_IntersectionForm_perfect.md), [`AX_AnalyticCycleBasis`](AX_AnalyticCycleBasis.md), [`AX_RiemannBilinear`](AX_RiemannBilinear.md)
 **Cycle 5** (6 nodes): [`Hyperelliptic-instIsManifold`](Hyperelliptic-instIsManifold.md), [`Hyperelliptic-instTopologicalSpace`](Hyperelliptic-instTopologicalSpace.md), [`AX_Hyperelliptic_oddEquiv`](AX_Hyperelliptic_oddEquiv.md), [`Hyperelliptic-instChartedSpace`](Hyperelliptic-instChartedSpace.md), [`Hyperelliptic`](Hyperelliptic.md), [`AX_Hyperelliptic_evenEquiv`](AX_Hyperelliptic_evenEquiv.md)
-**Cycle 6** (3 nodes): [`AX_pathIntegral_local_antiderivative`](AX_pathIntegral_local_antiderivative.md), [`pathIntegralBasepointFunctional`](pathIntegralBasepointFunctional.md), [`AX_ofCurve_contMDiff`](AX_ofCurve_contMDiff.md)
+**Cycle 6** (3 nodes): [`AX_pathIntegral_local_antiderivative`](AX_pathIntegral_local_antiderivative.md), [`pathIntegralBasepointFunctional`](pathIntegralBasepointFunctional.md), [`AX_ofCurve_contMDiff`](AX_ofCurve_contMDiff.md) — **resolved/obsolete as of 2026-06-07**: `AX_pathIntegral_local_antiderivative` was retired as FALSE (deleted, not proved; path-independence now lives at homology via `loopIntegralToH1`) and `pathIntegralBasepointFunctional` is a real `def`, so this cycle no longer exists.
 **Cycle 7** (7 nodes): [`infinityChart_compat_affineLiftProjY`](infinityChart_compat_affineLiftProjY.md), [`affineLiftProjY_compat_infinityChart`](affineLiftProjY_compat_infinityChart.md), [`infinityChart_compat_affineLiftProjX`](infinityChart_compat_affineLiftProjX.md), [`infinityChart_mem_source`](infinityChart_mem_source.md), [`infinityInverseMap`](infinityInverseMap.md), [`infinityChart`](infinityChart.md), [`affineLiftProjX_compat_infinityChart`](affineLiftProjX_compat_infinityChart.md)
 
 ## Discharge leaves (no project-internal prereqs)
@@ -61,8 +61,8 @@ first wave.
 | revise | 1 | [`PlaneCurve`](PlaneCurve.md) | mathlib-now | 7 |
 | revise | 2 | [`squareLocalHomeomorph_zero_notMem_source`](squareLocalHomeomorph_zero_notMem_source.md) | mathlib-now | 0 |
 | revise | 3 | [`AX_Elliptic_aLoop_analytic`](AX_Elliptic_aLoop_analytic.md) | mathlib-now | 1 |
-| revise | 4 | [`AX_BranchLocus`](AX_BranchLocus.md) | mathlib-now | 3 |
-| revise | 5 | [`AX_pushforward_contMDiff`](AX_pushforward_contMDiff.md) | needs-infra | 0 |
+| revise | 4 | [`AX_BranchLocus`](AX_BranchLocus.md) (now a **theorem**, discharged) | mathlib-now | 3 |
+| revise | 5 | [`AX_pushforward_contMDiff`](AX_pushforward_contMDiff.md) (discharged) | needs-infra | 0 |
 | revise | 8 | [`AX_H1_ProjectiveLine_trivial`](AX_H1_ProjectiveLine_trivial.md) | needs-infra | 0 |
 | reject | 1 | [`ambientPhi_ambientPsi_eq`](ambientPhi_ambientPsi_eq.md) | mathlib-now | 0 |
 | reject | 1 | [`polynomialLocalHomeomorph_no_critical_in_source`](polynomialLocalHomeomorph_no_critical_in_source.md) | mathlib-now | 0 |
@@ -356,7 +356,9 @@ graph TD
 
 ### Cycle 6 — `pathIntegralBasepointFunctional` ↔ `AX_pathIntegral_local_antiderivative` ↔ `AX_ofCurve_contMDiff` (path-integral)
 
-**Pattern:** the path-integral functional is the data; local-antiderivative is its FTC property; ofCurve_contMDiff uses both to argue the Abel-Jacobi map is smooth. The dep cycle arises because each plan cites the others in its `Blocked by:`. **Break:** discharge **`pathIntegralBasepointFunctional`** as a real `def` once `loopIntegralToH1` + `pathIntegralAnalyticArc` infrastructure land (see fulcrum analysis). Then FTC `_local_antiderivative` follows; then `_ofCurve_contMDiff` is `ContMDiff.comp` + FTC + manifold quotient. ORDER MATTERS.
+**Resolved/obsolete as of 2026-06-07.** `AX_pathIntegral_local_antiderivative` was **retired as FALSE** (deleted, not proved — a single-valued ℂ open-path "FTC" forces zero periods); path-independence now lives at homology via `loopIntegralToH1`, and `pathIntegralBasepointFunctional` is a real `def`. The cycle below no longer exists; the analysis is retained for history.
+
+**Pattern (historical):** the path-integral functional is the data; local-antiderivative is its FTC property; ofCurve_contMDiff uses both to argue the Abel-Jacobi map is smooth. The dep cycle arises because each plan cites the others in its `Blocked by:`. **Break:** discharge **`pathIntegralBasepointFunctional`** as a real `def` once `loopIntegralToH1` + `pathIntegralAnalyticArc` infrastructure land (see fulcrum analysis). Then FTC `_local_antiderivative` follows; then `_ofCurve_contMDiff` is `ContMDiff.comp` + FTC + manifold quotient. ORDER MATTERS.
 
 ```mermaid
 graph TD

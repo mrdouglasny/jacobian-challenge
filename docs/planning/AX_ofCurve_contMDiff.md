@@ -1,8 +1,48 @@
 # `AX_ofCurve_contMDiff` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07 (supersedes the 2026-06-03 route below)
+>
+> **The old prerequisite is gone.** This plan's "Blocked by" / step 1 named
+> `AX_pathIntegral_local_antiderivative` (a single-valued open-path FTC). That
+> axiom was **retired as FALSE** — a single-valued primitive on open paths
+> forces all periods to vanish (see `Jacobians/Axioms/AbelJacobiMap.lean:84`).
+> Path-independence now lives correctly at the homology level via
+> `loopIntegralToH1`. So **steps 1, 4, 5a are dead** as written — do not try to
+> "discharge that axiom to a theorem".
+>
+> **New route (use the homotopy-invariance / developing-value substrate).**
+> Since 2026-06-03 the HI workstream landed exactly the endpoint-regularity
+> machinery this proof needs:
+> - `developingValue` + `developingValue_basepoint_indep`
+>   (`Jacobians/RiemannSurface/DevelopingValueAlgebra.lean:20`) — the
+>   basepoint-fixed primitive underlying `pathIntegralBasepointFunctional`.
+> - `canonicalArcIntegral` (`CanonicalArcIntegral.lean:17`) with
+>   `canonicalArcIntegral_homotopy_invariant`
+>   (`HomotopyInvarianceDevelop.lean:873`), `_add`, `_smul`, `_reverse`.
+> - Worked endpoint-analyticity witness:
+>   `analyticLoop_canonicalArcIntegral_ellipticDz_mem_lattice`
+>   (`Elliptic/OfCurveInj.lean:104`) — `AX_ofCurve_inj` itself is now
+>   **discharged** (2026-06-05), so its endpoint-analyticity pattern is a
+>   template here.
+>
+> The reduction is unchanged in spirit (steps 2–3, 6 below still hold): peel
+> `ULift.up` + `QuotientAddGroup.mk'` + constant subtraction, reduce to
+> `ofCurveAmbient X P` smooth via `contMDiff_pi`, then per-component analyticity
+> in the chart at the upper endpoint `Q`. What changes is the **source** of that
+> analyticity: not the dead FTC axiom, but the endpoint-derivative of
+> `developingValue` being `coeff_i Q (φ_Q Q)` (holomorphic by
+> `IsHolomorphicOneFormCoeff`), packaged through the arc-integral API +
+> `Complex.analyticOn_of_differentiableOn`.
+>
+> **Status:** no longer blocked on any axiom (the only blocker was retired).
+> Effort still ~7 / ~250–350 LOC; this is now the *most tractable standalone*
+> Abel–Jacobi axiom — the residue route / trace map are NOT needed for it.
+> _The 2026-06-03 recipe below is retained for the steps 2–3/6 scaffolding;
+> read it through the refresh above._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:238`
-**Route:** provable-from-other-axioms &nbsp;&nbsp; **Effort:** 7 &nbsp;&nbsp; **Est:** ~1 focused week once `AX_pathIntegral_local_antiderivative` is a theorem, ~250–350 LOC
-**Blocked by:** `AX_pathIntegral_local_antiderivative` (`Jacobians/Axioms/AbelJacobiMap.lean:116`); transitively `pathIntegralBasepointFunctional`.
+**Route:** provable-from-other-axioms &nbsp;&nbsp; **Effort:** 7 &nbsp;&nbsp; **Est:** ~250–350 LOC (the `AX_pathIntegral_local_antiderivative` prerequisite was retired as false — see refresh above)
+**Blocked by:** ~~`AX_pathIntegral_local_antiderivative`~~ **(retired as false — no longer a blocker)**; now uses the `developingValue` / `canonicalArcIntegral` substrate directly.
 
 **Statement (verbatim):**
 ```lean

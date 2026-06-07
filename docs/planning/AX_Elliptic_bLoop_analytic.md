@@ -1,3 +1,5 @@
+> **✅ DISCHARGED — 2026-06-07.** This axiom is now a proved theorem; this plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # `AX_Elliptic_bLoop_analytic` — discharge recipe
 
 **Location:** `Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean:90`

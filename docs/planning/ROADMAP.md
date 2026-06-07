@@ -8,6 +8,12 @@ Routing decisions for all **90 real axioms** across 27 files of the `Jacobians` 
 > - **Phase 1** (2026-06-04): `Divisor` / `Divisor-instAddCommGroup` / `Divisor-deg`, `AX_BranchLocus` → 90 → 86.
 > - **bridgePath cluster — all 6** (2026-06-04, branch `phase2-bridgepath`): `bridgePath` (now a `def`), `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, **and `bridgePath_lineIntegrable`** → 86 → 80, via the new `Bridge/BridgePath.lean` smooth-path-connectedness infrastructure (`_lineIntegrable` from continuity of `pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable`). The entire cluster is discharged.
 > - **Hyperelliptic leaf instances** (branch `phase2-leaves`, PR #3): `Hyperelliptic.instCompactSpace` / `instConnectedSpace` / `instT2Space` / `instNonempty` discharged there (86 → 82); still listed as open *on this branch* since that PR is not yet merged. Counts compose at merge.
+> - **Abel–Jacobi opacity chain** (2026-06-05): `AX_ofCurve_inj` → theorem (homotopy-invariance / `developingValue` route); `pathIntegralBasepointFunctional` de-opaqued to a real `def`; `loopIntegralToH1` discharged. `ABEL_JACOBI_DISCHARGE_PLAN.md`'s "deepest gap" is now closed.
+> - **Hyperelliptic equiv + Elliptic loops** (Phase-3 / PR #86): `oddEquiv` / `evenEquiv`, Elliptic `aLoop`/`bLoop` analyticity → theorems.
+> - **Functoriality smoothness** (PR #88): `AX_pushforward_contMDiff` / `AX_pullback_contMDiff` → theorems.
+> - **PlaneCurve cluster** (PR #92 / #94): `AX_PlaneCurveAffine_nonempty`, `PlaneCurve.instT2Space` (+ topology cluster) → theorems on standard-3 axioms.
+> - **Liouville L2 / L3** (PR #96, 2026-06-07): `AX_HyperellipticForm_polynomial_decomposition` + `AX_HyperellipticOneForm_eq_form` → theorems (the canonical-differentials theorem). The 2d "true-but-unproven" class is now empty.
+> - **Net:** live kernel-verified count is **50** as of 2026-06-07 (down from this page's 90 baseline). Per-axiom live status: [`AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md); aggregate tracker: [issue #77](https://github.com/mrdouglasny/jacobian-challenge/issues/77). The route/effort rows below are the 2026-06-03 baseline — cross-check against the audit before picking up any row.
 
 ## Vetting summary
 

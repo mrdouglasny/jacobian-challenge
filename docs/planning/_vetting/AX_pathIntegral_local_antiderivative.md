@@ -1,3 +1,5 @@
+> **✅ DISCHARGED (retired).** This axiom no longer exists in the kernel — the single-valued ℂ open-path "FTC" it asserted is FALSE for Abel–Jacobi and was deleted (path-independence lives at H1 via `loopIntegralToH1`). This plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # Gemini 3.1 Pro critique — `AX_pathIntegral_local_antiderivative`
 
 **Model:** gemini-3.1-pro-preview

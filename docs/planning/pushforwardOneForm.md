@@ -1,5 +1,12 @@
 # `pushforwardOneForm` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> `AX_BranchLocus` is now a **theorem** (`Jacobians/Axioms/BranchLocus.lean:202`, discharged Phase-1 2026-06-04 via Wallace `weightedFiberConservation`), so the trace construction's **finite-fiber prerequisite is satisfied**: the finite-fiber `Finset` data and the fiber-degree identity (`∀ q, (∑' p, localOrder f p q) = d`) are now theorem-backed, not axioms. The **real remaining gate is the trace itself** — building the branch-point removable-singularity API + the Newton-sum symmetric-function cancellation at branch points (steps 2–3 below). This is unchanged: still effort 10, months / 3,000+ LOC of from-scratch analytic infrastructure.
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:146`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 10 &nbsp;&nbsp; **Est:** months of dedicated work, 3,000+ LOC (trace formula, symmetric product infrastructure, Riemann removable singularity)
 **Blocked by:** `AX_BranchLocus` (`Jacobians/Axioms/BranchLocus.lean:100`); transitively depends on `localOrder` (`Jacobians/Axioms/BranchLocus.lean:69–72`, already a `def`).

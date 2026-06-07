@@ -1,5 +1,12 @@
 # `AX_pullbackAmbient_preserves_lattice` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> `AX_BranchLocus` is now a **theorem** (`Jacobians/Axioms/BranchLocus.lean:202`, discharged 2026-06-04), so the finite branch locus + common degree `d` used by the homology-transfer step (step 2) is **theorem-backed**, not an axiom blocker. The **real gate is `pushforwardOneForm`**: `pullbackAmbientLinear` (`Jacobians/Axioms/AbelJacobiMap.lean:289–301`) is *defined using* `pushforwardOneForm` (`AbelJacobiMap.lean:146`, still an axiom), so this lattice-preservation law cannot be discharged until that trace map is a real `def` — plus the H1-transfer + integral-trace naturality infra below. (Note: step 3's proposed helper axiom `AX_pushforwardOneForm_integral_trace` should be avoided per the axiom-hygiene rules — discharge the trace `def` first.)
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:324`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 9 &nbsp;&nbsp; **Est:** ~4–6 weeks, ~800–1200 LOC (requires heavy homology transfer infrastructure)
 **Blocked by:** `AX_AnalyticCycleBasis`, `AX_PeriodLattice`, `AX_BranchLocus`

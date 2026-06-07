@@ -1,3 +1,5 @@
+> **✅ DISCHARGED (retired).** This axiom no longer exists in the kernel — the single-valued ℂ open-path "FTC" it asserted is FALSE for Abel–Jacobi and was deleted (see `Jacobians/Axioms/AbelJacobiMap.lean` notes; path-independence lives at H1 via `loopIntegralToH1`, not at this chart-local FTC). This plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # `AX_pathIntegral_local_antiderivative` — discharge recipe
 
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:116`

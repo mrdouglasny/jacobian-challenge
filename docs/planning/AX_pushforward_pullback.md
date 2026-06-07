@@ -1,5 +1,12 @@
 # `AX_pushforward_pullback` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> `AX_BranchLocus` is now a **theorem** (`Jacobians/Axioms/BranchLocus.lean:202`, discharged 2026-06-04), so the fiber-degree multiplication input — the common degree `d` with `∀ q, (∑' p, localOrder f p q) = d` and finite branch locus (layer A1 / step 2) — is now **available as a theorem**, not a prerequisite axiom. The **real remaining gate is still `pushforwardOneForm` becoming a real `def`** (layer A2): until the trace map has a body, the 1-form identity `f_* ∘ f^* = deg·id` is unreachable and this Jacobian-level statement cannot be proved.
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:679`
 **Route:** genuine-textbook &nbsp;&nbsp; **Effort:** 8 &nbsp;&nbsp; **Est:** ~4–6 focused weeks once prerequisites land, ~400–700 LOC of project code (excluding the prerequisite trace construction and the manifold-Sard / open-mapping infrastructure that must arrive first)
 **Blocked by:** `pushforwardOneForm` (`Jacobians/Axioms/AbelJacobiMap.lean:146`, currently axiomatic — must be a real `def` first), `AX_BranchLocus` (`Jacobians/Axioms/BranchLocus.lean:100`), and a project-side trace identity for `pushforwardOneForm ∘ pullbackOneForm` (currently nowhere — see step 2 below). Transitively: the manifold-level Open Mapping Theorem / a Mathlib-or-bespoke Sard's lemma for non-constant holomorphic maps `X → Y` between compact Riemann surfaces (Mathlib v4.28 has Sard only for finite-dim real vector spaces, e.g. `Mathlib/MeasureTheory/Function/Jacobian.lean:598, 647` and the Hausdorff-dim version at `Mathlib/Topology/MetricSpace/HausdorffDimension.lean:560, 568` — none on manifolds).
