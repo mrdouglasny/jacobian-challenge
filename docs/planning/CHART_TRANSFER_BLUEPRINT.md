@@ -57,8 +57,23 @@ the −1 eigenvalue. Anti-invariance still comes from the **green Liouville scaf
 hAna (off-root analyticity) hold for all x. Do NOT try to derive anti-invariance from
 the cocycle.
 
+## KEY: the axiom is `hQ`-guarded (discovered 2026-06-07)
+`AX_HyperellipticForm_polynomial_decomposition` quantifies over
+`(a, hpY, q, hQ : Quotient.out q = Sum.inl a, z ∈ affine target)` and constrains
+`form.coeff q z`. The `hQ` guard means it ONLY constrains affine-rep points, where
+`form.coeff q = affCoeff form a` (the `inl` branch). So the discharge: build the
+global numerator `G z := affCoeff form (chosen a at z) z · √f(z)`, prove it's a
+polynomial `g` (entire via affCoeff analyticity + anti-invariance + removable +
+Liouville-growth), then at `hQ` points `form.coeff q z = affCoeff form a z = G z/√f
+= g.eval z/√f` via `affCoeff_of_inl`. NO need to handle `form.coeff` at ∞-rep
+points. The CHOSEN-point trick: `liouvilleChosenAffinePoint z` has `a.val.1 = z`
+AND `a.invol.val.1 = z` (invol negates only y), so BOTH `affCoeff form a` and
+`affCoeff form a.invol` are analytic at the common basepoint `z`
+(`affCoeff_analyticAt_basepoint`) ⇒ hAna is DIRECT after the retrofit.
+
 ## Sub-tasks
-1. **CT-1** define `affCoeff` + `affCoeff_of_inl` reduction lemma.
+- **CT-2** ✅ DONE: `affCoeff_analyticAt_basepoint : AnalyticAt ℂ (affCoeff form a) a.val.1` (2df253e), + `affCoeff`/`affCoeff_of_inl`/`affCoeff_analyticOn_of_inl` + center helpers.
+1. **CT-1** define `affCoeff` + `affCoeff_of_inl` reduction lemma. ✅ DONE.
 2. **CT-2** `affCoeff` analyticity on the affine target (inl branch trivial; inr branch
    via 1/z transition + Field 1 + domain mapping). The real new work.
 3. **CT-3** retrofit `liouvilleProjXNumerator`/`liouvilleTwoSheetSum` to `affCoeff`;
