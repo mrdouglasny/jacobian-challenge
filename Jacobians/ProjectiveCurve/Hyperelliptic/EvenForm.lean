@@ -801,7 +801,7 @@ on the chart-overlap source equals `w ↦ w⁻¹` (the Möbius). This is
 the core geometric content of the cross-summand cocycle in the
 smoothLocusY × smoothLocusY (reverseData) sub-case. -/
 
-private lemma chart_transition_eq_inv_X_U
+lemma chart_transition_eq_inv_X_U
     [hf : Fact (¬ Odd H.f.natDegree)]
     (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
     (b : HyperellipticAffineInfinity H)
