@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 52** — all **52** in our own modules. The vendored
+**Active project axioms: 50** — all **50** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -198,7 +198,7 @@ Per the review plan, axioms are split into two classes:
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 21 | curve-specific chart constructions | real but unverified |
-| 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
+| 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 
 ---
 
@@ -295,8 +295,8 @@ is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-dischar
 
 | Axiom | File:Line | Status |
 |-------|-----------|--------|
-| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven. **Step 4 of its proof plan is proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
-| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm` onto the low-degree forms; feeds `genus_HyperellipticEven_le`. **Reduces to L2 + cocycle propagation** (`hyperellipticForm_coeff_projX`, the bridge lemma). The only remaining gap in the even-genus theorem. |
+| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean` | **DISCHARGED → theorem** (2026-06-07, PR #96) — direct two-sheet σ-anti-invariance + `affCoeff` chart-transfer ⇒ single-sheet numerator entire + poly-growth ⇒ polynomial. |
+| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean` | **DISCHARGED → theorem** (2026-06-07, PR #96) — L2 + cocycle propagation across branch/∞ charts + `ext_of_coeff`. |
 
 ---
 
@@ -379,7 +379,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 52 — the vendored Kirov subtree is now axiom-free, so 52 is the total.
+#   prints 50 — the vendored Kirov subtree is now axiom-free, so 50 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -396,7 +396,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 52
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 50
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
