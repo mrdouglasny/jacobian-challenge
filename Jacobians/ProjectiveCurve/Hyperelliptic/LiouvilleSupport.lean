@@ -289,6 +289,93 @@ theorem affCoeff_analyticOn_of_inr_of_mapsTo
   simpa [domain, hEq]
     using hProd
 
+/-- Basepoint analyticity of the affine `x`-coefficient attached to a
+smooth-`Y` affine point.
+
+This is the pointwise form needed by the Liouville two-sheet sum: in the
+infinity-representative branch it uses only the fact that the basepoint inverse
+lies in the local infinity chart target, not a global `MapsTo` statement. -/
+theorem affCoeff_analyticAt_basepoint
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H) :
+    AnalyticAt ℂ (affCoeff (H := H) form a) a.val.1 := by
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  cases hQ : Quotient.out q with
+  | inl a' =>
+      have hQq : Quotient.out q = Sum.inl a' := by
+        simpa using hQ
+      have hOutEq : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a') = q := by
+        rw [← hQq]
+        exact Quotient.out_eq q
+      have ha' : a' = a := by
+        exact HyperellipticEvenProj.proj_inl_injective H (by
+          simpa [q, HyperellipticEvenProj.proj, Function.comp_def] using hOutEq)
+      have hQa : Quotient.out q = Sum.inl a := by
+        simpa [ha'] using hQq
+      have hEq : affCoeff (H := H) form a = form.coeff q := by
+        simpa [q] using affCoeff_of_inl (H := H) form a a' hQq
+      have haSrc : a ∈ (affineChartProjX (H := H) a hpY).source :=
+        affineChartProjX_mem_source a hpY
+      have haTarget : a.val.1 ∈ (affineChartProjX (H := H) a hpY).target := by
+        simpa using (affineChartProjX (H := H) a hpY).map_source haSrc
+      rw [hEq]
+      exact AnalyticOn.analyticAt
+        ((affineChartProjX (H := H) a hpY).open_target.mem_nhds haTarget)
+        (form_coeff_analyticOn_affineProjX_target form a hpY q hQa)
+  | inr b =>
+      have hQq : Quotient.out q = Sum.inr b := by
+        simpa using hQ
+      obtain ⟨hx, _hb, _hbY⟩ :=
+        affCoeff_inr_out_eq_affineGluingImage (H := H) a hpY hQq
+      have hform : AnalyticOn ℂ (form.coeff q) (extChartAt 𝓘(ℂ, ℂ) q).target :=
+        form.2.1 q
+      have hExt : (extChartAt 𝓘(ℂ, ℂ) q).target =
+          (infinityLiftChart H hf.out b).target := by
+        rw [extChartAt_target]
+        change
+          ↑𝓘(ℂ, ℂ).symm ⁻¹' (HyperellipticEvenProj.chartAt H hf.out q).target ∩
+              Set.range ↑𝓘(ℂ, ℂ) =
+            (infinityLiftChart H hf.out b).target
+        change _ ∩ Set.range (id : ℂ → ℂ) = _
+        rw [Set.range_id, Set.inter_univ]
+        change (HyperellipticEvenProj.chartAt H hf.out q).target =
+          (infinityLiftChart H hf.out b).target
+        unfold HyperellipticEvenProj.chartAt
+        rw [hQq]
+      rw [hExt] at hform
+      have hbaseInv : a.val.1⁻¹ ∈ (infinityLiftChart H hf.out b).target :=
+        affCoeff_inr_base_inv_mem_infinityLiftChart_target (H := H) a hpY hQq
+      have hbaseOne : 1 / a.val.1 ∈ (infinityLiftChart H hf.out b).target := by
+        simpa [one_div] using hbaseInv
+      have hCoeffAt : AnalyticAt ℂ (form.coeff q) (1 / a.val.1) :=
+        AnalyticOn.analyticAt
+          ((infinityLiftChart H hf.out b).open_target.mem_nhds hbaseOne)
+          hform
+      have hInv : AnalyticAt ℂ (fun z : ℂ => z⁻¹) a.val.1 :=
+        (analyticAt_id (𝕜 := ℂ) (z := a.val.1)).inv hx
+      have hInvOne : AnalyticAt ℂ (fun z : ℂ => 1 / z) a.val.1 := by
+        simpa [one_div] using hInv
+      have hCoeffComp :
+          AnalyticAt ℂ (fun z : ℂ => form.coeff q (1 / z)) a.val.1 := by
+        simpa [Function.comp_def] using hCoeffAt.comp hInvOne
+      have hPow : AnalyticAt ℂ (fun z : ℂ => z ^ 2) a.val.1 :=
+        (analyticAt_id (𝕜 := ℂ) (z := a.val.1)).pow 2
+      have hInvPow : AnalyticAt ℂ (fun z : ℂ => (z ^ 2)⁻¹) a.val.1 :=
+        hPow.inv (pow_ne_zero 2 hx)
+      have hFactor : AnalyticAt ℂ (fun z : ℂ => -1 / z ^ 2) a.val.1 := by
+        convert hInvPow.neg using 1
+        ext z
+        simp [div_eq_mul_inv]
+      have hProd : AnalyticAt ℂ
+          (fun z : ℂ => form.coeff q (1 / z) * (-1 / z ^ 2)) a.val.1 :=
+        hCoeffComp.mul hFactor
+      have hEq : affCoeff (H := H) form a =
+          fun z : ℂ => form.coeff q (1 / z) * (-1 / z ^ 2) := by
+        funext z
+        simp [affCoeff, q, hQq]
+      simpa [hEq] using hProd
+
 /-- The local Liouville numerator is analytic on the smooth-`Y` projX target. -/
 theorem liouvilleProjXNumerator_analyticOn
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
