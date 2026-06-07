@@ -621,14 +621,20 @@ axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
-/-- **Axiom (re-instated 2026-06-04 after review).** `PlaneCurve H` is nonempty.
-This statement is TRUE — a positive-degree (`d ≥ 1`) homogeneous `F` over `ℂ`
-always has a nontrivial projective zero (restrict `F` to a line ⊂ ℙ² to get a
-nonconstant homogeneous binary form, which has a root). An earlier "discharge"
-proved it via `AX_PlaneCurveAffine_nonempty`, which is **FALSE** for `F = z` (see
-the flag above), so that proof was unsound and is reverted. Real proof
-(projective Nullstellensatz / line restriction) is a tracked follow-up — it must
-NOT route through the flagged affine axiom. -/
+/-- `PlaneCurve H` is nonempty (proved 2026-06-07, PR #99/#102).
+
+Lift an affine zero into projective space: `AX_PlaneCurveAffine_nonempty H` gives
+a point `(x, y)` of the `z = 1` affine patch lying on the curve, and `[x : y : 1]`
+is then a projective point on `PlaneCurve H` (the third coordinate is `1 ≠ 0`, so
+the representative is nonzero).
+
+Soundness note: routing through `AX_PlaneCurveAffine_nonempty` is legitimate here.
+An *earlier* discharge was reverted because, at that time, the affine-nonempty
+statement was a flagged axiom that was **FALSE** for `F = z` (issue #82). That
+hole has since been closed on both sides: `PlaneCurveData` was strengthened with
+`h_irreducible` + `z ∤ F` (so `F = z` is no longer a valid datum), and
+`AX_PlaneCurveAffine_nonempty` was **proved as a theorem** (PR #92, `#print axioms`
+standard-3). The affine witness is therefore sound, and so is this lift. -/
 instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) := by
   obtain ⟨⟨x, y⟩, hp⟩ := PlaneCurveAffine.AX_PlaneCurveAffine_nonempty H
   let v : Fin 3 → ℂ := ![x, y, 1]
