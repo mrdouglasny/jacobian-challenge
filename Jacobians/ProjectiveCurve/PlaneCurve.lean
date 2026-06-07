@@ -285,6 +285,136 @@ theorem AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
+private def nonZVarEquivFin2 : NonZVar ≃ Fin 2 where
+  toFun i := if (i : Fin 3) = 0 then 0 else 1
+  invFun j := if j = 0 then ⟨0, by simp⟩ else ⟨1, by simp⟩
+  left_inv := by grind
+  right_inv := by grind
+
+private noncomputable def affinePolynomialFin2 (F : MvPolynomial (Fin 3) ℂ) :
+    MvPolynomial (Fin 2) ℂ :=
+  MvPolynomial.renameEquiv ℂ nonZVarEquivFin2 (affinePolynomial F)
+
+private lemma affinePolynomialFin2_eval_eq (F : MvPolynomial (Fin 3) ℂ)
+    (v : Fin 2 → ℂ) :
+    MvPolynomial.eval v (affinePolynomialFin2 F) =
+      MvPolynomial.eval ![v 0, v 1, (1 : ℂ)] F := by
+  unfold affinePolynomialFin2
+  rw [MvPolynomial.renameEquiv_apply, MvPolynomial.eval_rename,
+    affinePolynomial_eval_eq]
+  congr
+  funext i
+  fin_cases i <;> simp [nonZVarEquivFin2]
+
+private noncomputable def fin1Polynomial (P : MvPolynomial (Fin 1) ℂ) : Polynomial ℂ :=
+  Polynomial.map (MvPolynomial.isEmptyAlgEquiv ℂ (Fin 0)) (MvPolynomial.finSuccEquiv ℂ 0 P)
+
+private lemma fin1Polynomial_eval (P : MvPolynomial (Fin 1) ℂ) (x : ℂ) :
+    Polynomial.eval x (fin1Polynomial P) = MvPolynomial.eval (fun _ : Fin 1 => x) P := by
+  unfold fin1Polynomial
+  change Polynomial.eval x
+      (Polynomial.map (MvPolynomial.eval finZeroElim) (MvPolynomial.finSuccEquiv ℂ 0 P)) = _
+  rw [← MvPolynomial.eval_eq_eval_mv_eval' finZeroElim x P]
+  congr
+  funext i
+  fin_cases i
+  simp
+
+private lemma fin1Polynomial_ne_zero {P : MvPolynomial (Fin 1) ℂ} (hP : P ≠ 0) :
+    fin1Polynomial P ≠ 0 := by
+  unfold fin1Polynomial
+  have : MvPolynomial.finSuccEquiv ℂ 0 P ≠ 0 := by
+    simp_all
+  exact (Polynomial.map_ne_zero_iff (MvPolynomial.isEmptyAlgEquiv ℂ (Fin 0)).injective).mpr this
+
+private lemma finite_zeroSet_fin1 (P : MvPolynomial (Fin 1) ℂ) (hP : P ≠ 0) :
+    ({x : ℂ | MvPolynomial.eval (fun _ : Fin 1 => x) P = 0}).Finite := by
+  let p := fin1Polynomial P
+  have : p ≠ 0 := fin1Polynomial_ne_zero hP
+  refine (p.roots.toFinset.finite_toSet.subset ?_)
+  intro x hx
+  have hxroot : Polynomial.IsRoot p x := by
+    rw [Polynomial.IsRoot.def]
+    simpa [p, fin1Polynomial_eval P x] using hx
+  simp_all
+
+private lemma exists_zero_first_of_degreeOf_pos (P : MvPolynomial (Fin 2) ℂ)
+    (hdeg : 0 < MvPolynomial.degreeOf (0 : Fin 2) P) :
+    ∃ R : Set ℂ, R.Finite ∧
+      ∀ x ∉ R, ∃ y : ℂ, MvPolynomial.eval (Fin.cons y (fun _ : Fin 1 => x)) P = 0 := by
+  let p : Polynomial (MvPolynomial (Fin 1) ℂ) := MvPolynomial.finSuccEquiv ℂ 1 P
+  let L : MvPolynomial (Fin 1) ℂ := p.leadingCoeff
+  have hpdeg : 0 < p.natDegree := by
+    simpa [p, MvPolynomial.natDegree_finSuccEquiv] using hdeg
+  have : p ≠ 0 := by
+    intro hp0
+    simp_all
+  have : L ≠ 0 := by
+    simpa [L] using (Polynomial.leadingCoeff_ne_zero.mpr this)
+  refine ⟨{x : ℂ | MvPolynomial.eval (fun _ : Fin 1 => x) L = 0}, finite_zeroSet_fin1 L this, ?_⟩
+  intro x _
+  let q : Polynomial ℂ := Polynomial.map (MvPolynomial.eval (fun _ : Fin 1 => x)) p
+  have : q.coeff p.natDegree ≠ 0 := by
+    have hxL : MvPolynomial.eval (fun _ : Fin 1 => x) L ≠ 0 := by grind
+    simpa [q, L, Polynomial.coeff_map, Polynomial.coeff_natDegree] using hxL
+  have : 0 < q.natDegree :=
+    lt_of_lt_of_le hpdeg (Polynomial.le_natDegree_of_ne_zero this)
+  have hqpos : 0 < q.degree := Polynomial.natDegree_pos_iff_degree_pos.mp this
+  obtain ⟨y, hy⟩ := Complex.exists_root hqpos
+  refine ⟨y, ?_⟩
+  have : Polynomial.eval y q = 0 := Polynomial.IsRoot.def.mp hy
+  rw [MvPolynomial.eval_eq_eval_mv_eval' (fun _ : Fin 1 => x) y P]
+  grind
+
+private lemma eq_C_of_degreeOf_fin2_eq_zero (P : MvPolynomial (Fin 2) ℂ)
+    (h0 : MvPolynomial.degreeOf (0 : Fin 2) P = 0)
+    (h1 : MvPolynomial.degreeOf (1 : Fin 2) P = 0) :
+    P = MvPolynomial.C (MvPolynomial.coeff 0 P) := by
+  ext m
+  rw [MvPolynomial.coeff_C]
+  by_cases hm : m = 0
+  · simp [hm]
+  · have hcoeff : MvPolynomial.coeff m P = 0 := by
+      by_contra hne
+      have hs : m ∈ P.support := MvPolynomial.mem_support_iff.mpr hne
+      have : m (0 : Fin 2) = 0 := Nat.eq_zero_of_le_zero
+          (by simpa [h0] using MvPolynomial.le_degreeOf_of_mem_support (p := P) (0 : Fin 2) hs)
+      have hm1 : m (1 : Fin 2) = 0 := Nat.eq_zero_of_le_zero
+          (by simpa [h1] using MvPolynomial.le_degreeOf_of_mem_support (p := P) (1 : Fin 2) hs)
+      have : m = 0 := by
+        ext i
+        fin_cases i <;> simp_all
+      simp_all
+    simp_all
+
+private lemma eq_zero_or_exists_degreeOf_pos_of_not_isUnit_fin2 (P : MvPolynomial (Fin 2) ℂ)
+    (hP : ¬ IsUnit P) :
+    P = 0 ∨ 0 < MvPolynomial.degreeOf (0 : Fin 2) P ∨
+      0 < MvPolynomial.degreeOf (1 : Fin 2) P := by
+  by_cases hzero : P = 0
+  · simp_all
+  · right
+    by_cases h0 : 0 < MvPolynomial.degreeOf (0 : Fin 2) P
+    · simp_all
+    · right
+      by_contra h1pos
+      have hd0 : MvPolynomial.degreeOf (0 : Fin 2) P = 0 := Nat.eq_zero_of_not_pos h0
+      have hd1 : MvPolynomial.degreeOf (1 : Fin 2) P = 0 := Nat.eq_zero_of_not_pos h1pos
+      have hC := eq_C_of_degreeOf_fin2_eq_zero P hd0 hd1
+      have : MvPolynomial.coeff 0 P ≠ 0 := by
+        grind
+      exact hP (by
+        rw [hC]
+        exact (MvPolynomial.isUnit_iff_eq_C_of_isReduced
+          (P := MvPolynomial.C (MvPolynomial.coeff 0 P))).mpr
+          ⟨MvPolynomial.coeff 0 P, IsUnit.mk0 _ this, rfl⟩)
+
+private def swapFin2 : Fin 2 ≃ Fin 2 where
+  toFun i := if i = 0 then 1 else 0
+  invFun i := if i = 0 then 1 else 0
+  left_inv := by grind
+  right_inv := by grind
+
 /-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
 The affine patch is connected: the projective curve is connected (irreducible),
 and removing the finitely many points at infinity leaves a connected real surface. -/
@@ -297,8 +427,91 @@ attribute [instance] AX_PlaneCurveAffine_connected
 The affine patch is noncompact: by Bézout the degree-`d` curve meets `z = 0` in
 `≥ 1` point, so the affine patch is the compact projective curve minus a nonempty
 finite set. -/
-axiom AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
-    NoncompactSpace (PlaneCurveAffine H)
+theorem AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
+    NoncompactSpace (PlaneCurveAffine H) := by
+  let P : MvPolynomial (Fin 2) ℂ := affinePolynomialFin2 H.F.val
+  have : ¬ IsUnit P := by
+    intro hunit
+    exact affinePolynomial_not_isUnit H (by
+      simpa [P, affinePolynomialFin2] using
+        hunit.map ((MvPolynomial.renameEquiv ℂ nonZVarEquivFin2).symm :
+          MvPolynomial (Fin 2) ℂ →+* MvPolynomial NonZVar ℂ))
+  refine ⟨?_⟩
+  intro hcompact
+  rcases eq_zero_or_exists_degreeOf_pos_of_not_isUnit_fin2 P this with hP0 | hdeg
+  · let π : PlaneCurveAffine H → ℂ := fun p => p.val.1
+    have hπ : Continuous π := continuous_subtype_val.fst
+    have : Function.Surjective π := by
+      intro x
+      refine ⟨⟨(x, 0), ?_⟩, rfl⟩
+      have hz : MvPolynomial.eval ![x, 0] P = 0 := by simp [hP0]
+      simpa [P, affinePolynomialFin2_eval_eq H.F.val ![x, 0]] using hz
+    have : π '' (Set.univ : Set (PlaneCurveAffine H)) = Set.univ := by
+      ext x
+      constructor
+      · simp
+      · intro _
+        rcases this x with ⟨p, rfl⟩
+        simp
+    have : IsCompact (Set.univ : Set ℂ) := by
+      simpa [this] using hcompact.image hπ
+    exact (inferInstance : NoncompactSpace ℂ).noncompact_univ this
+  · rcases hdeg with hdeg0 | hdeg1
+    · obtain ⟨R, hRfinite, hRproj⟩ := exists_zero_first_of_degreeOf_pos P hdeg0
+      let π : PlaneCurveAffine H → ℂ := fun p => p.val.2
+      have : Continuous π := continuous_subtype_val.snd
+      have : IsCompact (Set.range π) := by
+        simpa only [Set.image_univ] using hcompact.image this
+      have hunion : Set.range π ∪ R = Set.univ := by
+        ext x
+        constructor
+        · simp
+        · intro _
+          by_cases hxR : x ∈ R
+          · simp_all
+          · rcases hRproj x hxR with ⟨y, hy⟩
+            refine Or.inl ⟨⟨(y, x), ?_⟩, rfl⟩
+            have hy' : MvPolynomial.eval ![y, x] P = 0 := by
+              have hvec :
+                  (Fin.cons y (fun _ : Fin 1 => x) : Fin 2 → ℂ) = ![y, x] := by
+                funext i
+                fin_cases i <;> rfl
+              simp_all
+            simpa [P, affinePolynomialFin2_eval_eq H.F.val ![y, x]] using hy'
+      have : IsCompact (Set.univ : Set ℂ) := by
+        simpa [hunion] using this.union hRfinite.isCompact
+      exact (inferInstance : NoncompactSpace ℂ).noncompact_univ this
+    · let Q : MvPolynomial (Fin 2) ℂ := MvPolynomial.renameEquiv ℂ swapFin2 P
+      have : 0 < MvPolynomial.degreeOf (0 : Fin 2) Q := by
+        have :=
+          MvPolynomial.degreeOf_rename_of_injective (p := P) swapFin2.injective (1 : Fin 2)
+        simpa [Q, MvPolynomial.renameEquiv_apply, swapFin2] using this ▸ hdeg1
+      obtain ⟨R, hRfinite, hRproj⟩ := exists_zero_first_of_degreeOf_pos Q this
+      let π : PlaneCurveAffine H → ℂ := fun p => p.val.1
+      have : Continuous π := continuous_subtype_val.fst
+      have : IsCompact (Set.range π) := by
+        simpa only [Set.image_univ] using hcompact.image this
+      have hunion : Set.range π ∪ R = Set.univ := by
+        ext x
+        constructor
+        · simp
+        · intro _
+          by_cases hxR : x ∈ R
+          · simp_all
+          · rcases hRproj x hxR with ⟨y, hy⟩
+            refine Or.inl ⟨⟨(x, y), ?_⟩, rfl⟩
+            have hy' : MvPolynomial.eval ![x, y] P = 0 := by
+              dsimp [Q] at hy
+              rw [MvPolynomial.eval_rename] at hy
+              have hvec :
+                  ((Fin.cons y (fun _ : Fin 1 => x)) ∘ swapFin2 : Fin 2 → ℂ) = ![x, y] := by
+                funext i
+                fin_cases i <;> rfl
+              simp_all
+            simpa [P, affinePolynomialFin2_eval_eq H.F.val ![x, y]] using hy'
+      have : IsCompact (Set.univ : Set ℂ) := by
+        simpa [hunion] using this.union hRfinite.isCompact
+      exact (inferInstance : NoncompactSpace ℂ).noncompact_univ this
 
 attribute [instance] AX_PlaneCurveAffine_noncompact
 
