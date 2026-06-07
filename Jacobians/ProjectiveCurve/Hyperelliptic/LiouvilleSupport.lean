@@ -642,4 +642,26 @@ theorem differentiable_of_analyticAt_off_roots (g : ℂ → ℂ)
     exact (hAna z hz).differentiableAt
   · exact (hAna z₀ hz₀).differentiableAt
 
+/-- **Liouville endgame.** An entire function tending to `0` at infinity (along
+the cocompact filter) is identically `0`. The closing step of the direct-Liouville
+core (Mσ.4 step 4): once the single-valued coefficient is entire and decays at the
+points over `∞`, it vanishes, hence the form does. Proved via the degree-`0`
+growth bound (continuity + decay ⇒ boundedness) feeding
+`differentiable_eq_polynomial_of_growth` (a bounded entire function is constant),
+then uniqueness of the cocompact limit pins the constant to `0`. -/
+theorem eq_zero_of_differentiable_tendsto_zero_cocompact (g : ℂ → ℂ)
+    (hg : Differentiable ℂ g)
+    (h0 : Filter.Tendsto g (Filter.cocompact ℂ) (𝓝 0)) :
+    ∀ z, g z = 0 := by
+  obtain ⟨C, hC⟩ := polynomial_growth_bound_of_tendsto_div_pow g 0 0 hg.continuous
+    (by simpa using h0)
+  obtain ⟨p, _hpdeg, hpeq⟩ :=
+    Jacobians.GeneralResults.differentiable_eq_polynomial_of_growth 0 g hg C hC
+  have hpc : p = Polynomial.C (p.coeff 0) := Polynomial.eq_C_of_natDegree_le_zero _hpdeg
+  have hgc : ∀ z, g z = p.coeff 0 := fun z => by rw [hpeq z, hpc]; simp
+  have hgconst : g = fun _ : ℂ => p.coeff 0 := funext hgc
+  rw [hgconst] at h0
+  have hzero : p.coeff 0 = 0 := tendsto_const_nhds_iff.mp h0
+  exact fun z => by rw [hgc z, hzero]
+
 end Jacobians.ProjectiveCurve
