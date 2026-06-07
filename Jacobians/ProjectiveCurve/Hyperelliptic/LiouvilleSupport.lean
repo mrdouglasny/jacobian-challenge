@@ -1534,6 +1534,487 @@ theorem liouvilleBranchPoint_numerator_dslope_analyticAt_zero
   exact Jacobians.GeneralResults.analyticAt_dslope_oddPart
     (liouvilleBranchPoint_numerator_analyticAt_zero (H := H) form hx q hQ)
 
+/-- The infinity-side branch numerator in the `v` coordinate of the reversed
+curve. This is the same cancellation as `liouvilleProjYNumerator`, but for a
+branch point whose preferred representative is on the infinity summand. -/
+noncomputable def liouvilleInfinityProjYNumerator
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hpX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (q : HyperellipticEvenProj H) : ℂ → ℂ :=
+  fun v =>
+    form.coeff q v *
+      ((Polynomial.reverse H.f).derivative.eval
+          ((polynomialLocalHomeomorph
+            (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).symm (v ^ 2)) / 2)
+
+/-- A form coefficient is analytic on an infinity branch `v`-chart when the
+preferred representative is the corresponding infinity point. -/
+theorem form_coeff_analyticOn_infinityProjY_target
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hpX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inr b) :
+    AnalyticOn ℂ (form.coeff q)
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).target := by
+  have hform : AnalyticOn ℂ (form.coeff q) (extChartAt 𝓘(ℂ, ℂ) q).target :=
+    form.2.1 q
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) q).target =
+      (infinityLiftChart H hf.out b).target := by
+    rw [extChartAt_target]
+    change
+      ↑𝓘(ℂ, ℂ).symm ⁻¹' (HyperellipticEvenProj.chartAt H hf.out q).target ∩
+          Set.range ↑𝓘(ℂ, ℂ) =
+        (infinityLiftChart H hf.out b).target
+    change _ ∩ Set.range (id : ℂ → ℂ) = _
+    rw [Set.range_id, Set.inter_univ]
+    change (HyperellipticEvenProj.chartAt H hf.out q).target =
+      (infinityLiftChart H hf.out b).target
+    unfold HyperellipticEvenProj.chartAt
+    rw [hQ]
+  rw [hExt] at hform
+  simpa [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+    affineChartAt_of_not_mem_smoothLocusY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpYn]
+    using hform
+
+/-- The infinity-side branch numerator is analytic in the branch coordinate. -/
+theorem liouvilleInfinityProjYNumerator_analyticOn
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hpX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inr b) :
+    AnalyticOn ℂ (liouvilleInfinityProjYNumerator (H := H) form b hpX q)
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).target := by
+  exact (form_coeff_analyticOn_infinityProjY_target form b hpX hpYn q hQ).mul
+    (polynomialLocalHomeomorph_symm_sq_derivative_div_two_analyticOn
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX)
+
+/-- Pointwise infinity-side branch numerator analyticity at `v = 0`. -/
+theorem liouvilleInfinityBranchPoint_numerator_analyticAt_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hpX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hb0 : b.val.2 = 0)
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inr b) :
+    AnalyticAt ℂ (liouvilleInfinityProjYNumerator (H := H) form b hpX q) 0 := by
+  have h0target : (0 : ℂ) ∈
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).target := by
+    have hsrc : b ∈
+        (affineChartProjY
+          (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).source :=
+      affineChartProjY_mem_source (H := HyperellipticAffineInfinity.reverseData H hf.out)
+        b hpX
+    have htarget :=
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).map_source hsrc
+    change b.val.2 ∈
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).target at htarget
+    simpa [hb0] using htarget
+  exact AnalyticOn.analyticAt
+    ((affineChartProjY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hpX).open_target.mem_nhds
+        h0target)
+    (liouvilleInfinityProjYNumerator_analyticOn form b hpX hpYn q hQ)
+
+/-- The odd-part difference quotient of the infinity-side branch numerator is
+analytic at the branch coordinate. -/
+theorem liouvilleInfinityBranchPoint_numerator_dslope_analyticAt_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hpX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hpYn : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hb0 : b.val.2 = 0)
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inr b) :
+    AnalyticAt ℂ
+      (dslope
+        (fun v : ℂ =>
+          liouvilleInfinityProjYNumerator (H := H) form b hpX q v -
+            liouvilleInfinityProjYNumerator (H := H) form b hpX q (-v))
+        0) 0 := by
+  exact Jacobians.GeneralResults.analyticAt_dslope_oddPart
+    (liouvilleInfinityBranchPoint_numerator_analyticAt_zero
+      (H := H) form b hpX hpYn hb0 q hQ)
+
+/-- Data extracted when an affine branch point is represented on the infinity
+summand by `Quotient.out`. -/
+theorem liouvilleBranchPoint_out_inr_data
+    {x : ℂ} (hx : H.f.eval x = 0)
+    {b : HyperellipticAffineInfinity H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (liouvilleBranchPoint (H := H) x hx))) = Sum.inr b) :
+    ∃ hxNZ : x ≠ 0,
+      b = affineGluingImage (liouvilleBranchPoint (H := H) x hx) (by
+          simpa [liouvilleBranchPoint] using hxNZ) ∧
+        b.val.2 = 0 ∧
+        b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out) ∧
+        b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) := by
+  let p := liouvilleBranchPoint (H := H) x hx
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl p)
+  have hProj : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl p) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b) := by
+    have hOut : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b) = q := by
+      rw [← show Quotient.out q = Sum.inr b by simpa [q, p] using hQ]
+      exact Quotient.out_eq q
+    exact hOut.symm
+  obtain ⟨hpNZ, hb⟩ := proj_inl_eq_proj_inr_iff (H := H) hProj
+  have hxNZ : x ≠ 0 := by
+    simpa [p, liouvilleBranchPoint] using hpNZ
+  refine ⟨hxNZ, ?_, ?_, ?_, ?_⟩
+  · simpa [p] using hb
+  · simp [hb, p, liouvilleBranchPoint, affineGluingImage_val_snd]
+  · exact mem_smoothLocusX_of_y_eq_zero
+      (HyperellipticAffineInfinity.reverseData H hf.out) (by
+        simp [hb, p, liouvilleBranchPoint, affineGluingImage_val_snd])
+  · intro hbY
+    exact hbY (by
+      simp [hb, p, liouvilleBranchPoint, affineGluingImage_val_snd])
+
+/-- Infinity-branch cancellation for a moving off-branch affine point. In the
+preferred infinity branch coordinate `v`, the affine `dx` coefficient is
+`-u(v)^2` times the odd-branch numerator divided by `v`, where
+`u(v) = x^{-1}` is the reverse affine coordinate. -/
+theorem affCoeff_eq_liouvilleInfinityProjYNumerator_div_of_branch
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (b : HyperellipticAffineInfinity H)
+    (hbX : b ∈ smoothLocusX (HyperellipticAffineInfinity.reverseData H hf.out))
+    (hbYn : b ∉ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    (q : HyperellipticEvenProj H) (hQ : Quotient.out q = Sum.inr b)
+    (a : HyperellipticAffine H) (haY : a ∈ smoothLocusY H)
+    (hx : a.val.1 ≠ 0)
+    {v : ℂ}
+    (hv : v ∈
+      (affineChartProjY
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbX).target)
+    (hvne : v ≠ 0)
+    (hBranchSymm :
+      (infinityLiftChart H hf.out b).symm v =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a))
+    (hu_eq : (polynomialLocalHomeomorph
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbX).symm (v ^ 2) =
+      a.val.1⁻¹) :
+    affCoeff (H := H) form a a.val.1 =
+      - (a.val.1⁻¹) ^ 2 *
+        (liouvilleInfinityProjYNumerator (H := H) form b hbX q v / v) := by
+  classical
+  let Hrev := HyperellipticAffineInfinity.reverseData H hf.out
+  let qA : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  let c := infinityLiftChart H hf.out b
+  have hChQ : (_root_.chartAt ℂ q :
+      OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) = c := by
+    change HyperellipticEvenProj.chartAt H hf.out q = c
+    unfold HyperellipticEvenProj.chartAt
+    rw [hQ]
+  have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = c.target := by
+    rw [extChartAt_target]
+    change ↑𝓘(ℂ, ℂ).symm ⁻¹' (_root_.chartAt ℂ q).target ∩ Set.range ↑𝓘(ℂ, ℂ) =
+      c.target
+    rw [hChQ]
+    change c.target ∩ Set.range (id : ℂ → ℂ) = c.target
+    rw [Set.range_id, Set.inter_univ]
+  have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticEvenProj H) =
+      (c.symm : ℂ → HyperellipticEvenProj H) := by
+    funext t
+    change (_root_.chartAt ℂ q).symm t = c.symm t
+    rw [hChQ]
+  have hvExt : v ∈ (extChartAt 𝓘(ℂ, ℂ) q).target := by
+    rw [hExtTarget]
+    simpa [c, infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+      affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn, Hrev] using hv
+  cases hQa : Quotient.out qA with
+  | inl a' =>
+      have hQqA : Quotient.out qA = Sum.inl a' := by simpa using hQa
+      have hOutEq : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a') = qA := by
+        rw [← hQqA]
+        exact Quotient.out_eq qA
+      have ha' : a' = a := by
+        exact HyperellipticEvenProj.proj_inl_injective H (by
+          simpa [qA, HyperellipticEvenProj.proj, Function.comp_def] using hOutEq)
+      have hQqAa : Quotient.out qA = Sum.inl a := by
+        simpa [ha'] using hQqA
+      let cA := affineLiftChart H hf.out a
+      have hqASrc : qA ∈ cA.source := by
+        change (HyperellipticEvenProj.proj H (Sum.inl a)) ∈
+          ((affineChartAt (H := H) a).lift_openEmbedding
+            (isOpenEmbedding_proj_inl H hf.out)).source
+        rw [OpenPartialHomeomorph.lift_openEmbedding_source]
+        refine ⟨a, ?_, rfl⟩
+        simpa [affineChartAt_of_mem_smoothLocusY (H := H) a haY] using
+          affineChartProjX_mem_source (H := H) a haY
+      have hChQA : (_root_.chartAt ℂ qA :
+          OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) = cA := by
+        change HyperellipticEvenProj.chartAt H hf.out qA = cA
+        unfold HyperellipticEvenProj.chartAt
+        rw [hQqAa]
+      have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticEvenProj H → ℂ) =
+          (cA : HyperellipticEvenProj H → ℂ) := by
+        funext t
+        change (_root_.chartAt ℂ qA) t = cA t
+        rw [hChQA]
+      have hExtSrcA : (extChartAt 𝓘(ℂ, ℂ) qA).source = cA.source := by
+        rw [extChartAt_source, hChQA]
+      have hSrcExt : (extChartAt 𝓘(ℂ, ℂ) q).symm v ∈
+          (extChartAt 𝓘(ℂ, ℂ) qA).source := by
+        rw [hExtSymm, hExtSrcA, hBranchSymm]
+        exact hqASrc
+      have hCoord : (extChartAt 𝓘(ℂ, ℂ) qA)
+          ((extChartAt 𝓘(ℂ, ℂ) q).symm v) = a.val.1 := by
+        rw [hExtCoeA, hExtSymm, hBranchSymm]
+        change ((affineChartAt (H := H) a).lift_openEmbedding
+            (isOpenEmbedding_proj_inl H hf.out))
+          ((HyperellipticEvenProj.proj H ∘
+            (Sum.inl : HyperellipticAffine H → HyperellipticEvenPre H)) a) = a.val.1
+        rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+        rw [affineChartAt_of_mem_smoothLocusY (H := H) a haY]
+        rfl
+      have hOverlap : v ∈ (c.symm.trans cA).source := by
+        refine ⟨?_, ?_⟩
+        · simpa [c, infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+            affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn, Hrev] using hv
+        · change c.symm v ∈ cA.source
+          rw [hBranchSymm]
+          exact hqASrc
+      have hEqOn : (fun t : ℂ => cA (c.symm t)) =ᶠ[𝓝 v]
+          (fun t : ℂ =>
+            ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹) := by
+        refine Filter.eventually_of_mem ((c.symm.trans cA).open_source.mem_nhds hOverlap) ?_
+        intro t ht
+        have htTarget : t ∈ (affineChartProjY (H := Hrev) b hbX).target := by
+          have : t ∈ c.target := ht.1
+          simpa [c, infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+            affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn, Hrev] using this
+        have hSrc_unwound : c.symm t ∈ cA.source := ht.2
+        simp only [cA, affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source,
+          OpenPartialHomeomorph.lift_openEmbedding_symm, c, infinityLiftChart] at hSrc_unwound
+        rw [affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn] at hSrc_unwound
+        rw [affineChartAt_of_mem_smoothLocusY (H := H) a haY] at hSrc_unwound
+        obtain ⟨aa, haa_src, haa_eq⟩ := hSrc_unwound
+        have haa_eq' : Quotient.mk (hyperellipticEvenSetoid H)
+            (Sum.inr ((affineChartProjY (H := Hrev) b hbX).symm t)) =
+            Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl aa) := by
+          simpa [c, infinityLiftChart, affineChartAt_of_not_mem_smoothLocusY
+            (H := Hrev) b hbYn, OpenPartialHomeomorph.lift_openEmbedding_symm,
+            HyperellipticEvenProj.proj, Hrev] using haa_eq.symm
+        have haa_eq'' : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl aa) =
+            Quotient.mk (hyperellipticEvenSetoid H)
+              (Sum.inr ((affineChartProjY (H := Hrev) b hbX).symm t)) :=
+          haa_eq'.symm
+        obtain ⟨hx_t, haa_glue⟩ := proj_inl_eq_proj_inr_iff (H := H) haa_eq''
+        change cA (c.symm t) =
+          ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹
+        have hcsymm_eq : c.symm t =
+            Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl aa) := by
+          simpa [c, infinityLiftChart, affineChartAt_of_not_mem_smoothLocusY
+            (H := Hrev) b hbYn, OpenPartialHomeomorph.lift_openEmbedding_symm,
+            HyperellipticEvenProj.proj, Hrev] using haa_eq.symm
+        rw [hcsymm_eq]
+        change ((affineChartAt (H := H) a).lift_openEmbedding
+            (isOpenEmbedding_proj_inl H hf.out))
+          ((HyperellipticEvenProj.proj H ∘
+            (Sum.inl : HyperellipticAffine H → HyperellipticEvenPre H)) aa) =
+          ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹
+        rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+        rw [affineChartAt_of_mem_smoothLocusY (H := H) a haY]
+        change aa.val.1 =
+          ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹
+        have hxrev :
+            (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2) =
+              aa.val.1⁻¹ := by
+          have hfst := congrArg (fun bb : HyperellipticAffineInfinity H => bb.val.1)
+            haa_glue
+          have hchart :=
+            affineChartProjY_symm_apply_fst (H := Hrev) b hbX htTarget
+          change (((affineChartProjY (H := Hrev) b hbX).symm t :
+            HyperellipticAffine Hrev).val.1) = aa.val.1⁻¹ at hfst
+          simpa [hchart, affineGluingImage_val_fst] using hfst
+        rw [hxrev, inv_inv]
+      have hDeriv : fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) qA) ∘
+            (extChartAt 𝓘(ℂ, ℂ) q).symm) v 1 =
+          -(2 * v /
+              (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹) /
+            (a.val.1⁻¹) ^ 2 := by
+        rw [hExtCoeA, hExtSymm]
+        change fderiv ℂ (fun t : ℂ => cA (c.symm t)) v 1 =
+          -(2 * v /
+              (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹) /
+            (a.val.1⁻¹) ^ 2
+        rw [Filter.EventuallyEq.fderiv_eq hEqOn]
+        have htrans :=
+          affineChartProjY_to_projX_transition_hasDerivAt (H := Hrev) b hbX hv
+        have hTHasDeriv :
+            HasDerivAt
+              (fun t : ℂ =>
+                ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹)
+              (-(2 * v /
+                  (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹) /
+                (a.val.1⁻¹) ^ 2) v := by
+          have huNZ :
+              (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (v ^ 2) ≠ 0 := by
+            simpa [hu_eq] using inv_ne_zero hx
+          have h := htrans.fun_inv huNZ
+          simpa [Hrev, hu_eq] using h
+        change deriv
+          (fun t : ℂ =>
+            ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2))⁻¹) v = _
+        exact hTHasDeriv.deriv
+      have hCocy := form.2.2.1 q qA v hvExt hSrcExt
+      have hCoeff :
+          form.coeff qA a.val.1 =
+            - (a.val.1⁻¹) ^ 2 *
+              (liouvilleInfinityProjYNumerator (H := H) form b hbX q v / v) := by
+        have hFne :
+            (Polynomial.reverse H.f).derivative.eval
+              ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (v ^ 2)) ≠ 0 :=
+          polynomialLocalHomeomorph_symm_eval_derivative_ne_zero (H := Hrev) b hbX hv
+        have hFneA :
+            (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹ ≠ 0 := by
+          simpa [hu_eq] using hFne
+        have hC :
+            form.coeff q v =
+              form.coeff qA a.val.1 *
+                (-(2 * v /
+                    (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹) /
+                  (a.val.1⁻¹) ^ 2) := by
+          unfold HolomorphicOneForm.coeff
+          rw [hCocy, hCoord, hDeriv]
+        unfold liouvilleInfinityProjYNumerator
+        rw [hu_eq, hC]
+        field_simp [hvne, hFneA, inv_ne_zero hx]
+      have hAff : affCoeff (H := H) form a a.val.1 = form.coeff qA a.val.1 := by
+        simp [affCoeff, qA, hQqAa]
+      exact hAff.trans hCoeff
+  | inr bA =>
+      have hQqA : Quotient.out qA = Sum.inr bA := by simpa using hQa
+      obtain ⟨hxA, hbA, hbAY⟩ :=
+        affCoeff_inr_out_eq_affineGluingImage (H := H) a haY hQqA
+      let cA := infinityLiftChart H hf.out bA
+      have hqASrc : qA ∈ cA.source := by
+        have h : qA ∈ (_root_.chartAt ℂ qA :
+            OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source :=
+          ChartedSpace.mem_chart_source qA
+        change qA ∈ (HyperellipticEvenProj.chartAt H hf.out qA).source at h
+        unfold HyperellipticEvenProj.chartAt at h
+        rw [hQqA] at h
+        exact h
+      have hChQA : (_root_.chartAt ℂ qA :
+          OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ) = cA := by
+        change HyperellipticEvenProj.chartAt H hf.out qA = cA
+        unfold HyperellipticEvenProj.chartAt
+        rw [hQqA]
+      have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticEvenProj H → ℂ) =
+          (cA : HyperellipticEvenProj H → ℂ) := by
+        funext t
+        change (_root_.chartAt ℂ qA) t = cA t
+        rw [hChQA]
+      have hExtSrcA : (extChartAt 𝓘(ℂ, ℂ) qA).source = cA.source := by
+        rw [extChartAt_source, hChQA]
+      have hSrcExt : (extChartAt 𝓘(ℂ, ℂ) q).symm v ∈
+          (extChartAt 𝓘(ℂ, ℂ) qA).source := by
+        rw [hExtSymm, hExtSrcA, hBranchSymm]
+        exact hqASrc
+      have hqA_eq_inr :
+          Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bA) = qA := by
+        rw [← hQqA]
+        exact Quotient.out_eq qA
+      have hCoord : (extChartAt 𝓘(ℂ, ℂ) qA)
+          ((extChartAt 𝓘(ℂ, ℂ) q).symm v) = a.val.1⁻¹ := by
+        rw [hExtCoeA, hExtSymm, hBranchSymm]
+        have hInlEqInr :
+            Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) =
+              Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr bA) := by
+          rw [hbA]
+          exact proj_eq_affineGluingImage (H := H) a hxA
+        rw [hInlEqInr]
+        change ((affineChartAt (H := Hrev) bA).lift_openEmbedding
+            (isOpenEmbedding_proj_inr H hf.out))
+          ((HyperellipticEvenProj.proj H ∘
+            (Sum.inr : HyperellipticAffineInfinity H → HyperellipticEvenPre H)) bA) =
+          a.val.1⁻¹
+        rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+        rw [affineChartAt_of_mem_smoothLocusY (H := Hrev) bA hbAY]
+        change bA.val.1 = a.val.1⁻¹
+        simp [hbA, affineGluingImage_val_fst]
+      have hOverlap : v ∈ (c.symm.trans cA).source := by
+        refine ⟨?_, ?_⟩
+        · simpa [c, infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+            affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn, Hrev] using hv
+        · change c.symm v ∈ cA.source
+          rw [hBranchSymm]
+          exact hqASrc
+      have hEqOn : (fun t : ℂ => cA (c.symm t)) =ᶠ[𝓝 v]
+          (fun t : ℂ => (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2)) := by
+        refine Filter.eventually_of_mem ((c.symm.trans cA).open_source.mem_nhds hOverlap) ?_
+        intro t ht
+        have htTarget : t ∈ (affineChartProjY (H := Hrev) b hbX).target := by
+          have : t ∈ c.target := ht.1
+          simpa [c, infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+            affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn, Hrev] using this
+        change (c.symm.trans cA) t =
+          (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2)
+        change (((affineChartAt (H := Hrev) b).lift_openEmbedding
+            (isOpenEmbedding_proj_inr H hf.out)).symm.trans
+            ((affineChartAt (H := Hrev) bA).lift_openEmbedding
+              (isOpenEmbedding_proj_inr H hf.out))) t =
+          (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2)
+        rw [OpenPartialHomeomorph.lift_openEmbedding_trans_apply]
+        rw [affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn]
+        rw [affineChartAt_of_mem_smoothLocusY (H := Hrev) bA hbAY]
+        change (((affineChartProjY (H := Hrev) b hbX).symm t :
+          HyperellipticAffine Hrev).val.1) =
+          (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2)
+        exact affineChartProjY_symm_apply_fst (H := Hrev) b hbX htTarget
+      have hDeriv : fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) qA) ∘
+            (extChartAt 𝓘(ℂ, ℂ) q).symm) v 1 =
+          2 * v / (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹ := by
+        rw [hExtCoeA, hExtSymm]
+        change fderiv ℂ (fun t : ℂ => cA (c.symm t)) v 1 =
+          2 * v / (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹
+        rw [Filter.EventuallyEq.fderiv_eq hEqOn]
+        have htrans :=
+          affineChartProjY_to_projX_transition_hasDerivAt (H := Hrev) b hbX hv
+        change deriv (fun t : ℂ =>
+          (polynomialLocalHomeomorph (H := Hrev) b hbX).symm (t ^ 2)) v =
+          2 * v / (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹
+        simpa [hu_eq] using htrans.deriv
+      have hCocy := form.2.2.1 q qA v hvExt hSrcExt
+      have hCoeff :
+          form.coeff qA (a.val.1⁻¹) * (-(a.val.1⁻¹) ^ 2) =
+            - (a.val.1⁻¹) ^ 2 *
+              (liouvilleInfinityProjYNumerator (H := H) form b hbX q v / v) := by
+        have hFne :
+            (Polynomial.reverse H.f).derivative.eval
+              ((polynomialLocalHomeomorph (H := Hrev) b hbX).symm (v ^ 2)) ≠ 0 :=
+          polynomialLocalHomeomorph_symm_eval_derivative_ne_zero (H := Hrev) b hbX hv
+        have hFneA :
+            (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹ ≠ 0 := by
+          simpa [hu_eq] using hFne
+        have hC :
+            form.coeff q v =
+              form.coeff qA (a.val.1⁻¹) *
+                (2 * v /
+                  (Polynomial.reverse H.f).derivative.eval a.val.1⁻¹) := by
+          unfold HolomorphicOneForm.coeff
+          rw [hCocy, hCoord, hDeriv]
+        unfold liouvilleInfinityProjYNumerator
+        rw [hu_eq, hC]
+        field_simp [hvne, hFneA]
+      have hAff : affCoeff (H := H) form a a.val.1 =
+          form.coeff qA (a.val.1⁻¹) * (-1 / a.val.1 ^ 2) := by
+        simp [affCoeff, qA, hQqA]
+      rw [hAff]
+      convert hCoeff using 1
+      field_simp [hx]
+
 /-- Dividing the local numerator by the nonzero chart branch recovers the chart
 coefficient. This is the local algebraic readout used in the final L2 assembly. -/
 theorem form_coeff_eq_liouvilleProjXNumerator_div
@@ -2607,6 +3088,295 @@ theorem liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inl
     field_simp [hyNZ]
     ring
   exact hModel.congr' hEq.symm
+
+/-- Branch punctured limit in the case where the projective branch point's
+preferred chart is the infinity-side `v` branch chart. -/
+theorem liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inr
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z₀ : ℂ} (hz₀ : H.f.eval z₀ = 0)
+    {b : HyperellipticAffineInfinity H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (liouvilleBranchPoint (H := H) z₀ hz₀))) =
+      Sum.inr b) :
+    ∃ L : ℂ, Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+      (𝓝[≠] z₀) (𝓝 L) := by
+  classical
+  let p := liouvilleBranchPoint (H := H) z₀ hz₀
+  let hpX := liouvilleBranchPoint_mem_smoothLocusX (H := H) hz₀
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl p)
+  obtain ⟨hz₀NZ, hb, hb0, hbX, hbYn⟩ :=
+    liouvilleBranchPoint_out_inr_data (H := H) hz₀ hQ
+  let Hrev := HyperellipticAffineInfinity.reverseData H hf.out
+  let M : ℂ → ℂ := liouvilleInfinityProjYNumerator (H := H) form b hbX q
+  let D : ℂ → ℂ := dslope (fun v : ℂ => M v - M (-v)) 0
+  refine ⟨- (z₀⁻¹) ^ 2 * D 0, ?_⟩
+  have hQq : Quotient.out q = Sum.inr b := by
+    simpa [q, p] using hQ
+  have hDcont : ContinuousAt D 0 := by
+    have hAna : AnalyticAt ℂ D 0 := by
+      simpa [D, M, q, Hrev] using
+        liouvilleInfinityBranchPoint_numerator_dslope_analyticAt_zero
+          (H := H) form b hbX hbYn hb0 q hQq
+    exact hAna.continuousAt
+  have hyTendsto : Filter.Tendsto
+      (fun z : ℂ => (liouvilleChosenAffinePoint (H := H) z).val.2)
+      (𝓝[≠] z₀) (𝓝 0) :=
+    (liouvilleChosenAffinePoint_snd_tendsto_zero (H := H) hz₀).mono_left
+      nhdsWithin_le_nhds
+  have hinvTendsto : Filter.Tendsto (fun z : ℂ => z⁻¹)
+      (𝓝[≠] z₀) (𝓝 z₀⁻¹) :=
+    (continuousAt_inv₀ hz₀NZ).tendsto.mono_left nhdsWithin_le_nhds
+  have hvTendsto : Filter.Tendsto
+      (fun z : ℂ =>
+        (liouvilleChosenAffinePoint (H := H) z).val.2 *
+          z⁻¹ ^ (H.f.natDegree / 2))
+      (𝓝[≠] z₀) (𝓝 0) := by
+    have hpow := hinvTendsto.pow (H.f.natDegree / 2)
+    simpa using hyTendsto.mul hpow
+  have hFactor : Filter.Tendsto (fun z : ℂ => - (z⁻¹) ^ 2)
+      (𝓝[≠] z₀) (𝓝 (-(z₀⁻¹) ^ 2)) :=
+    (hinvTendsto.pow 2).neg
+  have hModel : Filter.Tendsto
+      (fun z : ℂ =>
+        - (z⁻¹) ^ 2 *
+          D ((liouvilleChosenAffinePoint (H := H) z).val.2 *
+            z⁻¹ ^ (H.f.natDegree / 2)))
+      (𝓝[≠] z₀) (𝓝 (-(z₀⁻¹) ^ 2 * D 0)) := by
+    exact hFactor.mul (hDcont.tendsto.comp hvTendsto)
+  have hEq : liouvilleTwoSheetSum (H := H) form =ᶠ[𝓝[≠] z₀]
+      fun z : ℂ =>
+        - (z⁻¹) ^ 2 *
+          D ((liouvilleChosenAffinePoint (H := H) z).val.2 *
+            z⁻¹ ^ (H.f.natDegree / 2)) := by
+    let e := polynomialLocalHomeomorph (H := H) p hpX
+    let eInf := polynomialLocalHomeomorph (H := Hrev) b hbX
+    have hz₀Src : z₀ ∈ e.source := by
+      simpa [e, p, liouvilleBranchPoint] using
+        polynomialLocalHomeomorph_mem_source (H := H) p hpX
+    have hSrcEv : ∀ᶠ z in 𝓝 z₀, z ∈ e.source :=
+      e.open_source.mem_nhds hz₀Src
+    have hu₀Src : z₀⁻¹ ∈ eInf.source := by
+      have hbSrc : b ∈ (affineChartProjY (H := Hrev) b hbX).source :=
+        affineChartProjY_mem_source (H := Hrev) b hbX
+      change b.val.1 ∈ eInf.source at hbSrc
+      have hb1 : b.val.1 = z₀⁻¹ := by
+        simp [hb, liouvilleBranchPoint, affineGluingImage_val_fst]
+      simpa [hb1] using hbSrc
+    have hInvSrcEv : ∀ᶠ z in 𝓝 z₀, z⁻¹ ∈ eInf.source :=
+      (continuousAt_inv₀ hz₀NZ).eventually (eInf.open_source.mem_nhds hu₀Src)
+    have hZneEv : ∀ᶠ z in 𝓝 z₀, z ≠ 0 :=
+      (continuousAt_id.eventually_ne hz₀NZ)
+    have hRootEv : ∀ᶠ z in 𝓝[≠] z₀, H.f.eval z ≠ 0 := by
+      have hne : H.f ≠ 0 := by
+        intro hzero
+        have hd := H.h_degree
+        rw [hzero, Polynomial.natDegree_zero] at hd
+        omega
+      have hfin : {x : ℂ | H.f.IsRoot x}.Finite :=
+        Polynomial.finite_setOf_isRoot hne
+      set R' : Set ℂ := {x : ℂ | H.f.IsRoot x} \ {z₀} with hR'
+      have hR'closed : IsClosed R' := (hfin.subset Set.diff_subset).isClosed
+      have hmem : R'ᶜ ∈ 𝓝 z₀ :=
+        hR'closed.isOpen_compl.mem_nhds (by simp [hR'])
+      filter_upwards [self_mem_nhdsWithin, mem_nhdsWithin_of_mem_nhds hmem] with z hz hzc
+      intro hzero
+      exact hzc ⟨hzero, hz⟩
+    filter_upwards [eventually_nhdsWithin_of_eventually_nhds hSrcEv,
+      eventually_nhdsWithin_of_eventually_nhds hInvSrcEv,
+      eventually_nhdsWithin_of_eventually_nhds hZneEv, hRootEv] with z hzSrc hzInvSrc hzNZ hzEval
+    let a : HyperellipticAffine H := liouvilleChosenAffinePoint (H := H) z
+    let y : ℂ := a.val.2
+    let v : ℂ := y * z⁻¹ ^ (H.f.natDegree / 2)
+    have haY : a ∈ smoothLocusY H := by
+      simpa [a] using liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hzEval
+    have haσY : a.invol ∈ smoothLocusY H :=
+      HyperellipticAffine.invol_mem_smoothLocusY a haY
+    have hxA : a.val.1 ≠ 0 := by
+      simpa [a] using hzNZ
+    have hxAσ : a.invol.val.1 ≠ 0 := by
+      simpa [HyperellipticAffine.invol] using hxA
+    have hySq : y ^ 2 = H.f.eval z := by
+      simpa [a, y] using liouvilleChosenAffinePoint_snd_sq (H := H) z
+    have hyNZ : y ≠ 0 := by
+      intro hy0
+      apply hzEval
+      simpa [hy0] using hySq.symm
+    have hvNZ : v ≠ 0 := by
+      exact mul_ne_zero hyNZ (pow_ne_zero _ (inv_ne_zero hzNZ))
+    have hyTarget : y ∈ (affineChartProjY (H := H) p hpX).target := by
+      have hmap : H.f.eval z ∈ e.target := by
+        have heq : (e : ℂ → ℂ) z = H.f.eval z := by
+          simp [e, polynomialLocalHomeomorph]
+        simpa [heq] using e.map_source hzSrc
+      change y ^ 2 ∈ e.target
+      rwa [hySq]
+    have hnegTarget : -y ∈ (affineChartProjY (H := H) p hpX).target := by
+      have hy2Target : y ^ 2 ∈ e.target := by
+        simpa [affineChartProjY, e] using hyTarget
+      change (-y) ^ 2 ∈ e.target
+      simpa [pow_two] using hy2Target
+    have hxSymm : (affineChartProjY (H := H) p hpX).symm y = a := by
+      apply Subtype.ext
+      apply Prod.ext
+      · have hfst := affineChartProjY_symm_apply_fst (H := H) p hpX hyTarget
+        have hleft : e.symm (H.f.eval z) = z := by
+          have hleft' := e.left_inv hzSrc
+          have heq : (e : ℂ → ℂ) z = H.f.eval z := by
+            simp [e, polynomialLocalHomeomorph]
+          simpa [heq] using hleft'
+        change ((affineChartProjY (H := H) p hpX).symm y).val.1 = a.val.1
+        rw [hfst, hySq, hleft]
+        rfl
+      · change ((affineChartProjY (H := H) p hpX).symm y).val.2 = a.val.2
+        simpa [a, y] using affineChartProjY_symm_apply_snd (H := H) p hpX hyTarget
+    have hxNegSymm : (affineChartProjY (H := H) p hpX).symm (-y) = a.invol := by
+      apply Subtype.ext
+      apply Prod.ext
+      · have hfst := affineChartProjY_symm_apply_fst (H := H) p hpX hnegTarget
+        have hleft : e.symm (H.f.eval z) = z := by
+          have hleft' := e.left_inv hzSrc
+          have heq : (e : ℂ → ℂ) z = H.f.eval z := by
+            simp [e, polynomialLocalHomeomorph]
+          simpa [heq] using hleft'
+        change ((affineChartProjY (H := H) p hpX).symm (-y)).val.1 = a.invol.val.1
+        have hnegSq : (-y) ^ 2 = H.f.eval z := by
+          simpa [sq] using hySq
+        rw [hfst, hnegSq, hleft]
+        rfl
+      · change ((affineChartProjY (H := H) p hpX).symm (-y)).val.2 = a.invol.val.2
+        have hsnd := affineChartProjY_symm_apply_snd (H := H) p hpX hnegTarget
+        simpa [a, y, HyperellipticAffine.invol] using hsnd
+    have hvSq : v ^ 2 = (Polynomial.reverse H.f).eval z⁻¹ := by
+      show (y * z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = _
+      rw [mul_pow, hySq]
+      have hpow_eq : (z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = z⁻¹ ^ H.f.natDegree := by
+        rw [← pow_mul]
+        congr 1
+        have heven : Even H.f.natDegree := Nat.not_odd_iff_even.mp hf.out
+        obtain ⟨m, hm⟩ := heven
+        omega
+      rw [hpow_eq]
+      exact (reverse_eval_inv_eq (H := H) z hzNZ).symm
+    have hvTarget : v ∈ (affineChartProjY (H := Hrev) b hbX).target := by
+      change v ^ 2 ∈ eInf.target
+      rw [hvSq]
+      have hmap : (eInf : ℂ → ℂ) z⁻¹ ∈ eInf.target := eInf.map_source hzInvSrc
+      have hact : (eInf : ℂ → ℂ) z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹ := by
+        show Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
+        rfl
+      simpa [hact] using hmap
+    have hnegvTarget : -v ∈ (affineChartProjY (H := Hrev) b hbX).target := by
+      have hv2Target : v ^ 2 ∈ eInf.target := by
+        simpa [affineChartProjY, eInf] using hvTarget
+      change (-v) ^ 2 ∈ eInf.target
+      simpa [pow_two] using hv2Target
+    have hu_eq : eInf.symm (v ^ 2) = z⁻¹ := by
+      have hleft := eInf.left_inv hzInvSrc
+      have hact : (eInf : ℂ → ℂ) z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹ := by
+        show Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
+        rfl
+      rw [hact] at hleft
+      simpa [hvSq] using hleft
+    have huneg_eq : eInf.symm ((-v) ^ 2) = z⁻¹ := by
+      simpa [pow_two] using hu_eq
+    have hBranchSymm : (infinityLiftChart H hf.out b).symm v =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) := by
+      have hbv_eq : ((affineChartProjY (H := Hrev) b hbX).symm v :
+          HyperellipticAffine Hrev) = affineGluingImage a hxA := by
+        apply Subtype.ext
+        apply Prod.ext
+        · change (((affineChartProjY (H := Hrev) b hbX).symm v :
+            HyperellipticAffine Hrev).val.1) = (affineGluingImage a hxA).val.1
+          rw [affineChartProjY_symm_apply_fst (H := Hrev) b hbX hvTarget, hu_eq]
+          simp [affineGluingImage_val_fst, a]
+        · change (((affineChartProjY (H := Hrev) b hbX).symm v :
+            HyperellipticAffine Hrev).val.2) = (affineGluingImage a hxA).val.2
+          rw [affineChartProjY_symm_apply_snd (H := Hrev) b hbX hvTarget]
+          simp [affineGluingImage_val_snd, v, y, a]
+      change ((affineChartAt (H := Hrev) b).lift_openEmbedding
+          (isOpenEmbedding_proj_inr H hf.out)).symm v =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+      rw [affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn]
+      change Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inr ((affineChartProjY (H := Hrev) b hbX).symm v)) =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+      rw [hbv_eq]
+      exact (proj_eq_affineGluingImage (H := H) a hxA).symm
+    have hBranchNegSymm : (infinityLiftChart H hf.out b).symm (-v) =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a.invol) := by
+      have hbv_eq : ((affineChartProjY (H := Hrev) b hbX).symm (-v) :
+          HyperellipticAffine Hrev) = affineGluingImage a.invol hxAσ := by
+        apply Subtype.ext
+        apply Prod.ext
+        · change (((affineChartProjY (H := Hrev) b hbX).symm (-v) :
+            HyperellipticAffine Hrev).val.1) = (affineGluingImage a.invol hxAσ).val.1
+          rw [affineChartProjY_symm_apply_fst (H := Hrev) b hbX hnegvTarget, huneg_eq]
+          simp [affineGluingImage_val_fst, a, HyperellipticAffine.invol]
+        · change (((affineChartProjY (H := Hrev) b hbX).symm (-v) :
+            HyperellipticAffine Hrev).val.2) = (affineGluingImage a.invol hxAσ).val.2
+          rw [affineChartProjY_symm_apply_snd (H := Hrev) b hbX hnegvTarget]
+          simp [affineGluingImage_val_snd, v, y, a, HyperellipticAffine.invol, neg_mul]
+      change ((affineChartAt (H := Hrev) b).lift_openEmbedding
+          (isOpenEmbedding_proj_inr H hf.out)).symm (-v) =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a.invol)
+      rw [affineChartAt_of_not_mem_smoothLocusY (H := Hrev) b hbYn]
+      change Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inr ((affineChartProjY (H := Hrev) b hbX).symm (-v))) =
+        Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a.invol)
+      rw [hbv_eq]
+      exact (proj_eq_affineGluingImage (H := H) a.invol hxAσ).symm
+    have hA :
+        affCoeff (H := H) form a z =
+          - (z⁻¹) ^ 2 * (M v / v) := by
+      have h := affCoeff_eq_liouvilleInfinityProjYNumerator_div_of_branch
+        (H := H) form b hbX hbYn q hQq a haY hxA hvTarget hvNZ hBranchSymm
+        (by simpa [a] using hu_eq)
+      simpa [M, a] using h
+    have hσ :
+        affCoeff (H := H) form a.invol z =
+          - (z⁻¹) ^ 2 * (M (-v) / (-v)) := by
+      have h := affCoeff_eq_liouvilleInfinityProjYNumerator_div_of_branch
+        (H := H) form b hbX hbYn q hQq a.invol haσY hxAσ hnegvTarget
+        (neg_ne_zero.mpr hvNZ) hBranchNegSymm
+        (by simpa [a, HyperellipticAffine.invol] using huneg_eq)
+      simpa [M, a, HyperellipticAffine.invol] using h
+    rw [show liouvilleChosenAffinePoint (H := H) z = a from rfl]
+    rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hzEval, hA, hσ]
+    have hD : D v = (M v - M (-v)) / v := by
+      simpa [D] using Jacobians.GeneralResults.dslope_oddPart_of_ne (h := M) (w := v) hvNZ
+    rw [hD]
+    field_simp [hvNZ]
+    ring
+  exact hModel.congr' hEq.symm
+
+/-- Every affine branch point has a finite punctured limit for the direct
+two-sheet sum, independent of whether `Quotient.out` chooses the affine branch
+chart or the infinity branch chart. -/
+theorem liouvilleTwoSheetSum_branch_tendsto
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    ∀ z₀, H.f.eval z₀ = 0 →
+      ∃ L, Filter.Tendsto (liouvilleTwoSheetSum (H := H) form) (𝓝[≠] z₀) (𝓝 L) := by
+  intro z₀ hz₀
+  let p := liouvilleBranchPoint (H := H) z₀ hz₀
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl p)
+  cases hQ : Quotient.out q with
+  | inl a =>
+      have hOutEq : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) = q := by
+        rw [← hQ]
+        exact Quotient.out_eq q
+      have ha : a = p := by
+        exact HyperellipticEvenProj.proj_inl_injective H (by
+          simpa [q, HyperellipticEvenProj.proj, Function.comp_def] using hOutEq)
+      have hQp : Quotient.out q = Sum.inl p := by
+        simpa [ha] using hQ
+      exact liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inl
+        (H := H) form hz₀ (by simpa [q, p] using hQp)
+  | inr b =>
+      exact liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inr
+        (H := H) form hz₀ (b := b) (by simpa [q, p] using hQ)
 
 /-- On the common clean affine `x`-chart target for the two sheets, the fixed
 two-sheet coefficient sum is analytic. This is the kernel-clean DR-A local
