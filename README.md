@@ -29,7 +29,7 @@ These are the genuine theorems — what a reader can trust the formalization to 
 |--------|--------|
 | `genus ProjectiveLine = 0` | **axiom-free** (chart-cocycle + Liouville: 1-forms on ℙ¹ are a subsingleton) |
 | `genus (Elliptic ω₁ ω₂) = 1` | **axiom-free** (intrinsic Liouville on `ellipticDz`) |
-| `genus (HyperellipticEvenProj H) = H.f.natDegree / 2 − 1` | real proof, modulo the Liouville L2/L3 axioms only |
+| `genus (HyperellipticEvenProj H) = H.f.natDegree / 2 − 1` | real proof — Liouville L2/L3 **discharged** (PR #96) |
 | Abel–Jacobi **injective** for genus > 0 | **theorem** `AX_ofCurve_inj` (`Axioms/OfCurveInjective.lean`) — was an axiom, now derived from the proved period-triangle theorem + Abel's theorem + a proven genus obstruction |
 | Albanese **categoricity** `ofCurve_isJacobian` | **theorem** — the concrete `Jacobian`/`ofCurve` satisfy the universal property (`∃!` factorization through holomorphic group homs), pinning the Jacobian up to unique isomorphism |
 | Functoriality identities (`pushforward`/`pullback` id + comp) | derived **theorems**, not axioms |
@@ -49,7 +49,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 | Functoriality (pushforward / pullback smoothness + naturality) | ~9 | 🟡 |
 | Torus / Albanese universal property | 4 | 🟡 |
 | Concrete curves (hyperelliptic / plane-curve atlases & witnesses) | ~26 | 🟢🟡 |
-| Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 2 | 🔴 |
+| Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 0 | ✅ **discharged** (PR #96) |
 
 **Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)`, a ℂ-submodule of the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero` — corrected from an earlier raw-`X→ℂ` version that was *degenerate*: it admitted germ-zero "spike" functions, so was infinite-dimensional with `finrank ≡ 0`; the compiled `germZero_ne_bot` witnesses that bug; this de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`h⁰(0) = 1` is now proved axiom-free** over the corrected space — `L(0)` = holomorphic functions = constants (via the normal-form honest representative + Liouville → `LinearEquiv (ℂ ≃ L(0))` → `finrank = 1`), the concrete confirmation that the faithfulness fix gives the *right* dimension (it was `finrank ≡ 0` over the old degenerate space). **`RiemannRochAPI` and `SerreDualityAPI` still carry 8 deferred `sorry`s** (the Riemann–Roch identity, `h⁰(K) = g`, general finite-dimensionality of `L(D)`, Serre vanishing) — the genuine open targets, true-but-unproven over the corrected space. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
 
