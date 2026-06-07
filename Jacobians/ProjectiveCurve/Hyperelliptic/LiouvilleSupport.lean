@@ -4272,4 +4272,22 @@ theorem liouvilleChosenNumeratorG_analyticAt
       (squareLocalHomeomorph_symm_eval_analyticOn (H := H) a₀ ha₀Y)
   exact h1.mul h2
 
+omit hf in
+/-- **L2.1a** The `√f` branch flips sign between the two sheets: on the involuted
+affine chart it is the negative of the branch on the original chart, at any `z`
+where the two charts' inverse images are involutes. (Used in the cross-sheet case
+of the single-sheet numerator's off-root analyticity.) -/
+theorem squareLocalHomeomorph_symm_eval_invol_flip
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (hpYσ : a.invol ∈ smoothLocusY H)
+    {z : ℂ} (hzT : z ∈ (affineChartProjX (H := H) a hpY).target)
+    (hzσT : z ∈ (affineChartProjX (H := H) a.invol hpYσ).target)
+    (hpair : ((affineChartProjX (H := H) a.invol hpYσ).symm z : HyperellipticAffine H) =
+      ((affineChartProjX (H := H) a hpY).symm z : HyperellipticAffine H).invol) :
+    (squareLocalHomeomorph (H := H) a.invol hpYσ).symm (H.f.eval z) =
+      -(squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) := by
+  rw [← affineChartProjX_symm_apply_snd (H := H) a hpY hzT,
+    ← affineChartProjX_symm_apply_snd (H := H) a.invol hpYσ hzσT, hpair]
+  simp [HyperellipticAffine.invol]
+
 end Jacobians.ProjectiveCurve
