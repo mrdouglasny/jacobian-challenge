@@ -119,11 +119,169 @@ genuinely nonempty, connected, and noncompact — so the statements below are
 **true** (still axioms = unproven, but sound). Non-vacuous: e.g. the smooth conic
 `F = x²+y²+z²` satisfies every field. -/
 
+private abbrev NonZVar : Type := {i : Fin 3 // i ≠ (2 : Fin 3)}
+
+private noncomputable def zAsOption (F : MvPolynomial (Fin 3) ℂ) :
+    MvPolynomial (Option NonZVar) ℂ :=
+  MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm F
+
+private noncomputable def zPolynomial (F : MvPolynomial (Fin 3) ℂ) :
+    Polynomial (MvPolynomial NonZVar ℂ) :=
+  MvPolynomial.optionEquivLeft ℂ NonZVar (zAsOption F)
+
+private noncomputable def affinePolynomial (F : MvPolynomial (Fin 3) ℂ) :
+    MvPolynomial NonZVar ℂ :=
+  Polynomial.eval 1 (zPolynomial F)
+
+private lemma exists_eval_eq_zero_of_not_isUnit_mvPolynomial
+    {σ : Type*} [Finite σ] (P : MvPolynomial σ ℂ) (hP : ¬ IsUnit P) :
+    ∃ x : σ → ℂ, MvPolynomial.eval x P = 0 := by
+  let I : Ideal (MvPolynomial σ ℂ) := Ideal.span ({P} : Set (MvPolynomial σ ℂ))
+  by_contra hzero
+  have : MvPolynomial.zeroLocus ℂ I = (∅ : Set (σ → ℂ)) := by
+    ext x
+    constructor
+    · intro hx
+      have : MvPolynomial.aeval x P = 0 := hx P (Ideal.subset_span (by simp))
+      have : MvPolynomial.eval x P = 0 := by assumption
+      exact (hzero ⟨x, this⟩).elim
+    · simp
+  have hrad : I.radical = ⊤ := by
+    calc
+      I.radical = MvPolynomial.vanishingIdeal ℂ (MvPolynomial.zeroLocus ℂ I) := by
+        simp only [MvPolynomial.vanishingIdeal_zeroLocus_eq_radical]
+      _ = MvPolynomial.vanishingIdeal ℂ (∅ : Set (σ → ℂ)) := by rw [this]
+      _ = ⊤ := MvPolynomial.vanishingIdeal_empty
+  have : I = ⊤ := (Ideal.radical_eq_top).mp hrad
+  have : (1 : MvPolynomial σ ℂ) ∈ I := by
+    rw [this]
+    exact Submodule.mem_top
+  rw [Ideal.mem_span_singleton] at this
+  exact hP (isUnit_of_dvd_one this)
+
+private lemma affinePolynomial_eval_eq (F : MvPolynomial (Fin 3) ℂ) (x : NonZVar → ℂ) :
+    MvPolynomial.eval x (affinePolynomial F) =
+      MvPolynomial.eval (fun i : Fin 3 =>
+        if h : i = (2 : Fin 3) then (1 : ℂ) else x ⟨i, h⟩) F := by
+  unfold affinePolynomial zPolynomial zAsOption
+  rw [← Polynomial.eval_one_map (MvPolynomial.eval x)
+    ((MvPolynomial.optionEquivLeft ℂ NonZVar)
+      ((MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm) F))]
+  rw [← MvPolynomial.optionEquivLeft_elim_eval]
+  rw [MvPolynomial.eval_rename]
+  have hfun :
+      ((fun o : Option NonZVar ↦ o.elim (1 : ℂ) x) ∘
+          (Equiv.optionSubtypeNe (2 : Fin 3)).symm) =
+        (fun i : Fin 3 ↦ if h : i = (2 : Fin 3) then (1 : ℂ) else x ⟨i, h⟩) := by
+    funext i
+    by_cases h : i = (2 : Fin 3) <;> simp [*]
+  simp [*]
+
+private lemma optionElim_degree (u : NonZVar →₀ ℕ) (k : ℕ) :
+    (u.optionElim k).degree = u.degree + k := by
+  simp [Finsupp.degree_eq_sum, Nat.add_comm]
+
+private lemma coeff_affinePolynomial_eq_coeff_zAsOption_zero
+    {F : MvPolynomial (Fin 3) ℂ} {d : ℕ} (hF : F.IsHomogeneous d)
+    (u : NonZVar →₀ ℕ) (hu : u.degree = d) :
+    MvPolynomial.coeff u (affinePolynomial F) =
+      MvPolynomial.coeff (u.optionElim 0) (zAsOption F) := by
+  unfold affinePolynomial zPolynomial
+  rw [Polynomial.eval_eq_sum_range]
+  simp only [one_pow, mul_one, MvPolynomial.coeff_sum]
+  trans MvPolynomial.coeff u (((MvPolynomial.optionEquivLeft ℂ NonZVar) (zAsOption F)).coeff 0)
+  · refine Finset.sum_eq_single (M := ℂ) (0 : ℕ) ?_ ?_
+    · intro i _hi hne
+      rw [MvPolynomial.optionEquivLeft_coeff_coeff]
+      have : (zAsOption F).IsHomogeneous d := by
+        unfold zAsOption
+        exact hF.rename_isHomogeneous
+      exact this.coeff_eq_zero (by grind [optionElim_degree])
+    · simp
+  · rw [MvPolynomial.optionEquivLeft_coeff_coeff]
+
+private lemma optionElim_zero_subtypeDomain_eq_mapDomain
+    (m : Fin 3 →₀ ℕ) (hmz : m (2 : Fin 3) = 0) :
+    (m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))).optionElim 0 =
+      m.mapDomain (Equiv.optionSubtypeNe (2 : Fin 3)).symm := by
+  ext o
+  cases o with simp [Finsupp.mapDomain_equiv_apply, hmz]
+
+private lemma subtypeDomain_degree_eq_of_z_eq_zero
+    {F : MvPolynomial (Fin 3) ℂ} {d : ℕ} (hF : F.IsHomogeneous d)
+    {m : Fin 3 →₀ ℕ} (hm : m ∈ F.support) (hmz : m (2 : Fin 3) = 0) :
+    (m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))).degree = d := by
+  have hmdeg : m.degree = d := (hF.degree_eq_sum_deg_support hm).symm
+  have hmap := congrArg Finsupp.degree (optionElim_zero_subtypeDomain_eq_mapDomain m hmz)
+  rw [optionElim_degree, Nat.add_zero, Finsupp.degree_mapDomain] at hmap
+  exact hmap.trans hmdeg
+
+private lemma affinePolynomial_not_isUnit (H : PlaneCurveData) :
+    ¬ IsUnit (affinePolynomial H.F.val) := by
+  intro hunit
+  obtain ⟨c, _hc, hc⟩ :=
+    (MvPolynomial.isUnit_iff_eq_C_of_isReduced (P := affinePolynomial H.F.val)).mp hunit
+  have hcoeff_zero :
+      ∀ m ∈ H.F.val.support, m (2 : Fin 3) = 0 → False := by
+    intro m hm hmz
+    let u : NonZVar →₀ ℕ := m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))
+    have hudeg : u.degree = H.d :=
+      subtypeDomain_degree_eq_of_z_eq_zero H.F.homogeneous hm hmz
+    have hune : u ≠ 0 := by
+      intro hzero
+      have : u.degree = 0 := by simp [hzero]
+      have hd0 : H.d = 0 := hudeg ▸ this
+      exact (Nat.not_succ_le_zero 0) (by simpa [hd0] using H.h_deg)
+    have hsurvive :
+        MvPolynomial.coeff u (affinePolynomial H.F.val) =
+          MvPolynomial.coeff m H.F.val := by
+      calc
+        MvPolynomial.coeff u (affinePolynomial H.F.val)
+            = MvPolynomial.coeff (u.optionElim 0) (zAsOption H.F.val) :=
+              coeff_affinePolynomial_eq_coeff_zAsOption_zero H.F.homogeneous u hudeg
+        _ = MvPolynomial.coeff (m.mapDomain (Equiv.optionSubtypeNe (2 : Fin 3)).symm)
+              (MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm H.F.val) := by
+              rw [optionElim_zero_subtypeDomain_eq_mapDomain m hmz]
+              rfl
+        _ = MvPolynomial.coeff m H.F.val := by
+              rw [MvPolynomial.coeff_rename_mapDomain]
+              exact (Equiv.optionSubtypeNe (2 : Fin 3)).symm.injective
+    have hleft_zero : MvPolynomial.coeff u (affinePolynomial H.F.val) = 0 := by
+      rw [hc]
+      have h0u : ¬ (0 : NonZVar →₀ ℕ) = u := fun h => hune h.symm
+      rw [MvPolynomial.coeff_C]
+      simp [h0u]
+    have : MvPolynomial.coeff m H.F.val ≠ 0 :=
+      MvPolynomial.mem_support_iff.mp hm
+    exact this (hsurvive ▸ hleft_zero)
+  have :
+      H.F.val ∈ Ideal.span (MvPolynomial.X '' ({(2 : Fin 3)} : Set (Fin 3))) := by
+    rw [MvPolynomial.mem_ideal_span_X_image]
+    intro m hm
+    exact ⟨(2 : Fin 3), by simp, by
+      by_contra hmz
+      exact hcoeff_zero m hm (by simpa using hmz)⟩
+  have : H.F.val ∈ Ideal.span ({MvPolynomial.X (2 : Fin 3)} :
+        Set (MvPolynomial (Fin 3) ℂ)) := by
+    simpa using this
+  rw [Ideal.mem_span_singleton] at this
+  exact H.h_not_at_infinity this
+
 /-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
 The `z = 1` affine patch is nonempty: an irreducible `F` with `z ∤ F` dehomogenises
 to a nonconstant `F(x,y,1)`, which has a zero over `ℂ`. -/
-axiom AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
-    Nonempty (PlaneCurveAffine H)
+theorem AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
+    Nonempty (PlaneCurveAffine H) := by
+  obtain ⟨x, hx⟩ :=
+    exists_eval_eq_zero_of_not_isUnit_mvPolynomial (affinePolynomial H.F.val)
+      (affinePolynomial_not_isUnit H)
+  refine ⟨⟨(x ⟨0, by decide⟩, x ⟨1, by decide⟩), ?_⟩⟩
+  rw [affinePolynomial_eval_eq H.F.val x] at hx
+  have : ![x ⟨0, by decide⟩, x ⟨1, by decide⟩, 1] =
+  (fun i : Fin 3 ↦ if h : i = (2 : Fin 3) then 1 else x ⟨i, h⟩) := by
+    funext i
+    fin_cases i <;> simp
+  grind
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
@@ -183,6 +341,145 @@ def PlaneCurve (H : PlaneCurveData) : Type :=
     ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
       Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
 
+private abbrev ProjectivePlaneNonzeroVectors := {v : Fin 3 → ℂ // v ≠ 0}
+
+private def unitSmulProjectivePlaneNonzeroVectors (a : ℂˣ)
+    (v : ProjectivePlaneNonzeroVectors) : ProjectivePlaneNonzeroVectors :=
+  ⟨(a : ℂ) • (v : Fin 3 → ℂ), by
+    intro
+    have : (a : ℂ) ≠ 0 := by simp
+    have : (v : Fin 3 → ℂ) = 0 := by simp_all
+    grind⟩
+
+private def unitSmulProjectivePlaneNonzeroVectorsHomeomorph (a : ℂˣ) :
+    ProjectivePlaneNonzeroVectors ≃ₜ ProjectivePlaneNonzeroVectors where
+  toFun := unitSmulProjectivePlaneNonzeroVectors a
+  invFun := unitSmulProjectivePlaneNonzeroVectors a⁻¹
+  left_inv v := by
+    apply Subtype.ext
+    change ((↑(a⁻¹) : ℂ) • ((a : ℂ) • (v : Fin 3 → ℂ))) = (v : Fin 3 → ℂ)
+    simp
+  right_inv v := by
+    apply Subtype.ext
+    change ((a : ℂ) • ((↑(a⁻¹) : ℂ) • (v : Fin 3 → ℂ))) = (v : Fin 3 → ℂ)
+    simp
+  continuous_toFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
+  continuous_invFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
+
+private lemma projectivization_preimage_image_eq (U : Set ProjectivePlaneNonzeroVectors) :
+    (Projectivization.mk' ℂ) ⁻¹' ((Projectivization.mk' ℂ) '' U) =
+      Set.iUnion (fun a : ℂˣ => unitSmulProjectivePlaneNonzeroVectors a '' U) := by
+  ext x
+  constructor
+  · rintro ⟨y, hyU, hxy⟩
+    rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk] at hxy
+    rcases (Projectivization.mk_eq_mk_iff ℂ
+        (y : Fin 3 → ℂ) (x : Fin 3 → ℂ) y.2 x.2).1 hxy with ⟨a, ha⟩
+    rw [Set.mem_iUnion]
+    refine ⟨a⁻¹, ?_⟩
+    refine ⟨y, hyU, ?_⟩
+    apply Subtype.ext
+    change ((↑(a⁻¹) : ℂ) • (y : Fin 3 → ℂ)) = (x : Fin 3 → ℂ)
+    rw [← ha]
+    change ((↑(a⁻¹) : ℂ) • ((a : ℂ) • (x : Fin 3 → ℂ))) = (x : Fin 3 → ℂ)
+    simp
+  · intro hx
+    rw [Set.mem_iUnion] at hx
+    rcases hx with ⟨a, y, hyU, rfl⟩
+    refine ⟨y, hyU, ?_⟩
+    rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk]
+    grind [unitSmulProjectivePlaneNonzeroVectors, Projectivization.mk_eq_mk_iff']
+
+private theorem projectivization_isOpenMap_mk' :
+    IsOpenMap (@Quotient.mk' ProjectivePlaneNonzeroVectors
+      (projectivizationSetoid ℂ (Fin 3 → ℂ))) := by
+  intro U hU
+  rw [← isQuotientMap_quotient_mk'.isOpen_preimage]
+  change IsOpen ((Projectivization.mk' ℂ :
+      ProjectivePlaneNonzeroVectors → Projectivization ℂ (Fin 3 → ℂ)) ⁻¹'
+    ((Projectivization.mk' ℂ :
+      ProjectivePlaneNonzeroVectors → Projectivization ℂ (Fin 3 → ℂ)) '' U))
+  rw [projectivization_preimage_image_eq]
+  exact isOpen_iUnion fun a =>
+    (unitSmulProjectivePlaneNonzeroVectorsHomeomorph a).isOpenMap U hU
+
+private theorem projectivization_isOpenQuotientMap_mk' :
+    IsOpenQuotientMap (@Quotient.mk' ProjectivePlaneNonzeroVectors
+      (projectivizationSetoid ℂ (Fin 3 → ℂ))) where
+  surjective := Quotient.mk_surjective
+  continuous := continuous_quotient_mk'
+  isOpenMap := projectivization_isOpenMap_mk'
+
+private lemma projectivization_mk'_eq_mk'_iff_minors
+    (u v : ProjectivePlaneNonzeroVectors) :
+    Projectivization.mk' ℂ u = Projectivization.mk' ℂ v ↔
+      ∀ i j : Fin 3, (u : Fin 3 → ℂ) i * (v : Fin 3 → ℂ) j =
+        (u : Fin 3 → ℂ) j * (v : Fin 3 → ℂ) i := by
+  rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk]
+  rw [Projectivization.mk_eq_mk_iff' ℂ (u : Fin 3 → ℂ) (v : Fin 3 → ℂ) u.2 v.2]
+  constructor
+  · rintro ⟨a, h⟩ i j
+    rw [← h]
+    change (a • (v : Fin 3 → ℂ)) i * (v : Fin 3 → ℂ) j =
+      (a • (v : Fin 3 → ℂ)) j * (v : Fin 3 → ℂ) i
+    simp [mul_comm, mul_left_comm, mul_assoc]
+  · intro h
+    have hv_nonzero : ∃ k : Fin 3, (v : Fin 3 → ℂ) k ≠ 0 := by
+      by_contra hnone
+      apply v.2
+      ext k
+      by_contra hk
+      exact hnone ⟨k, hk⟩
+    rcases hv_nonzero with ⟨k, hvk⟩
+    let a : ℂ := (u : Fin 3 → ℂ) k / (v : Fin 3 → ℂ) k
+    refine ⟨a, ?_⟩
+    ext i
+    change a * (v : Fin 3 → ℂ) i = (u : Fin 3 → ℂ) i
+    grind
+
+private def projectivizationMinor (i j : Fin 3)
+    (p : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors) : ℂ :=
+  (p.1 : Fin 3 → ℂ) i * (p.2 : Fin 3 → ℂ) j -
+    (p.1 : Fin 3 → ℂ) j * (p.2 : Fin 3 → ℂ) i
+
+private theorem continuous_projectivizationMinor (i j : Fin 3) :
+    Continuous (projectivizationMinor i j) :=
+      ((((continuous_apply i).comp (continuous_subtype_val.comp continuous_fst)).mul
+        ((continuous_apply j).comp (continuous_subtype_val.comp continuous_snd))).sub
+          (((continuous_apply j).comp (continuous_subtype_val.comp continuous_fst)).mul
+            ((continuous_apply i).comp (continuous_subtype_val.comp continuous_snd))))
+
+private theorem projectivization_rel_closed :
+    IsClosed {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+      Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2} := by
+  have hset :
+      {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+        Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2} =
+        ⋂ i : Fin 3, ⋂ j : Fin 3,
+          {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+            projectivizationMinor i j q = 0} := by
+    ext q
+    constructor
+    · intro h
+      change Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2 at h
+      rw [projectivization_mk'_eq_mk'_iff_minors q.1 q.2] at h
+      simp [projectivizationMinor, sub_eq_zero, h]
+    · intro h
+      change Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2
+      rw [projectivization_mk'_eq_mk'_iff_minors q.1 q.2]
+      intro i j
+      have hij : projectivizationMinor i j q = 0 := by
+        simpa using (Set.mem_iInter.mp (Set.mem_iInter.mp h i) j)
+      simpa [projectivizationMinor, sub_eq_zero] using hij
+  rw [hset]
+  exact isClosed_iInter fun i ↦ isClosed_iInter fun j ↦
+    isClosed_eq (continuous_projectivizationMinor i j) continuous_const
+
+private theorem projectivization_t2Space :
+    T2Space (Quotient (projectivizationSetoid ℂ (Fin 3 → ℂ))) := by
+  rw [t2Space_iff_of_isOpenQuotientMap projectivization_isOpenQuotientMap_mk']
+  exact projectivization_rel_closed
+
 instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
     TopologicalSpace (PlaneCurve H) := by
   letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
@@ -194,9 +491,14 @@ instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
         Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
   infer_instance
 
--- TODO: prove Hausdorffness for the quotient projective topology.
-axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
-attribute [instance] PlaneCurve.instT2Space
+instance PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H) := by
+  let : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace
+      (Quotient (projectivizationSetoid ℂ _)))
+  let : T2Space (Projectivization ℂ (Fin 3 → ℂ)) := projectivization_t2Space
+  change T2Space { p : Projectivization _ _ // ∃ v, ∃ hv,
+        Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
+  infer_instance
 
 -- TODO: prove compactness via the quotient of the unit sphere, or an explicit
 -- finite closed-polydisc projective cover.

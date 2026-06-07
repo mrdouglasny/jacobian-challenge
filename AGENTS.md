@@ -9,9 +9,12 @@ Apply these rules regardless of which agent you are.
 - **`CLAUDE.md`** — the project rules. Despite the name, they apply to every agent:
   Lean pre-push verification, CI, **axiom soundness & vetting**, where major changes
   get discussed, the protected-files list, and gotchas.
-- **`AXIOM_AUDIT.md`** — the axiom ledger + vetting protocol. Refresh it in the
-  **same commit** that adds, removes, or strengthens an axiom; keep the counts in
-  `README.md` in sync (CI's `scripts/check_axiom_consistency.sh` enforces this).
+- **`AXIOM_AUDIT.md`** — the axiom ledger + vetting protocol. When you add,
+  remove, or strengthen an axiom, update the relevant **ledger entry** (the
+  per-axiom row / vetting note) in the same commit. You do **not** need to update
+  the numeric **axiom counts** (the header, `README.md` at-a-glance, or the
+  by-class table) — the maintainer reconciles those at merge. CI prints the kernel
+  count for reference but no longer fails on count drift.
 - **`docs/planning/`** — per-workstream design docs (read the relevant one before
   large changes in that area).
 

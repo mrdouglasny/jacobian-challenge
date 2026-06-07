@@ -1,10 +1,35 @@
 /-
 `HolomorphicOneForm X` — holomorphic 1-forms on a complex 1-manifold `X`.
 
-At the pinned Mathlib commit there is no cotangent-bundle API for complex
-manifolds (nor a general `ContMDiff` section API that applies, since the
-cotangent bundle isn't constructed). We therefore use the chart-cocycle
-formulation per `docs/formalization-plan.md` §4.1 fallback path.
+We use the chart-cocycle formulation per `docs/formalization-plan.md`
+§4.1 fallback path.
+
+NOTE (corrected 2026-06-06): the original justification here — "no
+cotangent-bundle API, nor a `ContMDiff` section API that applies" — is
+**stale**. The intrinsic bundle path now type-checks at the pin:
+  * `Cₛ^ω⟮𝓘(ℂ,E); E →L[ℂ] ℂ, CotangentSpace E X⟯`
+    (`Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean`)
+    is exactly "holomorphic section of the cotangent bundle" — over the
+    ℂ-model, `ContMDiff … ω` = `AnalyticOn ℂ` = holomorphic.
+  * the cotangent bundle (`Jacobians/Vendor/Wallace/.../CotangentBundle.lean`,
+    vendored 2026-06-02) carries a `ContMDiffVectorBundle ω` instance
+    automatically: tangent (`Tangent.lean`, needs `IsManifold 𝓘(ℂ) ω X`,
+    which we already have) ⊗ trivial line bundle, glued by the hom-bundle
+    instance (`VectorBundle/Hom.lean`).
+The chart-cocycle form persists for three *practical* reasons, not an
+API gap: (1) it predates the vendored cotangent bundle; (2) populating
+the section type fights the `not reducible` `TangentSpace` operator-norm
+diamonds (`backward.isDefEq.respectTransparency false`); (3) the whole
+downstream interface (`AX_FiniteDimOneForms`, periods, `ellipticDz`,
+ProjectiveLine subsingleton) is wired against this submodule.
+
+TODO (do not attempt without a tracking Discussion — touches a shared
+interface, see CLAUDE.md "major change" rule): reformulate
+`HolomorphicOneForm X := Cₛ^ω⟮𝓘(ℂ,E); E →L[ℂ] ℂ, CotangentSpace E X⟯`.
+The section route is cleaner — coordinate-independence is free (no
+hand-imposed cocycle) and `IsZeroOffChartTarget` becomes unnecessary (a
+section *is* its fiber values, so no off-target slack), and
+`ContMDiffSection` ships its own `Module ℂ` instance.
 
 A holomorphic 1-form is specified by a chart-local coefficient
 `coeff : X → ℂ → ℂ` (first argument: the centre point of the chart;
