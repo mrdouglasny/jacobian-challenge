@@ -224,6 +224,71 @@ theorem inv_mem_infinityLiftChart_target_of_gluing_source
     affineChartAt_of_mem_smoothLocusY
       (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY] using hTarget'
 
+/-- Analyticity of the `affCoeff` infinity branch once the chart-transfer
+domain map has been supplied. The remaining geometric obligation is exactly
+`z ∈ affine target`, `z ≠ 0` implies `z⁻¹ ∈ infinity target`. -/
+theorem affCoeff_analyticOn_of_inr_of_mapsTo
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {b : HyperellipticAffineInfinity H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inr b)
+    (hMaps : Set.MapsTo (fun z : ℂ => z⁻¹)
+      ((affineChartProjX (H := H) a hpY).target ∩ {z | z ≠ 0})
+      (infinityLiftChart H hf.out b).target) :
+    AnalyticOn ℂ (affCoeff (H := H) form a)
+      ((affineChartProjX (H := H) a hpY).target ∩ {z | z ≠ 0}) := by
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  let domain : Set ℂ :=
+    (affineChartProjX (H := H) a hpY).target ∩ {z | z ≠ 0}
+  have hQq : Quotient.out q = Sum.inr b := by
+    simpa [q] using hQ
+  have hform : AnalyticOn ℂ (form.coeff q) (extChartAt 𝓘(ℂ, ℂ) q).target :=
+    form.2.1 q
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) q).target =
+      (infinityLiftChart H hf.out b).target := by
+    rw [extChartAt_target]
+    change
+      ↑𝓘(ℂ, ℂ).symm ⁻¹' (HyperellipticEvenProj.chartAt H hf.out q).target ∩
+          Set.range ↑𝓘(ℂ, ℂ) =
+        (infinityLiftChart H hf.out b).target
+    change _ ∩ Set.range (id : ℂ → ℂ) = _
+    rw [Set.range_id, Set.inter_univ]
+    change (HyperellipticEvenProj.chartAt H hf.out q).target =
+      (infinityLiftChart H hf.out b).target
+    unfold HyperellipticEvenProj.chartAt
+    rw [hQq]
+  rw [hExt] at hform
+  have hInv : AnalyticOn ℂ (fun z : ℂ => z⁻¹) domain := by
+    exact (analyticOn_id.mono (Set.subset_univ _)).inv (by
+      intro z hz
+      exact hz.2)
+  have hInvOne : AnalyticOn ℂ (fun z : ℂ => 1 / z) domain := by
+    simpa [one_div] using hInv
+  have hMapsOne : Set.MapsTo (fun z : ℂ => 1 / z) domain
+      (infinityLiftChart H hf.out b).target := by
+    simpa [domain, one_div] using hMaps
+  have hCoeffComp : AnalyticOn ℂ (fun z : ℂ => form.coeff q (1 / z)) domain := by
+    simpa [Function.comp_def] using hform.comp hInvOne hMapsOne
+  have hPow : AnalyticOn ℂ (fun z : ℂ => z ^ 2) domain :=
+    (analyticOn_id.mono (Set.subset_univ _)).pow 2
+  have hInvPow : AnalyticOn ℂ (fun z : ℂ => (z ^ 2)⁻¹) domain :=
+    hPow.inv (by
+      intro z hz
+      exact pow_ne_zero 2 hz.2)
+  have hFactor : AnalyticOn ℂ (fun z : ℂ => -1 / z ^ 2) domain := by
+    simpa [div_eq_mul_inv] using hInvPow.neg
+  have hProd : AnalyticOn ℂ
+      (fun z : ℂ => form.coeff q (1 / z) * (-1 / z ^ 2)) domain :=
+    hCoeffComp.mul hFactor
+  have hEq : affCoeff (H := H) form a =
+      fun z : ℂ => form.coeff q (1 / z) * (-1 / z ^ 2) := by
+    funext z
+    simp [affCoeff, q, hQq]
+  simpa [domain, hEq]
+    using hProd
+
 /-- The local Liouville numerator is analytic on the smooth-`Y` projX target. -/
 theorem liouvilleProjXNumerator_analyticOn
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
