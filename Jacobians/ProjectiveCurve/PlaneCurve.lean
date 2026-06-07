@@ -341,6 +341,145 @@ def PlaneCurve (H : PlaneCurveData) : Type :=
     ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
       Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
 
+private abbrev ProjectivePlaneNonzeroVectors := {v : Fin 3 → ℂ // v ≠ 0}
+
+private def unitSmulProjectivePlaneNonzeroVectors (a : ℂˣ)
+    (v : ProjectivePlaneNonzeroVectors) : ProjectivePlaneNonzeroVectors :=
+  ⟨(a : ℂ) • (v : Fin 3 → ℂ), by
+    intro
+    have : (a : ℂ) ≠ 0 := by simp
+    have : (v : Fin 3 → ℂ) = 0 := by simp_all
+    grind⟩
+
+private def unitSmulProjectivePlaneNonzeroVectorsHomeomorph (a : ℂˣ) :
+    ProjectivePlaneNonzeroVectors ≃ₜ ProjectivePlaneNonzeroVectors where
+  toFun := unitSmulProjectivePlaneNonzeroVectors a
+  invFun := unitSmulProjectivePlaneNonzeroVectors a⁻¹
+  left_inv v := by
+    apply Subtype.ext
+    change ((↑(a⁻¹) : ℂ) • ((a : ℂ) • (v : Fin 3 → ℂ))) = (v : Fin 3 → ℂ)
+    simp
+  right_inv v := by
+    apply Subtype.ext
+    change ((a : ℂ) • ((↑(a⁻¹) : ℂ) • (v : Fin 3 → ℂ))) = (v : Fin 3 → ℂ)
+    simp
+  continuous_toFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
+  continuous_invFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
+
+private lemma projectivization_preimage_image_eq (U : Set ProjectivePlaneNonzeroVectors) :
+    (Projectivization.mk' ℂ) ⁻¹' ((Projectivization.mk' ℂ) '' U) =
+      Set.iUnion (fun a : ℂˣ => unitSmulProjectivePlaneNonzeroVectors a '' U) := by
+  ext x
+  constructor
+  · rintro ⟨y, hyU, hxy⟩
+    rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk] at hxy
+    rcases (Projectivization.mk_eq_mk_iff ℂ
+        (y : Fin 3 → ℂ) (x : Fin 3 → ℂ) y.2 x.2).1 hxy with ⟨a, ha⟩
+    rw [Set.mem_iUnion]
+    refine ⟨a⁻¹, ?_⟩
+    refine ⟨y, hyU, ?_⟩
+    apply Subtype.ext
+    change ((↑(a⁻¹) : ℂ) • (y : Fin 3 → ℂ)) = (x : Fin 3 → ℂ)
+    rw [← ha]
+    change ((↑(a⁻¹) : ℂ) • ((a : ℂ) • (x : Fin 3 → ℂ))) = (x : Fin 3 → ℂ)
+    simp
+  · intro hx
+    rw [Set.mem_iUnion] at hx
+    rcases hx with ⟨a, y, hyU, rfl⟩
+    refine ⟨y, hyU, ?_⟩
+    rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk]
+    grind [unitSmulProjectivePlaneNonzeroVectors, Projectivization.mk_eq_mk_iff']
+
+private theorem projectivization_isOpenMap_mk' :
+    IsOpenMap (@Quotient.mk' ProjectivePlaneNonzeroVectors
+      (projectivizationSetoid ℂ (Fin 3 → ℂ))) := by
+  intro U hU
+  rw [← isQuotientMap_quotient_mk'.isOpen_preimage]
+  change IsOpen ((Projectivization.mk' ℂ :
+      ProjectivePlaneNonzeroVectors → Projectivization ℂ (Fin 3 → ℂ)) ⁻¹'
+    ((Projectivization.mk' ℂ :
+      ProjectivePlaneNonzeroVectors → Projectivization ℂ (Fin 3 → ℂ)) '' U))
+  rw [projectivization_preimage_image_eq]
+  exact isOpen_iUnion fun a =>
+    (unitSmulProjectivePlaneNonzeroVectorsHomeomorph a).isOpenMap U hU
+
+private theorem projectivization_isOpenQuotientMap_mk' :
+    IsOpenQuotientMap (@Quotient.mk' ProjectivePlaneNonzeroVectors
+      (projectivizationSetoid ℂ (Fin 3 → ℂ))) where
+  surjective := Quotient.mk_surjective
+  continuous := continuous_quotient_mk'
+  isOpenMap := projectivization_isOpenMap_mk'
+
+private lemma projectivization_mk'_eq_mk'_iff_minors
+    (u v : ProjectivePlaneNonzeroVectors) :
+    Projectivization.mk' ℂ u = Projectivization.mk' ℂ v ↔
+      ∀ i j : Fin 3, (u : Fin 3 → ℂ) i * (v : Fin 3 → ℂ) j =
+        (u : Fin 3 → ℂ) j * (v : Fin 3 → ℂ) i := by
+  rw [Projectivization.mk'_eq_mk, Projectivization.mk'_eq_mk]
+  rw [Projectivization.mk_eq_mk_iff' ℂ (u : Fin 3 → ℂ) (v : Fin 3 → ℂ) u.2 v.2]
+  constructor
+  · rintro ⟨a, h⟩ i j
+    rw [← h]
+    change (a • (v : Fin 3 → ℂ)) i * (v : Fin 3 → ℂ) j =
+      (a • (v : Fin 3 → ℂ)) j * (v : Fin 3 → ℂ) i
+    simp [mul_comm, mul_left_comm, mul_assoc]
+  · intro h
+    have hv_nonzero : ∃ k : Fin 3, (v : Fin 3 → ℂ) k ≠ 0 := by
+      by_contra hnone
+      apply v.2
+      ext k
+      by_contra hk
+      exact hnone ⟨k, hk⟩
+    rcases hv_nonzero with ⟨k, hvk⟩
+    let a : ℂ := (u : Fin 3 → ℂ) k / (v : Fin 3 → ℂ) k
+    refine ⟨a, ?_⟩
+    ext i
+    change a * (v : Fin 3 → ℂ) i = (u : Fin 3 → ℂ) i
+    grind
+
+private def projectivizationMinor (i j : Fin 3)
+    (p : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors) : ℂ :=
+  (p.1 : Fin 3 → ℂ) i * (p.2 : Fin 3 → ℂ) j -
+    (p.1 : Fin 3 → ℂ) j * (p.2 : Fin 3 → ℂ) i
+
+private theorem continuous_projectivizationMinor (i j : Fin 3) :
+    Continuous (projectivizationMinor i j) :=
+      ((((continuous_apply i).comp (continuous_subtype_val.comp continuous_fst)).mul
+        ((continuous_apply j).comp (continuous_subtype_val.comp continuous_snd))).sub
+          (((continuous_apply j).comp (continuous_subtype_val.comp continuous_fst)).mul
+            ((continuous_apply i).comp (continuous_subtype_val.comp continuous_snd))))
+
+private theorem projectivization_rel_closed :
+    IsClosed {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+      Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2} := by
+  have hset :
+      {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+        Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2} =
+        ⋂ i : Fin 3, ⋂ j : Fin 3,
+          {q : ProjectivePlaneNonzeroVectors × ProjectivePlaneNonzeroVectors |
+            projectivizationMinor i j q = 0} := by
+    ext q
+    constructor
+    · intro h
+      change Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2 at h
+      rw [projectivization_mk'_eq_mk'_iff_minors q.1 q.2] at h
+      simp [projectivizationMinor, sub_eq_zero, h]
+    · intro h
+      change Projectivization.mk' ℂ q.1 = Projectivization.mk' ℂ q.2
+      rw [projectivization_mk'_eq_mk'_iff_minors q.1 q.2]
+      intro i j
+      have hij : projectivizationMinor i j q = 0 := by
+        simpa using (Set.mem_iInter.mp (Set.mem_iInter.mp h i) j)
+      simpa [projectivizationMinor, sub_eq_zero] using hij
+  rw [hset]
+  exact isClosed_iInter fun i ↦ isClosed_iInter fun j ↦
+    isClosed_eq (continuous_projectivizationMinor i j) continuous_const
+
+private theorem projectivization_t2Space :
+    T2Space (Quotient (projectivizationSetoid ℂ (Fin 3 → ℂ))) := by
+  rw [t2Space_iff_of_isOpenQuotientMap projectivization_isOpenQuotientMap_mk']
+  exact projectivization_rel_closed
+
 instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
     TopologicalSpace (PlaneCurve H) := by
   letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
@@ -352,9 +491,14 @@ instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
         Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
   infer_instance
 
--- TODO: prove Hausdorffness for the quotient projective topology.
-axiom PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H)
-attribute [instance] PlaneCurve.instT2Space
+instance PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H) := by
+  let : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace
+      (Quotient (projectivizationSetoid ℂ _)))
+  let : T2Space (Projectivization ℂ (Fin 3 → ℂ)) := projectivization_t2Space
+  change T2Space { p : Projectivization _ _ // ∃ v, ∃ hv,
+        Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
+  infer_instance
 
 -- TODO: prove compactness via the quotient of the unit sphere, or an explicit
 -- finite closed-polydisc projective cover.
