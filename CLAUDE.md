@@ -164,7 +164,15 @@ its tracker issue. (Pinned issue #82 is the running announcement / post-mortem l
 
 These files set the rules and the trust boundary; they are **owner-vetted** via
 `.github/CODEOWNERS` (changes require @mrdouglasny review): `CLAUDE.md`,
-`AGENTS.md`, `.github/CODEOWNERS`, `.github/workflows/`, `AXIOM_AUDIT.md`,
-`scripts/axiom_report.lean`, `scripts/check_axiom_consistency.sh`, `docs/axiom-report.txt`.
-A collaborator's agent may *propose* edits to these via PR, but they do not merge
-without the owner's review. Do not try to weaken or bypass these guards.
+`AGENTS.md`, `.github/CODEOWNERS`, `.github/workflows/`, `scripts/axiom_report.lean`,
+`scripts/check_axiom_consistency.sh`. A collaborator's agent may *propose* edits to
+these via PR, but they do not merge without the owner's review. Do not try to weaken
+or bypass these guards.
+
+`AXIOM_AUDIT.md` and `docs/axiom-report.txt` are deliberately **not** protected:
+`axiom-report.txt` is regenerated and diffed against the kernel by CI, so it cannot
+diverge from the kernel without failing the build, and `AXIOM_AUDIT.md` is
+documentation with no kernel/CI soundness power. The trust root is the *generator and
+checker* CI relies on (`scripts/axiom_report.lean`, `scripts/check_axiom_consistency.sh`),
+which stay protected — so routine axiom-discharge PRs can update the ledger and the
+machine-checked report without owner review while the gate still verifies them.

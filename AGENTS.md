@@ -28,10 +28,14 @@ Apply these rules regardless of which agent you are.
 - **Major / soundness-touching changes need discussion first** (GitHub Discussion or
   a tracking issue), then a PR that links it. Routine discharges may go straight to PR.
 - **Protected files are owner-vetted** (`.github/CODEOWNERS`). You may *propose* edits
-  to `CLAUDE.md`, `AGENTS.md`, `.github/CODEOWNERS`, `.github/workflows/`,
-  `AXIOM_AUDIT.md`, and the axiom-report/consistency scripts via PR, but they do not
-  merge without @mrdouglasny's review. **Do not attempt to weaken or bypass these
-  guards** (the soundness scripts, the sorry/axiom CI gates, branch protection).
+  to `CLAUDE.md`, `AGENTS.md`, `.github/CODEOWNERS`, `.github/workflows/`, and the
+  axiom-report/consistency scripts (`scripts/axiom_report.lean`,
+  `scripts/check_axiom_consistency.sh`) via PR, but they do not merge without
+  @mrdouglasny's review. **Do not attempt to weaken or bypass these guards** (the
+  soundness scripts, the sorry/axiom CI gates, branch protection). `AXIOM_AUDIT.md`
+  and `docs/axiom-report.txt` are *not* protected — the report is CI-regenerated and
+  kernel-diffed, the audit is documentation — so routine discharge PRs update them
+  directly.
 
 ## Provenance
 Disclose AI-agent authorship in PRs (DCO sign-off / `Co-Authored-By`), and fill the
