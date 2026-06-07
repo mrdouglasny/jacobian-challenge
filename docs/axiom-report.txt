@@ -111,7 +111,6 @@
  Classical.choice,
  Quot.sound,
  GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph,
- Axioms.HyperellipticLiouville.AX_HyperellipticOneForm_eq_form,
  ProjectiveCurve.HyperellipticAffine.AX_HyperellipticAffine_connected,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]

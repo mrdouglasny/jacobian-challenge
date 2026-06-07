@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 55** — all **55** in our own modules. The vendored
+**Active project axioms: 53** — all **53** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -187,7 +187,7 @@ Per the review plan, axioms are split into two classes:
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 24 | curve-specific chart constructions | real but unverified |
-| 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
+| 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 
 ---
 
@@ -271,21 +271,23 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Elliptic witnesses (`AX_Elliptic_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:97,173` | 2; `AX_Elliptic_aLoop_analytic` was **discharged to a theorem** (PR #86, 2026-06-06) via `extChartAt_quotient_mk_line_analyticAt`. `_bLoop_analytic` strengthened to `IsAnalyticArcStrong` 2026-06-06; affine-in-chart justification recorded; **re-vet pending**. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
-### 2d. Flagged — *true-but-unproven; needs end-to-end check*
+### 2d. Flagged — *empty: both entries DISCHARGED (2026-06-07)*
 
-The two cross-summand cocycle axioms that used to live here were **unsound**
-(false for `deg g ≥ N/2−1`) and are now **retired** — see Recently
-discharged. The remaining two are the Liouville hierarchy L2/L3 — genuinely true,
-but not yet checked end-to-end. They are the classical canonical-differentials
-theorem for hyperelliptic curves (the deepest result left); L3 is shown to
-reduce to L2 + cocycle propagation (`hyperellipticForm_coeff_projX`), and L2
-is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-discharge-plan.md)
-(L2-step-4 already proven; the branch-point + degree-at-∞ core remains, ~1–2 months).
+This class is now **empty**. The two cross-summand cocycle axioms that used to
+live here were unsound and were retired earlier; the remaining two — the
+Liouville hierarchy **L2/L3** (the classical canonical-differentials theorem for
+even-degree hyperelliptic curves) — are now **proven theorems** as of 2026-06-07.
 
-| Axiom | File:Line | Status |
-|-------|-----------|--------|
-| `AX_HyperellipticForm_polynomial_decomposition` (Liouville L2) | `Axioms/HyperellipticLiouville.lean:215` | true-but-unproven. **Step 4 of its proof plan is proven** (`differentiable_eq_polynomial_of_growth`); steps 1–3 (branch-point regularity + degree-at-∞) remain. |
-| `AX_HyperellipticOneForm_eq_form` (Liouville L3) | `Axioms/HyperellipticLiouville.lean:260` | true-but-unproven. Surjectivity of `hyperellipticForm` onto the low-degree forms; feeds `genus_HyperellipticEven_le`. **Reduces to L2 + cocycle propagation** (`hyperellipticForm_coeff_projX`, the bridge lemma). The only remaining gap in the even-genus theorem. |
+`AX_HyperellipticForm_polynomial_decomposition` (L2) and
+`AX_HyperellipticOneForm_eq_form` (L3) were discharged via the **direct
+two-sheet σ-anti-invariance route** (no quotient construction): a chart-transfer
+`affCoeff` layer (past the `Quotient.out` representative gap) + three analytic
+inputs (off-root analyticity, removable branch limits, cocompact decay) force the
+two-sheet coefficient sum to vanish (σ-anti-invariance), making the single-sheet
+numerator `affCoeff·√f` a well-defined entire function of polynomial growth ⇒ a
+polynomial (L2); L2 + cocycle propagation + `ext_of_coeff` ⇒ L3. `#print axioms
+genus_HyperellipticEven_eq` no longer depends on either (only standard-3 + the
+scoped even-genus chart/connectedness axioms remain). 55 → 53.
 
 ---
 
@@ -367,7 +369,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 55 — the vendored Kirov subtree is now axiom-free, so 55 is the total.
+#   prints 53 — the vendored Kirov subtree is now axiom-free, so 53 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -384,7 +386,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 55
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 53
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
