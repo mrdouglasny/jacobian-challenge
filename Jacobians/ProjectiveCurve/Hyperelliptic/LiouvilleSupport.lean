@@ -53,6 +53,32 @@ noncomputable def liouvilleProjXNumerator
     form.coeff q z *
       (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z)
 
+/-- The coefficient of a one-form in the affine `x`-coordinate attached to `a`.
+
+If the quotient representative of `mk (inl a)` is affine, this is the form's
+own coefficient. If the representative is the infinity-side point, this pulls
+the coefficient back through the elementary transition `u = 1 / x`,
+`du = -dx / x^2`. -/
+noncomputable def affCoeff
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) : ℂ → ℂ :=
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  match Quotient.out q with
+  | Sum.inl _ => form.coeff q
+  | Sum.inr _ => fun z => form.coeff q (1 / z) * (-1 / z ^ 2)
+
+/-- When the preferred quotient representative of `mk (inl a)` is affine,
+`affCoeff` reduces to the original chart coefficient. -/
+theorem affCoeff_of_inl
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a a' : HyperellipticAffine H)
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inl a') :
+    affCoeff (H := H) form a =
+      form.coeff (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) := by
+  simp [affCoeff, hQ]
+
 /-- A form coefficient is analytic on the explicit smooth-`Y` projX target when
 `q`'s chosen representative is the corresponding affine point. -/
 theorem form_coeff_analyticOn_affineProjX_target
