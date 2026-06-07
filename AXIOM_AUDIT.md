@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 54** — all **54** in our own modules. The vendored
+**Active project axioms: 53** — all **53** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -165,6 +165,11 @@ the three class-2c Elliptic-witness axioms. Then → **54** by **proving
 `AX_Elliptic_bLoop_analytic`** (2026-06-07) by the same quotient-chart line
 analyticity argument; only `_H1_symplectic` remains.
 
+Then → **53** by **proving `AX_PlaneCurveAffine_nonempty`** (2026-06-07): the
+affine patch is nonempty from `exists_eval_eq_zero_of_not_isUnit_mvPolynomial`
+applied to the dehomogenized affine polynomial. The remaining PlaneCurve cluster
+has six projective instances plus two affine props.
+
 ---
 
 ## Triage
@@ -175,7 +180,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (42 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (38 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -187,7 +192,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 23 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 22 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
@@ -264,7 +269,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: `instNonempty` + 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 3 affine props (type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instNonempty` reverted in review) | `ProjectiveCurve/PlaneCurve.lean` | 9 |
+| `PlaneCurve`: `instNonempty` + 5 manifold/topology instances (`instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 2 affine props (`AX_PlaneCurveAffine_connected`, `AX_PlaneCurveAffine_noncompact`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; projective `instNonempty` reverted in review) | `ProjectiveCurve/PlaneCurve.lean` | 8 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -324,6 +329,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_PlaneCurveAffine_nonempty` *(2026-06-07)* | dehomogenize to `affinePolynomial H.F.val`; `affinePolynomial_not_isUnit` plus `exists_eval_eq_zero_of_not_isUnit_mvPolynomial` gives a complex zero in the affine patch | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_Period_Triangle` *(2026-06-06)* | conjugate the triangle loop to `Classical.arbitrary X`; use `loopDevValH1Hom_eq_loopIntegralToH1_apply` + `loop_canonicalArcIntegral_mem_periodLatticeInBasis` from the analytic cycle basis; cancel bridge/reverse periods by `canonicalArcIntegral_trans`/`_reverse` | `Axioms/AbelJacobiMap.lean`, `RiemannSurface/LoopIntegralHom.lean`, `RiemannSurface/ArcAlgebra.lean` |
 | `AX_cycleBasisLoop_integrable` *(2026-06-06)* | `analyticArc_canonicalIntegrand_intervalIntegrable` from strong per-cell analytic witnesses; cycle-basis loops are ordinary `AnalyticArc`s | `RiemannSurface/LoopIntegral.lean`, `RiemannSurface/PartitionIndependence.lean` |
 | `squareLocalHomeomorph_zero_notMem_source`, `polynomialLocalHomeomorph_no_critical_in_source` *(2026-06-06, PR #78)* | affine-form IFT-shape proved directly — square: distinct preimages collide under squaring ⇒ contradiction; polynomial: `ApproximatesLinearOn` / `HasFDerivAt` inverse-function argument | `ProjectiveCurve/Hyperelliptic/AffineForm.lean:66,280` |
@@ -368,7 +374,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 54 — the vendored Kirov subtree is now axiom-free, so 54 is the total.
+#   prints 53 — the vendored Kirov subtree is now axiom-free, so 53 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -385,7 +391,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 54
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 53
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
