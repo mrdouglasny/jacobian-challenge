@@ -341,6 +341,72 @@ def PlaneCurve (H : PlaneCurveData) : Type :=
     ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0,
       Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
 
+private abbrev ProjectivePlaneVector := Fin 3 → ℂ
+
+private lemma homogeneous_eval_smul {p : MvPolynomial (Fin 3) ℂ} {d : ℕ}
+    (hp : p.IsHomogeneous d) (c : ℂ) (v : ProjectivePlaneVector) :
+    p.eval (fun i => c * v i) = c ^ d * p.eval v := by
+  rw [MvPolynomial.eval_eq', MvPolynomial.eval_eq']
+  calc
+    (∑ x ∈ p.support, p.coeff x * ∏ i, (c * v i) ^ x i)
+        = ∑ x ∈ p.support, p.coeff x * (c ^ d * ∏ i, v i ^ x i) := by
+          refine Finset.sum_congr rfl ?_
+          intro x hx
+          have hdeg : d = ∑ i ∈ x.support, x i :=
+            hp.degree_eq_sum_deg_support hx
+          have hprod : ∏ i : Fin 3, (c * v i) ^ x i =
+              c ^ d * ∏ i : Fin 3, v i ^ x i := by
+            rw [hdeg]
+            simp_rw [mul_pow]
+            rw [Finset.prod_mul_distrib]
+            congr 1
+            rw [Finset.prod_pow_eq_pow_sum]
+            have hsum : x.sum (fun _ n => n) = ∑ i : Fin 3, x i :=
+              Finsupp.sum_fintype x (fun _ n => n) (by simp)
+            change c ^ (∑ i : Fin 3, x i) = c ^ (∑ i ∈ x.support, x i)
+            rw [← hsum]
+            rfl
+          rw [hprod]
+    _ = c ^ d * ∑ x ∈ p.support, p.coeff x * ∏ i, v i ^ x i := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro x hx
+      ring
+
+private abbrev planeCurveUnitZero (H : PlaneCurveData) : Type :=
+  {v : ProjectivePlaneVector // ‖v‖ = 1 ∧ H.F.val.eval v = 0}
+
+private lemma planeCurveUnitZero_isCompact (H : PlaneCurveData) :
+    IsCompact {v : ProjectivePlaneVector | ‖v‖ = 1 ∧ H.F.val.eval v = 0} := by
+  have : IsCompact (Metric.sphere (0 : ProjectivePlaneVector) 1) :=
+    isCompact_sphere 0 1
+  have : IsClosed {v : ProjectivePlaneVector | H.F.val.eval v = 0} :=
+    isClosed_eq (MvPolynomial.continuous_eval H.F.val) continuous_const
+  have :
+      {v : ProjectivePlaneVector | ‖v‖ = 1 ∧ H.F.val.eval v = 0} =
+        Metric.sphere (0 : ProjectivePlaneVector) 1 ∩
+          {v : ProjectivePlaneVector | H.F.val.eval v = 0} := by
+    ext
+    simp
+  grind [IsCompact.inter_right]
+
+private instance planeCurveUnitZero_compactSpace (H : PlaneCurveData) :
+    CompactSpace (planeCurveUnitZero H) :=
+  isCompact_iff_compactSpace.mp (planeCurveUnitZero_isCompact H)
+
+private lemma nonzero_of_mem_planeCurveUnitZero {H : PlaneCurveData}
+    (v : planeCurveUnitZero H) :
+    (v.1 : ProjectivePlaneVector) ≠ 0 := by
+  intro
+  have : ‖(v.1)‖ = 0 := by simp [*]
+  grind
+
+private noncomputable def planeCurveUnitZeroToPlaneCurve (H : PlaneCurveData) :
+    planeCurveUnitZero H → PlaneCurve H := fun v =>
+  ⟨Projectivization.mk ℂ (v.1 : ProjectivePlaneVector)
+      (nonzero_of_mem_planeCurveUnitZero v),
+    ⟨(v.1 : ProjectivePlaneVector), nonzero_of_mem_planeCurveUnitZero v, rfl, v.2.2⟩⟩
+
 private abbrev ProjectivePlaneNonzeroVectors := {v : Fin 3 → ℂ // v ≠ 0}
 
 private def unitSmulProjectivePlaneNonzeroVectors (a : ℂˣ)
@@ -491,6 +557,13 @@ instance PlaneCurve.instTopologicalSpace (H : PlaneCurveData) :
         Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
   infer_instance
 
+private lemma continuous_planeCurveUnitZeroToPlaneCurve (H : PlaneCurveData) :
+    Continuous (planeCurveUnitZeroToPlaneCurve H) := by
+  let : TopologicalSpace (Projectivization ℂ ProjectivePlaneVector) :=
+    inferInstanceAs (TopologicalSpace (Quotient (projectivizationSetoid _ _)))
+  apply Continuous.subtype_mk
+  exact continuous_quotient_mk'.comp (continuous_subtype_val.subtype_mk _)
+
 instance PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H) := by
   let : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
     inferInstanceAs (TopologicalSpace
@@ -500,11 +573,48 @@ instance PlaneCurve.instT2Space (H : PlaneCurveData) : T2Space (PlaneCurve H) :=
         Projectivization.mk ℂ v hv = p ∧ H.F.val.eval v = 0 }
   infer_instance
 
--- TODO: prove compactness via the quotient of the unit sphere, or an explicit
--- finite closed-polydisc projective cover.
-axiom PlaneCurve.instCompactSpace (H : PlaneCurveData) :
-    CompactSpace (PlaneCurve H)
-attribute [instance] PlaneCurve.instCompactSpace
+instance PlaneCurve.instCompactSpace (H : PlaneCurveData) :
+    CompactSpace (PlaneCurve H) := by
+  let : TopologicalSpace (Projectivization ℂ ProjectivePlaneVector) :=
+    inferInstanceAs (TopologicalSpace (Quotient _))
+  rw [← isCompact_univ_iff]
+  have : IsCompact ((planeCurveUnitZeroToPlaneCurve H) ''
+      (Set.univ : Set (planeCurveUnitZero H))) :=
+    isCompact_univ.image (continuous_planeCurveUnitZeroToPlaneCurve H)
+  rw [show (planeCurveUnitZeroToPlaneCurve H) '' (Set.univ : Set (planeCurveUnitZero H)) =
+      (Set.univ : Set (PlaneCurve H)) by
+    ext p
+    constructor
+    · intro
+      trivial
+    · intro
+      obtain ⟨v, hv, hmk, heval⟩ := p.2
+      let c : ℂ := ((‖v‖)⁻¹ : ℝ)
+      let w := (c * v ·)
+      have : ‖v‖ ≠ 0 := mt norm_eq_zero.mp hv
+      have hc_ne : c ≠ 0 := by
+        dsimp [c]
+        exact_mod_cast inv_ne_zero this
+      have : ‖w‖ = 1 := by
+        dsimp [w, c]
+        change ‖((↑(‖v‖)⁻¹ : ℂ) • v : ProjectivePlaneVector)‖ = 1
+        rw [norm_smul]
+        have hnonneg : 0 ≤ (‖v‖)⁻¹ := inv_nonneg.mpr (norm_nonneg v)
+        rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hnonneg]
+        exact inv_mul_cancel₀ this
+      have heval_w : H.F.val.eval w = 0 := by
+        dsimp [w, c]
+        rw [homogeneous_eval_smul H.F.homogeneous]
+        simp [heval]
+      refine ⟨⟨w, this, heval_w⟩, trivial, ?_⟩
+      apply Subtype.ext
+      change Projectivization.mk ℂ w
+          (nonzero_of_mem_planeCurveUnitZero ⟨w, this, heval_w⟩) = p.1
+      rw [← hmk]
+      apply (Projectivization.mk_eq_mk_iff ℂ _ _ _ _).2
+      refine ⟨Units.mk0 c hc_ne, ?_⟩
+      rfl] at this
+  grind
 
 -- TODO: prove connectedness from irreducibility/overlapping affine charts.
 axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
