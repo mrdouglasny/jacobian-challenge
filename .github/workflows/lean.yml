@@ -97,8 +97,12 @@ jobs:
           [ "$fail" -eq 0 ] && echo "✓ every \`sorry\`-bearing file is an allowlisted scaffold; core is sorry-free." >> "$GITHUB_STEP_SUMMARY"
           exit $fail
 
-      - name: Axiom count consistent across docs
+      - name: Axiom count (informational — maintainer reconciles at merge)
         if: always()
         run: |
-          bash scripts/check_axiom_consistency.sh >> "$GITHUB_STEP_SUMMARY" 2>&1 || {
-            echo "::error::axiom-count drift — AXIOM_AUDIT.md / README.md disagree with the kernel count"; exit 1; }
+          # Non-blocking: prints the kernel axiom count + any doc drift to the run
+          # summary so the maintainer can reconcile counts at merge. Contributors do
+          # NOT need to update axiom counts; this never fails the build. (The
+          # soundness-relevant gate is "Axiom report in sync with the kernel" above.)
+          bash scripts/check_axiom_consistency.sh >> "$GITHUB_STEP_SUMMARY" 2>&1 || \
+            echo "::notice::axiom-count docs differ from the kernel — informational only; counts are reconciled by the maintainer at merge."

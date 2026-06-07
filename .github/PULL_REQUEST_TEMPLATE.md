@@ -18,3 +18,8 @@ which checks you ran. -->
 
 - [ ] Builds locally (`lake build`)
 - [ ] No new `sorry`/axiom (or: new axioms are classified + vetted)
+
+<!-- You do NOT need to update axiom counts (AXIOM_AUDIT.md header / README /
+by-class table) — the maintainer reconciles counts at merge. Just add or adjust
+the per-axiom ledger entry in AXIOM_AUDIT.md if you add, remove, or change an axiom. -->
+
