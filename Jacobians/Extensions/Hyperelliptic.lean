@@ -44,7 +44,8 @@ Classical references:
 -/
 
 import Jacobians.Challenge
-import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
 

@@ -45,7 +45,8 @@ See `docs/hyperelliptic-even-atlas-plan.md` for the full plan.
 -/
 
 import Jacobians.Challenge
-import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
+import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.RiemannSurface.OneForm
