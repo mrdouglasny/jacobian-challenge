@@ -40,8 +40,15 @@ of `S²` is not in Mathlib at the pin, so we record the consequence for
 
 Retired to a theorem when `SimplyConnectedSpace (Metric.sphere 0 1)`
 lands in Mathlib (or when we choose to prove it). -/
-axiom AX_H1_ProjectiveLine_trivial (x₀ : ProjectiveLine) :
-    Subsingleton (H1 ProjectiveLine x₀)
+theorem AX_H1_ProjectiveLine_trivial (x₀ : ProjectiveLine) :
+    Subsingleton (H1 ProjectiveLine x₀) := by
+  haveI hg : genus ProjectiveLine = 0 := genus_projectiveLine_eq_zero
+  obtain ⟨b⟩ := AX_AnalyticCycleBasis x₀
+  haveI hEmp : IsEmpty (Fin (2 * genus ProjectiveLine)) := by
+    rw [hg, Nat.mul_zero]
+    infer_instance
+  have : Subsingleton (Fin (2 * genus ProjectiveLine) →₀ ℤ) := by infer_instance
+  exact b.isBasis.repr.toEquiv.subsingleton
 
 /-- A canonical analytic loop at `x₀`: the constant path. Analyticity
 is trivial because the function is constant. -/
