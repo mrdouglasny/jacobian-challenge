@@ -619,4 +619,27 @@ theorem eventually_eval_ne_zero_nhdsWithin (z₀ : ℂ) :
   intro hzero
   exact hzc ⟨hzero, hz⟩
 
+omit hf in
+/-- **Shared removable-singularity engine.** A function analytic off the roots of
+`H.f` and globally continuous on `ℂ` is entire. The branch points (roots of
+`H.f`) are isolated (`eventually_eval_ne_zero_nhdsWithin`), so analyticity on the
+punctured neighbourhood plus continuity at the point gives differentiability there
+by Riemann's removable-singularity theorem.
+
+Consumed by both the Mσ.4 single-valued-coefficient argument (`c` entire) and the
+L2 Differentiable-`G` assembly (P4 in
+`docs/planning/L2_DIFFERENTIABLE_G_BLUEPRINT.md`). The remaining content in each
+caller is supplying the off-root analyticity and the global continuity (the
+branch-point continuity being the genuine analytic work). -/
+theorem differentiable_of_analyticAt_off_roots (g : ℂ → ℂ)
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 → AnalyticAt ℂ g z)
+    (hCont : Continuous g) : Differentiable ℂ g := by
+  intro z₀
+  by_cases hz₀ : H.f.eval z₀ = 0
+  · refine (Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
+      ?_ hCont.continuousAt).differentiableAt
+    filter_upwards [eventually_eval_ne_zero_nhdsWithin (H := H) z₀] with z hz
+    exact (hAna z hz).differentiableAt
+  · exact (hAna z₀ hz₀).differentiableAt
+
 end Jacobians.ProjectiveCurve
