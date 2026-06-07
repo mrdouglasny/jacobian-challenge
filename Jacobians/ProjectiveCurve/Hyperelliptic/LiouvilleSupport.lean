@@ -4218,4 +4218,24 @@ theorem chosen_coeff_eq_neg_of_liouvilleTwoSheetSumRemovable_eq_zero
   rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hz] at hs
   simpa [add_eq_zero_iff_eq_neg] using hs
 
+/-- **σ-anti-invariance (unconditional).** For every holomorphic 1-form on the
+even-degree hyperelliptic curve, the affine-`x` coefficients at the two sheets
+over a non-branch point `z` are negatives of each other. This is the
+direct-two-sheet-route conclusion (`s ≡ 0`): the three analytic inputs
+`liouvilleTwoSheetSum_analyticAt_off_roots`, `liouvilleTwoSheetSum_branch_tendsto`,
+and `liouvilleTwoSheetSumRemovable_tendsto_zero_cocompact` feed the
+removable-extension Liouville capstone, forcing the two-sheet sum to vanish. -/
+theorem affCoeff_chosen_anti_invariance
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z) z =
+      -affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z :=
+  chosen_coeff_eq_neg_of_liouvilleTwoSheetSumRemovable_eq_zero (H := H) form
+    (liouvilleTwoSheetSumRemovable_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact
+      (H := H) form
+      (liouvilleTwoSheetSum_analyticAt_off_roots (H := H) form)
+      (liouvilleTwoSheetSum_branch_tendsto (H := H) form)
+      (liouvilleTwoSheetSumRemovable_tendsto_zero_cocompact (H := H) form))
+    hz
+
 end Jacobians.ProjectiveCurve
