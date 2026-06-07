@@ -1425,6 +1425,152 @@ theorem liouvilleChosenTwoSheetSum_analyticAt
     simpa [a₀] using affCoeff_analyticAt_basepoint (H := H) form a₀.invol ha₀σY
   simpa [a₀] using h1.add h2
 
+/-- The direct two-sheet sum is analytic away from branch points. Near a
+non-branch basepoint, the arbitrary chosen sheet is one of the two fixed local
+branches; the sum is symmetric, so it is eventually equal to the fixed analytic
+two-branch expression. -/
+theorem liouvilleTwoSheetSum_analyticAt_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z₀ : ℂ} (hz₀ : H.f.eval z₀ ≠ 0) :
+    AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z₀ := by
+  classical
+  let a₀ := liouvilleChosenAffinePoint (H := H) z₀
+  have ha₀Y : a₀ ∈ smoothLocusY H := by
+    simpa [a₀] using liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz₀
+  let a₀σ : HyperellipticAffine H := a₀.invol
+  have ha₀σY : a₀σ ∈ smoothLocusY H := by
+    simpa [a₀σ] using HyperellipticAffine.invol_mem_smoothLocusY a₀ ha₀Y
+  let e₀ := affineChartProjX (H := H) a₀ ha₀Y
+  let e₀σ := affineChartProjX (H := H) a₀σ ha₀σY
+  let q₀ : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a₀)
+  let q₀σ : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a₀σ)
+  have ha₀Src : a₀ ∈ e₀.source := by
+    simpa [e₀] using affineChartProjX_mem_source (H := H) a₀ ha₀Y
+  have hz₀Target : z₀ ∈ e₀.target := by
+    have h := e₀.map_source ha₀Src
+    simpa [e₀, a₀] using h
+  have ha₀σSrc : a₀σ ∈ e₀σ.source := by
+    simpa [e₀σ] using affineChartProjX_mem_source (H := H) a₀σ ha₀σY
+  have hz₀σTarget : z₀ ∈ e₀σ.target := by
+    have h := e₀σ.map_source ha₀σSrc
+    simpa [e₀σ, a₀σ, a₀, HyperellipticAffine.invol] using h
+  have hSymm₀ : e₀.symm z₀ = a₀ := by
+    have hMap : e₀ a₀ = a₀.val.1 := by
+      change a₀.val.1 = a₀.val.1
+      rfl
+    rw [show z₀ = a₀.val.1 by simp [a₀], ← hMap]
+    exact e₀.left_inv ha₀Src
+  have hSymm₀σ : e₀σ.symm z₀ = a₀σ := by
+    have hMap : e₀σ a₀σ = a₀σ.val.1 := by
+      change a₀σ.val.1 = a₀σ.val.1
+      rfl
+    rw [show z₀ = a₀σ.val.1 by simp [a₀σ, a₀, HyperellipticAffine.invol], ← hMap]
+    exact e₀σ.left_inv ha₀σSrc
+  have hProjCont₀ : ContinuousAt
+      (fun z : ℂ =>
+        Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (e₀.symm z : HyperellipticAffine H))) z₀ :=
+    continuous_quotient_mk'.continuousAt.comp
+      ((continuous_inl.continuousAt).comp (e₀.continuousAt_symm hz₀Target))
+  have hProjCont₀σ : ContinuousAt
+      (fun z : ℂ =>
+        Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (e₀σ.symm z : HyperellipticAffine H))) z₀ :=
+    continuous_quotient_mk'.continuousAt.comp
+      ((continuous_inl.continuousAt).comp (e₀σ.continuousAt_symm hz₀σTarget))
+  have hPref₀ : ∀ᶠ z in 𝓝 z₀,
+      Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (e₀.symm z : HyperellipticAffine H)) ∈
+        (_root_.chartAt ℂ q₀ :
+          OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source := by
+    have hqSrc : q₀ ∈ (_root_.chartAt ℂ q₀ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source :=
+      ChartedSpace.mem_chart_source q₀
+    have hmem : (_root_.chartAt ℂ q₀ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source ∈
+        𝓝 q₀ :=
+      (_root_.chartAt ℂ q₀ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).open_source.mem_nhds hqSrc
+    exact hProjCont₀.eventually (by simpa [q₀, hSymm₀] using hmem)
+  have hPref₀σ : ∀ᶠ z in 𝓝 z₀,
+      Quotient.mk (hyperellipticEvenSetoid H)
+          (Sum.inl (e₀σ.symm z : HyperellipticAffine H)) ∈
+        (_root_.chartAt ℂ q₀σ :
+          OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source := by
+    have hqSrc : q₀σ ∈ (_root_.chartAt ℂ q₀σ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source :=
+      ChartedSpace.mem_chart_source q₀σ
+    have hmem : (_root_.chartAt ℂ q₀σ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).source ∈
+        𝓝 q₀σ :=
+      (_root_.chartAt ℂ q₀σ :
+        OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ).open_source.mem_nhds hqSrc
+    exact hProjCont₀σ.eventually (by simpa [q₀σ, hSymm₀σ] using hmem)
+  have hBranchPair : ∀ᶠ z in 𝓝 z₀,
+      e₀σ.symm z = (e₀.symm z).invol := by
+    have h :=
+      affineChartProjX_invol_symm_eq_eventually (H := H) a₀ ha₀Y
+    simpa [a₀σ, e₀, e₀σ] using h
+  have hEval : ∀ᶠ z in 𝓝 z₀, H.f.eval z ≠ 0 :=
+    (Polynomial.continuous H.f).continuousAt.eventually_ne hz₀
+  have hEq : (fun z : ℂ =>
+        affCoeff (H := H) form a₀ z + affCoeff (H := H) form a₀σ z) =ᶠ[𝓝 z₀]
+      liouvilleTwoSheetSum (H := H) form := by
+    filter_upwards [e₀.open_target.mem_nhds hz₀Target,
+      e₀σ.open_target.mem_nhds hz₀σTarget, hPref₀, hPref₀σ, hBranchPair, hEval]
+      with z hzT hzσT hSrcPref hSrcPrefσ hPair hzNZ
+    let p₀ : HyperellipticAffine H := e₀.symm z
+    let p₀σ : HyperellipticAffine H := e₀σ.symm z
+    have hp₀σ_eq : p₀σ = p₀.invol := by
+      simpa [p₀, p₀σ] using hPair
+    have hFix₀ : affCoeff (H := H) form a₀ z =
+        affCoeff (H := H) form p₀ z := by
+      simpa [a₀, e₀, p₀, q₀] using
+        affCoeff_eq_of_projX_symm (H := H) form a₀ ha₀Y hzT hSrcPref
+    have hFix₀σ : affCoeff (H := H) form a₀σ z =
+        affCoeff (H := H) form p₀.invol z := by
+      have h := affCoeff_eq_of_projX_symm (H := H) form a₀σ ha₀σY hzσT hSrcPrefσ
+      simpa [a₀σ, e₀σ, p₀σ, hp₀σ_eq, q₀σ] using h
+    let a := liouvilleChosenAffinePoint (H := H) z
+    have haSq : a.val.2 ^ 2 = H.f.eval z := by
+      simpa [a] using liouvilleChosenAffinePoint_snd_sq (H := H) z
+    have hp₀Fst : p₀.val.1 = z := by
+      simpa [p₀, e₀] using affineChartProjX_symm_apply_fst (H := H) a₀ ha₀Y hzT
+    have hp₀Sq : p₀.val.2 ^ 2 = H.f.eval z := by
+      have hprop := p₀.property
+      simpa [hp₀Fst] using hprop
+    have hSheets := eq_or_eq_neg_of_sq_eq_sq a.val.2 p₀.val.2 (haSq.trans hp₀Sq.symm)
+    rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hzNZ]
+    rcases hSheets with hSame | hOpp
+    · have ha_eq : a = p₀ := by
+        apply Subtype.ext
+        apply Prod.ext
+        · simp [a, p₀, hp₀Fst]
+        · exact hSame
+      rw [show liouvilleChosenAffinePoint (H := H) z = a from rfl]
+      rw [ha_eq, hFix₀, hFix₀σ]
+    · have ha_eq : a = p₀.invol := by
+        apply Subtype.ext
+        apply Prod.ext
+        · simp [a, p₀, hp₀Fst, HyperellipticAffine.invol]
+        · simpa [HyperellipticAffine.invol] using hOpp
+      rw [show liouvilleChosenAffinePoint (H := H) z = a from rfl]
+      rw [ha_eq, HyperellipticAffine.invol_invol, hFix₀, hFix₀σ]
+      rw [add_comm]
+  exact (liouvilleChosenTwoSheetSum_analyticAt (H := H) form hz₀).congr
+    (by simpa [a₀, a₀σ] using hEq)
+
+/-- Off-root analyticity of the direct two-sheet sum, packaged in the `hAna`
+shape used by the Liouville scaffolding. -/
+theorem liouvilleTwoSheetSum_analyticAt_off_roots
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z := by
+  intro z hz
+  exact liouvilleTwoSheetSum_analyticAt_of_eval_ne_zero (H := H) form hz
+
 /-- On the common clean affine `x`-chart target for the two sheets, the fixed
 two-sheet coefficient sum is analytic. This is the kernel-clean DR-A local
 analyticity statement; global single-valuedness still requires the symmetric
