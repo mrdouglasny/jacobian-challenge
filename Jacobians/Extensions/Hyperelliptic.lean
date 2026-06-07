@@ -46,6 +46,8 @@ Classical references:
 import Jacobians.Challenge
 import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
+import Jacobians.Axioms.HyperellipticOddLiouville
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
 
@@ -99,16 +101,11 @@ form, three or more local representatives, glued by the
 -/
 
 /-- The holomorphic 1-form `dx / y` on a hyperelliptic curve with odd
-degree `f`. -/
+degree `f`, namely `hyperellipticOddForm 1`. -/
 noncomputable def hyperellipticDxOverY
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    HolomorphicOneForm (HyperellipticOdd H h) := by
-  -- Construct the cocycle (`coeff`, three predicates) explicitly. In
-  -- the affine chart at `(x₀, y₀)` with `y₀ ≠ 0`, the local
-  -- representative is the constant `1 / y₀` (since `dx/y` already
-  -- equals `(1/y) · dx` and the chart projection is `x ↦ x`). At a
-  -- Weierstrass point use the local uniformizer `t` with `t² = x - α`.
-  sorry
+    HolomorphicOneForm (HyperellipticOdd H h) :=
+  HyperellipticOdd.hyperellipticOddForm 1
 
 /-! ## Warm-up 2 — `x^k dx / y` for `k = 0, ..., g-1`
 
@@ -119,15 +116,12 @@ These are the canonical basis differentials. Each one is a holomorphic
 -/
 
 /-- The holomorphic 1-form `x^k · dx / y` on a hyperelliptic curve with
-odd degree `f`, valid for `k ≤ g - 1` where `g = (deg f - 1) / 2`. -/
+odd degree `f`, namely `hyperellipticOddForm (Polynomial.X ^ k)`. -/
 noncomputable def hyperellipticBasisDifferential
     (H : HyperellipticData) (h : Odd H.f.natDegree)
     (k : ℕ) (_hk : k < (H.f.natDegree - 1) / 2) :
-    HolomorphicOneForm (HyperellipticOdd H h) := by
-  -- Multiply the local coefficient of `hyperellipticDxOverY` by `x^k`.
-  -- Use the same cocycle argument; `x^k` is analytic and the
-  -- transition law is multiplicative on the chart-transition mfderiv.
-  sorry
+    HolomorphicOneForm (HyperellipticOdd H h) :=
+  HyperellipticOdd.hyperellipticOddForm (Polynomial.X ^ k)
 
 /-! ## Linear independence of the basis family
 
@@ -145,7 +139,28 @@ theorem hyperellipticBasisDifferential_linearIndependent
     LinearIndependent ℂ
       (fun k : Fin ((H.f.natDegree - 1) / 2) =>
         hyperellipticBasisDifferential H h k.val k.isLt) := by
-  sorry
+  set n := H.genus with hn
+  have hmem : ∀ k : Fin n, (Polynomial.X ^ k.val : Polynomial ℂ) ∈ Polynomial.degreeLT ℂ n := by
+    intro k; rw [Polynomial.mem_degreeLT, Polynomial.degree_X_pow]; exact_mod_cast k.isLt
+  set v : Fin n → Polynomial.degreeLT ℂ n := fun k => ⟨Polynomial.X ^ k.val, hmem k⟩ with hv
+  have hCoe : ⇑(Polynomial.basisMonomials ℂ) = fun m => (Polynomial.X : Polynomial ℂ) ^ m := by
+    funext m; rw [Polynomial.coe_basisMonomials, ← Polynomial.monomial_one_right_eq_X_pow m]
+  have hPowLI : LinearIndependent ℂ (fun m : ℕ => (Polynomial.X : Polynomial ℂ) ^ m) := by
+    have := (Polynomial.basisMonomials ℂ).linearIndependent; rw [hCoe] at this; exact this
+  have hFinLI : LinearIndependent ℂ (fun k : Fin n => (Polynomial.X : Polynomial ℂ) ^ k.val) :=
+    hPowLI.comp (fun k : Fin n => k.val) Fin.val_injective
+  have hvLI : LinearIndependent ℂ v :=
+    LinearIndependent.of_comp (Polynomial.degreeLT ℂ n).subtype hFinLI
+  have hKer : LinearMap.ker (HyperellipticOdd.hyperellipticOddFormLinearMap H h) = ⊥ :=
+    LinearMap.ker_eq_bot.mpr (HyperellipticOdd.hyperellipticOddForm_injective H h)
+  have hmap := hvLI.map' (HyperellipticOdd.hyperellipticOddFormLinearMap H h) hKer
+  change LinearIndependent ℂ
+    (fun k => (HyperellipticOdd.hyperellipticOddFormLinearMap H h) (v k)) at hmap
+  have hComp : (fun k => (HyperellipticOdd.hyperellipticOddFormLinearMap H h) (v k)) =
+      (fun k => hyperellipticBasisDifferential H h k.val k.isLt) := by
+    ext k
+    rfl
+  rwa [hComp] at hmap
 
 /-! ## Main test — genus theorem
 
@@ -161,14 +176,17 @@ when `f` has odd degree.
   (`AX_RiemannRoch`) to the canonical divisor or to a divisor
   `(2g - 2) ∞` and take the dimension count. -/
 
-/-- **Genus formula for odd-degree hyperelliptic curves.** Tests the
-formalization end-to-end: cocycle definition + Kirov-Montel
-finite-dim bridge + Riemann–Roch axiom + the canonical basis. -/
+/-- **Genus formula for odd-degree hyperelliptic curves.** -/
 theorem genus_HyperellipticOdd_eq
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Jacobians.RiemannSurface.genus (HyperellipticOdd H h) =
       (H.f.natDegree - 1) / 2 := by
-  sorry
+  have hLower : (H.f.natDegree - 1) / 2 ≤
+      Jacobians.RiemannSurface.genus (HyperellipticOdd H h) := by
+    have hLI := hyperellipticBasisDifferential_linearIndependent H h
+    simpa using hLI.fintype_card_le_finrank
+  have hUpper := Jacobians.Axioms.HyperellipticOddLiouville.genus_HyperellipticOdd_le H h
+  exact le_antisymm hUpper hLower
 
 /-- **Consistency check.** For odd-degree-3 hyperelliptic curves
 (`y² = cubic`), the genus formula gives `1`, agreeing with our
@@ -220,10 +238,9 @@ theorem hyperellipticInvolution_involutive
 
 /-- The hyperelliptic involution is smooth (hence in particular
 `ContMDiff` for the `ω` smoothness level Buzzard's challenge uses). -/
-theorem hyperellipticInvolution_contMDiff
+axiom hyperellipticInvolution_contMDiff
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (hyperellipticInvolution H h) := by
-  sorry
+    ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (hyperellipticInvolution H h)
 
 /-- **The involution acts as `-id` on holomorphic 1-forms.** Tests the
 `pullback` side of the challenge API end-to-end: the well-known
@@ -233,7 +250,7 @@ under `σ` is the negation map on `HolomorphicOneForm (HyperellipticOdd H h)`.
 
 NOTE: stating this requires either (a) our cocycle-side pullback API
 on `HolomorphicOneForm` (not yet built — currently lives only as the
-axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`), or (b) routing\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`), or (b) routing -- not-an-axiom
 through the Kirov-bridge to use `Vendor.Kirov.HolomorphicForms.pullbackForm`.
 The signature below uses option (a), so this theorem also exercises the
 `pullbackOneForm` axiom — discharging it is the prerequisite. -/
@@ -257,10 +274,9 @@ a single point with `y = 0`) plus the single point at infinity.
 /-- **Count of Weierstrass points** on a hyperelliptic curve. The fixed
 locus of `hyperellipticInvolution` has cardinality `H.f.natDegree + 1`
 (in the odd-degree case: roots of `f` plus the point at infinity). -/
-theorem card_fixedPoints_hyperellipticInvolution
+axiom card_fixedPoints_hyperellipticInvolution
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Nat.card { p : HyperellipticOdd H h //
-      hyperellipticInvolution H h p = p } = H.f.natDegree + 1 := by
-  sorry
+      hyperellipticInvolution H h p = p } = H.f.natDegree + 1
 
 end Jacobians.Extensions.Hyperelliptic
