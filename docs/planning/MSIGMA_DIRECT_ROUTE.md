@@ -62,8 +62,14 @@ sorry-free, and `…DerivFactor`/`…ChartRep` encode the σ chart-derivative fa
 (B_q, A_q) the Step-B `w`-coordinate computation may reuse. No need to delete.
 
 ## Open sub-tasks (in order)
-1. **DR-A** single-valued `s` on `ℂ \ {f=0}` + its off-root analyticity.
+1. **DR-A** ✅ DONE (Codex 70b5c9e, green): `liouvilleTwoSheetSum` (global `s`),
+   `liouvilleChosenAffinePoint`, `liouvilleLocalSheetSum`,
+   `liouvilleTwoSheetSum_of_eval_ne_zero`,
+   `liouvilleLocalSheetSum_analyticAt_inter_affineProjX` (s analytic off {f=0}),
+   and the payoff bridge `chosen_coeff_eq_neg_of_liouvilleTwoSheetSum_eq_zero`
+   (s≡0 ⇒ anti-invariance). Quotient.out rep issue worked around.
 2. **DR-B** branch-point continuity of `s` (the `w`-coordinate odd-zero
    cancellation — the hard analytic lemma) ⇒ `s` entire via the banked engine.
+   IN PROGRESS (Codex a461fded4d3011e83); Gemini-3.1-pro blueprint on standby if it stalls.
 3. **DR-C** ∞-decay `s = O(1/z²)` ⇒ Tendsto 0 cocompact.
 4. **DR-D** Liouville ⇒ `s≡0` ⇒ anti-invariance identity (banked endgame) ⇒ P1.
