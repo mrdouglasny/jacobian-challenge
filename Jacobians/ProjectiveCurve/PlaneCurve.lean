@@ -673,18 +673,18 @@ lemma PlaneCurve_nhdsWithin_compl_singleton_neBot (H : PlaneCurveData) (x : Plan
   exact NormedField.nhdsNE_neBot (e x)
 
 /-- The subset of points at infinity on the projective curve. -/
-def InfinityPoints (H : PlaneCurveData) : Set (PlaneCurve H) :=
+def infinityPoints (H : PlaneCurveData) : Set (PlaneCurve H) :=
   { p | ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0, Projectivization.mk ℂ v hv = p.1 ∧ v 2 = 0 }
 
 /-- **Axiom (NOT VERIFIED — sound).**
 The set of points at infinity on the projective curve is finite. -/
 axiom infinityPoints_finite (H : PlaneCurveData) :
-  (InfinityPoints H).Finite
+  (infinityPoints H).Finite
 
 theorem range_toPlaneCurve_eq_compl_infinityPoints (H : PlaneCurveData) :
-    Set.range (PlaneCurveAffine.toPlaneCurve H) = (InfinityPoints H)ᶜ := by
+    Set.range (PlaneCurveAffine.toPlaneCurve H) = (infinityPoints H)ᶜ := by
   ext p
-  simp only [Set.mem_range, Set.mem_compl_iff, InfinityPoints, Set.mem_setOf_eq]
+  simp only [Set.mem_range, Set.mem_compl_iff, infinityPoints, Set.mem_setOf_eq]
   constructor
   · rintro ⟨q, rfl⟩ ⟨v, hv, h_mk, h_z⟩
     have h_eq : Projectivization.mk ℂ v hv =
