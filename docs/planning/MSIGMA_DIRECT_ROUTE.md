@@ -53,7 +53,7 @@ difference `φ₁−φ₂ ∝ H(w)+H(−w) ≈ 2H(0)` does NOT cancel ⇒ blows 
 - **Conclusion.** `s≡0` ⇒ `ω.coeff qOpp z = −ω.coeff qSame z` ⇒ feeds the P1
   sheet-swap (`liouvilleProjXNumerator_eq_of_neg_coeff_neg_branch`, 4a02267) ⇒
   L2 Differentiable-G P1 closes ⇒ P3/P4 per `L2_DIFFERENTIABLE_G_BLUEPRINT.md` ⇒
-  flip `AX_HyperellipticForm_polynomial_decomposition` ⇒ L3 ⇒ 58→56.
+  flip `AX_HyperellipticForm_polynomial_decomposition` ⇒ L3 ⇒ 55→53.
 
 ## Status of the abandoned pullback pieces
 Codex's green Mσ.3 helpers (`pullbackInvolutionChartRep/DerivFactor/Coeff`,

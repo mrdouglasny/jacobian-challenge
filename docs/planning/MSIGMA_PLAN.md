@@ -10,7 +10,7 @@ Prove `pullbackInvolution_eq_neg : pullbackInvolution H ω = -ω` (σ-anti-invar
 of holomorphic 1-forms). This discharges the L2/P1 reduction
 `form.coeff qSame z = −form.coeff qOpp z` (sheet-swap helper
 `liouvilleProjXNumerator_eq_of_neg_coeff_neg_branch` already landed, 4a02267),
-unblocking the Differentiable-G blueprint → L2 → L3 → axiom count 58→56.
+unblocking the Differentiable-G blueprint → L2 → L3 → axiom count 55→53.
 
 ## Already done (reuse)
 - **Mσ.1/Mσ.2**: involution σ on the surface + `ContMDiff` — DONE
@@ -37,7 +37,7 @@ MRD only for a new axiom / frozen-interface change.
 - [ ] DR. **direct two-sheet route** → σ-anti-invariance `ω.coeff qOpp z = −ω.coeff qSame z` (= P1). status: todo   deps: [Mσ.2]   note: see `docs/planning/MSIGMA_DIRECT_ROUTE.md` (Gemini-deep-think-vetted). `s(z):=ω.coeff qSame z + ω.coeff qOpp z` (invariant combo) ≡ 0 by Liouville. Sub-tasks: DR-A single-valued s + off-root analyticity; DR-B branch continuity (w-coord odd-zero cancellation `(H(w)−H(−w))/z'(w)`, the hard kernel) ⇒ entire via BANKED `differentiable_of_analyticAt_off_roots`; DR-C ∞-decay O(1/z²); DR-D Liouville via BANKED `eq_zero_of_differentiable_tendsto_zero_cocompact` ⇒ s≡0 ⇒ anti-invariance. Two of four steps already banked this session.
 - [ ] L2payoff. close L2/P1 with Mσ.5 ⇒ flip `AX_HyperellipticForm_polynomial_decomposition`   status: todo   deps: [Mσ.5]   note: feed `pullbackInvolution_eq_neg` into the P1 sheet-swap goal, then P1→P3→P4 (Differentiable G) per the blueprint + growth ⇒ axiom→theorem.
 - [ ] L3. `AX_HyperellipticOneForm_eq_form`   status: todo   deps: [L2payoff]   note: cocycle propagation (L3a already a theorem) per `genus-L2-L3-discharge-plan.md`.
-- [ ] D. retire both axioms; #print axioms; reconcile 58→56; PR   status: todo   deps: [L2payoff, L3]
+- [ ] D. retire both axioms; #print axioms; reconcile 55→53; PR   status: todo   deps: [L2payoff, L3]
 
 ## Sequencing
 Mσ.3 (Codex, chart-bookkeeping) → Mσ.4 (me, reuses blueprint) → Mσ.5 (short) →
