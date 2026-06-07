@@ -517,6 +517,76 @@ attribute [instance] AX_PlaneCurveAffine_noncompact
 
 end PlaneCurveAffine
 
+/-- **Affine plane curve (y-patch)**: the subtype of `ℂ²` cut out by `F(x, 1, z) = 0`. -/
+def PlaneCurveAffineY (H : PlaneCurveData) : Type :=
+  { p : ℂ × ℂ // H.F.val.eval ![p.1, (1 : ℂ), p.2] = 0 }
+
+namespace PlaneCurveAffineY
+
+variable {H : PlaneCurveData}
+
+instance : TopologicalSpace (PlaneCurveAffineY H) :=
+  inferInstanceAs (TopologicalSpace
+    { p : ℂ × ℂ // H.F.val.eval ![p.1, (1 : ℂ), p.2] = 0 })
+
+instance : T2Space (PlaneCurveAffineY H) :=
+  inferInstanceAs (T2Space
+    { p : ℂ × ℂ // H.F.val.eval ![p.1, (1 : ℂ), p.2] = 0 })
+
+theorem isClosed_carrier (H : PlaneCurveData) :
+    IsClosed { p : ℂ × ℂ | H.F.val.eval ![p.1, (1 : ℂ), p.2] = 0 } := by
+  have hcont : Continuous (fun p : ℂ × ℂ =>
+      H.F.val.eval ![p.1, (1 : ℂ), p.2]) := by
+    have hvec : Continuous (fun p : ℂ × ℂ => (![p.1, (1 : ℂ), p.2] : Fin 3 → ℂ)) := by
+      refine continuous_pi (fun i => ?_)
+      fin_cases i
+      · exact continuous_fst
+      · exact continuous_const
+      · exact continuous_snd
+    exact (MvPolynomial.continuous_eval H.F.val).comp hvec
+  exact isClosed_eq hcont continuous_const
+
+instance : LocallyCompactSpace (PlaneCurveAffineY H) := by
+  have hclosed := isClosed_carrier H
+  exact hclosed.isClosedEmbedding_subtypeVal.locallyCompactSpace
+
+end PlaneCurveAffineY
+
+/-- **Affine plane curve (x-patch)**: the subtype of `ℂ²` cut out by `F(1, y, z) = 0`. -/
+def PlaneCurveAffineX (H : PlaneCurveData) : Type :=
+  { p : ℂ × ℂ // H.F.val.eval ![(1 : ℂ), p.1, p.2] = 0 }
+
+namespace PlaneCurveAffineX
+
+variable {H : PlaneCurveData}
+
+instance : TopologicalSpace (PlaneCurveAffineX H) :=
+  inferInstanceAs (TopologicalSpace
+    { p : ℂ × ℂ // H.F.val.eval ![(1 : ℂ), p.1, p.2] = 0 })
+
+instance : T2Space (PlaneCurveAffineX H) :=
+  inferInstanceAs (T2Space
+    { p : ℂ × ℂ // H.F.val.eval ![(1 : ℂ), p.1, p.2] = 0 })
+
+theorem isClosed_carrier (H : PlaneCurveData) :
+    IsClosed { p : ℂ × ℂ | H.F.val.eval ![(1 : ℂ), p.1, p.2] = 0 } := by
+  have hcont : Continuous (fun p : ℂ × ℂ =>
+      H.F.val.eval ![(1 : ℂ), p.1, p.2]) := by
+    have hvec : Continuous (fun p : ℂ × ℂ => (![(1 : ℂ), p.1, p.2] : Fin 3 → ℂ)) := by
+      refine continuous_pi (fun i => ?_)
+      fin_cases i
+      · exact continuous_const
+      · exact continuous_fst
+      · exact continuous_snd
+    exact (MvPolynomial.continuous_eval H.F.val).comp hvec
+  exact isClosed_eq hcont continuous_const
+
+instance : LocallyCompactSpace (PlaneCurveAffineX H) := by
+  have hclosed := isClosed_carrier H
+  exact hclosed.isClosedEmbedding_subtypeVal.locallyCompactSpace
+
+end PlaneCurveAffineX
+
 /-! ### Projective compactification
 
 A smooth plane curve of degree `d` generically meets the line at
