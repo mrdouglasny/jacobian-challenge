@@ -497,7 +497,7 @@ theorem squareLocalHomeomorph_contDiffOn_symm (p : HyperellipticAffine H)
     simpa using (contDiffAt_id.pow 2 : ContDiffAt ℂ ω (fun y : ℂ => y ^ 2) p.val.2)
   simpa [squareLocalHomeomorph, c, e'] using
     (Jacobians.GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph
-      (f := fun y : ℂ => y ^ 2) (a := p.val.2) hf hf' (by simp))
+      (f := fun y : ℂ => y ^ 2) (a := p.val.2) hf hf')
 
 /-- Remaining OA1 compatibility boundary: `x`-chart followed by `y`-chart. -/
 theorem affineChartProjX_compat_affineChartProjY
@@ -550,7 +550,7 @@ theorem polynomialLocalHomeomorph_contDiffOn_symm (p : HyperellipticAffine H)
     simpa using (Polynomial.contDiff_aeval H.f ω).contDiffAt
   simpa [polynomialLocalHomeomorph, c, e'] using
     (Jacobians.GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph
-      (f := fun x : ℂ => H.f.eval x) (a := p.val.1) hf hf' (by simp))
+      (f := fun x : ℂ => H.f.eval x) (a := p.val.1) hf hf')
 
 /-- Remaining OA1 compatibility boundary: `y`-chart followed by `x`-chart. -/
 theorem affineChartProjY_compat_affineChartProjX

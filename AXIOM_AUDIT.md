@@ -267,7 +267,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
-| `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:9` | 1 |
+| `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:11` | 1 |
 | Elliptic witnesses (`AX_Elliptic_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:97,173` | 2; `AX_Elliptic_aLoop_analytic` was **discharged to a theorem** (PR #86, 2026-06-06) via `extChartAt_quotient_mk_line_analyticAt`. `_bLoop_analytic` strengthened to `IsAnalyticArcStrong` 2026-06-06; affine-in-chart justification recorded; **re-vet pending**. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
