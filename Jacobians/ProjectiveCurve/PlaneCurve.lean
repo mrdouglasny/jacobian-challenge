@@ -621,16 +621,20 @@ axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
     ConnectedSpace (PlaneCurve H)
 attribute [instance] PlaneCurve.instConnectedSpace
 
-/-- **Axiom (re-instated 2026-06-04 after review).** `PlaneCurve H` is nonempty.
-This statement is TRUE — a positive-degree (`d ≥ 1`) homogeneous `F` over `ℂ`
-always has a nontrivial projective zero (restrict `F` to a line ⊂ ℙ² to get a
-nonconstant homogeneous binary form, which has a root). An earlier "discharge"
-proved it via `AX_PlaneCurveAffine_nonempty`, which is **FALSE** for `F = z` (see
-the flag above), so that proof was unsound and is reverted. Real proof
-(projective Nullstellensatz / line restriction) is a tracked follow-up — it must
-NOT route through the flagged affine axiom. -/
-axiom PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H)
-attribute [instance] PlaneCurve.instNonempty
+/-- `PlaneCurve H` is nonempty.
+This is proved by lifting the (now-proven) affine-nonempty witness `(x, y)` from
+`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]` in `PlaneCurve H`.
+The historical soundness concern about the affine patch being empty for `F = z` (issue #82)
+is resolved at the data level: `PlaneCurveData` requires `h_not_at_infinity` (`z ∤ F`),
+making the affine nonempty axiom/theorem sound. -/
+instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) := by
+  obtain ⟨⟨x, y⟩, hp⟩ := PlaneCurveAffine.AX_PlaneCurveAffine_nonempty H
+  let v : Fin 3 → ℂ := ![x, y, 1]
+  have hv : v ≠ 0 := by
+    intro h
+    have h2 : v 2 = 0 := congrFun h 2
+    exact one_ne_zero h2
+  exact ⟨⟨Projectivization.mk ℂ v hv, v, hv, rfl, hp⟩⟩
 
 axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
     ChartedSpace ℂ (PlaneCurve H)
