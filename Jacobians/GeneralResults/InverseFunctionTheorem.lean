@@ -16,7 +16,7 @@ lemma norm_sub_le_of_approx {E F : Type*} [NormedAddCommGroup E] [NormedSpace �
   have h_deriv : HasFDerivAt (f - ⇑f') (df - f') z := hdf.sub f'.hasFDerivAt
   exact h_deriv.le_of_lipschitzOn (hs.mem_nhds hz) h_lip
 
-noncomputable def is_equiv_of_approx {E F : Type*} [NormedAddCommGroup E]
+private noncomputable def equivOfApproxLinear {E F : Type*} [NormedAddCommGroup E]
     [NormedSpace ℂ E] [CompleteSpace E] [NormedAddCommGroup F] [NormedSpace ℂ F]
     [CompleteSpace F] {f' : E ≃L[ℂ] F} {df : E →L[ℂ] F} {c : ℝ≥0}
     (hc : c < ‖(f'.symm : F →L[ℂ] E)‖₊⁻¹)
@@ -38,7 +38,7 @@ noncomputable def is_equiv_of_approx {E F : Type*} [NormedAddCommGroup E]
   exact ContinuousLinearEquiv.ofBijective df
     (LinearMap.ker_eq_bot.mpr h_inj) (LinearMap.range_eq_top.mpr h_surj)
 
-noncomputable def equiv_of_approx {E F : Type*} [NormedAddCommGroup E]
+private noncomputable def equivOfApproxAt {E F : Type*} [NormedAddCommGroup E]
     [NormedSpace ℂ E] [CompleteSpace E] [NormedAddCommGroup F] [NormedSpace ℂ F]
     [CompleteSpace F] {f : E → F} {f' : E ≃L[ℂ] F} {s : Set E} {c : ℝ≥0}
     (hs : IsOpen s) (hf : ApproximatesLinearOn f (f' : E →L[ℂ] F) s c)
@@ -59,7 +59,7 @@ noncomputable def equiv_of_approx {E F : Type*} [NormedAddCommGroup E]
     have h2 : ‖df - (f' : E →L[ℂ] F)‖ * ‖x - y‖ ≤ c * ‖x - y‖ := by
       gcongr
     exact le_trans h1 h2
-  exact is_equiv_of_approx hc h_approx
+  exact equivOfApproxLinear hc h_approx
 
 /-- The inverse branch produced by `ContDiffAt.toOpenPartialHomeomorph` is smooth
 on its whole target, not just pointwise. -/
@@ -88,7 +88,7 @@ theorem contDiffOn_symm_toOpenPartialHomeomorph
   have h_lt : ‖(f'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ / 2 < ‖(f'.symm : ℂ →L[ℂ] ℂ)‖₊⁻¹ := by
     apply NNReal.half_lt_self
     exact inv_ne_zero (ne_of_gt h_pos)
-  let df_equiv := equiv_of_approx h_open h_approx hx h_deriv_x h_lt
+  let df_equiv := equivOfApproxAt h_open h_approx hx h_deriv_x h_lt
   have h_deriv_e_x : HasFDerivAt (⇑e) (df_equiv : ℂ →L[ℂ] ℂ) (e.symm y) := h_deriv_x
   have h_cd_e_x : ContDiffAt ℂ ω (⇑e) (e.symm y) := h_cd_x
   rw [contDiffWithinAt_iff_contDiffAt (e.open_target.mem_nhds hy)]
