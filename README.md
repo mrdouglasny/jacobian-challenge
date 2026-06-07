@@ -11,7 +11,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Build** | `lake build Jacobians` green (8602 jobs) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 47, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 45, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 8 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
@@ -39,7 +39,7 @@ The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved dir
 
 ## What it assumes — the axiom layer
 
-Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into seven topics (counts sum to the **47** kernel-verified axioms; topic boundaries are soft — a few axioms could reasonably sit in an adjacent row); difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
+Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into seven topics (counts sum to the **45** kernel-verified axioms; topic boundaries are soft — a few axioms could reasonably sit in an adjacent row); difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
 
 | Topic | Count | Difficulty |
 |-------|:-----:|:----------:|
@@ -48,9 +48,9 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 | Sheaf cohomology / Riemann–Roch / Serre / Plücker / uniformization (`H0` de-opaqued) | 10 | 🔴 |
 | Functoriality (pushforward / pullback naturality + lattice preservation) | 7 | 🟡 |
 | Torus / Albanese universal property | 3 | 🟡 |
-| Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 17 | 🟢🟡 |
+| Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 15 | 🟢🟡 |
 | Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 0 | ✅ **discharged** (PR #96) |
-| **Total** | **47** | |
+| **Total** | **45** | |
 
 **Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)`, a ℂ-submodule of the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero` — corrected from an earlier raw-`X→ℂ` version that was *degenerate*: it admitted germ-zero "spike" functions, so was infinite-dimensional with `finrank ≡ 0`; the compiled `germZero_ne_bot` witnesses that bug; this de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`h⁰(0) = 1` is now proved axiom-free** over the corrected space — `L(0)` = holomorphic functions = constants (via the normal-form honest representative + Liouville → `LinearEquiv (ℂ ≃ L(0))` → `finrank = 1`), the concrete confirmation that the faithfulness fix gives the *right* dimension (it was `finrank ≡ 0` over the old degenerate space). **`RiemannRochAPI` and `SerreDualityAPI` still carry 8 deferred `sorry`s** (the Riemann–Roch identity, `h⁰(K) = g`, general finite-dimensionality of `L(D)`, Serre vanishing) — the genuine open targets, true-but-unproven over the corrected space. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
 

@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 47** — all **47** in our own modules. The vendored
+**Active project axioms: 45** — all **45** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -194,6 +194,17 @@ axiom was proved in PR #92 over the strengthened `PlaneCurveData` (`z ∤ F` exc
 the old `F = z` counterexample, issue #82), closing the hole that forced the earlier
 revert.
 
+Then → **46** by **proving `AX_H1_ProjectiveLine_trivial`** (PR #104, 2026-06-07):
+`genus ℙ¹ = 0` (axiom-free), so the `AX_AnalyticCycleBasis` symplectic basis is
+indexed by `Fin (2·0) = Fin 0` (empty), giving `H¹(ℙ¹) ≃ (Fin 0 →₀ ℤ)` — a
+subsingleton. A reduction to the already-present `AX_AnalyticCycleBasis`, not a
+new dependency.
+
+Then → **45** by **proving `AX_PlaneCurveAffine_noncompact`** (PR #106, 2026-06-07):
+the affine plane curve admits a finite-exception projection onto `ℂ`; compactness
+of the affine patch would force `ℂ` compact after adjoining finitely many points,
+contradicting `NoncompactSpace ℂ`. `#print axioms` standard-3.
+
 ---
 
 ## Triage
@@ -204,7 +215,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (36 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (32 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -216,7 +227,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 18 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 16 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 
 ---
@@ -293,7 +304,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: 3 manifold/topology instances (`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 2 affine props (`AX_PlaneCurveAffine_connected`, `AX_PlaneCurveAffine_noncompact`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/projective `instNonempty` and affine `nonempty` all now proved) | `ProjectiveCurve/PlaneCurve.lean` | 5 |
+| `PlaneCurve`: 3 manifold/topology instances (`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 1 affine prop (`AX_PlaneCurveAffine_connected`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/projective `instNonempty`/affine `nonempty`/affine `noncompact` all now proved) | `ProjectiveCurve/PlaneCurve.lean` | 4 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -349,6 +360,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_PlaneCurveAffine_nonempty` *(2026-06-07)* | dehomogenize to `affinePolynomial H.F.val`; `affinePolynomial_not_isUnit` plus `exists_eval_eq_zero_of_not_isUnit_mvPolynomial` gives a complex zero in the affine patch | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_Period_Triangle` *(2026-06-06)* | conjugate the triangle loop to `Classical.arbitrary X`; use `loopDevValH1Hom_eq_loopIntegralToH1_apply` + `loop_canonicalArcIntegral_mem_periodLatticeInBasis` from the analytic cycle basis; cancel bridge/reverse periods by `canonicalArcIntegral_trans`/`_reverse` | `Axioms/AbelJacobiMap.lean`, `RiemannSurface/LoopIntegralHom.lean`, `RiemannSurface/ArcAlgebra.lean` |
 | `AX_cycleBasisLoop_integrable` *(2026-06-06)* | `analyticArc_canonicalIntegrand_intervalIntegrable` from strong per-cell analytic witnesses; cycle-basis loops are ordinary `AnalyticArc`s | `RiemannSurface/LoopIntegral.lean`, `RiemannSurface/PartitionIndependence.lean` |
@@ -394,7 +406,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 47 — the vendored Kirov subtree is now axiom-free, so 47 is the total.
+#   prints 45 — the vendored Kirov subtree is now axiom-free, so 45 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -411,7 +423,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 47
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 45
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
