@@ -6,6 +6,46 @@ faithful definitions** of `LineBundle` / `H¹` / `canonicalDivisor` so the pinni
 theorems (`SheafCohomologyFaithful`) are genuinely **provable**, not definitional.
 Companion to the faithfulness spec in `RiemannSurface/SheafCohomologySpec.lean`.*
 
+## ✅ Deep-think faithfulness verdict — 2026-06-07 (Gemini, query: `docs/deep-think-adelic-h1-faithfulness.md`)
+
+**The definitions and statements are FAITHFUL — no redesign.** Confirmed against
+Serre, *Groupes algébriques et corps de classes* ch. II:
+- `adeleH1 D := 𝔸_X/(𝔸_X(D)+K_X)` is exactly Weil's `H¹(X,𝒪(D))`; the
+  `ord_p ≥ −D(p)` bound and diagonal are correct (no sign errors).
+- **The `K_X`-valued (not `K_p`-completion) repartitions are correct** — this is
+  Weil's *répartition*, not the full adele ring; Mittag-Leffler density of `K_X`
+  in the completions makes `R/(R(D)+K) ≅ 𝔸/(𝔸(D)+K)`. Using the global field is a
+  formalization *advantage* (no topological completions). **The crux design
+  worry is cleared.**
+- RR arithmetic faithful (it is the fully-synthesized RR since `g` is pinned to
+  `finrank HolomorphicOneForm`); `serre_anchor`'s `∃ K, ∀ D` is the right strength;
+  the pins are non-degenerate (a junk `K_X = ℂ` would make `adeleH1` infinite-dim
+  and *fail* `adeleH1_finiteDim`/RR — can't be cheated).
+
+**Two action items it surfaced (proof prerequisites, not statement bugs):**
+
+1. **Upgrade `MeroField` to a `CommRing` + `Algebra ℂ`, with a module action on
+   (meromorphic) 1-forms.** Needed for the Serre residue pairing `(a,ω) ↦ ∑ res_p(a_p·ω)`
+   — currently `MeroField` is only an additive ℂ-vector space, so `a_p·ω` isn't yet
+   expressible. Also: define **meromorphic 1-forms** and the dualizing space
+   `H⁰(𝒪(K−D)) = {ω | div ω ≥ D}`. The residue theorem **`∑_p res_p ω = 0`** is the
+   crux (it makes the principal diagonal `K_X` vanish under the pairing, so it
+   descends to the quotient).
+
+2. **⚠ HIDDEN LANDMINE — existence of a non-constant meromorphic function (Riemann
+   Existence Theorem).** The adelic RR proof is algebraic: it needs `K_X` to be a
+   transcendence-degree-1 function field over `ℂ` — i.e. `K_X ≠ ℂ`. The proof picks a
+   non-constant `x ∈ K_X`, views `X` as a finite branched cover of `ℙ¹`, and uses
+   `[K_X : ℂ(x)] < ∞`. **Without `K_X ≠ ℂ`, the RR/finiteness proof is permanently
+   stuck.** The genus pin protects vacuity at the *statement* level, but *proving* the
+   pins needs this theorem. Decision to record: it likely enters as a vetted textbook
+   axiom (Riemann Existence Theorem) for general `X`, OR is supplied per-curve for the
+   concrete witnesses (ℙ¹/elliptic/hyperelliptic have explicit non-constant functions).
+   `adeleH1_finiteDim` is the *engine* that drives RR (prove finiteness for a positive
+   `D`, then exact sequences) — and it stalls on the same input.
+
+`Divisor X = FreeAbelianGroup X` already enforces strictly-finite support (✓).
+
 ## Basic object: the compact Riemann surface `X` (1-d complex manifold), unchanged
 
 Keep Buzzard's analytic `X` (`[ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]`,
