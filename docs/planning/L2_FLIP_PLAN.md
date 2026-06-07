@@ -36,7 +36,18 @@ committed + pushed so a hang costs one lemma, not the session.*
   the `liouvilleTwoSheetSum_branch_tendsto` map-pushforward lemmas).
 - **L2.4** `Differentiable ℂ liouvilleNumeratorGRemovable` — `differentiable_of_analyticAt_off_roots`
   + Continuous (from L2.2 off-root + L2.3 branch limits, mirror `…Removable_differentiable_…`).
-- **L2.5** GROWTH `‖G z‖ ≤ C(1+‖z‖)^(N/2−2)` — the ONE genuinely new piece (∞-chart).
+- **L2.5 GROWTH — Gemini-3.1-pro-vetted route (b): work in the ∞-chart, NO √f branch-selection.**
+  KEY IDENTITY (powers of `u=1/z` cancel algebraically): `G(z)/z^(N/2−2) =ᶠ[cocompact ℂ] −H(1/z)·v(1/z)`,
+  where `H = form.coeff` in the ∞-chart (analytic at u=0, value `c₀`) and `v(u)` = the ∞-chart
+  `√(reverse f)(u)` branch (`v² = (reverse f)(u)` via the gluing `mem_of_affine` Even.lean:291;
+  `√f(z) = v(1/z)·z^(N/2)`). Both analytic at 0 ⇒ `−H·v` ContinuousAt 0 ⇒
+  `Tendsto (G·/z^(N/2−2)) cocompact (𝓝 (−H 0·v 0))` via `tendsto_inv_cocompact_zero` (ALREADY proven)
+  + `EventuallyEq.tendsto` + `ContinuousAt.mul/.neg` + `Tendsto.comp`. The EventuallyEq REUSES the
+  ∞-chart machinery from `h0` (`liouvilleTwoSheetSumRemovable_tendsto_zero_cocompact` did the same
+  `s =ᶠ[cocompact] -(z⁻¹)²·(g₁+g₂)` reduction — copy its fixed-∞-chart EventuallyEq, single term × v).
+  Then `polynomial_growth_bound_of_tendsto_div_pow G (N/2−2) (−H 0·v 0) (G continuous) (the Tendsto)`
+  (:3502) ⇒ `∃C, ‖G z‖≤C(1+‖z‖)^(N/2−2)`.
+- **L2.5-OLD** GROWTH `‖G z‖ ≤ C(1+‖z‖)^(N/2−2)` — the ONE genuinely new piece (∞-chart).
   `polynomial_growth_bound_of_tendsto_div_pow G (N/2−2) c (cont) (hLim)`,
   `hLim : Tendsto (G z/z^(N/2−2)) cocompact (𝓝 c)`. At ∞ chosen-rep is `inr`:
   `G z = form.coeff⟦inl⟧(1/z)·(−1/z²)·√f(z)`, `√f~z^(N/2)`. ⇒ get its own Gemini-3.1-pro
