@@ -105,6 +105,34 @@ theorem form_coeff_analyticOn_affineProjX_target
     OpenPartialHomeomorph.lift_openEmbedding_target] at hform
   simpa [affineChartAt, hpY] using hform
 
+/-- `affCoeff` is analytic on the affine `x`-chart target in the affine
+representative branch. -/
+theorem affCoeff_analyticOn_of_inl
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {a' : HyperellipticAffine H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inl a') :
+    AnalyticOn ℂ (affCoeff (H := H) form a)
+      ((affineChartProjX (H := H) a hpY).target ∩ {z | z ≠ 0}) := by
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  have hQq : Quotient.out q = Sum.inl a' := by
+    simpa [q] using hQ
+  have hOutEq : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a') = q := by
+    rw [← hQq]
+    exact Quotient.out_eq q
+  have ha' : a' = a := by
+    exact HyperellipticEvenProj.proj_inl_injective H (by
+      simpa [q, HyperellipticEvenProj.proj, Function.comp_def] using hOutEq)
+  have hQa : Quotient.out q = Sum.inl a := by
+    simpa [q, ha'] using hQ
+  have hEq : affCoeff (H := H) form a = form.coeff q := by
+    simpa [q] using affCoeff_of_inl (H := H) form a a' hQ
+  rw [hEq]
+  exact (form_coeff_analyticOn_affineProjX_target form a hpY q hQa).mono
+    Set.inter_subset_left
+
 /-- The local Liouville numerator is analytic on the smooth-`Y` projX target. -/
 theorem liouvilleProjXNumerator_analyticOn
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
