@@ -4238,4 +4238,38 @@ theorem affCoeff_chosen_anti_invariance
       (liouvilleTwoSheetSumRemovable_tendsto_zero_cocompact (H := H) form))
     hz
 
+/-! ### L2: the single-sheet numerator `G = affCoeff·√f` is a polynomial -/
+
+/-- **L2.1c** Fixed-chart analyticity of the single-sheet numerator. The numerator
+in the chosen affine chart at `z₀`, `z ↦ affCoeff form a₀ z · √f(z)`, is analytic
+at `z₀` — `affCoeff` analytic at the chart basepoint times the analytic `√f`
+branch. (Mirror of `liouvilleChosenTwoSheetSum_analyticAt`, one term × √f.) -/
+theorem liouvilleChosenNumeratorG_analyticAt
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z₀ : ℂ} (hz₀ : H.f.eval z₀ ≠ 0) :
+    AnalyticAt ℂ
+      (fun z : ℂ =>
+        affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z₀) z *
+          (squareLocalHomeomorph (H := H) (liouvilleChosenAffinePoint (H := H) z₀)
+              (liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz₀)).symm
+            (H.f.eval z))
+      z₀ := by
+  classical
+  set a₀ := liouvilleChosenAffinePoint (H := H) z₀ with ha₀def
+  have ha₀Y : a₀ ∈ smoothLocusY H :=
+    liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz₀
+  have h1 : AnalyticAt ℂ (affCoeff (H := H) form a₀) z₀ :=
+    affCoeff_analyticAt_basepoint (H := H) form a₀ ha₀Y
+  have hz₀Target : z₀ ∈ (affineChartProjX (H := H) a₀ ha₀Y).target := by
+    have ha₀Src : a₀ ∈ (affineChartProjX (H := H) a₀ ha₀Y).source :=
+      affineChartProjX_mem_source (H := H) a₀ ha₀Y
+    have h := (affineChartProjX (H := H) a₀ ha₀Y).map_source ha₀Src
+    simpa [a₀] using h
+  have h2 : AnalyticAt ℂ
+      (fun z : ℂ => (squareLocalHomeomorph (H := H) a₀ ha₀Y).symm (H.f.eval z)) z₀ :=
+    AnalyticOn.analyticAt
+      ((affineChartProjX (H := H) a₀ ha₀Y).open_target.mem_nhds hz₀Target)
+      (squareLocalHomeomorph_symm_eval_analyticOn (H := H) a₀ ha₀Y)
+  exact h1.mul h2
+
 end Jacobians.ProjectiveCurve
