@@ -1107,6 +1107,91 @@ omit hf in
 @[simp] lemma liouvilleChosenAffinePoint_invol_fst (z : ℂ) :
     ((liouvilleChosenAffinePoint (H := H) z).invol).val.1 = z := rfl
 
+omit hf in
+/-- Near a smooth-`Y` point, the local `x`-branch centered at the involuted
+point is the pointwise involution of the local branch centered at the original
+point. -/
+theorem affineChartProjX_invol_symm_eq_eventually
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H) :
+    ∀ᶠ z in 𝓝 a.val.1,
+      ((affineChartProjX (H := H) a.invol
+          (HyperellipticAffine.invol_mem_smoothLocusY a hpY)).symm z :
+        HyperellipticAffine H) =
+        ((affineChartProjX (H := H) a hpY).symm z).invol := by
+  classical
+  let hpYσ := HyperellipticAffine.invol_mem_smoothLocusY a hpY
+  let e := affineChartProjX (H := H) a hpY
+  let eσ := affineChartProjX (H := H) a.invol hpYσ
+  change ∀ᶠ z in 𝓝 a.val.1, eσ.symm z = (e.symm z).invol
+  have haSrc : a ∈ e.source := by
+    simpa [e] using affineChartProjX_mem_source (H := H) a hpY
+  have haTarget : a.val.1 ∈ e.target := by
+    simpa [e] using e.map_source haSrc
+  have haσSrc : a.invol ∈ eσ.source := by
+    simpa [eσ, hpYσ] using affineChartProjX_mem_source (H := H) a.invol hpYσ
+  have haσTarget : a.val.1 ∈ eσ.target := by
+    have h := eσ.map_source haσSrc
+    simpa [eσ, HyperellipticAffine.invol] using h
+  have hYbase : ((e.symm a.val.1 : HyperellipticAffine H).val.2) = a.val.2 := by
+    rw [show e = affineChartProjX (H := H) a hpY from rfl]
+    rw [affineChartProjX_symm_apply_snd (H := H) a hpY haTarget]
+    exact squareLocalHomeomorph_symm_at_basepoint (H := H) a hpY
+  have hYσbase : ((eσ.symm a.val.1 : HyperellipticAffine H).val.2) = -a.val.2 := by
+    rw [show eσ = affineChartProjX (H := H) a.invol hpYσ from rfl]
+    rw [affineChartProjX_symm_apply_snd (H := H) a.invol hpYσ haσTarget]
+    simpa [HyperellipticAffine.invol] using
+      squareLocalHomeomorph_symm_at_basepoint (H := H) a.invol hpYσ
+  have hContY : ContinuousAt
+      (fun z : ℂ => ((e.symm z : HyperellipticAffine H).val.2)) a.val.1 :=
+    (continuous_snd.comp continuous_subtype_val).continuousAt.comp
+      (e.continuousAt_symm haTarget)
+  have hContYσ : ContinuousAt
+      (fun z : ℂ => ((eσ.symm z : HyperellipticAffine H).val.2)) a.val.1 :=
+    (continuous_snd.comp continuous_subtype_val).continuousAt.comp
+      (eσ.continuousAt_symm haσTarget)
+  have hSepAt :
+      ((eσ.symm a.val.1 : HyperellipticAffine H).val.2 -
+        (e.symm a.val.1 : HyperellipticAffine H).val.2) ≠ 0 := by
+    rw [hYσbase, hYbase]
+    intro h
+    have hmul : (2 : ℂ) * a.val.2 = 0 := by
+      calc
+        (2 : ℂ) * a.val.2 = -((-a.val.2) - a.val.2) := by ring
+        _ = 0 := by rw [h]; ring
+    exact hpY ((mul_eq_zero.mp hmul).resolve_left (by norm_num))
+  have hSepEv : ∀ᶠ z in 𝓝 a.val.1,
+      ((eσ.symm z : HyperellipticAffine H).val.2 -
+        (e.symm z : HyperellipticAffine H).val.2) ≠ 0 :=
+    (hContYσ.sub hContY).eventually_ne hSepAt
+  filter_upwards [e.open_target.mem_nhds haTarget,
+      eσ.open_target.mem_nhds haσTarget, hSepEv] with z hz hzσ hSep
+  have hSq : ((eσ.symm z : HyperellipticAffine H).val.2) ^ 2 =
+      ((e.symm z : HyperellipticAffine H).val.2) ^ 2 := by
+    have hσ : ((eσ.symm z : HyperellipticAffine H).val.2) ^ 2 = H.f.eval z := by
+      have hprop := (eσ.symm z : HyperellipticAffine H).property
+      simpa [eσ, affineChartProjX_symm_apply_fst (H := H) a.invol hpYσ hzσ]
+        using hprop
+    have h0 : ((e.symm z : HyperellipticAffine H).val.2) ^ 2 = H.f.eval z := by
+      have hprop := (e.symm z : HyperellipticAffine H).property
+      simpa [e, affineChartProjX_symm_apply_fst (H := H) a hpY hz]
+        using hprop
+    exact hσ.trans h0.symm
+  rcases eq_or_eq_neg_of_sq_eq_sq
+      ((eσ.symm z : HyperellipticAffine H).val.2)
+      ((e.symm z : HyperellipticAffine H).val.2) hSq with hSame | hNeg
+  · exfalso
+    exact hSep (by rw [hSame, sub_self])
+  · apply Subtype.ext
+    apply Prod.ext
+    · change ((eσ.symm z : HyperellipticAffine H).val.1) =
+        ((e.symm z : HyperellipticAffine H).invol).val.1
+      rw [affineChartProjX_symm_apply_fst (H := H) a.invol hpYσ hzσ]
+      rw [HyperellipticAffine.invol_val]
+      exact (affineChartProjX_symm_apply_fst (H := H) a hpY hz).symm
+    · change ((eσ.symm z : HyperellipticAffine H).val.2) =
+        ((e.symm z : HyperellipticAffine H).invol).val.2
+      simpa [HyperellipticAffine.invol] using hNeg
+
 /-- The fixed two-sheet coefficient sum for a pair of projective points. This is
 the local expression whose vanishing is exactly coefficient anti-invariance. -/
 noncomputable def liouvilleLocalSheetSum
