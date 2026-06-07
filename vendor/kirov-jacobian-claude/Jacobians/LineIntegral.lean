@@ -479,8 +479,7 @@ C¹-smooth in chart coordinates at `t`) and smoothness of `f`, the
 tangent of `f ∘ γ` at `t` equals the manifold derivative `mfderiv f`
 applied to the tangent of `γ` at `t`.
 
-Content sorry: the full proof requires ~100–200 lines of chart
-manipulation:
+The proof (complete below) is a three-step chart computation:
 1. Chart-pullback chain rule: `fderiv ℝ (chart_Y ∘ f ∘ γ) t 1 =
    (fderiv ℝ f_loc (chart_X (γ t))) (pathSpeed γ t)` via
    `fderiv.comp` on `f_loc ∘ (chart_X ∘ γ)` where `f_loc = chart_Y ∘

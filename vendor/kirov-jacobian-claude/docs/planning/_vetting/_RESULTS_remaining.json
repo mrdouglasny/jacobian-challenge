@@ -1,0 +1,470 @@
+[
+  {
+    "slug": "AX_Elliptic_bLoop_analytic",
+    "verdict": "revise",
+    "duration_s": 30.2,
+    "chars": 3618
+  },
+  {
+    "slug": "AX_AnalyticCycleBasis",
+    "verdict": "reject",
+    "duration_s": 49.8,
+    "chars": 5021
+  },
+  {
+    "slug": "AX_Hyperelliptic_evenEquiv",
+    "verdict": "accept",
+    "duration_s": 31.6,
+    "chars": 2370
+  },
+  {
+    "slug": "AX_Elliptic_H1_symplectic",
+    "verdict": "reject",
+    "duration_s": 63.8,
+    "chars": 4205
+  },
+  {
+    "slug": "AX_Elliptic_aLoop_analytic",
+    "verdict": "revise",
+    "duration_s": 80.5,
+    "chars": 3022
+  },
+  {
+    "slug": "AX_Hyperelliptic_genus",
+    "verdict": "reject",
+    "duration_s": 33.5,
+    "chars": 3172
+  },
+  {
+    "slug": "AX_IntersectionForm_alternating",
+    "verdict": "reject",
+    "duration_s": 30.1,
+    "chars": 2932
+  },
+  {
+    "slug": "AX_Hyperelliptic_oddEquiv",
+    "verdict": "revise",
+    "duration_s": 42.7,
+    "chars": 2918
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_connected",
+    "verdict": "reject",
+    "duration_s": 34.9,
+    "chars": 4936
+  },
+  {
+    "slug": "AX_HyperellipticAffine_connected",
+    "verdict": "reject",
+    "duration_s": 133.1,
+    "chars": 4187
+  },
+  {
+    "slug": "AX_IntersectionForm_perfect",
+    "verdict": "reject",
+    "duration_s": 71.4,
+    "chars": 3490
+  },
+  {
+    "slug": "AX_PeriodLattice",
+    "verdict": "accept",
+    "duration_s": 73.8,
+    "chars": 3317
+  },
+  {
+    "slug": "AX_curve_generates_jacobian",
+    "verdict": "reject",
+    "duration_s": 30.6,
+    "chars": 3451
+  },
+  {
+    "slug": "AX_PluckerFormula",
+    "verdict": "reject",
+    "duration_s": 49.4,
+    "chars": 4391
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_noncompact",
+    "verdict": "reject",
+    "duration_s": 100.3,
+    "chars": 4409
+  },
+  {
+    "slug": "AX_ofCurve_contMDiff",
+    "verdict": "revise",
+    "duration_s": 55.8,
+    "chars": 3589
+  },
+  {
+    "slug": "AX_pathIntegral_local_antiderivative",
+    "verdict": "reject",
+    "duration_s": 37.8,
+    "chars": 3524
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_nonempty",
+    "verdict": "reject",
+    "duration_s": 102.1,
+    "chars": 3111
+  },
+  {
+    "slug": "AX_pullback_contMDiff",
+    "verdict": "revise",
+    "duration_s": 40.2,
+    "chars": 2234
+  },
+  {
+    "slug": "AX_pushforwardOneForm_id",
+    "verdict": "revise",
+    "duration_s": 41.0,
+    "chars": 2796
+  },
+  {
+    "slug": "AX_pushforwardAmbient_preserves_lattice",
+    "verdict": "reject",
+    "duration_s": 74.2,
+    "chars": 4013
+  },
+  {
+    "slug": "AX_ofCurve_inj",
+    "verdict": "reject",
+    "duration_s": 116.1,
+    "chars": 4169
+  },
+  {
+    "slug": "Divisor-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 31.1,
+    "chars": 2267
+  },
+  {
+    "slug": "AX_pullbackAmbient_preserves_lattice",
+    "verdict": "reject",
+    "duration_s": 124.3,
+    "chars": 3728
+  },
+  {
+    "slug": "AX_pushforwardOneForm_comp",
+    "verdict": "reject",
+    "duration_s": 102.5,
+    "chars": 3958
+  },
+  {
+    "slug": "Divisor",
+    "verdict": "revise",
+    "duration_s": 55.5,
+    "chars": 2774
+  },
+  {
+    "slug": "H0-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 35.3,
+    "chars": 2353
+  },
+  {
+    "slug": "H0-instModule",
+    "verdict": "revise",
+    "duration_s": 39.9,
+    "chars": 2816
+  },
+  {
+    "slug": "H0",
+    "verdict": "reject",
+    "duration_s": 36.4,
+    "chars": 3429
+  },
+  {
+    "slug": "AX_pushforward_contMDiff",
+    "verdict": "revise",
+    "duration_s": 77.2,
+    "chars": 2791
+  },
+  {
+    "slug": "H1-instModule",
+    "verdict": "accept",
+    "duration_s": 15.5,
+    "chars": 1373
+  },
+  {
+    "slug": "H1-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 28.5,
+    "chars": 2852
+  },
+  {
+    "slug": "Hyperelliptic-instCompactSpace",
+    "verdict": "accept",
+    "duration_s": 44.8,
+    "chars": 3060
+  },
+  {
+    "slug": "Hyperelliptic-instConnectedSpace",
+    "verdict": "accept",
+    "duration_s": 46.1,
+    "chars": 2125
+  },
+  {
+    "slug": "Hyperelliptic-instChartedSpace",
+    "verdict": "revise",
+    "duration_s": 56.4,
+    "chars": 2949
+  },
+  {
+    "slug": "H1",
+    "verdict": "reject",
+    "duration_s": 59.1,
+    "chars": 4052
+  },
+  {
+    "slug": "Hyperelliptic-instNonempty",
+    "verdict": "revise",
+    "duration_s": 26.3,
+    "chars": 2866
+  },
+  {
+    "slug": "Hyperelliptic-instIsManifold",
+    "verdict": "revise",
+    "duration_s": 76.5,
+    "chars": 3489
+  },
+  {
+    "slug": "Hyperelliptic-instTopologicalSpace",
+    "verdict": "reject",
+    "duration_s": 34.6,
+    "chars": 2490
+  },
+  {
+    "slug": "LineBundle-ofDivisor",
+    "verdict": "revise",
+    "duration_s": 47.3,
+    "chars": 2321
+  },
+  {
+    "slug": "Hyperelliptic-instT2Space",
+    "verdict": "revise",
+    "duration_s": 67.6,
+    "chars": 2170
+  },
+  {
+    "slug": "LineBundle",
+    "verdict": "reject",
+    "duration_s": 50.1,
+    "chars": 3859
+  },
+  {
+    "slug": "PlaneCurve-instChartedSpace",
+    "verdict": "revise",
+    "duration_s": 58.3,
+    "chars": 4008
+  },
+  {
+    "slug": "PlaneCurve-instIsManifold",
+    "verdict": "reject",
+    "duration_s": 48.6,
+    "chars": 3740
+  },
+  {
+    "slug": "PlaneCurve-instNonempty",
+    "verdict": "revise",
+    "duration_s": 38.7,
+    "chars": 2273
+  },
+  {
+    "slug": "PlaneCurve-instT2Space",
+    "verdict": "revise",
+    "duration_s": 35.4,
+    "chars": 3355
+  },
+  {
+    "slug": "Hyperelliptic",
+    "verdict": "revise",
+    "duration_s": 131.1,
+    "chars": 2929
+  },
+  {
+    "slug": "PlaneCurve-instTopologicalSpace",
+    "verdict": "revise",
+    "duration_s": 33.9,
+    "chars": 2386
+  },
+  {
+    "slug": "PlaneCurve-instConnectedSpace",
+    "verdict": "revise",
+    "duration_s": 89.9,
+    "chars": 3566
+  },
+  {
+    "slug": "affineLiftProjX_compat_infinityChart",
+    "verdict": "error",
+    "error": "[Errno 54] Connection reset by peer",
+    "tb": "Traceback (most recent call last):\n  File \"/Users/mrd/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py\", line 101, in map_httpcore_exceptions\n    yield\n  File \"/Users/mrd/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py\", line 250, in handle_request\n    resp = self._pool.handle_request(req)\nhttpcore.ReadError: [Errno 54] Connection reset by peer\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/private/tmp/vet_plans_rest.py\", line 99, in critique_one\n    resp = client.models.generate_content(\n  File \"/Users/mrd/Library/Python/3.9/lib/python/site-packages/google/genai/models.py\", line 5020, in generate_content\n    response = self._generate_content(\nhttpx.ReadError: [Errno 54] Connection reset by peer\n"
+  },
+  {
+    "slug": "PlaneCurve",
+    "verdict": "revise",
+    "duration_s": 54.0,
+    "chars": 2657
+  },
+  {
+    "slug": "abelJacobiDiv",
+    "verdict": "revise",
+    "duration_s": 46.4,
+    "chars": 3164
+  },
+  {
+    "slug": "PrincipalDivisors",
+    "verdict": "reject",
+    "duration_s": 80.5,
+    "chars": 4003
+  },
+  {
+    "slug": "bridgePath",
+    "verdict": "reject",
+    "duration_s": 41.8,
+    "chars": 3179
+  },
+  {
+    "slug": "ambientPhi_ambientPsi_eq",
+    "verdict": "reject",
+    "duration_s": 51.9,
+    "chars": 3222
+  },
+  {
+    "slug": "bridgePath_at_one",
+    "verdict": "accept",
+    "duration_s": 22.0,
+    "chars": 2584
+  },
+  {
+    "slug": "bridgePath_at_zero",
+    "verdict": "accept",
+    "duration_s": 12.4,
+    "chars": 1855
+  },
+  {
+    "slug": "bridgePath_continuous",
+    "verdict": "accept",
+    "duration_s": 27.0,
+    "chars": 1784
+  },
+  {
+    "slug": "affineLiftProjY_compat_infinityChart",
+    "verdict": "revise",
+    "duration_s": 105.9,
+    "chars": 4448
+  },
+  {
+    "slug": "bridgePath_chart_differentiable",
+    "verdict": "reject",
+    "duration_s": 58.6,
+    "chars": 3593
+  },
+  {
+    "slug": "canonicalDivisor",
+    "verdict": "reject",
+    "duration_s": 51.8,
+    "chars": 4809
+  },
+  {
+    "slug": "genus_eq_zero_iff_homeo",
+    "verdict": "revise",
+    "duration_s": 41.7,
+    "chars": 2933
+  },
+  {
+    "slug": "affineLiftChart_compat_infinityLiftChart",
+    "verdict": "reject",
+    "duration_s": 197.0,
+    "chars": 4505
+  },
+  {
+    "slug": "bridgePath_lineIntegrable",
+    "verdict": "reject",
+    "duration_s": 122.8,
+    "chars": 3432
+  },
+  {
+    "slug": "infinityChart_mem_source",
+    "verdict": "accept",
+    "duration_s": 13.1,
+    "chars": 1159
+  },
+  {
+    "slug": "infinityChart_compat_affineLiftProjX",
+    "verdict": "accept",
+    "duration_s": 47.4,
+    "chars": 3250
+  },
+  {
+    "slug": "infinityChart_compat_affineLiftProjY",
+    "verdict": "accept",
+    "duration_s": 33.7,
+    "chars": 2349
+  },
+  {
+    "slug": "contDiffOn_symm_toOpenPartialHomeomorph",
+    "verdict": "reject",
+    "duration_s": 118.8,
+    "chars": 3700
+  },
+  {
+    "slug": "infinityChart",
+    "verdict": "revise",
+    "duration_s": 88.2,
+    "chars": 4229
+  },
+  {
+    "slug": "infinityLiftChart_compat_affineLiftChart",
+    "verdict": "reject",
+    "duration_s": 41.2,
+    "chars": 3330
+  },
+  {
+    "slug": "intersectionForm",
+    "verdict": "reject",
+    "duration_s": 60.6,
+    "chars": 2745
+  },
+  {
+    "slug": "pathIntegralBasepointFunctional",
+    "verdict": "reject",
+    "duration_s": 35.8,
+    "chars": 4587
+  },
+  {
+    "slug": "infinityInverseMap",
+    "verdict": "reject",
+    "duration_s": 83.3,
+    "chars": 3340
+  },
+  {
+    "slug": "instPeriodLatticeDiscrete",
+    "verdict": "revise",
+    "duration_s": 91.0,
+    "chars": 3737
+  },
+  {
+    "slug": "pushforwardOneForm",
+    "verdict": "reject",
+    "duration_s": 34.6,
+    "chars": 5032
+  },
+  {
+    "slug": "loopIntegralToH1",
+    "verdict": "reject",
+    "duration_s": 90.9,
+    "chars": 3797
+  },
+  {
+    "slug": "squareLocalHomeomorph_zero_notMem_source",
+    "verdict": "revise",
+    "duration_s": 81.1,
+    "chars": 2821
+  },
+  {
+    "slug": "polynomialLocalHomeomorph_no_critical_in_source",
+    "verdict": "reject",
+    "duration_s": 95.1,
+    "chars": 4055
+  }
+]

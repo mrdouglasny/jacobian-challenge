@@ -32,14 +32,14 @@ of a compact connected complex 1-manifold.
 Mathematically: global holomorphic 1-forms on `X`. Defined here (rather
 than in `HolomorphicForms.lean`) so that `genus` below can refer to it. -/
 def HolomorphicOneForms (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type _ :=
+    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type _ :=
   ContMDiffSection 𝓘(ℂ) (ℂ →L[ℂ] ℂ) ω
     (fun x : X => TangentSpace 𝓘(ℂ) x →L[ℂ] (Bundle.Trivial X ℂ) x)
 
 section HOFInstances
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+    [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
 noncomputable instance : AddCommGroup (HolomorphicOneForms X) :=
   inferInstanceAs (AddCommGroup
@@ -64,18 +64,11 @@ the `FiniteDimensional ℂ (HolomorphicOneForms X)` instance (in
 `HolomorphicForms.lean`, content-gated) is required for `genus` to be
 the "right" number. -/
 noncomputable def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
+  [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
   Module.finrank ℂ (Jacobians.HolomorphicOneForms X)
 
-/-- A compact Riemann surface has genus 0 iff it is homeomorphic to the sphere.
-This is the "anti-hack" constraint preventing `∀ X, genus X = 0`.
-
-Classical result (Forster §16.3: Uniformization theorem; Miranda §V): a
-compact Riemann surface of genus 0 is homeomorphic to the 2-sphere.
-Mathlib does not currently have this; real proof would follow from
-uniformization or Riemann–Roch (genus 0 ⇒ a non-constant meromorphic
-function with a single simple pole gives a biholomorphism X → ℂP¹ ≃ S²). -/
-lemma genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
-    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
-    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :=
-  sorry
+-- The challenge theorem `genus_eq_zero_iff_homeo` (genus 0 ⟺ `X ≃ₜ S²`) is declared in
+-- `Jacobians/DegreeOneSphere.lean` (root namespace, like `genus`), NOT here: its forward direction
+-- needs the degree-one endgame, which lives downstream of `Genus` (via `ProjectiveLine → Genus`).
+-- Declaring it there breaks the import cycle an in-`Genus` proof would create. `Nonempty X` comes
+-- free from `[ConnectedSpace X]`, so the spec signature is unchanged.

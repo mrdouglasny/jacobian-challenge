@@ -1,0 +1,210 @@
+# formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
+# Describes the `main` branch state at HEAD 3ff3fa0 (PR #7 merged).
+# A CHALLENGE / scaffold repo: Buzzard's 24-sorry Jacobian-Challenge API is fully
+# closed with real defs/instances, and three concrete genus theorems are proved —
+# but the bulk of the deep mathematics sits behind ~55 classified, discharge-planned
+# axioms (Riemann–Roch, Serre duality, Liouville L2/L3, …). "Reduced to classical
+# inputs", NOT a from-first-principles solution.
+version: "v0.3"
+
+project:
+  name: "jacobian-challenge"
+  authors: ["Michael R. Douglas"]
+  license: "Apache-2.0"
+
+sources:
+  - title: "The Jacobian Challenge (Lean 4 gist, v0.2)"
+    authors: ["Kevin Buzzard"]
+    id: "https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9"
+    type: "blueprint"
+    license: "unspecified"
+    author_contacted: "n/a"
+    note: >
+      The challenge being addressed: a single Challenge.lean defining the Jacobian
+      of a compact Riemann surface, the Abel–Jacobi map, and pushforward/pullback
+      functoriality, exposed via 24 `sorry`s (v0.2, April 2026). Verbatim copy
+      pinned at Jacobians/Challenge.lean.
+  - title: "Lectures on Riemann Surfaces"
+    authors: ["Otto Forster"]
+    id: "ISBN:978-1-4612-5963-3"
+    type: "textbook"
+    license: "proprietary"
+    note: "Holomorphic 1-forms, genus, canonical differentials (§17)."
+  - title: "Algebraic Curves and Riemann Surfaces"
+    authors: ["Rick Miranda"]
+    id: "ISBN:978-0-8218-0268-7"
+    type: "textbook"
+    license: "proprietary"
+    note: "Hyperelliptic 1-form bases and genus (Ch. VII); Riemann–Roch."
+  - title: "Tata Lectures on Theta I"
+    authors: ["David Mumford"]
+    id: "10.1007/978-1-4899-2843-6"
+    type: "textbook"
+    license: "proprietary"
+    note: "Period lattice / Jacobian / Abel theory (§III.3)."
+  - title: "Jacobian Varieties (course notes)"
+    authors: ["J. S. Milne"]
+    id: "https://www.jmilne.org/math/xnotes/JVs.pdf"
+    type: "lecture-notes"
+    license: "proprietary"
+    note: "Albanese universal property of the Jacobian (IsJacobian statement)."
+  - title: "Principles of Algebraic Geometry"
+    authors: ["Phillip Griffiths", "Joseph Harris"]
+    id: "ISBN:978-0-471-05059-9"
+    type: "textbook"
+    license: "proprietary"
+    note: "Riemann bilinear relations, Riemann–Roch, Serre duality."
+
+status:
+  scope: >
+    A scaffold / "challenge" repo bridging to Kevin Buzzard's Jacobian Challenge.
+    All 24 `sorry`s in the pinned Challenge.lean are discharged as real `def`s and
+    `instance`s (no axiom stub at the Buzzard-API level), via a period-lattice
+    construction ComplexTorus V L := V ⧸ L with the 7 required typeclass instances
+    supplied by hand. Concrete curve models (ProjectiveLine, Elliptic,
+    HyperellipticOdd/Even) are real types; three genus theorems are proved. The
+    S1–S7 hyperelliptic 1-form framework and the Albanese universal-property
+    statement (IsJacobian) are added beyond the API. NOT a from-first-principles
+    proof: the deep classical content (Riemann–Roch, Serre duality, Abel, Riemann
+    bilinear, branch locus, uniformization, canonical-differentials via the
+    Liouville L2/L3 hierarchy, plus curve-atlas and line-integral constructions)
+    remains as ~55 classified, discharge-planned axioms. genus(ℙ¹)=0 and
+    genus(Elliptic)=1 are axiom-free (Lean core only); genus(HyperellipticEven)
+    reduces to the Liouville L2/L3 axioms. Vendors axiom-free Lean from
+    rkirov/jacobian-claude (Apache-2.0) and tangentstorm/JacobianChallenge (MIT).
+  sorry_count: 11           # build-warning count; all OUTSIDE the core/API
+  sorry_in_definitions: 0
+  axioms:                   # ~55 active, kernel-verified (AXIOM_AUDIT.md); a representative selection.
+                            # AX_pushforward_contMDiff / AX_pullback_contMDiff discharged to theorems (kernel-verified 58 → 56).
+    - AX_RiemannRoch                              # Axioms/RiemannRoch.lean (classical)
+    - AX_SerreDuality                             # Axioms/SerreDuality.lean (classical)
+    - AX_AbelTheorem                              # Axioms/AbelTheorem.lean (classical)
+    - AX_RiemannBilinear                          # Axioms/RiemannBilinear.lean (classical)
+    - AX_BranchLocus                              # Axioms/BranchLocus.lean (classical)
+    - AX_genus_eq_zero_iff_homeo                  # Axioms/Uniformization0.lean (classical)
+    - AX_AnalyticCycleBasis                       # Axioms/AnalyticCycleBasis.lean
+    - AX_PeriodLattice                            # Axioms/PeriodLattice.lean
+    - AX_HyperellipticForm_polynomial_decomposition  # Axioms/HyperellipticLiouville.lean (Liouville L2)
+    - AX_HyperellipticOneForm_eq_form             # Axioms/HyperellipticLiouville.lean (Liouville L3)
+    # + line-bundle/divisor, PlaneCurve atlas, unified-Hyperelliptic ≃ₜ, IFT, and
+    #   Jacobian-API property axioms — full set (~55) in AXIOM_AUDIT.md
+  main_results:
+    - declaration: "Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero"
+      file: "Jacobians/ProjectiveCurve/Line/Genus.lean"
+      sorry_count: 0
+      axioms: []   # #print axioms: [propext, Classical.choice, Quot.sound] only
+      literature_dependencies:
+        - statement: "the projective line has genus 0"
+          source: "ISBN:978-1-4612-5963-3"
+    - declaration: "Jacobians.ProjectiveCurve.genus_Elliptic_eq_one"
+      file: "Jacobians/ProjectiveCurve/Elliptic/OneForm.lean"
+      sorry_count: 0
+      axioms: []   # Lean core only (intrinsic Liouville on ellipticDz)
+      literature_dependencies:
+        - statement: "an elliptic curve C/Λ has genus 1"
+          source: "10.1007/978-1-4899-2843-6"
+    - declaration: "Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq"
+      file: "Jacobians/Extensions/HyperellipticEven.lean"
+      sorry_count: 0
+      axioms:
+        - AX_HyperellipticForm_polynomial_decomposition
+        - AX_HyperellipticOneForm_eq_form
+      literature_dependencies:
+        - statement: "genus of y²=f(x), deg f even, is deg(f)/2 - 1"
+          source: "ISBN:978-0-8218-0268-7"
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code"
+      prompting_notes: >
+        Primary prover/author across the project (zero human-written Lean).
+        Cycle-by-cycle proving with compiler-guided repair; axiom-vs-proof
+        boundary set by the mathematician-user. Earlier sessions also used Opus 4.7.
+    - method: "agent"
+      models: ["gpt-5-codex"]
+      framework: "Codex"
+      prompting_notes: >
+        Auxiliary rescue passes (Jacobian functoriality derivations,
+        HyperellipticEven T2/Compact proofs, affine cocycle equations) and axiom
+        cross-review (README "Resources used"; docs/codex-review.md).
+    - method: "agent"
+      models: ["aristotle"]
+      framework: "Aristotle (Harmonic)"
+      prompting_notes: >
+        Automated theorem prover used as a proving agent (via the marathon
+        tooling): drafting and filling Lean proof bodies, with Claude Code
+        orchestrating prompts and integrating the results.
+    - method: "other"
+      models: ["gemini-3-pro"]
+      framework: "Gemini (deep-think / chat)"
+      prompting_notes: >
+        Cross-vetting only, not a prover: axiom audits, type-equality smell-tests,
+        the discharge-plan review (gemini-3.1-pro-preview). Caught the
+        AX_FiniteDimOneForms-as-instance and EvenForm Möbius-axiom unsoundnesses.
+  notes: >
+    No AGENTS.md / GEMINI.md at repo root; model attribution from README
+    "Resources used", docs/, and the project's vetting records. Recent commit
+    co-author trailers credit "Claude Opus 4.8 (1M context)". Build: Lean v4.30.0.
+
+fidelity:
+  divergences: >
+    This is a CHALLENGE/scaffold repo, not a complete proof. The Buzzard API is
+    closed with real defs/instances and functoriality identities are derived
+    theorems, but the deep mathematics is reduced to ~55 classified axioms with
+    written discharge plans rather than proved. Three genus theorems are genuinely
+    proved: genus(ℙ¹)=0 and genus(Elliptic)=1 from Lean core only,
+    genus(HyperellipticEven) modulo the Liouville L2/L3 axioms. The Albanese
+    universal property IsJacobian is a compiling statement; proving Buzzard's
+    concrete Jacobian satisfies it (categoricity) is the open next target.
+    Construction generalized to the period-lattice (V ⧸ L) route. Axioms are
+    LLM-vetted but have had no independent human-mathematician review.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >
+    11 `sorry` total, all outside the core (Extensions/Hyperelliptic.lean 6,
+    Extensions/AbelJacobi.lean 4, ProjectiveCurve/Hyperelliptic/AntiInvariance.lean 1);
+    Challenge.lean, the core construction, and the concrete-curve witnesses are
+    sorry-free. ~55 active project axioms, kernel-verified and triaged in
+    AXIOM_AUDIT.md; golden #print axioms trace in docs/axiom-report.txt confirms no
+    sorryAx under any closed headline. The two formerly-unsound cocycle axioms were
+    retired; the vendored Kirov + Wallace subtrees are axiom-free. LLM-cross-vetted
+    (Gemini deep-think + Codex); not human-mathematician reviewed.
+
+alignment:
+  namespace: "Jacobians"
+  statements:
+    - source: "https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9"
+      lean: "Jacobians.Challenge (24 sorries closed)"
+      module: "Jacobians.Challenge"
+      status: "proved"
+      note: >
+        All 24 Buzzard `sorry`s discharged as real def/instance; functoriality
+        (id + comp) are derived theorems. Rests on the classified axiom layer below the API.
+    - source: "ISBN:978-1-4612-5963-3"
+      lean: "Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero"
+      module: "Jacobians.ProjectiveCurve.Line.Genus"
+      status: "proved"
+      note: "Axiom-free (Lean core only)."
+    - source: "10.1007/978-1-4899-2843-6"
+      lean: "Jacobians.ProjectiveCurve.genus_Elliptic_eq_one"
+      module: "Jacobians.ProjectiveCurve.Elliptic.OneForm"
+      status: "proved"
+      note: "Axiom-free (Lean core only)."
+    - source: "ISBN:978-0-8218-0268-7"
+      lean: "Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq"
+      module: "Jacobians.Extensions.HyperellipticEven"
+      status: "literature-dependency"
+      note: "Real theorem (le_antisymm), but the upper bound consumes the Liouville L2/L3 axioms + atlas/IFT axioms."
+    - source: "https://www.jmilne.org/math/xnotes/JVs.pdf"
+      lean: "Jacobians.IsJacobian"
+      module: "Jacobians.UniversalProperty"
+      status: "not-formalized"
+      note: "Albanese universal property as a Prop-valued statement only; the categoricity theorem is unproved (open next target)."
+
+acknowledgements: >
+  Vendors real Lean from rkirov/jacobian-claude (Apache-2.0) and
+  tangentstorm/JacobianChallenge / Michal Wallace (MIT). Challenge by Kevin Buzzard.

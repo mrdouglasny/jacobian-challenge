@@ -1,8 +1,7 @@
 # Design — Jacobians Lean API
 
 Long-term design choices for the Jacobians API challenge. Companion to
-`recon.md` (mathlib availability audit) and `REFERENCES.md` (textbook
-pointers).
+`REFERENCES.md` (textbook pointers).
 
 ## Optimization axes
 

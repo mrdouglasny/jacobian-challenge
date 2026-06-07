@@ -4,146 +4,96 @@
 
 Lean 4 formalization of Kevin Buzzard's
 [Jacobians API challenge](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9)
-(v0.2), pinned to Mathlib commit
-[`8e3c989104daaa052921bf43de9eef0e1ac9fbf5`](https://github.com/leanprover-community/mathlib4/commit/8e3c989104daaa052921bf43de9eef0e1ac9fbf5)
-(2026-04-15).
+(**v0.4**), pinned to Mathlib commit
+[`8e3c989`](https://github.com/leanprover-community/mathlib4/commit/8e3c989104daaa052921bf43de9eef0e1ac9fbf5)
+(2026-04-15). Built from scratch, with **zero reliance on future Mathlib**.
 
-## Disclaimer
+The exact v0.4 spec is committed verbatim as [`Jacobian_challenge.lean`](Jacobian_challenge.lean)
+(byte-for-byte identical to the gist), and [`ChallengeConformance.lean`](ChallengeConformance.lean)
+machine-checks (`lake env lean ChallengeConformance.lean`, exit 0) that this repo's declarations satisfy
+**every v0.4 signature exactly** — same names, same statements, no `[Nonempty X]` (v0.3), `𝓘(ℂ, E)`
+notation (v0.4), and the universe-polymorphic `Jacobian : Type u` (met by `ULift`-ing the concrete
+`Type 0` torus, via [`Jacobians/ULiftManifold.lean`](Jacobians/ULiftManifold.lean) — infrastructure
+Mathlib lacks).
 
-The human author (rkirov) does not know the mathematics involved
-(algebraic geometry, Riemann surfaces, Abel's theorem, etc.) and has
-not reviewed the content of this repository. Code, proofs, and
-documentation were produced by Claude (Anthropic's LLM) across
-several sessions with light human scoping/steering
-(see `human_input.md`). Expect errors in math, proof strategy, and
-documentation — anything flagged as a "real proof" here should be
-independently checked by someone who actually knows the subject
-before being relied on.
+## ⚠ Disclaimer — AI-produced, unreviewed by a mathematician
 
-## Status
+The human author ([rkirov](https://github.com/rkirov)) does not know the mathematics involved
+(algebraic geometry, Riemann surfaces, Serre duality, Abel's theorem) and has **not** reviewed the
+content. The code, proofs, and documentation were produced by **Claude** (Anthropic's LLM) across many
+sessions with light human scoping/steering (see [`human_input.md`](human_input.md)). The one hard
+guarantee is **Lean's kernel**: anything reported as *proven* here is `#print axioms`-clean (no
+`sorryAx`). Everything else — proof strategy, prose, mathematical judgment — may be wrong. Have a subject
+expert check before relying on anything.
 
-**Not done, not close to done.** The challenge file compiles and
-every main signature from Buzzard's spec is defined, but 17 `sorry`s
-remain — each corresponding to a named classical theorem not yet in
-Mathlib. Those 17 are the mathematically load-bearing pieces; filling
-them is substantial, multi-month-each, Mathlib-contribution-scale
-work (some of it touching genuinely deep theorems — Uniformization,
-Hodge decomposition for the period lattice, Abel's theorem).
+## Status — ~60% (foundations + several walls done; the hard analysis remains)
 
-The code to date is ~7,800 lines. A rough honest estimate for a
-complete, sorry-free solution is several times that, most of the
-remaining bulk being upstream Mathlib infrastructure (manifold
-Stokes, manifold-level meromorphic functions, divisor theory on
-manifolds, manifold degree, Čech cohomology of 𝒪, Riemann–Roch).
-None of those currently exist in Mathlib.
+- **Builds green** (`lake build`, exit 0; **34k lines of Lean** (`cloc`) across 171 files) with **0 custom axioms** — the
+  entire unproved surface is **~10 named `sorry`s**, each a true classical theorem absent from Mathlib.
+- **Machine-verified (`#print axioms`):** `genus`, `ContMDiff.degree`, the 7 `Jacobian` instances,
+  `ofCurve_self`, and the pushforward/pullback functoriality lemmas are sorry-free. The **residue
+  theorem** `MeromorphicFunction.deg_div` (Forster Cor. 4.25) is now closed and axiom-clean.
+- **The marquee deliverables still carry `sorryAx`** — `genus_eq_zero_iff_homeo`, `ofCurve_inj`, and the
+  holomorphicity statements are gated on the open walls below. *Matching a signature is not the same as a
+  finished proof.*
+- **Honest scope:** the remaining ~40% is genuinely-hard greenfield analysis (Riemann–Roch / Serre
+  duality, the finiteness theorem, Abel, surface topology, manifold de Rham) — a multi-session effort.
 
-### What is done
+📊 **See [`docs/architecture_map.html`](docs/architecture_map.html)** for the visual dependency map +
+progress, **[`formalization.yaml`](formalization.yaml)** for the
+[mathlib-initiative](https://github.com/mathlib-initiative/formalization.yaml) self-reporting metadata,
+and **[`docs/STATUS.md`](docs/STATUS.md)** / **[`docs/rethink_2026-06-05.md`](docs/rethink_2026-06-05.md)**
+for per-theorem status and the plan.
 
-- Every type/definition in Buzzard's challenge spec: `genus`,
-  `Jacobian`, `periodLattice`, `ofCurve`, `pushforward`, `pullback`,
-  `ContMDiff.degree` (the last two as `0` placeholders where
-  noted).
-- All the main theorems compile with the challenge's intended
-  statements.
-- Real proof chains for the `pushforward` side (functoriality,
-  lattice preservation, smoothness via `ZLatticeQuotient`).
-- `ofCurve_inj` (the main challenge theorem) reduces to Abel's
-  theorem via a real proof chain — the chain itself is genuine
-  (basepoint change, `abelJacobi ↔ ofCurve` bridge, two-point
-  divisor algebra).
-- Substantial real infrastructure: line integrals on manifolds
-  (0 sorries, the single biggest missing Mathlib piece),
-  chart-invariance of `meromorphicOrderAt`, Montel's theorem via
-  per-chart Arzelà, bundle-trivialization proofs like
-  `isClosed_criticalSet`, reverse/concat smoothness preservation
-  for smooth paths.
+### The remaining walls — the keystone first
 
-### What is remaining (17 sorries)
+**Finiteness (`exists_cechModel`, Forster §14) is the chokepoint:** Riemann–Roch, Serre duality, and the
+residue theorem's inputs all bottom out there. Downstream of it:
 
-Tiered by classical difficulty (not Lean-formalization difficulty,
-which is dominated by missing Mathlib infrastructure):
+| Wall | Gives | Status |
+|---|---|---|
+| `exists_cechModel` (finiteness, §14) | the RR/Serre tower | δ-complex proven; ∂̄-globalization + cover-independence open |
+| `exists_serreDualityData` (§17 residue pairing) | the forward headline | abstract cores proven; the pairing open |
+| `exists_skyscraperLES` (χ-additivity, §16) | cohomological RR | assembly proven; cover-independence open |
+| `abelJacobi_twoPoint_ne_zero` (#3, Abel) | `ofCurve_inj` | reduction proven; core open |
+| `exists_cutSurface` (#7, surface topology) | the Jacobian manifold structure | bilinear relations proven; cut chart open |
+| `HasHolomorphicPrimitives` (#1b, manifold de Rham) | the backward headline | S²-simply-connected proven; period slice open |
 
-- **Trivial / easy (~days of work once infrastructure exists):**
-  `PrincipalDivisors_le_DivisorOfDegZero`, `smoothPath_basepoint_change`,
-  `finite_branchLocus_of_nonconstant`, `criticalSet_ne_univ_of_nonconstant`.
-- **Medium (~weeks each, classical complex analysis):**
-  `smoothPath` existence, `finite_criticalSet_of_nonconstant`,
-  `ofCurve_contMDiff`.
-- **Hard (Mathlib-contribution scale, ~months each):**
-  `deg_div` (residue theorem on manifolds),
-  `exists_preimageCycle_of_nonconstant` (branched-cover lifting),
-  `ambientPsi_periodVec_mem_truePeriodLattice`,
-  `ambientPsi_preserves_truePeriodLattice`.
-- **Very hard (big named classical theorems):**
-  `ambientPhi_ambientPsi_eq` (degree identity; Forster §17),
-  `abelJacobi_twoPoint_ne_zero` (Abel's theorem + Riemann–Hurwitz;
-  Forster §21).
-- **Foundational (rank-2g period-lattice theorem; Hodge decomp):**
-  `DiscreteTopology (truePeriodLattice X)`,
-  `IsZLattice ℝ (truePeriodLattice X)`.
-- **Peak difficulty:** `genus_eq_zero_iff_homeo` (Uniformization in
-  the genus-0 case; Forster §16).
-
-See `docs/STATUS.md` for the full inventory with Forster/Miranda
-section references.
-
-## Layout
-
-- `Jacobians.lean` — the challenge file (main theorems + signatures).
-- `Jacobians/` — supporting infrastructure:
-  - `Abel.lean` — divisors, Abel–Jacobi map, meromorphic functions, Abel's theorem.
-  - `PeriodLattice.lean` — period vector, closed loops, Abel-Jacobi map (ofCurve), line integral machinery.
-  - `HolomorphicForms.lean` — pullback/pushforward of forms, ambient Φ/Ψ bridges.
-  - `LineIntegral.lean` — line integral, pathSpeed, chain rule, concat/reverse.
-  - `Genus.lean` — genus = dim HOF X.
-  - `Montel/` — Montel's theorem (compactness of holomorphic 1-forms under supNormK).
-  - `ZLatticeQuotient.lean` — quotient of ℂ^g by a ℤ-lattice as a complex manifold.
-- `docs/` — design notes, plans, references, status:
-  - `STATUS.md` — project status and milestones.
-  - `DESIGN.md` — long-term construction choices.
-  - `ABEL_JACOBI_PLAN.md` — roadmap for the Abel–Jacobi chain.
-  - `MONTEL_PATH.md` — Montel theorem proof path.
-  - `REFERENCES.md` — textbook/paper references per sorry.
-  - `recon.md` — Mathlib availability audit.
-
-## Build
+## Build & verify
 
 ```bash
-lake exe cache get   # pull Mathlib olean cache
-lake build
+lake exe cache get   # pull the Mathlib olean cache
+lake build           # green; expect `declaration uses 'sorry'` warnings (the open walls + sub-lemmas)
+lake env lean ChallengeConformance.lean   # exit 0 — verbatim v0.4 conformance
 ```
 
-Expect 17 `declaration uses 'sorry'` warnings (one per remaining
-classical sorry) and no errors.
+Verify any individual result with `#print axioms <decl>` — a `sorryAx` dependency means it is still gated.
 
 ## Approach
 
-An earlier draft used a typeclass-gating strategy (`HasAbelsTheorem`,
-`HasResidueTheorem`, etc.) to move the missing classical content to
-the instance layer. This was reverted: typeclass-gated axioms are
-content-equivalent to `sorry` but ambiguous (a reader may not notice
-the claim is unproved). All gated theorems are now honest
-`sorry`-bodies so the unproved surface is visible in Lean's warnings.
+Missing classical content is kept as **honest `sorry`-bodies** (visible in Lean's `sorry` warnings),
+never as typeclass-gated axioms. (An earlier draft tried `HasAbelsTheorem`/`HasResidueTheorem` instances;
+reverted — hidden axioms are content-equivalent to `sorry` but read as *proven*.) Real content proven
+along the way is preserved; each `sorry` is a single named classical theorem with a Forster/Miranda
+pointer, isolated so the unproved surface stays visible and `#print axioms`-auditable.
 
-Real content *was* proven along the way and is preserved. Everything
-else is a `sorry` with a named classical theorem attached, pointing
-to a Forster/Miranda section.
+## Layout
 
-Selected proven content (not just stated — real Lean proofs):
-- Chart-invariance of `meromorphicOrderAt` (Forster §6 / Miranda II.4).
-- Montel's theorem via Arzelà on per-chart bounded-analytic families.
-- Chain rule `pathSpeed_comp_eq_mfderiv` via `IsScalarTower ℝ ℂ ℂ` diamond bypass.
-- `lineIntegral_pullback` (change of variables).
-- `periodVec_pushforward_of_smooth` (linear algebra + chart pullback).
-- `ambientPhi_preserves_truePeriodLattice` (span induction).
-- `isClosed_criticalSet` (bundle trivialization + MVT).
-- `abelJacobi_twoPointDivisor` (direct sum computation).
-- `ofCurve_inj` — the main challenge theorem, proof chain is real
-  (relies on sorry-d Abel + Riemann–Hurwitz axioms at the leaves).
-- Various concat/reverse smoothness preservation theorems.
+- [`Jacobian_challenge.lean`](Jacobian_challenge.lean) — the verbatim v0.4 spec ·
+  [`ChallengeConformance.lean`](ChallengeConformance.lean) — the conformance check.
+- [`Jacobians.lean`](Jacobians.lean) + `Jacobians/` — the implementation (171 files):
+  `Abel.lean` (divisors, Abel–Jacobi, meromorphic functions), `PeriodLattice.lean`, `RiemannRoch.lean`,
+  `Dolbeault/` (Čech/Serre/finiteness), `Discharge/Manifold/` (degree/fibre machinery), `Montel/`,
+  `ZLatticeQuotient.lean`, …
+- `docs/` — [`architecture_map.html`](docs/architecture_map.html) (visual map), `STATUS.md`,
+  `rethink_2026-06-05.md` (the plan), `serre_17_build_plan.md`, `REFERENCES.md`, `DESIGN.md`, the
+  research notes, and `archive/` (older designs + the external-port audit).
+- [`formalization.yaml`](formalization.yaml) — repo-root self-reporting metadata.
 
 ## References
 
-- Forster, *Lectures on Riemann Surfaces* (primary).
-- Miranda, *Algebraic Curves and Riemann Surfaces*.
-- Farkas–Kra, *Riemann Surfaces*.
+- Forster, *Lectures on Riemann Surfaces* (GTM 81) — primary.
+- Miranda, *Algebraic Curves and Riemann Surfaces*; Griffiths–Harris, *Principles of Algebraic Geometry*.
+- Degree/fibre well-definedness infrastructure ported (MIT) from
+  [Brsanch/jacobian-lean-challenge](https://github.com/Brsanch/jacobian-lean-challenge); audited
+  axiom-clean (`docs/archive/EXTERNAL_AUDIT.md`).

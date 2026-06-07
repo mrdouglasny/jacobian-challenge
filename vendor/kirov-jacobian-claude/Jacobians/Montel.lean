@@ -42,8 +42,8 @@ four submodules:
   positive-definiteness.
 
 This root file packages them into `NormedAddCommGroup` / `NormedSpace ℂ`
-structures and derives `FiniteDimensional` from a single focused sorry:
-`closedBall_isCompact` (Steps 2–6 of the classical outline).
+structures and derives `FiniteDimensional` from `closedBall_isCompact`
+(Steps 2–6 of the classical outline), which is fully proven and axiom-clean.
 -/
 
 namespace Jacobians.Montel
@@ -217,19 +217,19 @@ Strategy (classical — Ahlfors-Sario, Rudin Ch. 14):
 3. Cauchy estimates ⇒ equicontinuous (B.7b).
 4. Arzelà-Ascoli ⇒ per-chart relative compactness (B.8).
 5. Finite product of precompact = precompact (B.9).
-6. Completeness via `exists_convergent_subseq_of_bounded` — the single
-   structural sorry remaining, reducing to the bundle-level form of
-   "uniform limit of holomorphic is holomorphic".
+6. Completeness via `exists_convergent_subseq_of_bounded` — the
+   bundle-level form of "uniform limit of holomorphic is holomorphic",
+   now fully proven (see `Complete.lean`).
 7. Sequential compactness ⇒ compactness (metric). -/
 
-/-- **Structural sorry — bounded sequences in HOF X have convergent
-subsequences** (bundle-level Montel's theorem).
+/-- **Bounded sequences in HOF X have convergent subsequences**
+(bundle-level Montel's theorem). Fully proven and axiom-clean.
 
 Given a bounded supNormK sequence of holomorphic 1-forms, there exists
 a supNormK-convergent subsequence with the limit in HOF X with
 `supNormK limit ≤ 1`.
 
-**Reduction path (all ingredients in place in sibling modules):**
+**Proof path (all ingredients proven in sibling modules):**
 1. Per-chart Arzelà (B.8 in `Compactness.lean`) gives per-chart
    convergent subsequences in `bcf(innerShrunkChart x₀, ℂ)`.
 2. Diagonal over finite `chartCover` gives a common subsequence
@@ -243,10 +243,8 @@ a supNormK-convergent subsequence with the limit in HOF X with
 6. Show `αs(φ k) → αLim` in supNormK and `supNormK αLim ≤ 1`.
 
 Step 5 is the bundle-level "uniform limit of holomorphic sections is
-holomorphic" — a classical 100+ year old result (Banach's completeness
-argument for spaces of holomorphic functions/sections), requiring ~200
-lines of bundle-reconstruction Lean plumbing. Not research-level math,
-just a Mathlib-adjacent contribution yet to be written. -/
+holomorphic"; it is discharged in `Complete.lean` via
+`contMDiffOn_totalSpaceMk_L_inner`. -/
 theorem HolomorphicOneForms.exists_convergent_subseq_of_bounded
     (αs : ℕ → Jacobians.HolomorphicOneForms X)
     (h : ∀ n, HolomorphicOneForms.supNormK (αs n) ≤ 1) :
@@ -262,8 +260,8 @@ theorem HolomorphicOneForms.exists_convergent_subseq_of_bounded
   -- Step 5d-limit: pointwise CLM limit `L y`.
   obtain ⟨L, hL⟩ := exists_toFun_limit (fun n : ℕ => αs (φ n)) h_cauchy
   -- Step 5d-smooth: bundle-smoothness reconstruction via substeps 1-5.
-  -- Substeps 1-3 + 4 (modulo inner inCoordinates sorry) handle the per-chart
-  -- smoothness; substep 5 below assembles via the finite cover.
+  -- Substeps 1-4 handle the per-chart smoothness; substep 5 below
+  -- assembles via the finite cover.
   have h_smooth : ContMDiff 𝓘(ℂ, ℂ) (𝓘(ℂ, ℂ).prod 𝓘(ℂ, ℂ →L[ℂ] ℂ)) ω
       (fun x : X => TotalSpace.mk' (ℂ →L[ℂ] ℂ)
         (E := fun x : X => TangentSpace 𝓘(ℂ, ℂ) x →L[ℂ] (Bundle.Trivial X ℂ) x)
@@ -384,17 +382,16 @@ the `FiniteDimensional` conclusion follows via Riesz:
         Jacobians.Montel.HolomorphicOneForms.closedBall_isCompact
 -/
 
-/-! ### Status (post-refactor)
+/-! ### Status
 
-- **`closedBall_isCompact`**: CLOSED (real proof via sequential
-  compactness using the structural sorry below).
-- **`exists_convergent_subseq_of_bounded`**: single structural sorry
-  — bundle-level Montel: bounded sequence has supNormK-convergent
-  subsequence. Reduces to a chart-transition estimate OR bundle-section
-  reconstruction (~200-400 lines of bundle-adjacent work).
+- **`closedBall_isCompact`**: PROVEN (axiom-clean) via sequential
+  compactness using `exists_convergent_subseq_of_bounded`.
+- **`exists_convergent_subseq_of_bounded`**: PROVEN — bundle-level
+  Montel: bounded sequence has a supNormK-convergent subsequence.
 - All Arzelà-Ascoli infrastructure (B.1-B.9) is in
   `Jacobians/Montel/Compactness.lean`, fully proven.
 - All analytic-limit machinery (`analyticOn_of_tendstoLocallyUniformlyOn`
-  etc.) is in place. -/
+  etc.) is in place. The entire Montel route to
+  `FiniteDimensional ℂ (HolomorphicOneForms X)` is sorry-free. -/
 
 end Jacobians.Montel

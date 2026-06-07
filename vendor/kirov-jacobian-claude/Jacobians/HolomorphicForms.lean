@@ -42,6 +42,8 @@ namespace Jacobians
 
 open scoped Manifold ContDiff Bundle
 
+set_option linter.unusedSectionVars false
+
 -- `HolomorphicOneForms` and its `AddCommGroup` / `Module ℂ` instances are
 -- defined in `Jacobians.Genus` (to allow `genus X := finrank ℂ (HOF X)`
 -- without a circular import).
@@ -270,10 +272,9 @@ noncomputable def ambientPsi {gX gY : ℕ}
   · exact 0
 
 /-- The ambient ℂ-linear map `Φ` induced by the pushforward of forms along
-`f : X → Y`. Defined as the matrix-transpose of `ambientPsi f hf` (via
-the standard Pi basis), dodging the need for a concrete `pushforwardForm`.
-The transpose reverses composition order, so covariant `ambientPhi_comp`
-is automatic from contravariant `ambientPsi_comp`. -/
+`f : X → Y`. Defined as the matrix-transpose of `ambientPsi f hf` (= `Mᵀ`, via
+the standard Pi basis). The transpose reverses composition order, so covariant
+`ambientPhi_comp` is automatic from contravariant `ambientPsi_comp`. -/
 noncomputable def ambientPhi {gX gY : ℕ}
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (Fin gX → ℂ) →L[ℂ] (Fin gY → ℂ) :=
@@ -311,19 +312,16 @@ theorem ambientPsi_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpa
   rw [pullbackForm_comp f hf g hg hgf]
   simp [LinearMap.comp_apply]
 
-/-- **Ambient degree identity** (Forster §17 / Miranda §III.4).
-The composition `ambientPhi f hf ∘ ambientPsi f hf` equals
-multiplication by the degree `d`. In terms of forms: `f_* ∘ f^* = deg(f) • id`.
+/- **Ambient degree identity** (`f_* ∘ f^* = deg(f) • id`, Griffiths–Harris
+Ch. 2 §2.7 — the trace map for forms).
 
-Mathlib has no manifold-level degree theory for proper holomorphic maps.
-Real content requires a real `ContMDiff.degree` (via preimage counting
-at regular values) together with a real trace/pushforward construction
-for `ambientPhi`. ~500-1000 lines to formalize. -/
-theorem ambientPhi_ambientPsi_eq {gX gY : ℕ}
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (d : ℕ)
-    (y : Fin gY → ℂ) :
-    ambientPhi (gX := gX) (gY := gY) f hf (ambientPsi f hf y) = (d : ℕ) • y :=
-  sorry
+This is stated in `Jacobians.lean` as `Jacobian.ambientPhi_ambientPsi_eq`,
+*not* here. It must pin the degree to the genuine `ContMDiff.degree f hf`,
+which is defined downstream of this file. The previous formulation here
+quantified over a free `d : ℕ`, making it vacuously false (instantiating
+`d = 0` and `d = 1` forces `y = 0` for all `y`) — the same defect class as
+the removed SmoothPath third conjunct. See `Jacobian.ambientPhi_ambientPsi_eq`
+for the honest single-degree statement. -/
 
 /-- `ambientPhi id = id` — follows from `ambientPsi_id` via the transpose
 construction: transpose of identity matrix is identity. -/

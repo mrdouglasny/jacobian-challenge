@@ -57,7 +57,7 @@ theorem isOpenMap_mk : IsOpenMap (QuotientAddGroup.mk : E → E ⧸ Λ) :=
 /-- Charted space structure on `E ⧸ Λ` modelled on `E`, coming from the fact
 that the quotient map is a surjective local homeomorphism. -/
 noncomputable instance chartedSpaceQuotient : ChartedSpace E (E ⧸ Λ) :=
-  (isLocalHomeomorph_mk Λ).chartedSpace QuotientAddGroup.mk_surjective
+  (isLocalHomeomorph_mk Λ).chartedSpace' QuotientAddGroup.mk_surjective
 
 end CoveringMap
 
@@ -313,6 +313,59 @@ for a `ContDiff` `f : E → E` (or `f : E × E → E`). By `contDiffOn_symm_mk`
 the outer factor is `ContDiff` on its natural domain, and the composite
 is then `ContDiff`. -/
 
+
+/-- The **quotient projection** `mk : E → E ⧸ Λ.toAddSubgroup` is `ContMDiff`.
+
+The chart on `E ⧸ Λ` at `mk x` is essentially `mk⁻¹` on a neighborhood
+(via `IsLocalHomeomorph.chartedSpace`), so the chart-pullback of `mk`
+along the trivial chart on `E` and this inverse chart is locally the
+identity, hence `ContDiff`. The proof mirrors the structure of
+`contMDiff_neg` but with `id` in place of the `neg` ambient map. -/
+theorem contMDiff_mk : ContMDiff 𝓘(𝕜, E) 𝓘(𝕜, E) n
+    (QuotientAddGroup.mk : E → E ⧸ Λ.toAddSubgroup) := by
+  intro x₀
+  -- Set up the local chart structure at mk x₀.
+  set q := (QuotientAddGroup.mk x₀ : E ⧸ Λ.toAddSubgroup) with hq_def
+  set x_c := Classical.choose
+    (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q) with hxc_def
+  have hqc : QuotientAddGroup.mk x_c = q :=
+    Classical.choose_spec (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q)
+  set P := IsLocalHomeomorph.chartAtPreimage
+    (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c with hP_def
+  have hP : (P : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
+    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c).symm
+  have hxc_mem : x_c ∈ P.source :=
+    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+  -- mk x₀ ∈ P.target: P x_c = mk x_c = q = mk x₀, and P maps source to target.
+  have hq_in_P : q ∈ P.target := by
+    have : P x_c = q := by rw [hP]; exact hqc
+    rw [← this]; exact P.map_source hxc_mem
+  have hx_pre : x₀ ∈ (QuotientAddGroup.mk : E → E ⧸ Λ.toAddSubgroup) ⁻¹' P.target := by
+    show QuotientAddGroup.mk x₀ ∈ P.target
+    rw [show QuotientAddGroup.mk x₀ = q from rfl]; exact hq_in_P
+  -- Now derive ContMDiffAt.
+  rw [contMDiffAt_iff]
+  refine ⟨QuotientAddGroup.continuous_mk.continuousAt, ?_⟩
+  simp only [modelWithCornersSelf_coe, Set.range_id]
+  rw [contDiffWithinAt_univ]
+  -- The required ContDiffAt is for the chart pullback.
+  -- chartAt at mk x₀ is P.symm; chartAt at x₀ on E is identity.
+  -- So pullback is fun y ↦ P.symm (mk y), which is ContDiffAt at x₀ by
+  -- `contDiffOn_symm_mk` since x₀ ∈ mk⁻¹ P.target.
+  have h_at : ContDiffAt 𝕜 n
+      (fun y : E => P.symm (QuotientAddGroup.mk y : E ⧸ Λ.toAddSubgroup)) x₀ := by
+    apply (contDiffOn_symm_mk Λ P hP).contDiffAt
+    exact (QuotientAddGroup.continuous_mk.isOpen_preimage _ P.open_target).mem_nhds hx_pre
+  -- extChartAt 𝓘(𝕜, E) x₀ x₀ = x₀ (trivial chart on E).
+  have hpoint : extChartAt 𝓘(𝕜, E) x₀ x₀ = x₀ := by
+    show (chartAt E x₀) x₀ = x₀
+    rfl
+  rw [hpoint]
+  -- The required pullback eventually equals fun y ↦ P.symm (mk y) near x₀.
+  apply h_at.congr_of_eventuallyEq
+  filter_upwards with y
+  -- extChartAt _ q (mk y) = chartAt q (mk y) = P.symm (mk y) by definition.
+  rfl
 
 /-- The negation map `q ↦ -q` on `E ⧸ Λ` is `ContMDiff`. -/
 theorem contMDiff_neg :

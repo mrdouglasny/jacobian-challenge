@@ -911,49 +911,22 @@ theorem contMDiffOn_totalSpaceMk_L_inner
     (h_scalar y₀ hy₀).smul contMDiffWithinAt_const
   exact h_smul_smooth.congr (fun y hy => h_simpl y hy) (h_simpl y₀ hy₀)
 
-/-! ### Remaining steps (DEFERRED)
+/-! ### Status
 
-The full completeness proof requires:
+The substeps of the completeness argument are proven in this file and its
+siblings:
 
-**Step 2** (uniform convergence on shrunkChart):
-  Given supNormK-Cauchy (α_n), and using Step 1, for each x₀ ∈ chartCover,
-  `localRep α_n x₀` is uniformly Cauchy on compact `shrunkChart x₀`.
-  Since ℂ is complete, uniform limit exists as a continuous function
-  `g_{x₀} : shrunkChart x₀ → ℂ`.
+- **Per-chart uniform Cauchy / limit** (`localRep` on `shrunkChart x₀`):
+  `cauchySeq_alpha_toFun_apply_symmL`, `exists_toFun_limit`.
+- **Pointwise CLM limit** (1-dim tangent reduction via
+  `toFun_eq_localRep_smul`): `exists_toFun_limit`.
+- **Smoothness of the limit** (chart-wise analytic ⇒ `ContMDiffSection ω`):
+  `contMDiffOn_totalSpaceMk_L_inner`, assembled over the finite cover in
+  `exists_convergent_subseq_of_bounded` (`Montel.lean`).
+- **Convergence in supNormK** and **compactness of the closed ball**:
+  `norm_localRep_sub_limit_le` and `closedBall_isCompact` (`Montel.lean`).
 
-**Step 3** (pointwise CLM limit):
-  For each y ∈ X, pick x₀ ∈ chartCover with y ∈ innerShrunkChart x₀
-  (exists by `iUnion_innerShrunkChart_chartCover_eq`). Using the 1-dim
-  tangent space (`alpha_toFun_eq_zero_of_localRep_eq_zero` machinery in
-  SupNorm.lean), α_n.toFun y is Cauchy in operator norm, converging to
-  some `α∞_CLM y : T_y X →L[ℂ] ℂ`.
-
-**Step 4** (smoothness of limit — **the hardest piece**):
-  Use `analyticOn_of_pullback_tendsto_locally_uniformly` (already in
-  Compactness.lean) on each chart: chart-wise pullback is locally
-  uniform limit of analytic functions, hence analytic. Then reconstruct
-  α∞ : ContMDiffSection ω from the chart-analytic pullbacks. This
-  bundle-section reconstruction from chart pieces requires
-  manifold-level assembly machinery beyond current Compactness.lean.
-
-**Step 5** (convergence in supNormK norm):
-  α_n → α∞ in supNormK follows from per-chart uniform convergence
-  (each chartNormK (α_n - α∞) → 0, so supNormK (α_n - α∞) → 0).
-
-**Step 6** (CompleteSpace instance):
-  Package as `CompleteSpace` instance for HOF X under `normedAddCommGroup`.
-
-Once CompleteSpace is in place, `closedBall_isCompact` in `Montel.lean`
-follows from: closedBall is totally bounded (via Arzela from
-Compactness.lean) + closed (trivial in normed space) + complete ambient
-= compact.
-
-**Why this is genuinely multi-session work:** Step 4 is a bundle-level
-theorem that doesn't exist in Mathlib: "analytic functions on chart
-overlaps that agree on transitions glue to a `ContMDiffSection ω`". It
-requires careful use of the `IsManifold ω` structure to assemble
-chart-wise analyticity into global smoothness. Estimated
-200–400 lines of dedicated Lean work.
--/
+The full Montel route to `FiniteDimensional ℂ (HolomorphicOneForms X)` is
+sorry-free and axiom-clean. -/
 
 end Jacobians.Montel

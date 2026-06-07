@@ -11,9 +11,9 @@ import Mathlib.Topology.ContinuousMap.Bounded.ArzelaAscoli
 import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 /-!
-# Montel path — compactness of the closed unit ball (work in progress)
+# Montel path — compactness of the closed unit ball
 
-This file is the step-B decomposition of the single content sorry
+This file is the step-B decomposition of
 `HolomorphicOneForms.closedBall_isCompact` in `Jacobians/Montel.lean`.
 The classical outline (Ahlfors–Sario Ch II §5, Rudin Ch 14) proceeds:
 
@@ -31,8 +31,8 @@ The classical outline (Ahlfors–Sario Ch II §5, Rudin Ch 14) proceeds:
    its image is relatively compact, hence compact.
 
 This file lands step 1 — the continuous-map bundling of `localRep` on
-the compact shrunk chart — as clean, sorry-free API. The remaining
-steps (3)–(6) are separately scheduled.
+the compact shrunk chart — as clean, sorry-free API. Steps (3)–(6) are
+completed across this file and `Complete.lean`.
 -/
 
 namespace Jacobians.Montel

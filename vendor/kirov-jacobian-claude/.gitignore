@@ -1,0 +1,19 @@
+/.lake
+/build
+/lake-packages
+/lean_packages
+*.olean
+*.ilean
+*.trace
+*.hash
+
+# vim swap files
+*.swp
+*.swo
+
+# Claude Code ephemeral state
+.claude/scheduled_tasks.lock
+.claude/settings.json
+.claude/settings.local.json
+*.pdf
+docs/architecture_map.html

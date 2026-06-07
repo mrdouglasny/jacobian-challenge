@@ -19,6 +19,13 @@ and in comments above difficult proofs.
   between analytic and algebraic viewpoints; use when Forster's style is
   too terse or when a divisor-theoretic perspective clarifies things.
 
+> **Local PDFs in repo root** (gitignored): Forster GTM 81, Miranda GSM 5, Griffiths–Harris.
+> **Key route divergence (2026-06-04, verified):** for the global residue / Serre `Res`, Forster §17.1–17.3
+> defines `Res` via `(2πi)⁻¹∬_X` (manifold Stokes) — which this repo **avoids**. The repo's PDE-free route
+> is **Miranda §VIII.3's algebraic residue theorem via the trace to ℙ¹** (`∑Res_X(ω)=∑Res_{ℙ¹}(Tr ω)=0`,
+> reusing `TraceForm`/`pushforwardForm`). This is the **general 1-form residue theorem and is distinct from
+> `deg_div`** (which is only the `df/f` special case). See `docs/path_to_completion_reuse.md` §3.
+
 ## Per-sorry canonical references
 
 Record chapter/section pointers next to each sorry as it's closed.
@@ -32,7 +39,7 @@ Record chapter/section pointers next to each sorry as it's closed.
 | `ofCurve` (Abel–Jacobi map) | Forster §20 | Miranda Ch. VIII §1 |
 | `ofCurve_contMDiff` | Forster §21 (holomorphicity) | Miranda Ch. VIII §2 |
 | `ofCurve_self` | trivial (definition unwinding) | — |
-| `ofCurve_inj` (Abel's theorem) | Forster §21 | Miranda Ch. VIII §3 |
+| `ofCurve_inj` (Abel's theorem) | Forster §20 (Abel's Thm 20.7) + §21.7 (Pic⁰ ↪ Jac injective) | Miranda Ch. VIII §3 |
 | `pushforward`, `pullback` | Miranda Ch. VII | Griffiths–Harris Ch. 2 |
 | `pushforward_contMDiff`, `pullback_contMDiff` | Miranda Ch. VII | — |
 | `pushforward_id_apply`, `pushforward_comp_apply`, mirror for pullback | trivial (functoriality) | — |

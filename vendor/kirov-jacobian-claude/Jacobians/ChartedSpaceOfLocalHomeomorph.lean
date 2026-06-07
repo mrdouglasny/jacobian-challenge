@@ -38,7 +38,7 @@ lemma eq_chartAtPreimage {f : X → Y} (hf : IsLocalHomeomorph f) (x : X) :
 homeomorphism `f : X → Y`. The chart at `y` is the inverse of a partial
 homeomorphism around a chosen preimage of `y`. -/
 @[implicit_reducible]
-noncomputable def chartedSpace {f : X → Y} (hf : IsLocalHomeomorph f)
+noncomputable def chartedSpace' {f : X → Y} (hf : IsLocalHomeomorph f)
     (hs : Function.Surjective f) : ChartedSpace X Y where
   atlas := Set.range fun y : Y =>
     (chartAtPreimage hf (Classical.choose (hs y))).symm

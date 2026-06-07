@@ -1,0 +1,464 @@
+[
+  {
+    "slug": "AX_Elliptic_bLoop_analytic",
+    "verdict": "revise",
+    "duration_s": 25.5,
+    "chars_in": 4529,
+    "chars_out": 5439
+  },
+  {
+    "slug": "AX_Elliptic_aLoop_analytic",
+    "verdict": "revise",
+    "duration_s": 30.5,
+    "chars_in": 6026,
+    "chars_out": 5220
+  },
+  {
+    "slug": "AX_Elliptic_H1_symplectic",
+    "verdict": "reject",
+    "duration_s": 36.8,
+    "chars_in": 8183,
+    "chars_out": 7663
+  },
+  {
+    "slug": "AX_AnalyticCycleBasis",
+    "verdict": "reject",
+    "duration_s": 41.7,
+    "chars_in": 11637,
+    "chars_out": 8723
+  },
+  {
+    "slug": "AX_HyperellipticAffine_connected",
+    "verdict": "reject",
+    "duration_s": 44.4,
+    "chars_in": 12265,
+    "chars_out": 10885
+  },
+  {
+    "slug": "AX_Hyperelliptic_genus",
+    "verdict": "reject",
+    "duration_s": 26.3,
+    "chars_in": 9848,
+    "chars_out": 3491
+  },
+  {
+    "slug": "AX_IntersectionForm_alternating",
+    "verdict": "reject",
+    "duration_s": 26.6,
+    "chars_in": 5446,
+    "chars_out": 5312
+  },
+  {
+    "slug": "AX_IntersectionForm_perfect",
+    "verdict": "reject",
+    "duration_s": 36.0,
+    "chars_in": 7952,
+    "chars_out": 7608
+  },
+  {
+    "slug": "AX_Hyperelliptic_oddEquiv",
+    "verdict": "revise",
+    "duration_s": 49.1,
+    "chars_in": 4106,
+    "chars_out": 5451
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_connected",
+    "verdict": "reject",
+    "duration_s": 44.9,
+    "chars_in": 10697,
+    "chars_out": 5465
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_nonempty",
+    "verdict": "reject",
+    "duration_s": 37.0,
+    "chars_in": 7239,
+    "chars_out": 6769
+  },
+  {
+    "slug": "AX_PlaneCurveAffine_noncompact",
+    "verdict": "reject",
+    "duration_s": 51.5,
+    "chars_in": 7212,
+    "chars_out": 7542
+  },
+  {
+    "slug": "AX_PluckerFormula",
+    "verdict": "reject",
+    "duration_s": 38.5,
+    "chars_in": 7228,
+    "chars_out": 5225
+  },
+  {
+    "slug": "AX_ofCurve_contMDiff",
+    "verdict": "revise",
+    "duration_s": 34.2,
+    "chars_in": 8463,
+    "chars_out": 9736
+  },
+  {
+    "slug": "AX_curve_generates_jacobian",
+    "verdict": "reject",
+    "duration_s": 46.7,
+    "chars_in": 7580,
+    "chars_out": 8151
+  },
+  {
+    "slug": "AX_pullback_contMDiff",
+    "verdict": "revise",
+    "duration_s": 18.9,
+    "chars_in": 4593,
+    "chars_out": 5225
+  },
+  {
+    "slug": "AX_ofCurve_inj",
+    "verdict": "reject",
+    "duration_s": 51.5,
+    "chars_in": 10365,
+    "chars_out": 6887
+  },
+  {
+    "slug": "AX_pullbackAmbient_preserves_lattice",
+    "verdict": "reject",
+    "duration_s": 38.2,
+    "chars_in": 6676,
+    "chars_out": 7533
+  },
+  {
+    "slug": "AX_pathIntegral_local_antiderivative",
+    "verdict": "reject",
+    "duration_s": 56.5,
+    "chars_in": 8544,
+    "chars_out": 8286
+  },
+  {
+    "slug": "AX_pushforwardAmbient_preserves_lattice",
+    "verdict": "reject",
+    "duration_s": 35.0,
+    "chars_in": 10248,
+    "chars_out": 7764
+  },
+  {
+    "slug": "AX_pushforwardOneForm_comp",
+    "verdict": "reject",
+    "duration_s": 27.8,
+    "chars_in": 7343,
+    "chars_out": 5837
+  },
+  {
+    "slug": "AX_pushforwardOneForm_id",
+    "verdict": "revise",
+    "duration_s": 24.9,
+    "chars_in": 5653,
+    "chars_out": 5938
+  },
+  {
+    "slug": "Divisor-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 21.1,
+    "chars_in": 3974,
+    "chars_out": 4654
+  },
+  {
+    "slug": "AX_pushforward_contMDiff",
+    "verdict": "revise",
+    "duration_s": 42.9,
+    "chars_in": 7492,
+    "chars_out": 8947
+  },
+  {
+    "slug": "H0-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 21.0,
+    "chars_in": 4187,
+    "chars_out": 4454
+  },
+  {
+    "slug": "H0",
+    "verdict": "reject",
+    "duration_s": 29.1,
+    "chars_in": 8134,
+    "chars_out": 5079
+  },
+  {
+    "slug": "Divisor",
+    "verdict": "revise",
+    "duration_s": 41.0,
+    "chars_in": 4889,
+    "chars_out": 5627
+  },
+  {
+    "slug": "H1-instAddCommGroup",
+    "verdict": "revise",
+    "duration_s": 20.7,
+    "chars_in": 3911,
+    "chars_out": 4458
+  },
+  {
+    "slug": "H1",
+    "verdict": "reject",
+    "duration_s": 24.7,
+    "chars_in": 9056,
+    "chars_out": 4644
+  },
+  {
+    "slug": "H0-instModule",
+    "verdict": "revise",
+    "duration_s": 43.4,
+    "chars_in": 3787,
+    "chars_out": 3635
+  },
+  {
+    "slug": "Hyperelliptic-instChartedSpace",
+    "verdict": "revise",
+    "duration_s": 34.0,
+    "chars_in": 7611,
+    "chars_out": 8345
+  },
+  {
+    "slug": "Hyperelliptic-instT2Space",
+    "verdict": "revise",
+    "duration_s": 16.5,
+    "chars_in": 2891,
+    "chars_out": 3219
+  },
+  {
+    "slug": "Hyperelliptic",
+    "verdict": "revise",
+    "duration_s": 45.5,
+    "chars_in": 4148,
+    "chars_out": 3819
+  },
+  {
+    "slug": "Hyperelliptic-instIsManifold",
+    "verdict": "revise",
+    "duration_s": 27.5,
+    "chars_in": 7869,
+    "chars_out": 8720
+  },
+  {
+    "slug": "Hyperelliptic-instNonempty",
+    "verdict": "revise",
+    "duration_s": 26.9,
+    "chars_in": 2841,
+    "chars_out": 3367
+  },
+  {
+    "slug": "LineBundle-ofDivisor",
+    "verdict": "revise",
+    "duration_s": 20.7,
+    "chars_in": 4391,
+    "chars_out": 3508
+  },
+  {
+    "slug": "LineBundle",
+    "verdict": "reject",
+    "duration_s": 34.3,
+    "chars_in": 7180,
+    "chars_out": 4102
+  },
+  {
+    "slug": "PlaneCurve",
+    "verdict": "revise",
+    "duration_s": 33.7,
+    "chars_in": 11610,
+    "chars_out": 2885
+  },
+  {
+    "slug": "Hyperelliptic-instTopologicalSpace",
+    "verdict": "reject",
+    "duration_s": 46.5,
+    "chars_in": 3101,
+    "chars_out": 3763
+  },
+  {
+    "slug": "PlaneCurve-instChartedSpace",
+    "verdict": "revise",
+    "duration_s": 36.7,
+    "chars_in": 6522,
+    "chars_out": 6995
+  },
+  {
+    "slug": "PlaneCurve-instNonempty",
+    "verdict": "revise",
+    "duration_s": 21.3,
+    "chars_in": 3046,
+    "chars_out": 3754
+  },
+  {
+    "slug": "PlaneCurve-instConnectedSpace",
+    "verdict": "revise",
+    "duration_s": 40.3,
+    "chars_in": 5273,
+    "chars_out": 5143
+  },
+  {
+    "slug": "PlaneCurve-instIsManifold",
+    "verdict": "reject",
+    "duration_s": 32.8,
+    "chars_in": 6517,
+    "chars_out": 6155
+  },
+  {
+    "slug": "PlaneCurve-instT2Space",
+    "verdict": "revise",
+    "duration_s": 35.9,
+    "chars_in": 4703,
+    "chars_out": 4710
+  },
+  {
+    "slug": "PlaneCurve-instTopologicalSpace",
+    "verdict": "revise",
+    "duration_s": 35.1,
+    "chars_in": 4002,
+    "chars_out": 3789
+  },
+  {
+    "slug": "abelJacobiDiv",
+    "verdict": "revise",
+    "duration_s": 24.0,
+    "chars_in": 5526,
+    "chars_out": 6146
+  },
+  {
+    "slug": "PrincipalDivisors",
+    "verdict": "reject",
+    "duration_s": 29.2,
+    "chars_in": 7929,
+    "chars_out": 4042
+  },
+  {
+    "slug": "ambientPhi_ambientPsi_eq",
+    "verdict": "reject",
+    "duration_s": 26.0,
+    "chars_in": 14008,
+    "chars_out": 4437
+  },
+  {
+    "slug": "affineLiftProjY_compat_infinityChart",
+    "verdict": "revise",
+    "duration_s": 37.3,
+    "chars_in": 8842,
+    "chars_out": 9933
+  },
+  {
+    "slug": "affineLiftChart_compat_infinityLiftChart",
+    "verdict": "reject",
+    "duration_s": 49.1,
+    "chars_in": 12498,
+    "chars_out": 10870
+  },
+  {
+    "slug": "bridgePath_chart_differentiable",
+    "verdict": "reject",
+    "duration_s": 46.3,
+    "chars_in": 9133,
+    "chars_out": 7596
+  },
+  {
+    "slug": "bridgePath",
+    "verdict": "reject",
+    "duration_s": 53.4,
+    "chars_in": 9699,
+    "chars_out": 6593
+  },
+  {
+    "slug": "canonicalDivisor",
+    "verdict": "reject",
+    "duration_s": 38.6,
+    "chars_in": 8129,
+    "chars_out": 6363
+  },
+  {
+    "slug": "genus_eq_zero_iff_homeo",
+    "verdict": "revise",
+    "duration_s": 33.4,
+    "chars_in": 10344,
+    "chars_out": 9316
+  },
+  {
+    "slug": "contDiffOn_symm_toOpenPartialHomeomorph",
+    "verdict": "reject",
+    "duration_s": 53.4,
+    "chars_in": 13870,
+    "chars_out": 5930
+  },
+  {
+    "slug": "bridgePath_lineIntegrable",
+    "verdict": "reject",
+    "duration_s": 69.1,
+    "chars_in": 10297,
+    "chars_out": 8273
+  },
+  {
+    "slug": "infinityChart",
+    "verdict": "revise",
+    "duration_s": 40.3,
+    "chars_in": 9960,
+    "chars_out": 10424
+  },
+  {
+    "slug": "infinityLiftChart_compat_affineLiftChart",
+    "verdict": "reject",
+    "duration_s": 37.6,
+    "chars_in": 12784,
+    "chars_out": 5844
+  },
+  {
+    "slug": "intersectionForm",
+    "verdict": "reject",
+    "duration_s": 36.4,
+    "chars_in": 7773,
+    "chars_out": 5824
+  },
+  {
+    "slug": "instPeriodLatticeDiscrete",
+    "verdict": "revise",
+    "duration_s": 46.4,
+    "chars_in": 7908,
+    "chars_out": 8973
+  },
+  {
+    "slug": "infinityInverseMap",
+    "verdict": "reject",
+    "duration_s": 74.3,
+    "chars_in": 10208,
+    "chars_out": 8205
+  },
+  {
+    "slug": "loopIntegralToH1",
+    "verdict": "reject",
+    "duration_s": 48.9,
+    "chars_in": 10998,
+    "chars_out": 9690
+  },
+  {
+    "slug": "polynomialLocalHomeomorph_no_critical_in_source",
+    "verdict": "reject",
+    "duration_s": 27.1,
+    "chars_in": 10254,
+    "chars_out": 4851
+  },
+  {
+    "slug": "pathIntegralBasepointFunctional",
+    "verdict": "reject",
+    "duration_s": 43.2,
+    "chars_in": 9161,
+    "chars_out": 5953
+  },
+  {
+    "slug": "pushforwardOneForm",
+    "verdict": "reject",
+    "duration_s": 33.3,
+    "chars_in": 9009,
+    "chars_out": 8180
+  },
+  {
+    "slug": "squareLocalHomeomorph_zero_notMem_source",
+    "verdict": "revise",
+    "duration_s": 34.3,
+    "chars_in": 9688,
+    "chars_out": 7586
+  }
+]
