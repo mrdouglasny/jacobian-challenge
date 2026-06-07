@@ -1,3 +1,5 @@
+> **✅ DISCHARGED — 2026-06-07 (PR #96).** This axiom is now a proved theorem; this plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # `AX_HyperellipticOneForm_eq_form` — discharge recipe
 
 **Location:** `Jacobians/Axioms/HyperellipticLiouville.lean:260`

@@ -2,7 +2,7 @@
 
 **Location:** `Jacobians/ProjectiveCurve/PlaneCurve.lean:121`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 8 &nbsp;&nbsp; **Est:** ~2-3 focused weeks, ~250 LOC (requires heavy `MvPolynomial` manipulation)
-**Blocked by:** `AX_PlaneCurveAffine_nonempty`
+**Blocked by:** `AX_PlaneCurveAffine_nonempty` (now a **theorem**, PR #92 — a usable lemma dependency, not a blocking axiom)
 
 **Statement (verbatim):**
 ```lean
@@ -15,7 +15,7 @@ axiom AX_PlaneCurveAffine_noncompact (H : PlaneCurveData) :
 attribute [instance] AX_PlaneCurveAffine_noncompact
 ```
 
-**Why it's an axiom right now:** The docstring states the classical fact "projective curves are compact, but their affine patches are not". While this is purely topological (`isClosed_carrier` is already a real theorem at `PlaneCurve.lean:82`), the affine patch is a closed subset of `ℂ²`, which is compact iff it is bounded. Showing an arbitrary algebraic curve is unbounded requires rigorous degree-counting and polynomial evaluation. This requires heavy infrastructure to bridge `MvPolynomial (Fin 3) ℂ` to univariate polynomials over `ℂ[X]` or `ℂ[Y]`, which Mathlib's API makes famously clunky. Furthermore, for the specific edge case $F = Z$, the affine patch is strictly empty (and thus compact); so the axiom structurally relies on `AX_PlaneCurveAffine_nonempty` to rule out this line at infinity.
+**Why it's an axiom right now:** The docstring states the classical fact "projective curves are compact, but their affine patches are not". While this is purely topological (`isClosed_carrier` is already a real theorem at `PlaneCurve.lean:82`), the affine patch is a closed subset of `ℂ²`, which is compact iff it is bounded. Showing an arbitrary algebraic curve is unbounded requires rigorous degree-counting and polynomial evaluation. This requires heavy infrastructure to bridge `MvPolynomial (Fin 3) ℂ` to univariate polynomials over `ℂ[X]` or `ℂ[Y]`, which Mathlib's API makes famously clunky. Furthermore, for the specific edge case $F = Z$, the affine patch is strictly empty (and thus compact); so the axiom structurally relies on `AX_PlaneCurveAffine_nonempty` (now a **theorem**, PR #92) to rule out this line at infinity.
 
 **Proof recipe**
 
@@ -25,7 +25,7 @@ Standard reference: **Hartshorne, *Algebraic Geometry*, I.2 Exercise 2.4** (affi
 
 2. **Sub-step 2 — set up the projections.** Define $\pi_x, \pi_y : PlaneCurveAffine H \to ℂ$ by $\pi_x(p) := p.val.1$ and $\pi_y(p) := p.val.2$ (analogous to the inline `π` in `Hyperelliptic/Basic.lean:111`). Both are continuous by `continuous_subtype_val.fst` and `.snd` (`Hyperelliptic/Basic.lean:112`).
 
-3. **Sub-step 3 — prove at least one projection is unbounded.** Because $F(X,Y,1)$ is not a constant (if it were, the affine patch would be empty, contradicting `AX_PlaneCurveAffine_nonempty` at `PlaneCurve.lean:103`), it must have positive degree in *at least one* of $X$ or $Y$. (This crucially handles cases like $F=X$, where the $X$-projection is a single point $\{0\}$, which is bounded.)
+3. **Sub-step 3 — prove at least one projection is unbounded.** Because $F(X,Y,1)$ is not a constant (if it were, the affine patch would be empty, contradicting `AX_PlaneCurveAffine_nonempty` at `PlaneCurve.lean:103`, now a **theorem**, PR #92), it must have positive degree in *at least one* of $X$ or $Y$. (This crucially handles cases like $F=X$, where the $X$-projection is a single point $\{0\}$, which is bounded.)
    - **Case 1:** $F(X,Y,1)$ has positive degree in $Y$. The leading coefficient in $\mathbb{C}[X]$ is a non-zero polynomial and thus has finitely many roots. For any $x \in \mathbb{C}$ that is not a root of this leading coefficient, the univariate polynomial $F_x(Y)$ has a root by `Complex.exists_root` (the same lemma used at `Hyperelliptic/Basic.lean:95`). Thus the image of $\pi_x$ is cofinite, and therefore unbounded.
    - **Case 2:** $F(X,Y,1)$ has positive degree in $X$. By a symmetric argument, the leading coefficient in $\mathbb{C}[Y]$ has finitely many roots, and the image of $\pi_y$ is cofinite, and therefore unbounded.
    - Conclude that at least one projection has an unbounded image.

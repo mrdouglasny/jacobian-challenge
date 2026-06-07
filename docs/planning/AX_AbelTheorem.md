@@ -1,5 +1,83 @@
 # `AX_AbelTheorem` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07 (read before the 2026-06-03 recipe below)
+>
+> This is the **deepest open node** of the Abel–Jacobi cluster and the chosen
+> "deepest part" target. Four things changed since the 2026-06-03 recipe:
+>
+> 1. **Some "Blocked by" entries are resolved.** `PrincipalDivisors` now has a
+>    real body (`= divHom.range`, G3 workstream — no longer "no body"), and a
+>    meromorphic-function theory exists: `MeromorphicFunctionField.Rep X` with
+>    `orderAt`, `divisor`, `orderFinsupp`, and locally-finite / finite order
+>    support (`orderCoeff_locallyFiniteSupport`, `orderSupport_finite`). So the
+>    `⊇` direction's statement "`div f = D` ⟺ `D ∈ PrincipalDivisors X`" is now
+>    *expressible* against real defs, not stubs. `AX_BranchLocus` is now a
+>    **theorem** too.
+>
+> 2. **`AX_ofCurve_inj` was discharged (2026-06-05) by a DIFFERENT route.** The
+>    2026-06-03 cross-plan note claimed this Forster residue+period route would
+>    be "the unified Abel–Jacobi infrastructure consumed by `AX_ofCurve_inj` as
+>    well." That is now **superseded**: `ofCurve_inj` was instead closed via the
+>    homotopy-invariance / `developingValue` / `loopIntegralToH1` route (see
+>    `Elliptic/OfCurveInj.lean` + the HI workstream), *without* building the
+>    residue theorem. Lesson for this plan: the HI machinery is a real, landed
+>    asset — the `⊇` direction's period-comparison (recipe step 1c) may be
+>    reachable through `loopIntegralToH1` + `canonicalArcIntegral_homotopy_invariant`
+>    rather than a from-scratch contour-integral residue theorem.
+>
+> 3. **The residue-theorem route decision is RESOLVED (2026-06-07): bypass it.**
+>    Gemini deep-think + Mathlib-name verification concluded the residue theorem
+>    is a *trap* for `⊇` — fundamental-polygon and partition-of-unity both need
+>    3000+ LOC of nonexistent manifold-Stokes API, and the `df/f`
+>    argument-principle bootstrap only reaches integer residues. The recommended
+>    `⊇` route instead proves **the Jacobi map `Φ(y) = AJ(f⁻¹(y))` is constant on
+>    the rational pencil `ℙ¹`** (holomorphic + bounded ⇒ Liouville ⇒ constant ⇒
+>    `AJ(zeros)=AJ(poles)`), reusing `weightedFiberConservation` and dodging
+>    residues entirely because the `jacobianBasis` forms are *holomorphic*. Full
+>    verified route + ~800–1200 LOC 4-file decomposition:
+>    [`ABEL_SUPSET_LIOUVILLE_ROUTE.md`](ABEL_SUPSET_LIOUVILLE_ROUTE.md). The
+>    Forster residue + period-normalization `⊇` recipe below is **superseded** by
+>    that route (kept for historical record). The general residue theorem is
+>    *deferred*, only re-opening if Serre duality needs it (then the
+>    picard-lefschetz contour-integration repo is the local-pieces substitute).
+>
+> 4. **The `⊆` direction (Jacobi inversion) is still genuinely blocked.** It
+>    consumes `AX_RiemannRoch` + `AX_SerreDuality` (both still axioms) to build
+>    the third-kind differential, plus `AX_RiemannBilinear`. Do **not** attempt
+>    `⊆` before those land. The `⊇` direction (principal ⇒ kernel), by contrast,
+>    needs only the residue theorem + `AX_RiemannBilinear` reciprocity and is the
+>    right first half to target.
+>
+> **Net:** terminal node, still multi-month, but the residue-theorem route is
+> the live decision and the `⊇` half is the tractable first milestone. The LOC
+> estimate below is pending the route decision in (3).
+
+## Split + route map (2026-06-07)
+
+`AX_AbelTheorem : ker(abelJacobiDiv X) ⊓ (deg X).ker = PrincipalDivisors X` is a
+biconditional. **Proposal: split it into two named lemmas** so the dependency
+graph is honest about which half the challenge needs:
+
+- **⊇ (easy)** `principal ⇒ kernel` — `PrincipalDivisors ⊆ ker ⊓ deg-0`.
+  Route: [`ABEL_SUPSET_LIOUVILLE_ROUTE.md`](ABEL_SUPSET_LIOUVILLE_ROUTE.md)
+  (Jacobi-map-constant-on-ℙ¹ via Liouville; ~800–1200 LOC; **no Stokes, no RR/Serre**).
+- **⊆ (hard)** `kernel ⇒ principal` (Jacobi inversion) — `ker ⊓ deg-0 ⊆ PrincipalDivisors`.
+  **This is the half the challenge's `ofCurve_inj` actually consumes**
+  (`OfCurveInjective.lean:34`). Two routes:
+  - Route A (Forster): [`ABEL_SUBSET_FORSTER_ROUTE.md`](ABEL_SUBSET_FORSTER_ROUTE.md)
+    — third-kind differential via RR+Serre; gated on the sheaf-cohomology cluster.
+  - Route B (Mumford theta): [`ABEL_SUBSET_MUMFORD_THETA_ROUTE.md`](ABEL_SUBSET_MUMFORD_THETA_ROUTE.md)
+    — Riemann theta + theta divisor; **independent of RR/Serre**, concrete/algebraic;
+    **recommended**, with a genus-1 base case via Mathlib `jacobiTheta`.
+
+Why split: `ofCurve_inj` currently depends on the *whole* biconditional axiom, so
+the cheap ⊇ Liouville build wouldn't reduce the challenge's axiom load on its own.
+Splitting lets `ofCurve_inj` depend only on the ⊆ lemma, makes the hard direction
+the visible blocker, and lets ⊇ land independently. Shared foundation for **both**
+⊆ routes: `AX_RiemannBilinear` (the A-normalized basis / `τ ∈ Siegel`) +
+`AX_AnalyticCycleBasis`. **Under discussion** (governance: splitting a soundness-
+adjacent axiom) — see the linked GitHub Discussion before the implementing PR.
+
 **Location:** `Jacobians/Axioms/AbelTheorem.lean:66`
 **Route:** genuine-textbook (with substantial `needs-infra` substrate) &nbsp;&nbsp; **Effort:** 8 &nbsp;&nbsp; **Est:** ~9–18 months, ~6000–9000 LOC across new files (manifold-integration + residue infrastructure absolutely dominates; the residue theorem alone is 2000–3500 LOC, not 50; the Abel-theorem assembly proper is the smaller ~1000–1500 LOC tail)
 **Blocked by:** `abelJacobiDiv` (`Jacobians/Axioms/AbelTheorem.lean:60`), `PrincipalDivisors` (`Jacobians/RiemannSurface/LineBundle.lean:70`), `Divisor.deg` (`Jacobians/RiemannSurface/LineBundle.lean:63`), the sheaf-cohomology layer (`LineBundle`, `H0`, `H1` at `Jacobians/RiemannSurface/LineBundle.lean:77,85,104`), and downstream-axiom prerequisites `AX_RiemannRoch` (`Jacobians/Axioms/RiemannRoch.lean:59`), `AX_SerreDuality` (`Jacobians/Axioms/SerreDuality.lean:54`), `AX_RiemannBilinear` (`Jacobians/Axioms/RiemannBilinear.lean:69`), `AX_AnalyticCycleBasis` (`Jacobians/Axioms/AnalyticCycleBasis.lean:257`), `AX_PeriodLattice` (`Jacobians/Axioms/PeriodLattice.lean:92`).

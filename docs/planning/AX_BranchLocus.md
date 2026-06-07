@@ -1,3 +1,5 @@
+> **✅ DISCHARGED — 2026-06-04 (Phase 1).** This axiom is now a proved theorem; this plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # `AX_BranchLocus` — discharge recipe
 
 **Location:** `Jacobians/Axioms/BranchLocus.lean:100`

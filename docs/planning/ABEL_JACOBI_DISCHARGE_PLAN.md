@@ -1,5 +1,30 @@
 # Abel–Jacobi discharge plan — the project's deepest gap
 
+> ## ✅ The gap described below is CLOSED — 2026-06-07
+>
+> This 2026-06-04 plan identified the "most serious gap" as the three-axiom
+> opacity chain `ofCurve_inj ⟵ AX_ofCurve_inj ⟵ pathIntegralBasepointFunctional
+> ⟵ loopIntegralToH1`, where `pathIntegralBasepointFunctional := 0` could hide a
+> degeneracy. **All three are now discharged** (2026-06-05): `ofCurve_inj` is a
+> theorem (homotopy-invariance / `developingValue` route — *not* the residue
+> route this doc anticipated), `pathIntegralBasepointFunctional` is a real `def`
+> (the period integral `ω ↦ ∫ ω`), and `loopIntegralToH1` is proved. The
+> degeneracy failure mode is closed: `ofCurve` is provably injective in positive
+> genus.
+>
+> **What remains open in the Abel–Jacobi cluster** (see the refreshed per-axiom
+> plans for current routes):
+> - `AX_AbelTheorem` — the deepest node; crux is the **residue theorem** (route
+>   re-vetting in progress). `⊆` still gated on `AX_RiemannRoch` + `AX_SerreDuality`.
+> - `pushforwardOneForm` (the trace map) — effort 10; gates `AX_pushforwardOneForm_id`/
+>   `_comp`, `AX_pullbackAmbient_preserves_lattice`, `AX_pushforward_pullback`.
+> - `AX_ofCurve_contMDiff` — now the most tractable standalone (developing-value route).
+> - `AX_pushforwardAmbient_preserves_lattice` — gated on unbuilt `pushforwardH1` / period naturality.
+>
+> _The 2026-06-04 analysis below is retained for its derivation of why the
+> opacity mattered; the "now tractable" section foreshadowed exactly the route
+> that landed._
+
 *2026-06-04. Companion to [`AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md), the
 [`ofCurve` contract card](../contracts/ofCurve.md), and
 [`PHASE_3_INFRA_PLAN.md`](PHASE_3_INFRA_PLAN.md).*

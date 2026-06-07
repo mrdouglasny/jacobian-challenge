@@ -1,5 +1,12 @@
 # `AX_pushforwardOneForm_id` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> The identity-fiber computation here relies on `localOrder`/finite-fiber data, which is now **theorem-backed** (`AX_BranchLocus` became a theorem 2026-06-04, `Jacobians/Axioms/BranchLocus.lean:202`). But the **real gate is unchanged**: this is a characterising law of `pushforwardOneForm`, which is **still an axiom with no body** (`Jacobians/Axioms/AbelJacobiMap.lean:146`). It cannot become a theorem until `pushforwardOneForm` is a real `def` (see `pushforwardOneForm.md`). After that, the discharge is the ~1-day, ~30–60 LOC computation below.
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:190`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 3 &nbsp;&nbsp; **Est:** ~1 focused day post-infra, ~30–60 LOC
 **Blocked by:** `pushforwardOneForm` (this is a *characterising* property of that `def`; cannot become a theorem until the underlying `def` and its trace map API exist).

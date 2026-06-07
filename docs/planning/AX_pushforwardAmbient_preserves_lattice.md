@@ -1,5 +1,12 @@
 # `AX_pushforwardAmbient_preserves_lattice` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> Unlike its `pullback` sibling, this axiom does **not** depend on the `pushforwardOneForm` trace map: `pushforwardAmbientLinear` (`Jacobians/Axioms/AbelJacobiMap.lean:272–284`) is the **dual of `pullbackOneForm`** (contravariant), which is already a real `def`. The **real gate is the H1-pushforward + path-integral naturality infrastructure** (steps 1–2 below: a genuine topological `pushforwardH1` and `contour_integral_pushforward_naturality`), which is **not yet built**. The `AX_AnalyticCycleBasis` / `AX_PeriodLattice` dependencies in the stale line below remain as listed; the previously-implicit branch-locus dependence is now moot since `AX_BranchLocus` is a theorem (`Jacobians/Axioms/BranchLocus.lean:202`, 2026-06-04).
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:310`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 8 &nbsp;&nbsp; **Est:** ~3–4 focused weeks, ~600–800 LOC (~60% shared with `AX_pullbackAmbient_preserves_lattice`)
 **Blocked by:** `AX_AnalyticCycleBasis`, `AX_PeriodLattice`

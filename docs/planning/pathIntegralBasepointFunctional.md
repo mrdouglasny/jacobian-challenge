@@ -1,3 +1,5 @@
+> **✅ DISCHARGED — de-opaqued to a real `def`.** This opaque axiom is now a concrete `noncomputable def` (`Jacobians/Axioms/AbelJacobiMap.lean`); this plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # `pathIntegralBasepointFunctional` — discharge recipe
 
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:98`

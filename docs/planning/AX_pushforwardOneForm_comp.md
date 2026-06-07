@@ -1,5 +1,12 @@
 # `AX_pushforwardOneForm_comp` — discharge recipe
 
+> ## ⟳ Substrate refresh — 2026-06-07
+>
+> **Corrected blockers (the 2026-06-03 "Blocked by" line below is stale):**
+> The finite-fiber decomposition on the unramified locus (steps 3–5) now rests on **theorem-backed** data: `AX_BranchLocus` became a theorem 2026-06-04 (`Jacobians/Axioms/BranchLocus.lean:202`). The **real gate is unchanged**: this functoriality law `(g∘f)_* = g_* ∘ f_*` cannot be proved until `pushforwardOneForm` is a real `def` (`Jacobians/Axioms/AbelJacobiMap.lean:146`, still an axiom — see `pushforwardOneForm.md`), and it additionally needs the Riemann removable-singularity infrastructure (step 6) that the trace discharge itself must build.
+>
+> _Recipe below retained for the route; read it through this refresh._
+
 **Location:** `Jacobians/Axioms/AbelJacobiMap.lean:197`
 **Route:** needs-infra &nbsp;&nbsp; **Effort:** 9 &nbsp;&nbsp; **Est:** ~4 focused weeks, ~600–800 LOC
 **Blocked by:** `pushforwardOneForm`, Riemann Removable Singularity infrastructure

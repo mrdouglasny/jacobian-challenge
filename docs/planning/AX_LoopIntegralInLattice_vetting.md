@@ -1,3 +1,5 @@
+> **⚠️ SUPERSEDED — vetting doc, never adopted.** This is a vetting/proposal record for a *new* candidate axiom (`AX_LoopIntegralInLattice` / `AX_Period_Triangle`) considered as a route to retire `AX_ofCurve_inj`. Neither candidate was ever added to the kernel (no such declaration exists), and `AX_ofCurve_inj` was independently DISCHARGED (2026-06-05, Abel injectivity now a theorem). This plan is retained as a historical record of the route, not active work. Canonical status: `AXIOM_AUDIT.md` → "Recently discharged".
+
 # Vetting request: the `AX_LoopIntegralInLattice` axiom (and a proposed triangle reformulation)
 
 **For external deep-think review.** Self-contained. The goal is to add ONE

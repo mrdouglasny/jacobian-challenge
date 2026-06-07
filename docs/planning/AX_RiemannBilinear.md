@@ -177,7 +177,7 @@ manipulation in Steps 3–8.
   that consumes this axiom is the file itself; downstream consumers are
   `Jacobians/Axioms/PeriodLattice.lean`, `Jacobians/Axioms/IntersectionForm.lean`,
   and `Jacobians/Axioms/AbelJacobiMap.lean` per ROADMAP rows for
-  `AX_PeriodLattice`, `intersectionForm`, `AX_ofCurve_inj`).
+  `AX_PeriodLattice`, `intersectionForm`, `AX_ofCurve_inj` — the last now a **theorem** (2026-06-05)).
 - `#print axioms Jacobians.Axioms.AX_PeriodLattice` no longer lists
   `AX_RiemannBilinear` (it is in `blocked_by` per ROADMAP line 202). New
   axioms `AX_HodgeInnerProduct` and `AX_PolygonStokes` may appear instead
