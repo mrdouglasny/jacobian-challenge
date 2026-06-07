@@ -119,11 +119,169 @@ genuinely nonempty, connected, and noncompact — so the statements below are
 **true** (still axioms = unproven, but sound). Non-vacuous: e.g. the smooth conic
 `F = x²+y²+z²` satisfies every field. -/
 
+private abbrev NonZVar : Type := {i : Fin 3 // i ≠ (2 : Fin 3)}
+
+private noncomputable def zAsOption (F : MvPolynomial (Fin 3) ℂ) :
+    MvPolynomial (Option NonZVar) ℂ :=
+  MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm F
+
+private noncomputable def zPolynomial (F : MvPolynomial (Fin 3) ℂ) :
+    Polynomial (MvPolynomial NonZVar ℂ) :=
+  MvPolynomial.optionEquivLeft ℂ NonZVar (zAsOption F)
+
+private noncomputable def affinePolynomial (F : MvPolynomial (Fin 3) ℂ) :
+    MvPolynomial NonZVar ℂ :=
+  Polynomial.eval 1 (zPolynomial F)
+
+private lemma exists_eval_eq_zero_of_not_isUnit_mvPolynomial
+    {σ : Type*} [Finite σ] (P : MvPolynomial σ ℂ) (hP : ¬ IsUnit P) :
+    ∃ x : σ → ℂ, MvPolynomial.eval x P = 0 := by
+  let I : Ideal (MvPolynomial σ ℂ) := Ideal.span ({P} : Set (MvPolynomial σ ℂ))
+  by_contra hzero
+  have : MvPolynomial.zeroLocus ℂ I = (∅ : Set (σ → ℂ)) := by
+    ext x
+    constructor
+    · intro hx
+      have : MvPolynomial.aeval x P = 0 := hx P (Ideal.subset_span (by simp))
+      have : MvPolynomial.eval x P = 0 := by assumption
+      exact (hzero ⟨x, this⟩).elim
+    · simp
+  have hrad : I.radical = ⊤ := by
+    calc
+      I.radical = MvPolynomial.vanishingIdeal ℂ (MvPolynomial.zeroLocus ℂ I) := by
+        simp only [MvPolynomial.vanishingIdeal_zeroLocus_eq_radical]
+      _ = MvPolynomial.vanishingIdeal ℂ (∅ : Set (σ → ℂ)) := by rw [this]
+      _ = ⊤ := MvPolynomial.vanishingIdeal_empty
+  have : I = ⊤ := (Ideal.radical_eq_top).mp hrad
+  have : (1 : MvPolynomial σ ℂ) ∈ I := by
+    rw [this]
+    exact Submodule.mem_top
+  rw [Ideal.mem_span_singleton] at this
+  exact hP (isUnit_of_dvd_one this)
+
+private lemma affinePolynomial_eval_eq (F : MvPolynomial (Fin 3) ℂ) (x : NonZVar → ℂ) :
+    MvPolynomial.eval x (affinePolynomial F) =
+      MvPolynomial.eval (fun i : Fin 3 =>
+        if h : i = (2 : Fin 3) then (1 : ℂ) else x ⟨i, h⟩) F := by
+  unfold affinePolynomial zPolynomial zAsOption
+  rw [← Polynomial.eval_one_map (MvPolynomial.eval x)
+    ((MvPolynomial.optionEquivLeft ℂ NonZVar)
+      ((MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm) F))]
+  rw [← MvPolynomial.optionEquivLeft_elim_eval]
+  rw [MvPolynomial.eval_rename]
+  have hfun :
+      ((fun o : Option NonZVar ↦ o.elim (1 : ℂ) x) ∘
+          (Equiv.optionSubtypeNe (2 : Fin 3)).symm) =
+        (fun i : Fin 3 ↦ if h : i = (2 : Fin 3) then (1 : ℂ) else x ⟨i, h⟩) := by
+    funext i
+    by_cases h : i = (2 : Fin 3) <;> simp [*]
+  simp [*]
+
+private lemma optionElim_degree (u : NonZVar →₀ ℕ) (k : ℕ) :
+    (u.optionElim k).degree = u.degree + k := by
+  simp [Finsupp.degree_eq_sum, Nat.add_comm]
+
+private lemma coeff_affinePolynomial_eq_coeff_zAsOption_zero
+    {F : MvPolynomial (Fin 3) ℂ} {d : ℕ} (hF : F.IsHomogeneous d)
+    (u : NonZVar →₀ ℕ) (hu : u.degree = d) :
+    MvPolynomial.coeff u (affinePolynomial F) =
+      MvPolynomial.coeff (u.optionElim 0) (zAsOption F) := by
+  unfold affinePolynomial zPolynomial
+  rw [Polynomial.eval_eq_sum_range]
+  simp only [one_pow, mul_one, MvPolynomial.coeff_sum]
+  trans MvPolynomial.coeff u (((MvPolynomial.optionEquivLeft ℂ NonZVar) (zAsOption F)).coeff 0)
+  · refine Finset.sum_eq_single (M := ℂ) (0 : ℕ) ?_ ?_
+    · intro i _hi hne
+      rw [MvPolynomial.optionEquivLeft_coeff_coeff]
+      have : (zAsOption F).IsHomogeneous d := by
+        unfold zAsOption
+        exact hF.rename_isHomogeneous
+      exact this.coeff_eq_zero (by grind [optionElim_degree])
+    · simp
+  · rw [MvPolynomial.optionEquivLeft_coeff_coeff]
+
+private lemma optionElim_zero_subtypeDomain_eq_mapDomain
+    (m : Fin 3 →₀ ℕ) (hmz : m (2 : Fin 3) = 0) :
+    (m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))).optionElim 0 =
+      m.mapDomain (Equiv.optionSubtypeNe (2 : Fin 3)).symm := by
+  ext o
+  cases o with simp [Finsupp.mapDomain_equiv_apply, hmz]
+
+private lemma subtypeDomain_degree_eq_of_z_eq_zero
+    {F : MvPolynomial (Fin 3) ℂ} {d : ℕ} (hF : F.IsHomogeneous d)
+    {m : Fin 3 →₀ ℕ} (hm : m ∈ F.support) (hmz : m (2 : Fin 3) = 0) :
+    (m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))).degree = d := by
+  have hmdeg : m.degree = d := (hF.degree_eq_sum_deg_support hm).symm
+  have hmap := congrArg Finsupp.degree (optionElim_zero_subtypeDomain_eq_mapDomain m hmz)
+  rw [optionElim_degree, Nat.add_zero, Finsupp.degree_mapDomain] at hmap
+  exact hmap.trans hmdeg
+
+private lemma affinePolynomial_not_isUnit (H : PlaneCurveData) :
+    ¬ IsUnit (affinePolynomial H.F.val) := by
+  intro hunit
+  obtain ⟨c, _hc, hc⟩ :=
+    (MvPolynomial.isUnit_iff_eq_C_of_isReduced (P := affinePolynomial H.F.val)).mp hunit
+  have hcoeff_zero :
+      ∀ m ∈ H.F.val.support, m (2 : Fin 3) = 0 → False := by
+    intro m hm hmz
+    let u : NonZVar →₀ ℕ := m.subtypeDomain (fun i : Fin 3 => i ≠ (2 : Fin 3))
+    have hudeg : u.degree = H.d :=
+      subtypeDomain_degree_eq_of_z_eq_zero H.F.homogeneous hm hmz
+    have hune : u ≠ 0 := by
+      intro hzero
+      have : u.degree = 0 := by simp [hzero]
+      have hd0 : H.d = 0 := hudeg ▸ this
+      exact (Nat.not_succ_le_zero 0) (by simpa [hd0] using H.h_deg)
+    have hsurvive :
+        MvPolynomial.coeff u (affinePolynomial H.F.val) =
+          MvPolynomial.coeff m H.F.val := by
+      calc
+        MvPolynomial.coeff u (affinePolynomial H.F.val)
+            = MvPolynomial.coeff (u.optionElim 0) (zAsOption H.F.val) :=
+              coeff_affinePolynomial_eq_coeff_zAsOption_zero H.F.homogeneous u hudeg
+        _ = MvPolynomial.coeff (m.mapDomain (Equiv.optionSubtypeNe (2 : Fin 3)).symm)
+              (MvPolynomial.rename (Equiv.optionSubtypeNe (2 : Fin 3)).symm H.F.val) := by
+              rw [optionElim_zero_subtypeDomain_eq_mapDomain m hmz]
+              rfl
+        _ = MvPolynomial.coeff m H.F.val := by
+              rw [MvPolynomial.coeff_rename_mapDomain]
+              exact (Equiv.optionSubtypeNe (2 : Fin 3)).symm.injective
+    have hleft_zero : MvPolynomial.coeff u (affinePolynomial H.F.val) = 0 := by
+      rw [hc]
+      have h0u : ¬ (0 : NonZVar →₀ ℕ) = u := fun h => hune h.symm
+      rw [MvPolynomial.coeff_C]
+      simp [h0u]
+    have : MvPolynomial.coeff m H.F.val ≠ 0 :=
+      MvPolynomial.mem_support_iff.mp hm
+    exact this (hsurvive ▸ hleft_zero)
+  have :
+      H.F.val ∈ Ideal.span (MvPolynomial.X '' ({(2 : Fin 3)} : Set (Fin 3))) := by
+    rw [MvPolynomial.mem_ideal_span_X_image]
+    intro m hm
+    exact ⟨(2 : Fin 3), by simp, by
+      by_contra hmz
+      exact hcoeff_zero m hm (by simpa using hmz)⟩
+  have : H.F.val ∈ Ideal.span ({MvPolynomial.X (2 : Fin 3)} :
+        Set (MvPolynomial (Fin 3) ℂ)) := by
+    simpa using this
+  rw [Ideal.mem_span_singleton] at this
+  exact H.h_not_at_infinity this
+
 /-- **Axiom (NOT VERIFIED — sound under `h_irreducible` + `h_not_at_infinity`).**
 The `z = 1` affine patch is nonempty: an irreducible `F` with `z ∤ F` dehomogenises
 to a nonconstant `F(x,y,1)`, which has a zero over `ℂ`. -/
-axiom AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
-    Nonempty (PlaneCurveAffine H)
+theorem AX_PlaneCurveAffine_nonempty (H : PlaneCurveData) :
+    Nonempty (PlaneCurveAffine H) := by
+  obtain ⟨x, hx⟩ :=
+    exists_eval_eq_zero_of_not_isUnit_mvPolynomial (affinePolynomial H.F.val)
+      (affinePolynomial_not_isUnit H)
+  refine ⟨⟨(x ⟨0, by decide⟩, x ⟨1, by decide⟩), ?_⟩⟩
+  rw [affinePolynomial_eval_eq H.F.val x] at hx
+  have : ![x ⟨0, by decide⟩, x ⟨1, by decide⟩, 1] =
+  (fun i : Fin 3 ↦ if h : i = (2 : Fin 3) then 1 else x ⟨i, h⟩) := by
+    funext i
+    fin_cases i <;> simp
+  grind
 
 attribute [instance] AX_PlaneCurveAffine_nonempty
 
