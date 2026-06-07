@@ -909,4 +909,141 @@ theorem chosen_coeff_eq_neg_of_analyticAt_off_roots_branch_tendsto_cocompact
       (H := H) form hAna hBranch h0)
     hz
 
+/-! ## Direct two-sheet removable extension -/
+
+/-- The branch-removable extension of the direct two-sheet sum.  It agrees
+with `liouvilleTwoSheetSum` away from the branch locus and fills each branch
+point with the filter limit of the punctured two-sheet sum.  This is the
+branch-value correction needed for DR-B: the original `liouvilleTwoSheetSum`
+is intentionally kept unchanged for its off-branch payoff bridge. -/
+noncomputable def liouvilleTwoSheetSumRemovable
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) : ℂ → ℂ :=
+  fun z =>
+    if H.f.eval z = 0 then
+      Filter.limUnder (𝓝[≠] z) (liouvilleTwoSheetSum (H := H) form)
+    else
+      liouvilleTwoSheetSum (H := H) form z
+
+@[simp] theorem liouvilleTwoSheetSumRemovable_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleTwoSheetSumRemovable (H := H) form z =
+      liouvilleTwoSheetSum (H := H) form z := by
+  simp [liouvilleTwoSheetSumRemovable, hz]
+
+theorem liouvilleTwoSheetSumRemovable_of_eval_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z = 0) :
+    liouvilleTwoSheetSumRemovable (H := H) form z =
+      Filter.limUnder (𝓝[≠] z) (liouvilleTwoSheetSum (H := H) form) := by
+  simp [liouvilleTwoSheetSumRemovable, hz]
+
+theorem liouvilleTwoSheetSumRemovable_eventuallyEq_of_eval_ne_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleTwoSheetSumRemovable (H := H) form =ᶠ[𝓝 z]
+      liouvilleTwoSheetSum (H := H) form := by
+  have hEval : ∀ᶠ w in 𝓝 z, H.f.eval w ≠ 0 :=
+    (Polynomial.continuous H.f).continuousAt.eventually_ne hz
+  filter_upwards [hEval] with w hw
+  exact liouvilleTwoSheetSumRemovable_of_eval_ne_zero (H := H) form hw
+
+theorem liouvilleTwoSheetSumRemovable_eventuallyEq_punctured
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (z : ℂ) :
+    liouvilleTwoSheetSumRemovable (H := H) form =ᶠ[𝓝[≠] z]
+      liouvilleTwoSheetSum (H := H) form := by
+  filter_upwards [eventually_eval_ne_zero_nhdsWithin (H := H) z] with w hw
+  exact liouvilleTwoSheetSumRemovable_of_eval_ne_zero (H := H) form hw
+
+/-- Continuity of the corrected removable extension from the local existence
+of each branch limit.  The hard DR-B kernel is exactly the `hBranch` input. -/
+theorem liouvilleTwoSheetSumRemovable_continuous_of_analyticAt_off_roots_and_branch_tendsto
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      ∃ L : ℂ, Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+        (𝓝[≠] z) (𝓝 L)) :
+    Continuous (liouvilleTwoSheetSumRemovable (H := H) form) := by
+  rw [continuous_iff_continuousAt]
+  intro z
+  by_cases hz : H.f.eval z = 0
+  · obtain ⟨L, hL⟩ := hBranch z hz
+    rw [continuousAt_iff_punctured_nhds]
+    rw [liouvilleTwoSheetSumRemovable_of_eval_eq_zero (H := H) form hz]
+    have hToLim : Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+        (𝓝[≠] z)
+        (𝓝 (Filter.limUnder (𝓝[≠] z) (liouvilleTwoSheetSum (H := H) form))) :=
+      tendsto_nhds_limUnder ⟨L, hL⟩
+    exact hToLim.congr'
+      (liouvilleTwoSheetSumRemovable_eventuallyEq_punctured (H := H) form z).symm
+  · exact (hAna z hz).continuousAt.congr
+      (liouvilleTwoSheetSumRemovable_eventuallyEq_of_eval_ne_zero
+        (H := H) form hz).symm
+
+/-- Differentiability of the corrected removable extension from off-root
+analyticity and branch limit existence, using the banked removable-singularity
+engine. -/
+theorem liouvilleTwoSheetSumRemovable_differentiable_of_analyticAt_off_roots_and_branch_tendsto
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      ∃ L : ℂ, Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+        (𝓝[≠] z) (𝓝 L)) :
+    Differentiable ℂ (liouvilleTwoSheetSumRemovable (H := H) form) := by
+  refine differentiable_of_analyticAt_off_roots (H := H)
+    (liouvilleTwoSheetSumRemovable (H := H) form) ?_ ?_
+  · intro z hz
+    exact (hAna z hz).congr
+      (liouvilleTwoSheetSumRemovable_eventuallyEq_of_eval_ne_zero
+        (H := H) form hz).symm
+  · exact
+      liouvilleTwoSheetSumRemovable_continuous_of_analyticAt_off_roots_and_branch_tendsto
+        (H := H) form hAna hBranch
+
+/-- Liouville endgame for the corrected removable extension. -/
+theorem liouvilleTwoSheetSumRemovable_eq_zero_of_analyticAt_off_roots_branch_tendsto_cocompact
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hAna : ∀ z : ℂ, H.f.eval z ≠ 0 →
+      AnalyticAt ℂ (liouvilleTwoSheetSum (H := H) form) z)
+    (hBranch : ∀ z : ℂ, H.f.eval z = 0 →
+      ∃ L : ℂ, Filter.Tendsto (liouvilleTwoSheetSum (H := H) form)
+        (𝓝[≠] z) (𝓝 L))
+    (h0 : Filter.Tendsto (liouvilleTwoSheetSumRemovable (H := H) form)
+      (Filter.cocompact ℂ) (𝓝 0)) :
+    ∀ z, liouvilleTwoSheetSumRemovable (H := H) form z = 0 :=
+  eq_zero_of_differentiable_tendsto_zero_cocompact
+    (liouvilleTwoSheetSumRemovable (H := H) form)
+    (liouvilleTwoSheetSumRemovable_differentiable_of_analyticAt_off_roots_and_branch_tendsto
+      (H := H) form hAna hBranch)
+    h0
+
+theorem liouvilleTwoSheetSum_eq_zero_of_removable_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hzero : ∀ z, liouvilleTwoSheetSumRemovable (H := H) form z = 0)
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    liouvilleTwoSheetSum (H := H) form z = 0 := by
+  have hz0 := hzero z
+  rwa [liouvilleTwoSheetSumRemovable_of_eval_ne_zero (H := H) form hz] at hz0
+
+/-- Conditional anti-invariance payoff from the corrected removable extension:
+once `s̃ ≡ 0`, the original off-branch two-sheet sum vanishes and the existing
+payoff bridge applies pointwise. -/
+theorem chosen_coeff_eq_neg_of_liouvilleTwoSheetSumRemovable_eq_zero
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    (hzero : ∀ z, liouvilleTwoSheetSumRemovable (H := H) form z = 0)
+    {z : ℂ} (hz : H.f.eval z ≠ 0) :
+    form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z))) z =
+      -form.coeff
+        (HyperellipticEvenProj.proj H
+          (Sum.inl (liouvilleChosenAffinePoint (H := H) z).invol)) z := by
+  have hs : liouvilleTwoSheetSum (H := H) form z = 0 :=
+    liouvilleTwoSheetSum_eq_zero_of_removable_eq_zero (H := H) form hzero hz
+  rw [liouvilleTwoSheetSum_of_eval_ne_zero (H := H) form hz] at hs
+  simpa [add_eq_zero_iff_eq_neg] using hs
+
 end Jacobians.ProjectiveCurve
