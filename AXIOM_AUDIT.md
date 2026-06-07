@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-06.*
+*Last updated 2026-06-07.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 55** — all **55** in our own modules. The vendored
+**Active project axioms: 54** — all **54** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -161,8 +161,9 @@ now removed.
 Then → **55** by **proving `AX_Elliptic_aLoop_analytic`** (PR #86, 2026-06-06): the
 elliptic a-loop is analytic, via the new `extChartAt_quotient_mk_line_analyticAt`
 (the quotient chart `ℂ → ℂ ⧸ L` is analytic on a line through the origin). One of
-the three class-2c Elliptic-witness axioms; `_bLoop_analytic` and `_H1_symplectic`
-remain.
+the three class-2c Elliptic-witness axioms. Then → **54** by **proving
+`AX_Elliptic_bLoop_analytic`** (2026-06-07) by the same quotient-chart line
+analyticity argument; only `_H1_symplectic` remains.
 
 ---
 
@@ -174,7 +175,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (43 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (42 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -186,7 +187,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 24 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 23 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
 ---
@@ -268,7 +269,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
 | `contDiffOn_symm_toOpenPartialHomeomorph` (narrow IFT gap) | `GeneralResults/InverseFunctionTheorem.lean:11` | 1 |
-| Elliptic witnesses (`AX_Elliptic_bLoop_analytic`, `_H1_symplectic`) | `…/Elliptic/Witnesses.lean:97,173` | 2; `AX_Elliptic_aLoop_analytic` was **discharged to a theorem** (PR #86, 2026-06-06) via `extChartAt_quotient_mk_line_analyticAt`. `_bLoop_analytic` strengthened to `IsAnalyticArcStrong` 2026-06-06; affine-in-chart justification recorded; **re-vet pending**. |
+| Elliptic witness (`AX_Elliptic_H1_symplectic`) | `…/Elliptic/Witnesses.lean:497` | 1; `AX_Elliptic_aLoop_analytic` (PR #86, 2026-06-06) and `AX_Elliptic_bLoop_analytic` (2026-06-07) were **discharged to theorems** via `extChartAt_quotient_mk_line_analyticAt`. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
 ### 2d. Flagged — *true-but-unproven; needs end-to-end check*
@@ -367,7 +368,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 55 — the vendored Kirov subtree is now axiom-free, so 55 is the total.
+#   prints 54 — the vendored Kirov subtree is now axiom-free, so 54 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -384,7 +385,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 55
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 54
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
