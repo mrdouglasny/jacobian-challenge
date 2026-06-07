@@ -79,7 +79,13 @@ sorry-free, and `…DerivFactor`/`…ChartRep` encode the σ chart-derivative fa
    - **hBranch** `∀ branch z, ∃ L, Tendsto s (𝓝[≠] z) (𝓝 L)` (THE HARD KERNEL —
      `DR_B_BRANCH_CONTINUITY_BLUEPRINT.md` w-cancellation).
    - **h0** `Tendsto s̃ cocompact (𝓝 0)` (DR-C ∞-decay).
-   IN PROGRESS: Codex afd7ddaa8cd055d1c discharging the three.
+   PROGRESS: **hAna ✅ DONE** (`liouvilleTwoSheetSum_analyticAt_off_roots`, ba8d68f) via
+   the full chart-transfer layer: `affCoeff` + `affCoeff_eq_of_overlap_{inl_inr,inl_inl,inr_inr}`
+   + dispatcher `affCoeff_eq_of_projX_symm` + the sheet-choice congruence. Inherits the 3
+   pre-existing scoped even-genus axioms (`contDiffOn_symm_toOpenPartialHomeomorph`,
+   `affineLiftChart_compat_infinityLiftChart`, `infinityLiftChart_compat_affineLiftChart`)
+   — already in `genus_HyperellipticEven_eq`'s footprint, so NO new axioms; flip stays 55→53.
+   REMAINING: **hBranch** (DR-B w-cancellation) + **h0** (DR-C ∞-decay) — Codex a9556e8c02c615f90.
 
 ## ⛔ FOUNDATIONAL BLOCKER hit (2026-06-07) — the `Quotient.out` chart gap
 Discharging **hAna** (and earlier the pullback obligation-1) is blocked by a gap
