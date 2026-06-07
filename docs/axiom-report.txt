@@ -110,7 +110,6 @@
 'Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph,
  ProjectiveCurve.HyperellipticAffine.AX_HyperellipticAffine_connected,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]
@@ -127,7 +126,6 @@
 'Jacobians.ProjectiveCurve.Hyperelliptic.instIsManifold' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- GeneralResults.contDiffOn_symm_toOpenPartialHomeomorph,
  ProjectiveCurve.HyperellipticEvenProj.affineLiftChart_compat_infinityLiftChart,
  ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart,
  ProjectiveCurve.HyperellipticOdd.affineLiftProjX_compat_infinityChart,
