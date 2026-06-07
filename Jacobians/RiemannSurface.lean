@@ -24,6 +24,9 @@ import Jacobians.RiemannSurface.Divisor
 import Jacobians.RiemannSurface.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
 import Jacobians.RiemannSurface.RiemannRochSpace
+import Jacobians.RiemannSurface.Cohomology.Repartitions
+import Jacobians.RiemannSurface.Cohomology.H1
+import Jacobians.RiemannSurface.Cohomology.RiemannRochAnchor
 import Jacobians.RiemannSurface.RiemannRochAPI
 import Jacobians.RiemannSurface.SerreDualityAPI
 import Jacobians.RiemannSurface.PluckerAPI
