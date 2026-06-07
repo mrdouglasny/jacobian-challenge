@@ -286,12 +286,9 @@ remains here is their **atlas/manifold** instances + the genus formula.
 
 The two cross-summand cocycle axioms that used to live here were **unsound**
 (false for `deg g ≥ N/2−1`) and are now **retired** — see Recently
-discharged. The remaining two are the Liouville hierarchy L2/L3 — genuinely true,
-but not yet checked end-to-end. They are the classical canonical-differentials
-theorem for hyperelliptic curves (the deepest result left); L3 is shown to
-reduce to L2 + cocycle propagation (`hyperellipticForm_coeff_projX`), and L2
-is decomposed in [`docs/genus-L2-L3-discharge-plan.md`](docs/genus-L2-L3-discharge-plan.md)
-(L2-step-4 already proven; the branch-point + degree-at-∞ core remains, ~1–2 months).
+discharged. The other two — the Liouville hierarchy **L2/L3** (the classical
+canonical-differentials theorem for hyperelliptic curves) — are now **proven
+theorems** (2026-06-07, PR #96), so this class is now **empty**.
 
 | Axiom | File:Line | Status |
 |-------|-----------|--------|
@@ -356,7 +353,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
-sound modulo the (true-but-unproven) Liouville L2/L3. `hyperellipticForm`
+sound. The Liouville L2/L3 axioms are now **discharged** (PR #96). `hyperellipticForm`
 is now total-but-axiom-free (zero form above degree `N/2−1`), with its
 linear-algebra API on `Polynomial.degreeLT ℂ (N/2−1)`.
 
