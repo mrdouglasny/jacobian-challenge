@@ -87,6 +87,15 @@ lemma pullbackInvolutionCoeff_of_not_mem
     simpa [extChartAt] using hz
   simp [pullbackInvolutionCoeff, hz']
 
+/-- The guarded σ-pullback coefficient family is normalized to vanish off each
+chart target. -/
+theorem pullbackInvolutionCoeff_isZeroOffChartTarget
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    IsZeroOffChartTarget (HyperellipticEvenProj H)
+      (pullbackInvolutionCoeff H form) := by
+  intro q z hz
+  exact pullbackInvolutionCoeff_of_not_mem (H := H) form hz
+
 /-- The **`dx`-coefficient** of `ω` at an affine point `a`: ω's coefficient in
 the lifted affine chart at `⟦inl a⟧`, obtained by transporting `ω.coeff` (given
 in the preferred chart `extChartAt ⟦inl a⟧`) through the change-of-chart formula.
