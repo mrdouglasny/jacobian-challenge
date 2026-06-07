@@ -31,6 +31,62 @@ variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 abbrev evenMk (a : HyperellipticAffine H) : HyperellipticEvenProj H :=
   Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
 
+/-- The hyperelliptic involution written from the chart at `q` into the chart
+at `σ q`. This is the `A_q` term in the σ-pullback coefficient formula. -/
+noncomputable def pullbackInvolutionChartRep (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] (q : HyperellipticEvenProj H) : ℂ → ℂ :=
+  fun z =>
+    (extChartAt 𝓘(ℂ, ℂ) (hyperellipticEvenInvol H q))
+      (hyperellipticEvenInvol H ((extChartAt 𝓘(ℂ, ℂ) q).symm z))
+
+/-- The derivative factor `B_q` for the σ-pullback of a one-form coefficient. -/
+noncomputable def pullbackInvolutionDerivFactor (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)] (q : HyperellipticEvenProj H) : ℂ → ℂ :=
+  fun z =>
+    fderiv ℂ
+      ((extChartAt 𝓘(ℂ, ℂ) (hyperellipticEvenInvol H q)) ∘
+        hyperellipticEvenInvol H ∘ (extChartAt 𝓘(ℂ, ℂ) q).symm) z 1
+
+/-- Concrete coefficient family for pullback by the even hyperelliptic
+involution. On each chart target this is
+`ω.coeff (σ q) (A_q z) * B_q z`; off the target it is normalized to `0` to
+match `IsZeroOffChartTarget`. -/
+noncomputable def pullbackInvolutionCoeff (H : HyperellipticData)
+    [Fact (¬ Odd H.f.natDegree)]
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    HyperellipticEvenProj H → ℂ → ℂ := by
+  classical
+  exact fun q z =>
+    if z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target then
+      form.coeff (hyperellipticEvenInvol H q)
+        (pullbackInvolutionChartRep H q z) *
+          pullbackInvolutionDerivFactor H q z
+    else
+      0
+
+lemma pullbackInvolutionCoeff_of_mem
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {q : HyperellipticEvenProj H} {z : ℂ}
+    (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target) :
+    pullbackInvolutionCoeff H form q z =
+      form.coeff (hyperellipticEvenInvol H q)
+        (pullbackInvolutionChartRep H q z) *
+          pullbackInvolutionDerivFactor H q z := by
+  classical
+  have hz' : z ∈ (chartAt ℂ q).target := by
+    simpa [extChartAt] using hz
+  simp [pullbackInvolutionCoeff, hz']
+
+lemma pullbackInvolutionCoeff_of_not_mem
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {q : HyperellipticEvenProj H} {z : ℂ}
+    (hz : z ∉ (extChartAt 𝓘(ℂ, ℂ) q).target) :
+    pullbackInvolutionCoeff H form q z = 0 := by
+  classical
+  have hz' : z ∉ (chartAt ℂ q).target := by
+    simpa [extChartAt] using hz
+  simp [pullbackInvolutionCoeff, hz']
+
 /-- The **`dx`-coefficient** of `ω` at an affine point `a`: ω's coefficient in
 the lifted affine chart at `⟦inl a⟧`, obtained by transporting `ω.coeff` (given
 in the preferred chart `extChartAt ⟦inl a⟧`) through the change-of-chart formula.
