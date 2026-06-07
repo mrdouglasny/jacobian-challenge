@@ -1106,6 +1106,46 @@ theorem AX_HyperellipticForm_polynomial_decomposition
     C hC
     (liouvilleRemovableNumerator_readout (H := H) form)
 
+/-- Smooth-`Y` chart-target part of L3. The public L2 theorem gives
+agreement with the canonical `hyperellipticForm` on projX chart targets;
+this wrapper rewrites the preferred `extChartAt` target in the
+`Quotient.out = Sum.inl a`, `a ∈ smoothLocusY` case. -/
+theorem coeff_eq_hyperellipticForm_on_smoothY_extChartTarget
+    {H : HyperellipticData} [hf : Fact (¬ Odd H.f.natDegree)]
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {g : Polynomial ℂ}
+    (hDeg : g.natDegree < H.f.natDegree / 2 - 1)
+    (hDecomp : ∀ (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+      (q : HyperellipticEvenProj H) (_hQ : Quotient.out q = Sum.inl a)
+      {z : ℂ} (_hz : z ∈ (affineChartProjX (H := H) a hpY).target),
+      form.coeff q z =
+        g.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
+    {q : HyperellipticEvenProj H} {z : ℂ}
+    {a : HyperellipticAffine H}
+    (hQ : Quotient.out q = Sum.inl a) (hpY : a ∈ smoothLocusY H)
+    (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target) :
+    form.coeff q z =
+      (HyperellipticEvenProj.hyperellipticForm H g).coeff q z := by
+  have hzX : z ∈ (affineChartProjX (H := H) a hpY).target := by
+    have hExt : (extChartAt 𝓘(ℂ, ℂ) q).target =
+        (affineChartProjX (H := H) a hpY).target := by
+      rw [extChartAt_target]
+      change ↑𝓘(ℂ, ℂ).symm ⁻¹' (HyperellipticEvenProj.chartAt H hf.out q).target ∩
+          Set.range ↑𝓘(ℂ, ℂ) =
+        (affineChartProjX (H := H) a hpY).target
+      change (HyperellipticEvenProj.chartAt H hf.out q).target ∩
+          Set.range (id : ℂ → ℂ) =
+        (affineChartProjX (H := H) a hpY).target
+      rw [Set.range_id, Set.inter_univ]
+      unfold HyperellipticEvenProj.chartAt
+      rw [hQ]
+      simp [HyperellipticEvenProj.affineLiftChart,
+        OpenPartialHomeomorph.lift_openEmbedding_target, affineChartAt, hpY]
+    rw [hExt] at hz
+    exact hz
+  exact coeff_eq_hyperellipticForm_on_projX_of_decomposition
+    (H := H) form hDeg hDecomp a hpY q hQ hzX
+
 /-! ## Level 3 — surjectivity of `hyperellipticForm`
 
 Every holomorphic 1-form on `HyperellipticEvenProj H` equals
