@@ -133,6 +133,97 @@ theorem affCoeff_analyticOn_of_inl
   exact (form_coeff_analyticOn_affineProjX_target form a hpY q hQa).mono
     Set.inter_subset_left
 
+/-- If the preferred representative of `mk (inl a)` is on the infinity side,
+then it is exactly the gluing image of `a`; in particular the affine
+`x`-coordinate of `a` is nonzero and the infinity representative is in the
+smooth-`Y` locus for the reversed curve. -/
+theorem affCoeff_inr_out_eq_affineGluingImage
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {b : HyperellipticAffineInfinity H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inr b) :
+    ∃ hx : a.val.1 ≠ 0,
+      b = affineGluingImage a hx ∧
+        b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) := by
+  let q : HyperellipticEvenProj H :=
+    Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)
+  have hProj : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a) =
+      Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b) := by
+    have hOut : Quotient.mk (hyperellipticEvenSetoid H) (Sum.inr b) = q := by
+      rw [← hQ]
+      exact Quotient.out_eq q
+    exact hOut.symm
+  obtain ⟨hx, hb⟩ := proj_inl_eq_proj_inr_iff (H := H) hProj
+  refine ⟨hx, hb, ?_⟩
+  simpa [hb] using affineGluingImage_mem_smoothLocusY (H := H) a hpY hx
+
+/-- In the infinity-representative branch, the basepoint inverse coordinate is
+in the infinity lifted chart target. This is the basepoint version of the
+chart-transfer domain mapping. -/
+theorem affCoeff_inr_base_inv_mem_infinityLiftChart_target
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {b : HyperellipticAffineInfinity H}
+    (hQ : Quotient.out
+        (Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl a)) = Sum.inr b) :
+    a.val.1⁻¹ ∈ (infinityLiftChart H hf.out b).target := by
+  obtain ⟨hx, hb, hbY⟩ :=
+    affCoeff_inr_out_eq_affineGluingImage (H := H) a hpY hQ
+  have hbSrc : b ∈
+      (HyperellipticAffine.affineChartAt
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b).source := by
+    rw [affineChartAt_of_mem_smoothLocusY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY]
+    exact affineChartProjX_mem_source
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY
+  have hbTarget := (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).map_source hbSrc
+  rw [affineChartAt_of_mem_smoothLocusY
+    (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY] at hbTarget
+  change b.val.1 ∈
+    (affineChartProjX
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY).target at hbTarget
+  have hbTarget' :
+      a.val.1⁻¹ ∈ (affineChartProjX
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY).target := by
+    simpa [hb, affineGluingImage_val_fst] using hbTarget
+  simpa [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+    affineChartAt_of_mem_smoothLocusY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY] using hbTarget'
+
+/-- Conditional pointwise domain mapping for the `x ↦ 1/x` chart transfer.
+Once the gluing image of the affine chart point is known to lie in the
+infinity chart source at `b`, its infinity `u`-coordinate is `z⁻¹`, hence
+`z⁻¹` is in the infinity lifted chart target. -/
+theorem inv_mem_infinityLiftChart_target_of_gluing_source
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (b : HyperellipticAffineInfinity H)
+    (hbY : b ∈ smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out))
+    {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target)
+    (hx : (((affineChartProjX (H := H) a hpY).symm z :
+      HyperellipticAffine H).val.1) ≠ 0)
+    (hSrc : affineGluingImage
+        (((affineChartProjX (H := H) a hpY).symm z : HyperellipticAffine H)) hx ∈
+      (HyperellipticAffine.affineChartAt
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b).source) :
+    z⁻¹ ∈ (infinityLiftChart H hf.out b).target := by
+  have hTarget := (HyperellipticAffine.affineChartAt
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b).map_source hSrc
+  rw [affineChartAt_of_mem_smoothLocusY
+    (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY] at hTarget
+  change ((affineGluingImage
+        (((affineChartProjX (H := H) a hpY).symm z : HyperellipticAffine H)) hx).val.1) ∈
+      (affineChartProjX
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY).target at hTarget
+  have hTarget' :
+      z⁻¹ ∈ (affineChartProjX
+        (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY).target := by
+    rw [affineGluingImage_val_fst] at hTarget
+    rw [affineChartProjX_symm_apply_fst (H := H) a hpY hz] at hTarget
+    exact hTarget
+  simpa [infinityLiftChart, OpenPartialHomeomorph.lift_openEmbedding_target,
+    affineChartAt_of_mem_smoothLocusY
+      (H := HyperellipticAffineInfinity.reverseData H hf.out) b hbY] using hTarget'
+
 /-- The local Liouville numerator is analytic on the smooth-`Y` projX target. -/
 theorem liouvilleProjXNumerator_analyticOn
     (form : HolomorphicOneForm (HyperellipticEvenProj H))
