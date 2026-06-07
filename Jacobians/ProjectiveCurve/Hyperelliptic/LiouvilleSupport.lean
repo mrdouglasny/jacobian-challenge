@@ -885,6 +885,32 @@ theorem liouvilleTwoSheetSum_of_eval_ne_zero
         affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z).invol z := by
   simp [liouvilleTwoSheetSum, hz]
 
+/-- The fixed two-sheet affine-coefficient expression determined by the chosen
+point over a non-branch basepoint is analytic at that basepoint.
+
+The remaining off-root analyticity step for `liouvilleTwoSheetSum` is to identify
+the arbitrary chosen sheet near `z₀` with one of these two fixed local sheets; the
+sum is symmetric, so the two cases give the same fixed expression. -/
+theorem liouvilleChosenTwoSheetSum_analyticAt
+    (form : HolomorphicOneForm (HyperellipticEvenProj H))
+    {z₀ : ℂ} (hz₀ : H.f.eval z₀ ≠ 0) :
+    AnalyticAt ℂ
+      (fun z : ℂ =>
+        affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z₀) z +
+          affCoeff (H := H) form (liouvilleChosenAffinePoint (H := H) z₀).invol z)
+      z₀ := by
+  classical
+  let a₀ := liouvilleChosenAffinePoint (H := H) z₀
+  have ha₀Y : a₀ ∈ smoothLocusY H := by
+    simpa [a₀] using liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz₀
+  have ha₀σY : a₀.invol ∈ smoothLocusY H :=
+    HyperellipticAffine.invol_mem_smoothLocusY a₀ ha₀Y
+  have h1 : AnalyticAt ℂ (affCoeff (H := H) form a₀) z₀ := by
+    simpa [a₀] using affCoeff_analyticAt_basepoint (H := H) form a₀ ha₀Y
+  have h2 : AnalyticAt ℂ (affCoeff (H := H) form a₀.invol) z₀ := by
+    simpa [a₀] using affCoeff_analyticAt_basepoint (H := H) form a₀.invol ha₀σY
+  simpa [a₀] using h1.add h2
+
 /-- On the common clean affine `x`-chart target for the two sheets, the fixed
 two-sheet coefficient sum is analytic. This is the kernel-clean DR-A local
 analyticity statement; global single-valuedness still requires the symmetric
