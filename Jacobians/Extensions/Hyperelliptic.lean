@@ -43,7 +43,7 @@ Classical references:
   hyperelliptic involution).
 -/
 
-import Jacobians.Challenge
+import Jacobians
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic

@@ -1,21 +1,19 @@
-.lake/
-build/
-lake-packages/
+/.lake
+/build
+/lake-packages
+/lean_packages
 *.olean
 *.ilean
 *.trace
 *.hash
-.DS_Store
-.claude/
 
-# Local-only commentary / competitive analysis of third-party repos — not for push
-commentary/
+# vim swap files
+*.swp
+*.swo
 
-# CI: ephemeral regenerated axiom report (guard step)
-axiom-report.regenerated.txt
-
-# Local reference PDFs (copyrighted — never commit)
-refs/
-
-# Gemini/MCP auto-generated query logs
-history/
+# Claude Code ephemeral state
+.claude/scheduled_tasks.lock
+.claude/settings.json
+.claude/settings.local.json
+*.pdf
+docs/architecture_map.html

@@ -13,7 +13,7 @@ This file is NOT part of the build root (`scripts/` is outside it); it is
 a standalone checker. Keep the list in sync with the headline theorems in
 README "Current state". See docs/validation-plan.md Part 1.1.
 -/
-import Jacobians.Challenge
+import Jacobians
 import Jacobians.Extensions.HyperellipticEven
 import Jacobians.ProjectiveCurve.Elliptic.OneForm
 import Jacobians.ProjectiveCurve.Line.Genus
