@@ -4821,4 +4821,54 @@ theorem liouvilleNumeratorGRaw_branch_tendsto
         field_simp [hvNZ]
       exact hModel.congr' hEq.symm
 
+/-- The removable single-sheet numerator is continuous: off the branch locus it
+agrees locally with the analytic raw numerator, and at branch points its value is
+the `limUnder` of the existing punctured limit. -/
+theorem liouvilleNumeratorG_continuous
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    Continuous (liouvilleNumeratorG (H := H) form) := by
+  rw [continuous_iff_continuousAt]
+  intro z
+  by_cases hz : H.f.eval z = 0
+  · obtain ⟨L, hL⟩ := liouvilleNumeratorGRaw_branch_tendsto (H := H) form z hz
+    rw [continuousAt_iff_punctured_nhds]
+    have hValue : liouvilleNumeratorG (H := H) form z =
+        Filter.limUnder (𝓝[≠] z) (liouvilleNumeratorGRaw (H := H) form) := by
+      simp [liouvilleNumeratorG, hz]
+    rw [hValue]
+    have hToLim : Filter.Tendsto (liouvilleNumeratorGRaw (H := H) form)
+        (𝓝[≠] z)
+        (𝓝 (Filter.limUnder (𝓝[≠] z) (liouvilleNumeratorGRaw (H := H) form))) :=
+      tendsto_nhds_limUnder ⟨L, hL⟩
+    have hEq : liouvilleNumeratorG (H := H) form =ᶠ[𝓝[≠] z]
+        liouvilleNumeratorGRaw (H := H) form := by
+      filter_upwards [eventually_eval_ne_zero_nhdsWithin (H := H) z] with w hw
+      exact liouvilleNumeratorG_of_eval_ne_zero (H := H) form hw
+    exact hToLim.congr' hEq.symm
+  · have hEq : liouvilleNumeratorG (H := H) form =ᶠ[𝓝 z]
+        liouvilleNumeratorGRaw (H := H) form := by
+      have hEval : ∀ᶠ w in 𝓝 z, H.f.eval w ≠ 0 :=
+        (Polynomial.continuous H.f).continuousAt.eventually_ne hz
+      filter_upwards [hEval] with w hw
+      exact liouvilleNumeratorG_of_eval_ne_zero (H := H) form hw
+    exact (liouvilleNumeratorGRaw_analyticAt_of_eval_ne_zero
+      (H := H) form hz).continuousAt.congr hEq.symm
+
+/-- The removable single-sheet numerator is entire. -/
+theorem liouvilleNumeratorG_differentiable
+    (form : HolomorphicOneForm (HyperellipticEvenProj H)) :
+    Differentiable ℂ (liouvilleNumeratorG (H := H) form) := by
+  refine differentiable_of_analyticAt_off_roots (H := H)
+    (liouvilleNumeratorG (H := H) form) ?_ ?_
+  · intro z hz
+    have hEq : liouvilleNumeratorG (H := H) form =ᶠ[𝓝 z]
+        liouvilleNumeratorGRaw (H := H) form := by
+      have hEval : ∀ᶠ w in 𝓝 z, H.f.eval w ≠ 0 :=
+        (Polynomial.continuous H.f).continuousAt.eventually_ne hz
+      filter_upwards [hEval] with w hw
+      exact liouvilleNumeratorG_of_eval_ne_zero (H := H) form hw
+    exact (liouvilleNumeratorGRaw_analyticAt_of_eval_ne_zero
+      (H := H) form hz).congr hEq.symm
+  · exact liouvilleNumeratorG_continuous (H := H) form
+
 end Jacobians.ProjectiveCurve
