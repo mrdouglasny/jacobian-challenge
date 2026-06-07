@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 58** — all **58** in our own modules. The vendored
+**Active project axioms: 56** — all **56** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -150,6 +150,14 @@ the bridge path cancels against its reverse by the canonical-arc algebra.
 `AX_AnalyticCycleBasis` + `intersectionForm`; no self-reference, no new axiom,
 and no `sorryAx`.
 
+Then → **56** by **discharging `AX_pushforward_contMDiff` and
+`AX_pullback_contMDiff` to theorems** (PR #88, 2026-06-06): the pushforward /
+pullback maps on Jacobians (the quotient-torus maps `V ⧸ Λ → W ⧸ Λ'` induced by
+a linear `Φ`) are proved smooth via a chart-level engine — after `contMDiffAt_iff`
+the chart composition equals the affine map `Φ + c₀` on a neighbourhood, smooth
+because `Φ` is a continuous linear map. Both were class 2b (definition-asserting),
+now removed.
+
 ---
 
 ## Triage
@@ -171,7 +179,7 @@ Per the review plan, axioms are split into two classes:
 |------|------:|--------|-------|
 | 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 8 | "my construction has good property P" | **may mask a bad def** |
+| 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 25 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 2 | true-but-unproven (Liouville L2/L3) | needs end-to-end check |
 
@@ -230,8 +238,6 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 | Axiom | File:Line | Note |
 |-------|-----------|------|
 | `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:348` | Abel–Jacobi smoothness |
-| `AX_pushforward_contMDiff` | `Axioms/AbelJacobiMap.lean:685` | pushforward smoothness |
-| `AX_pullback_contMDiff` | `Axioms/AbelJacobiMap.lean:734` | pullback smoothness |
 | `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication |
 | `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:413` | period-map naturality |
 | `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:427` | period-map naturality |
@@ -355,7 +361,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 58 — the vendored Kirov subtree is now axiom-free, so 58 is the total.
+#   prints 56 — the vendored Kirov subtree is now axiom-free, so 58 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -372,7 +378,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 58
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 56
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

@@ -54,7 +54,6 @@
  Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_PeriodLattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.AX_pushforward_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
  Axioms.intersectionForm]
 'Jacobian.pushforward_id_apply' depends on axioms: [propext,
@@ -75,7 +74,6 @@
  Axioms.AX_AnalyticCycleBasis,
  Axioms.AX_PeriodLattice,
  Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pullback_contMDiff,
  Axioms.instPeriodLatticeDiscrete,
  Axioms.intersectionForm,
  Axioms.pushforwardOneForm]
