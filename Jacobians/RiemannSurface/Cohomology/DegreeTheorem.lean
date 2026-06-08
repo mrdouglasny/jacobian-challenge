@@ -13,6 +13,7 @@ namespace Jacobians.RiemannSurface
 
 open scoped Manifold ContDiff Classical
 open Jacobians.Axioms
+open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
 universe u
 
@@ -40,5 +41,26 @@ theorem deg_nonneg_of_effective {D : Divisor X} (hD : Effective D) :
   rw [deg_eq_sum_toFinsupp]
   refine Finset.sum_nonneg (fun x _ => ?_)
   exact hD x
+
+/-! ### Bridge to the principal-divisor layer
+
+A *non-zero* `MeroField` element is non-zero **everywhere** (identity principle on
+connected `X`), so it has a representative usable as a `MeromorphicFunctionField`
+element with a principal divisor. This is the entry point to the bridge. -/
+
+/-- **Identity principle (field form).** A non-zero `F : MeroField X` has finite
+order at every point: vanishing on a non-empty open set would force vanishing
+everywhere (clopen + connected), contradicting `F ≠ 0`. -/
+theorem orderAtField_ne_top_of_ne_zero {F : MeroField X} (hF : F ≠ 0) (p : X) :
+    orderAtField p F ≠ ⊤ := by
+  obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective (GermZero X) F
+  rw [orderAtField_mk]
+  have hf_notmem : f ∉ GermZero X := fun hmem =>
+    hF ((Submodule.Quotient.mk_eq_zero (GermZero X)).mpr hmem)
+  have hex : ∃ q, orderAt q (f : X → ℂ) ≠ ⊤ := by
+    by_contra h
+    push_neg at h
+    exact hf_notmem h
+  exact orderAt_ne_top_of_exists (fun q => f.property q) hex p
 
 end Jacobians.RiemannSurface
