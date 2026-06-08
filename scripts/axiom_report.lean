@@ -20,7 +20,7 @@ import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.OneForm
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.PlaneCurve
-import Jacobians.RiemannSurface.RiemannRochAPI
+import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 
 open Jacobians Jacobian
 
