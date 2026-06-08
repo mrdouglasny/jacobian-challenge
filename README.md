@@ -43,12 +43,12 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 
 | Topic | Count | Difficulty |
 |-------|:-----:|:----------:|
-| Period / Hodge / homology core (Riemann bilinear, period lattice, intersection form, H₁ bases) | 8 | 🔴🟡 |
+| Period / Hodge / homology core (Riemann bilinear, period lattice, intersection form, H₁ bases) | 7 | 🔴🟡 |
 | Abel–Jacobi (`AX_AbelTheorem` + `ofCurve` smoothness; `ofCurve_inj` is now a theorem) | 2 | 🔴 |
 | Sheaf cohomology / Riemann–Roch / Serre / Plücker / uniformization (`H0` de-opaqued) | 11 | 🔴 |
 | Functoriality (pushforward / pullback naturality + lattice preservation) | 7 | 🟡 |
 | Torus / Albanese universal property | 3 | 🟡 |
-| Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 15 | 🟢🟡 |
+| Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 12 | 🟢🟡 |
 | Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 0 | ✅ **discharged** (PR #96) |
 | **Total** | **45** | |
 
