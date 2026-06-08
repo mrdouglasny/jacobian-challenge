@@ -47,15 +47,21 @@ Other existing scaffolding to connect to:
 |-------|------|-------------------|
 | `AX_RiemannRoch` | `Axioms/RiemannRoch.lean:59` | §16, from §14 finiteness + §15 exact sequence |
 | `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | §17, from §16 + residues |
-| `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | **not needed as stated** — Route 1 reaches the period lattice without the bilinear-relations period matrix (see §3) |
-| `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:265` | **weakened / retired** — `H₁ ≅ ℤ^{2g}` is a *byproduct* (§21.5), no 4g-gon needed |
+| `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | **off the critical path for the torus** — Route 1 reaches the period lattice without it (§3). BUT still required later for the **principal polarization / algebraicity** (Gemini C1 below): Forster builds only a complex torus, not a polarized abelian variety. |
+| `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:265` | **only the rank part is free.** Forster gives `H₁ ≅ ℤ^{2g}` as an abstract free group (§21.5), no 4g-gon — but **not** the symplectic basis or the intersection pairing (Gemini C1). The `loops_to_basis` / symplectic content + `AX_IntersectionForm` still need intersection theory / bilinear relations. |
 | `AX_PeriodLattice` (+ `instPeriodLatticeDiscrete`) | `Axioms/PeriodLattice.lean:92` | §21.4 directly, from `dim Ω¹ = g` + Abel |
 | `RiemannRochAPI`/`SerreDualityAPI` sorries (Wall A) | `RiemannSurface/*API.lean` | become the *main line*, not a side wall |
 
-The payoff is structural: in Route 1 `AX_AnalyticCycleBasis` and
-`AX_RiemannBilinear` — the two heaviest items (combined plan estimate well over a
-year) — are **not prerequisites**. The symplectic basis and `H₁ ≅ ℤ^{2g}` are
-*derived from* the period lattice construction, not assumed before it.
+The payoff is structural: in Route 1 the **construction of `Jac(X)` as a complex
+torus** and the **full-rank period lattice** do not require the two heaviest items
+(`AX_AnalyticCycleBasis`'s 4g-gon, `AX_RiemannBilinear`'s polygon-Stokes —
+combined plan estimate well over a year). `H₁ ≅ ℤ^{2g}` (as an abstract free
+group) is *derived* (§21.5), not assumed. **Caveat (Gemini C1):** Forster does
+**not** derive the symplectic basis or intersection pairing, and stops at a
+complex torus — the intersection form / Riemann bilinear relations return *if and
+when* we need the **principal polarization (algebraicity)** of the Jacobian. So
+the win is "construct the torus + lattice cheaply"; the polarization is deferred,
+not eliminated.
 
 ## 2. Build order (each step cites Forster + the file it lands in)
 
@@ -80,10 +86,11 @@ year) — are **not prerequisites**. The symplectic basis and `H₁ ≅ ℤ^{2g}
 7. **Abel's theorem** (§20) — uses 5, 6, surface-Stokes. → `Axioms/AbelTheorem.lean`
    (relate to existing `AX_AbelTheorem`).
 8. **Period lattice + Jacobi inversion** (§21) — `Per(ω₁,…,ω_g)` is a lattice in
-   ℂ^g (§21.4) and `H₁ ≅ ℤ^{2g}` (§21.5). Discharges `AX_PeriodLattice`,
-   `instPeriodLatticeDiscrete`, and **lets `AX_AnalyticCycleBasis` be weakened to
-   a derived statement** (the symplectic basis is now constructed, not assumed).
-   → `Axioms/PeriodLattice.lean`, `Axioms/AnalyticCycleBasis.lean`.
+   ℂ^g (§21.4) and `H₁ ≅ ℤ^{2g}` (§21.5, as an abstract free group). Discharges
+   `AX_PeriodLattice`, `instPeriodLatticeDiscrete`, and **provides the *rank* part
+   of `AX_AnalyticCycleBasis`** (the symplectic basis + intersection pairing are
+   NOT produced here — Gemini C1). → `Axioms/PeriodLattice.lean`,
+   `Axioms/AnalyticCycleBasis.lean`.
 
 ## 3. Why `AX_RiemannBilinear` drops out
 
@@ -96,9 +103,35 @@ it needs the Hodge norm + polygon-Stokes. Forster §21.4 instead proves
 - **rank-`g` period matrix** from `dim Ω¹ = g` (§17.10).
 
 None of these is the bilinear-relations period matrix. So `AX_RiemannBilinear`
-is not on the critical path for the Jacobian in this route (it remains a valid
-*statement* one could later prove for its own sake / for theta-function work,
-but the period lattice no longer waits on it).
+is not on the critical path for **constructing the torus and proving the lattice
+is full-rank**. It remains required for the **principal polarization** (the
+`Im τ ≻ 0` positivity that makes `Jac(X)` a projective abelian variety, not just
+a complex torus) — see Gemini C1. For the bare challenge + Albanese (which are
+torus-level), the period lattice no longer waits on it; for algebraicity, it
+returns.
+
+## 3b. Gemini deep-think review (2026-06-07)
+
+Vetted the route claims (full prompt + verdicts archived with the session).
+Summary:
+- **C2 / C3 / C4 / C5: Correct.** No hidden prerequisites. Forster genuinely
+  avoids polygon-Stokes, the Hodge-norm-as-a-separate-theorem, elliptic
+  regularity (Sobolev/Laplacian), *and* triangulations. Full-rank **spanning**
+  uses the **maximum principle** (a non-zero harmonic form with all periods zero
+  integrates to a non-constant harmonic function on a compact surface →
+  contradiction), *not* L²/Hodge-norm positivity; **discreteness** uses Abel + RR
+  + the inverse function theorem. The trade is "combinatorial topology + PDE" →
+  "compact operators + basic complex analysis," both well-developed in Mathlib.
+- **C1: Partially correct — the one real caveat.** Forster reaches `H₁ ≅ ℤ^{2g}`
+  only as an **abstract free abelian group** and builds `Jac(X)` strictly as a
+  **complex torus**. He does **not** derive the symplectic basis, the intersection
+  pairing, or the principal polarization. If/when we need the Jacobian to be an
+  **algebraic (projective) abelian variety**, the intersection form / Riemann
+  bilinear relations must be introduced then. Net: Route 1 buys the torus + lattice
+  cheaply; the polarization is **deferred, not eliminated**.
+
+Verdict: "Route 1 is vastly superior for Lean" for constructing the complex torus;
+proceed, with the polarization tracked as explicitly deferred work.
 
 ## 4. Risks / open items
 
@@ -108,6 +141,12 @@ but the period lattice no longer waits on it).
   §16–17 from there or prove the structure-sheaf side. Bookkeeping, not depth.
 - The two **mechanical bridge axioms** in `Bridge/KirovHolomorphic.lean` should
   be discharged so the keystone is fully axiom-clean.
+- **Principal polarization is deferred, not free** (Gemini C1). Forster yields a
+  complex torus; making `Jac(X)` a polarized abelian variety needs the
+  intersection form + Riemann bilinear relations (`Im τ ≻ 0`) later. Decide
+  whether the headline goal (challenge + Albanese) needs algebraicity — if it's
+  torus-level, this can stay deferred; if it needs the projective/polarized
+  structure, schedule `AX_RiemannBilinear` + intersection theory as a follow-on.
 - Cross-check the whole chain against **Griffiths–Harris Ch. 0–2** (not yet in
   `refs/`) before committing, to confirm Forster's route has no hidden Hodge
   prerequisite we've missed.
