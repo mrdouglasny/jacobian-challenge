@@ -1286,8 +1286,10 @@ theorem range_toPlaneCurve_eq_compl_infinityPoints (H : PlaneCurveData) :
     rw [Projectivization.mk_eq_mk_iff ℂ w v hw_nonzero hv]
     refine ⟨Units.mk0 c (inv_ne_zero h_v2), rfl⟩
 
-
-
+-- TODO: prove connectedness from irreducibility/overlapping affine charts.
+axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
+    ConnectedSpace (PlaneCurve H)
+attribute [instance] PlaneCurve.instConnectedSpace
 
 /-- `PlaneCurve H` is nonempty.
 This is proved by lifting the (now-proven) affine-nonempty witness `(x, y)` from

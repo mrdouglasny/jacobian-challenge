@@ -1181,11 +1181,15 @@ theorem mem_chartAt_source (H : PlaneCurveData) (q : PlaneCurve H) :
         rw [range_toPlaneCurveX_eq_U0 H]
         exact hq⟩
 
-noncomputable instance instChartedSpace (H : PlaneCurveData) :
+noncomputable instance PlaneCurve.instChartedSpace (H : PlaneCurveData) :
     ChartedSpace ℂ (PlaneCurve H) where
   atlas := Set.range (chartAt H)
   chartAt := chartAt H
   mem_chart_source q := mem_chartAt_source H q
   chart_mem_atlas q := ⟨q, rfl⟩
+
+axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
+attribute [instance] PlaneCurve.instIsManifold
 
 end Jacobians.ProjectiveCurve
