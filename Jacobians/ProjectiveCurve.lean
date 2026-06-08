@@ -29,4 +29,4 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport
 import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
 import Jacobians.ProjectiveCurve.PlaneCurve
-import Jacobians.ProjectiveCurve.PlaneCurve.Atlas
+import Jacobians.ProjectiveCurve.PlaneCurve.CrossCompat

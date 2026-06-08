@@ -38,7 +38,7 @@ Griffiths-Harris Ch. 2.4; Mumford's Red Book Ch. III §8.
 -/
 import Jacobians.RiemannSurface.Genus
 import Jacobians.ProjectiveCurve.PlaneCurve
-import Jacobians.ProjectiveCurve.PlaneCurve.Atlas
+import Jacobians.ProjectiveCurve.PlaneCurve.CrossCompat
 
 namespace Jacobians.Axioms
 
