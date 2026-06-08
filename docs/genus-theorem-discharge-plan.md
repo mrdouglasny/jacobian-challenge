@@ -11,7 +11,7 @@ _Drafted 2026-04-26. Updated 2026-04-29._
   (S8, real proof on top of the 3-level Liouville axiom hierarchy
   introduced in commit `cbcbdb3`).
 * **Odd parity — pending.** `genus_HyperellipticOdd_eq` still `sorry`
-  in `Jacobians/Extensions/Hyperelliptic.lean`. The framework mirrors
+  in `Jacobians/Extensions/HyperellipticOdd.lean`. The framework mirrors
   cleanly — once the cross-summand soundness fix lands the odd-side
   port is largely mechanical (`reverseData` definitional shortcut + a
   parallel single-summand 1-form on `OnePoint (HyperellipticAffine H)`).
@@ -34,7 +34,7 @@ Discharge the two genus theorems:
   ```
   **DONE** as of `65410a0` modulo the Liouville hierarchy axioms.
 * `genus_HyperellipticOdd_eq` in
-  [`Jacobians/Extensions/Hyperelliptic.lean`](../Jacobians/Extensions/Hyperelliptic.lean):
+  [`Jacobians/Extensions/HyperellipticOdd.lean`](../Jacobians/Extensions/HyperellipticOdd.lean):
   ```
   genus (HyperellipticOdd H h) = (H.f.natDegree - 1) / 2
   ```
@@ -222,7 +222,7 @@ canonical-divisor machinery. Tracked as future work, not actively
 pursued.
 
 **Odd parity:** still open. Mirror the framework into
-`Jacobians/Extensions/Hyperelliptic.lean` — the affine-side machinery
+`Jacobians/Extensions/HyperellipticOdd.lean` — the affine-side machinery
 already transfers via `reverseData`; the missing piece is the Liouville-
 hierarchy analogue for `HyperellipticOdd H h`, which has *one* point
 at infinity (vs two in the even case) so the polynomial-decomposition
@@ -255,7 +255,7 @@ is sorry-free. Open work for the even parity: discharge the
 two cross-summand axioms (replace with low-degree-only versions),
 discharge the three Liouville-hierarchy axioms.
 
-Open for odd parity: mirror the framework into Hyperelliptic.lean
+Open for odd parity: mirror the framework into HyperellipticOdd.lean
 (extension theorems still mostly `sorry`); the affine machinery
 already transfers via `reverseData`.
 

@@ -1,7 +1,7 @@
 /-
 # Challenge extensions: tests of the Abel-Jacobi map and Jacobian
 
-Companion to [`Hyperelliptic.lean`](Hyperelliptic.lean) and
+Companion to [`HyperellipticOdd.lean`](HyperellipticOdd.lean) and
 [`HyperellipticEven.lean`](HyperellipticEven.lean), which exercise the
 **form-side** of the formalization (cocycle 1-forms, basis, genus).
 This file exercises the **lattice / Abel-Jacobi side**: theorems whose
@@ -13,7 +13,7 @@ Each theorem is a meaningful end-to-end test:
 
 * it forces `pathIntegralBasepointFunctional` and the bridging axiom
   `AX_pathIntegral_local_antiderivative` to act non-trivially on the
-  basis 1-forms `x^k dx/y` of `Hyperelliptic.lean`;
+  basis 1-forms `x^k dx/y` of `HyperellipticOdd.lean`;
 * it forces `periodMapInBasis` / `periodLatticeInBasis` to land on a
   ℤ-lattice of the correct rank inside `Fin (genus X) → ℂ`, ruling out
   the `Λ = 0` collapse that would make the Jacobian into the whole
@@ -27,7 +27,7 @@ Discharge order recommended:
 
 1. **`periodLattice_rank_HyperellipticOdd_eq`** — the period lattice
    has Z-rank `2g`. Combines `AX_PeriodLattice` with the canonical
-   basis from `Hyperelliptic.lean` and the genus theorem. Forces both
+   basis from `HyperellipticOdd.lean` and the genus theorem. Forces both
    sides to compute (lattice via `periodMapInBasis`; genus via the
    basis count).
 2. **`abelJacobi_hyperellipticInvolution`** — A(σ P) = -A(P) modulo
@@ -64,7 +64,7 @@ References:
 -/
 
 import Jacobians.Challenge
-import Jacobians.Extensions.Hyperelliptic
+import Jacobians.Extensions.HyperellipticOdd
 import Jacobians.Extensions.HyperellipticEven
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.AbelTheorem
@@ -79,7 +79,7 @@ namespace Jacobians.Extensions.AbelJacobi
 open scoped Manifold ContDiff Topology
 open Jacobians Jacobians.ProjectiveCurve Jacobians.RiemannSurface
   Jacobians.Axioms Jacobians.AbelianVariety
-open Jacobians.Extensions.Hyperelliptic
+open Jacobians.Extensions.HyperellipticOdd
 
 /-! ## Test 1 — Period-lattice rank
 
@@ -127,7 +127,7 @@ theorem jacobian_HyperellipticOdd_isCompactTorus
 
 **Statement.** Fix a Weierstrass point `P₀` (in odd degree, the point
 at infinity is fixed by σ and is a Weierstrass point — see
-`hyperellipticInvolution_involutive` in `Hyperelliptic.lean`). For
+`hyperellipticInvolution_involutive` in `HyperellipticOdd.lean`). For
 every `P ∈ HyperellipticOdd H h`, the Abel-Jacobi map sends
 `σ P ↦ −A(P)` in `Jacobian X`.
 
@@ -164,7 +164,7 @@ theorem abelJacobi_hyperellipticInvolution
         (hyperellipticInvolution H h P) =
       - ofCurveImpl (HyperellipticOdd H h) (OnePoint.infty) P := by
   -- Strategy: combine the form-level identity
-  -- `pullback_hyperellipticInvolution_eq_neg` (Hyperelliptic.lean,
+  -- `pullback_hyperellipticInvolution_eq_neg` (HyperellipticOdd.lean,
   -- currently a `True` placeholder) with naturality of the path-integral
   -- functional under pullback (a derived form of
   -- `AX_pathIntegral_local_antiderivative`). Quantitatively:
@@ -263,7 +263,7 @@ but specializing to the explicit hyperelliptic basis tests:
 /-- **Riemann bilinear relations for the odd-degree hyperelliptic
 curve.** There exist a symplectic basis `b` of `H_1` and a normalized
 basis `cω` of holomorphic 1-forms (concretely, a renormalization of
-the canonical basis `x^k dx/y` from `Hyperelliptic.lean`) such that the
+the canonical basis `x^k dx/y` from `HyperellipticOdd.lean`) such that the
 period matrix
     τ[i,j] := ∫_{β_i} cω_j
 lies in `SiegelUpperHalfSpace (genus X)`, with α-period normalization

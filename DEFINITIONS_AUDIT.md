@@ -93,7 +93,7 @@ The deeper guarantee comes from the **headline theorems** (below).
 | Decl | File:Line | Flag | Disposition |
 |---|---|---|---|
 | `hasBranchAtInfinity` | `ProjectiveCurve/Hyperelliptic/Basic.lean:40` | (was orphan) | `:= Odd H.f.natDegree`. Was unused; **now pinned** by witness `hasBranchAtInfinity_eq_true_iff` (this audit). Transparently faithful. |
-| `hyperellipticBasisDifferential` | `Extensions/Hyperelliptic.lean:122` | sorry-body | Known `sorry` (outside the core challenge; tracked in `AXIOM_AUDIT.md`/README sorry inventory). |
+| `hyperellipticOddBasisDifferential` | `Extensions/HyperellipticOdd.lean:122` | sorry-body | Known `sorry` (outside the core challenge; tracked in `AXIOM_AUDIT.md`/README sorry inventory). |
 | `aLoop`, `bLoop` | `ProjectiveCurve/Elliptic/Witnesses.lean:123,143` | (witness) | Concrete A/B-cycle `AnalyticLoop`s (commit `d32b811`). **Forward scaffolding** earmarked for the `AX_Elliptic_H1_symplectic` discharge (`Path.toHomologyClass (aLoop)` is the intended H₁ basis). **Self-pinned:** the `AnalyticLoop` structure *forces* `start_eq`/`end_eq` (the loop must close at `0`), discharged in the witness — so they cannot be degenerate. |
 | `aArc`, `bArc`, `ellipticCycleBasis`, `projectiveLineCycleBasis`, `stereographic` | `…/Witnesses.lean`, `Line.lean:279` | near-orphan | Terminal concrete witnesses; orphan-by-design (their job is to *be* an existence demonstration, not to be called). Self-pinned by their stated types. |
 | `bridgePathImplRegular` | `Bridge/BridgePath.lean:837` | near-orphan | Internal predicate consumed by `bridgePathImpl_chart_differentiableAt_of_regular`. Fine. |

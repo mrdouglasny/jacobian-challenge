@@ -113,7 +113,7 @@ what makes the eventual `IsManifold` proof clean).
 
 Mirror of the planned odd basis-differential theorems
 (`hyperellipticDxOverY`, `hyperellipticBasisDifferential` in
-`Extensions/Hyperelliptic.lean`), specialized to the even case.
+`Extensions/HyperellipticOdd.lean`), specialized to the even case.
 
 The form `x^k dx/y` is holomorphic on `HyperellipticEven H h` for
 `k = 0, …, g - 1` where `g = H.f.natDegree / 2 - 1`. The constraint
@@ -121,7 +121,7 @@ The form `x^k dx/y` is holomorphic on `HyperellipticEven H h` for
 points ∞₊ and ∞₋ in the even case (vs the single ∞ in odd).
 
 **Files**: `Jacobians/Extensions/HyperellipticEven.lean` (companion
-to the existing `Extensions/Hyperelliptic.lean`).
+to the existing `Extensions/HyperellipticOdd.lean`).
 
 Estimated ~100–200 LOC. Concrete polynomial algebra; mechanical once
 EA2 lands.

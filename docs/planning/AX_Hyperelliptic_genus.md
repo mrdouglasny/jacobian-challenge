@@ -10,7 +10,7 @@ axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
     Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus
 ```
 
-**Why it's an axiom right now:** This is the top-level canonical-differentials genus theorem, deferring the unified statement on `Hyperelliptic H` to the underlying parity-specific implementations. The even parity has `genus_HyperellipticEven_eq` (`Extensions/HyperellipticEven.lean:160-166`) and the odd parity has `genus_HyperellipticOdd_eq` (`Extensions/Hyperelliptic.lean:166-170`). This axiom merely acts as the dispatch glue.
+**Why it's an axiom right now:** This is the top-level canonical-differentials genus theorem, deferring the unified statement on `Hyperelliptic H` to the underlying parity-specific implementations. The even parity has `genus_HyperellipticEven_eq` (`Extensions/HyperellipticEven.lean:160-166`) and the odd parity has `genus_HyperellipticOdd_eq` (`Extensions/HyperellipticOdd.lean:166-170`). This axiom merely acts as the dispatch glue.
 
 ### `Gemini critique addressed:`
 - Reclassified route to `provable-from-other-axioms` and reduced effort to 2, as this axiom is solely the dispatch glue.
