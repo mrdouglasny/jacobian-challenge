@@ -109,8 +109,7 @@
 'Jacobians.ProjectiveCurve.genus_Elliptic_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq' depends on axioms: [propext,
  Classical.choice,
- Quot.sound,
- ProjectiveCurve.HyperellipticAffine.AX_HyperellipticAffine_connected]
+ Quot.sound]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
