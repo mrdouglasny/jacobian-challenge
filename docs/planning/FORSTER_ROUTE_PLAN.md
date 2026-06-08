@@ -223,6 +223,39 @@ interface; see CLAUDE.md "major changes"). The comparison and this plan are
 recorded so the route decision is made with the prereq trees explicit rather
 than by default-inheriting the GH/Hodge route the current `AX_*` plans assume.
 
+## 5b. Decision (2026-06-07): adopt (a), then kill the period/torus axioms
+
+Owner decision after the three reviews:
+- **H0/H1 are pinned by the RR/Serre API/anchor — option (a).** No new mechanism:
+  `RiemannRochAPI`/`SerreDualityAPI` already expose the usable numerical content of
+  `AX_RiemannRoch`/`AX_SerreDuality` over the concrete `L(D) = riemannRochSpace D`,
+  and `SheafCohomologyFaithful` is the acceptance spec. RR/Serre are vetted as
+  **classified base axioms** (consistent — opaque `H1` is witnessed by the real
+  H¹; faithfully stated; cited Forster §16/§17). Tier-2/3 (proving the spec) is
+  deferred; #105's repartition `H1` becomes the *proof* of the pin, not its def.
+- **Then use RR/Serre to kill the period/torus axioms (Tier 1).**
+
+**Kill program (toolkit first, then the axioms).**
+
+*Step A — prove the toolkit (direct corollaries of `AX_RR`+`AX_Serre`; currently
+sorry in the API, no H1 construction needed).* Discharge these `RiemannRochAPI` /
+`SerreDualityAPI` sorries from the axioms:
+- `canonicalDivisor_deg` : `deg K = 2g − 2` (RR+Serre at D=0,K + `h0_zero`).
+- `h0_canonical` : `dim L(K) = g`, i.e. **`dim Ω¹ = g`** (Serre at D=0 + `h0_zero`).
+- `riemannRoch` : the H1-free identity `dim L(D) − dim L(K−D) = deg D + 1 − g`.
+- `h0_of_deg_gt`, `riemannRochSpace_finiteDimensional`, … as needed.
+Sorry only because unproven, not because they need Tier-3; they are the tools every
+kill below uses (especially `dim Ω¹ = g`). Routine sorry-discharge PRs.
+
+*Step B — kill the axioms* using Step A + Forster §19–21 (harmonic forms → Abel →
+period lattice), easiest-first:
+- `AX_genus_eq_zero_iff_homeo` (Forster §16.13: genus 0 ⇒ a degree-1 meromorphic
+  function ⇒ `≅ ℙ¹`) — closest to pure-RR.
+- `AX_PeriodLattice` (+ `instPeriodLatticeDiscrete`) — §21.4, via `dim Ω¹ = g` +
+  Abel + the maximum principle.
+- the rank part of `AX_AnalyticCycleBasis` — §21.5 (`H₁ ≅ ℤ^{2g}`).
+Each Step-B kill rewrites a core axiom → Discussion-linked PR.
+
 ## 6. Codex review (2026-06-07) — "revise, not reject"
 
 Codex rated the route a sound *strategic* direction but found the original draft
