@@ -225,6 +225,41 @@ representative). -/
 private noncomputable def localCoeffField (p : X) (n : ℕ) (F : MeroField X) : ℂ :=
   localLim (fieldRep F) p n
 
+private theorem localCoeffField_add {F G : MeroField X} (p : X) (n : ℕ)
+    (hF : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAtField p F)
+    (hG : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAtField p G) :
+    localCoeffField p n (F + G) = localCoeffField p n F + localCoeffField p n G := by
+  have hbF : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p ((fieldRep F : MeroFunctions X) : X → ℂ) := by
+    rw [orderAt_fieldRep]; exact hF
+  have hbG : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p ((fieldRep G : MeroFunctions X) : X → ℂ) := by
+    rw [orderAt_fieldRep]; exact hG
+  have hdiff : fieldRep (F + G) - (fieldRep F + fieldRep G) ∈ GermZero X := by
+    rw [← Submodule.Quotient.eq, fieldRep_mk, Submodule.Quotient.mk_add, fieldRep_mk, fieldRep_mk]
+  have hbsum : ((-(n : ℤ) : ℤ) : WithTop ℤ)
+      ≤ orderAt p ((fieldRep F + fieldRep G : MeroFunctions X) : X → ℂ) :=
+    le_trans (le_min hbF hbG)
+      (min_le_orderAt_add ((fieldRep F).property p) ((fieldRep G).property p))
+  unfold localCoeffField
+  rw [localLim_congr p n hdiff hbsum]
+  exact localLim_add (fieldRep F) (fieldRep G) p n hbF hbG
+
+private theorem localCoeffField_smul (c : ℂ) {F : MeroField X} (p : X) (n : ℕ)
+    (hF : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAtField p F) :
+    localCoeffField p n (c • F) = c • localCoeffField p n F := by
+  have hbF : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p ((fieldRep F : MeroFunctions X) : X → ℂ) := by
+    rw [orderAt_fieldRep]; exact hF
+  have hdiff : fieldRep (c • F) - c • fieldRep F ∈ GermZero X := by
+    rw [← Submodule.Quotient.eq, fieldRep_mk, Submodule.Quotient.mk_smul, fieldRep_mk]
+  have hbsmul : ((-(n : ℤ) : ℤ) : WithTop ℤ)
+      ≤ orderAt p ((c • fieldRep F : MeroFunctions X) : X → ℂ) := by
+    by_cases hc : c = 0
+    · simp [hc]
+    · rw [SetLike.val_smul, orderAt_const_smul_of_ne_zero hc p ((fieldRep F : MeroFunctions X) : X → ℂ)]
+      exact hbF
+  unfold localCoeffField
+  rw [localLim_congr p n hdiff hbsmul]
+  exact localLim_smul c (fieldRep F) p n hbF
+
 end Functional
 
 end Jacobians.RiemannSurface
