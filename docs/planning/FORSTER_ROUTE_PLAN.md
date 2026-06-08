@@ -73,7 +73,13 @@ not eliminated.
 2. **Čech `H¹(X,O)` + Dolbeault.** Forster §12–13. We have an `H1` type
    (`Cohomology/H1.lean`); need the structure-sheaf cohomology + the
    local-`∂̄`-solvability lemma (Dolbeault, §13). This is the main genuinely-new
-   analytic lemma; it is local and standard.
+   analytic lemma — but it is **strictly local/planar** (the `n=1`
+   Grothendieck–Dolbeault lemma), so it needs no manifold topology. Standard proof
+   = the **Cauchy–Pompeiu (generalized Cauchy integral) formula**: a local integral
+   operator inverting `∂̄` on a disk. Mathlib's planar Cauchy theory
+   (`Mathlib.Analysis.Complex.CauchyIntegral`, `Complex.integral`) is mature, so
+   this reduces to multivariable real calculus + integral bounds — tedious but
+   mechanical, no surface-Stokes. (Gemini-3 chat corroboration, 2026-06-07.)
 3. **Exact sequence + deRham** (§15) → `Cohomology/ExactSequence.lean`.
 4. **Riemann–Roch** (§16.9) — discharges `AX_RiemannRoch`. Pure homological
    algebra over steps 1–3. Land in `Axioms/RiemannRoch.lean` (axiom → theorem),
@@ -139,8 +145,12 @@ proceed, with the polarization tracked as explicitly deferred work.
   Standard, local, but not yet in the project. Biggest single piece of new work.
 - **`dim H¹(O)` vs `dim H⁰(Ω¹)`**: we hold the 1-form side; need to either run
   §16–17 from there or prove the structure-sheaf side. Bookkeeping, not depth.
-- The two **mechanical bridge axioms** in `Bridge/KirovHolomorphic.lean` should
-  be discharged so the keystone is fully axiom-clean.
+- The two **mechanical bridge axioms** in `Bridge/KirovHolomorphic.lean`
+  (`bridgeForm` exists / injective) should be discharged **first** — both Gemini
+  reviews flag this as the priority ("don't let `bridgeForm` remain an axiom for
+  long … prevents foundational rot"). They're mechanically verifiable in Mathlib's
+  bundle/section formalism and solidify the keystone the whole route stands on.
+  This is also the lowest-risk concrete first step: it touches no core interface.
 - **Principal polarization is deferred, not free** (Gemini C1). Forster yields a
   complex torus; making `Jac(X)` a polarized abelian variety needs the
   intersection form + Riemann bilinear relations (`Im τ ≻ 0`) later. Decide
