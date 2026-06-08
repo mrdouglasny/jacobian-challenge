@@ -286,4 +286,66 @@ noncomputable def localCoeffLinear (D : Divisor X) (p : X) :
 
 end Functional
 
+/-! ## Assembly: the one-point induction step -/
+
+private theorem coeff_self_add_of (D : Divisor X) (p : X) :
+    FreeAbelianGroup.coeff p (D + FreeAbelianGroup.of p) = FreeAbelianGroup.coeff p D + 1 := by
+  rw [map_add]
+  congr 1
+  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Finsupp.single_apply]
+
+private theorem coeff_ne_add_of (D : Divisor X) {p q : X} (h : q ≠ p) :
+    FreeAbelianGroup.coeff q (D + FreeAbelianGroup.of p) = FreeAbelianGroup.coeff q D := by
+  rw [map_add]
+  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Finsupp.single_apply,
+    Ne.symm h]
+
+/-- **The one-point induction step.** Adding a point `p` to an effective divisor
+`D` raises `dim L` by at most one, so `L(D + p)` is finite-dimensional whenever
+`L(D)` is. The kernel of the coefficient functional `φ` at `p` is exactly `L(D)`,
+so `L(D+p)/L(D) ↪ ℂ`. -/
+theorem finiteDimensional_riemannRochSpace_add_of (D : Divisor X) (p : X)
+    (hD : Effective D) [FiniteDimensional ℂ (riemannRochSpace D)] :
+    FiniteDimensional ℂ (riemannRochSpace (D + FreeAbelianGroup.of p)) := by
+  set Dp := D + FreeAbelianGroup.of p with hDp
+  have hle : riemannRochSpace D ≤ riemannRochSpace Dp := by
+    refine riemannRochSpace_mono (fun q => ?_)
+    by_cases hq : q = p
+    · subst q; rw [hDp, coeff_self_add_of]; omega
+    · rw [hDp, coeff_ne_add_of D hq]
+  -- key integer identity: (coeff_p Dp).toNat = coeff_p D + 1  (D effective)
+  have hn : ((FreeAbelianGroup.coeff p Dp).toNat : ℤ) = FreeAbelianGroup.coeff p D + 1 := by
+    have hnn : 0 ≤ FreeAbelianGroup.coeff p Dp := by rw [hDp, coeff_self_add_of]; have := hD p; omega
+    rw [Int.toNat_of_nonneg hnn, hDp, coeff_self_add_of]
+  set φ := localCoeffLinear Dp p with hφ
+  -- ker φ = the copy of L(D) inside L(Dp)
+  have hker : LinearMap.ker φ = Submodule.comap (riemannRochSpace Dp).subtype (riemannRochSpace D) := by
+    ext F
+    rw [LinearMap.mem_ker, Submodule.mem_comap, Submodule.coe_subtype]
+    show localCoeffField p (FreeAbelianGroup.coeff p Dp).toNat (F : MeroField X) = 0 ↔
+      (F : MeroField X) ∈ riemannRochSpace D
+    rw [localCoeffField_eq_zero_iff p _ (riemannRochSpace_orderBound F.2 p)]
+    have hpeq : ((-((FreeAbelianGroup.coeff p Dp).toNat : ℤ) + 1 : ℤ) : WithTop ℤ)
+        = ((-(FreeAbelianGroup.coeff p D) : ℤ) : WithTop ℤ) := by
+      norm_cast; omega
+    rw [hpeq]
+    constructor
+    · intro hp q
+      by_cases hq : q = p
+      · subst q; exact hp
+      · have hcoeff : FreeAbelianGroup.coeff q Dp = FreeAbelianGroup.coeff q D := by
+          rw [hDp]; exact coeff_ne_add_of D hq
+        have h2 := F.2 q; rwa [hcoeff] at h2
+    · intro hF1; exact hF1 p
+  -- L(D) copy is finite-dimensional
+  haveI hNfin : FiniteDimensional ℂ
+      (Submodule.comap (riemannRochSpace Dp).subtype (riemannRochSpace D)) :=
+    Module.Finite.equiv (Submodule.comapSubtypeEquivOfLe hle).symm
+  haveI : FiniteDimensional ℂ (LinearMap.ker φ) := by rw [hker]; exact hNfin
+  -- quotient is finite (embeds in ℂ via range φ)
+  haveI : FiniteDimensional ℂ (LinearMap.range φ) := inferInstance
+  haveI : FiniteDimensional ℂ (↥(riemannRochSpace Dp) ⧸ LinearMap.ker φ) :=
+    Module.Finite.equiv (φ.quotKerEquivRange).symm
+  exact Module.Finite.of_submodule_quotient (LinearMap.ker φ)
+
 end Jacobians.RiemannSurface
