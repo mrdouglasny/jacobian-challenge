@@ -14,7 +14,7 @@ import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 
 namespace Jacobians.RiemannSurface
 
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Classical
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
@@ -347,5 +347,65 @@ theorem finiteDimensional_riemannRochSpace_add_of (D : Divisor X) (p : X)
   haveI : FiniteDimensional ℂ (↥(riemannRochSpace Dp) ⧸ LinearMap.ker φ) :=
     Module.Finite.equiv (φ.quotKerEquivRange).symm
   exact Module.Finite.of_submodule_quotient (LinearMap.ker φ)
+
+/-- The effective divisor `∑_{p ∈ s} p` of a multiset of points. -/
+private noncomputable def divOfMultiset (s : Multiset X) : Divisor X :=
+  (s.map FreeAbelianGroup.of).sum
+
+@[simp] private theorem divOfMultiset_zero : divOfMultiset (0 : Multiset X) = 0 := by
+  simp [divOfMultiset]
+
+private theorem divOfMultiset_cons (p : X) (s : Multiset X) :
+    divOfMultiset (p ::ₘ s) = FreeAbelianGroup.of p + divOfMultiset s := by
+  simp [divOfMultiset]
+
+private theorem effective_divOfMultiset (s : Multiset X) : Effective (divOfMultiset s) := by
+  induction s using Multiset.induction with
+  | empty => simpa using effective_zero
+  | cons p s ih => rw [divOfMultiset_cons]; exact (effective_of p).add ih
+
+private theorem coeff_divOfMultiset (q : X) (s : Multiset X) :
+    FreeAbelianGroup.coeff q (divOfMultiset s) = (s.count q : ℤ) := by
+  induction s using Multiset.induction with
+  | empty => simp
+  | cons p s ih =>
+    rw [divOfMultiset_cons, map_add, ih, Multiset.count_cons]
+    have : FreeAbelianGroup.coeff q (FreeAbelianGroup.of p) = if q = p then 1 else 0 := by
+      simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Finsupp.single_apply,
+        eq_comm]
+    rw [this]; split <;> push_cast <;> ring
+
+/-- Finiteness for every effective `divOfMultiset s`, by induction on the multiset
+(base case = `L(0)` finite-dimensional, supplied as `h0`). -/
+private theorem finiteDimensional_divOfMultiset
+    (h0 : FiniteDimensional ℂ (riemannRochSpace (0 : Divisor X))) :
+    ∀ s : Multiset X, FiniteDimensional ℂ (riemannRochSpace (divOfMultiset s)) := by
+  intro s
+  induction s using Multiset.induction with
+  | empty => rwa [divOfMultiset_zero]
+  | cons p s ih =>
+    rw [divOfMultiset_cons, add_comm]
+    haveI := ih
+    exact finiteDimensional_riemannRochSpace_add_of (divOfMultiset s) p (effective_divOfMultiset s)
+
+/-- Every divisor is dominated by an effective `divOfMultiset` (its positive part). -/
+private theorem exists_multiset_ge (D : Divisor X) :
+    ∃ s : Multiset X, ∀ q, FreeAbelianGroup.coeff q D
+      ≤ FreeAbelianGroup.coeff q (divOfMultiset s) := by
+  refine ⟨Finsupp.toMultiset
+    (Finsupp.mapRange Int.toNat Int.toNat_zero (FreeAbelianGroup.toFinsupp D)), fun q => ?_⟩
+  rw [coeff_divOfMultiset, Finsupp.count_toMultiset, Finsupp.mapRange_apply]
+  show FreeAbelianGroup.coeff q D ≤ ((FreeAbelianGroup.toFinsupp D q).toNat : ℤ)
+  rw [show FreeAbelianGroup.coeff q D = FreeAbelianGroup.toFinsupp D q from rfl]
+  omega
+
+/-- **Finiteness of `L(D)`, modulo the base case `L(0)`.** Reduce to an effective
+`divOfMultiset` by monotonicity, then the multiset induction. -/
+theorem finiteDimensional_riemannRochSpace_of_base
+    (h0 : FiniteDimensional ℂ (riemannRochSpace (0 : Divisor X))) (D : Divisor X) :
+    FiniteDimensional ℂ (riemannRochSpace D) := by
+  obtain ⟨s, hs⟩ := exists_multiset_ge D
+  haveI := finiteDimensional_divOfMultiset h0 s
+  exact finiteDimensional_of_riemannRochSpace_le (riemannRochSpace_mono hs)
 
 end Jacobians.RiemannSurface
