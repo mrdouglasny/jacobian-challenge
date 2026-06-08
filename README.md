@@ -11,7 +11,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Build** | `lake build Jacobians` green (8602 jobs) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 41, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 42, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 8 intentional anchor-statement deferrals |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 
@@ -45,7 +45,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 |-------|:-----:|:----------:|
 | Period / Hodge / homology core (Riemann bilinear, period lattice, intersection form, H₁ bases) | 8 | 🔴🟡 |
 | Abel–Jacobi (`AX_AbelTheorem` + `ofCurve` smoothness; `ofCurve_inj` is now a theorem) | 2 | 🔴 |
-| Sheaf cohomology / Riemann–Roch / Serre / Plücker / uniformization (`H0` de-opaqued) | 10 | 🔴 |
+| Sheaf cohomology / Riemann–Roch / Serre / Plücker / uniformization (`H0` de-opaqued) | 11 | 🔴 |
 | Functoriality (pushforward / pullback naturality + lattice preservation) | 7 | 🟡 |
 | Torus / Albanese universal property | 3 | 🟡 |
 | Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 15 | 🟢🟡 |
