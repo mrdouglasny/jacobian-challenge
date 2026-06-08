@@ -106,6 +106,36 @@ recorded separately in `riemannRochSpace_finiteDimensional`. -/
 noncomputable abbrev h0 (D : Divisor X) : ℕ :=
   Module.finrank ℂ (riemannRochSpace D)
 
+/-- **Axiom (finiteness of Riemann–Roch spaces — Forster §14).** On a compact
+Riemann surface, `L(D) = riemannRochSpace D` is finite-dimensional over `ℂ`, for
+every divisor `D`. This is the §14 finiteness theorem specialized to
+`H⁰(O_D) = L(D)`; it makes `h0 D = finrank ℂ (L(D))` semantically faithful and
+supplies the `[FiniteDimensional H0]` instance `AX_RiemannRoch` requires. The
+`[FiniteDimensional H1]` side is **derived** (`instFiniteDimensional_H1_ofDivisor`).
+
+Vetted **Standard** (Gemini deep-think 2026-06-07): correctly typed, strong
+enough (all `D`), non-vacuous (true on compact `X`), satisfiable (the real theory
+is a model; no Serre Catch-22 — `AX_SerreDuality` carries no finiteness hyp).
+Discharge plan: `docs/planning/riemannRochSpace_finiteDimensional.md` (re-target
+the vendored Kirov Montel engine from `Ω¹` to general `L(D)`).
+
+Reference: Forster §14; Miranda Ch. VI; Mumford. -/
+@[instance] axiom riemannRochSpace_finiteDimensional (D : Divisor X) :
+    FiniteDimensional ℂ (riemannRochSpace D)
+
+/-- `H⁰(O_D)` is finite-dimensional (the pin, transported across the definitional
+`H0 (ofDivisor D) ≃ₗ riemannRochSpace D`). -/
+instance instFiniteDimensional_H0_ofDivisor (D : Divisor X) :
+    FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D)) :=
+  (H0_equiv_riemannRochSpace D).some.symm.finiteDimensional
+
+/-- `H¹(O_D)` is finite-dimensional, **derived** from the `L(D)`-finiteness pin
+via Serre duality: `H¹(O_D) ≃ₗ Dual (H⁰(O(K−D)))`, and the dual of a
+finite-dimensional space is finite-dimensional. -/
+instance instFiniteDimensional_H1_ofDivisor (D : Divisor X) :
+    FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D)) :=
+  (AX_SerreDuality D).some.symm.finiteDimensional
+
 /-- Textbook canonical degree formula (Forster section 17; Miranda VI):
 `deg K_X = 2g - 2`. The genus is a natural number in this development, so it is
 cast to `Int` before forming the divisor-degree identity. -/
@@ -124,7 +154,15 @@ then using `H0_equiv_riemannRochSpace` for both divisors. -/
 theorem riemannRoch (D : Divisor X) :
     (h0 D : ℤ) - (h0 (canonicalDivisor X - D) : ℤ) =
       Divisor.deg X D + 1 - (genus X : ℤ) := by
-  sorry
+  have hRR := AX_RiemannRoch D
+  have hH0 : Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) = h0 D :=
+    (H0_equiv_riemannRochSpace D).some.finrank_eq
+  have hH1 : Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) =
+      h0 (canonicalDivisor X - D) := by
+    rw [(AX_SerreDuality D).some.finrank_eq, Subspace.dual_finrank_eq,
+      (H0_equiv_riemannRochSpace (canonicalDivisor X - D)).some.finrank_eq]
+  rw [hH0, hH1] at hRR
+  exact hRR
 
 /-- Consistency bridge to the existing axiom-level Riemann-Roch package.
 
@@ -534,15 +572,9 @@ theorem h0_zero :
 Miranda VI; Mumford II.2): `H^0(K_X) ~= C^g`, hence `h^0(K_X) = g`. -/
 theorem h0_canonical :
     h0 (canonicalDivisor X) = genus X := by
-  sorry
+  have h := riemannRoch (0 : Divisor X)
+  rw [sub_zero, h0_zero, map_zero] at h
+  omega
 
-/-- Compactness/Cartan-Serre finiteness input for the concrete
-Riemann-Roch space `L(D)` (Forster section 16; Miranda VI): for every divisor
-`D`, the space of meromorphic functions satisfying `div(f) + D >= 0` is
-finite-dimensional over `C`. This is the finite-dimensionality theorem that
-makes `h0 D = finrank C (L(D))` semantically meaningful. -/
-theorem riemannRochSpace_finiteDimensional (D : Divisor X) :
-    FiniteDimensional ℂ (riemannRochSpace D) := by
-  sorry
 
 end Jacobians.RiemannSurface
