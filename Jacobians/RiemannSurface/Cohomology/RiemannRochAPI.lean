@@ -489,13 +489,6 @@ instance instFiniteDimensional_H1_ofDivisor (D : Divisor X) :
     FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D)) :=
   (AX_SerreDuality D).some.symm.finiteDimensional
 
-/-- Textbook canonical degree formula (Forster section 17; Miranda VI):
-`deg K_X = 2g - 2`. The genus is a natural number in this development, so it is
-cast to `Int` before forming the divisor-degree identity. -/
-theorem canonicalDivisor_deg :
-    Divisor.deg X (canonicalDivisor X) = 2 * (genus X : ℤ) - 2 := by
-  sorry
-
 /-- Riemann-Roch in pure `L(D)` terms (Forster section 17; Miranda VI;
 Mumford II.2):
 
@@ -582,5 +575,16 @@ theorem h0_canonical :
   rw [sub_zero, h0_zero, map_zero] at h
   omega
 
+
+/-- Textbook canonical degree formula (Forster section 17; Miranda VI):
+`deg K_X = 2g - 2`. The genus is a natural number in this development, so it is
+cast to `Int` before forming the divisor-degree identity. -/
+theorem canonicalDivisor_deg :
+    Divisor.deg X (canonicalDivisor X) = 2 * (genus X : ℤ) - 2 := by
+  -- Riemann–Roch at `D = K`: `h⁰(K) − h⁰(0) = deg K + 1 − g`, with `h⁰(K) = g`
+  -- and `h⁰(0) = 1`, gives `deg K = 2g − 2`.
+  have h := riemannRoch (canonicalDivisor X)
+  simp only [sub_self, h0_zero, h0_canonical, Nat.cast_one] at h
+  omega
 
 end Jacobians.RiemannSurface
