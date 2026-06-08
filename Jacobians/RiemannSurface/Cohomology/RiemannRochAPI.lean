@@ -116,8 +116,9 @@ supplies the `[FiniteDimensional H0]` instance `AX_RiemannRoch` requires. The
 Vetted **Standard** (Gemini deep-think 2026-06-07): correctly typed, strong
 enough (all `D`), non-vacuous (true on compact `X`), satisfiable (the real theory
 is a model; no Serre Catch-22 — `AX_SerreDuality` carries no finiteness hyp).
-Discharge plan: `docs/planning/riemannRochSpace_finiteDimensional.md` (re-target
-the vendored Kirov Montel engine from `Ω¹` to general `L(D)`).
+Discharge plan: `docs/planning/riemannRochSpace_finiteDimensional.md` /
+issue #116 — the elementary `ℓ(D) ≤ 1 + deg D⁺` upper bound (Montel-free),
+reusing the already-proved `L(0) = ℂ` Liouville half. Gemini + Codex vetted.
 
 Reference: Forster §14; Miranda Ch. VI; Mumford. -/
 @[instance] axiom riemannRochSpace_finiteDimensional (D : Divisor X) :
