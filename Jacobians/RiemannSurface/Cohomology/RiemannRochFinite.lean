@@ -260,6 +260,30 @@ private theorem localCoeffField_smul (c : ℂ) {F : MeroField X} (p : X) (n : �
   rw [localLim_congr p n hdiff hbsmul]
   exact localLim_smul c (fieldRep F) p n hbF
 
+/-- **Field-level kernel identity:** for `F` with pole order `≤ n` at `p`, the
+coefficient vanishes iff the order is one better. -/
+private theorem localCoeffField_eq_zero_iff {F : MeroField X} (p : X) (n : ℕ)
+    (hF : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAtField p F) :
+    localCoeffField p n F = 0 ↔ ((-(n : ℤ) + 1 : ℤ) : WithTop ℤ) ≤ orderAtField p F := by
+  have hb : ((-(n : ℤ) : ℤ) : WithTop ℤ)
+      ≤ orderAt p ((fieldRep F : MeroFunctions X) : X → ℂ) := by
+    rw [orderAt_fieldRep]; exact hF
+  rw [localCoeffField, localLim_eq_zero_iff (fieldRep F) p n hb, orderAt_fieldRep]
+
+/-- The local coefficient functional packaged as a `ℂ`-linear map on `L(D)`,
+with pole bound `n = (coeff_p D).toNat` at `p`. -/
+noncomputable def localCoeffLinear (D : Divisor X) (p : X) :
+    ↥(riemannRochSpace D) →ₗ[ℂ] ℂ where
+  toFun F := localCoeffField p (FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)).toNat
+    (F : MeroField X)
+  map_add' F G := by
+    simp only [Submodule.coe_add]
+    exact localCoeffField_add p _ (riemannRochSpace_orderBound F.2 p)
+      (riemannRochSpace_orderBound G.2 p)
+  map_smul' c F := by
+    simp only [Submodule.coe_smul, RingHom.id_apply]
+    exact localCoeffField_smul c p _ (riemannRochSpace_orderBound F.2 p)
+
 end Functional
 
 end Jacobians.RiemannSurface
