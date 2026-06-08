@@ -184,6 +184,47 @@ private theorem localLim_eq_zero_iff (f : MeroFunctions X) (p : X) (n : ℕ)
       WithTop.coe_lt_coe, WithTop.coe_le_coe]
     omega
 
+/-- **Representative-independence.** Two representatives differing by a germ-zero
+function have the same `localLim` (both order-bounded). This descends `localLim`
+to the germ quotient `MeroField`. -/
+private theorem localLim_congr {f f' : MeroFunctions X} (p : X) (n : ℕ)
+    (hd : f - f' ∈ GermZero X)
+    (hf' : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (f' : X → ℂ)) :
+    localLim f p n = localLim f' p n := by
+  have hbd : ((-(n : ℤ) : ℤ) : WithTop ℤ)
+      ≤ orderAt p ((f - f' : MeroFunctions X) : X → ℂ) := by
+    rw [hd p]; exact le_top
+  have hadd := localLim_add (f - f') f' p n hbd hf'
+  rw [sub_add_cancel] at hadd
+  rw [hadd, localLim_germZero hd p n, zero_add]
+
+/-! ### Descending the functional to `MeroField` -/
+
+/-- A chosen germ representative of a `MeroField` element. -/
+private noncomputable def fieldRep (F : MeroField X) : MeroFunctions X := Quotient.out F
+
+private theorem fieldRep_mk (F : MeroField X) :
+    (Submodule.Quotient.mk (fieldRep F) : MeroField X) = F := Quotient.out_eq F
+
+private theorem orderAt_fieldRep (F : MeroField X) (p : X) :
+    orderAt p ((fieldRep F : MeroFunctions X) : X → ℂ) = orderAtField p F := by
+  conv_rhs => rw [← fieldRep_mk F, orderAtField_mk]
+
+/-- The pole-bound `ord_p F ≥ -n` with `n = (coeff_p D).toNat` holds for **every**
+`F ∈ L(D)` (effective or not). -/
+private theorem riemannRochSpace_orderBound {D : Divisor X} {F : MeroField X}
+    (hF : F ∈ riemannRochSpace D) (p : X) :
+    ((-((FreeAbelianGroup.coeff p (D : FreeAbelianGroup X)).toNat : ℤ) : ℤ) : WithTop ℤ)
+      ≤ orderAtField p F := by
+  refine le_trans ?_ (hF p)
+  rw [WithTop.coe_le_coe]
+  omega
+
+/-- The local coefficient functional descended to `MeroField` (via the chosen
+representative). -/
+private noncomputable def localCoeffField (p : X) (n : ℕ) (F : MeroField X) : ℂ :=
+  localLim (fieldRep F) p n
+
 end Functional
 
 end Jacobians.RiemannSurface
