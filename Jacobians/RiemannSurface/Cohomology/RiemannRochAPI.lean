@@ -8,6 +8,7 @@ import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 import Jacobians.GeneralResults.ChartTransition
 import Jacobians.RiemannSurface.Cohomology.RiemannRochFinite
+import Jacobians.RiemannSurface.Cohomology.DegreeTheorem
 
 /-!
 # Riemann-Roch API in terms of the germ-quotient space `L(D)`
@@ -17,8 +18,9 @@ germ-quotient definition
 `riemannRochSpace D = L(D) = {f | div(f) + D >= 0}` from
 `Jacobians.RiemannSurface.Cohomology.RiemannRochSpace`.
 
-All results here are vetted statement anchors. The proofs are intentionally
-deferred with `sorry`; the value is in the faithful, type-correct statements.
+The statement anchors here are vetted against the textbook form. Some bridges
+still use the axiom-level cohomology package, while the high-degree corollary is
+now discharged through the negative-degree Riemann-Roch-space theorem.
 
 References: Forster, *Lectures on Riemann Surfaces*, sections 16/17; Miranda,
 Ch. VI; Mumford, *Algebraic Geometry I*, Ch. II.
@@ -510,6 +512,35 @@ theorem riemannRoch (D : Divisor X) :
   rw [hH0, hH1] at hRR
   exact hRR
 
+/-- Global holomorphic functions on a compact connected Riemann surface are
+constant (Forster section 16; Miranda VI): `L(0) = C`, so `h^0(0) = 1`. -/
+theorem h0_zero :
+    h0 (0 : Divisor X) = 1 := by
+  let e : ℂ ≃ₗ[ℂ] riemannRochSpace (0 : Divisor X) :=
+    LinearEquiv.ofBijective (constRRSZeroLinear (X := X))
+      ⟨constRRSZeroLinear_injective (X := X), constRRSZeroLinear_surjective (X := X)⟩
+  change Module.finrank ℂ (riemannRochSpace (0 : Divisor X)) = 1
+  rw [← e.finrank_eq, Module.finrank_self]
+
+/-- Holomorphic differentials have dimension the genus (Forster sections 16/17;
+Miranda VI; Mumford II.2): `H^0(K_X) ~= C^g`, hence `h^0(K_X) = g`. -/
+theorem h0_canonical :
+    h0 (canonicalDivisor X) = genus X := by
+  have h := riemannRoch (0 : Divisor X)
+  rw [sub_zero, h0_zero, map_zero] at h
+  omega
+
+/-- Textbook canonical degree formula (Forster section 17; Miranda VI):
+`deg K_X = 2g - 2`. The genus is a natural number in this development, so it is
+cast to `Int` before forming the divisor-degree identity. -/
+theorem canonicalDivisor_deg :
+    Divisor.deg X (canonicalDivisor X) = 2 * (genus X : ℤ) - 2 := by
+  -- Riemann–Roch at `D = K`: `h⁰(K) − h⁰(0) = deg K + 1 − g`, with `h⁰(K) = g`
+  -- and `h⁰(0) = 1`, gives `deg K = 2g − 2`.
+  have h := riemannRoch (canonicalDivisor X)
+  simp only [sub_self, h0_zero, h0_canonical, Nat.cast_one] at h
+  omega
+
 /-- Consistency bridge to the existing axiom-level Riemann-Roch package.
 
 Given the `AX_RiemannRoch` numerical statement, the `AX_SerreDuality`
@@ -545,7 +576,17 @@ degrees are integer-valued. -/
 theorem h0_of_deg_gt (D : Divisor X) :
     2 * (genus X : ℤ) - 2 < Divisor.deg X D →
       (h0 D : ℤ) = Divisor.deg X D + 1 - (genus X : ℤ) := by
-  sorry
+  intro hD
+  have hKD_neg : Divisor.deg X (canonicalDivisor X - D) < 0 := by
+    rw [map_sub, canonicalDivisor_deg]
+    omega
+  have hKD_bot : riemannRochSpace (canonicalDivisor X - D) = ⊥ :=
+    riemannRochSpace_eq_bot_of_deg_neg' hKD_neg
+  have hKD_h0 : h0 (canonicalDivisor X - D) = 0 := by
+    unfold h0
+    rw [hKD_bot]
+    simp
+  simpa [hKD_h0] using riemannRoch D
 
 /-- Single-point positive-genus corollary (Forster section 17; Miranda VI):
 for `g > 0`, the Riemann-Roch space `L(P)` has dimension one, i.e. only
@@ -556,35 +597,5 @@ positive-genus hypothesis excludes the genus-zero case where `h^0(P) = 2`. -/
 theorem h0_point_eq_one_of_genus_pos (p : X) (hg : 0 < genus X) :
     h0 (FreeAbelianGroup.of p : Divisor X) = 1 := by
   sorry
-
-/-- Global holomorphic functions on a compact connected Riemann surface are
-constant (Forster section 16; Miranda VI): `L(0) = C`, so `h^0(0) = 1`. -/
-theorem h0_zero :
-    h0 (0 : Divisor X) = 1 := by
-  let e : ℂ ≃ₗ[ℂ] riemannRochSpace (0 : Divisor X) :=
-    LinearEquiv.ofBijective (constRRSZeroLinear (X := X))
-      ⟨constRRSZeroLinear_injective (X := X), constRRSZeroLinear_surjective (X := X)⟩
-  change Module.finrank ℂ (riemannRochSpace (0 : Divisor X)) = 1
-  rw [← e.finrank_eq, Module.finrank_self]
-
-/-- Holomorphic differentials have dimension the genus (Forster sections 16/17;
-Miranda VI; Mumford II.2): `H^0(K_X) ~= C^g`, hence `h^0(K_X) = g`. -/
-theorem h0_canonical :
-    h0 (canonicalDivisor X) = genus X := by
-  have h := riemannRoch (0 : Divisor X)
-  rw [sub_zero, h0_zero, map_zero] at h
-  omega
-
-
-/-- Textbook canonical degree formula (Forster section 17; Miranda VI):
-`deg K_X = 2g - 2`. The genus is a natural number in this development, so it is
-cast to `Int` before forming the divisor-degree identity. -/
-theorem canonicalDivisor_deg :
-    Divisor.deg X (canonicalDivisor X) = 2 * (genus X : ℤ) - 2 := by
-  -- Riemann–Roch at `D = K`: `h⁰(K) − h⁰(0) = deg K + 1 − g`, with `h⁰(K) = g`
-  -- and `h⁰(0) = 1`, gives `deg K = 2g − 2`.
-  have h := riemannRoch (canonicalDivisor X)
-  simp only [sub_self, h0_zero, h0_canonical, Nat.cast_one] at h
-  omega
 
 end Jacobians.RiemannSurface
