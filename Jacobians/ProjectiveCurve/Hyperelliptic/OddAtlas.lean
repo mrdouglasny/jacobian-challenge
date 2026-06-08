@@ -9,7 +9,7 @@ uniformizer `t = y / x^{g+1}`) into:
 * `instance : IsManifold 𝓘(ℂ) ω (HyperellipticOdd H h)`
 
 Once these compile, the two **temporary `axiom`s** at the top of
-`Jacobians/Extensions/Hyperelliptic.lean` (OA4) can be deleted; instance
+`Jacobians/Extensions/HyperellipticOdd.lean` (OA4) can be deleted; instance
 resolution picks up the real ones from this file.
 
 See `docs/hyperelliptic-odd-atlas-plan.md`.

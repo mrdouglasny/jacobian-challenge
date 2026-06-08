@@ -58,7 +58,7 @@ known_values:                    # the test matrix: instance → expected → st
       - contDiffOn_symm_toOpenPartialHomeomorph
   - instance: HyperellipticOdd
     expected: "(N − 1)/2"
-    theorem: "(Extensions/Hyperelliptic.lean — stated)"
+    theorem: "(Extensions/HyperellipticOdd.lean — stated)"
     status: sorry
     axiom_deps: []
 well_definedness:                # what makes the def non-degenerate at all

@@ -71,7 +71,7 @@ jobs:
           #   (b) anchor-layer files — intentionally deferred proofs of Gemini-vetted
           #       RR/Serre/Plücker statements (the value is the locked-down statement;
           #       see README "Anchor APIs").
-          allow="Jacobians/Extensions/Hyperelliptic.lean
+          allow="Jacobians/Extensions/HyperellipticOdd.lean
           Jacobians/Extensions/AbelJacobi.lean
           Jacobians/Bridge/KirovLineIntegral.lean
           Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean

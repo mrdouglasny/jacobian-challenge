@@ -60,7 +60,7 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 - **This is a reduction, not a closed proof.** A theorem whose only non-Lean-proven content is a textbook-classical axiom should be read as *"reduced to that classical input"*, not *"proved from Mathlib"*.
 - **Zero human-written Lean.** The Lean was written by Claude (Opus) with Codex rescue passes and Gemini axiom audits, directed by a mathematician on scope, the axiom-vs-proof boundary, and review of every landing.
 - **`sorry`s, in two honest categories** (the *core* — challenge API, Jacobian construction, curve witnesses, S1–S7 1-form framework — is `sorry`-free):
-  - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/Hyperelliptic.lean` 6, `Extensions/AbelJacobi.lean` 4, `Hyperelliptic/AntiInvariance.lean` 1).
+  - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/HyperellipticOdd.lean` 6 — the odd-degree extension project, deliberately mirroring the *completed* `Extensions/HyperellipticEven.lean`; `Extensions/AbelJacobi.lean` 4; `Hyperelliptic/AntiInvariance.lean` 1).
   - **8 anchor-layer** — *intentionally* deferred proofs of the vetted RR/Serre statements above (`RiemannRochAPI` 7, `SerreDualityAPI` 1). `PluckerAPI` is fully proved; `h⁰(0)=1` is proved axiom-free; in `SerreDualityAPI`, the dimension-form duality and the `h⁰−h¹` identity are real (from `AX_SerreDuality` / `AX_RiemannRoch`), leaving only Serre vanishing.
 
 ## How it's built

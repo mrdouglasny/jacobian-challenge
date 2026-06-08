@@ -2,11 +2,11 @@
 
 _Drafted 2026-04-25 (companion to `hyperelliptic-atlas-plan.md` from
 2026-04-23, narrowed to the **odd-degree** parity that
-`Jacobians/Extensions/Hyperelliptic.lean` immediately needs)._
+`Jacobians/Extensions/HyperellipticOdd.lean` immediately needs)._
 
 ## Why this plan exists
 
-`Jacobians/Extensions/Hyperelliptic.lean` currently has two
+`Jacobians/Extensions/HyperellipticOdd.lean` currently has two
 **temporary `axiom`s** at the top:
 
 ```lean
@@ -116,7 +116,7 @@ the `OnePoint` extension.
 
 Once `OddAtlas` builds, delete the two `axiom HyperellipticOdd.instX` /
 `attribute [instance]` lines at the top of
-`Jacobians/Extensions/Hyperelliptic.lean`. Lean's instance resolution
+`Jacobians/Extensions/HyperellipticOdd.lean`. Lean's instance resolution
 picks up the real instances from `OddAtlas`.
 
 ## Total estimate
@@ -133,7 +133,7 @@ addressed by an analogous `EvenAtlas/` later.
 
 ## Payoff
 
-- The two temporary `axiom`s in `Extensions/Hyperelliptic.lean` retire.
+- The two temporary `axiom`s in `Extensions/HyperellipticOdd.lean` retire.
 - `HolomorphicOneForm (HyperellipticOdd H h)` is honestly typed.
 - The warm-up theorems (`hyperellipticDxOverY`, basis differentials)
   become attackable.

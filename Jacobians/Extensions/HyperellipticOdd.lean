@@ -1,11 +1,22 @@
 /-
-# Challenge extensions: hyperelliptic curves
+# Challenge extensions: hyperelliptic curves, odd-degree case
 
-This file states a sequence of theorems **extending Buzzard's challenge**
-to concrete computations on the hyperelliptic curves we have already
-constructed (`HyperellipticOdd`, `HyperellipticEven`,
-[`Hyperelliptic`](../ProjectiveCurve/Hyperelliptic.lean)). Each theorem
-is a meaningful test of the formalization end-to-end:
+Companion to [`Jacobians/Extensions/HyperellipticEven.lean`](HyperellipticEven.lean)
+(even-degree warm-ups + headline genus, **completed**). This file is the
+**odd-degree extension project**: the analogous theorems for
+`HyperellipticOdd H h` with `h : Odd H.f.natDegree`, structured to mirror
+the even-degree file decl-for-decl and section-for-section.
+
+Unlike the even file — whose genus theorem is **discharged** (PR #96, via
+the Liouville/maximum-modulus axiom hierarchy) — the odd-degree warm-ups
+and headline genus are **deliberately left as `sorry`** scaffolds: this is
+a *stretch / extension* track, **not required for Buzzard's challenge**
+(the core challenge headlines are ℙ¹ and `Elliptic`; the even file is the
+completed real-example vetting). The odd file exists to (a) mirror the even
+structure on the single-∞ parity and (b) host the hyperelliptic-involution
+and Weierstrass-point stretch material the even file omits.
+
+Each theorem is a meaningful test of the formalization end-to-end:
 
 - it forces the cocycle definition `HolomorphicOneForm` to compute
   correctly on a non-elliptic curve;
@@ -16,31 +27,31 @@ is a meaningful test of the formalization end-to-end:
 - it forces the `genus`, `Jacobian`, `ofCurve`, `pullback`, `pushforward`
   API to match its classical meaning, not just type-check.
 
-All theorems below are stated as `theorem … := by sorry` (or
-`noncomputable def … := sorry` when the construction itself is the
-deliverable). Discharge order recommended:
+## Discharge order recommended
 
-1. **Warm-ups** (single-form constructions): `hyperellipticDxOverY`,
-   `hyperellipticBasisDifferential`. Each is a single witness — no
-   upper bound work, just the cocycle predicates on a concrete form.
-2. **Linear independence of the basis family** (`x^k dx/y` for
-   `k = 0, … , g-1`): combinatorial / power-series argument.
-3. **Genus theorem** (`genus_HyperellipticOdd_eq`): combine the basis
-   for the lower bound with `AX_RiemannRoch` for the upper bound.
-4. **Consistency** (`genus_HyperellipticOdd_eq_one_of_deg_three`): the
+1. `hyperellipticOddDxOverY` — `dx/y` as a holomorphic 1-form.
+2. `hyperellipticOddBasisDifferential` — the canonical basis `x^k dx/y`
+   for `k = 0, …, g-1` where `g = (H.f.natDegree - 1) / 2`.
+3. `hyperellipticOddBasisDifferential_linearIndependent`.
+4. `genus_HyperellipticOdd_eq` — the headline test, lower bound from the
+   basis (`hyperellipticOddGenus_lower_bound`) + upper bound from
+   Riemann–Roch / the Liouville axiom hierarchy (the remaining gap).
+5. **Consistency** (`genus_HyperellipticOdd_eq_one_of_deg_three`): the
    `g = 1` case agrees with `genus_Elliptic_eq_one`.
-5. **Stretch** (`hyperellipticInvolution_*`): the hyperelliptic
-   involution `σ : (x, y) ↦ (x, -y)` and the fact `σ^* = -id` on
-   `H^0(X, Ω^1)`. Tests `pullback`/functoriality. Requires defining
-   the involution as a real Lean function first.
+6. **Stretch** (`hyperellipticInvolution_*`, `card_fixedPoints_*`): the
+   hyperelliptic involution `σ : (x, y) ↦ (x, -y)`, the fact `σ^* = -id`
+   on `H^0(X, Ω^1)`, and the Weierstrass-point count.
 
-Classical references:
+## Cross-references
 
+Classical references (same as the even case):
 * Forster, *Lectures on Riemann Surfaces*, §17 (genus of hyperelliptic
   curves; canonical basis).
 * Miranda, *Algebraic Curves and Riemann Surfaces*, Ch. VII §1–2.
 * Mumford, *Tata Lectures on Theta I*, §III.3 (canonical basis,
   hyperelliptic involution).
+
+See `docs/hyperelliptic-odd-atlas-plan.md` for the full plan.
 -/
 
 import Jacobians.Challenge
@@ -48,7 +59,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
 
-namespace Jacobians.Extensions.Hyperelliptic
+namespace Jacobians.Extensions.HyperellipticOdd
 
 open scoped Manifold ContDiff
 open Jacobians.ProjectiveCurve
@@ -99,7 +110,7 @@ form, three or more local representatives, glued by the
 
 /-- The holomorphic 1-form `dx / y` on a hyperelliptic curve with odd
 degree `f`. -/
-noncomputable def hyperellipticDxOverY
+noncomputable def hyperellipticOddDxOverY
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     HolomorphicOneForm (HyperellipticOdd H h) := by
   -- Construct the cocycle (`coeff`, three predicates) explicitly. In
@@ -119,11 +130,11 @@ These are the canonical basis differentials. Each one is a holomorphic
 
 /-- The holomorphic 1-form `x^k · dx / y` on a hyperelliptic curve with
 odd degree `f`, valid for `k ≤ g - 1` where `g = (deg f - 1) / 2`. -/
-noncomputable def hyperellipticBasisDifferential
+noncomputable def hyperellipticOddBasisDifferential
     (H : HyperellipticData) (h : Odd H.f.natDegree)
     (k : ℕ) (_hk : k < (H.f.natDegree - 1) / 2) :
     HolomorphicOneForm (HyperellipticOdd H h) := by
-  -- Multiply the local coefficient of `hyperellipticDxOverY` by `x^k`.
+  -- Multiply the local coefficient of `hyperellipticOddDxOverY` by `x^k`.
   -- Use the same cocycle argument; `x^k` is analytic and the
   -- transition law is multiplicative on the chart-transition mfderiv.
   sorry
@@ -139,14 +150,14 @@ because `1, x, x^2, …, x^(g-1)` are linearly independent polynomials.
 
 /-- The canonical basis of holomorphic 1-forms on a hyperelliptic curve
 with odd-degree `f` is linearly independent. -/
-theorem hyperellipticBasisDifferential_linearIndependent
+theorem hyperellipticOddBasisDifferential_linearIndependent
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     LinearIndependent ℂ
       (fun k : Fin ((H.f.natDegree - 1) / 2) =>
-        hyperellipticBasisDifferential H h k.val k.isLt) := by
+        hyperellipticOddBasisDifferential H h k.val k.isLt) := by
   sorry
 
-/-! ## Main test — genus theorem
+/-! ## Headline test — genus theorem for odd hyperelliptic
 
 The classical formula: `genus (HyperellipticOdd H h) = (deg f - 1) / 2`
 when `f` has odd degree.
@@ -160,14 +171,42 @@ when `f` has odd degree.
   (`AX_RiemannRoch`) to the canonical divisor or to a divisor
   `(2g - 2) ∞` and take the dimension count. -/
 
-/-- **Genus formula for odd-degree hyperelliptic curves.** Tests the
-formalization end-to-end: cocycle definition + Kirov-Montel
-finite-dim bridge + Riemann–Roch axiom + the canonical basis. -/
+/-- **Lower bound for the genus.** The linear independence of the
+canonical basis `{x^k dx/y : k < g}` immediately gives `g ≤ genus` via
+`LinearIndependent.fintype_card_le_finrank`. Mirrors
+`hyperellipticEvenGenus_lower_bound`. The `FiniteDimensional` instance
+comes from `Jacobians.Bridge.KirovHolomorphic` (without it `Module.finrank`
+would silently collapse to 0). Proved modulo the still-`sorry`ed
+`hyperellipticOddBasisDifferential_linearIndependent`. -/
+theorem hyperellipticOddGenus_lower_bound
+    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    (H.f.natDegree - 1) / 2 ≤
+      Jacobians.RiemannSurface.genus (HyperellipticOdd H h) := by
+  have hLI := hyperellipticOddBasisDifferential_linearIndependent H h
+  simpa using hLI.fintype_card_le_finrank
+
+/-- **Upper bound for the genus.** The remaining genuine gap on the odd
+track: unlike the even case — where the bound is supplied by
+`Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le`
+(PR #96) — there is as yet **no odd analogue** of the Liouville/
+Riemann–Roch upper bound. Discharge via Riemann–Roch (`AX_RiemannRoch`)
+on the canonical divisor, or by porting the even Liouville hierarchy to
+the single-∞ parity. -/
+theorem genus_HyperellipticOdd_le
+    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    Jacobians.RiemannSurface.genus (HyperellipticOdd H h) ≤
+      (H.f.natDegree - 1) / 2 := by
+  sorry
+
+/-- **Genus formula for odd-degree hyperelliptic curves.** Mirrors
+`genus_HyperellipticEven_eq` for the odd parity. Tests the formalization
+end-to-end: cocycle definition + Kirov-Montel finite-dim bridge +
+canonical basis (lower) + the upper-bound gap. -/
 theorem genus_HyperellipticOdd_eq
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Jacobians.RiemannSurface.genus (HyperellipticOdd H h) =
-      (H.f.natDegree - 1) / 2 := by
-  sorry
+      (H.f.natDegree - 1) / 2 :=
+  le_antisymm (genus_HyperellipticOdd_le H h) (hyperellipticOddGenus_lower_bound H h)
 
 /-- **Consistency check.** For odd-degree-3 hyperelliptic curves
 (`y² = cubic`), the genus formula gives `1`, agreeing with our
@@ -262,4 +301,4 @@ theorem card_fixedPoints_hyperellipticInvolution
       hyperellipticInvolution H h p = p } = H.f.natDegree + 1 := by
   sorry
 
-end Jacobians.Extensions.Hyperelliptic
+end Jacobians.Extensions.HyperellipticOdd

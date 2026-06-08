@@ -1,7 +1,7 @@
 /-
 # Challenge extensions: hyperelliptic curves, even-degree case
 
-Companion to [`Jacobians/Extensions/Hyperelliptic.lean`](Hyperelliptic.lean)
+Companion to [`Jacobians/Extensions/HyperellipticOdd.lean`](HyperellipticOdd.lean)
 (odd-degree warm-ups + headline genus). This file states the analogous
 theorems for the even-degree parity:
 `HyperellipticEvenProj H` for `h : ¬ Odd H.f.natDegree`.
