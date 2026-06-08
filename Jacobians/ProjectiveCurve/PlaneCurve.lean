@@ -829,14 +829,450 @@ instance PlaneCurve.instCompactSpace (H : PlaneCurveData) :
       rfl] at this
   grind
 
--- TODO: prove connectedness from irreducibility/overlapping affine charts.
-axiom PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
-    ConnectedSpace (PlaneCurve H)
-attribute [instance] PlaneCurve.instConnectedSpace
+noncomputable def PlaneCurveAffine.toPlaneCurve (H : PlaneCurveData)
+    (p : PlaneCurveAffine H) : PlaneCurve H := by
+  let v : Fin 3 → ℂ := ![p.val.1, p.val.2, 1]
+  have hv : v ≠ 0 := by
+    intro h
+    have h2 : v 2 = 0 := congrFun h 2
+    exact one_ne_zero h2
+  refine ⟨Projectivization.mk ℂ v hv, v, hv, rfl, p.property⟩
+
+theorem continuous_toPlaneCurve (H : PlaneCurveData) :
+    Continuous (PlaneCurveAffine.toPlaneCurve H) := by
+  letI : Setoid { v : Fin 3 → ℂ // v ≠ 0 } := projectivizationSetoid ℂ (Fin 3 → ℂ)
+  letI : TopologicalSpace (Projectivization ℂ (Fin 3 → ℂ)) :=
+    inferInstanceAs (TopologicalSpace (Quotient (projectivizationSetoid ℂ _)))
+  apply Continuous.subtype_mk
+  refine continuous_quotient_mk'.comp ?_
+  apply Continuous.subtype_mk
+  refine continuous_pi (fun i => ?_)
+  fin_cases i
+  · exact continuous_subtype_val.fst
+  · exact continuous_subtype_val.snd
+  · exact continuous_const
+
+axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
+    ChartedSpace ℂ (PlaneCurve H)
+attribute [instance] PlaneCurve.instChartedSpace
+
+axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
+attribute [instance] PlaneCurve.instIsManifold
+
+lemma PlaneCurve_nhdsWithin_compl_singleton_neBot (H : PlaneCurveData) (x : PlaneCurve H) :
+    (nhdsWithin x {x}ᶜ).NeBot := by
+  let e := chartAt ℂ x
+  have hx : x ∈ e.source := mem_chart_source ℂ x
+  have h_map := e.map_nhdsWithin_preimage_eq hx {e x}ᶜ
+  have h_eq : nhdsWithin x (e ⁻¹' {e x}ᶜ) = nhdsWithin x {x}ᶜ := by
+    refine nhdsWithin_eq_nhdsWithin' (e.open_source.mem_nhds hx) ?_
+    ext y
+    simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_compl_iff, Set.mem_singleton_iff]
+    constructor
+    · rintro ⟨hy1, hy2⟩
+      refine ⟨?_, hy2⟩
+      intro h_eq
+      apply hy1
+      rw [h_eq]
+    · rintro ⟨hy1, hy2⟩
+      refine ⟨?_, hy2⟩
+      intro h_eq
+      apply hy1
+      exact e.injOn hy2 hx h_eq
+  rw [← h_eq]
+  rw [← Filter.map_neBot_iff e]
+  rw [h_map]
+  exact NormedField.nhdsNE_neBot (e x)
+
+/-- The subset of points at infinity on the projective curve. -/
+def infinityPoints (H : PlaneCurveData) : Set (PlaneCurve H) :=
+  { p | ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0, Projectivization.mk ℂ v hv = p.1 ∧ v 2 = 0 }
+
+section
+
+open MvPolynomial
+
+noncomputable def infPoly (H : PlaneCurveData) : Polynomial ℂ :=
+  MvPolynomial.aeval (fun i => if i = 0 then Polynomial.X
+    else if i = 1 then 1 else 0) H.F.val
+
+noncomputable def infMon (d i : ℕ) : Fin 3 →₀ ℕ :=
+  Finsupp.equivFunOnFinite.symm ![i, d - i, 0]
+
+lemma exists_monomial_z0 (H : PlaneCurveData) :
+    ∃ m ∈ H.F.val.support, m 2 = 0 := by
+  by_contra h_all
+  push Not at h_all
+  have h_le : ∀ m ∈ H.F.val.support, Finsupp.single (2 : Fin 3) 1 ≤ m := by
+    intro m hm
+    rw [Finsupp.single_le_iff]
+    have h_nz : m 2 ≠ 0 := h_all m hm
+    omega
+  have h_mod : H.F.val.modMonomial (Finsupp.single 2 1) = 0 := by
+    ext m
+    rw [coeff_zero]
+    by_cases hm : m ∈ H.F.val.support
+    · rw [coeff_modMonomial_of_le H.F.val (h_le m hm)]
+    · rw [mem_support_iff] at hm
+      push Not at hm
+      by_cases h_le2 : Finsupp.single 2 1 ≤ m
+      · rw [coeff_modMonomial_of_le H.F.val h_le2]
+      · rw [coeff_modMonomial_of_not_le H.F.val h_le2, hm]
+  have h_dvd : MvPolynomial.X 2 ∣ H.F.val :=
+    MvPolynomial.X_dvd_iff_modMonomial_eq_zero.mpr h_mod
+  exact H.h_not_at_infinity h_dvd
+
+lemma prod_f_eq (m : Fin 3 →₀ ℕ) :
+    m.prod (fun i k => (if i = 0 then Polynomial.X
+      else if i = 1 then (1 : Polynomial ℂ) else 0) ^ k) =
+    if m 2 = 0 then Polynomial.X ^ m 0 else 0 := by
+  have h_prod : m.prod (fun i k => (if i = 0 then Polynomial.X
+        else if i = 1 then (1 : Polynomial ℂ) else 0) ^ k) =
+      ∏ i : Fin 3, (if i = 0 then Polynomial.X
+        else if i = 1 then (1 : Polynomial ℂ) else 0) ^ m i := by
+    rw [Finsupp.prod_fintype]
+    · intro i
+      simp
+  rw [h_prod]
+  rw [Fin.prod_univ_three]
+  by_cases h : m 2 = 0 <;> simp [h]
+
+lemma infPoly_eq_sum (H : PlaneCurveData) :
+    infPoly H = H.F.val.support.sum (fun m =>
+      if m 2 = 0 then Polynomial.monomial (m 0) (MvPolynomial.coeff m H.F.val) else 0) := by
+  dsimp [infPoly]
+  conv_lhs => rw [MvPolynomial.as_sum H.F.val]
+  rw [map_sum]
+  refine Finset.sum_congr rfl ?_
+  intro m hm
+  rw [MvPolynomial.aeval_monomial]
+  have h_prod := prod_f_eq m
+  rw [h_prod]
+  by_cases h2 : m 2 = 0
+  · simp only [h2, Polynomial.algebraMap_eq, Nat.reduceAdd, Fin.isValue, if_true]
+    rw [Polynomial.C_mul_X_pow_eq_monomial]
+  · simp only [h2, Polynomial.algebraMap_eq, Nat.reduceAdd, Fin.isValue, mul_zero, if_false]
+
+lemma m_eq_infMon (d : ℕ) (m : Fin 3 →₀ ℕ) (h2 : m 2 = 0) (hdeg : (Finsupp.weight 1) m = d) :
+    m = infMon d (m 0) := by
+  have h_sum : (Finsupp.weight 1) m = m 0 + m 1 + m 2 := by
+    change (Finsupp.weight (fun _ => (1 : ℕ))) m = m 0 + m 1 + m 2
+    have h := Finsupp.weight_apply (fun _ => (1 : ℕ)) m
+    rw [h]
+    rw [Finsupp.sum_fintype]
+    · simp [Fin.sum_univ_three]
+    · intro x
+      simp
+  rw [h_sum, h2, add_zero] at hdeg
+  have h_m1 : m 1 = d - m 0 := by omega
+  ext i
+  fin_cases i <;> simp [h_m1, h2, infMon]
+
+lemma coeff_infPoly (H : PlaneCurveData) (i : ℕ) :
+    (infPoly H).coeff i = MvPolynomial.coeff (infMon H.d i) H.F.val := by
+  rw [infPoly_eq_sum]
+  rw [Polynomial.finsetSum_coeff]
+  by_cases h_mem : infMon H.d i ∈ H.F.val.support
+  · have h_eq : ∀ m ∈ H.F.val.support,
+        ((if m 2 = 0 then Polynomial.monomial (m 0) (MvPolynomial.coeff m H.F.val) else 0) :
+          Polynomial ℂ).coeff i =
+            if m = infMon H.d i then MvPolynomial.coeff (infMon H.d i) H.F.val else 0 := by
+      intro m hm
+      by_cases hm_inf : m = infMon H.d i
+      · subst hm_inf
+        have h2 : (infMon H.d i) 2 = 0 := rfl
+        have h0 : (infMon H.d i) 0 = i := rfl
+        simp only [h2, h0, if_true, Polynomial.coeff_monomial]
+      · rw [if_neg hm_inf]
+        by_cases h2 : m 2 = 0
+        · rw [if_pos h2]
+          rw [Polynomial.coeff_monomial]
+          split_ifs with h_eq2
+          · have h_deg : (Finsupp.weight 1) m = H.d :=
+              H.F.homogeneous (MvPolynomial.mem_support_iff.mp hm)
+            have hm_inf2 : m = infMon H.d i := by
+              have h_eq3 : m = infMon H.d (m 0) := m_eq_infMon H.d m h2 h_deg
+              rw [h_eq2] at h_eq3
+              exact h_eq3
+            contradiction
+          · rfl
+        · rw [if_neg h2]
+          rfl
+    rw [Finset.sum_congr rfl h_eq]
+    rw [Finset.sum_eq_single (infMon H.d i)]
+    · simp
+    · intro b hb hne
+      simp [hne]
+    · intro h_not
+      exact (h_not h_mem).elim
+  · -- If infMon H.d i is not in the support:
+    have h_eq : ∀ m ∈ H.F.val.support,
+        ((if m 2 = 0 then Polynomial.monomial (m 0) (MvPolynomial.coeff m H.F.val) else 0) :
+          Polynomial ℂ).coeff i = 0 := by
+      intro m hm
+      by_cases h2 : m 2 = 0
+      · rw [if_pos h2]
+        rw [Polynomial.coeff_monomial]
+        split_ifs with h_eq2
+        · have h_deg : (Finsupp.weight 1) m = H.d :=
+            H.F.homogeneous (MvPolynomial.mem_support_iff.mp hm)
+          have hm_inf2 : m = infMon H.d i := by
+            have h_eq3 : m = infMon H.d (m 0) := m_eq_infMon H.d m h2 h_deg
+            rw [h_eq2] at h_eq3
+            exact h_eq3
+          rw [hm_inf2] at hm
+          contradiction
+        · rfl
+      · rw [if_neg h2]
+        rfl
+    rw [Finset.sum_congr rfl h_eq]
+    simp only [Nat.reduceAdd, Finset.sum_const_zero]
+    have h_zero : MvPolynomial.coeff (infMon H.d i) H.F.val = 0 := by
+      rwa [MvPolynomial.mem_support_iff, not_not] at h_mem
+    exact h_zero.symm
+
+lemma infPoly_ne_zero (H : PlaneCurveData) : infPoly H ≠ 0 := by
+  rcases exists_monomial_z0 H with ⟨m, hm, hm2⟩
+  have h_deg : (Finsupp.weight 1) m = H.d :=
+    H.F.homogeneous (MvPolynomial.mem_support_iff.mp hm)
+  have h_eq : m = infMon H.d (m 0) := m_eq_infMon H.d m hm2 h_deg
+  have h_coeff : MvPolynomial.coeff (infMon H.d (m 0)) H.F.val ≠ 0 := by
+    rw [← h_eq]
+    exact MvPolynomial.mem_support_iff.mp hm
+  have h_poly_coeff : (infPoly H).coeff (m 0) ≠ 0 := by
+    rw [coeff_infPoly]
+    exact h_coeff
+  intro h_zero
+  rw [h_zero] at h_poly_coeff
+  simp at h_poly_coeff
+
+lemma vec1_ne_zero (t : ℂ) : (![t, 1, 0] : Fin 3 → ℂ) ≠ 0 := by
+  intro h
+  have h1 : (![t, 1, 0] : Fin 3 → ℂ) 1 = 0 := congrFun h 1
+  exact one_ne_zero h1
+
+lemma vec2_ne_zero : (![1, 0, 0] : Fin 3 → ℂ) ≠ 0 := by
+  intro h
+  have h0 : (![1, 0, 0] : Fin 3 → ℂ) 0 = 0 := congrFun h 0
+  exact one_ne_zero h0
+
+noncomputable def infProj (x : ℂ ⊕ Unit) : Projectivization ℂ (Fin 3 → ℂ) :=
+  match x with
+  | Sum.inl t => Projectivization.mk ℂ ![t, 1, 0] (vec1_ne_zero t)
+  | Sum.inr () => Projectivization.mk ℂ ![1, 0, 0] vec2_ne_zero
+
+noncomputable def infFinset (H : PlaneCurveData) : Finset (ℂ ⊕ Unit) :=
+  open Classical in
+  ((infPoly H).roots.toFinset).map ⟨Sum.inl, Sum.inl_injective⟩ ∪
+    (Finset.univ : Finset Unit).map ⟨Sum.inr, Sum.inr_injective⟩
+
+lemma eval_zero_of_proj_eq {H : PlaneCurveData} {v w : Fin 3 → ℂ} (hv : v ≠ 0) (hw : w ≠ 0)
+    (h : Projectivization.mk ℂ v hv = Projectivization.mk ℂ w hw) (hw_zero : H.F.val.eval w = 0) :
+    H.F.val.eval v = 0 := by
+  rw [Projectivization.mk_eq_mk_iff ℂ v w hv hw] at h
+  rcases h with ⟨c, hc⟩
+  rw [← hc]
+  change H.F.val.eval (fun i => (c : ℂ) * w i) = 0
+  rw [homogeneous_eval_smul H.F.homogeneous]
+  rw [hw_zero, mul_zero]
+
+lemma eval_aeval_eq (F : MvPolynomial (Fin 3) ℂ) (f : Fin 3 → Polynomial ℂ) (t : ℂ) :
+    (MvPolynomial.aeval f F).eval t = MvPolynomial.eval (fun i => (f i).eval t) F := by
+  induction F using MvPolynomial.induction_on with
+  | C c => simp
+  | add p q hp hq => simp [hp, hq]
+  | mul_X p i hp => simp [hp]
+
+lemma eval_infPoly (H : PlaneCurveData) (t : ℂ) :
+    (infPoly H).eval t = H.F.val.eval ![t, 1, 0] := by
+  dsimp [infPoly]
+  rw [eval_aeval_eq]
+  apply congrArg (fun x => MvPolynomial.eval x H.F.val)
+  ext i
+  fin_cases i <;> simp
+
+open Classical in
+lemma image_infinityPoints_subset (H : PlaneCurveData) :
+    Subtype.val '' (infinityPoints H) ⊆ ↑((infFinset H).image infProj) := by
+  classical
+  rintro p ⟨q, hq, rfl⟩
+  rcases hq with ⟨v, hv, h_mk, hz⟩
+  have hq_prop := q.property
+  rcases hq_prop with ⟨w, hw, hw_mk, hw_eval⟩
+  have heval : H.F.val.eval v = 0 := by
+    apply eval_zero_of_proj_eq hv hw ?_ hw_eval
+    rw [hw_mk, h_mk]
+  by_cases h1 : v 1 = 0
+  · have h0 : v 0 ≠ 0 := by
+      intro h_v0
+      apply hv
+      ext i
+      fin_cases i
+      · exact h_v0
+      · exact h1
+      · exact hz
+    have h_eq : Projectivization.mk ℂ v hv =
+        Projectivization.mk ℂ ![1, 0, 0] vec2_ne_zero := by
+      rw [Projectivization.mk_eq_mk_iff ℂ v ![1, 0, 0] hv vec2_ne_zero]
+      refine ⟨Units.mk0 (v 0) h0, ?_⟩
+      ext i
+      fin_cases i
+      · simp
+      · simp [h1]
+      · simp [hz]
+    rw [Finset.mem_coe, Finset.mem_image]
+    refine ⟨Sum.inr (), ?_, ?_⟩
+    · rw [infFinset]
+      rw [Finset.mem_union]
+      right
+      rw [Finset.mem_map]
+      refine ⟨(), Finset.mem_univ _, rfl⟩
+    · rw [infProj]
+      exact h_eq.symm.trans h_mk
+  · let t := v 0 / v 1
+    have h_eq : Projectivization.mk ℂ v hv =
+        Projectivization.mk ℂ ![t, 1, 0] (vec1_ne_zero t) := by
+      rw [Projectivization.mk_eq_mk_iff ℂ v ![t, 1, 0] hv (vec1_ne_zero t)]
+      refine ⟨Units.mk0 (v 1) h1, ?_⟩
+      ext i
+      fin_cases i
+      · simp only [t, Fin.isValue, Nat.reduceAdd, Fin.zero_eta, Pi.smul_apply, Matrix.cons_val_zero,
+          Units.smul_mk0, smul_eq_mul]
+        rw [mul_comm, div_mul_cancel₀ _ h1]
+      · simp
+      · simp [hz]
+    have heval_t : H.F.val.eval ![t, 1, 0] = 0 := by
+      apply eval_zero_of_proj_eq (vec1_ne_zero t) hv ?_ heval
+      rw [h_eq]
+    have ht_root : t ∈ (infPoly H).roots := by
+      rw [Polynomial.mem_roots (infPoly_ne_zero H)]
+      rw [Polynomial.IsRoot]
+      rw [eval_infPoly]
+      exact heval_t
+    rw [Finset.mem_coe, Finset.mem_image]
+    refine ⟨Sum.inl t, ?_, ?_⟩
+    · rw [infFinset]
+      rw [Finset.mem_union]
+      left
+      rw [Finset.mem_map]
+      refine ⟨t, ?_, rfl⟩
+      rw [Multiset.mem_toFinset]
+      exact ht_root
+    · rw [infProj]
+      exact h_eq.symm.trans h_mk
+
+open Classical in
+theorem infinityPoints_finite (H : PlaneCurveData) :
+    (infinityPoints H).Finite := by
+  classical
+  have h_img : (Subtype.val '' (infinityPoints H)).Finite := by
+    apply Set.Finite.subset
+      (Finset.finite_toSet ((infFinset H).image infProj))
+    exact image_infinityPoints_subset H
+  exact Set.Finite.of_finite_image h_img Subtype.val_injective.injOn
+
+end
+
+theorem range_toPlaneCurve_eq_compl_infinityPoints (H : PlaneCurveData) :
+    Set.range (PlaneCurveAffine.toPlaneCurve H) = (infinityPoints H)ᶜ := by
+  ext p
+  simp only [Set.mem_range, Set.mem_compl_iff, infinityPoints, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨q, rfl⟩ ⟨v, hv, h_mk, h_z⟩
+    have h_eq : Projectivization.mk ℂ v hv =
+      Projectivization.mk ℂ ![q.val.1, q.val.2, 1] (by
+        intro h
+        have h2 : ![q.val.1, q.val.2, 1] 2 = 0 := congrFun h 2
+        exact one_ne_zero h2) := by
+      exact h_mk
+    rw [Projectivization.mk_eq_mk_iff ℂ v ![q.val.1, q.val.2, 1] hv] at h_eq
+    rcases h_eq with ⟨a, ha⟩
+    have h2 : v 2 = (a : ℂ) := by
+      have h_eval := congrFun ha 2
+      change (a • ![q.val.1, q.val.2, 1]) 2 = v 2 at h_eval
+      rw [← h_eval]
+      change (a : ℂ) • (1 : ℂ) = (a : ℂ)
+      rw [smul_eq_mul, mul_one]
+    rw [h_z] at h2
+    have ha_zero : (a : ℂ) = 0 := by
+      simpa using h2.symm
+    exact a.ne_zero ha_zero
+  · intro hp
+    letI : Setoid { v : Fin 3 → ℂ // v ≠ 0 } := projectivizationSetoid ℂ (Fin 3 → ℂ)
+    obtain ⟨v, hv, h_mk, heval⟩ := p.2
+    have h_v2 : v 2 ≠ 0 := by
+      intro hz
+      apply hp
+      refine ⟨v, hv, h_mk, hz⟩
+    let c := (v 2)⁻¹
+    let w := c • v
+    have hw2 : w 2 = 1 := by
+      change c * v 2 = 1
+      exact inv_mul_cancel₀ h_v2
+    have heval_w : H.F.val.eval w = 0 := by
+      change H.F.val.eval (fun i => c * v i) = 0
+      rw [homogeneous_eval_smul H.F.homogeneous]
+      rw [heval, mul_zero]
+    have h_w_eq : w = ![w 0, w 1, 1] := by
+      ext i
+      fin_cases i
+      · rfl
+      · rfl
+      · exact hw2
+    have h_q_eval : H.F.val.eval ![w 0, w 1, (1 : ℂ)] = 0 := by
+      rw [← h_w_eq]
+      exact heval_w
+    let q : PlaneCurveAffine H := ⟨(w 0, w 1), h_q_eval⟩
+    refine ⟨q, ?_⟩
+    apply Subtype.ext
+    change Projectivization.mk ℂ ![w 0, w 1, 1] _ = p.val
+    have hw_nonzero : w ≠ 0 := by
+      intro h
+      have h2 : w 2 = 0 := congrFun h 2
+      rw [hw2] at h2
+      exact one_ne_zero h2
+    have h_mk_eq : Projectivization.mk ℂ ![w 0, w 1, 1] (h_w_eq ▸ hw_nonzero) =
+        Projectivization.mk ℂ w hw_nonzero := by
+      change Quotient.mk' (⟨![w 0, w 1, 1], h_w_eq ▸ hw_nonzero⟩ : {v : Fin 3 → ℂ // v ≠ 0}) =
+        Quotient.mk' (⟨w, hw_nonzero⟩ : {v : Fin 3 → ℂ // v ≠ 0})
+      congr 1
+      ext i
+      fin_cases i
+      · rfl
+      · rfl
+      · exact hw2.symm
+    rw [h_mk_eq]
+    rw [← h_mk]
+    rw [Projectivization.mk_eq_mk_iff ℂ w v hw_nonzero hv]
+    refine ⟨Units.mk0 c (inv_ne_zero h_v2), rfl⟩
+
+theorem dense_range_toPlaneCurve (H : PlaneCurveData) :
+    Dense (Set.range (PlaneCurveAffine.toPlaneCurve H)) := by
+  have h_ne : ∀ x : PlaneCurve H, (nhdsWithin x {x}ᶜ).NeBot :=
+    PlaneCurve_nhdsWithin_compl_singleton_neBot H
+  haveI : ∀ x : PlaneCurve H, (nhdsWithin x {x}ᶜ).NeBot := h_ne
+  rw [range_toPlaneCurve_eq_compl_infinityPoints H]
+  rw [Set.compl_eq_univ_diff]
+  exact Dense.diff_finite dense_univ (infinityPoints_finite H)
+
+instance PlaneCurve.instConnectedSpace (H : PlaneCurveData) :
+    ConnectedSpace (PlaneCurve H) := by
+  have _hAff : ConnectedSpace (PlaneCurveAffine H) :=
+    PlaneCurveAffine.AX_PlaneCurveAffine_connected H
+  have hRange : IsConnected (Set.range (PlaneCurveAffine.toPlaneCurve H)) :=
+    isConnected_range (continuous_toPlaneCurve H)
+  have hDense : Dense (Set.range (PlaneCurveAffine.toPlaneCurve H)) :=
+    dense_range_toPlaneCurve H
+  have hUniv : IsConnected (Set.univ : Set (PlaneCurve H)) :=
+    hDense.closure_eq ▸ hRange.closure
+  exact connectedSpace_iff_univ.mpr hUniv
+
 
 /-- `PlaneCurve H` is nonempty.
 This is proved by lifting the (now-proven) affine-nonempty witness `(x, y)` from
-`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]` in `PlaneCurve H`.
+`PlaneCurveAffine.AX_PlaneCurveAffine_nonempty` to the projective point `[x : y : 1]`
+in `PlaneCurve H`.
 The historical soundness concern about the affine patch being empty for `F = z` (issue #82)
 is resolved at the data level: `PlaneCurveData` requires `h_not_at_infinity` (`z ∤ F`),
 making the affine nonempty axiom/theorem sound. -/
@@ -848,14 +1284,6 @@ instance PlaneCurve.instNonempty (H : PlaneCurveData) : Nonempty (PlaneCurve H) 
     have h2 : v 2 = 0 := congrFun h 2
     exact one_ne_zero h2
   exact ⟨⟨Projectivization.mk ℂ v hv, v, hv, rfl, hp⟩⟩
-
-axiom PlaneCurve.instChartedSpace (H : PlaneCurveData) :
-    ChartedSpace ℂ (PlaneCurve H)
-attribute [instance] PlaneCurve.instChartedSpace
-
-axiom PlaneCurve.instIsManifold (H : PlaneCurveData) :
-    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H)
-attribute [instance] PlaneCurve.instIsManifold
 
 -- TODO (genus_eq): `Jacobians.RiemannSurface.genus (PlaneCurve H) = H.genus`
 -- via the Plücker formula discharge.
