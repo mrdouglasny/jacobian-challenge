@@ -110,7 +110,7 @@
 'Jacobians.Extensions.HyperellipticEven.genus_HyperellipticEven_eq' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart]
+ ProjectiveCurve.HyperellipticAffine.AX_HyperellipticAffine_connected]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
@@ -124,7 +124,6 @@
 'Jacobians.ProjectiveCurve.Hyperelliptic.instIsManifold' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- ProjectiveCurve.HyperellipticEvenProj.infinityLiftChart_compat_affineLiftChart,
  ProjectiveCurve.HyperellipticOdd.affineLiftProjX_compat_infinityChart,
  ProjectiveCurve.HyperellipticOdd.affineLiftProjY_compat_infinityChart,
  ProjectiveCurve.HyperellipticOdd.infinityChart,

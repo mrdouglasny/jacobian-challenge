@@ -1,37 +1,63 @@
 # Forster-route discharge plan for the core period axioms
 
-**Thesis.** Re-base the discharge of the core Jacobian axioms on Forster's
-cohomological route (GTM 81, Ch. 2) instead of the Griffiths–Harris Hodge /
-period-matrix route the current `AX_*` plans assume. The Forster route's single
-hard analytic input — the §14 finiteness theorem — **is already discharged in
-this project** via the vendored Kirov Montel machinery, and everything else is
-homological algebra that avoids the 4g-gon topology and polygon-Stokes (the two
-biggest, not-in-Mathlib line items of the current plans).
+**Thesis.** Re-base the *period/torus* axiom discharges on Forster's cohomological
+route (GTM 81, Ch. 2) instead of the Griffiths–Harris Hodge / period-matrix route
+the current `AX_*` plans assume. Forster's route reaches `Jac(X)` as a complex
+torus, and the full-rank period lattice, **without the 4g-gon topology or
+polygon-Stokes** — the two biggest not-in-Mathlib line items of the current plans.
+
+**Scope — three tiers (Codex review, §6).** Read this plan at three tiers, which
+earlier drafts conflated:
+- **Tier 1 — downstream reductions *assuming* RR/Serre as audited base axioms.**
+  Sound and actionable now: use `AX_RiemannRoch`/`AX_SerreDuality` (+ Forster
+  §19–21) to discharge the *period/torus* axioms (`AX_PeriodLattice`, the rank
+  part of `AX_AnalyticCycleBasis`, …) and shrink dependency spread. The real
+  near-term win; does **not** require proving RR/Serre.
+- **Tier 2 — a faithful sheaf-cohomology layer.** Required before RR/Serre can be
+  *claimed discharged*: must prove `SheafCohomologyFaithful`
+  (`RiemannSurface/SheafCohomologySpec.lean`), which needs a **faithful `H1`**
+  (currently an opaque placeholder — `LineBundle.lean:13`), not a stub.
+- **Tier 3 — full RR/Serre discharge.** Heavy infrastructure: Čech `H¹(X, O_D)`
+  for *all* divisors `D`, the long exact sequence, Dolbeault, residues/integration,
+  Serre-pairing nondegeneracy.
+
+The route's strength is **Tier 1**. Tiers 2–3 are a major infrastructure project;
+earlier drafts understated this by calling the §14 keystone "banked" (it is not —
+see §0).
 
 Companion: [`JACOBIAN_ROUTE_COMPARISON.md`](JACOBIAN_ROUTE_COMPARISON.md) (the
 route comparison + prereq trees).
 
 ---
 
-## 0. What we already have (the keystone is done)
+## 0. What we actually have (and the keystone gap)
 
-The one hard analytic prerequisite of Forster's route is **§14: finiteness of
-`H¹(X, O)`**, equivalently (by Serre, §17.10) **`dim H⁰(X, Ω¹) < ∞`**. The
-project already has this:
+It is tempting to say the §14 finiteness keystone is already banked. **It is not**,
+and the conflation is the substantive error Codex caught:
 
-- `Jacobians/Axioms/FiniteDimOneForms.lean` — the old `AX_FiniteDimOneForms`
-  axiom was **retired 2026-04-25**. `FiniteDimensional ℂ (HolomorphicOneForm X)`
-  is now a **theorem**, transferred from Kirov's real Montel-derived
-  `FiniteDimensional ℂ (Vendor.Kirov.HolomorphicOneForms X)` along an injective
-  ℂ-linear bridge (`Jacobians/Bridge/KirovHolomorphic.lean`), modulo two
-  *mechanical* bridge axioms (`bridgeForm` exists / is injective).
+- **What we hold:** `FiniteDimensional ℂ (HolomorphicOneForm X)`, i.e.
+  `dim H⁰(X, Ω¹) < ∞` — the *single* number, the 1-form side, via Kirov's Montel
+  machinery (`Bridge/KirovHolomorphic.lean`; `AX_FiniteDimOneForms` retired
+  2026-04-25, modulo two mechanical bridge axioms).
+- **What §14 / Riemann–Roch needs:** `dim H¹(X, O_D) < ∞` for **every** divisor
+  `D`, *and* a **faithful `H1`** functor with the Čech/long-exact-sequence
+  machinery RR's inductive proof (Forster §16.7–16.10) runs on. Our `H1` is still
+  an **opaque placeholder** (`LineBundle.lean:13`; `H0 = riemannRochSpace D` is
+  de-opaqued, `H1` is not).
+- **Why we can't bootstrap:** deriving `dim H¹(X, O) < ∞` from
+  `dim H⁰(Ω¹) < ∞` goes *through Serre duality* — which is downstream, so the
+  inference is **circular**. The structure-sheaf finiteness must be proved
+  **directly** (the same Montel/compact-perturbation argument, applied to `O`/`O_D`,
+  not the 1-forms). That is real new work, not banked.
+
+So the Montel engine is genuinely reusable, but only as the *engine* for a
+finiteness theorem we still have to state and prove on the structure sheaf —
+**Tier 3**, not done.
+
+The analytic-engine assets that *are* in place:
 - `Jacobians/Vendor/Kirov/Montel/{Compactness,Complete,Cover,LocalRep,ChartNorm,
-  SupNorm,ChartTransition}.lean` — a full normal-families / Montel compactness
-  layer. This is exactly the analytic engine §14 runs on.
-
-So the deepest step of Route 1 is essentially banked. Forster as literally
-written wants `dim H¹(X,O) < ∞`; we hold the Serre-dual form `dim H⁰(Ω¹) < ∞`.
-Either seeds Ch. 2 — see §2 below for which to standardize on.
+  SupNorm,ChartTransition}.lean` — the normal-families / Montel compactness layer.
+- `riemannRochSpace D` — the real `L(D) = H⁰(O_D)` (de-opaqued, faithful).
 
 Other existing scaffolding to connect to:
 - `Jacobians/RiemannSurface/Cohomology/{H1,Repartitions,RiemannRochAnchor}.lean`
@@ -63,13 +89,36 @@ when* we need the **principal polarization (algebraicity)** of the Jacobian. So
 the win is "construct the torus + lattice cheaply"; the polarization is deferred,
 not eliminated.
 
-## 2. Build order (each step cites Forster + the file it lands in)
+## 1b. Tier 1 — the near-term win (start here)
 
-1. **Standardize the finiteness keystone.** Decide between (a) keep `dim H⁰(Ω¹)
-   < ∞` (have it) and adapt §16–17 to start from the 1-form side, or (b) prove
-   `dim H¹(X,O) < ∞` directly with the same Montel engine. Recommend (a):
-   reuse `Bridge/KirovHolomorphic.lean`; only the two mechanical bridge axioms
-   remain. → consolidate in a new `RiemannSurface/Cohomology/Finiteness.lean`.
+This is the sound, immediately-actionable part, and it does **not** wait on the
+Tier-2/3 sheaf-cohomology build. Treat `AX_RiemannRoch` and `AX_SerreDuality` as
+**audited base axioms** (they already are — classified, cited Forster §16/§17),
+and use them + Forster's §19–21 torus construction to **discharge the downstream
+period/torus axioms**:
+- `AX_PeriodLattice` (+ `instPeriodLatticeDiscrete`) — §21.4, from `dim Ω¹ = g`
+  (a consequence of `AX_SerreDuality`, §17.10) + Abel + the maximum principle.
+- the **rank** part of `AX_AnalyticCycleBasis` — `H₁ ≅ ℤ^{2g}` (§21.5), no 4g-gon.
+- Abel-level consequences feeding `AX_AbelTheorem` and the period machinery.
+
+Net effect: fewer *independent* deep axioms downstream, all funnelled through the
+two audited RR/Serre axioms — without claiming RR/Serre themselves are proved.
+This is the dependency-spread reduction Codex rates as the good path. **No major
+infrastructure; can proceed as ordinary discharge PRs** (each still a "major
+change" only insofar as it rewrites a core axiom — so: Discussion-linked, but no
+new sheaf-cohomology layer required).
+
+## 2. Build order (Tier 3 — the full RR/Serre discharge)
+
+Steps 1–8 are the **Tier-3** infrastructure (do **not** start here for the
+near-term win — see §1b for Tier-1). They are sequenced; each cites Forster + the
+file it lands in.
+
+1. **State + prove structure-sheaf finiteness directly.** `dim H¹(X, O_D) < ∞`
+   for all `D`, via the Montel/compact-perturbation argument applied to `O`/`O_D`
+   (Forster §14). **Do not** try to derive it from `dim H⁰(Ω¹) < ∞` — that routes
+   through Serre and is circular (§0). Reuse the Kirov Montel layer as the engine,
+   not the 1-form result as the conclusion. → `RiemannSurface/Cohomology/Finiteness.lean`.
 2. **Čech `H¹(X,O)` + Dolbeault.** Forster §12–13. We have an `H1` type
    (`Cohomology/H1.lean`); need the structure-sheaf cohomology + the
    local-`∂̄`-solvability lemma (Dolbeault, §13). This is the main genuinely-new
@@ -143,8 +192,14 @@ proceed, with the polarization tracked as explicitly deferred work.
 
 - **Dolbeault (§13)** is the one new analytic lemma to build (local ∂̄-solvability).
   Standard, local, but not yet in the project. Biggest single piece of new work.
-- **`dim H¹(O)` vs `dim H⁰(Ω¹)`**: we hold the 1-form side; need to either run
-  §16–17 from there or prove the structure-sheaf side. Bookkeeping, not depth.
+- **`dim H¹(O)` vs `dim H⁰(Ω¹)` — a real gap, not bookkeeping** (Codex). We hold
+  the 1-form side; RR needs structure-sheaf finiteness for all `O_D`. The two are
+  linked only *by Serre*, so the structure-sheaf finiteness must be proved directly
+  (§0, §2.1), not inherited. This is the Tier-3 entry cost.
+- **Faithful `H1` gate (Tier 2).** RR/Serre cannot be *claimed discharged* until
+  `SheafCohomologyFaithful` (`SheafCohomologySpec.lean`) is proved — i.e. `H1` is
+  de-opaqued from its current placeholder to a faithful functor. This gate sits
+  between Tier 1 (assume RR/Serre) and Tier 3 (prove them).
 - The two **mechanical bridge axioms** in `Bridge/KirovHolomorphic.lean`
   (`bridgeForm` exists / injective) should be discharged **first** — both Gemini
   reviews flag this as the priority ("don't let `bridgeForm` remain an axiom for
@@ -167,3 +222,66 @@ Proposal — for discussion before any code moves (touches the core axiom
 interface; see CLAUDE.md "major changes"). The comparison and this plan are
 recorded so the route decision is made with the prereq trees explicit rather
 than by default-inheriting the GH/Hodge route the current `AX_*` plans assume.
+
+## 5b. Decision (2026-06-07): adopt (a), then kill the period/torus axioms
+
+Owner decision after the three reviews:
+- **H0/H1 are pinned by the RR/Serre API/anchor — option (a).** No new mechanism:
+  `RiemannRochAPI`/`SerreDualityAPI` already expose the usable numerical content of
+  `AX_RiemannRoch`/`AX_SerreDuality` over the concrete `L(D) = riemannRochSpace D`,
+  and `SheafCohomologyFaithful` is the acceptance spec. RR/Serre are vetted as
+  **classified base axioms** (consistent — opaque `H1` is witnessed by the real
+  H¹; faithfully stated; cited Forster §16/§17). Tier-2/3 (proving the spec) is
+  deferred; #105's repartition `H1` becomes the *proof* of the pin, not its def.
+- **Then use RR/Serre to kill the period/torus axioms (Tier 1).**
+
+**Kill program (toolkit first, then the axioms).**
+
+*Step A — prove the toolkit (direct corollaries of `AX_RR`+`AX_Serre`; currently
+sorry in the API, no H1 construction needed).* Discharge these `RiemannRochAPI` /
+`SerreDualityAPI` sorries from the axioms:
+- `canonicalDivisor_deg` : `deg K = 2g − 2` (RR+Serre at D=0,K + `h0_zero`).
+- `h0_canonical` : `dim L(K) = g`, i.e. **`dim Ω¹ = g`** (Serre at D=0 + `h0_zero`).
+- `riemannRoch` : the H1-free identity `dim L(D) − dim L(K−D) = deg D + 1 − g`.
+- `h0_of_deg_gt`, `riemannRochSpace_finiteDimensional`, … as needed.
+Sorry only because unproven, not because they need Tier-3; they are the tools every
+kill below uses (especially `dim Ω¹ = g`). Routine sorry-discharge PRs.
+
+*Step B — kill the axioms* using Step A + Forster §19–21 (harmonic forms → Abel →
+period lattice), easiest-first:
+- `AX_genus_eq_zero_iff_homeo` (Forster §16.13: genus 0 ⇒ a degree-1 meromorphic
+  function ⇒ `≅ ℙ¹`) — closest to pure-RR.
+- `AX_PeriodLattice` (+ `instPeriodLatticeDiscrete`) — §21.4, via `dim Ω¹ = g` +
+  Abel + the maximum principle.
+- the rank part of `AX_AnalyticCycleBasis` — §21.5 (`H₁ ≅ ℤ^{2g}`).
+Each Step-B kill rewrites a core axiom → Discussion-linked PR.
+
+## 6. Codex review (2026-06-07) — "revise, not reject"
+
+Codex rated the route a sound *strategic* direction but found the original draft
+**overclaimed**, on two substantive points (not docs) and one cosmetic:
+
+1. **Circular finiteness claim (substantive).** The draft said the §14 keystone
+   was "already banked" because `HolomorphicOneForm X` is finite-dimensional. But
+   that is `dim H⁰(Ω¹) < ∞`, *not* `dim H¹(X, O_D) < ∞`, not a faithful `H1`, and
+   not the Čech/LES infrastructure RR/Serre run on. Linking the two needs Serre →
+   circular. **Folded in:** §0 rewritten; §2.1 now mandates proving structure-sheaf
+   finiteness directly.
+2. **Missing sheaf-cohomology gate (substantive).** "Fully discharge RR/Serre"
+   requires passing `SheafCohomologyFaithful` (`SheafCohomologySpec.lean`) — a
+   faithful `H1`, currently an opaque placeholder. **Folded in:** the three-tier
+   framing (Thesis, §1b, §4) makes Tier 2 explicit.
+3. **Stale bridge-axiom note (docs only).** Acknowledged.
+
+Codex's three-tier restructuring — now the spine of this doc:
+- **Tier 1:** downstream reductions *assuming* RR/Serre (the good path, §1b).
+- **Tier 2:** faithful sheaf-cohomology layer (`SheafCohomologyFaithful`).
+- **Tier 3:** full RR/Serre discharge (H1 + LES + Dolbeault + residues + Serre
+  pairing nondegeneracy).
+
+Net of all three reviews (Gemini deep-think + Gemini-3 chat + Codex): the route is
+**the right reorganization of the discharge strategy and the right way to retire
+the period/torus axioms cheaply (Tier 1)** — but it is **not** a finished discharge
+plan for RR/Serre themselves; Tiers 2–3 are a real infrastructure project whose
+entry cost (direct structure-sheaf finiteness + a faithful `H1`) the first draft
+understated.
