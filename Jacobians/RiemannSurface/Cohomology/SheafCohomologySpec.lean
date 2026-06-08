@@ -40,11 +40,11 @@ regression, not progress.
 Forster, *Lectures on Riemann Surfaces*, Ch. II §16 (𝒪(D)); Ch. III §16–17
 (Riemann–Roch, Serre). Mumford, *Algebraic Geometry I*, Ch. II.
 -/
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.Cohomology.LineBundle
 import Jacobians.RiemannSurface.Genus
 import Jacobians.ProjectiveCurve.Line
 
-namespace Jacobians.RiemannSurface.SheafCohomologySpec
+namespace Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
 
 open scoped Manifold ContDiff
 open Jacobians.Axioms Jacobians.RiemannSurface
@@ -182,4 +182,4 @@ def SheafCohomologyFaithful : Prop :=
     ∧ (∀ D : Divisor Jacobians.ProjectiveCurve.ProjectiveLine,
         projectiveLine_H1_vanishing D)
 
-end Jacobians.RiemannSurface.SheafCohomologySpec
+end Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec

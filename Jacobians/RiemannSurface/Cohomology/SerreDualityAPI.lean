@@ -3,7 +3,7 @@ Copyright (c) 2026 Michael R Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import Jacobians.RiemannSurface.RiemannRochAPI
+import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 
 /-!
 # Serre duality API in terms of the concrete space `L(D)`
@@ -11,7 +11,7 @@ import Jacobians.RiemannSurface.RiemannRochAPI
 This file states the textbook Serre-duality consequences in dimension form,
 linking the (still opaque) `H1` to the concrete Riemann-Roch space
 `H0 (O(K - D)) = riemannRochSpace (K - D)` of
-`Jacobians.RiemannSurface.RiemannRochSpace`.
+`Jacobians.RiemannSurface.Cohomology.RiemannRochSpace`.
 
 The underlying linear isomorphism `H1(O(D)) ≃ₗ[ℂ] (H0(O(K - D)))ᵛ` is the
 axiom `AX_SerreDuality`; here we expose its **usable numerical content**

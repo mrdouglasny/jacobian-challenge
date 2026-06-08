@@ -32,7 +32,7 @@ See `docs/completion-plan.md` workstream A4.
 Reference: Forster, *Lectures on Riemann Surfaces*, Ch. I §8 (divisors)
 + Ch. II §15-17 (line bundles + sheaves); Mumford Vol I §II.2.
 -/
-import Jacobians.RiemannSurface.RiemannRochSpace
+import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 
 namespace Jacobians.Axioms
 

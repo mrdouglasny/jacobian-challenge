@@ -3,7 +3,7 @@ Copyright (c) 2026 Michael R Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import Jacobians.RiemannSurface.RiemannRochSpace
+import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
 import Jacobians.GeneralResults.ChartTransition
@@ -14,7 +14,7 @@ import Jacobians.GeneralResults.ChartTransition
 This file states the textbook Riemann-Roch consequences directly for the
 germ-quotient definition
 `riemannRochSpace D = L(D) = {f | div(f) + D >= 0}` from
-`Jacobians.RiemannSurface.RiemannRochSpace`.
+`Jacobians.RiemannSurface.Cohomology.RiemannRochSpace`.
 
 All results here are vetted statement anchors. The proofs are intentionally
 deferred with `sorry`; the value is in the faithful, type-correct statements.
