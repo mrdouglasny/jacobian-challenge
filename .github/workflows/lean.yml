@@ -76,7 +76,8 @@ jobs:
           Jacobians/Bridge/KirovLineIntegral.lean
           Jacobians/ProjectiveCurve/Hyperelliptic/AntiInvariance.lean
           Jacobians/RiemannSurface/RiemannRochAPI.lean
-          Jacobians/RiemannSurface/SerreDualityAPI.lean"
+          Jacobians/RiemannSurface/SerreDualityAPI.lean
+          Jacobians/RiemannSurface/Cohomology/RiemannRochAnchor.lean"
           pat='(:=|[[:space:]]by|=>|;|<;>)[[:space:]]*sorry\b|^[[:space:]]*sorry[[:space:]]*$'
           allow_clean="$(echo "$allow" | sed 's/^[[:space:]]*//')"
           fail=0
