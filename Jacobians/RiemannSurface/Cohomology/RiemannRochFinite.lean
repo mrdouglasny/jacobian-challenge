@@ -96,4 +96,69 @@ private theorem localTwist_tendsto_exists (f : MeroFunctions X) (p : X) (n : ℕ
   rw [add_comm]
   simpa using h2
 
+section Functional
+open Topology Filter
+
+/-- The value of the local pole-clearing functional on a representative: the
+punctured-chart limit of the twist (junk `0` if no pole bound, but on `L(D)` the
+limit always exists by `localTwist_tendsto_exists`). -/
+private noncomputable def localLim (f : MeroFunctions X) (p : X) (n : ℕ) : ℂ :=
+  limUnder (𝓝[≠] (chartAt ℂ p p)) (localTwist f p n)
+
+/-- On the order-bounded subspace the twist actually converges to `localLim`. -/
+private theorem localTwist_tendsto (f : MeroFunctions X) (p : X) (n : ℕ)
+    (h : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (f : X → ℂ)) :
+    Tendsto (localTwist f p n) (𝓝[≠] (chartAt ℂ p p)) (𝓝 (localLim f p n)) := by
+  obtain ⟨c, hc⟩ := localTwist_tendsto_exists f p n h
+  rwa [localLim, hc.limUnder_eq]
+
+private theorem localTwist_add (f g : MeroFunctions X) (p : X) (n : ℕ) :
+    localTwist (f + g) p n = localTwist f p n + localTwist g p n := by
+  funext z
+  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply, Function.comp_apply,
+    Pi.add_apply, Submodule.coe_add]
+  ring
+
+private theorem localTwist_smul (c : ℂ) (f : MeroFunctions X) (p : X) (n : ℕ) :
+    localTwist (c • f) p n = c • localTwist f p n := by
+  funext z
+  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply, Function.comp_apply,
+    Pi.smul_apply, SetLike.val_smul, smul_eq_mul]
+  ring
+
+/-- `localLim` is additive on the order-bounded subspace (both limits exist). -/
+private theorem localLim_add (f g : MeroFunctions X) (p : X) (n : ℕ)
+    (hf : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (f : X → ℂ))
+    (hg : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (g : X → ℂ)) :
+    localLim (f + g) p n = localLim f p n + localLim g p n := by
+  have hsum : Tendsto (localTwist (f + g) p n) (𝓝[≠] (chartAt ℂ p p))
+      (𝓝 (localLim f p n + localLim g p n)) := by
+    rw [localTwist_add]
+    exact (localTwist_tendsto f p n hf).add (localTwist_tendsto g p n hg)
+  rw [localLim, hsum.limUnder_eq]
+
+/-- `localLim` is homogeneous. -/
+private theorem localLim_smul (c : ℂ) (f : MeroFunctions X) (p : X) (n : ℕ)
+    (hf : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (f : X → ℂ)) :
+    localLim (c • f) p n = c • localLim f p n := by
+  have hs : Tendsto (localTwist (c • f) p n) (𝓝[≠] (chartAt ℂ p p))
+      (𝓝 (c • localLim f p n)) := by
+    rw [localTwist_smul]
+    exact (localTwist_tendsto f p n hf).const_smul c
+  rw [localLim, hs.limUnder_eq]
+
+/-- **Well-definedness on the germ quotient:** a germ-zero representative has
+`localLim = 0`. -/
+private theorem localLim_germZero {g : MeroFunctions X} (hg : g ∈ GermZero X)
+    (p : X) (n : ℕ) : localLim g p n = 0 := by
+  have htop : meromorphicOrderAt (localTwist g p n) (chartAt ℂ p p) = ⊤ := by
+    rw [localTwist_meromorphicOrderAt, hg p]; simp
+  have hev : localTwist g p n =ᶠ[𝓝[≠] (chartAt ℂ p p)] 0 :=
+    meromorphicOrderAt_eq_top_iff.mp htop
+  have htend : Tendsto (localTwist g p n) (𝓝[≠] (chartAt ℂ p p)) (𝓝 0) :=
+    Tendsto.congr' hev.symm tendsto_const_nhds
+  rw [localLim, htend.limUnder_eq]
+
+end Functional
+
 end Jacobians.RiemannSurface
