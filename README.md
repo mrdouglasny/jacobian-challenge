@@ -37,15 +37,19 @@ These are the genuine theorems — what a reader can trust the formalization to 
 
 The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` as a real computation through the period lattice — the strongest single piece of evidence that the construction is non-degenerate.
 
-## Two levels: the challenge, and the subchallenge to discharge the axioms
+## How the work divides — three separable parts
 
-This project has a **two-tier structure**, and the two tiers should be read separately.
+The repository is **three clearly separable parts**, and only the first is "the challenge". A map before the details:
 
-**Level 1 — Buzzard's challenge (the interface).** *Closed.* All 24 `sorry`s in `Challenge.lean` are filled with real `def`s/`instance`s, and the anti-degeneracy headlines (correct genus, injective Abel–Jacobi, Albanese universal property) are proved — **resting on** the axiom layer. The core is `sorry`-free; every headline is `#print axioms`-checked to depend only on the axioms it names plus the three Lean-core axioms, never `sorryAx`. In Buzzard's own terms ("sorry-free ⇒ done"), Level 1 is **met modulo a declared, audited axiom layer**.
+| Part | What it is | Required for the challenge? | `sorry` status |
+|------|-----------|:---:|---|
+| **1. Buzzard's challenge** — `Challenge.lean` + the construction | the interface Buzzard posed | — *(it **is** the challenge)* | **core `sorry`-free**; rests on the 42-axiom layer |
+| **2. RR/Serre/sheaf subchallenge** — `RiemannSurface/Cohomology/` | discharge the deep axioms via one classical spine | **no** — the challenge *rests on* the axioms; this *proves* them | 5 anchor `sorry`s (RR 4 + Serre 1) |
+| **3. Hyperelliptic extension projects** — `Extensions/`, `ProjectiveCurve/Hyperelliptic/` | exercise the formalization on real curves | **no** — real-example vetting | **even completed** (PR #96); **odd** = 6-`sorry` stretch |
 
-**Level 2 — the subchallenge: prove the axioms.** The axiom layer (42 axioms) is itself the open research program. Discharging it is *not* required for Level 1 — it is the deeper goal of reducing the whole challenge to **a single classical spine: Riemann–Roch + Serre duality**. The reduction target is *"Buzzard challenge = axiom table + RR/Serre"*: once RR/Serre are in hand, the rest of the table follows.
+**Part 1 — Buzzard's challenge (the interface). *Closed.*** All 24 `sorry`s in `Challenge.lean` are filled with real `def`s/`instance`s, and the anti-degeneracy headlines (correct genus, injective Abel–Jacobi, Albanese universal property) are proved — **resting on** the axiom layer. The core is `sorry`-free; every headline is `#print axioms`-checked to depend only on the axioms it names plus the three Lean-core axioms, never `sorryAx`. In Buzzard's own terms ("sorry-free ⇒ done"), Part 1 is **met modulo a declared, audited axiom layer**.
 
-**How the two deepest clusters connect — and why filling a handful of `sorry`s could discharge a whole cluster of axioms.** The 🔴 research-grade debt appears in *two* places in the table below that are really **the same content seen from two routes**:
+**Part 2 — the RR/Serre/sheaf subchallenge: prove the axioms.** The axiom layer (42 axioms) is itself the open research program, and discharging it is *not* required for Part 1. It is the deeper goal of reducing the whole challenge to **a single classical spine: Riemann–Roch + Serre duality** (the sheaf-cohomology anchor under `RiemannSurface/Cohomology/`). The reduction target is *"Buzzard challenge = axiom table + RR/Serre"*: once RR/Serre are in hand, the rest of the table follows. **Why filling a handful of `sorry`s could discharge a whole cluster of axioms** — the 🔴 research-grade debt appears in *two* places in the axiom table below that are really **the same content seen from two routes**:
 
 - the **Period / Hodge / homology axioms** (7: `AX_RiemannBilinear`, `AX_PeriodLattice`, `intersectionForm` + its alternating/perfect laws, `AX_AnalyticCycleBasis` / `H1FreeRank2g`) — *postulated directly* (the Griffiths–Harris / Hodge route); and
 - the **5 anchor-layer `sorry`s** — faithful, cross-model-vetted *statements* of Riemann–Roch (§16) and Serre duality (§17) in `Cohomology/RiemannRochAPI` (4) / `Cohomology/SerreDualityAPI` (1), with their **proofs deferred** (the Forster cohomological route). The keystone is already partly in place: `#113` proved the `riemannRoch` identity and `h⁰(K) = g` from the anchor + the `riemannRochSpace_finiteDimensional` finiteness pin; the 5 that remain are secondary corollaries plus Serre vanishing.
@@ -53,6 +57,11 @@ This project has a **two-tier structure**, and the two tiers should be read sepa
 These are **not independent work**. Under the Forster route (Forster, *Lectures on Riemann Surfaces*, GTM 81, §§14–21 — see [`refs/`](refs/)), **filling the anchor `sorry`s retires the period/Hodge/homology axioms as downstream theorems**: Serre §17.10 gives `dim H⁰(Ω¹) = g` (period-matrix rank ⇒ `AX_PeriodLattice`), Abel §20 + harmonic-period nondegeneracy §19 give the lattice, and `H₁ ≅ ℤ^{2g}` falls out as a §21.5 byproduct (⇒ `AX_AnalyticCycleBasis`). There is **one** hard analytic input — the §14 finiteness theorem `dim H¹(X, O) < ∞`, already pinned as `riemannRochSpace_finiteDimensional` — and the rest is homological algebra, *avoiding* the not-in-Mathlib Hodge-norm + polygon-Stokes + 4g-gon topology the period axioms would otherwise need.
 
 So the period cluster and the anchor `sorry`s are **two copies of one roof**. The subchallenge's efficient path is to **finish the anchor `sorry`s and let the period axioms collapse into proofs over the anchor** — which is why the reduction goal is *axiom table + RR/Serre*, not *axiom table + RR/Serre + an independent Hodge build*. Route comparison: [`refs/JACOBIAN_ROUTE_COMPARISON.md`](refs/JACOBIAN_ROUTE_COMPARISON.md).
+
+**Part 3 — the hyperelliptic extension projects: vetting on real curves.** Orthogonal to Parts 1–2: concrete curve families that exercise the whole formalization end-to-end (cocycle 1-forms → finite-dim bridge → genus → Jacobian → functoriality) on a non-trivial example, forcing the API to *compute correctly*, not merely type-check. They neither close the challenge nor sit on any axiom's critical path. Two parities, structured symmetrically (core atlas in `ProjectiveCurve/Hyperelliptic/{Even,Odd}Atlas/` + an extension file in `Extensions/Hyperelliptic{Even,Odd}.lean`):
+
+- the **even-degree** track is **completed** — `genus_HyperellipticEven_eq` is a real proved theorem (Liouville L2/L3 discharged, PR #96), the strongest evidence that genus computes correctly on a whole family;
+- the **odd-degree** track (`Extensions/HyperellipticOdd.lean`, 6 `sorry`s) is a deliberate parallel **stretch project** mirroring the even one decl-for-decl — its lower genus bound is proved, the upper bound and warm-ups remain `sorry`. It is **not required for Buzzard's challenge**; it exists to mirror the completed even case on the single-∞ parity and to host the hyperelliptic-involution / Weierstrass-point material.
 
 ## What it assumes — the axiom layer
 
