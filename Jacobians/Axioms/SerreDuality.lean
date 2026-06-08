@@ -35,7 +35,7 @@ manifolds isn't in Mathlib at this pin.
 See `docs/formalization-plan.md` §7; `docs/completion-plan.md` workstream
 A5. Reference: Forster Ch. II §17; Mumford Vol I §II.2.
 -/
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.Cohomology.LineBundle
 
 namespace Jacobians.Axioms
 

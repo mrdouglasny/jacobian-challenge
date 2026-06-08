@@ -21,14 +21,14 @@ import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.Genus
 import Jacobians.RiemannSurface.GenusInvariance
 import Jacobians.RiemannSurface.Divisor
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.Cohomology.LineBundle
 import Jacobians.RiemannSurface.MeromorphicFunctionField
-import Jacobians.RiemannSurface.RiemannRochSpace
+import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Jacobians.RiemannSurface.Cohomology.Repartitions
 import Jacobians.RiemannSurface.Cohomology.H1
 import Jacobians.RiemannSurface.Cohomology.RiemannRochAnchor
-import Jacobians.RiemannSurface.RiemannRochAPI
-import Jacobians.RiemannSurface.SerreDualityAPI
+import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
+import Jacobians.RiemannSurface.Cohomology.SerreDualityAPI
 import Jacobians.RiemannSurface.PluckerAPI
 import Jacobians.RiemannSurface.MeromorphicToP1
 import Jacobians.RiemannSurface.DegreeOneGenusZero
@@ -47,7 +47,7 @@ import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.HomotopyInvarianceDevelop
 import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.LoopIntegral
-import Jacobians.RiemannSurface.SheafCohomologySpec
+import Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm
 import Jacobians.RiemannSurface.PathIntegral

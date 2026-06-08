@@ -41,7 +41,7 @@ A4 + A5.
 Reference: Mumford Vol I Ch. II §2; Forster, Lectures on Riemann
 Surfaces, Ch. III.
 -/
-import Jacobians.RiemannSurface.LineBundle
+import Jacobians.RiemannSurface.Cohomology.LineBundle
 
 namespace Jacobians.Axioms
 

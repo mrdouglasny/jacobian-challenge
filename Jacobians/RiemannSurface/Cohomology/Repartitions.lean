@@ -3,7 +3,7 @@ Copyright (c) 2026 Michael R Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import Jacobians.RiemannSurface.RiemannRochSpace
+import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Mathlib.Data.Set.Finite.Basic
 
 /-!
@@ -205,8 +205,7 @@ private theorem meroFun_orderCoeff_support_finite (g : X → ℂ)
   simpa using h
 
 /-- A principal repartition has only finitely many poles.  This is the compact
-Riemann-surface finite-pole theorem for the additive germ quotient `MeroField`.
- -/
+Riemann-surface finite-pole theorem for the additive germ quotient `MeroField`. -/
 theorem diagonal_isRepartition (f : MeroField X) :
     IsRepartition (fun _ : X => f) := by
   refine Submodule.Quotient.induction_on (GermZero X) f ?_
