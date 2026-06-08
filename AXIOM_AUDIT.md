@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 42** — all **42** in our own modules. The vendored
+**Active project axioms: 41** — all **41** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -128,8 +128,10 @@ compiles the spike witness. `H0` still `:= riemannRochSpace D` (instances adapt;
 no axiom change). **`h0_zero` (h⁰(0)=1) is now PROVED axiom-free** over the corrected
 space (normal-form honest representative + Liouville ⇒ `L(0) ≃ ℂ`, `#print
 axioms`-clean, tracked in `docs/axiom-report.txt`) — the concrete check that the
-fix gives the right dimension (it was false over the old degenerate space). Only
-general `riemannRochSpace_finiteDimensional` and `h0_canonical` remain deferred.
+fix gives the right dimension (it was false over the old degenerate space).
+`h0_canonical` (#113) and **`riemannRochSpace_finiteDimensional`** (#116, the
+elementary `ℓ(D) ≤ 1 + deg D⁺` route) are now both **proved** — see Recently
+discharged.
 Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
 real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
 is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
@@ -224,7 +226,7 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 16 | classical theorems, citable | high |
+| 1 — textbook-standard | 15 | classical theorems, citable | high |
 | 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
@@ -360,6 +362,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
 | `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_PlaneCurveAffine_nonempty` *(2026-06-07)* | dehomogenize to `affinePolynomial H.F.val`; `affinePolynomial_not_isUnit` plus `exists_eval_eq_zero_of_not_isUnit_mvPolynomial` gives a complex zero in the affine patch | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_Period_Triangle` *(2026-06-06)* | conjugate the triangle loop to `Classical.arbitrary X`; use `loopDevValH1Hom_eq_loopIntegralToH1_apply` + `loop_canonicalArcIntegral_mem_periodLatticeInBasis` from the analytic cycle basis; cancel bridge/reverse periods by `canonicalArcIntegral_trans`/`_reverse` | `Axioms/AbelJacobiMap.lean`, `RiemannSurface/LoopIntegralHom.lean`, `RiemannSurface/ArcAlgebra.lean` |
@@ -406,7 +409,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 42 — the vendored Kirov subtree is now axiom-free, so 42 is the total.
+#   prints 41 — the vendored Kirov subtree is now axiom-free, so 42 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -423,7 +426,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 42
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 41
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
