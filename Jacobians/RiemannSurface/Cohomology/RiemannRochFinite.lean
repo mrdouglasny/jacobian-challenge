@@ -159,6 +159,31 @@ private theorem localLim_germZero {g : MeroFunctions X} (hg : g ∈ GermZero X)
     Tendsto.congr' hev.symm tendsto_const_nhds
   rw [localLim, htend.limUnder_eq]
 
+/-- **The kernel identity (local form).** For `f` with a pole of order `≤ n` at
+`p`, the coefficient `localLim f = 0` exactly when the order is actually `≥ -(n-1)`
+— i.e. killing the top Laurent coefficient improves the pole bound by one. -/
+private theorem localLim_eq_zero_iff (f : MeroFunctions X) (p : X) (n : ℕ)
+    (h : ((-(n : ℤ) : ℤ) : WithTop ℤ) ≤ orderAt p (f : X → ℂ)) :
+    localLim f p n = 0 ↔ ((-(n : ℤ) + 1 : ℤ) : WithTop ℤ) ≤ orderAt p (f : X → ℂ) := by
+  have hzero_iff : localLim f p n = 0 ↔
+      Tendsto (localTwist f p n) (𝓝[≠] (chartAt ℂ p p)) (𝓝 0) := by
+    constructor
+    · intro h0
+      have := localTwist_tendsto f p n h
+      rwa [h0] at this
+    · intro ht
+      exact tendsto_nhds_unique (localTwist_tendsto f p n h) ht
+  rw [hzero_iff, tendsto_zero_iff_meromorphicOrderAt_pos (localTwist_meromorphicAt f p n),
+    localTwist_meromorphicOrderAt]
+  -- goal: 0 < ↑n + orderAt p f  ↔  ↑(-↑n + 1) ≤ orderAt p f
+  induction (orderAt p (f : X → ℂ)) using WithTop.recTopCoe with
+  | top => simp
+  | coe k =>
+    rw [show (n : WithTop ℤ) = ((n : ℤ) : WithTop ℤ) by norm_cast,
+      ← WithTop.coe_add, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) by norm_cast,
+      WithTop.coe_lt_coe, WithTop.coe_le_coe]
+    omega
+
 end Functional
 
 end Jacobians.RiemannSurface
