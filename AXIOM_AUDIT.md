@@ -217,7 +217,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (32 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (26 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -409,7 +409,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 41 — the vendored Kirov subtree is now axiom-free, so 42 is the total.
+#   prints 41 — the vendored Kirov subtree is now axiom-free, so 41 is the total.
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
