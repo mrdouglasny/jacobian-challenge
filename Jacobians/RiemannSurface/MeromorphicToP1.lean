@@ -251,8 +251,10 @@ private theorem toP1Rep_chartLocal_nonpole (f : Rep X) (p : X)
       AnalyticAt ℂ φ (chartAt ℂ p p) ∧
       (chartAt ℂ (toP1Rep f p) ∘ toP1Rep f ∘ (chartAt ℂ p).symm)
         =ᶠ[𝓝 (chartAt ℂ p p)] φ ∧
-      ∀ᶠ z in 𝓝 (chartAt ℂ p p),
-        toP1Rep f ((chartAt ℂ p).symm z) ∈ (chartAt ℂ (toP1Rep f p)).source := by
+      (∀ᶠ z in 𝓝 (chartAt ℂ p p),
+        toP1Rep f ((chartAt ℂ p).symm z) ∈ (chartAt ℂ (toP1Rep f p)).source) ∧
+      analyticOrderNatAt φ (chartAt ℂ p p) =
+        Int.toNat ((orderAt p (f : X → ℂ)).untop₀) := by
   classical
   let e : OpenPartialHomeomorph X ℂ := chartAt ℂ p
   let z₀ : ℂ := e p
@@ -269,9 +271,12 @@ private theorem toP1Rep_chartLocal_nonpole (f : Rep X) (p : X)
     have h' : (0 : WithTop ℤ) ≤ (n : WithTop ℤ) := by
       simpa [hn] using h_nonpole
     exact_mod_cast h'
+  let k : ℕ := Int.toNat n
+  have hk_int : (k : ℤ) = n := by
+    exact Int.toNat_of_nonneg hn_nonneg
   have horderF : meromorphicOrderAt F z₀ = n := by
     simpa [F, z₀, e, orderAt_eq_chartAt] using hn.symm
-  obtain ⟨g, hg_an, _hg_ne, hFG₀⟩ := (meromorphicOrderAt_eq_int_iff hf_mer).1 horderF
+  obtain ⟨g, hg_an, hg_ne, hFG₀⟩ := (meromorphicOrderAt_eq_int_iff hf_mer).1 horderF
   let G : ℂ → ℂ := fun z => (z - z₀) ^ n * g z
   have hG_an_z₀ : AnalyticAt ℂ G z₀ := by
     have hpow : AnalyticAt ℂ (fun z : ℂ => (z - z₀) ^ n) z₀ :=
@@ -314,7 +319,20 @@ private theorem toP1Rep_chartLocal_nonpole (f : Rep X) (p : X)
       have hnotpole_z : ¬ orderAt (e.symm z) (f : X → ℂ) < 0 :=
         not_lt.mpr hnonpole_z
       simp [toP1Rep, hnotpole_z, hrv_z]
-  refine ⟨G, hG_an_z₀, ?_, ?_⟩
+  have hG_order : analyticOrderNatAt G z₀ = k := by
+    have hG_eq_nat :
+        G =ᶠ[𝓝 z₀] fun z : ℂ => (z - z₀) ^ k • g z := by
+      filter_upwards [] with z
+      simp [G, smul_eq_mul, ← zpow_natCast, hk_int]
+    have hG_order_enat : analyticOrderAt G z₀ = (k : ℕ∞) := by
+      exact hG_an_z₀.analyticOrderAt_eq_natCast.mpr
+        ⟨g, hg_an, hg_ne, hG_eq_nat⟩
+    simp [analyticOrderNatAt, hG_order_enat]
+  have horder_toNat :
+      Int.toNat ((orderAt p (f : X → ℂ)).untop₀) = k := by
+    rw [← hn]
+    simp [WithTop.untop₀_coe, k]
+  refine ⟨G, hG_an_z₀, ?_, ?_, ?_⟩
   · filter_upwards [hrep_eq] with z hz
     change chartAt ℂ (toP1Rep f p) (toP1Rep f (e.symm z)) = G z
     rw [hchart_target, hz]
@@ -323,6 +341,7 @@ private theorem toP1Rep_chartLocal_nonpole (f : Rep X) (p : X)
     rw [hz, hchart_target]
     change ((G z : ℂ) : ProjectiveLine) ∈ chart0.source
     simp [chart0]
+  · rw [hG_order, horder_toNat]
 
 private theorem toP1Rep_chartLocal_pole (f : Rep X) (p : X)
     (hpole : orderAt p (f : X → ℂ) < 0) :
@@ -505,7 +524,7 @@ private theorem toP1Rep_contMDiffAt (f : Rep X) (p : X) :
   · obtain ⟨φ, hφ, hchart, hsrc, _horder⟩ := toP1Rep_chartLocal_pole f p hpole
     exact toP1Rep_contMDiffAt_of_chartLocal f p hφ hchart hsrc
   · have h_nonpole : 0 ≤ orderAt p (f : X → ℂ) := not_lt.mp hpole
-    obtain ⟨φ, hφ, hchart, hsrc⟩ := toP1Rep_chartLocal_nonpole f p h_nonpole
+    obtain ⟨φ, hφ, hchart, hsrc, _horder⟩ := toP1Rep_chartLocal_nonpole f p h_nonpole
     exact toP1Rep_contMDiffAt_of_chartLocal f p hφ hchart hsrc
 
 private theorem toP1Rep_contMDiff (f : Rep X) :
@@ -527,6 +546,76 @@ private theorem mapAnalyticOrderAt_toP1Rep_pole (f : Rep X) (p : X)
       chart1_infty_apply, (chartAt ℂ p).left_inv (mem_chart_source ℂ p)]
   have hφ_z₀ : φ z₀ = 0 := by
     rw [← hchart'.self_of_nhds, hlocal_z₀]
+  have hsub :
+      (fun t => chartLocalAt (toP1Rep f) p t -
+        chartLocalAt (toP1Rep f) p (chartAt ℂ p p)) =ᶠ[𝓝 z₀] φ := by
+    filter_upwards [hchart'] with t ht
+    simp [z₀, ht, hlocal_z₀]
+  unfold mapAnalyticOrderAt analyticOrderNatAt
+  rw [analyticOrderAt_congr hsub]
+  simpa [z₀] using horder
+
+private theorem toP1Rep_eq_zero_iff (f : Rep X) (p : X) :
+    toP1Rep f p = (((0 : ℂ) : ProjectiveLine)) ↔
+      0 < orderAt p (f : X → ℂ) := by
+  constructor
+  · intro hp
+    by_cases hpole : orderAt p (f : X → ℂ) < 0
+    · have hbad : (∞ : ProjectiveLine) = (((0 : ℂ) : ProjectiveLine)) := by
+        simp [toP1Rep, hpole] at hp
+      exact False.elim ((OnePoint.infty_ne_coe (0 : ℂ)) hbad)
+    · have h_nonpole : 0 ≤ orderAt p (f : X → ℂ) := not_lt.mp hpole
+      let e : OpenPartialHomeomorph X ℂ := chartAt ℂ p
+      let z₀ : ℂ := e p
+      let F : ℂ → ℂ := (f : X → ℂ) ∘ e.symm
+      have hf_mer : MeromorphicAt F z₀ := by
+        have h := f.meromorphicAt p
+        unfold MeromorphicAtX at h
+        rwa [extChartAt_symm_eq_chartAt_symm, extChartAt_eq_chartAt] at h
+      have hrv : regularValueRep f p = 0 := by
+        have hchart := congrArg chart0 hp
+        simpa [toP1Rep, hpole, chart0_coe_apply] using hchart
+      have hF_tendsto_zero : Tendsto F (𝓝[≠] z₀) (𝓝 (0 : ℂ)) := by
+        simpa [F, z₀, hrv] using regularValueRep_spec f p h_nonpole
+      have horderF_pos : 0 < meromorphicOrderAt F z₀ :=
+        (tendsto_zero_iff_meromorphicOrderAt_pos hf_mer).1 hF_tendsto_zero
+      simpa [F, z₀, e, orderAt_eq_chartAt] using horderF_pos
+  · intro hzero
+    have h_nonpole : 0 ≤ orderAt p (f : X → ℂ) := hzero.le
+    have hpole : ¬ orderAt p (f : X → ℂ) < 0 := not_lt.mpr h_nonpole
+    let e : OpenPartialHomeomorph X ℂ := chartAt ℂ p
+    let z₀ : ℂ := e p
+    let F : ℂ → ℂ := (f : X → ℂ) ∘ e.symm
+    have horderF_pos : 0 < meromorphicOrderAt F z₀ := by
+      simpa [F, z₀, e, orderAt_eq_chartAt] using hzero
+    have hF_tendsto_zero : Tendsto F (𝓝[≠] z₀) (𝓝 (0 : ℂ)) :=
+      tendsto_zero_of_meromorphicOrderAt_pos horderF_pos
+    have hrv : regularValueRep f p = 0 :=
+      tendsto_nhds_unique (regularValueRep_spec f p h_nonpole)
+        (by simpa [F, z₀] using hF_tendsto_zero)
+    simp [toP1Rep, hpole, hrv]
+
+private theorem mapAnalyticOrderAt_toP1Rep_zero (f : Rep X) (p : X)
+    (hzero : 0 < orderAt p (f : X → ℂ)) :
+    mapAnalyticOrderAt (toP1Rep f) p =
+      Int.toNat ((orderAt p (f : X → ℂ)).untop₀) := by
+  have h_nonpole : 0 ≤ orderAt p (f : X → ℂ) := hzero.le
+  obtain ⟨φ, _hφ, hchart, _hsrc, horder⟩ := toP1Rep_chartLocal_nonpole f p h_nonpole
+  let z₀ : ℂ := chartAt ℂ p p
+  have hchart' : chartLocalAt (toP1Rep f) p =ᶠ[𝓝 z₀] φ := by
+    simpa [chartLocalAt, z₀, Function.comp_assoc] using hchart
+  have horder_pos :
+      0 < Int.toNat ((orderAt p (f : X → ℂ)).untop₀) := by
+    have h_untop_pos : 0 < (orderAt p (f : X → ℂ)).untop₀ := by
+      rw [← WithTop.coe_untop₀_of_ne_top (f.order_ne_top p)] at hzero
+      exact_mod_cast hzero
+    omega
+  have hφ_z₀ : φ z₀ = 0 :=
+    apply_eq_zero_of_analyticOrderNatAt_ne_zero (by
+      rw [horder]
+      exact ne_of_gt horder_pos)
+  have hlocal_z₀ : chartLocalAt (toP1Rep f) p z₀ = 0 := by
+    rw [hchart'.self_of_nhds, hφ_z₀]
   have hsub :
       (fun t => chartLocalAt (toP1Rep f) p t -
         chartLocalAt (toP1Rep f) p (chartAt ℂ p p)) =ᶠ[𝓝 z₀] φ := by
@@ -560,6 +649,12 @@ theorem toP1_eq_infty_iff (f : MeromorphicFunctionField X) (p : X) :
   · simp [toP1, toP1Rep, orderAtMF, hpole]
   · simp [toP1, toP1Rep, orderAtMF, hpole]
 
+theorem toP1_eq_zero_iff (f : MeromorphicFunctionField X) (p : X) :
+    toP1 f p = (((0 : ℂ) : ProjectiveLine)) ↔ 0 < orderAtMF p f := by
+  refine Quotient.inductionOn f ?_
+  intro f
+  simpa [toP1_mk, orderAtMF] using toP1Rep_eq_zero_iff f p
+
 theorem mapAnalyticOrderAt_toP1 (f : MeromorphicFunctionField X) {p : X}
     (hp : toP1 f p = (∞ : ProjectiveLine)) :
     mapAnalyticOrderAt (toP1 f) p =
@@ -572,6 +667,19 @@ theorem mapAnalyticOrderAt_toP1 (f : MeromorphicFunctionField X) {p : X}
       (Quotient.mk (Rep.setoid (X := X)) f) p).1 hp
     simpa [orderAtMF] using h
   simpa [toP1_mk, orderAtMF] using mapAnalyticOrderAt_toP1Rep_pole f p hpole
+
+theorem mapAnalyticOrderAt_toP1_zero (f : MeromorphicFunctionField X) {p : X}
+    (hp : toP1 f p = (((0 : ℂ) : ProjectiveLine))) :
+    mapAnalyticOrderAt (toP1 f) p =
+      Int.toNat ((orderAtMF p f).untop₀) := by
+  revert hp
+  refine Quotient.inductionOn f ?_
+  intro f hp
+  have hzero : 0 < orderAt p (f : X → ℂ) := by
+    have h := (toP1_eq_zero_iff
+      (Quotient.mk (Rep.setoid (X := X)) f) p).1 hp
+    simpa [orderAtMF] using h
+  simpa [toP1_mk, orderAtMF] using mapAnalyticOrderAt_toP1Rep_zero f p hzero
 
 theorem toP1_infty_fiber_finite (f : MeromorphicFunctionField X) :
     (toP1 f ⁻¹' ({(∞ : ProjectiveLine)} : Set ProjectiveLine)).Finite := by
@@ -592,6 +700,27 @@ theorem toP1_infty_weightedFiberSum (f : MeromorphicFunctionField X) :
   have hp_infty : toP1 f p = (∞ : ProjectiveLine) := by
     simpa using hp_fiber
   exact mapAnalyticOrderAt_toP1 f hp_infty
+
+theorem toP1_zero_fiber_finite (f : MeromorphicFunctionField X) :
+    (toP1 f ⁻¹' ({(((0 : ℂ) : ProjectiveLine))} : Set ProjectiveLine)).Finite := by
+  refine (orderSupport_finite f).subset ?_
+  intro p hp
+  rw [Set.mem_preimage, Set.mem_singleton_iff] at hp
+  rw [Set.mem_setOf_eq]
+  exact (toP1_eq_zero_iff f p).1 hp |>.ne'
+
+theorem toP1_zero_weightedFiberSum (f : MeromorphicFunctionField X) :
+    (toP1_zero_fiber_finite f).toFinset.sum (mapAnalyticOrderAt (toP1 f)) =
+      (toP1_zero_fiber_finite f).toFinset.sum
+        (fun p => Int.toNat ((orderAtMF p f).untop₀)) := by
+  refine Finset.sum_congr rfl ?_
+  intro p hp
+  have hp_fiber :
+      p ∈ toP1 f ⁻¹' ({(((0 : ℂ) : ProjectiveLine))} : Set ProjectiveLine) := by
+    simpa [Set.Finite.mem_toFinset] using hp
+  have hp_zero : toP1 f p = (((0 : ℂ) : ProjectiveLine)) := by
+    simpa using hp_fiber
+  exact mapAnalyticOrderAt_toP1_zero f hp_zero
 
 /-- Nonconstancy of a meromorphic-function-field element as seen by its
 associated map to `ℙ¹(ℂ)`. -/
