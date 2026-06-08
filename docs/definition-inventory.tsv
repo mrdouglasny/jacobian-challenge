@@ -64,8 +64,8 @@ Jacobians/Challenge.lean	174	nc-def	pullback	94	used	Jacobians.Axioms.pullbackIm
 Jacobians/Challenge.lean	196	nc-def	_root_.ContMDiff.degree	167	used	Jacobians.Axioms.degreeImpl f hf  lemma pushforward_pullback	
 Jacobians/Extensions/AbelJacobi.lean	207	def	fiberPoint	5	used	⟨(x₀, y₀), hxy⟩  /-- **Abel's theorem on the affine fiber di	
 Jacobians/Extensions/HyperellipticOdd.lean	63	def	involution	33	used	by   refine ⟨(p.val.1, -p.val.2), ?_⟩   calc     (-p.val.2) 	
-Jacobians/Extensions/HyperellipticOdd.lean	102	nc-def	hyperellipticDxOverY	2	used	by   -- Construct the cocycle (`coeff`, three predicates) ex	wrapper
-Jacobians/Extensions/HyperellipticOdd.lean	122	nc-def	hyperellipticBasisDifferential	2	sorry	by   -- Multiply the local coefficient of `hyperellipticDxOv	sorry-body,wrapper
+Jacobians/Extensions/HyperellipticOdd.lean	102	nc-def	hyperellipticOddDxOverY	2	used	by   -- Construct the cocycle (`coeff`, three predicates) ex	wrapper
+Jacobians/Extensions/HyperellipticOdd.lean	122	nc-def	hyperellipticOddBasisDifferential	2	sorry	by   -- Multiply the local coefficient of `hyperellipticDxOv	sorry-body,wrapper
 Jacobians/Extensions/HyperellipticOdd.lean	199	nc-def	hyperellipticInvolution	10	used	-- On the affine chart: send `⟨(x, y), hxy⟩` to `⟨(x, -y), n	
 Jacobians/Extensions/HyperellipticEven.lean	81	nc-def	hyperellipticEvenDxOverY	2	used	HyperellipticEvenProj.hyperellipticForm H 1  /-! ## Warm-up 	
 Jacobians/Extensions/HyperellipticEven.lean	98	nc-def	hyperellipticEvenBasisDifferential	3	used	HyperellipticEvenProj.hyperellipticForm H (Polynomial.X ^ k)	

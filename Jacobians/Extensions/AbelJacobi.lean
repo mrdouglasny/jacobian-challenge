@@ -1,7 +1,7 @@
 /-
 # Challenge extensions: tests of the Abel-Jacobi map and Jacobian
 
-Companion to [`HyperellipticOdd.lean`](Hyperelliptic.lean) and
+Companion to [`HyperellipticOdd.lean`](HyperellipticOdd.lean) and
 [`HyperellipticEven.lean`](HyperellipticEven.lean), which exercise the
 **form-side** of the formalization (cocycle 1-forms, basis, genus).
 This file exercises the **lattice / Abel-Jacobi side**: theorems whose

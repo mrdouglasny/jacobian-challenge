@@ -255,7 +255,7 @@ is sorry-free. Open work for the even parity: discharge the
 two cross-summand axioms (replace with low-degree-only versions),
 discharge the three Liouville-hierarchy axioms.
 
-Open for odd parity: mirror the framework into Hyperelliptic.lean
+Open for odd parity: mirror the framework into HyperellipticOdd.lean
 (extension theorems still mostly `sorry`); the affine machinery
 already transfers via `reverseData`.
 
