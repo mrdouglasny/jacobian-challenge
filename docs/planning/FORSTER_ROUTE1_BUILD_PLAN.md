@@ -115,11 +115,54 @@ Cross-checks the running Codex audit; all from `.lake/packages/mathlib`.
   Mathlib is the calculus MVT, unrelated). Pure-linear-algebra build; the
   unimodular-over-ℤ refinement is the danger-zone half.
 
-**Provisional gate read: GO.** The decisive P0.1 is compile-confirmed; the three
-gaps (Dolbeault, residue assembly, symplectic-basis algebra) are bounded standard
-builds or at worst three clean low-level axioms — none blocks the keystone.
-Finalize once the Codex audit lands (Dolbeault cost, residue assembly feasibility,
-unimodularity route).
+**Provisional gate read (pre-audit): GO.** — *revised below; the audit overturns
+this.*
+
+### Phase-0 GATE DECISION — post Codex Mathlib audit (2026-06-08): **PARK for the near term**
+
+The Codex audit sharpens P0.1 and overturns the "cheaper near-term win" framing.
+The LES *substrate* is real (`Ext.covariantSequence`, Mayer–Vietoris `sequence_exact`,
+`cechComplexFunctor`) — but the **inputs Forster §§13–21 consume are mostly ABSENT
+from Mathlib**, each months-scale to build to upstream grade:
+
+| Item | Audit verdict | Gap |
+|---|---|---|
+| Holomorphic sheaves `O`, `Ω¹` | **TODO in Mathlib** (`Geometry/Manifold/Complex.lean`) — only *smooth* sheaves exist (`smoothSheafCommRing`) | build `O`/`Ω¹` as sheaves: **weeks** |
+| Dolbeault `∂̄`-Poincaré | **ABSENT** | local solvability + Dolbeault thm: **months** |
+| Manifold differential forms + integration | **TODO** (`DifferentialForm.Basic`, `PartitionOfUnity`) — flat-space `extDeriv` only | manifold forms/∫: **months** |
+| Hodge ⋆ / harmonic forms / `∫ω∧⋆ω̄` | **ABSENT** | depends on forms+Dolbeault: **months** |
+| Integral Poincaré duality / unimodularity | **PARTIAL** — singular homology exists, but no cup product / fundamental class / `unimodular ℤ-form ⇒ symplectic basis` | **months** (topology); ℤ-symplectic algebra weeks *after* unimodularity |
+| Residue surface-Stokes | **PARTIAL** — flat box-divergence + circle/Cauchy strong; global compact-surface Stokes blocked on manifold forms | weeks–months |
+
+**Bottom line (audit, verbatim sense):** *"Route 1 is not buildable on current
+Mathlib in a weeks-scale discharge."* And — critically — **axiomatizing the gaps
+mostly RELOCATES the debt**: a `DolbeaultPoincare` / `surfaceStokes_residue` /
+`IntegralPoincareDuality_unimodular` / `HodgeDecomposition` axiom set "is not
+materially safer than keeping the period cluster axiomatized" unless we commit to
+retiring them through *upstream-grade infrastructure*.
+
+**Reconciling the two vettings.** Gemini (math level) is right that Route 1 is the
+*cleaner* route and §19's positivity is elementary; Codex (Mathlib level) is right
+that the **infrastructure those steps stand on — manifold forms, holomorphic
+sheaves, Dolbeault, Hodge ⋆, integral PD — does not yet exist in Mathlib**. Both
+routes are gated on building that infrastructure; Route 1 needs *less* of it than
+Route 2 (no 4g-gon, no polygon-Stokes), but it is a **months-to-years upstream
+build, not a near-term axiom collapse.**
+
+**Decision: do NOT pour weeks into Route 1 as a near-term discharge.** Options:
+1. **Keep the period cluster axiomatized** (status quo); pursue independent feasible
+   wins instead — Abel ⊇ (in progress, needs none of this infra), the pure-ℤ
+   symplectic-basis algebra (weeks, once we accept unimodularity as one clean axiom),
+   the adelic RR/Serre track (concrete, residue-pairing-gated).
+2. **Commit to Route 1 as a long-horizon infrastructure program** — build (and ideally
+   upstream) manifold differential forms → holomorphic sheaves → Dolbeault → Hodge.
+   Months-to-years; the payoff is real (retires ~9 + becomes Mathlib infra) but it is
+   not a quick collapse.
+
+**Cheapest decisive next de-risk (if pursuing):** try to *state* (no proofs)
+`0 → ℂ → O → Ω¹ → 0` + the connecting `H⁰(Ω¹) → H¹(ℂ)` on a complex manifold. The
+LES extraction works (`Ext.covariantSequence`); the probe will likely fail at
+*stating `O`/`Ω¹`* — confirming the real gap is the holomorphic-sheaf layer.
 
 ---
 
