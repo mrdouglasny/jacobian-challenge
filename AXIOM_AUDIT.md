@@ -314,9 +314,9 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
-| `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard) |
-| `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard) |
-| `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
+| `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard). **DT-vetted per-axiom 2026-06-09: SATISFIABLE/FAITHFUL** — 4g-gon dissection gives 2g analytic loops at one basepoint; refinement-based analyticity is the correct (post-#82) form; `loops_to_basis` Hurewicz tie is the load-bearing anti-vacuity pin; g=0 empty-basis case sound |
+| `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
+| `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
@@ -340,7 +340,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | Axiom | File:Line | Note |
 |-------|-----------|------|
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
-| `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
+| `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL with a recorded nuance** — the genuine topological form (transported along the canonical basepoint-independent Hurewicz iso) satisfies all companions; opacity is spec-complete for current uses (downstream consumes only the symplectic-basis values + the RBR primitives, and Sp(2g,ℤ) transitivity makes any compliant model equivalent), BUT the *topological anchoring* debt re-surfaces when `AX_RBR1`/`AX_RBR2` are eventually discharged by genuine Stokes — at that point the form must be tied to the actual dissection (record: discharge RBR + intersectionForm jointly). Cosmetic: a `→ₗ[ℤ]` retype would unlock Mathlib bilinear-form API (no soundness content) |
 | `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
 | Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08, and **per-axiom for satisfiability/faithfulness 2026-06-09 (`DT`, verdict SATISFIABLE/FAITHFUL, rating Likely correct — see the Layer-3 vetting note above)**; references Forster §§16–17. Vetted (DT+CX); not yet discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
