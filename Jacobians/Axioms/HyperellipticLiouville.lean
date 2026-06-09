@@ -1939,7 +1939,7 @@ theorem AX_HyperellipticOneForm_eq_form
           exact hb_u_ne
         have hContU0 : ContinuousAt (fun w : ℂ => e.symm (w ^ 2)) 0 := by
           have h0sq : (0 : ℂ) ^ 2 ∈ e.target := by
-            simpa [affineChartProjY, e] using hzeroInf
+            simpa [HyperellipticAffine.affineChartProjY, e] using hzeroInf
           have hsymm : ContinuousAt e.symm (0 : ℂ) := by
             simpa using e.continuousAt_symm h0sq
           have hpow : ContinuousAt (fun w : ℂ => w ^ 2) (0 : ℂ) := by
@@ -1983,9 +1983,9 @@ theorem AX_HyperellipticOneForm_eq_form
             have hune : e.symm (w ^ 2) ≠ 0 := by
               intro huw
               have hw2 : w ^ 2 ∈ e.target := by
-                simpa [affineChartProjY, e] using hw
+                simpa [HyperellipticAffine.affineChartProjY, e] using hw
               have hz2 : z ^ 2 ∈ e.target := by
-                simpa [affineChartProjY, e] using hzInf
+                simpa [HyperellipticAffine.affineChartProjY, e] using hzInf
               have hsq : w ^ 2 = z ^ 2 := by
                 calc
                   w ^ 2 = (e : ℂ → ℂ) (e.symm (w ^ 2)) := (e.right_inv hw2).symm
