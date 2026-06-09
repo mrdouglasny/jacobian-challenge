@@ -227,9 +227,11 @@ seven**, concordant. Rating **Likely correct**:
   exactly what a genuine `K` has.
 - `cohomologyLES`: the skyscraper quotient `O(D+P)/O(D)` is **always** exactly
   1-dimensional (even when `P ∈ supp D`), so the `χ`-jump is exactly `+1` with no
-  off-by-one; the **concrete** first map rigidly forces `principalPart` to be the
-  genuine leading-Laurent residue map (codim-1 kernel ⇒ non-zero), so the
-  existential exactness is **non-vacuous**, not satisfiable by degenerate maps.
+  off-by-one; the **concrete** first map pins `ker principalPart = L(D)`
+  (codim ≤ 1), so when `L(D) ⊊ L(D+P)` the functional is forced **nonzero** — the
+  genuine leading-Laurent residue map **up to a nonzero scalar** (not literally
+  fixed, but non-degenerate), so the existential exactness is **non-vacuous**, not
+  satisfiable by the all-zero maps.
 - `h1coh_zero_finrank` (`h¹(O)=g`): correct Hodge symmetry `h^{0,1}=h^{1,0}`;
   **every compact Riemann surface is Kähler** (real-dim 2 ⇒ every 2-form closed),
   so it holds unconditionally with no projectivity gap and no real-vs-ℂ factor
