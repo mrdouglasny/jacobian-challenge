@@ -1,5 +1,6 @@
 import Jacobians.Layer3.EulerChar
-import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
+import Jacobians.RiemannSurface.Cohomology.RiemannRochBase
+import Jacobians.RiemannSurface.Cohomology.LineBundleBasic
 import Mathlib.LinearAlgebra.Dimension.Constructions
 
 /-!

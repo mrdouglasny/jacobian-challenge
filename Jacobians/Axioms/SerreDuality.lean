@@ -18,10 +18,8 @@ where `K = canonicalDivisor X` represents the canonical sheaf `Ω¹_X`.
 * Plus `AX_RiemannRoch`, implies the classical numerical Riemann-Roch
   `dim L(D) - dim L(K - D) = deg D - g + 1`.
 
-## Why axiomatized
-
-Same reason as `AX_RiemannRoch` — sheaf cohomology on complex
-manifolds isn't in Mathlib at this pin.
+This declaration is now a theorem wrapper over the Layer-3 equivalence
+`serreDuality_equiv`, after the API identifies `H1(O(D))` with `H1coh D`.
 
 ## History
 
@@ -51,11 +49,13 @@ divisor `D`, there is a canonical ℂ-linear isomorphism
 where `K := canonicalDivisor X` represents `Ω¹_X`. The isomorphism is
 "perfect pairing" shape, packaged via `Nonempty` of the equivalence
 to emphasize existence rather than a canonical choice. -/
-axiom AX_SerreDuality {X : Type*} [TopologicalSpace X] [T2Space X]
+theorem AX_SerreDuality {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) :
     Nonempty
       (H1 (LineBundle.ofDivisor D) ≃ₗ[ℂ]
-        Module.Dual ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D))))
+        Module.Dual ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D)))) := by
+  simpa [H0, H1] using
+    (Jacobians.Layer3.serreDuality_equiv (X := X) D)
 
 end Jacobians.Axioms
