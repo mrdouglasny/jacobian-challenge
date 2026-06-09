@@ -9,12 +9,12 @@ import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 # Serre duality API in terms of the concrete space `L(D)`
 
 This file states the textbook Serre-duality consequences in dimension form,
-linking the (still opaque) `H1` to the concrete Riemann-Roch space
+linking `H1` (now `Layer3.H1coh`) to the concrete Riemann-Roch space
 `H0 (O(K - D)) = riemannRochSpace (K - D)` of
 `Jacobians.RiemannSurface.Cohomology.RiemannRochSpace`.
 
 The underlying linear isomorphism `H1(O(D)) ≃ₗ[ℂ] (H0(O(K - D)))ᵛ` is the
-axiom `AX_SerreDuality`; here we expose its **usable numerical content**
+theorem wrapper `AX_SerreDuality`; here we expose its **usable numerical content**
 `h1(D) = h0(K - D)` (a finite-dimensional vector space and its dual have equal
 dimension) and the Serre-vanishing corollary `deg D > 2g - 2 ⇒ h1(D) = 0`,
 which is exactly what turns the `h0 - h1` Riemann-Roch identity into the
@@ -23,12 +23,11 @@ effective `h0 = deg D + 1 - g`.
 These are vetted statement anchors. `h1_eq_h0_canonical_sub` (the dimension-form
 duality), Serre vanishing (`h1_eq_zero_of_deg_gt`), and
 `riemannRoch_h0_sub_h1` (the `h0 - h1` identity) are now **real proofs**: the
-first from `AX_SerreDuality` via `LinearEquiv.finrank_eq` +
+first from the Layer-3-backed `AX_SerreDuality` theorem via `LinearEquiv.finrank_eq` +
 `Subspace.dual_finrank_eq`, vanishing from `deg K = 2g - 2` plus the
 negative-degree Riemann-Roch-space theorem, and the last a re-export of
-`AX_RiemannRoch` once the finite-dimensionality instances are threaded through.
-`H1` is deliberately left opaque so Serre duality remains a checkable target
-rather than being baked into a definition.
+the Layer-3-backed `AX_RiemannRoch` theorem once the finite-dimensionality
+instances are threaded through.
 
 References: Forster, *Lectures on Riemann Surfaces*, section 17 (Serre duality);
 Griffiths-Harris, *Principles of Algebraic Geometry*, Ch. 1; Miranda, Ch. VI.
@@ -59,9 +58,9 @@ variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
 /-- `h^1(D)` is the complex dimension of the first sheaf cohomology
-`H^1(X, O(D))`.  `H1` is kept opaque (an honest axiom type); Serre duality
-below identifies this dimension with `h^0(K - D)`, which is the concrete
-`finrank` of `riemannRochSpace (K - D)`. -/
+`H^1(X, O(D))`, now represented by the Layer-3 `H1coh D`. Serre duality below
+identifies this dimension with `h^0(K - D)`, which is the concrete `finrank` of
+`riemannRochSpace (K - D)`. -/
 noncomputable abbrev h1 (D : Divisor X) : ℕ :=
   Module.finrank ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D))
 

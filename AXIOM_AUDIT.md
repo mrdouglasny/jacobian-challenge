@@ -10,7 +10,8 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 41** — all **41** in our own modules. The vendored
+**Active project axioms: 43** — all **43** in our own modules (#126 added 7 Layer-3
+cohomology axioms `(NOT VERIFIED)`; this PR's discharge retires the 5 RR/Serre + opaque-`H1` axioms). The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -118,7 +119,8 @@ fallback `AX_torus_descent_holo` used for E6. The pre-existing
 axiom. Then → **63** by **de-opaquing** `H0` to the concrete
 `riemannRochSpace D` and replacing `H0.instAddCommGroup` / `H0.instModule` with
 instances inherited from the submodule carrier (2026-06-05). `LineBundle` and
-`LineBundle.ofDivisor` remain honest opaque placeholders; `H1` remains opaque.
+`LineBundle.ofDivisor` remain honest opaque placeholders; `H1` has since been
+wired to Layer-3 `H1coh` (2026-06-09).
 **Faithfulness correction (2026-06-06, count unchanged):** `riemannRochSpace` was
 first defined over raw `X → ℂ`, which was *degenerate* — germ-zero "spike"
 functions made it infinite-dimensional (`finrank ≡ 0`). It is now a submodule of
@@ -207,6 +209,13 @@ the affine plane curve admits a finite-exception projection onto `ℂ`; compactn
 of the affine patch would force `ℂ` compact after adjoining finitely many points,
 contradicting `NoncompactSpace ℂ`. `#print axioms` standard-3.
 
+RR/Serre discharge wiring (2026-06-09): `H1` is now definitionally
+`Layer3.H1coh`, with additive/module/finite-dimensional instances inherited from
+Layer 3. `AX_RiemannRoch` and `AX_SerreDuality` are theorem wrappers over
+`Layer3.riemannRochL3` and `Layer3.serreDuality_equiv`; the old opaque `Axioms.H1`
+type and its two instance axioms are retired. The four Layer-3 cohomology axioms
+remain `(NOT VERIFIED)` pending owner review of #126.
+
 ---
 
 ## Triage
@@ -226,11 +235,12 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 15 | classical theorems, citable | high |
-| 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
+| 1 — textbook-standard | 13 | classical theorems, citable | high |
+| 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
+| 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `(NOT VERIFIED)` | research |
 
 ---
 
@@ -241,8 +251,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 
 | Axiom | File:Line | Reference |
 |-------|-----------|-----------|
-| `AX_RiemannRoch` | `Axioms/RiemannRoch.lean:59` | Forster §16; Miranda Ch. VI |
-| `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | Forster §17; Griffiths–Harris Ch. 1 |
 | `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
@@ -276,7 +284,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 |-------|-----------|------|
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
-| `LineBundle`, `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (6) | `RiemannSurface/LineBundle.lean:46–99` | line-bundle / sheaf-cohomology **type stubs**. `H0` is now `riemannRochSpace D` with inherited submodule instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
+| `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
 | Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08; references Forster §§16–17. `(NOT VERIFIED)` until discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
@@ -363,6 +371,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain `(NOT VERIFIED)` and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
 | `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
 | `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_PlaneCurveAffine_nonempty` *(2026-06-07)* | dehomogenize to `affinePolynomial H.F.val`; `affinePolynomial_not_isUnit` plus `exists_eval_eq_zero_of_not_isUnit_mvPolynomial` gives a complex zero in the affine patch | `ProjectiveCurve/PlaneCurve.lean` |
@@ -410,7 +419,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 41 — the vendored Kirov subtree is now axiom-free, so 41 is the total.
+#   prints 43 — the vendored Kirov subtree is now axiom-free, so 43 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -427,7 +436,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 41
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 43
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

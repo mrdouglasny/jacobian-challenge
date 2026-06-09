@@ -1,5 +1,6 @@
 import Jacobians.Layer3.EulerChar
-import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
+import Jacobians.RiemannSurface.Cohomology.RiemannRochBase
+import Jacobians.RiemannSurface.Cohomology.LineBundleBasic
 import Mathlib.LinearAlgebra.Dimension.Constructions
 
 /-!
@@ -296,13 +297,13 @@ theorem canonicalDivisor_deg_L3 :
 
 /-!
 Non-vacuity note. `h0_canonical_L3` (`h⁰(K) = g`) and `canonicalDivisor_deg_L3`
-(`deg K = 2g − 2`) are proved here **purely from the four Layer-3 axioms**
+(`deg K = 2g − 2`) are proved here **purely from the Layer-3 cohomology axioms**
 (not from `AX_RiemannRoch` / `AX_SerreDuality`), which (i) is the discriminating
 faithfulness check a degenerate `H1coh` would fail, and (ii) resolves the
 review caveat that the existing `h0_canonical` rests on the very axioms being
 re-derived. With `riemannRochL3`/`serreDualityL3`, the existing `AX_RiemannRoch`/
-`AX_SerreDuality` become derivable once a follow-up wires `H1coh` to the existing
-`h1`; the `SheafCohomologySpec` §3 `h⁰(O(np)) = n + 1` test follows from this
+`AX_SerreDuality` are theorem wrappers after wiring the public `H1` API to
+`H1coh`; the `SheafCohomologySpec` §3 `h⁰(O(np)) = n + 1` test follows from this
 package plus genus-zero facts.
 -/
 
