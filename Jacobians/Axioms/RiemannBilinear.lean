@@ -20,16 +20,16 @@ relations**.
 * Period map injectivity follows (retired `AX_PeriodInjective` was
   already a consequence of `AX_PeriodLattice`).
 
-## Why axiomatized
+## Now a THEOREM (Layer-3 Phase C)
 
-The proof is classical: integration by parts + Hodge-star positivity on
-a compact Kähler manifold. Writing it requires:
-(a) Actual path integration (multi-chart, homotopy-invariant) — see
-    `PathIntegral.lean`.
-(b) Hodge inner product on `H⁰(Ω¹)`.
-(c) Riemann surface orientability (automatic from complex structure).
-
-Each is a substantial sub-project.
+Proved in `Jacobians/Layer3/Periods.lean` (`riemannBilinear_exists`) from the
+two basis-free primitives `AX_RBR1` (isotropy / Stokes) and `AX_RBR2` (Hodge
+positivity) through the axiom-free matrix engine: `AX_RBR2` makes the
+A-period matrix invertible (normalization), `AX_RBR1` gives `τ = τᵀ`, and
+`AX_RBR1`+`AX_RBR2` give `Im τ ≻ 0` — exactly Siegel membership. The two
+primitives isolate the genuine analytic content (`∫_X ω∧η = 0` and
+`i∫_X ω∧ω̄ > 0` routed through the dual intersection form, avoiding 2-form
+integration); each was statement-vetted before introduction.
 
 ## History
 
@@ -48,6 +48,7 @@ Griffiths-Harris, *Principles of Algebraic Geometry*, Ch. 2 §2.
 import Jacobians.RiemannSurface.Periods
 import Jacobians.Axioms.AnalyticCycleBasis
 import Jacobians.AbelianVariety.Siegel
+import Jacobians.Layer3.Periods
 
 namespace Jacobians.Axioms
 
@@ -55,9 +56,9 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface Jacobians.AbelianVariety
 
-/-- **Axiom (Riemann's bilinear relations).** There exists a symplectic
-`H_1` basis, a normalized `H⁰(Ω¹)` basis, and a Siegel-upper-half-space
-matrix `τ` such that:
+/-- **Riemann's bilinear relations — THEOREM** (Layer-3 Phase C; was an
+axiom). There exists a symplectic `H_1` basis, a normalized `H⁰(Ω¹)` basis,
+and a Siegel-upper-half-space matrix `τ` such that:
 
 1. The A-periods of `ω` against the `α`-cycles of the symplectic basis
    are the identity: `∫_{α_i} ω_j = δ_ij`.
@@ -65,8 +66,9 @@ matrix `τ` such that:
 
 Since `τ ∈ SiegelUpperHalfSpace (genus X)` by the type, it is
 automatically symmetric and has positive-definite imaginary part —
-the content of Riemann's second bilinear relation. -/
-axiom AX_RiemannBilinear {X : Type*} [TopologicalSpace X] [T2Space X]
+the content of Riemann's second bilinear relation. Proof:
+`Layer3.riemannBilinear_exists`, from `AX_RBR1`/`AX_RBR2`. -/
+theorem AX_RiemannBilinear {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) :
     ∃ (b : AnalyticCycleBasis X x₀)
@@ -77,6 +79,7 @@ axiom AX_RiemannBilinear {X : Type*} [TopologicalSpace X] [T2Space X]
         periodMap X x₀ (b.isBasis (αEmbed i)) (cω j) = if i = j then 1 else 0) ∧
       -- τ is the B-period matrix.
       (∀ i j : Fin (genus X),
-        τ.val i j = periodMap X x₀ (b.isBasis (βEmbed i)) (cω j))
+        τ.val i j = periodMap X x₀ (b.isBasis (βEmbed i)) (cω j)) :=
+  Jacobians.Layer3.riemannBilinear_exists x₀
 
 end Jacobians.Axioms
