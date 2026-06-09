@@ -171,6 +171,113 @@ theorem aPeriodMatrix_isUnit {x₀ : X} (b : AnalyticCycleBasis X x₀)
   obtain ⟨v, hv, hvz⟩ := Matrix.exists_mulVec_eq_zero_iff.mpr hdet
   exact hv (aPeriodMatrix_mulVec_eq_zero b cω hvz)
 
+private theorem mulVec_col_eq {g : ℕ} (M N : Matrix (Fin g) (Fin g) ℂ) (j : Fin g) :
+    M *ᵥ (fun k => N k j) = fun i => (M * N) i j := by
+  funext i
+  simp only [Matrix.mulVec, dotProduct, Matrix.mul_apply]
+
+/-- `A · A⁻¹ = 1` for the (invertible) A-period matrix. -/
+theorem aPeriodMatrix_mul_inv {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    aPeriodMatrix b cω * (aPeriodMatrix b cω)⁻¹ = 1 :=
+  Matrix.mul_nonsing_inv _ ((Matrix.isUnit_iff_isUnit_det _).mp (aPeriodMatrix_isUnit b cω))
+
+/-- The normalized period matrix `τ = B · A⁻¹` (B-periods of the A-normalized
+form basis). Symmetric with `Im τ ≻ 0` by the reductions below. -/
+def tauMatrix {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Matrix (Fin (genus X)) (Fin (genus X)) ℂ :=
+  bPeriodMatrix b cω * (aPeriodMatrix b cω)⁻¹
+
+/-- The `j`-th normalized holomorphic differential `ω̂_j = ∑_k (A⁻¹)_{kj} ω_k`,
+chosen so its A-periods are `δ_{·j}`. -/
+def normalizedForm {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (j : Fin (genus X)) : HolomorphicOneForm X :=
+  cω.equivFun.symm (fun k => (aPeriodMatrix b cω)⁻¹ k j)
+
+/-- The normalized differentials realize the engine's `[I | τ]` columns:
+`periodVec b ω̂_j = col τ j`. -/
+theorem periodVec_normalizedForm {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (j : Fin (genus X)) :
+    periodVec b (normalizedForm b cω j) = col (tauMatrix b cω) j := by
+  have hfst : (periodVec b (normalizedForm b cω j)).1 = Pi.single j 1 := by
+    rw [normalizedForm, periodVec_fst_eq_aMulVec, mulVec_col_eq, aPeriodMatrix_mul_inv]
+    funext i
+    simp [Matrix.one_apply, Pi.single_apply, eq_comm]
+  have hsnd : (periodVec b (normalizedForm b cω j)).2 = fun i => tauMatrix b cω i j := by
+    rw [normalizedForm, periodVec_snd_eq_bMulVec, mulVec_col_eq]
+    rfl
+  rw [show col (tauMatrix b cω) j = (Pi.single j (1 : ℂ), fun i => tauMatrix b cω i j) from rfl]
+  exact Prod.ext hfst hsnd
+
+/-- **THM_Tau_Symmetric.** From `AX_RBR1`, the normalized period matrix is
+symmetric. -/
+theorem tauMatrix_isSymm {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    (tauMatrix b cω).IsSymm := by
+  refine tau_symmetric_of_rbr1 (fun i j => ?_)
+  have h := AX_RBR1 b (normalizedForm b cω i) (normalizedForm b cω j)
+  rwa [periodVec_normalizedForm, periodVec_normalizedForm] at h
+
+theorem conjPeriodVec_eq {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (η : HolomorphicOneForm X) :
+    conjPeriodVec b η = (star (periodVec b η).1, star (periodVec b η).2) :=
+  rfl
+
+/-- The A-normalized combination `∑_j c_j ω̂_j = ∑ (A⁻¹ *ᵥ c)_k ω_k`. -/
+def normalizedCombo {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (c : Fin (genus X) → ℂ) : HolomorphicOneForm X :=
+  cω.equivFun.symm ((aPeriodMatrix b cω)⁻¹ *ᵥ c)
+
+/-- The period vector of `∑ c_j ω̂_j` is the engine's `omegaCol τ c = (c, τ *ᵥ c)`. -/
+theorem periodVec_normalizedCombo {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (c : Fin (genus X) → ℂ) :
+    periodVec b (normalizedCombo b cω c) = omegaCol (tauMatrix b cω) c := by
+  have hfst : (periodVec b (normalizedCombo b cω c)).1 = c := by
+    rw [normalizedCombo, periodVec_fst_eq_aMulVec, Matrix.mulVec_mulVec,
+      aPeriodMatrix_mul_inv, Matrix.one_mulVec]
+  have hsnd : (periodVec b (normalizedCombo b cω c)).2 = tauMatrix b cω *ᵥ c := by
+    rw [normalizedCombo, periodVec_snd_eq_bMulVec, Matrix.mulVec_mulVec]
+    rfl
+  rw [show omegaCol (tauMatrix b cω) c = (c, tauMatrix b cω *ᵥ c) from rfl]
+  exact Prod.ext hfst hsnd
+
+/-- The conjugate period vector of `∑ c_j ω̂_j` is the engine's `conjCol τ c`. -/
+theorem conjPeriodVec_normalizedCombo {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (c : Fin (genus X) → ℂ) :
+    conjPeriodVec b (normalizedCombo b cω c) = conjCol (tauMatrix b cω) c := by
+  rw [conjPeriodVec_eq, periodVec_normalizedCombo]
+  rfl
+
+/-- A nonzero coefficient vector gives a nonzero normalized form (`A⁻¹` is
+injective). -/
+theorem normalizedCombo_ne_zero {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    {c : Fin (genus X) → ℂ} (hc : c ≠ 0) : normalizedCombo b cω c ≠ 0 := by
+  rw [normalizedCombo, Ne, LinearEquiv.map_eq_zero_iff]
+  intro h0
+  refine hc ?_
+  have h1 : aPeriodMatrix b cω *ᵥ ((aPeriodMatrix b cω)⁻¹ *ᵥ c) = c := by
+    rw [Matrix.mulVec_mulVec, aPeriodMatrix_mul_inv, Matrix.one_mulVec]
+  rw [h0, Matrix.mulVec_zero] at h1
+  exact h1.symm
+
+/-- **THM_Tau_PosDef.** From `AX_RBR1` + `AX_RBR2`, the imaginary part of the
+normalized period matrix is positive definite. -/
+theorem tauMatrix_posDef {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    ((tauMatrix b cω).map Complex.im).PosDef := by
+  refine tau_posDef_of_rbr2 (fun i j => ?_) (fun c hc => ?_)
+  · have h := AX_RBR1 b (normalizedForm b cω i) (normalizedForm b cω j)
+    rwa [periodVec_normalizedForm, periodVec_normalizedForm] at h
+  · have h := AX_RBR2 b (normalizedCombo b cω c) (normalizedCombo_ne_zero b cω hc)
+    rwa [periodVec_normalizedCombo, conjPeriodVec_normalizedCombo] at h
+
 end
 
 end Jacobians.Layer3
