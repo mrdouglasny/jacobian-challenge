@@ -215,11 +215,12 @@ Layer 3. `AX_RiemannRoch` and `AX_SerreDuality` are theorem wrappers over
 `Layer3.riemannRochL3` and `Layer3.serreDuality_equiv`; the old opaque `Axioms.H1`
 type and its two instance axioms are retired.
 
-**Layer-3 axiom vetting (2026-06-09, source `DT`).** The **seven** Layer-3
+**Layer-3 axiom vetting (2026-06-09, sources `DT`, `CX`).** The **seven** Layer-3
 cohomology axioms (`H1coh` + 3 instances + `cohomologyLES` + `h1coh_zero_finrank`
-+ `serreDuality_equiv`) were satisfiability/faithfulness-vetted by Gemini
-deep-think, **one focused query per load-bearing axiom**. Verdict
-**SATISFIABLE / FAITHFUL** for each, rating **Likely correct**:
++ `serreDuality_equiv`) were satisfiability/faithfulness-vetted by **Gemini
+deep-think** (`DT`, one focused query per load-bearing axiom) **and independently
+by Codex** (`CX`, per-axiom). **Both reached SATISFIABLE / FAITHFUL for all
+seven**, concordant. Rating **Likely correct**:
 - *Joint model.* The genuine sheaf cohomology `H¹(X,O(D))` plus the genuine
   canonical divisor `K = (η)` is a model satisfying all seven simultaneously, so
   the conjunction is consistent; the forced `deg K = 2g−2` and `ℓ(K) = g` are
@@ -249,6 +250,18 @@ witnessed in-tree: `h0_canonical_L3` proves `ℓ(K)=g`, which a degenerate
 `H1coh ≡ 0` would force to `0`, contradicting `genus(Elliptic)=1`. The axioms
 stay `(NOT VERIFIED)` in-code (= not yet discharged to Lean proofs) but are no
 longer review-pending.
+
+*Codex caveats (both by-design, not soundness issues):* (i) the LES skyscraper
+term is `ULift ℂ`, not literal `ℂ` — intentional universe-lift so all six terms
+share universe `u`; `ULift ℂ ≅ ℂ` as ℂ-spaces and `skyscraperFiber_finrank`
+proves `finrank = 1`, so the `χ`-jump-by-1 is intact. (ii) `serreDuality_equiv`
+asserts `Nonempty (≃ₗ)`, i.e. the dimension-level perfect-pairing existence, not
+the natural Serre pairing — deliberate, and exactly what the dimension-form
+theorems consume. *Prior art (`CX`):* Mathlib has **general** sheaf-cohomology
+infra (`Sheaf.H` via `Ext`, Čech, a Mayer–Vietoris LES, skyscraper sheaves) and a
+meromorphic-divisor API, but **no importable Riemann–Roch/Serre-for-curves** —
+the eventual Lean discharge builds on the general infra, not a finished theorem
+(consistent with the `Sheaf.H` finiteness wall noted in the Phase-B design).
 
 ---
 
