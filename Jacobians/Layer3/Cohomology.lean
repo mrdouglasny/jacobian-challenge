@@ -25,7 +25,7 @@ universe u
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
-/-- **Layer-3 axiom (NOT VERIFIED).** The opaque first cohomology vector space
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The opaque first cohomology vector space
 `H¹(X, O(D))` attached to the concrete divisor sheaf `O(D)`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. This is the real
@@ -33,21 +33,21 @@ sheaf cohomology group `H¹(X, O(D))`; only its vector-space structure and
 finite-dimensionality are exposed at Layer 3. -/
 axiom H1coh (D : Divisor X) : Type u
 
-/-- **Layer-3 axiom (NOT VERIFIED).** Additive group structure on
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Additive group structure on
 `H¹(X, O(D))`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
 axiom H1coh.instAddCommGroup (D : Divisor X) : AddCommGroup (H1coh D)
 attribute [instance] H1coh.instAddCommGroup
 
-/-- **Layer-3 axiom (NOT VERIFIED).** Complex vector-space structure on
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Complex vector-space structure on
 `H¹(X, O(D))`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
 axiom H1coh.instModule (D : Divisor X) : Module ℂ (H1coh D)
 attribute [instance] H1coh.instModule
 
-/-- **Layer-3 axiom (NOT VERIFIED).** Serre finiteness for the first cohomology
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Serre finiteness for the first cohomology
 of `O(D)`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
@@ -111,7 +111,7 @@ structure CohomologyLESData (D : Divisor X) (P : X) where
       (0 : H1coh (D + FreeAbelianGroup.of P) →ₗ[ℂ] ZeroCoh.{u})
       (0 : ZeroCoh.{u} →ₗ[ℂ] ZeroCoh.{u})
 
-/-- **Layer-3 axiom (NOT VERIFIED).** The divisor-addition long exact
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The divisor-addition long exact
 cohomology sequence
 
 `0 -> L(D) -> L(D+P) -> ℂ_P -> H¹(X,O(D)) -> H¹(X,O(D+P)) -> 0`,
@@ -123,14 +123,14 @@ standard long exact sequence obtained from
 `0 -> O(D) -> O(D+P) -> ℂ_P -> 0`. -/
 axiom cohomologyLES (D : Divisor X) (P : X) : CohomologyLESData D P
 
-/-- **Layer-3 axiom (NOT VERIFIED).** The base first-cohomology dimension:
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The base first-cohomology dimension:
 `h¹(O_X) = genus(X)`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
 axiom h1coh_zero_finrank :
     Module.finrank ℂ (H1coh (0 : Divisor X)) = genus X
 
-/-- **Layer-3 axiom (NOT VERIFIED).** Serre duality as a perfect pairing,
+/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Serre duality as a perfect pairing,
 packaged as a linear equivalence with the dual of `L(K-D)`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §17. -/
