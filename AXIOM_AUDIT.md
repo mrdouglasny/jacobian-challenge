@@ -10,7 +10,10 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 43** — all **43** in our own modules (#126 added 7 Layer-3
+**Active project axioms: 42** — all **42** in our own modules (Layer-3 Phase C
+discharged the period cluster: `AX_RiemannBilinear`, `AX_PeriodLattice`,
+`instPeriodLatticeDiscrete` are now **theorems** over the 2 statement-vetted
+basis-free primitives `AX_RBR1`/`AX_RBR2`, net −1; #126 added 7 Layer-3
 cohomology axioms, now DT+CX-vetted SATISFIABLE/FAITHFUL; the #131 discharge retired the 5 RR/Serre + opaque-`H1` axioms). The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
@@ -285,12 +288,13 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 13 | classical theorems, citable | high |
+| 1 — textbook-standard | 10 | classical theorems, citable | high |
 | 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `DT`+`CX`-vetted SATISFIABLE/FAITHFUL 2026-06-09, **Likely correct**; vetted but not yet discharged | research |
+| 3 — Layer-3 period primitives (Phase C) | 2 | `Layer3.AX_RBR1` (isotropy/Stokes) + `Layer3.AX_RBR2` (Hodge positivity) — statement-vetted (`DT`, per-axiom, sign verified on the torus) **before** introduction; discharge `AX_RiemannBilinear`/`AX_PeriodLattice`/`instPeriodLatticeDiscrete` | research |
 
 ---
 
@@ -301,15 +305,12 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 
 | Axiom | File:Line | Reference |
 |-------|-----------|-----------|
-| `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
 | `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard) |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard) |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity |
-| `AX_PeriodLattice` | `Axioms/PeriodLattice.lean:92` | period lattice is a full ℤ-lattice |
-| `instPeriodLatticeDiscrete` | `Axioms/PeriodLattice.lean:77` | discreteness of the period lattice |
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
@@ -421,6 +422,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I·τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
 | `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
 | `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
 | `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
@@ -469,7 +471,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 43 — the vendored Kirov subtree is now axiom-free, so 43 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1).
+#   prints 42 — the vendored Kirov subtree is now axiom-free, so 42 is the total (incl. 7+2 Layer-3 axioms, less the 5 discharged RR/Serre+H1 and the 3 discharged period-cluster axioms).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -486,7 +488,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 43
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 42
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

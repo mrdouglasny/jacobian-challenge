@@ -1,43 +1,32 @@
-/- 
+/-
 `AX_PeriodLattice`: the period image in basis coordinates is a full
-`ℤ`-lattice in `ℂ^g`.
+`ℤ`-lattice in `ℂ^g`. **Now a THEOREM** (Layer-3 Phase C), together with its
+discreteness companion — both proved in `Jacobians/Layer3/Periods.lean` from
+the basis-free Riemann-bilinear primitives `AX_RBR1`/`AX_RBR2` through the
+axiom-free period-lattice engine. The names and `instance` attributes are
+kept so all downstream consumers (the Jacobian bridge) are untouched.
 
 ## Construction-level setup
 
-`periodMap X x₀` currently lands in `(HolomorphicOneForm X →ₗ[ℂ] ℂ)`. The
-Jacobian bridge in `Jacobians/Jacobian/Construction.lean` needs a lattice
-inside the concrete ambient `Fin (genus X) → ℂ`, because
-`ComplexTorus.lean` is already built over explicit finite-dimensional
-normed complex vector spaces.
+`periodMap X x₀` lands in `(HolomorphicOneForm X →ₗ[ℂ] ℂ)`. The Jacobian
+bridge in `Jacobians/Jacobian/Construction.lean` needs a lattice inside the
+concrete ambient `Fin (genus X) → ℂ`, so `Axioms/PeriodLatticeBase.lean`
+fixes a basis `b` and transports the period map into coordinates
+(`periodMapInBasis`); its range `periodLatticeInBasis X x₀ b` is the lattice
+used by the bridge construction.
 
-So this file fixes a basis
+## Proof route (Layer-3 Phase C)
 
-* `b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)`
-
-and transports the period map into coordinates:
-
-* `periodMapInBasis X x₀ b : H1 X x₀ →ₗ[ℤ] (Fin (genus X) → ℂ)`.
-
-Its range `periodLatticeInBasis X x₀ b` is the lattice used by the
-bridge construction.
-
-## Why axiomatized
-
-The classical theorem is that the period image is discrete of full real
-rank. Equivalently, in any holomorphic-one-form basis it is a full
-`ℤ`-lattice in `ℂ^g`. This follows from the Riemann bilinear relations;
-see Mumford, *Tata Lectures on Theta I*, Ch. II §2, and Griffiths-Harris,
-Ch. 2 §2.
-
-At the current project stage the actual proof depends on path integrals,
-the intersection form, and the positive-definiteness statement packaged in
-`AX_RiemannBilinear`, so we expose the lattice property here as a named
-axiom for the Jacobian bridge.\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
-
-Both axioms below are **NOT VERIFIED** and should be retired once the
-Riemann-bilinear infrastructure lands.
+Mumford, *Tata Lectures on Theta I*, Ch. II §2; Griffiths-Harris, Ch. 2 §2.
+For the A-normalized form basis the lattice is exactly the `[I | τ]` column
+lattice of the engine (`periodLatticeInBasis_normalized_eq`, using `τ = τᵀ`
+for the row/column bridge), where `Im τ ≻ 0` comes from `AX_RBR2`; an
+arbitrary basis is reached by `ZLattice.comap` along the dual-coordinate
+change. Remaining trust: `AX_RBR1`/`AX_RBR2` (vetted), the symplectic cycle
+basis, and the intersection form.
 -/
 import Jacobians.Axioms.PeriodLatticeBase
+import Jacobians.Layer3.Periods
 
 namespace Jacobians.Axioms
 
@@ -45,33 +34,30 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-/-- **Axiom (NOT VERIFIED).** In basis coordinates, the period image carries
-the discrete topology.
-
-This is one half of the data required by Mathlib's `IsZLattice`-based
-`ComplexTorus` API. It should eventually be derived from
-`AX_RiemannBilinear`, since a full lattice in a finite-dimensional real
-vector space is automatically discrete. -/
-axiom instPeriodLatticeDiscrete (X : Type*) [TopologicalSpace X] [T2Space X]
+/-- In basis coordinates, the period image carries the discrete topology.
+**Discharged to a theorem** (Layer-3 Phase C): proved in
+`Layer3/Periods.lean` from `AX_RBR2` (positivity ⇒ `Im τ ≻ 0` ⇒ the engine's
+discrete `[I | τ]` lattice) and the dual-coordinate-change transport. -/
+theorem instPeriodLatticeDiscrete (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
-    DiscreteTopology (periodLatticeInBasis X x₀ b)
+    DiscreteTopology (periodLatticeInBasis X x₀ b) :=
+  Jacobians.Layer3.periodLatticeInBasis_discrete x₀ b
 
 attribute [instance] instPeriodLatticeDiscrete
 
-/-- **Axiom (NOT VERIFIED).** In basis coordinates, the image of the period
-map is a full `ℤ`-lattice in `Fin (genus X) → ℂ`.
-
-Mathematical source: the classical period-lattice theorem, equivalently the
-combination of Riemann's bilinear relations with the rank computation
-`rank H₁(X, ℤ) = 2g`. This is the exact hypothesis needed to feed the
-period image into `AbelianVariety.ComplexTorus`. -/
-axiom AX_PeriodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
+/-- In basis coordinates, the image of the period map is a full `ℤ`-lattice
+in `Fin (genus X) → ℂ`. **Discharged to a theorem** (Layer-3 Phase C): proved
+in `Layer3/Periods.lean` from `AX_RBR1` + `AX_RBR2` through the axiom-free
+period-lattice engine (`Im τ ≻ 0` ⇒ full `IsZLattice`), transported to every
+form basis. -/
+theorem AX_PeriodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
-    IsZLattice ℝ (periodLatticeInBasis X x₀ b)
+    IsZLattice ℝ (periodLatticeInBasis X x₀ b) :=
+  Jacobians.Layer3.periodLatticeInBasis_isZLattice x₀ b
 
 attribute [instance] AX_PeriodLattice
 

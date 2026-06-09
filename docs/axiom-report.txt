@@ -44,18 +44,18 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
  Axioms.AX_ofCurve_contMDiff,
- Axioms.instPeriodLatticeDiscrete,
- Axioms.intersectionForm]
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.instPeriodLatticeDiscrete,
- Axioms.intersectionForm]
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
 'Jacobian.pushforward_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
@@ -72,11 +72,11 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_PeriodLattice,
  Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.instPeriodLatticeDiscrete,
  Axioms.intersectionForm,
- Axioms.pushforwardOneForm]
+ Axioms.pushforwardOneForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
 'Jacobian.pullback_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
