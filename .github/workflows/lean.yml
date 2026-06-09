@@ -98,6 +98,18 @@ jobs:
           [ "$fail" -eq 0 ] && echo "✓ every \`sorry\`-bearing file is an allowlisted scaffold; core is sorry-free." >> "$GITHUB_STEP_SUMMARY"
           exit $fail
 
+      - name: Sorry count (informational — maintainer reconciles at merge)
+        if: always()
+        run: |
+          # Non-blocking companion to the file-level guard above, which proves the
+          # core is sorry-free but (by its own note) asserts no total. This prints
+          # the kernel-style REAL sorry count (Lean comments — incl. docstring
+          # `:= by sorry` examples — stripped, so prose doesn't inflate it) and
+          # flags any drift vs the README "At a glance" total to the run summary,
+          # so the maintainer reconciles at merge. Never fails the build.
+          bash scripts/check_sorry_consistency.sh >> "$GITHUB_STEP_SUMMARY" 2>&1 || \
+            echo "::notice::sorry-count docs differ from the real count — informational only; reconciled by the maintainer at merge."
+
       - name: Axiom count (informational — maintainer reconciles at merge)
         if: always()
         run: |
