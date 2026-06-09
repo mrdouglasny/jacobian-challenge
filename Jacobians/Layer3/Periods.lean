@@ -436,6 +436,94 @@ theorem periodLatticeInBasis_normalized_eq {x₀ : X} (cb : AnalyticCycleBasis X
     funext (periodBasis_apply _ _)
   rw [periodLattice, hb]
 
+/-- Transport `DiscreteTopology` along an equality of submodules. -/
+private theorem discrete_of_eq {E : Type*} [NormedAddCommGroup E]
+    {L₁ L₂ : Submodule ℤ E} (h : L₁ = L₂) [DiscreteTopology L₁] :
+    DiscreteTopology L₂ := by
+  subst h; infer_instance
+
+/-- Transport `IsZLattice` along an equality of submodules. -/
+private theorem isZLattice_of_eq {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] {L₁ L₂ : Submodule ℤ E} (h : L₁ = L₂)
+    [DiscreteTopology L₁] [DiscreteTopology L₂] [hZ : IsZLattice ℝ L₁] :
+    IsZLattice ℝ L₂ := by
+  subst h; exact hZ
+
+/-- Dual-coordinate change between two form bases: the `ℂ`-linear automorphism
+of `ℂ^g` sending the `b₁`-coordinates of a functional to its `b₂`-coordinates. -/
+noncomputable def dualCoordChange
+    (b₁ b₂ : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    (Fin (genus X) → ℂ) ≃ₗ[ℂ] (Fin (genus X) → ℂ) :=
+  b₁.dualBasis.equivFun.symm ≪≫ₗ b₂.dualBasis.equivFun
+
+theorem periodMapInBasis_comp (x₀ : X)
+    (b₁ b₂ : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (γ : H1 X x₀) :
+    periodMapInBasis X x₀ b₂ γ
+      = dualCoordChange b₁ b₂ (periodMapInBasis X x₀ b₁ γ) := by
+  simp [periodMapInBasis, dualCoordChange]
+
+/-- The inverse dual-coordinate change (`b₂`-coordinates back to
+`b₁`-coordinates) as a continuous `ℝ`-linear equivalence, in the exact shape
+consumed by Mathlib's `ZLattice.comap` instances. -/
+noncomputable def dualCoordChangeCLE
+    (b₁ b₂ : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    (Fin (genus X) → ℂ) ≃L[ℝ] (Fin (genus X) → ℂ) :=
+  ((dualCoordChange b₁ b₂).symm.restrictScalars ℝ).toContinuousLinearEquiv
+
+/-- The `b₂`-coordinate lattice is the pullback of the `b₁`-coordinate lattice
+along the dual-coordinate change. -/
+theorem periodLatticeInBasis_eq_comap (x₀ : X)
+    (b₁ b₂ : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    periodLatticeInBasis X x₀ b₂
+      = ZLattice.comap ℝ (periodLatticeInBasis X x₀ b₁)
+          (dualCoordChangeCLE b₁ b₂).toLinearMap := by
+  ext v
+  have hcoe : ∀ w, (dualCoordChangeCLE b₁ b₂) w = (dualCoordChange b₁ b₂).symm w :=
+    fun w => rfl
+  constructor
+  · rintro ⟨γ, rfl⟩
+    refine ⟨γ, ?_⟩
+    rw [periodMapInBasis_comp x₀ b₁ b₂ γ]
+    show periodMapInBasis X x₀ b₁ γ
+      = (dualCoordChangeCLE b₁ b₂) (dualCoordChange b₁ b₂ (periodMapInBasis X x₀ b₁ γ))
+    rw [hcoe, LinearEquiv.symm_apply_apply]
+  · rintro ⟨γ, hγ⟩
+    refine ⟨γ, ?_⟩
+    rw [periodMapInBasis_comp x₀ b₁ b₂ γ, hγ]
+    show (dualCoordChange b₁ b₂) ((dualCoordChange b₁ b₂).symm v) = v
+    exact LinearEquiv.apply_symm_apply _ v
+
+/-- **DISCHARGE (for `instPeriodLatticeDiscrete`).** The coordinate period
+lattice is discrete for every basis of holomorphic 1-forms. -/
+theorem periodLatticeInBasis_discrete (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    DiscreteTopology (periodLatticeInBasis X x₀ b) := by
+  obtain ⟨cb⟩ := AX_AnalyticCycleBasis x₀
+  set b₁ := normalizedBasis cb (Module.finBasis ℂ (HolomorphicOneForm X)) with hb₁
+  haveI h₁ : DiscreteTopology (periodLatticeInBasis X x₀ b₁) :=
+    discrete_of_eq
+      (periodLatticeInBasis_normalized_eq cb (Module.finBasis ℂ (HolomorphicOneForm X))).symm
+  exact discrete_of_eq (periodLatticeInBasis_eq_comap x₀ b₁ b).symm
+
+/-- **DISCHARGE (for `AX_PeriodLattice`).** The coordinate period lattice is a
+full `ℤ`-lattice in `ℂ^g` for every basis of holomorphic 1-forms. -/
+theorem periodLatticeInBasis_isZLattice (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    letI := periodLatticeInBasis_discrete x₀ b
+    IsZLattice ℝ (periodLatticeInBasis X x₀ b) := by
+  obtain ⟨cb⟩ := AX_AnalyticCycleBasis x₀
+  set b₁ := normalizedBasis cb (Module.finBasis ℂ (HolomorphicOneForm X)) with hb₁
+  haveI h₁d : DiscreteTopology (periodLatticeInBasis X x₀ b₁) :=
+    discrete_of_eq
+      (periodLatticeInBasis_normalized_eq cb (Module.finBasis ℂ (HolomorphicOneForm X))).symm
+  haveI h₁z : IsZLattice ℝ (periodLatticeInBasis X x₀ b₁) :=
+    isZLattice_of_eq
+      (periodLatticeInBasis_normalized_eq cb (Module.finBasis ℂ (HolomorphicOneForm X))).symm
+  haveI hbd : DiscreteTopology (periodLatticeInBasis X x₀ b) :=
+    periodLatticeInBasis_discrete x₀ b
+  exact isZLattice_of_eq (periodLatticeInBasis_eq_comap x₀ b₁ b).symm
+
 end
 
 end Jacobians.Layer3
