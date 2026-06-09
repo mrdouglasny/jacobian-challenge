@@ -213,8 +213,42 @@ RR/Serre discharge wiring (2026-06-09): `H1` is now definitionally
 `Layer3.H1coh`, with additive/module/finite-dimensional instances inherited from
 Layer 3. `AX_RiemannRoch` and `AX_SerreDuality` are theorem wrappers over
 `Layer3.riemannRochL3` and `Layer3.serreDuality_equiv`; the old opaque `Axioms.H1`
-type and its two instance axioms are retired. The four Layer-3 cohomology axioms
-remain `(NOT VERIFIED)` pending owner review of #126.
+type and its two instance axioms are retired.
+
+**Layer-3 axiom vetting (2026-06-09, source `DT`).** The **seven** Layer-3
+cohomology axioms (`H1coh` + 3 instances + `cohomologyLES` + `h1coh_zero_finrank`
++ `serreDuality_equiv`) were satisfiability/faithfulness-vetted by Gemini
+deep-think, **one focused query per load-bearing axiom**. Verdict
+**SATISFIABLE / FAITHFUL** for each, rating **Likely correct**:
+- *Joint model.* The genuine sheaf cohomology `H¹(X,O(D))` plus the genuine
+  canonical divisor `K = (η)` is a model satisfying all seven simultaneously, so
+  the conjunction is consistent; the forced `deg K = 2g−2` and `ℓ(K) = g` are
+  exactly what a genuine `K` has.
+- `cohomologyLES`: the skyscraper quotient `O(D+P)/O(D)` is **always** exactly
+  1-dimensional (even when `P ∈ supp D`), so the `χ`-jump is exactly `+1` with no
+  off-by-one; the **concrete** first map rigidly forces `principalPart` to be the
+  genuine leading-Laurent residue map (codim-1 kernel ⇒ non-zero), so the
+  existential exactness is **non-vacuous**, not satisfiable by degenerate maps.
+- `h1coh_zero_finrank` (`h¹(O)=g`): correct Hodge symmetry `h^{0,1}=h^{1,0}`;
+  **every compact Riemann surface is Kähler** (real-dim 2 ⇒ every 2-form closed),
+  so it holds unconditionally with no projectivity gap and no real-vs-ℂ factor
+  error (`finrank ℂ`).
+- `serreDuality_equiv`: the Serre pairing is genuinely **ℂ-bilinear** (residue /
+  wedge form), not conjugate-linear, so the ℂ-linear `≃ₗ[ℂ]` to `Module.Dual` is
+  the correct dimension-level form; `Nonempty (≃ₗ[ℂ])` reduces to dimension
+  equality `h¹(D)=ℓ(K−D)`, and the opaque `K` is consistent (genuine `K`
+  satisfies the whole family at `D` and `K−D`).
+- `H1coh` + 3 instances: trivially satisfiable structural axioms (any finite-dim
+  `ℂ`-space, e.g. `ℂⁿ`, is a witness).
+
+A Gemini "Lean typing" sub-remark on `cohomologyLES` (claiming `Function.Exact`
+"doesn't exist") was a hallucination from the English prose — `Function.Exact :
+(M→N)→(N→P)→[Zero P]→Prop` is genuine Mathlib API, the file uses it with
+zero-map padding at the ends, and it compiles on `main`. Non-vacuity is also
+witnessed in-tree: `h0_canonical_L3` proves `ℓ(K)=g`, which a degenerate
+`H1coh ≡ 0` would force to `0`, contradicting `genus(Elliptic)=1`. The axioms
+stay `(NOT VERIFIED)` in-code (= not yet discharged to Lean proofs) but are no
+longer review-pending.
 
 ---
 
@@ -240,7 +274,7 @@ Per the review plan, axioms are split into two classes:
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
-| 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `(NOT VERIFIED)` | research |
+| 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `DT`-vetted SATISFIABLE/FAITHFUL 2026-06-09, **Likely correct**; `(NOT VERIFIED)` = not yet discharged | research |
 
 ---
 
@@ -285,7 +319,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
-| Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08; references Forster §§16–17. `(NOT VERIFIED)` until discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
+| Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08, and **per-axiom for satisfiability/faithfulness 2026-06-09 (`DT`, verdict SATISFIABLE/FAITHFUL, rating Likely correct — see the Layer-3 vetting note above)**; references Forster §§16–17. `(NOT VERIFIED)` until discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
 
