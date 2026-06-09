@@ -78,13 +78,21 @@ jobs:
           Jacobians/RiemannSurface/Cohomology/RiemannRochAPI.lean
           Jacobians/RiemannSurface/Cohomology/SerreDualityAPI.lean
           Jacobians/RiemannSurface/Cohomology/RiemannRochAnchor.lean"
-          pat='(:=|[[:space:]]by|=>|;|<;>)[[:space:]]*sorry\b|^[[:space:]]*sorry[[:space:]]*$'
           allow_clean="$(echo "$allow" | sed 's/^[[:space:]]*//')"
           fail=0
           echo "### Sorry guard (file-level: core must stay sorry-free)" >> "$GITHUB_STEP_SUMMARY"
-          # File-level only — exact on *which* files carry a sorry. Per-declaration
-          # counts (authoritative) live in the README; a cheap grep over-counts
-          # proof-sketch lines, so we don't assert a total here.
+          # File-level only — exact on *which* files carry a sorry. The robust
+          # file list (Lean comments stripped, broad `\bsorry\b` so term-mode
+          # `exact sorry`/`refine sorry`/`simpa using sorry` are caught, prose and
+          # `sorryAx` are not) comes from scripts/check_sorry_consistency.sh.
+          # Per-declaration counts live in the README; the informational step
+          # below verifies the total against the real count.
+          # Capture the list first so a detector failure FAILS the gate (a process
+          # substitution would yield empty and let the gate pass silently).
+          if ! sorry_list="$(bash scripts/check_sorry_consistency.sh --list-files)"; then
+            echo "::error::sorry detector (scripts/check_sorry_consistency.sh) failed to run"
+            exit 1
+          fi
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             if grep -qxF "$f" <<< "$allow_clean"; then
@@ -94,7 +102,7 @@ jobs:
               echo "- ❌ \`$f\` — NOT allowed (sorry escaped the scaffolds)" >> "$GITHUB_STEP_SUMMARY"
               fail=1
             fi
-          done < <(grep -rIlE "$pat" Jacobians --include='*.lean' | grep -v /Vendor/ | sort)
+          done < <(printf '%s\n' "$sorry_list" | sort)
           [ "$fail" -eq 0 ] && echo "✓ every \`sorry\`-bearing file is an allowlisted scaffold; core is sorry-free." >> "$GITHUB_STEP_SUMMARY"
           exit $fail
 
