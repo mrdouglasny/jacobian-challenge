@@ -31,6 +31,7 @@ import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 import Jacobians.RiemannSurface.Cohomology.SerreDualityAPI
 import Jacobians.RiemannSurface.PluckerAPI
 import Jacobians.RiemannSurface.MeromorphicToP1
+import Jacobians.RiemannSurface.Abel.FiberDivisor
 import Jacobians.RiemannSurface.DegreeOneGenusZero
 import Jacobians.RiemannSurface.MultiChartIntegral
 import Jacobians.RiemannSurface.IntegrandIndependence
