@@ -3,6 +3,7 @@ import Jacobians.UniversalProperty
 import Jacobians.AbelianVariety
 import Jacobians.Axioms
 import Jacobians.Jacobian
+import Jacobians.Layer3
 import Jacobians.ProjectiveCurve
 import Jacobians.RiemannSurface
 import Jacobians.Vendor
