@@ -82,3 +82,47 @@ pending a Mathlib-grade build, not proved from Mathlib." Same honesty bar as Lay
 
 *Vetting: this layering proposed by the owner 2026-06-08 after the Gemini (math) +
 Codex (Mathlib) Route-1 vettings. Each L3 primitive re-vetted before reliance.*
+
+---
+
+## SCOPE VERDICT (2026-06-08, both probes complete): **GREEN — viable, ~2–3 months, gated on sheaf-model faithfulness**
+
+**Probe 1 (linear-algebra reductions): GREEN.** `exists_symplectic_basis` (field
+Darboux) landed sorry-free, axiom-free (`784c1c7`, branch `layer3-symplectic-basis`).
+The ℤ lift (for `AX_AnalyticCycleBasis` on `H₁(X;ℤ)`) needs **one** Mathlib-grade
+integral-lattice-splitting lemma (`unimodular alternating ℤ-form splits off a
+hyperbolic plane`: `M = span{v,w} ⊕ ᗮ`, complement finite-free + restricted-
+unimodular) — weeks, or a clean L3-PD-adjacent axiom.
+
+**Probe 2 (cohomology reductions): GREEN engine, sheaf-model is the cost.** The RR
+Euler-characteristic engine `eulerChar_additive_of_exact_six` (+ skyscraper
+corollary) landed sorry-free, axiom-free (`9e3fa8c`, branch `layer3-rr-probe`) via
+`Function.Exact` + rank-nullity. **But** the project has only *global* meromorphic
+infrastructure (`riemannRochSpace D` is a global submodule); a real sheaf `O(D)` —
+local sections, gluing, the skyscraper SES, the `Sheaf.H 0 (O(D)) ≅ L(D)` bridge —
+is unbuilt. Mathlib has the substrate (`Sheaf.H`, `Ext.covariantSequence`,
+`skyscraperSheaf`) but **not** holomorphic/meromorphic sheaves (TODO). Estimate
+(Probe 2): **3–6 weeks just to *state* a credible axiomatized sheaf model + bridges**
+(the project's own `SheafCohomologySpec` flags it as not-yet-faithfully-stateable),
+then a few hundred LOC to assemble RR over it.
+
+**Net:** Layer 3 is real. The reductions are tractable (proven). The dominant cost
++ the faithfulness risk both live in **stating the `O(D)`-sheaf primitive** — a
+wrong sheaf axiom is a false kernel, and it's the hardest thing to state right.
+
+## Implementation phasing
+
+- **Phase A — analytic primitives + their *non-sheaf* reductions (lower risk; start here).**
+  L3-PD ⇒ symplectic basis (field done; build/axiomatize the ℤ-splitting) +
+  intersection form; L3-Hodge ⇒ Riemann bilinear (`∫ω∧ω=0` by type, `i∫ω∧⋆ω̄>0`).
+  Discharges `AX_AnalyticCycleBasis`, `intersectionForm(+laws)`, `AX_RiemannBilinear`,
+  `AX_H1FreeRank2g` over L3-PD/L3-Hodge — **no sheaf model needed.**
+- **Phase B — the sheaf-model core (the risky 3–6-wk design).** Faithfully axiomatize
+  `O(D)` sheaf + skyscraper SES + `H⁰≅L(D)` bridge; assemble RR (§16) via the
+  Euler-char engine + Dolbeault; Serre (§17) via the residue pairing. **Design + Gemini-vet
+  the sheaf axioms BEFORE building** (faithfulness-critical).
+- **Phase C — period lattice (§19/§21).** Harmonic forms (L3-Dolbeault+L3-Hodge) ⇒
+  `AX_PeriodLattice`; Abel ⊇ already underway.
+
+Each L3 primitive gets the full axiom-vetting protocol (citation, satisfiability
+witness, Gemini review, `(NOT VERIFIED)` until cleared) before any theorem rests on it.
