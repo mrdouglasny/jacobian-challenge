@@ -459,7 +459,8 @@ connected Riemann surface, `L(D) = riemannRochSpace D` is finite-dimensional ove
 `ℂ` for every divisor `D`. **Discharged** (formerly an axiom) by the elementary
 `ℓ(D) ≤ 1 + deg D⁺` route (`RiemannRochFinite.lean`, issue #116), from the
 `L(0) = ℂ` base case above. Supplies the `[FiniteDimensional H0]` instance
-`AX_RiemannRoch` needs; the H1 side is derived via Serre.
+used by the theorem-level Riemann-Roch wrapper; the H1 side is inherited from
+Layer 3.
 
 Reference: Forster §14; Miranda Ch. VI. -/
 @[instance] theorem riemannRochSpace_finiteDimensional (D : Divisor X) :

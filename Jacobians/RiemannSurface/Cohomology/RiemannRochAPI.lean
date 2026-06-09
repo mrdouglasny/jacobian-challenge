@@ -94,13 +94,13 @@ theorem canonicalDivisor_deg :
   simp only [sub_self, h0_zero, h0_canonical, Nat.cast_one] at h
   omega
 
-/-- Consistency bridge to the existing axiom-level Riemann-Roch package.
+/-- Consistency bridge to the theorem-level Riemann-Roch package.
 
-Given the `AX_RiemannRoch` numerical statement, the `AX_SerreDuality`
+Given the `AX_RiemannRoch` numerical theorem, the `AX_SerreDuality`
 identification
 `H^1(O(D)) ~= H^0(O(K_X - D))^*`, and the two comparison equivalences
 `H0_equiv_riemannRochSpace`, one obtains the pure `L(D)` form stated in
-`riemannRoch`. This theorem is only a statement anchor; its body is deferred. -/
+`riemannRoch`. -/
 theorem riemannRoch_consistent_with_AX (D : Divisor X)
     [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
     [FiniteDimensional ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D))]
@@ -120,10 +120,10 @@ theorem riemannRoch_consistent_with_AX (D : Divisor X)
           riemannRochSpace (canonicalDivisor X - D))) :
     (h0 D : ℤ) - (h0 (canonicalDivisor X - D) : ℤ) =
       Divisor.deg X D + 1 - (genus X : ℤ) :=
-  -- Now subsumed: `riemannRoch` proves this identity directly from the same
-  -- `AX_RiemannRoch` / `AX_SerreDuality` layer (via `H0_equiv_riemannRochSpace`),
-  -- so the explicitly supplied equivalences `hAX`/`hSerre`/`hD`/`hKD` are
-  -- redundant. The theorem is retained as a stated consistency anchor.
+  -- Now subsumed: `riemannRoch` proves this identity directly from the
+  -- Layer-3-backed RR/Serre wrappers, so the explicitly supplied equivalences
+  -- `hAX`/`hSerre`/`hD`/`hKD` are redundant. The theorem is retained as a stated
+  -- consistency anchor.
   riemannRoch D
 
 /-- High-degree Riemann-Roch corollary (Forster section 17; Miranda VI): if
