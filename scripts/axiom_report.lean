@@ -19,7 +19,7 @@ import Jacobians.ProjectiveCurve.Elliptic.OneForm
 import Jacobians.ProjectiveCurve.Line.Genus
 import Jacobians.ProjectiveCurve.Line.OneForm
 import Jacobians.ProjectiveCurve.Hyperelliptic
-import Jacobians.ProjectiveCurve.PlaneCurve
+import Jacobians.ProjectiveCurve.PlaneCurve.CrossCompat
 import Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 
 open Jacobians Jacobian
@@ -64,3 +64,6 @@ open Jacobians Jacobian
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instNonempty
+#print axioms Jacobians.ProjectiveCurve.PlaneCurve.instChartedSpace
+#print axioms Jacobians.ProjectiveCurve.PlaneCurve.instConnectedSpace
+

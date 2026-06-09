@@ -10,7 +10,8 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 43** — all **43** in our own modules (#126 added 7 Layer-3
+**Active project axioms: 42** — all **42** in our own modules (#117 discharged
+`PlaneCurve.instChartedSpace` to a real atlas, `#print axioms` standard-3; #126 added 7 Layer-3
 cohomology axioms, now DT+CX-vetted SATISFIABLE/FAITHFUL; the #131 discharge retired the 5 RR/Serre + opaque-`H1` axioms). The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
@@ -288,7 +289,7 @@ Per the review plan, axioms are split into two classes:
 | 1 — textbook-standard | 13 | classical theorems, citable | high |
 | 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 11 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `DT`+`CX`-vetted SATISFIABLE/FAITHFUL 2026-06-09, **Likely correct**; vetted but not yet discharged | research |
 
@@ -365,7 +366,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: 3 manifold/topology instances (`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 1 affine prop (`AX_PlaneCurveAffine_connected`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/projective `instNonempty`/affine `nonempty`/affine `noncompact` all now proved) | `ProjectiveCurve/PlaneCurve.lean` | 4 |
+| `PlaneCurve`: `instIsManifold` + 1 affine prop `AX_PlaneCurveAffine_connected` (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117** — Euler + IFT affine charts, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 2 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -421,6 +422,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `PlaneCurve.instChartedSpace` *(#117, 2026-06-09)* | concrete `ChartedSpace` for the smooth projective plane curve: Euler's homogeneous-function theorem ⇒ nonvanishing dehomogenized gradient on each `x/y/z=1` patch, 6 local charts via the proved Inverse Function Theorem (#99), open-embedding atlas. `#print axioms` standard-3, no `sorryAx`. (Contributed by @daouid.) | `ProjectiveCurve/PlaneCurve/{Euler,AffineChart,Atlas,CrossCompat}.lean` |
 | `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
 | `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
 | `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
@@ -469,7 +471,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 43 — the vendored Kirov subtree is now axiom-free, so 43 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1).
+#   prints 42 — the vendored Kirov subtree is now axiom-free, so 42 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1, less PlaneCurve.instChartedSpace #117).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -486,7 +488,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 43
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 42
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
