@@ -15,11 +15,12 @@ torus. Build plan: `docs/planning/LAYER3_PHASE_C_BUILD.md`.
 import Jacobians.Layer3.RiemannBilinear
 import Jacobians.Axioms.AnalyticCycleBasis
 import Jacobians.RiemannSurface.Periods
+import Jacobians.AbelianVariety.Siegel
 
 namespace Jacobians.Layer3
 
 open scoped Manifold Topology ContDiff
-open Jacobians.RiemannSurface Jacobians.Axioms
+open Jacobians.RiemannSurface Jacobians.Axioms Jacobians.AbelianVariety
 
 noncomputable section
 
@@ -277,6 +278,55 @@ theorem tauMatrix_posDef {x₀ : X} (b : AnalyticCycleBasis X x₀)
     rwa [periodVec_normalizedForm, periodVec_normalizedForm] at h
   · have h := AX_RBR2 b (normalizedCombo b cω c) (normalizedCombo_ne_zero b cω hc)
     rwa [periodVec_normalizedCombo, conjPeriodVec_normalizedCombo] at h
+
+/-- The normalized period matrix packaged as a Siegel upper-half-space element
+(symmetric with `Im ≻ 0`). -/
+def tauSiegel {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    SiegelUpperHalfSpace (genus X) :=
+  ⟨tauMatrix b cω, tauMatrix_isSymm b cω, tauMatrix_posDef b cω⟩
+
+@[simp]
+theorem tauSiegel_val {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    (tauSiegel b cω).val = tauMatrix b cω :=
+  rfl
+
+/-- The coordinate-space automorphism given by the invertible matrix `A⁻¹`. -/
+private def eInvMat {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    (Fin (genus X) → ℂ) ≃ₗ[ℂ] (Fin (genus X) → ℂ) :=
+  LinearEquiv.ofLinear (Matrix.toLin' (aPeriodMatrix b cω)⁻¹)
+    (Matrix.toLin' (aPeriodMatrix b cω))
+    (by rw [← Matrix.toLin'_mul,
+          Matrix.nonsing_inv_mul _
+            ((Matrix.isUnit_iff_isUnit_det _).mp (aPeriodMatrix_isUnit b cω)),
+          Matrix.toLin'_one])
+    (by rw [← Matrix.toLin'_mul,
+          Matrix.mul_nonsing_inv _
+            ((Matrix.isUnit_iff_isUnit_det _).mp (aPeriodMatrix_isUnit b cω)),
+          Matrix.toLin'_one])
+
+/-- The A-normalized differentials `ω̂` as a `Module.Basis` (`cω` transformed by
+the invertible `A⁻¹`). -/
+def normalizedBasis {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X) :=
+  cω.map (cω.equivFun ≪≫ₗ (eInvMat b cω ≪≫ₗ cω.equivFun.symm))
+
+theorem normalizedBasis_apply {x₀ : X} (b : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) (j : Fin (genus X)) :
+    normalizedBasis b cω j = normalizedForm b cω j := by
+  rw [normalizedBasis, Module.Basis.map_apply, LinearEquiv.trans_apply,
+    LinearEquiv.trans_apply]
+  have hself : cω.equivFun (cω j) = Pi.single j 1 := by
+    funext k
+    simp [Module.Basis.equivFun_self, Pi.single_apply, eq_comm]
+  rw [hself, normalizedForm]
+  congr 1
+  show eInvMat b cω (Pi.single j 1) = fun k => (aPeriodMatrix b cω)⁻¹ k j
+  rw [eInvMat, LinearEquiv.ofLinear_apply, Matrix.toLin'_apply, Matrix.mulVec_single_one]
+  rfl
 
 end
 
