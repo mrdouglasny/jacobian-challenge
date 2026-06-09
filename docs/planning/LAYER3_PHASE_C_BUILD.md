@@ -34,30 +34,41 @@ basis-free primitives `AX_RBR1`, `AX_RBR2` over the existing period map.*
 - `instPeriodLatticeDiscrete` — `DiscreteTopology (periodLatticeInBasis …)`
   (follows from `IsZLattice`, so it collapses once `AX_PeriodLattice` is a
   theorem).
-- `AX_RiemannBilinear` — the period matrix in any form-basis is symmetric with
-  pos-def imaginary part.
+- `AX_RiemannBilinear` — **existential** (this is the actual axiom shape): there
+  exist a symplectic `H₁` basis `b : AnalyticCycleBasis X x₀`, a **normalized**
+  form basis `cω : Basis (Fin g) ℂ (HolomorphicOneForm X)` with A-periods the
+  identity (`periodMap x₀ (b.isBasis (αEmbed i)) (cω j) = δᵢⱼ`), and a
+  `τ : SiegelUpperHalfSpace (genus X)` with B-periods `τ`
+  (`τ.val i j = periodMap x₀ (b.isBasis (βEmbed i)) (cω j)`). The `Siegel` type
+  **bakes in** `τ` symmetric + `Im τ ≻ 0`. *(Note: "symmetric in an **arbitrary**
+  form-basis" is the known-**false** formulation; symmetry holds only for the
+  **normalized** basis. We discharge this existential, not the arbitrary-basis
+  claim — which is exactly what the reduction below produces.)*
 
 ## The two new primitives (to be vetted before committing)
 
 Stated basis-free over `periodMap`, using the symplectic basis to read off the
-A/B period vectors. For `ω : HolomorphicOneForm X` let
-`periodVec cb ω := (fun i => periodMap X x₀ (cb.A i) ω,
-                    fun i => periodMap X x₀ (cb.B i) ω) : PeriodVector g`
-(A-periods and B-periods of `ω` over the symplectic basis `cb`).
+A/B period vectors. The `AnalyticCycleBasis` API exposes the symplectic cycles as
+`b.isBasis (αEmbed i)` (A-cycles) and `b.isBasis (βEmbed i)` (B-cycles) — there
+are **no** `b.A`/`b.B` fields. For `ω : HolomorphicOneForm X` let
+`periodVec b ω := (fun i => periodMap X x₀ (b.isBasis (αEmbed i)) ω,
+                   fun i => periodMap X x₀ (b.isBasis (βEmbed i)) ω) : PeriodVector g`
+(A-periods and B-periods of `ω` over the symplectic basis `b`). This matches the
+period convention already used by `AX_RiemannBilinear`.
 
 - **`AX_RBR1` (isotropy / Stokes).** For all `ω η : HolomorphicOneForm X`,
-  `Q (periodVec cb ω) (periodVec cb η) = 0`.
+  `Q (periodVec b ω) (periodVec b η) = 0`.
   *Math:* `Q` over the symplectic basis = the cup-product / intersection
   pairing of the two closed `(1,0)`-forms `= ∫_X ω ∧ η = 0` since
   `(1,0)∧(1,0) = 0`. Stated via `Q` to **avoid 2-form integration** in Lean.
 - **`AX_RBR2` (Hodge positivity).** For all `0 ≠ ω : HolomorphicOneForm X`,
-  `0 < (Complex.I * Q (periodVec cb ω) (conjPeriodVec cb ω)).re`
-  where `conjPeriodVec cb ω := (star A-periods, star B-periods)`.
+  `0 < (Complex.I * Q (periodVec b ω) (conjPeriodVec b ω)).re`
+  where `conjPeriodVec b ω := (star A-periods, star B-periods)`.
   *Math:* `= i ∫_X ω ∧ ω̄ > 0`, the Hodge metric positivity on holomorphic
   1-forms; again routed through `Q` to avoid 2-form integration.
 
 Both are independent of the *form* basis (quantified over all `ω`) but use the
-chosen symplectic *homology* basis `cb` (legitimate: a different symplectic basis
+chosen symplectic *homology* basis `b` (legitimate: a different symplectic basis
 is an `Sp(2g,ℤ)` change preserving `Q`). They are the genuine Stokes / Hodge
 inputs — the irreducible analytic reality.
 
@@ -81,11 +92,13 @@ Cleared to commit both as `Periods.lean` primitives `(NOT VERIFIED)`.
 ## Reduction steps (theorems over the primitives)
 
 1. **`THM_NormalizedDifferentials`** (axiom-free given RBR2). The A-period matrix
-   `Aᵢⱼ = periodMap (cb.A i) ωⱼ` (for a fixed form-basis `b`) is invertible:
+   `Aᵢⱼ = periodMap x₀ (b.isBasis (αEmbed i)) ωⱼ` (for a fixed form-basis `cω`)
+   is invertible:
    if some `0 ≠ c` had `A c = 0`, the form `ω = Σ cⱼ ωⱼ` would have all
    A-periods zero, contradicting `AX_RBR2` (positivity ⇒ no nonzero form has
    vanishing A-periods). Normalize `ω̂ = b · A⁻¹` so that
-   `periodMap (cb.A i) ω̂ⱼ = δᵢⱼ`. Then `τᵢⱼ := periodMap (cb.B i) ω̂ⱼ`.
+   `periodMap x₀ (b.isBasis (αEmbed i)) ω̂ⱼ = δᵢⱼ`. Then
+   `τᵢⱼ := periodMap x₀ (b.isBasis (βEmbed i)) ω̂ⱼ`.
 2. **`THM_Tau_Symmetric`** — `τ.IsSymm`, from `AX_RBR1` on `ω̂ᵢ, ω̂ⱼ` via
    `tau_symmetric_of_rbr1` (the normalized period vector of `ω̂ⱼ` is exactly
    `col τ j = (Pi.single j 1, τ ·ⱼ)`).
