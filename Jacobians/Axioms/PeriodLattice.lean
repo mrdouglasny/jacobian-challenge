@@ -37,35 +37,13 @@ axiom for the Jacobian bridge.\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\
 Both axioms below are **NOT VERIFIED** and should be retired once the
 Riemann-bilinear infrastructure lands.
 -/
-import Jacobians.RiemannSurface.Genus
-import Jacobians.RiemannSurface.Periods
+import Jacobians.Axioms.PeriodLatticeBase
 
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
-
-/-- The period map written in coordinates with respect to a chosen basis of
-holomorphic one-forms. The original `periodMap` is only additive; we view
-it as a `ℤ`-linear map via `AddMonoidHom.toIntLinearMap`, then compose with
-the coordinate map on the dual basis. -/
-noncomputable def periodMapInBasis (X : Type*) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
-    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
-    H1 X x₀ →ₗ[ℤ] (Fin (genus X) → ℂ) :=
-  (b.dualBasis.equivFun.toLinearMap.restrictScalars ℤ).comp (periodMap X x₀).toIntLinearMap
-
-/-- The period lattice in basis coordinates, defined as the range of
-`periodMapInBasis`. This is the `Submodule ℤ` consumed by
-`AbelianVariety.ComplexTorus`. -/
-noncomputable def periodLatticeInBasis (X : Type*) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
-    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
-    Submodule ℤ (Fin (genus X) → ℂ) :=
-  LinearMap.range (periodMapInBasis X x₀ b)
 
 /-- **Axiom (NOT VERIFIED).** In basis coordinates, the period image carries
 the discrete topology.
