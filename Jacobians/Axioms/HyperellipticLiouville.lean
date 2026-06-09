@@ -62,7 +62,8 @@ chart-overlap arguments.
   1-form. This unblocks the architectural use of Level 3 here.
 -/
 
-import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.Hyperelliptic.Basic
+import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport

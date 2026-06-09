@@ -173,37 +173,103 @@ noncomputable def AX_Hyperelliptic_evenEquiv (H : HyperellipticData)
 
 /-- `Hyperelliptic H` is compact: transport `CompactSpace` along the parity
 homeomorphism to the real `HyperellipticOdd`/`HyperellipticEven` case. -/
-instance Hyperelliptic.instCompactSpace (H : HyperellipticData) :
+@[reducible] private noncomputable def Hyperelliptic.t2SpaceOf
+    (H : HyperellipticData) (d : Decidable (Odd H.f.natDegree)) :
+    letI := Hyperelliptic.topologicalSpaceOf H d
+    T2Space (Hyperelliptic.carrierOf H d) :=
+  @Decidable.casesOn (Odd H.f.natDegree)
+    (motive := fun d =>
+      letI := Hyperelliptic.topologicalSpaceOf H d
+      T2Space (Hyperelliptic.carrierOf H d)) d
+    (fun h =>
+      letI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+      (inferInstanceAs (T2Space (HyperellipticEvenProj H)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isFalse h)
+        T2Space (Hyperelliptic.carrierOf H (isFalse h))))
+    (fun h =>
+      (inferInstanceAs (T2Space (HyperellipticOdd H h)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isTrue h)
+        T2Space (Hyperelliptic.carrierOf H (isTrue h))))
+
+/-- `Hyperelliptic H` is Hausdorff, transported along the parity homeomorphism. -/
+noncomputable instance Hyperelliptic.instT2Space (H : HyperellipticData) :
+    T2Space (Hyperelliptic H) := by
+  unfold Hyperelliptic Hyperelliptic.instTopologicalSpace
+  exact Hyperelliptic.t2SpaceOf H (Nat.instDecidablePredOdd H.f.natDegree)
+
+@[reducible] private noncomputable def Hyperelliptic.compactSpaceOf
+    (H : HyperellipticData) (d : Decidable (Odd H.f.natDegree)) :
+    letI := Hyperelliptic.topologicalSpaceOf H d
+    CompactSpace (Hyperelliptic.carrierOf H d) :=
+  @Decidable.casesOn (Odd H.f.natDegree)
+    (motive := fun d =>
+      letI := Hyperelliptic.topologicalSpaceOf H d
+      CompactSpace (Hyperelliptic.carrierOf H d)) d
+    (fun h =>
+      letI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+      (inferInstanceAs (CompactSpace (HyperellipticEvenProj H)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isFalse h)
+        CompactSpace (Hyperelliptic.carrierOf H (isFalse h))))
+    (fun h =>
+      (inferInstanceAs (CompactSpace (HyperellipticOdd H h)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isTrue h)
+        CompactSpace (Hyperelliptic.carrierOf H (isTrue h))))
+
+/-- `Hyperelliptic H` is compact: transport `CompactSpace` along the parity
+homeomorphism to the real `HyperellipticOdd`/`HyperellipticEven` case. -/
+noncomputable instance Hyperelliptic.instCompactSpace (H : HyperellipticData) :
     CompactSpace (Hyperelliptic H) := by
-  by_cases h : Odd H.f.natDegree
-  · exact (AX_Hyperelliptic_oddEquiv H h).symm.compactSpace
-  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
-    exact (AX_Hyperelliptic_evenEquiv H h).symm.compactSpace
+  unfold Hyperelliptic Hyperelliptic.instTopologicalSpace
+  exact Hyperelliptic.compactSpaceOf H (Nat.instDecidablePredOdd H.f.natDegree)
+
+@[reducible] private noncomputable def Hyperelliptic.connectedSpaceOf
+    (H : HyperellipticData) (d : Decidable (Odd H.f.natDegree)) :
+    letI := Hyperelliptic.topologicalSpaceOf H d
+    ConnectedSpace (Hyperelliptic.carrierOf H d) :=
+  @Decidable.casesOn (Odd H.f.natDegree)
+    (motive := fun d =>
+      letI := Hyperelliptic.topologicalSpaceOf H d
+      ConnectedSpace (Hyperelliptic.carrierOf H d)) d
+    (fun h =>
+      letI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+      (inferInstanceAs (ConnectedSpace (HyperellipticEvenProj H)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isFalse h)
+        ConnectedSpace (Hyperelliptic.carrierOf H (isFalse h))))
+    (fun h =>
+      (inferInstanceAs (ConnectedSpace (HyperellipticOdd H h)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isTrue h)
+        ConnectedSpace (Hyperelliptic.carrierOf H (isTrue h))))
 
 /-- `Hyperelliptic H` is connected: transport `ConnectedSpace` along the parity
 homeomorphism (`Homeomorph.connectedSpace_iff`; Mathlib has no `.connectedSpace`). -/
-instance Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
+noncomputable instance Hyperelliptic.instConnectedSpace (H : HyperellipticData) :
     ConnectedSpace (Hyperelliptic H) := by
-  by_cases h : Odd H.f.natDegree
-  · exact (AX_Hyperelliptic_oddEquiv H h).connectedSpace_iff.mpr inferInstance
-  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
-    exact (AX_Hyperelliptic_evenEquiv H h).connectedSpace_iff.mpr inferInstance
+  unfold Hyperelliptic Hyperelliptic.instTopologicalSpace
+  exact Hyperelliptic.connectedSpaceOf H (Nat.instDecidablePredOdd H.f.natDegree)
 
-/-- `Hyperelliptic H` is Hausdorff, transported along the parity homeomorphism. -/
-instance Hyperelliptic.instT2Space (H : HyperellipticData) :
-    T2Space (Hyperelliptic H) := by
-  by_cases h : Odd H.f.natDegree
-  · exact (AX_Hyperelliptic_oddEquiv H h).symm.t2Space
-  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
-    exact (AX_Hyperelliptic_evenEquiv H h).symm.t2Space
+@[reducible] private noncomputable def Hyperelliptic.nonemptyOf
+    (H : HyperellipticData) (d : Decidable (Odd H.f.natDegree)) :
+    letI := Hyperelliptic.topologicalSpaceOf H d
+    Nonempty (Hyperelliptic.carrierOf H d) :=
+  @Decidable.casesOn (Odd H.f.natDegree)
+    (motive := fun d =>
+      letI := Hyperelliptic.topologicalSpaceOf H d
+      Nonempty (Hyperelliptic.carrierOf H d)) d
+    (fun h =>
+      letI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
+      (inferInstanceAs (Nonempty (HyperellipticEvenProj H)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isFalse h)
+        Nonempty (Hyperelliptic.carrierOf H (isFalse h))))
+    (fun h =>
+      (inferInstanceAs (Nonempty (HyperellipticOdd H h)) :
+        letI := Hyperelliptic.topologicalSpaceOf H (isTrue h)
+        Nonempty (Hyperelliptic.carrierOf H (isTrue h))))
 
 /-- `Hyperelliptic H` is nonempty, transported along the parity homeomorphism. -/
-instance Hyperelliptic.instNonempty (H : HyperellipticData) :
+noncomputable instance Hyperelliptic.instNonempty (H : HyperellipticData) :
     Nonempty (Hyperelliptic H) := by
-  by_cases h : Odd H.f.natDegree
-  · exact Nonempty.map (AX_Hyperelliptic_oddEquiv H h).symm inferInstance
-  · haveI : Fact (¬ Odd H.f.natDegree) := ⟨h⟩
-    exact Nonempty.map (AX_Hyperelliptic_evenEquiv H h).symm inferInstance
+  unfold Hyperelliptic
+  exact Hyperelliptic.nonemptyOf H (Nat.instDecidablePredOdd H.f.natDegree)
 
 /-- **Axiom.** The genus of `y² = f(x)` matches the combinatorial
 formula `⌊(deg f - 1) / 2⌋`. -/
