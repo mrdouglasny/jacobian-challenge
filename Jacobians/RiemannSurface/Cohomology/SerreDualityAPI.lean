@@ -63,7 +63,7 @@ variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 below identifies this dimension with `h^0(K - D)`, which is the concrete
 `finrank` of `riemannRochSpace (K - D)`. -/
 noncomputable abbrev h1 (D : Divisor X) : ℕ :=
-  Module.finrank ℂ (H1 (LineBundle.ofDivisor D))
+  Module.finrank ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D))
 
 /-- Serre duality, dimension form (Forster section 17; Griffiths-Harris Ch. 1):
 `h^1(D) = h^0(K - D)`.  This is the numerical shadow of the linear isomorphism
@@ -107,7 +107,7 @@ in `RiemannRochAPI`) with `h1_eq_h0_canonical_sub` recovers the classical
 each other. -/
 theorem riemannRoch_h0_sub_h1 (D : Divisor X)
     [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
-    [FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))] :
+    [FiniteDimensional ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D))] :
     (h0 D : ℤ) - (h1 D : ℤ) = Divisor.deg X D + 1 - (genus X : ℤ) :=
   AX_RiemannRoch D
 

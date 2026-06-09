@@ -9,6 +9,7 @@ import Jacobians.Axioms.SerreDuality
 import Jacobians.GeneralResults.ChartTransition
 import Jacobians.RiemannSurface.Cohomology.RiemannRochFinite
 import Jacobians.RiemannSurface.Cohomology.DegreeTheorem
+import Jacobians.RiemannSurface.DegreeOneGenusZero
 
 /-!
 # Riemann-Roch API in terms of the germ-quotient space `L(D)`
@@ -488,7 +489,7 @@ instance instFiniteDimensional_H0_ofDivisor (D : Divisor X) :
 via Serre duality: `H¹(O_D) ≃ₗ Dual (H⁰(O(K−D)))`, and the dual of a
 finite-dimensional space is finite-dimensional. -/
 instance instFiniteDimensional_H1_ofDivisor (D : Divisor X) :
-    FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D)) :=
+    FiniteDimensional ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D)) :=
   (AX_SerreDuality D).some.symm.finiteDimensional
 
 /-- Riemann-Roch in pure `L(D)` terms (Forster section 17; Miranda VI;
@@ -505,7 +506,7 @@ theorem riemannRoch (D : Divisor X) :
   have hRR := AX_RiemannRoch D
   have hH0 : Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) = h0 D :=
     (H0_equiv_riemannRochSpace D).some.finrank_eq
-  have hH1 : Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) =
+  have hH1 : Module.finrank ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D)) =
       h0 (canonicalDivisor X - D) := by
     rw [(AX_SerreDuality D).some.finrank_eq, Subspace.dual_finrank_eq,
       (H0_equiv_riemannRochSpace (canonicalDivisor X - D)).some.finrank_eq]
@@ -550,24 +551,28 @@ identification
 `riemannRoch`. This theorem is only a statement anchor; its body is deferred. -/
 theorem riemannRoch_consistent_with_AX (D : Divisor X)
     [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
-    [FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))]
+    [FiniteDimensional ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D))]
     [FiniteDimensional ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D)))]
-    (hAX :
+    (_hAX :
       (Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) : ℤ) -
-        (Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) : ℤ) =
+        (Module.finrank ℂ (Jacobians.Axioms.H1 (LineBundle.ofDivisor D)) : ℤ) =
           Divisor.deg X D + 1 - (genus X : ℤ))
-    (hSerre :
+    (_hSerre :
       Nonempty
-        (H1 (LineBundle.ofDivisor D) ≃ₗ[ℂ]
+        (Jacobians.Axioms.H1 (LineBundle.ofDivisor D) ≃ₗ[ℂ]
           Module.Dual ℂ (H0 (LineBundle.ofDivisor (canonicalDivisor X - D)))))
-    (hD : Nonempty (H0 (LineBundle.ofDivisor D) ≃ₗ[ℂ] riemannRochSpace D))
-    (hKD :
+    (_hD : Nonempty (H0 (LineBundle.ofDivisor D) ≃ₗ[ℂ] riemannRochSpace D))
+    (_hKD :
       Nonempty
         (H0 (LineBundle.ofDivisor (canonicalDivisor X - D)) ≃ₗ[ℂ]
           riemannRochSpace (canonicalDivisor X - D))) :
     (h0 D : ℤ) - (h0 (canonicalDivisor X - D) : ℤ) =
-      Divisor.deg X D + 1 - (genus X : ℤ) := by
-  sorry
+      Divisor.deg X D + 1 - (genus X : ℤ) :=
+  -- Now subsumed: `riemannRoch` proves this identity directly from the same
+  -- `AX_RiemannRoch` / `AX_SerreDuality` layer (via `H0_equiv_riemannRochSpace`),
+  -- so the explicitly supplied equivalences `hAX`/`hSerre`/`hD`/`hKD` are
+  -- redundant. The theorem is retained as a stated consistency anchor.
+  riemannRoch D
 
 /-- High-degree Riemann-Roch corollary (Forster section 17; Miranda VI): if
 `deg D > 2g - 2`, then `H^1(O(D)) = 0`, equivalently `L(K_X - D) = 0`, so
@@ -588,6 +593,111 @@ theorem h0_of_deg_gt (D : Divisor X) :
     simp
   simpa [hKD_h0] using riemannRoch D
 
+private theorem effective_deg_one_eq_of (D : Divisor X) (hD : Effective D)
+    (hdeg : Divisor.deg X D = 1) : ∃ q : X, D = FreeAbelianGroup.of q := by
+  classical
+  let fs : X →₀ ℤ := FreeAbelianGroup.toFinsupp (D : FreeAbelianGroup X)
+  let ns : X →₀ ℕ := Finsupp.mapRange Int.toNat Int.toNat_zero fs
+  have hsum_ns_int : ((ns.sum (fun _ n => n) : ℕ) : ℤ) = 1 := by
+    calc
+      ((ns.sum (fun _ n => n) : ℕ) : ℤ)
+          = fs.sum (fun _ n => (Int.toNat n : ℤ)) := by
+            rw [show ns.sum (fun _ n => n) = fs.sum (fun _ n => Int.toNat n) by
+              simp [ns, Finsupp.sum_mapRange_index]]
+            simp
+      _ = fs.sum (fun _ n => n) := by
+            apply Finsupp.sum_congr
+            intro q _hq
+            have hnonneg : 0 ≤ fs q := by
+              simpa [fs, FreeAbelianGroup.coeff] using hD q
+            exact Int.toNat_of_nonneg hnonneg
+      _ = 1 := by
+            simpa [fs, deg_eq_sum_toFinsupp] using hdeg
+  have hsum_ns : ns.sum (fun _ n => n) = 1 := by omega
+  obtain ⟨q, hns⟩ := (Finsupp.sum_eq_one_iff ns).mp hsum_ns
+  have hfs : fs = Finsupp.single q (1 : ℤ) := by
+    ext r
+    have hnat : (fs r).toNat = (Finsupp.single q (1 : ℕ)) r := by
+      simpa [ns, Finsupp.mapRange_apply] using congrFun (congrArg DFunLike.coe hns) r
+    by_cases hnonneg : 0 ≤ fs r
+    · have hcast := congrArg (fun n : ℕ => (n : ℤ)) hnat
+      by_cases hr : r = q
+      · subst r
+        simpa [Int.toNat_of_nonneg hnonneg] using hcast
+      · simpa [Int.toNat_of_nonneg hnonneg, Finsupp.single_eq_of_ne hr] using hcast
+    · have hD_r : 0 ≤ fs r := by
+        simpa [fs, FreeAbelianGroup.coeff] using hD r
+      omega
+  refine ⟨q, ?_⟩
+  calc
+    D = Finsupp.toFreeAbelianGroup fs := by
+      simp [fs]
+    _ = Finsupp.toFreeAbelianGroup (Finsupp.single q (1 : ℤ)) := by
+      rw [hfs]
+    _ = FreeAbelianGroup.of q := by
+      simp
+
+private theorem divisorOf_eq_pointSub_of_mem_point {F : MeroField X} (hF : F ≠ 0) {p : X}
+    (hFP : F ∈ riemannRochSpace (FreeAbelianGroup.of p : Divisor X)) :
+    ∃ q : X, divisorOf hF = (FreeAbelianGroup.of q - FreeAbelianGroup.of p : Divisor X) := by
+  classical
+  let P : Divisor X := FreeAbelianGroup.of p
+  have heff : Effective (divisorOf hF + P) :=
+    effective_divisorOf_add hF hFP
+  have hdeg_div : Divisor.deg X (divisorOf hF) = 0 :=
+    deg_divisor_eq_zero (toMF hF)
+  have hdegP : Divisor.deg X P = 1 := by
+    simp [P, Divisor.deg]
+  have hdegE : Divisor.deg X (divisorOf hF + P) = 1 := by
+    rw [map_add, hdeg_div, hdegP, zero_add]
+  obtain ⟨q, hE⟩ := effective_deg_one_eq_of (divisorOf hF + P) heff hdegE
+  refine ⟨q, ?_⟩
+  calc
+    divisorOf hF = (divisorOf hF + P) - P := by
+      abel
+    _ = FreeAbelianGroup.of q - P := by
+      rw [hE]
+    _ = FreeAbelianGroup.of q - FreeAbelianGroup.of p := by
+      simp [P]
+
+private theorem pointSub_mem_principal_of_divisorOf_eq {F : MeroField X} (hF : F ≠ 0)
+    {q p : X}
+    (hdiv : divisorOf hF = (FreeAbelianGroup.of q - FreeAbelianGroup.of p : Divisor X)) :
+    ((FreeAbelianGroup.of q - FreeAbelianGroup.of p : FreeAbelianGroup X) : Divisor X) ∈
+      PrincipalDivisors X := by
+  rw [PrincipalDivisors]
+  rw [Subgroup.mem_toAddSubgroup']
+  refine ⟨toMF hF, ?_⟩
+  change Multiplicative.ofAdd (MeromorphicFunctionField.divisor (toMF hF)) =
+    Multiplicative.ofAdd
+      ((FreeAbelianGroup.of q - FreeAbelianGroup.of p : FreeAbelianGroup X) : Divisor X)
+  simpa [divisorOf] using congrArg Multiplicative.ofAdd hdiv
+
+private theorem riemannRochSpace_point_le_zero (p : X) (hg : 0 < genus X) :
+    riemannRochSpace (FreeAbelianGroup.of p : Divisor X) ≤
+      riemannRochSpace (0 : Divisor X) := by
+  intro F hFP
+  by_cases hF : F = 0
+  · rw [hF]
+    exact (riemannRochSpace (0 : Divisor X)).zero_mem
+  · obtain ⟨q, hdiv⟩ := divisorOf_eq_pointSub_of_mem_point hF hFP
+    have hprincipal :
+        ((FreeAbelianGroup.of q - FreeAbelianGroup.of p : FreeAbelianGroup X) : Divisor X) ∈
+          PrincipalDivisors X :=
+      pointSub_mem_principal_of_divisorOf_eq hF hdiv
+    have hqp : q = p := principal_imp_eq_of_genus_pos hg q p hprincipal
+    have hdiv0 : divisorOf hF = 0 := by
+      rw [hdiv, hqp]
+      simp
+    intro r
+    have hcoeff := coeff_divisorOf hF r
+    have hcoeff0 : (orderAtField r F).untop₀ = 0 := by
+      rw [hdiv0] at hcoeff
+      simpa using hcoeff.symm
+    have hfin := orderAtField_ne_top_of_ne_zero hF r
+    rw [← WithTop.coe_untop₀_of_ne_top hfin, hcoeff0]
+    norm_num
+
 /-- Single-point positive-genus corollary (Forster section 17; Miranda VI):
 for `g > 0`, the Riemann-Roch space `L(P)` has dimension one, i.e. only
 constant meromorphic functions have at most one simple pole at `P`.
@@ -596,6 +706,16 @@ This formulation uses the divisor `(P)` as `FreeAbelianGroup.of p`; the
 positive-genus hypothesis excludes the genus-zero case where `h^0(P) = 2`. -/
 theorem h0_point_eq_one_of_genus_pos (p : X) (hg : 0 < genus X) :
     h0 (FreeAbelianGroup.of p : Divisor X) = 1 := by
-  sorry
+  let P : Divisor X := FreeAbelianGroup.of p
+  have hP0 : riemannRochSpace P ≤ riemannRochSpace (0 : Divisor X) := by
+    simpa [P] using riemannRochSpace_point_le_zero p hg
+  have h0P : riemannRochSpace (0 : Divisor X) ≤ riemannRochSpace P := by
+    refine riemannRochSpace_mono (fun q => ?_)
+    simpa [P] using (effective_of (X := X) p q)
+  have hspace : riemannRochSpace P = riemannRochSpace (0 : Divisor X) :=
+    le_antisymm hP0 h0P
+  change Module.finrank ℂ (riemannRochSpace P) = 1
+  rw [hspace]
+  exact h0_zero
 
 end Jacobians.RiemannSurface
