@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-09.*
+*Last updated 2026-06-07.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,9 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 40** — all **40** in our own modules. The vendored
+**Active project axioms: 42** — all **42** in our own modules (#117 discharged
+`PlaneCurve.instChartedSpace` to a real atlas, `#print axioms` standard-3; #126 added 7 Layer-3
+cohomology axioms, now DT+CX-vetted SATISFIABLE/FAITHFUL; the #131 discharge retired the 5 RR/Serre + opaque-`H1` axioms). The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -118,7 +120,8 @@ fallback `AX_torus_descent_holo` used for E6. The pre-existing
 axiom. Then → **63** by **de-opaquing** `H0` to the concrete
 `riemannRochSpace D` and replacing `H0.instAddCommGroup` / `H0.instModule` with
 instances inherited from the submodule carrier (2026-06-05). `LineBundle` and
-`LineBundle.ofDivisor` remain honest opaque placeholders; `H1` remains opaque.
+`LineBundle.ofDivisor` remain honest opaque placeholders; `H1` has since been
+wired to Layer-3 `H1coh` (2026-06-09).
 **Faithfulness correction (2026-06-06, count unchanged):** `riemannRochSpace` was
 first defined over raw `X → ℂ`, which was *degenerate* — germ-zero "spike"
 functions made it infinite-dimensional (`finrank ≡ 0`). It is now a submodule of
@@ -128,8 +131,10 @@ compiles the spike witness. `H0` still `:= riemannRochSpace D` (instances adapt;
 no axiom change). **`h0_zero` (h⁰(0)=1) is now PROVED axiom-free** over the corrected
 space (normal-form honest representative + Liouville ⇒ `L(0) ≃ ℂ`, `#print
 axioms`-clean, tracked in `docs/axiom-report.txt`) — the concrete check that the
-fix gives the right dimension (it was false over the old degenerate space). Only
-general `riemannRochSpace_finiteDimensional` and `h0_canonical` remain deferred.
+fix gives the right dimension (it was false over the old degenerate space).
+`h0_canonical` (#113) and **`riemannRochSpace_finiteDimensional`** (#116, the
+elementary `ℓ(D) ≤ 1 + deg D⁺` route) are now both **proved** — see Recently
+discharged.
 Then → **62** by **discharging `AX_torus_descent_holo`** (2026-06-06): it is now a
 real `theorem` in `Axioms/TorusAlbanese.lean`, proving the descended quotient map
 is `ContMDiff ω` via the local-section route over Kirov's `ZLatticeQuotient`
@@ -205,6 +210,63 @@ the affine plane curve admits a finite-exception projection onto `ℂ`; compactn
 of the affine patch would force `ℂ` compact after adjoining finitely many points,
 contradicting `NoncompactSpace ℂ`. `#print axioms` standard-3.
 
+RR/Serre discharge wiring (2026-06-09): `H1` is now definitionally
+`Layer3.H1coh`, with additive/module/finite-dimensional instances inherited from
+Layer 3. `AX_RiemannRoch` and `AX_SerreDuality` are theorem wrappers over
+`Layer3.riemannRochL3` and `Layer3.serreDuality_equiv`; the old opaque `Axioms.H1`
+type and its two instance axioms are retired.
+
+**Layer-3 axiom vetting (2026-06-09, sources `DT`, `CX`).** The **seven** Layer-3
+cohomology axioms (`H1coh` + 3 instances + `cohomologyLES` + `h1coh_zero_finrank`
++ `serreDuality_equiv`) were satisfiability/faithfulness-vetted by **Gemini
+deep-think** (`DT`, one focused query per load-bearing axiom) **and independently
+by Codex** (`CX`, per-axiom). **Both reached SATISFIABLE / FAITHFUL for all
+seven**, concordant. Rating **Likely correct**:
+- *Joint model.* The genuine sheaf cohomology `H¹(X,O(D))` plus the genuine
+  canonical divisor `K = (η)` is a model satisfying all seven simultaneously, so
+  the conjunction is consistent; the forced `deg K = 2g−2` and `ℓ(K) = g` are
+  exactly what a genuine `K` has.
+- `cohomologyLES`: the skyscraper quotient `O(D+P)/O(D)` is **always** exactly
+  1-dimensional (even when `P ∈ supp D`), so the `χ`-jump is exactly `+1` with no
+  off-by-one; the **concrete** first map pins `ker principalPart = L(D)`
+  (codim ≤ 1), so when `L(D) ⊊ L(D+P)` the functional is forced **nonzero** — the
+  genuine leading-Laurent residue map **up to a nonzero scalar** (not literally
+  fixed, but non-degenerate), so the existential exactness is **non-vacuous**, not
+  satisfiable by the all-zero maps.
+- `h1coh_zero_finrank` (`h¹(O)=g`): correct Hodge symmetry `h^{0,1}=h^{1,0}`;
+  **every compact Riemann surface is Kähler** (real-dim 2 ⇒ every 2-form closed),
+  so it holds unconditionally with no projectivity gap and no real-vs-ℂ factor
+  error (`finrank ℂ`).
+- `serreDuality_equiv`: the Serre pairing is genuinely **ℂ-bilinear** (residue /
+  wedge form), not conjugate-linear, so the ℂ-linear `≃ₗ[ℂ]` to `Module.Dual` is
+  the correct dimension-level form; `Nonempty (≃ₗ[ℂ])` reduces to dimension
+  equality `h¹(D)=ℓ(K−D)`, and the opaque `K` is consistent (genuine `K`
+  satisfies the whole family at `D` and `K−D`).
+- `H1coh` + 3 instances: trivially satisfiable structural axioms (any finite-dim
+  `ℂ`-space, e.g. `ℂⁿ`, is a witness).
+
+A Gemini "Lean typing" sub-remark on `cohomologyLES` (claiming `Function.Exact`
+"doesn't exist") was a hallucination from the English prose — `Function.Exact :
+(M→N)→(N→P)→[Zero P]→Prop` is genuine Mathlib API, the file uses it with
+zero-map padding at the ends, and it compiles on `main`. Non-vacuity is also
+witnessed in-tree: `h0_canonical_L3` proves `ℓ(K)=g`, which a degenerate
+`H1coh ≡ 0` would force to `0`, contradicting `genus(Elliptic)=1`. The axioms
+are no longer review-pending: the in-code docstrings now read **"vetted DT+CX;
+not yet discharged"** (the review-pending `(NOT VERIFIED)` tag is cleared). They
+remain axioms until discharged to Lean proofs.
+
+*Codex caveats (both by-design, not soundness issues):* (i) the LES skyscraper
+term is `ULift ℂ`, not literal `ℂ` — intentional universe-lift so all six terms
+share universe `u`; `ULift ℂ ≅ ℂ` as ℂ-spaces and `skyscraperFiber_finrank`
+proves `finrank = 1`, so the `χ`-jump-by-1 is intact. (ii) `serreDuality_equiv`
+asserts `Nonempty (≃ₗ)`, i.e. the dimension-level perfect-pairing existence, not
+the natural Serre pairing — deliberate, and exactly what the dimension-form
+theorems consume. *Prior art (`CX`):* Mathlib has **general** sheaf-cohomology
+infra (`Sheaf.H` via `Ext`, Čech, a Mayer–Vietoris LES, skyscraper sheaves) and a
+meromorphic-divisor API, but **no importable Riemann–Roch/Serre-for-curves** —
+the eventual Lean discharge builds on the general infra, not a finished theorem
+(consistent with the `Sheaf.H` finiteness wall noted in the Phase-B design).
+
 ---
 
 ## Triage
@@ -215,7 +277,7 @@ Per the review plan, axioms are split into two classes:
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (32 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (26 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -224,11 +286,12 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 16 | classical theorems, citable | high |
-| 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
+| 1 — textbook-standard | 13 | classical theorems, citable | high |
+| 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 11 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
+| 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `DT`+`CX`-vetted SATISFIABLE/FAITHFUL 2026-06-09, **Likely correct**; vetted but not yet discharged | research |
 
 ---
 
@@ -239,8 +302,6 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 
 | Axiom | File:Line | Reference |
 |-------|-----------|-----------|
-| `AX_RiemannRoch` | `Axioms/RiemannRoch.lean:59` | Forster §16; Miranda Ch. VI |
-| `AX_SerreDuality` | `Axioms/SerreDuality.lean:54` | Forster §17; Griffiths–Harris Ch. 1 |
 | `AX_RiemannBilinear` | `Axioms/RiemannBilinear.lean:69` | Griffiths–Harris Ch. 2 (bilinear relations) |
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
@@ -274,7 +335,8 @@ or contradictory, or doesn't pin down the intended object. The three marked
 |-------|-----------|------|
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
-| `LineBundle`, `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (6) | `RiemannSurface/LineBundle.lean:46–99` | line-bundle / sheaf-cohomology **type stubs**. `H0` is now `riemannRochSpace D` with inherited submodule instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
+| `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
+| Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08, and **per-axiom for satisfiability/faithfulness 2026-06-09 (`DT`, verdict SATISFIABLE/FAITHFUL, rating Likely correct — see the Layer-3 vetting note above)**; references Forster §§16–17. Vetted (DT+CX); not yet discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
 
@@ -304,7 +366,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: 1 manifold/topology instance (`instIsManifold`) + 1 affine prop (`AX_PlaneCurveAffine_connected`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/projective `instNonempty`/affine `nonempty`/affine `noncompact` all now proved) | `ProjectiveCurve/PlaneCurve.lean` & `Atlas.lean` | 2 |
+| `PlaneCurve`: `instIsManifold` + 1 affine prop `AX_PlaneCurveAffine_connected` (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117** — Euler + IFT affine charts, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 2 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -360,6 +422,9 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `PlaneCurve.instChartedSpace` *(#117, 2026-06-09)* | concrete `ChartedSpace` for the smooth projective plane curve: Euler's homogeneous-function theorem ⇒ nonvanishing dehomogenized gradient on each `x/y/z=1` patch, 6 local charts via the proved Inverse Function Theorem (#99), open-embedding atlas. `#print axioms` standard-3, no `sorryAx`. (Contributed by @daouid.) | `ProjectiveCurve/PlaneCurve/{Euler,AffineChart,Atlas,CrossCompat}.lean` |
+| `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
+| `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
 | `AX_PlaneCurveAffine_noncompact` *(2026-06-07)* | finite-exception projection of the affine zero locus onto `ℂ`; compactness of the affine patch would make `ℂ` compact after adjoining a finite compact set | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_PlaneCurveAffine_nonempty` *(2026-06-07)* | dehomogenize to `affinePolynomial H.F.val`; `affinePolynomial_not_isUnit` plus `exists_eval_eq_zero_of_not_isUnit_mvPolynomial` gives a complex zero in the affine patch | `ProjectiveCurve/PlaneCurve.lean` |
 | `AX_Period_Triangle` *(2026-06-06)* | conjugate the triangle loop to `Classical.arbitrary X`; use `loopDevValH1Hom_eq_loopIntegralToH1_apply` + `loop_canonicalArcIntegral_mem_periodLatticeInBasis` from the analytic cycle basis; cancel bridge/reverse periods by `canonicalArcIntegral_trans`/`_reverse` | `Axioms/AbelJacobiMap.lean`, `RiemannSurface/LoopIntegralHom.lean`, `RiemannSurface/ArcAlgebra.lean` |
@@ -379,7 +444,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 | **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
 | **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` as a pure parity dispatch `if h : Odd … then HyperellipticOdd H h else HyperellipticEvenProj H`; the instances are defined via `Decidable.casesOn` with an explicit motive (`carrierOf`/`topologicalSpaceOf`) so they reduce in lockstep with the carrier's `dite` (solving the dependent-`dite` defeq that defeats a naive `split`); the equivs are `Homeomorph`s and the 4 prop instances transport through them. **Kernel-verified:** `#print axioms Hyperelliptic` = the 3 standard (carrier is atlas-free), `instTopologicalSpace` standard-3, and `instChartedSpace`/`instIsManifold` correctly transport the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms — that is where the atlas dependency belongs. 6 named axioms → `def`/instances, **no NEW axioms**. | `ProjectiveCurve/Hyperelliptic.lean` |
-| **PlaneCurve Tier-1 & Tier-2** (6): `PlaneCurve`, `instTopologicalSpace`, `instT2Space`, `instCompactSpace`, `instChartedSpace`, `instConnectedSpace` *(Phase 3 plus later discharges & PR #117)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype; `instT2Space` inherited from the proved `projectivization_t2Space`; `instCompactSpace` from the compact representative slice; `instChartedSpace` fully proved via implicit function theorem on smooth locus; `instConnectedSpace` proved from affine connectedness. `#print axioms` verified standard-3 for type/topology/compact/T2/charted-space; `instConnectedSpace` depends only on `AX_PlaneCurveAffine_connected`. `instNonempty` proved. `instIsManifold` remains an honest axiom. | `ProjectiveCurve/PlaneCurve.lean`, `Atlas.lean` & `CrossCompat.lean` |
+| **PlaneCurve Tier-1** (4): `PlaneCurve`, `instTopologicalSpace`, `instT2Space`, `instCompactSpace` *(Phase 3 plus later T2/compactness discharges)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype; `instT2Space` inherited from the proved `projectivization_t2Space`; `instCompactSpace` follows from the compact unit-norm representative slice `planeCurveUnitZero` mapping continuously and surjectively onto `PlaneCurve`. `#print axioms PlaneCurve` = standard 3. `instNonempty` (it had rested on the *false* `AX_PlaneCurveAffine_nonempty`), `instConnectedSpace`, the atlas, and the affine props remain honest axioms. *(`infinityInverseMap`'s Phase-3 discharge was reverted in review — arbitrary-root `def`.)* | `ProjectiveCurve/PlaneCurve.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
@@ -406,7 +471,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 42 — the vendored Kirov subtree is now axiom-free, so 42 is the total.
+#   prints 42 — the vendored Kirov subtree is now axiom-free, so 42 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1, less PlaneCurve.instChartedSpace #117).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
