@@ -11,7 +11,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Build** | `lake build Jacobians` green (8602 jobs) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 41, all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 43 (RR + Serre now **theorems** over a 7-axiom Layer-3 cohomology scaffold, `(NOT VERIFIED)`), all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 3 anchor-statement deferrals (the separate adelic RR/Serre route) |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 

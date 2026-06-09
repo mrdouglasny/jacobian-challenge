@@ -10,7 +10,8 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 41** — all **41** in our own modules. The vendored
+**Active project axioms: 43** — all **43** in our own modules (#126 added 7 Layer-3
+cohomology axioms `(NOT VERIFIED)`; this PR's discharge retires the 5 RR/Serre + opaque-`H1` axioms). The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -234,11 +235,12 @@ Per the review plan, axioms are split into two classes:
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 15 | classical theorems, citable | high |
-| 2a — data-existence | 8 | "this function/object exists with spec S" | spec needs review |
+| 1 — textbook-standard | 13 | classical theorems, citable | high |
+| 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 12 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
+| 3 — Layer-3 cohomology (#126) | 7 | axiomatic `H1coh`(+3 instances)+`cohomologyLES`+`h1coh_zero_finrank`+`serreDuality_equiv` — `(NOT VERIFIED)` | research |
 
 ---
 
@@ -417,7 +419,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 41 — the vendored Kirov subtree is now axiom-free, so 41 is the total.
+#   prints 43 — the vendored Kirov subtree is now axiom-free, so 43 is the total (incl. 7 Layer-3 axioms, less the 5 discharged RR/Serre+H1).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -434,7 +436,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 41
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 43
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
