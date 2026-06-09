@@ -274,18 +274,23 @@ the eventual Lean discharge builds on the general infra, not a finished theorem
 
 ## Triage
 
-Per the review plan, axioms are split into two classes:
+Per the review plan, axioms are split into the following triage buckets. Classes
+1 and 2 are the original audit buckets; Class 3 tracks newly introduced Layer-3
+primitives that are statement-vetted but not yet discharged.
 
-- **Class 1 — standard form, textbook-proven** (15 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (10 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (26 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (22 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
   obvious discharge. **This is the class to focus on.** Subdivided 2a–2d
   below, with 2d (Flagged) the most urgent.
+- **Class 3 — Layer-3 primitives** (9 axioms). Standard cohomology and
+  Riemann-bilinear primitives introduced to prove earlier table entries as
+  theorems while keeping the remaining trust boundary explicit.
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
@@ -423,7 +428,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
-| `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I·τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
+| `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I | τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
 | `PlaneCurve.instChartedSpace` *(#117, 2026-06-09)* | concrete `ChartedSpace` for the smooth projective plane curve: Euler's homogeneous-function theorem ⇒ nonvanishing dehomogenized gradient on each `x/y/z=1` patch, 6 local charts via the proved Inverse Function Theorem (#99), open-embedding atlas. `#print axioms` standard-3, no `sorryAx`. (Contributed by @daouid.) | `ProjectiveCurve/PlaneCurve/{Euler,AffineChart,Atlas,CrossCompat}.lean` |
 | `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
 | `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
