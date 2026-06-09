@@ -277,6 +277,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1) |
 | `LineBundle`, `H1`(+`instAddCommGroup`,`instModule`), `canonicalDivisor`, `LineBundle.ofDivisor` (6) | `RiemannSurface/LineBundle.lean:46–99` | line-bundle / sheaf-cohomology **type stubs**. `H0` is now `riemannRochSpace D` with inherited submodule instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
+| Layer 3 Phase-B cohomology scaffold: `H1coh`(+`instAddCommGroup`,`instModule`,`instFiniteDimensional`), `cohomologyLES`, `h1coh_zero_finrank`, `serreDuality_equiv` | `Layer3/Cohomology.lean:33–138` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: finite-dimensional `H1coh`, the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08; references Forster §§16–17. `(NOT VERIFIED)` until discharged. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
 ### 2b. Definition-asserting axioms — *may mask a bad definition*
 
