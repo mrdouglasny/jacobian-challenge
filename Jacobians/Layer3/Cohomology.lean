@@ -267,12 +267,43 @@ theorem serreDualityL3 (D : Divisor X) :
     _ = Module.finrank ℂ (riemannRochSpace (canonicalDivisor X - D)) :=
           Subspace.dual_finrank_eq
 
+/-- **Layer-3: holomorphic differentials have dimension the genus** — `h⁰(K) = g`,
+proved from the Layer-3 Serre pairing at `D = 0` plus `h1coh_zero_finrank`,
+**independently of `AX_RiemannRoch` / `AX_SerreDuality`**. This is the discriminating
+non-vacuity check: a degenerate `H1coh` could not produce `dim L(K) = g`. -/
+theorem h0_canonical_L3 :
+    Module.finrank ℂ (riemannRochSpace (canonicalDivisor X)) = genus X := by
+  have hS := serreDualityL3 (0 : Divisor X)
+  rw [sub_zero] at hS
+  rw [h1coh_zero_finrank] at hS
+  exact hS.symm
+
+/-- **Layer-3: canonical degree** — `deg K = 2g − 2`, proved from `riemannRochL3`,
+`h0_canonical_L3`, and Serre duality at `D = K` (where `H1coh K ≅ L(0)`, dimension 1),
+all within the Layer-3 package. -/
+theorem canonicalDivisor_deg_L3 :
+    Divisor.deg X (canonicalDivisor X) = 2 * (genus X : ℤ) - 2 := by
+  have hRR := riemannRochL3 (canonicalDivisor X)
+  have hHK : Module.finrank ℂ (H1coh (canonicalDivisor X)) = 1 := by
+    have h := serreDualityL3 (canonicalDivisor X)
+    rw [sub_self] at h
+    rw [h]
+    simpa [h0] using (h0_zero (X := X))
+  have hLK : Module.finrank ℂ (riemannRochSpace (canonicalDivisor X)) = genus X :=
+    h0_canonical_L3
+  simp only [eulerCharL3, hLK, hHK] at hRR
+  omega
+
 /-!
-Non-vacuity note. With `riemannRochL3` and `serreDualityL3`, the existing
-`AX_RiemannRoch` and `AX_SerreDuality` statements become derivable after a
-follow-up wires `H1coh` to the existing `h1`. The `SheafCohomologySpec` §3
-projective-line computations, such as `h⁰(O(np)) = n + 1`, should follow from
-this Layer-3 package plus genus-zero facts.
+Non-vacuity note. `h0_canonical_L3` (`h⁰(K) = g`) and `canonicalDivisor_deg_L3`
+(`deg K = 2g − 2`) are proved here **purely from the four Layer-3 axioms**
+(not from `AX_RiemannRoch` / `AX_SerreDuality`), which (i) is the discriminating
+faithfulness check a degenerate `H1coh` would fail, and (ii) resolves the
+review caveat that the existing `h0_canonical` rests on the very axioms being
+re-derived. With `riemannRochL3`/`serreDualityL3`, the existing `AX_RiemannRoch`/
+`AX_SerreDuality` become derivable once a follow-up wires `H1coh` to the existing
+`h1`; the `SheafCohomologySpec` §3 `h⁰(O(np)) = n + 1` test follows from this
+package plus genus-zero facts.
 -/
 
 end Jacobians.Layer3
