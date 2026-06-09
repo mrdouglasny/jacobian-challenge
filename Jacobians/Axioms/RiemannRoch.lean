@@ -21,11 +21,9 @@ the axiom takes them as typeclass arguments.
   a biholomorphism `X → ℂP¹`. This gives the `⇒` direction of
   `genus_eq_zero_iff_homeo` modulo `AX_SerreDuality`.
 
-**Why axiomatized.** `H⁰`, `H¹`, `𝒪(D)`, `deg D` are all sheaf-cohomology
-concepts on complex manifolds, which Mathlib does not supply at this
-pin. Proving Riemann-Roch from scratch requires either sheaf cohomology
-+ Čech or the analytic machinery (heat kernel / Euler characteristic
-via ∂̄). Both are substantial projects on their own.
+This declaration is now a theorem wrapper over the Layer-3 cohomology scaffold:
+`H1` is definitionally `Layer3.H1coh`, and the numerical identity follows from
+`Layer3.riemannRochL3`.
 
 ## History
 
@@ -56,13 +54,15 @@ finite-dimensional, which holds classically by compactness):
     dim H⁰(X, 𝒪(D)) − dim H¹(X, 𝒪(D)) = deg D + 1 − g.
 
 Both sides cast to `ℤ` to avoid `Nat`-subtraction truncation. -/
-axiom AX_RiemannRoch {X : Type*} [TopologicalSpace X] [T2Space X]
+theorem AX_RiemannRoch {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (D : Divisor X)
     [_h0fd : FiniteDimensional ℂ (H0 (LineBundle.ofDivisor D))]
     [_h1fd : FiniteDimensional ℂ (H1 (LineBundle.ofDivisor D))] :
     (Module.finrank ℂ (H0 (LineBundle.ofDivisor D)) : ℤ) -
     (Module.finrank ℂ (H1 (LineBundle.ofDivisor D)) : ℤ) =
-      Divisor.deg X D + 1 - (genus X : ℤ)
+      Divisor.deg X D + 1 - (genus X : ℤ) := by
+  simpa [H0, H1, Jacobians.Layer3.eulerCharL3] using
+    (Jacobians.Layer3.riemannRochL3 (X := X) D)
 
 end Jacobians.Axioms
