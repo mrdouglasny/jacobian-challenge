@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-07.*
+*Last updated 2026-06-09.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 42** — all **42** in our own modules. The vendored
+**Active project axioms: 40** — all **40** in our own modules. The vendored
 Kirov subtree is now **axiom-free**: its 2 unused `:= sorry`-handoff axioms
 (`genus_eq_zero_iff_homeo`, `ambientPhi_ambientPsi_eq`) were deleted 2026-06-04
 (they had no references beyond their own declarations; the challenge uses the
@@ -304,7 +304,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: 3 manifold/topology instances (`instConnectedSpace`/`instChartedSpace`/`instIsManifold`) + 1 affine prop (`AX_PlaneCurveAffine_connected`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/projective `instNonempty`/affine `nonempty`/affine `noncompact` all now proved) | `ProjectiveCurve/PlaneCurve.lean` | 4 |
+| `PlaneCurve`: 1 manifold/topology instance (`instIsManifold`) + 1 affine prop (`AX_PlaneCurveAffine_connected`; type + `instTopologicalSpace` discharged Phase-3 Tier-1; `instT2Space`/`instCompactSpace`/`instConnectedSpace`/`instChartedSpace`/projective `instNonempty`/affine `nonempty`/affine `noncompact` all now proved) | `ProjectiveCurve/PlaneCurve.lean` & `Atlas.lean` | 2 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
@@ -379,7 +379,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 | `Hyperelliptic.{instCompactSpace,instConnectedSpace,instT2Space,instNonempty}` *(Phase 2, 2026-06-04)* | `instance`s by parity dispatch through `AX_Hyperelliptic_oddEquiv`/`evenEquiv`: `.symm.compactSpace`/`.symm.t2Space`, `.connectedSpace_iff.mpr inferInstance`, `Nonempty.map .symm inferInstance` | `ProjectiveCurve/Hyperelliptic.lean` |
 | **bridgePath cluster — all 6**: `bridgePath`, `bridgePath_continuous`, `bridgePath_chart_differentiable`, `bridgePath_at_zero`, `bridgePath_at_one`, `bridgePath_lineIntegrable` *(2026-06-04)* | new `BridgePath.lean` proves a connected complex 1-manifold is smoothly path-connected: `bridgePathImpl` = chart-ball Lebesgue subdivision of a `PathConnectedSpace` path, replaced piecewise by flat-endpoint affine segments (`flatSegment`, `flatReparam`) concatenated via `Path.trans`; `_continuous` from `Path.continuous_extend`, endpoints `@[simp]`, `_chart_differentiable` from the recentring chart-transition (`contDiffWithinAt_ext_coord_change` ⇒ `DifferentiableAt.restrictScalars`) + per-piece interior + dyadic junction glue (`HasDerivWithinAt.union`). `bridgePath` becomes a `def`, the rest theorems backing the same names. `_lineIntegrable` then follows from continuity of `Vendor.Kirov.pathSpeed (bridgePath …)` ⇒ `IntervalIntegrable` (`#print axioms` = standard 3; `lake build Jacobians` green, no downstream fallout) | `Bridge/BridgePath.lean` + `Bridge/KirovLineIntegral.lean` |
 | **Hyperelliptic type cascade** (6): `Hyperelliptic`, `instTopologicalSpace`, `instChartedSpace`, `instIsManifold`, `AX_Hyperelliptic_oddEquiv`, `AX_Hyperelliptic_evenEquiv` *(Phase 3, 2026-06-04)* | `Hyperelliptic` → `noncomputable def` as a pure parity dispatch `if h : Odd … then HyperellipticOdd H h else HyperellipticEvenProj H`; the instances are defined via `Decidable.casesOn` with an explicit motive (`carrierOf`/`topologicalSpaceOf`) so they reduce in lockstep with the carrier's `dite` (solving the dependent-`dite` defeq that defeats a naive `split`); the equivs are `Homeomorph`s and the 4 prop instances transport through them. **Kernel-verified:** `#print axioms Hyperelliptic` = the 3 standard (carrier is atlas-free), `instTopologicalSpace` standard-3, and `instChartedSpace`/`instIsManifold` correctly transport the (sound, unproven) odd-`infinityChart` + even-atlas-compat axioms — that is where the atlas dependency belongs. 6 named axioms → `def`/instances, **no NEW axioms**. | `ProjectiveCurve/Hyperelliptic.lean` |
-| **PlaneCurve Tier-1** (4): `PlaneCurve`, `instTopologicalSpace`, `instT2Space`, `instCompactSpace` *(Phase 3 plus later T2/compactness discharges)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype; `instT2Space` inherited from the proved `projectivization_t2Space`; `instCompactSpace` follows from the compact unit-norm representative slice `planeCurveUnitZero` mapping continuously and surjectively onto `PlaneCurve`. `#print axioms PlaneCurve` = standard 3. `instNonempty` (it had rested on the *false* `AX_PlaneCurveAffine_nonempty`), `instConnectedSpace`, the atlas, and the affine props remain honest axioms. *(`infinityInverseMap`'s Phase-3 discharge was reverted in review — arbitrary-root `def`.)* | `ProjectiveCurve/PlaneCurve.lean` |
+| **PlaneCurve Tier-1 & Tier-2** (6): `PlaneCurve`, `instTopologicalSpace`, `instT2Space`, `instCompactSpace`, `instChartedSpace`, `instConnectedSpace` *(Phase 3 plus later discharges & PR #117)* | `PlaneCurve` → faithful subtype `def` of `Projectivization ℂ (Fin 3 → ℂ)` via a rep-independent existential predicate (`∃ v hv, mk v hv = p ∧ eval v = 0`, using `H.F.homogeneous`); topology from the subtype; `instT2Space` inherited from the proved `projectivization_t2Space`; `instCompactSpace` from the compact representative slice; `instChartedSpace` fully proved via implicit function theorem on smooth locus; `instConnectedSpace` proved from affine connectedness. `#print axioms` verified standard-3 for type/topology/compact/T2/charted-space; `instConnectedSpace` depends only on `AX_PlaneCurveAffine_connected`. `instNonempty` proved. `instIsManifold` remains an honest axiom. | `ProjectiveCurve/PlaneCurve.lean`, `Atlas.lean` & `CrossCompat.lean` |
 
 The two cocycle axioms (task #21, 2026-06-01) were the only **unsound**
 axioms in the repo; their retirement makes `genus_HyperellipticEven_eq`
