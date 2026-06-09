@@ -14,6 +14,7 @@ torus. Build plan: `docs/planning/LAYER3_PHASE_C_BUILD.md`.
 -/
 import Jacobians.Layer3.RiemannBilinear
 import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodLatticeBase
 import Jacobians.RiemannSurface.Periods
 import Jacobians.AbelianVariety.Siegel
 
@@ -327,6 +328,113 @@ theorem normalizedBasis_apply {x₀ : X} (b : AnalyticCycleBasis X x₀)
   show eInvMat b cω (Pi.single j 1) = fun k => (aPeriodMatrix b cω)⁻¹ k j
   rw [eInvMat, LinearEquiv.ofLinear_apply, Matrix.toLin'_apply, Matrix.mulVec_single_one]
   rfl
+
+/-- **Riemann bilinear relations, PROVED** (the exact existential of
+`AX_RiemannBilinear`): there exist a symplectic `H₁` basis, an A-normalized
+basis of holomorphic 1-forms, and a Siegel upper-half-space matrix `τ` whose
+entries are the B-periods. Derived from `AX_RBR1` + `AX_RBR2` through the
+axiom-free matrix engine — the symplectic basis comes from
+`AX_AnalyticCycleBasis`, the starting form basis from `Module.finBasis`
+(`genus X` is definitionally `finrank ℂ (HolomorphicOneForm X)`). -/
+theorem riemannBilinear_exists (x₀ : X) :
+    ∃ (b : AnalyticCycleBasis X x₀)
+      (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+      (τ : SiegelUpperHalfSpace (genus X)),
+      (∀ i j : Fin (genus X),
+        periodMap X x₀ (b.isBasis (αEmbed i)) (cω j) = if i = j then 1 else 0) ∧
+      (∀ i j : Fin (genus X),
+        τ.val i j = periodMap X x₀ (b.isBasis (βEmbed i)) (cω j)) := by
+  obtain ⟨b⟩ := AX_AnalyticCycleBasis x₀
+  set cω₀ : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X) :=
+    Module.finBasis ℂ (HolomorphicOneForm X) with hcω₀
+  refine ⟨b, normalizedBasis b cω₀, tauSiegel b cω₀, fun i j => ?_, fun i j => ?_⟩
+  · have h := congrFun (congrArg Prod.fst (periodVec_normalizedForm b cω₀ j)) i
+    rw [normalizedBasis_apply, ← periodVec_fst, h]
+    simp [col, Pi.single_apply]
+  · have h := congrFun (congrArg Prod.snd (periodVec_normalizedForm b cω₀ j)) i
+    rw [normalizedBasis_apply, ← periodVec_snd, h, tauSiegel_val]
+    rfl
+
+/-! ### Period-lattice discharge
+
+`periodLatticeInBasis X x₀ b` (the lattice consumed by the Jacobian bridge) is
+a discrete full `ℤ`-lattice for EVERY form basis `b`: first identify it for the
+A-normalized basis with the engine's `periodLattice τ` (`[I | τ]` columns, via
+the symmetry of `τ` for the row/column bridge), then transport to an arbitrary
+basis along the dual-coordinate change (a `ℂ`-linear automorphism of `ℂ^g`),
+using Mathlib's `ZLattice.comap` instances. -/
+
+theorem periodMapInBasis_apply (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (γ : H1 X x₀) (i : Fin (genus X)) :
+    periodMapInBasis X x₀ b γ i = periodMap X x₀ γ (b i) := by
+  simp [periodMapInBasis, Module.Basis.equivFun_apply, Module.Basis.dualBasis_repr]
+
+private theorem range_eq_span_image {M N : Type*} [AddCommGroup M] [AddCommGroup N]
+    [Module ℤ M] [Module ℤ N] {ι : Type*} (v : Module.Basis ι ℤ M) (f : M →ₗ[ℤ] N) :
+    LinearMap.range f = Submodule.span ℤ (Set.range (⇑f ∘ ⇑v)) := by
+  rw [LinearMap.range_eq_map, ← v.span_eq, Submodule.map_span, Set.range_comp]
+
+/-- The α-cycles of the symplectic basis map to the `I`-columns. -/
+theorem periodMapInBasis_normalized_alpha {x₀ : X} (cb : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) (i : Fin (genus X)) :
+    periodMapInBasis X x₀ (normalizedBasis cb cω) (cb.isBasis (αEmbed i))
+      = periodColumns (tauMatrix cb cω) (Sum.inl i) := by
+  funext j
+  rw [periodMapInBasis_apply, normalizedBasis_apply, periodColumns_inl]
+  have h := congrFun (congrArg Prod.fst (periodVec_normalizedForm cb cω j)) i
+  rw [← periodVec_fst, h]
+  simp [col, Pi.single_apply, eq_comm]
+
+/-- The β-cycles of the symplectic basis map to the `τ`-columns (via `τ = τᵀ`). -/
+theorem periodMapInBasis_normalized_beta {x₀ : X} (cb : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) (i : Fin (genus X)) :
+    periodMapInBasis X x₀ (normalizedBasis cb cω) (cb.isBasis (βEmbed i))
+      = periodColumns (tauMatrix cb cω) (Sum.inr i) := by
+  funext j
+  rw [periodMapInBasis_apply, normalizedBasis_apply, periodColumns_inr]
+  have h := congrFun (congrArg Prod.snd (periodVec_normalizedForm cb cω j)) i
+  rw [← periodVec_snd, h]
+  have hs := tauMatrix_isSymm cb cω
+  simpa [col] using Matrix.IsSymm.apply hs j i
+
+/-- The symplectic-basis image of the normalized period map is exactly the set
+of `[I | τ]` columns. -/
+theorem range_periodMapInBasis_normalized {x₀ : X} (cb : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Set.range (⇑(periodMapInBasis X x₀ (normalizedBasis cb cω)) ∘ ⇑cb.isBasis)
+      = Set.range (periodColumns (tauMatrix cb cω)) := by
+  apply Set.Subset.antisymm
+  · rintro _ ⟨k, rfl⟩
+    by_cases h : (k : ℕ) < genus X
+    · have hkeq : αEmbed (X := X) ⟨(k : ℕ), h⟩ = k := Fin.ext rfl
+      refine ⟨Sum.inl ⟨k, h⟩, ?_⟩
+      rw [← periodMapInBasis_normalized_alpha cb cω ⟨k, h⟩, Function.comp_apply, hkeq]
+    · have hk2 := k.isLt
+      have hkeq : βEmbed (X := X) ⟨(k : ℕ) - genus X, by omega⟩ = k := by
+        apply Fin.ext
+        simp only [βEmbed]
+        omega
+      refine ⟨Sum.inr ⟨(k : ℕ) - genus X, by omega⟩, ?_⟩
+      rw [← periodMapInBasis_normalized_beta cb cω ⟨(k : ℕ) - genus X, by omega⟩,
+        Function.comp_apply, hkeq]
+  · rintro _ ⟨k, rfl⟩
+    cases k with
+    | inl i => exact ⟨αEmbed i, periodMapInBasis_normalized_alpha cb cω i⟩
+    | inr i => exact ⟨βEmbed i, periodMapInBasis_normalized_beta cb cω i⟩
+
+/-- In normalized coordinates, the period lattice is the engine's `[I | τ]`
+column lattice. -/
+theorem periodLatticeInBasis_normalized_eq {x₀ : X} (cb : AnalyticCycleBasis X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    periodLatticeInBasis X x₀ (normalizedBasis cb cω)
+      = periodLattice (tauMatrix cb cω) (tauMatrix_posDef cb cω) := by
+  rw [periodLatticeInBasis, range_eq_span_image cb.isBasis,
+    range_periodMapInBasis_normalized]
+  have hb : ⇑(periodBasis (tauMatrix cb cω) (tauMatrix_posDef cb cω))
+      = periodColumns (tauMatrix cb cω) :=
+    funext (periodBasis_apply _ _)
+  rw [periodLattice, hb]
 
 end
 
