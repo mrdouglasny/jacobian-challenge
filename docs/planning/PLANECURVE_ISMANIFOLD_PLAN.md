@@ -70,10 +70,40 @@ lemmas... NO — no sorries on main: PR 1 must keep `instIsManifold` an axiom an
 only land the proved compat lemmas + infrastructure); PR 2..n = cross-patch
 pairs; final PR = assemble `chartAt_compat`, convert the axiom, count 41 → 40.
 
-## Risks
+## Risks + gap analysis (first attempt, 2026-06-09)
 
+- **The mixed-chart derivative-invertibility gap (the real blocker).** The
+  mixed transitions (projY↔projX) need `ContDiffAt` of the IFT chart's
+  `symm` at arbitrary points of the transition source. Mathlib's
+  `OpenPartialHomeomorph.contDiffAt_symm` requires the derivative of `phi` to
+  be invertible **at the preimage point** — but `phiLocalHomeomorph`'s source
+  is whatever Mathlib's IFT ball produces, NOT visibly contained in the
+  nonvanishing locus `{∂₀F ≠ 0}`. Mathematically it IS contained (an
+  `ApproximatesLinearOn` ball with `c < ‖f'⁻¹‖⁻¹` forces every interior
+  derivative to be a small perturbation of the invertible `f'`; alternatively
+  injective-analytic ⇒ nonvanishing Jacobian, but that's NOT in Mathlib).
+  Two resolution routes:
+  1. **(Recommended) Restrict the charts**: redefine each `affineChartProj*`
+     as the restriction of `phiLocalHomeomorph` to the open set
+     `source ∩ {∂F ≠ 0}` (still a nbhd of the center, so `ChartedSpace`
+     survives verbatim). Then every source point has invertible derivative
+     BY CONSTRUCTION and `contDiffAt_symm` applies pointwise. Small
+     modification to #117's `AffineChart.lean` (coordinate with @daouid).
+  2. Prove the perturbation lemma (`ApproximatesLinearOn` + `c < N⁻¹` ⇒
+     derivative invertible on the ball) as a `GeneralResults` addition —
+     more reusable, more work.
+- **Definitional plumbing**: the #117 charts are structure literals inside
+  tactic blocks with no `_apply`/`_symm_apply` simp API; even the trivial
+  same-kind (YY/XX) transitions — which are the **identity on source**
+  (chart application = coordinate extraction, so `contDiffOn_id.congr`) —
+  need `dsimp [affineChartProjY]`-style unfolding à la
+  `affineChartProjY_mem_source`. PR 1 should first add the missing
+  `_apply`/`_symm_apply` lemmas, then the diagonal cases.
 - The `prefChart` Classical dite makes the leaf case-split 2×2 per pair; need
-  dite-stable simp lemmas (`affineChartAt_of_not_mem_smoothLocus*` analogs —
-  check what #117 already provides).
+  dite-stable simp lemmas (`affineChartAt_of_not_mem_smoothLocus*` analogs).
 - Cross-patch nonvanishing extraction is where the even-atlas proof spent its
   effort; expect the same.
+
+**Status 2026-06-09**: scoped + claimed (#52); first-attempt analysis above;
+parked pending the route-1-vs-2 design choice (worth a quick owner/daouid
+ping since route 1 touches #117's file).
