@@ -89,6 +89,38 @@ period cluster axiomatized and reassess (or do only the parts that net out).
 Each retained nut-axiom gets the full vetting protocol (citation, satisfiability,
 Gemini review) and its own discharge tracker.
 
+### Phase-0 findings — hands-on Mathlib recon (2026-06-08, our pin)
+
+Cross-checks the running Codex audit; all from `.lake/packages/mathlib`.
+
+- **P0.1 sheaf-cohomology LES — GREEN (compile-confirmed).** `lake env lean`
+  type-checks: `CategoryTheory.Sheaf.H : Sheaf J AddCommGrpCat → ℕ → Type`
+  (sheaf cohomology, needs `[HasSheafify] [HasExt]`), `Sheaf.H.equiv₀ : F.H 0 ≃+
+  Γ(F)` (H⁰ = global sections), and `ShortComplex.ShortExact.δ : X₃.homology i ⟶
+  X₁.homology j` + `homology_exact₁/₂/₃` (the homological LES). So the keystone's
+  homological algebra is **assemble existing API**, not build-from-scratch — the
+  single biggest flagged risk is substantially de-risked. *Open architecture
+  choice (audit to detail): model `X` via an open-cover Grothendieck site with
+  `O` an `AddCommGrp`-valued abelian sheaf so `Sheaf.H` applies; derive the
+  sheaf-cohomology LES from a sheaf SES through `HasExt`/derived functors.*
+- **P0.2 Dolbeault (N1) — GAP.** No `∂̄`/Dolbeault/inhomogeneous-CR in
+  `Analysis.Complex`. Build (Cauchy-transform) or one clean low-level axiom.
+- **P0.3 residue surface-Stokes (N2) — PARTIAL/positive.** `MeasureTheory.Integral.
+  DivergenceTheorem` + `BoxIntegral.DivergenceTheorem` + `MeasureTheory.Integral.
+  CircleIntegral` present — the pieces for the punctured-surface residue argument
+  exist; assembly needed.
+- **P0.4 symplectic basis (N3-algebra) — GAP.** `LinearAlgebra.SymplecticGroup`
+  has the standard matrix `J` + symplectic group, but **no** "alternating
+  nondegenerate form ⇒ symplectic/Darboux basis" lemma (the `Darboux.lean` in
+  Mathlib is the calculus MVT, unrelated). Pure-linear-algebra build; the
+  unimodular-over-ℤ refinement is the danger-zone half.
+
+**Provisional gate read: GO.** The decisive P0.1 is compile-confirmed; the three
+gaps (Dolbeault, residue assembly, symplectic-basis algebra) are bounded standard
+builds or at worst three clean low-level axioms — none blocks the keystone.
+Finalize once the Codex audit lands (Dolbeault cost, residue assembly feasibility,
+unimodularity route).
+
 ---
 
 ## Phase 1 — Real cohomology foundation (~3–5 wk). The keystone.
