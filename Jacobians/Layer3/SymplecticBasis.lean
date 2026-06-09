@@ -262,8 +262,6 @@ private theorem exists_symplectic_basis_aux
                   h, fOpt, hbWf]
   exact hP (finrank K V) V B halt huni rfl
 
-end Jacobians.Layer3
-
 /-- Field version of the Darboux theorem for alternating bilinear forms.
 
 This is the fallback version of the intended integral statement: over a field,
@@ -281,3 +279,5 @@ theorem exists_symplectic_basis
         (∀ i, b (Sum.inl i) = e i) ∧
         (∀ i, b (Sum.inr i) = f i) :=
   Jacobians.Layer3.exists_symplectic_basis_aux B halt huni
+
+end Jacobians.Layer3
