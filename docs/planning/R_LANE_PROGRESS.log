@@ -106,3 +106,64 @@ norm_complex_apply, whose Jacobian is literally OneOneLawAt's normSq factor;
 (iii) the ω₀-coefficient witness for IsOneZeroCoeff (+ the K-point-separating cover
 refinement above) before R6 can evaluate on real Z¹(O_K) data; (iv) cite
 resNormalization = -π⁻¹ from SignTest for the final normalization - do not re-derive.
+
+# ---- Session 3: R4 (feat/keystone-r4-integral) ----
+
+[R4a DONE] Integral.lean compiles clean (lake env lean, no warnings); 8 headlines axiom-clean
+([propext, Classical.choice, Quot.sound]): contDiff_pouCoeff, integrable_pouCoeff_mul,
+resIntegral, resFunctional, det_complexToReal_smul_one, setIntegral_image_holomorphic,
+setIntegral_overlap_relocate, setIntegral_overlap_relocate'.
+THE FUNCTIONAL: pouCoeff 𝔇 j := indicator (chartMap j '' U_j) (rhoC 𝔇 j ∘ (chart j).symm) —
+the indicator cutoff is what makes the chart-pushed weight an HONEST global planar function
+(junk values of (chart j).symm outside the target are killed because tsupport ρ_j ⊆ U_j, so
+the cutoff only removes zeros); globally ContDiff + HasCompactSupport, hence each summand
+∫ ρ̃_j·t_j integrable from IsOneOneCoeff smoothness alone.
+resIntegralFun t := ∑_j ∫_ℂ pouCoeff 𝔇 j z * t j z; resIntegral : oneOneCoeff 𝔇 →ₗ[ℂ] ℂ
+(map_add via integral_add over the member integrability; map_smul via integral_const_mul);
+resFunctional := resNormalization • resIntegral 𝔇 — R0 constant CITED, not re-derived.
+RELOCATION: setIntegral_image_holomorphic (∫_{φ''s} u = ∫_s normSq φ′ · u∘φ) from
+integral_image_eq_integral_abs_det_fderiv_smul + det_complexToReal_smul_one
+(det_ℝ(c·) = normSq c via LinearMap.det_restrictScalars + Algebra.norm_complex_apply — the
+exact scoping-inventory route); headline setIntegral_overlap_relocate: over overlapImage
+(chart reads of U_j ⊓ U_k, open/injective/holomorphic via the R1 transition atoms), the
+f-weighted integral of t_j equals the chart-k read — the CoV Jacobian is consumed by
+OneOneLawAt evaluated pointwise (Eventually.self_of_nhds). R1's normSq design paid off on
+the nose. Gotcha for posterity: chartMap j x vs (chartAt ...) x are defeq but not syntactic;
+every left_inv/right_inv rewrite needs a TYPED have (hli : ... = x := left_inv ...), and
+setIntegral_congr_fun goals need dsimp only to beta-reduce before rw.
+
+[R4b DONE] OmegaWitness.lean compiles clean; 3 headlines axiom-clean:
+localRep_transitionMap, isOneZeroCoeff_omegaCoeff, exists_omegaCoeff_ne_zero.
+THE ω₀ WITNESS: omegaCoeff 𝔇 α j := coeffAt α (𝔇.center j) (the PROVEN
+Montel.localRep/FormCoeff layer). The (1,0) law comes from localRep_transitionMap:
+localRep α c_j = φ′_{jk}·localRep α c_k on U_j ⊓ U_k, proven from the frame identity
+trivAt_symmL_one_eq_fderiv_C (SmoothPathCore: the chart-c unit tangent IS fderiv of the
+chart transition) + fderiv chain rule through φ_{jk} (transition factors as
+(chart_y∘chart_k⁻¹)∘φ near chart_j y) + ℂ-linearity of α.toFun y. Non-triviality at g ≥ 1:
+exists_omegaCoeff_ne_zero via Module.nontrivial_of_finrank_pos (finrank = kirovGenus) +
+exists_localRep_self_ne_zero + Montel.localRep_chart_transition/chartTransitionFactor_ne_zero.
+K-POINT CONSTRAINT RECORDED WHERE IT BITES: the witness is UNCONDITIONAL (any cover, any α);
+the refinement constraint is on the SCALAR w-data (HolomorphicOnOverlaps for Z¹(O_K) reps),
+surfacing at R6 evaluation — recorded in the OmegaWitness module docstring next to the g=0
+note, per the Gemini verdict's request.
+G=0 (Gemini flag on #156): docs/planning/R4_G0_NOTE.md — lane R conditioned on
+0 < kirovGenus X; NO fake witness, NO meromorphic-ω₀ generalization; genus 0 routes through
+the snapshot SerreResidueDirectGenus0* leg (S9); the case split lives at the keystone
+exists_serreDualityData instantiation (R7/R8), not inside lane R.
+
+[R4 GATES] Both files wired into the KirovDolbeault root aggregator in the same commits
+(F7 lesson); root lake build green (8758 jobs); all 11 R4 headlines #print-axioms standard-3.
+R5 NEXT NEEDS: (i) the planar Stokes atom ∫_ℂ ∂̄g = 0 for g ∈ C^∞_c (Fubini via
+volume_preserving_equiv_real_prod + intervalIntegral FTC on lines, or
+integral2_divergence_prod_of_hasFDerivAt; GreenBox is the worked precedent); (ii) the
+assembly: for a coboundary w = δh read through splitCoeff, t_j = ∂̄(β_j) with
+β = ∑_k ρ̃_k·(h_k·ω₀)-coefficients; I(δh) = ∑_j ∫ ∂̄(ρ̃_j β_j) − ∑_j ∫ (∂̄ρ̃_j)·β_j; first
+sum dies termwise by (i) (pouCoeff is ContDiff + compact support — use dbar_mul from R0 for
+the Leibniz split); second sum dies by re-inserting the PoU (sum_rhoC_apply/sum_dbarRho via
+the rhoC backbone) + setIntegral_overlap_relocate to re-route each (j,k) term + the cocycle.
+Integrands are pouCoeff-weighted ⇒ all integrability free from R4's lemmas. Cite R0's
+resNormalization; the functional to kill coboundaries on is resIntegral (normalization
+commutes). Note: pouCoeff's ∂̄ is not yet packaged — R5 should add dbar_pouCoeff lemmas
+(chart read of dbarRho) on top of contDiff_pouCoeff, or work with dbar (pouCoeff j) directly
+via DbarDisk; support lemmas (support_pouCoeff ⊆ chartMap j '' tsupport ρ_j) are implicit in
+pouCoeff_eq_zero_of_notMem_image_tsupport.
