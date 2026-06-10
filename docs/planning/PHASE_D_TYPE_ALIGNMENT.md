@@ -647,3 +647,17 @@ Cross-cutting checks (all clear):
    `CohomologyLESData`. Axioms 37 → 36.
 5. `h1coh_zero_finrank` / `serreDuality_equiv`: parked behind the keystone
    (`exists_serreDualityData`, Phase B).
+
+---
+
+## A2 faithfulness-vetting verdicts (2026-06-10, deep-think, one query per item)
+
+| Item | Verdict | Key point |
+|---|---|---|
+| `FiniteCover.cechH1` (+ `MGerm`/`OmegaD`/`ordU`, deltas) | **Standard** | Full-product non-alternating cochains ARE Forster §12's own convention (p. 92); degenerate-triple identities (g_ii=0, g_ij=−g_ji) verified, so it equals alternating H¹. Codiscrete-germ quotient kills exactly removable-singularity junk. |
+| `SkyscraperLES` (+ Base; h0Incl, h0ToSky, f₃, h1Map, exactness) | **Standard** | Middle term as literal ℂ with f₂ not-required-surjective is the correct (2026-06-02-fixed) design; rank–nullity walk shows ANY inhabitant forces the real χ-jump, including the f₂=0 base-point edge. Not satisfiable by dimension-distorting data. |
+| `linearSystem D` + `germZeroSubmodule` + `globalSectionsEquivQuot` | **Standard** | `orderW ≡ ⊤` set is discrete ⇒ junk kernel exactly; quotient recovers classical L(D), `lDim` = Forster h⁰; H⁰=global sections needs no Leray condition. |
+| `LocallyRealizable` + `chartDiskCover` + `exists_realizableLerayCover` | **Standard** | coeffGermLin surjectivity = genuine local Mittag-Leffler at the right quantifier strength; surjectivity onto 1-dim ℂ can't be faked by junk conventions; existence non-vacuous (n ≥ 1, honest chart disks). |
+
+No flags. No convention mismatch endangering a bridge to standard definitions.
+Bridges (A4) may rely on these four interfaces.
