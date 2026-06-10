@@ -73,6 +73,21 @@ theorem smooth_locus_cover (p : PlaneCurveAffine H) :
 
 def V (p : ℂ × ℂ) : Fin 3 → ℂ := ![p.1, p.2, 1]
 
+theorem continuous_V : Continuous V := by
+  refine continuous_pi (fun i => ?_)
+  fin_cases i
+  · exact continuous_fst
+  · exact continuous_snd
+  · exact continuous_const
+
+/-- Locus where the `phi` straightening has invertible derivative. -/
+def phiDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 0 H.F.val).eval (V q) ≠ 0 }
+
+/-- Locus where the `psi` straightening has invertible derivative. -/
+def psiDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 1 H.F.val).eval (V q) ≠ 0 }
+
 noncomputable def dV : (ℂ × ℂ) →L[ℂ] (Fin 3 → ℂ) :=
   LinearMap.toContinuousLinearMap
     { toFun := fun dp => ![dp.1, dp.2, 0]
@@ -169,6 +184,18 @@ theorem contDiff_eval {σ : Type*} [Fintype σ] (p : MvPolynomial σ ℂ) (n : �
     simp only [eval_mul, eval_X]
     exact hp.mul (contDiff_apply ℂ ℂ i)
 
+theorem isOpen_phiDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (phiDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 0 H.F.val).eval (V q)) :=
+    (contDiff_eval (pderiv 0 H.F.val) ω).continuous.comp continuous_V
+  simpa [phiDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
+theorem isOpen_psiDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (psiDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 1 H.F.val).eval (V q)) :=
+    (contDiff_eval (pderiv 1 H.F.val) ω).continuous.comp continuous_V
+  simpa [psiDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
 theorem contDiff_phi (H : PlaneCurveData) (n : ℕ∞ω) :
     ContDiff ℂ n (phi H) := by
   have h_V : ContDiff ℂ n V := by
@@ -188,13 +215,36 @@ noncomputable def phiLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine 
   have ha : a ≠ 0 := hp
   let e' := dphi_equiv a b ha
   have hf : HasFDerivAt (phi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val := hasFDerivAt_phi H p.val
-  exact (contDiff_phi H ω).contDiffAt.toOpenPartialHomeomorph (phi H) hf (by simp)
+  exact ((contDiff_phi H ω).contDiffAt.toOpenPartialHomeomorph (phi H) hf (by simp)).restrOpen
+    (phiDerivNonzeroLocus H) (isOpen_phiDerivNonzeroLocus H)
 
 theorem phiLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffine H)
     (hp : p ∈ PlaneCurveAffine.smoothLocusX H) :
     ⇑(phiLocalHomeomorph H p hp) = phi H := by
   unfold phiLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem phiLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffine H)
+    (hp : p ∈ PlaneCurveAffine.smoothLocusX H) :
+    p.val ∈ (phiLocalHomeomorph H p hp).source := by
+  unfold phiLocalHomeomorph
+  let a := (pderiv 0 H.F.val).eval ![p.val.1, p.val.2, 1]
+  let b := (pderiv 1 H.F.val).eval ![p.val.1, p.val.2, 1]
+  have ha : a ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
+  have hf : HasFDerivAt (phi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_phi H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_phi H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [phiDerivNonzeroLocus, V, PlaneCurveAffine.smoothLocusX] using hp⟩
+
+theorem phiLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffine H) (hp : p ∈ PlaneCurveAffine.smoothLocusX H)
+    {q : ℂ × ℂ} (hq : q ∈ (phiLocalHomeomorph H p hp).source) :
+    (pderiv 0 H.F.val).eval (V q) ≠ 0 := by
+  unfold phiLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjY_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffine H)
     (hp : p ∈ PlaneCurveAffine.smoothLocusX H) (y : ℂ)
@@ -411,13 +461,36 @@ noncomputable def psiLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine 
   have hb : b ≠ 0 := hp
   let e' := dpsi_equiv a b hb
   have hf : HasFDerivAt (psi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val := hasFDerivAt_psi H p.val
-  exact (contDiff_psi H ω).contDiffAt.toOpenPartialHomeomorph (psi H) hf (by simp)
+  exact ((contDiff_psi H ω).contDiffAt.toOpenPartialHomeomorph (psi H) hf (by simp)).restrOpen
+    (psiDerivNonzeroLocus H) (isOpen_psiDerivNonzeroLocus H)
 
 theorem psiLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffine H)
     (hp : p ∈ PlaneCurveAffine.smoothLocusY H) :
     ⇑(psiLocalHomeomorph H p hp) = psi H := by
   unfold psiLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem psiLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffine H)
+    (hp : p ∈ PlaneCurveAffine.smoothLocusY H) :
+    p.val ∈ (psiLocalHomeomorph H p hp).source := by
+  unfold psiLocalHomeomorph
+  let a := (pderiv 0 H.F.val).eval ![p.val.1, p.val.2, 1]
+  let b := (pderiv 1 H.F.val).eval ![p.val.1, p.val.2, 1]
+  have hb : b ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
+  have hf : HasFDerivAt (psi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_psi H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_psi H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [psiDerivNonzeroLocus, V, PlaneCurveAffine.smoothLocusY] using hp⟩
+
+theorem psiLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffine H) (hp : p ∈ PlaneCurveAffine.smoothLocusY H)
+    {q : ℂ × ℂ} (hq : q ∈ (psiLocalHomeomorph H p hp).source) :
+    (pderiv 1 H.F.val).eval (V q) ≠ 0 := by
+  unfold psiLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjX_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffine H)
     (hp : p ∈ PlaneCurveAffine.smoothLocusY H) (x : ℂ)
@@ -545,6 +618,33 @@ noncomputable def affineChartProjX (H : PlaneCurveData) (p : PlaneCurveAffine H)
 
 def VY (p : ℂ × ℂ) : Fin 3 → ℂ := ![p.1, 1, p.2]
 
+theorem continuous_VY : Continuous VY := by
+  refine continuous_pi (fun i => ?_)
+  fin_cases i
+  · exact continuous_fst
+  · exact continuous_const
+  · exact continuous_snd
+
+/-- Locus where the `phiY` straightening has invertible derivative. -/
+def phiYDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 0 H.F.val).eval (VY q) ≠ 0 }
+
+/-- Locus where the `psiY` straightening has invertible derivative. -/
+def psiYDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 2 H.F.val).eval (VY q) ≠ 0 }
+
+theorem isOpen_phiYDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (phiYDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 0 H.F.val).eval (VY q)) :=
+    (contDiff_eval (pderiv 0 H.F.val) ω).continuous.comp continuous_VY
+  simpa [phiYDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
+theorem isOpen_psiYDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (psiYDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 2 H.F.val).eval (VY q)) :=
+    (contDiff_eval (pderiv 2 H.F.val) ω).continuous.comp continuous_VY
+  simpa [psiYDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
 noncomputable def dVY : (ℂ × ℂ) →L[ℂ] (Fin 3 → ℂ) :=
   LinearMap.toContinuousLinearMap
     { toFun := fun dp => ![dp.1, 0, dp.2]
@@ -669,13 +769,36 @@ noncomputable def phiYLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine
   let e' := dphi_equiv a b ha
   have hf : HasFDerivAt (phiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
     hasFDerivAt_phiY H p.val
-  exact (contDiff_phiY H ω).contDiffAt.toOpenPartialHomeomorph (phiY H) hf (by simp)
+  exact ((contDiff_phiY H ω).contDiffAt.toOpenPartialHomeomorph (phiY H) hf
+    (by simp)).restrOpen (phiYDerivNonzeroLocus H) (isOpen_phiYDerivNonzeroLocus H)
 
 theorem phiYLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusX H) :
     ⇑(phiYLocalHomeomorph H p hp) = phiY H := by
   unfold phiYLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem phiYLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineY H)
+    (hp : p ∈ PlaneCurveAffineY.smoothLocusX H) :
+    p.val ∈ (phiYLocalHomeomorph H p hp).source := by
+  unfold phiYLocalHomeomorph
+  let a := (pderiv 0 H.F.val).eval ![p.val.1, 1, p.val.2]
+  let b := (pderiv 2 H.F.val).eval ![p.val.1, 1, p.val.2]
+  have ha : a ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
+  have hf : HasFDerivAt (phiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_phiY H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_phiY H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [phiYDerivNonzeroLocus, VY, PlaneCurveAffineY.smoothLocusX] using hp⟩
+
+theorem phiYLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffineY H) (hp : p ∈ PlaneCurveAffineY.smoothLocusX H)
+    {q : ℂ × ℂ} (hq : q ∈ (phiYLocalHomeomorph H p hp).source) :
+    (pderiv 0 H.F.val).eval (VY q) ≠ 0 := by
+  unfold phiYLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjZ_Y_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusX H) (z : ℂ)
@@ -851,13 +974,36 @@ noncomputable def psiYLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine
   let e' := dpsi_equiv a b hb
   have hf : HasFDerivAt (psiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
     hasFDerivAt_psiY H p.val
-  exact (contDiff_psiY H ω).contDiffAt.toOpenPartialHomeomorph (psiY H) hf (by simp)
+  exact ((contDiff_psiY H ω).contDiffAt.toOpenPartialHomeomorph (psiY H) hf
+    (by simp)).restrOpen (psiYDerivNonzeroLocus H) (isOpen_psiYDerivNonzeroLocus H)
 
 theorem psiYLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusZ H) :
     ⇑(psiYLocalHomeomorph H p hp) = psiY H := by
   unfold psiYLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem psiYLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineY H)
+    (hp : p ∈ PlaneCurveAffineY.smoothLocusZ H) :
+    p.val ∈ (psiYLocalHomeomorph H p hp).source := by
+  unfold psiYLocalHomeomorph
+  let a := (pderiv 0 H.F.val).eval ![p.val.1, 1, p.val.2]
+  let b := (pderiv 2 H.F.val).eval ![p.val.1, 1, p.val.2]
+  have hb : b ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
+  have hf : HasFDerivAt (psiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_psiY H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_psiY H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [psiYDerivNonzeroLocus, VY, PlaneCurveAffineY.smoothLocusZ] using hp⟩
+
+theorem psiYLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffineY H) (hp : p ∈ PlaneCurveAffineY.smoothLocusZ H)
+    {q : ℂ × ℂ} (hq : q ∈ (psiYLocalHomeomorph H p hp).source) :
+    (pderiv 2 H.F.val).eval (VY q) ≠ 0 := by
+  unfold psiYLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjX_Y_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusZ H) (x : ℂ)
@@ -987,6 +1133,33 @@ noncomputable def affineChartProjX_Y (H : PlaneCurveData) (p : PlaneCurveAffineY
 
 def VX (p : ℂ × ℂ) : Fin 3 → ℂ := ![1, p.1, p.2]
 
+theorem continuous_VX : Continuous VX := by
+  refine continuous_pi (fun i => ?_)
+  fin_cases i
+  · exact continuous_const
+  · exact continuous_fst
+  · exact continuous_snd
+
+/-- Locus where the `phiX` straightening has invertible derivative. -/
+def phiXDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 1 H.F.val).eval (VX q) ≠ 0 }
+
+/-- Locus where the `psiX` straightening has invertible derivative. -/
+def psiXDerivNonzeroLocus (H : PlaneCurveData) : Set (ℂ × ℂ) :=
+  { q | (pderiv 2 H.F.val).eval (VX q) ≠ 0 }
+
+theorem isOpen_phiXDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (phiXDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 1 H.F.val).eval (VX q)) :=
+    (contDiff_eval (pderiv 1 H.F.val) ω).continuous.comp continuous_VX
+  simpa [phiXDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
+theorem isOpen_psiXDerivNonzeroLocus (H : PlaneCurveData) :
+    IsOpen (psiXDerivNonzeroLocus H) := by
+  have hcont : Continuous (fun q : ℂ × ℂ => (pderiv 2 H.F.val).eval (VX q)) :=
+    (contDiff_eval (pderiv 2 H.F.val) ω).continuous.comp continuous_VX
+  simpa [psiXDerivNonzeroLocus] using (isOpen_ne (x := (0 : ℂ))).preimage hcont
+
 noncomputable def dVX : (ℂ × ℂ) →L[ℂ] (Fin 3 → ℂ) :=
   LinearMap.toContinuousLinearMap
     { toFun := fun dp => ![0, dp.1, dp.2]
@@ -1111,13 +1284,36 @@ noncomputable def phiXLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine
   let e' := dphi_equiv a b ha
   have hf : HasFDerivAt (phiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
     hasFDerivAt_phiX H p.val
-  exact (contDiff_phiX H ω).contDiffAt.toOpenPartialHomeomorph (phiX H) hf (by simp)
+  exact ((contDiff_phiX H ω).contDiffAt.toOpenPartialHomeomorph (phiX H) hf
+    (by simp)).restrOpen (phiXDerivNonzeroLocus H) (isOpen_phiXDerivNonzeroLocus H)
 
 theorem phiXLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusY H) :
     ⇑(phiXLocalHomeomorph H p hp) = phiX H := by
   unfold phiXLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem phiXLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineX H)
+    (hp : p ∈ PlaneCurveAffineX.smoothLocusY H) :
+    p.val ∈ (phiXLocalHomeomorph H p hp).source := by
+  unfold phiXLocalHomeomorph
+  let a := (pderiv 1 H.F.val).eval ![1, p.val.1, p.val.2]
+  let b := (pderiv 2 H.F.val).eval ![1, p.val.1, p.val.2]
+  have ha : a ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
+  have hf : HasFDerivAt (phiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_phiX H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_phiX H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [phiXDerivNonzeroLocus, VX, PlaneCurveAffineX.smoothLocusY] using hp⟩
+
+theorem phiXLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffineX H) (hp : p ∈ PlaneCurveAffineX.smoothLocusY H)
+    {q : ℂ × ℂ} (hq : q ∈ (phiXLocalHomeomorph H p hp).source) :
+    (pderiv 1 H.F.val).eval (VX q) ≠ 0 := by
+  unfold phiXLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjZ_X_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusY H) (z : ℂ)
@@ -1293,13 +1489,36 @@ noncomputable def psiXLocalHomeomorph (H : PlaneCurveData) (p : PlaneCurveAffine
   let e' := dpsi_equiv a b hb
   have hf : HasFDerivAt (psiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
     hasFDerivAt_psiX H p.val
-  exact (contDiff_psiX H ω).contDiffAt.toOpenPartialHomeomorph (psiX H) hf (by simp)
+  exact ((contDiff_psiX H ω).contDiffAt.toOpenPartialHomeomorph (psiX H) hf
+    (by simp)).restrOpen (psiXDerivNonzeroLocus H) (isOpen_psiXDerivNonzeroLocus H)
 
 theorem psiXLocalHomeomorph_coe (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusZ H) :
     ⇑(psiXLocalHomeomorph H p hp) = psiX H := by
   unfold psiXLocalHomeomorph
-  exact ContDiffAt.toOpenPartialHomeomorph_coe (E := ℂ × ℂ) (F := ℂ × ℂ) _ _ _
+  simp
+
+theorem psiXLocalHomeomorph_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineX H)
+    (hp : p ∈ PlaneCurveAffineX.smoothLocusZ H) :
+    p.val ∈ (psiXLocalHomeomorph H p hp).source := by
+  unfold psiXLocalHomeomorph
+  let a := (pderiv 1 H.F.val).eval ![1, p.val.1, p.val.2]
+  let b := (pderiv 2 H.F.val).eval ![1, p.val.1, p.val.2]
+  have hb : b ≠ 0 := hp
+  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
+  have hf : HasFDerivAt (psiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
+    hasFDerivAt_psiX H p.val
+  exact ⟨ContDiffAt.mem_toOpenPartialHomeomorph_source
+    ((contDiff_psiX H ω).contDiffAt (x := p.val))
+    (hf' := hf) (hn := by simp), by
+      simpa [psiXDerivNonzeroLocus, VX, PlaneCurveAffineX.smoothLocusZ] using hp⟩
+
+theorem psiXLocalHomeomorph_deriv_ne_zero_of_mem_source (H : PlaneCurveData)
+    (p : PlaneCurveAffineX H) (hp : p ∈ PlaneCurveAffineX.smoothLocusZ H)
+    {q : ℂ × ℂ} (hq : q ∈ (psiXLocalHomeomorph H p hp).source) :
+    (pderiv 2 H.F.val).eval (VX q) ≠ 0 := by
+  unfold psiXLocalHomeomorph at hq
+  exact hq.2
 
 theorem affineChartProjY_X_invFun_prop (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusZ H) (y : ℂ)
@@ -1428,4 +1647,3 @@ noncomputable def affineChartProjY_X (H : PlaneCurveData) (p : PlaneCurveAffineX
     }
 
 end Jacobians.ProjectiveCurve
-

@@ -995,91 +995,37 @@ theorem affineChartProjY_mem_source (H : PlaneCurveData) (p : PlaneCurveAffine H
     (hp : p ∈ PlaneCurveAffine.smoothLocusX H) :
     p ∈ (affineChartProjY H p hp).source := by
   dsimp [affineChartProjY]
-  unfold phiLocalHomeomorph
-  let a := (pderiv 0 H.F.val).eval ![p.val.1, p.val.2, 1]
-  let b := (pderiv 1 H.F.val).eval ![p.val.1, p.val.2, 1]
-  have ha : a ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
-  have hf : HasFDerivAt (phi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_phi H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_phi H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact phiLocalHomeomorph_mem_source H p hp
 
 theorem affineChartProjX_mem_source (H : PlaneCurveData) (p : PlaneCurveAffine H)
     (hp : p ∈ PlaneCurveAffine.smoothLocusY H) :
     p ∈ (affineChartProjX H p hp).source := by
   dsimp [affineChartProjX]
-  unfold psiLocalHomeomorph
-  let a := (pderiv 0 H.F.val).eval ![p.val.1, p.val.2, 1]
-  let b := (pderiv 1 H.F.val).eval ![p.val.1, p.val.2, 1]
-  have hb : b ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
-  have hf : HasFDerivAt (psi H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_psi H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_psi H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact psiLocalHomeomorph_mem_source H p hp
 
 theorem affineChartProjZ_Y_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusX H) [Nonempty (PlaneCurveAffineY H)] :
     p ∈ (affineChartProjZ_Y H p hp).source := by
   dsimp [affineChartProjZ_Y]
-  unfold phiYLocalHomeomorph
-  let a := (pderiv 0 H.F.val).eval ![p.val.1, 1, p.val.2]
-  let b := (pderiv 2 H.F.val).eval ![p.val.1, 1, p.val.2]
-  have ha : a ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
-  have hf : HasFDerivAt (phiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_phiY H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_phiY H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact phiYLocalHomeomorph_mem_source H p hp
 
 theorem affineChartProjX_Y_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineY H)
     (hp : p ∈ PlaneCurveAffineY.smoothLocusZ H) [Nonempty (PlaneCurveAffineY H)] :
     p ∈ (affineChartProjX_Y H p hp).source := by
   dsimp [affineChartProjX_Y]
-  unfold psiYLocalHomeomorph
-  let a := (pderiv 0 H.F.val).eval ![p.val.1, 1, p.val.2]
-  let b := (pderiv 2 H.F.val).eval ![p.val.1, 1, p.val.2]
-  have hb : b ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
-  have hf : HasFDerivAt (psiY H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_psiY H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_psiY H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact psiYLocalHomeomorph_mem_source H p hp
 
 theorem affineChartProjZ_X_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusY H) [Nonempty (PlaneCurveAffineX H)] :
     p ∈ (affineChartProjZ_X H p hp).source := by
   dsimp [affineChartProjZ_X]
-  unfold phiXLocalHomeomorph
-  let a := (pderiv 1 H.F.val).eval ![1, p.val.1, p.val.2]
-  let b := (pderiv 2 H.F.val).eval ![1, p.val.1, p.val.2]
-  have ha : a ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dphi_equiv a b ha
-  have hf : HasFDerivAt (phiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_phiX H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_phiX H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact phiXLocalHomeomorph_mem_source H p hp
 
 theorem affineChartProjY_X_mem_source (H : PlaneCurveData) (p : PlaneCurveAffineX H)
     (hp : p ∈ PlaneCurveAffineX.smoothLocusZ H) [Nonempty (PlaneCurveAffineX H)] :
     p ∈ (affineChartProjY_X H p hp).source := by
   dsimp [affineChartProjY_X]
-  unfold psiXLocalHomeomorph
-  let a := (pderiv 1 H.F.val).eval ![1, p.val.1, p.val.2]
-  let b := (pderiv 2 H.F.val).eval ![1, p.val.1, p.val.2]
-  have hb : b ≠ 0 := hp
-  let e' : (ℂ × ℂ) ≃L[ℂ] (ℂ × ℂ) := dpsi_equiv a b hb
-  have hf : HasFDerivAt (psiX H) (e' : (ℂ × ℂ) →L[ℂ] (ℂ × ℂ)) p.val :=
-    hasFDerivAt_psiX H p.val
-  exact ContDiffAt.mem_toOpenPartialHomeomorph_source
-    ((contDiff_psiX H ω).contDiffAt (x := p.val))
-    (hf' := hf) (hn := by simp)
+  exact psiXLocalHomeomorph_mem_source H p hp
 
 theorem PlaneCurveAffine.prefChart_mem_source (H : PlaneCurveData) (p : PlaneCurveAffine H) :
     p ∈ (prefChart H p).source := by
