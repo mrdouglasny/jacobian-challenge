@@ -764,7 +764,7 @@ private lemma bridgeForm_chartLine_integrand [Nonempty X]
           rw [hspeed]
           rfl
 
-private lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
+lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
     (P : X) (form : HolomorphicOneForm X) :
     (fun z : ℂ =>
         Jacobians.Vendor.Kirov.lineIntegral (Jacobians.Bridge.bridgeForm form)
@@ -814,7 +814,7 @@ private lemma hasDerivAt_mul_sub_of_continuousAt {f : ℂ → ℂ} {a : ℂ}
     exact slope_sub_smul f hne
   exact Tendsto.congr' hslope.symm (hf.tendsto.mono_left nhdsWithin_le_nhds)
 
-private lemma chartLine_average_coeff_continuousAt
+lemma chartLine_average_coeff_continuousAt
     (P : X) (form : HolomorphicOneForm X) :
     ContinuousAt
       (fun z : ℂ =>

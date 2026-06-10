@@ -266,7 +266,7 @@ theorem mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
   simpa [modelWithCornersSelf_coe_symm] using
     (show z ∈ (chartAt V p).target ↔ z ∈ chartTarget (L := L) p from Iff.rfl)
 
-private lemma extChartAt_apply_quotient_mk (p : ComplexTorus V L) {z : V}
+lemma extChartAt_apply_quotient_mk (p : ComplexTorus V L) {z : V}
     (hz : z ∈ chartTarget (L := L) p) :
     extChartAt 𝓘(ℂ, V) p (QuotientAddGroup.mk' L.toAddSubgroup z) = z := by
   simpa [extChartAt, modelWithCornersSelf_coe] using chart_apply_mk (L := L) p hz
