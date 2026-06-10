@@ -127,10 +127,10 @@ Lean `v4.30.0`; Mathlib at the revision pinned in `lake-manifest.json`. CI runs 
 
 We build on real Lean from two sibling Jacobian-Challenge attempts, each vendored under its **upstream** license with per-file attribution headers, the upstream `LICENSE`, and a `PROVENANCE.md`. Full adoption record: [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md).
 
-- **[rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)** (Apache 2.0) — Montel finite-dimensionality of holomorphic 1-forms, line integrals, the ℤ-lattice/complex-torus quotient infrastructure. Used to retire `AX_FiniteDimOneForms` and `pullbackOneForm` and to back the Abel–Jacobi integral. Ported under `Jacobians/Vendor/Kirov/`.
+- **[rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)** (Apache 2.0) — Montel finite-dimensionality of holomorphic 1-forms, line integrals, the ℤ-lattice/complex-torus quotient infrastructure. Used to retire `AX_FiniteDimOneForms` and `pullbackOneForm` and to back the Abel–Jacobi integral. Ported under `Jacobians/Vendor/Kirov/`. **A second, larger snapshot** of the same repo (commit `4437c2b`, 2026-06-09) is preserved as a standalone forward-ported build under [`vendor/kirov-dolbeault-port/`](vendor/kirov-dolbeault-port/) — this snapshot contains the first sorry-free Lean proof of the 1-form residue theorem `∑ Res = 0` (`residueTheorem_unconditional`, `#print axioms`-clean at standard-3) together with the Čech `H¹` finiteness (Forster §14), the skyscraper χ-step (§16), and the §17.6 easy half of Serre duality. It compiles independently under our exact toolchain (Mathlib `c5ea003`, build green). It is **not** part of our main build; integration is planned as Phase D (see [`docs/planning/PHASE_D_BRIDGE_PLAN.md`](docs/planning/PHASE_D_BRIDGE_PLAN.md)).
 - **[tangentstorm/JacobianChallenge](https://github.com/tangentstorm/JacobianChallenge)** (MIT) — self-contained, sorry-free analytic modules (holomorphic maps, meromorphic order, branched covers). Ported under `Jacobians/Vendor/Wallace/`; used in the genus-obstruction proof behind Abel injectivity.
 
-Both vendored subtrees are **axiom-free**; their headline theorems `#print axioms`-verify to the three standard Lean axioms only.
+The in-build vendored subtrees (`Jacobians/Vendor/Kirov/` and `Jacobians/Vendor/Wallace/`) are **axiom-free**; their headline theorems `#print axioms`-verify to the three standard Lean axioms only.
 
 ## Contributors & acknowledgments
 
