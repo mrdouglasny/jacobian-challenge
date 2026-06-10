@@ -47,3 +47,62 @@ R3 next: Wirtinger chain rule dbar (f∘φ) = ((dbar f)∘φ)·conj φ′ for ho
 coordinates, dbar of it = member of oneOneCoeff (uses pouSplit_telescope +
 dbar_eq_zero_of_differentiableAt on w, transitionMap_analyticAt/deriv_ne_zero
 from OneOneCoeff.lean). Cite R0's resNormalization, do not re-derive signs.
+
+# ---- Session 2: R3 (feat/keystone-r3-glue) ----
+
+[R3a DONE] ChainRule.lean compiles clean (lake env lean); dbar_comp axiom-clean
+([propext, Classical.choice, Quot.sound]).  The planar Wirtinger chain rule:
+  dbar (f ∘ φ) z = dbar f (φ z) * (starRingEnd ℂ) (deriv φ z)
+for φ holomorphic at z, f merely ℝ-differentiable at φ z.  Proof: fderiv_comp +
+HasDerivAt.complexToReal_fderiv (the same atom dbar_eq_zero_of_differentiableAt uses),
+then real-basis (1, I) decomposition of the ℝ-linear fderiv of f; the I² = -1 step via
+linear_combination Complex.I_sq (plain `ring` can't use it).  Own file, not appended to
+SignTest: SignTest is the frozen R0 gate ("cite, do not re-derive"); ChainRule imports it
+so the planar calculus dbar_mul -> dbar_comp stays linearly ordered for R4-R6.
+
+[R3 DESIGN NOTE - LAW-SHAPE ANALYSIS; READ BEFORE BUILDING R4] The handoff's literal
+slot-free claim "(dbar (pouSplit ∘ (chart j).symm))_j ∈ oneOneCoeff" is NOT provable over
+the landed R2 interface, and is false for nontrivial data: R2's w is SCALAR overlap data
+(plain additive IsOverlapCocycle - the ML m_j - m_i shape; a form-coefficient family
+cannot satisfy the plain additive triple-overlap identity across charts), so the
+telescope forces s_k∘φ - s_j = (holomorphic), pinning the transformation of ∂̄s to the
+(0,1) factor conj φ' ALONE.  A family obeying both the (0,1) and the (1,1) law would
+need φ' ≡ 1 wherever it is nonzero.  R1's OneOneLawAt was NOT adjusted - it is correct
+as landed (normSq φ' is what Lebesgue change-of-variables patches in R4).  The factors
+reconcile exactly as the handoff's NOTE says: the second φ' enters via the holomorphic
+change of the dz-slot, which on scalar overlap data must be an explicit input - the
+holomorphic (1,0) chart-coefficient family IsOneZeroCoeff g (overlap law
+g_j = (g_k ∘ φ)·φ', i.e. the chart coefficients of a global holomorphic 1-form; in the
+residue application, of the S1 canonical form ω₀ with K = div ω₀).  Headline family:
+t_j := dbar(s_j)·g_j  =  the chart coefficient of Forster's τ = ∂̄(σ_scalar·ω₀).
+APPLICATION CONSTRAINT recorded for R4/R6: at K = div ω₀ ≠ 0 (genus ≥ 2) the scalar
+Z¹(O_K) data has poles at K-points, so HolomorphicOnOverlaps requires the chart-disk
+cover REFINED so each of the finitely many K-points lies in a single cover set (then
+w k j is holomorphic on every overlap, and at a K-point of U_j only the k = j term of
+σ_j survives, killed by the cocycle diagonal w j j = 0).  Genus 1: K = 0, no refinement.
+The ω₀-witness for IsOneZeroCoeff is a later lane-R rung (germ-extraction layer).
+
+[R3b DONE] Glue.lean compiles clean (lake env lean, no warnings); all 4 proof headlines
+axiom-clean ([propext, Classical.choice, Quot.sound]): contDiffAt_splitCoeff,
+splitCoeff_transition_eventuallyEq, dbar_splitCoeff_transition, glueCoeff_mem_oneOneCoeff.
+splitCoeff 𝔇 w j := pouSplit 𝔇 w j ∘ (chartAt ℂ (𝔇.center j)).symm (the handoff's s_j);
+contDiffAt_splitCoeff via contMDiffAt_pouSplit + contMDiffOn_chart_symm through the
+RealManifold bridge; splitCoeff_transition_eventuallyEq = pouSplit_telescope read in
+chart-j coordinates (germ-eventual, per the R1 germ discipline);
+dbar_splitCoeff_transition = the (0,1) law (chain rule dbar_comp +
+dbar_eq_zero_of_differentiableAt on ŵ + DbarOpenDisk.dbar_add);
+glueCoeff_mem_oneOneCoeff = THE R3 HEADLINE: glueCoeff 𝔇 w g (= fun j z =>
+DbarDisk.dbar (splitCoeff 𝔇 w j) z * g j z) ∈ oneOneCoeff 𝔇 for w smooth + cocycle +
+holomorphic-on-overlaps and g an IsOneZeroCoeff slot family; normSq φ' reassembled by
+Complex.mul_conj.  resNormalization cited (Glue/ChainRule docstrings), not re-derived.
+Import gotcha (pre-existing in snapshot): GluedDbarDatum/CechFinitenessBallSolve clashes
+with DolbeaultComparisonInverse (duplicate `rhoC`); used the snapshot's own local copy
+ChartDiskCover.contDiffAt_dbar_chartDisk (ChartDiskFiniteness) instead - same collision
+the snapshot already documents at that lemma.
+R4 NEXT NEEDS: (i) the integral functional I(c) := Σ_j ∫ ρ̃_j · t_j over glueCoeff
+members (ℂ-linearity free from oneOneCoeff being a Submodule); (ii) the chart-relocation
+lemma via integral_image_eq_integral_abs_det_fderiv_smul + det_restrictScalars +
+norm_complex_apply, whose Jacobian is literally OneOneLawAt's normSq factor;
+(iii) the ω₀-coefficient witness for IsOneZeroCoeff (+ the K-point-separating cover
+refinement above) before R6 can evaluate on real Z¹(O_K) data; (iv) cite
+resNormalization = -π⁻¹ from SignTest for the final normalization - do not re-derive.
