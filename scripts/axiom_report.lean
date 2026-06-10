@@ -61,7 +61,7 @@ open Jacobians Jacobian
 section JacobianInstances
 open scoped Manifold ContDiff
 variable {X' : Type*} [TopologicalSpace X'] [T2Space X'] [CompactSpace X']
-    [ConnectedSpace X'] [Nonempty X'] [ChartedSpace ℂ X'] [IsManifold 𝓘(ℂ) ⊤ X']
+    [ConnectedSpace X'] [ChartedSpace ℂ X'] [IsManifold 𝓘(ℂ) ⊤ X']
 
 -- Use _root_.Jacobian to disambiguate from open Jacobian namespace
 @[implicit_reducible] private noncomputable def jacInst_AddCommGroup :
