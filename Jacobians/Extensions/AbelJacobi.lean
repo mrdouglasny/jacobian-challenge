@@ -70,7 +70,7 @@ import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.AbelTheorem
 import Jacobians.Axioms.PeriodLattice
 import Jacobians.Axioms.RiemannBilinear
-import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodCycleBasis
 import Jacobians.RiemannSurface.Periods
 import Jacobians.AbelianVariety.Siegel
 
@@ -253,7 +253,7 @@ positive-definite, after α-normalization.
 the Jacobian is not just a complex torus but a **principally polarized
 abelian variety**. It reduces (modulo basis change) to `AX_RiemannBilinear`,
 but specializing to the explicit hyperelliptic basis tests:
-  * `AX_AnalyticCycleBasis` produces a symplectic basis on the actual
+  * `AX_PeriodCycleBasis` produces a symplectic basis on the actual
     odd-degree hyperelliptic curve (not just an abstract one);
   * the integration of `x^k dx/y` against α-cycles produces
     non-degenerate periods (forcing the basis-side `pathIntegralBasepointFunctional`
@@ -271,7 +271,7 @@ lies in `SiegelUpperHalfSpace (genus X)`, with α-period normalization
 theorem riemannBilinear_hyperellipticOdd
     (H : HyperellipticData) (h : Odd H.f.natDegree)
     (x₀ : HyperellipticOdd H h) :
-    ∃ (b : AnalyticCycleBasis (HyperellipticOdd H h) x₀)
+    ∃ (b : PeriodCycleBasis (HyperellipticOdd H h) x₀)
       (cω : Module.Basis (Fin (RiemannSurface.genus (HyperellipticOdd H h))) ℂ
               (HolomorphicOneForm (HyperellipticOdd H h)))
       (τ : SiegelUpperHalfSpace (RiemannSurface.genus (HyperellipticOdd H h))),
@@ -283,7 +283,7 @@ theorem riemannBilinear_hyperellipticOdd
           periodMap (HyperellipticOdd H h) x₀ (b.isBasis (βEmbed i)) (cω j)) := by
   -- Direct application of `AX_RiemannBilinear` — but stated here as a
   -- specialized theorem so the test forces the `genus`,
-  -- `AnalyticCycleBasis`, and `HolomorphicOneForm` machinery to all
+  -- `PeriodCycleBasis`, and `HolomorphicOneForm` machinery to all
   -- compute on the actual `HyperellipticOdd H h` type, not just
   -- abstractly. Discharging is one line:
   --   exact AX_RiemannBilinear x₀
@@ -317,12 +317,12 @@ theorem periodLattice_rank_HyperellipticEven_eq
 
 /-- **Riemann bilinear relations, even case.** Specialization of
 `AX_RiemannBilinear` to `HyperellipticEvenProj`; the test forces the
-`AnalyticCycleBasis`, `HolomorphicOneForm`, and `genus` machinery to
+`PeriodCycleBasis`, `HolomorphicOneForm`, and `genus` machinery to
 all compute on the even-projective curve, not just abstractly. -/
 theorem riemannBilinear_hyperellipticEven
     (H : HyperellipticData) [Fact (¬ Odd H.f.natDegree)]
     (x₀ : HyperellipticEvenProj H) :
-    ∃ (b : AnalyticCycleBasis (HyperellipticEvenProj H) x₀)
+    ∃ (b : PeriodCycleBasis (HyperellipticEvenProj H) x₀)
       (cω : Module.Basis (Fin (RiemannSurface.genus (HyperellipticEvenProj H))) ℂ
               (HolomorphicOneForm (HyperellipticEvenProj H)))
       (τ : SiegelUpperHalfSpace (RiemannSurface.genus (HyperellipticEvenProj H))),

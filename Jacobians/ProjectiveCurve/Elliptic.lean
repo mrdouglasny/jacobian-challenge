@@ -32,7 +32,7 @@ No new axioms are introduced.
   an elliptic curve is the curve itself. Needs the above + the
   bridge through the period map. Will be a nice worked example once
   `periodMap` is a real def.
-* Concrete instantiation of `AX_AnalyticCycleBasis` on `Elliptic` — the
+* Concrete instantiation of `AX_PeriodCycleBasis` on `Elliptic` — the
   `A`- and `B`-cycles are the line segments from `0` to `ω₁` and from
   `0` to `ω₂` in the universal cover `ℂ`, projected down. Provides a
   concrete witness that the axiom is non-vacuous.
@@ -139,9 +139,9 @@ instance : Nonempty (Elliptic ω₁ ω₂ h) :=
 -- TODO (genus_eq_one): `genus (Elliptic ω₁ ω₂ h) = 1`. Awaits
 -- `OneForm.lean` predicate refinement.
 
--- TODO (analytic basis): concrete `AnalyticCycleBasis (Elliptic ω₁ ω₂ h) 0`
+-- TODO (analytic basis): concrete `PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0`
 -- with A-cycle = segment [0, ω₁] and B-cycle = segment [0, ω₂]. Witness
--- that `AX_AnalyticCycleBasis` is non-vacuous.
+-- that `AX_PeriodCycleBasis` is non-vacuous.
 
 end Elliptic
 

@@ -3,7 +3,7 @@ import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.Axioms.PeriodLattice
-import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodCycleBasis
 
 /-!
 # Loop integrals as homomorphisms
@@ -111,7 +111,7 @@ theorem loopDevValH1Hom_eq_loopIntegralToH1_apply {X : Type*}
     (x₀ : X) (form : HolomorphicOneForm X) (h : H1 X x₀) :
     loopDevValH1Hom x₀ form h = (loopIntegralToH1 x₀ h) form := by
   classical
-  let cb := Classical.choice (Jacobians.Axioms.AX_AnalyticCycleBasis x₀)
+  let cb := Classical.choice (Jacobians.Axioms.AX_PeriodCycleBasis x₀)
   let F : H1 X x₀ →ₗ[ℤ] ℂ := (loopDevValH1Hom x₀ form).toIntLinearMap
   let G : H1 X x₀ →ₗ[ℤ] ℂ :=
     { toFun := fun h => (loopIntegralToH1 x₀ h) form
