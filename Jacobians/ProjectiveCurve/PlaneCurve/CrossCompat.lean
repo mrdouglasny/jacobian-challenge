@@ -1,6 +1,6 @@
 import Mathlib
 import Jacobians.ProjectiveCurve.PlaneCurve
-import Jacobians.ProjectiveCurve.PlaneCurve.Atlas
+import Jacobians.ProjectiveCurve.PlaneCurve.AtlasCompat
 
 open scoped Manifold Topology ContDiff
 
