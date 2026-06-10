@@ -167,3 +167,64 @@ commutes). Note: pouCoeff's ∂̄ is not yet packaged — R5 should add dbar_pou
 (chart read of dbarRho) on top of contDiff_pouCoeff, or work with dbar (pouCoeff j) directly
 via DbarDisk; support lemmas (support_pouCoeff ⊆ chartMap j '' tsupport ρ_j) are implicit in
 pouCoeff_eq_zero_of_notMem_image_tsupport.
+
+# ---- Session 4: R5 (feat/keystone-r5-stokes) ----
+
+[R5a DONE] Stokes.lean compiles clean (lake env lean, no warnings); 9 headlines axiom-clean
+([propext, Classical.choice, Quot.sound]). THE PLANAR ATOM: integral_dbar_eq_zero
+(∫_ℂ ∂̄g dA = 0 for g ∈ C^∞_c) — NOT via GreenBox/Fubini-by-hand: Mathlib's
+integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable (Analysis.Calculus.LineDeriv.
+IntegrationByParts, the prepackaged Fubini + line-FTC) applied against the constant 1 gives
+∫ ∂_v g = 0 per direction (integral_fderiv_apply_eq_zero); ∂̄ = ½(∂_x + i∂_y) finishes.
+No R5_BLOCKER needed — the IBP lemma's instance side conditions (IsAddHaarMeasure volume on ℂ)
+resolved first try. THE PACKAGING GAP (flagged in the R4 handoff) closed:
+dbar_pouCoeff_chartRead (on chartMap j '' U_j, ∂̄ρ̃_j = ∂̄ of the honest read ρ_j∘(chart j).symm)
++ dbar_pouCoeff_eq_zero_of_notMem_image_tsupport (frontier case, compact-tsupport clearance) —
+same two-case pattern as contDiff_pouCoeff. PoU reinsertion: sum_dbar_rhoC_read
+(∑_j ∂̄(ρ_j∘(chart k).symm) = 0 on the chart target — chart-read sum_dbarRho_eq_zero, derived
+from the GLOBAL sum_rhoC_apply: the sum of reads is constantly 1 even through junk values).
+Germ calculus dbar_congr_of_eventuallyEq / dbar_eq_zero_of_eventuallyEq_zero / dbar_finset_sum
++ globalization helpers contDiff_of_chartImage_clearance / contDiff_pouCoeff_mul /
+contDiffAt_chartSymmRead / chartMap_image_U_subset_target for all downstream integrability.
+
+[R5b DONE — THE R5 HEADLINE] CoboundaryVanish.lean compiles clean; 12 decls axiom-clean.
+KILLS-COBOUNDARIES (verbatim):
+  theorem resFunctional_eq_zero_of_coboundary (t : oneOneCoeff 𝔇)
+      (ht : (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w g)
+      (hg : IsOneZeroCoeff 𝔇 g) (hsm : SmoothOnSets 𝔇 h) (hhol : HolomorphicOnSets 𝔇 h)
+      (hδ : IsCoboundaryOn 𝔇 w h) : resFunctional 𝔇 t = 0
+with IsCoboundaryOn 𝔇 w h := ∀ i j, ∀ x ∈ U_i ⊓ U_j, w i j x = h j x - h i x
+(membership-guarded — the exact shape R7's germ extraction of a B¹(𝒪_K) coboundary delivers).
+Proof: Forster collapse pouSplit_eq_of_coboundary (σ_i = h_i − β, β = pouAverage = ∑ρ_k h_k,
+globally ContMDiff by the gdTerm pattern) ⇒ t_j = −∂̄(β̃_j g_j) on chart images; per-j Leibniz
+split via R0's dbar_mul (integral_pouCoeff_glueCoeff_of_coboundary): ∂̄(ρ̃_j B_j)-term dies by
+the R5a atom, survivor PoU-reinserted to (j,k) terms; per-(j,k) relocation
+(integral_overlapTerm_relocate): vanish-off-overlap (ρ_k clearance / ∂̄ρ̃_j clearance) →
+setIntegral_overlap_relocate (R4) on the (1,1) family ∂̄ρ_j ∧ (β·ω₀)
+(isOneOneCoeff_dbarRead_mul: conj φ′ from dbar_comp on the relocated read, scalar β̃ invariant,
+φ′ from the dz-slot; mul_conj reassembles normSq — same reconciliation as Glue) → re-extend by
+the pouCoeff indicator; per-k kill (sum_integral_relocated_eq_zero) by sum_dbar_rhoC_read;
+Finset.sum_comm glues. Coboundary data feeds glueCoeff_mem_oneOneCoeff for free
+(smoothOnOverlaps/isOverlapCocycle/holomorphicOnOverlaps_of_coboundary), so R7 needs no side
+conditions beyond (w, h, g) shape. DESCENT PACKAGING CHECKED: the port's quotient is
+cechH1 = Z¹ ⧸ B¹.submoduleOf Z¹ with CousinResidueData.vanish_coboundary consumed by
+Submodule.liftQ (GlobalResidueConstruct.lean:141-182, res_mk simp at :171);
+resFunctional_eq_zero_of_coboundary is that field's chart-coefficient feeder — deliberately NOT
+instantiated here (R7 scope: germ→coefficient extraction Z¹(𝒪_K) → overlap families, then liftQ).
+
+[R5 GATES] Both files wired into the root aggregator in their own commits (f11f1a1 R5a,
+2fe3103 R5b); root lake build green (8760 jobs); all 21 R5 decls #print-axioms standard-3
+([propext, Classical.choice, Quot.sound]); no sorries; not pushed (orchestrator gates).
+R6 NEXT NEEDS (BOTH pieces): (i) THE SIMPLE-POLE ML-TIE (S3 scoping §4.R6, the hardest rung):
+for the explicit single-simple-pole ML cocycle e_{ij} = m_i − m_j with Res_a(ω₀·m) = r,
+resFunctional evaluates to r — route: η = ∑ρ_k(ω₀ m_k)-coefficients, ContDiffBump cutoff ψ_a
+in one chart, smooth part dies by R5a atom + R4 relocation, singular part is EXACTLY
+DbarDisk.cauchyPompeiu_area at the pole (ψ_a(a)=1, no annulus limits); identify r via
+resAt_const_mul_sub_inv; CITE resNormalization = −π⁻¹ (R0) — the R5b coboundary machinery
+(IsCoboundaryOn is exactly the off-pole shape: away from a, e = δm honestly) plus the K-point
+cover-refinement constraint recorded in Glue/OmegaWitness docstrings. (ii) THE UNWINDREGULARITY
+DISCHARGE (SerreUnwind.lean:275, the §17.7 pole-bound regularity Prop, hypothesis-parametric)
+— S5's SurjectivityInputs assembly is complete modulo it; under the Forster architecture its
+discharge becomes an R6-style residue-evaluation estimate, so schedule it WITH the ML-tie, not
+after R7. R7 then: germ→coefficient extraction + CousinResidueData instantiation (liftQ descent
+is already proven in the port).

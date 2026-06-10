@@ -40,6 +40,8 @@ import KirovDolbeault.Dolbeault.FineResidue.ChainRule
 import KirovDolbeault.Dolbeault.FineResidue.Glue
 import KirovDolbeault.Dolbeault.FineResidue.Integral
 import KirovDolbeault.Dolbeault.FineResidue.OmegaWitness
+import KirovDolbeault.Dolbeault.FineResidue.Stokes
+import KirovDolbeault.Dolbeault.FineResidue.CoboundaryVanish
 
 /-
 
