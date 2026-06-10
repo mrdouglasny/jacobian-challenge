@@ -15,3 +15,20 @@
      Expected after D1: 36 - 3 + 1 = 34 (or 33 if elliptic axiom falls).
 Plan: c1 new axiom file; c2 consumer refactor + delete old axioms;
       c3 elliptic witness attempt; c4 ledger reconcile + report regen.
+
+[T1] Commit a88da93: Jacobians/Axioms/PeriodCycleBasis.lean (structure,
+     arcPeriodVec + @[simp] layout pins via αEmbed/βEmbed, conjArcPeriodVec,
+     AX_PeriodCycleBasis). Compiles clean.
+[T2] Commit ba013cd: consumer refactor complete, FULL lake build green.
+     - Periods.lean: R1Holds/R2Holds threading; choicePeriodCycleBasis_r1/_r2
+       transfer the bundle fields to periodMap level on the chosen witness
+       (key lemma periodVec_choice_eq_arcPeriodVec, loopIntegralToH1_loop
+       pattern). riemannBilinear_exists / periodLatticeInBasis_discrete /
+       _isZLattice statements unchanged.
+     - AX_AnalyticCycleBasis + AX_RBR1 + AX_RBR2 deleted; only axiom decl in
+       the touched files is AX_PeriodCycleBasis.
+     - Line witness: R1 empty-sum, R2 vacuous via
+       HolomorphicOneForm_projectiveLine_eq_zero — compiles, no new axiom.
+     - Elliptic AX_Elliptic_H1_symplectic re-typed to PeriodCycleBasis with
+       satisfiability note (orientation choice for R2 sign).
+Next: elliptic discharge attempt (c3), then #print axioms gates + ledger (c4).
