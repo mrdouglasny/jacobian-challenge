@@ -21,3 +21,29 @@ resNormalization · ∫ = 1 for χ(a)=1 (resNormalization_integral_eq_one).
 No fudge: raw Forster (2πi)⁻¹ on the Lebesgue integral would give i/2; the −2i Jacobian
 (dz∧dz̄ = −2i·dA) is recorded as resNormalization_eq_two_pi_I_inv_mul.
 Non-vacuity witness via ContDiffBump (exists_signTest_witness). Committing R0; next R1.
+
+[R1 DONE] OneOneCoeff.lean compiles clean; 5 headline decls axiom-clean.
+The (1,1) chart-coefficient layer: chartMap/transitionMap (+ analyticAt,
+deriv_ne_zero, relocation transitionMap_chartMap from the proven
+transition_analyticAt_of_mem / transition_deriv_ne_zero atoms in
+CechModelManifold.lean), OneOneLawAt (germ-eventual |φ'|² law via Complex.normSq),
+oneOneCoeff : Submodule ℂ (ι → ℂ → ℂ) (free ℂ-linearity for R4), and
+isOneOneCoeff_congr (germ-robustness, scoping risk item 2). Committing R1; next R2
+(PoU split reusing cechPoU/rhoC/dbarRho from DolbeaultComparisonInverse).
+
+[R2 DONE] PoUSplit.lean compiles clean (no warnings after omit [Nonempty X]);
+3 headlines axiom-clean. pouSplit σ_i := ∑_k ρ_k·(w k i) over the REUSED
+cechPoU/rhoC backbone; contMDiffAt_pouSplit (gdTerm support-aware gluing pattern);
+pouSplit_telescope (support-aware refinement of cechCoboundary_telescoping —
+cocycle identity demanded only on triple overlaps, IsOverlapCocycle);
+isOverlapCocycle_sub gives the ML difference-family shape w i j = v j − v i.
+M1 scope (R0+R1+R2) complete; committing R2.
+
+[SESSION END] Commits on feat/keystone-r0-signtest: a1d7ac9 (R0), 72c06c6 (R1),
+6066025 (R2). All FineResidue files sorry-free, lake-env-lean-validated,
+headlines axiom-clean. Not pushed (orchestrator gates).
+R3 next: Wirtinger chain rule dbar (f∘φ) = ((dbar f)∘φ)·conj φ′ for holomorphic φ
+(planar, fderiv composition + DbarDisk.dbar), then: pouSplit read in chart-j
+coordinates, dbar of it = member of oneOneCoeff (uses pouSplit_telescope +
+dbar_eq_zero_of_differentiableAt on w, transitionMap_analyticAt/deriv_ne_zero
+from OneOneCoeff.lean). Cite R0's resNormalization, do not re-derive signs.
