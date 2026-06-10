@@ -1,0 +1,11 @@
+# Trace-bridge discharge progress (issues #26/#27/#28, branch feat/trace-bridge)
+
+2026-06-10 T0  Read cluster-C plans on #26/#27/#28 + Gemini verdict. Route confirmed:
+               new Bridge/KirovDolbeaultTrace.lean (kdFormAlign identity equiv +
+               bridgeKDFormEquiv = bridgeFormEquiv.trans kdFormAlign), then in-place
+               conversion of pushforwardOneForm / AX_pushforwardOneForm_id / _comp in
+               Axioms/AbelJacobiMap.lean, conjugating port traceFormTotal{,_id,_comp}.
+               Port TraceForm.olean already built (vendor/kirov-dolbeault-port/.lake).
+               Affected headline wrappers (from docs/axiom-report.txt): Jacobian.pullback,
+               pullback_contMDiff, pullback_id_apply, pullback_comp_apply,
+               pushforward_pullback.
