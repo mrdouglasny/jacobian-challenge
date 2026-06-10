@@ -683,7 +683,18 @@ The *only* remaining input is the **holomorphic Poincaré lemma / monodromy theo
 a global primitive); Mathlib has only the plane/ball version, the manifold de Rham globalisation is
 the open gap. The whole route, *modulo that single input*, is assembled axiom-clean in
 `Jacobians.genus_zero_of_nonempty_homeo_sphere_of_hasPrimitives`; the one remaining gap below is exactly
-`HasHolomorphicPrimitives X`. -/
+`HasHolomorphicPrimitives X`.
+
+**Scope of the remaining sorry (E6 reroute, 2026-06-10).** This bare-homeomorphism statement
+is now needed *only* for the backward half of the conformance headline `genus_eq_zero_iff_homeo`
+(`KirovDolbeault.GenusSphereHeadline`). Wherever the homeomorphism arises from the degree-one
+chain itself — i.e. from a single simple pole, as in the Abel-wall genus obstruction — the
+genus-0 conclusion is available **without** this sorry via the biholomorphic genus transport
+`Jacobians.genus_zero_of_singleSimplePole` (`KirovDolbeault.DegreeOneGenusTransport`,
+axiom-clean, keystone- and de-Rham-free). The transport cannot replace THIS statement: a bare
+`X ≃ₜ S²` carries no complex structure, so no holomorphic degree-1 map is available to pull
+forms back along; closing this sorry as stated genuinely requires the de Rham input (or
+uniformization). See `docs/planning/E6_BLOCKER.md` in the parent repository. -/
 theorem genus_zero_of_nonempty_homeo_sphere {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     (h : Nonempty (X ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :
