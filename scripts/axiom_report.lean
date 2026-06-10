@@ -52,6 +52,37 @@ open Jacobians Jacobian
 -- `h⁰(0) = 1` over the corrected (germ-quotient) L(D): axiom-free faithfulness check.
 #print axioms Jacobians.RiemannSurface.h0_zero
 
+-- Jacobian typeclass instances (the 7 Buzzard-required typeclass obligations).
+-- These are anonymous instances in Challenge.lean so we wrap them in named theorems.
+-- Jacobian typeclass instances (Buzzard's 7 typeclass obligations + AddCommGroup).
+-- These are anonymous in Challenge.lean; wrap in named theorems to use #print axioms.
+-- The variable below mirrors the constraint assumed throughout Challenge.lean.
+section JacobianInstances
+open scoped Manifold ContDiff
+variable {X' : Type*} [TopologicalSpace X'] [T2Space X'] [CompactSpace X']
+    [ConnectedSpace X'] [Nonempty X'] [ChartedSpace ℂ X'] [IsManifold 𝓘(ℂ) ⊤ X']
+
+-- Use _root_.Jacobian to disambiguate from open Jacobian namespace
+private noncomputable def jacInst_AddCommGroup : AddCommGroup (_root_.Jacobian X') := inferInstance
+private theorem jacInst_T2Space : T2Space (_root_.Jacobian X') := inferInstance
+private theorem jacInst_CompactSpace : CompactSpace (_root_.Jacobian X') := inferInstance
+private theorem jacInst_ConnectedSpace : ConnectedSpace (_root_.Jacobian X') := inferInstance
+private noncomputable def jacInst_ChartedSpace :
+    ChartedSpace (Fin (genus X') → ℂ) (_root_.Jacobian X') := inferInstance
+private theorem jacInst_IsManifold :
+    IsManifold 𝓘(ℂ, Fin (genus X') → ℂ) ⊤ (_root_.Jacobian X') := inferInstance
+private theorem jacInst_LieAddGroup :
+    LieAddGroup 𝓘(ℂ, Fin (genus X') → ℂ) ⊤ (_root_.Jacobian X') := inferInstance
+
+#print axioms jacInst_AddCommGroup
+#print axioms jacInst_T2Space
+#print axioms jacInst_CompactSpace
+#print axioms jacInst_ConnectedSpace
+#print axioms jacInst_ChartedSpace
+#print axioms jacInst_IsManifold
+#print axioms jacInst_LieAddGroup
+end JacobianInstances
+
 -- Phase-3 prerequisite-type discharges: kernel evidence for the AXIOM_AUDIT
 -- "Recently discharged" claims. The carriers are standard-3 (no atlas axioms);
 -- the chart/manifold instances correctly transport the (sound) atlas axioms.

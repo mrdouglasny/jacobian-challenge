@@ -111,6 +111,53 @@
  Classical.choice,
  Quot.sound]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+scripts/axiom_report.lean:66:0: warning: Definition `_private.scripts.axiom_report.0.jacInst_AddCommGroup` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
+scripts/axiom_report.lean:70:0: warning: Definition `_private.scripts.axiom_report.0.jacInst_ChartedSpace` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
+'_private.scripts.axiom_report.0.jacInst_AddCommGroup' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm]
+'_private.scripts.axiom_report.0.jacInst_T2Space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
+'_private.scripts.axiom_report.0.jacInst_CompactSpace' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
+'_private.scripts.axiom_report.0.jacInst_ConnectedSpace' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm]
+'_private.scripts.axiom_report.0.jacInst_ChartedSpace' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
+'_private.scripts.axiom_report.0.jacInst_IsManifold' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
+'_private.scripts.axiom_report.0.jacInst_LieAddGroup' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm,
+ Layer3.AX_RBR1,
+ Layer3.AX_RBR2]
 'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
  Classical.choice,
