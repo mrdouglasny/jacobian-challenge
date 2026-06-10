@@ -25,8 +25,8 @@
   `hδδ`/`hcomm` algebra, the `leray` disk-acyclicity field, and the `cechH1 ≃ supH1` comparison remain
   — see `CechFinitenessWiring.exists_cechModel`.)
 -/
-import Jacobians.Dolbeault.CechModelDelta
-import Jacobians.Dolbeault.CechModelManifold
+import KirovDolbeault.Dolbeault.CechModelDelta
+import KirovDolbeault.Dolbeault.CechModelManifold
 
 open scoped Manifold ContDiff Topology
 open Jacobians.Montel ContinuousLinearMap

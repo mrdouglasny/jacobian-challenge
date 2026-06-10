@@ -9,7 +9,7 @@
   Leray surjectivity (`H¹(disk,𝒪)=0`, from the proven G1 `DbarDisk`) — are all that stands between
   this and `DolbeaultLadder.finiteDimensional_cechH1`.
 -/
-import Jacobians.Dolbeault.SchwartzFiniteness
+import KirovDolbeault.Dolbeault.SchwartzFiniteness
 
 open Jacobians.SchwartzFiniteness ContinuousLinearMap
 

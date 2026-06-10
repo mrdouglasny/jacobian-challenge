@@ -3,11 +3,11 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.ProperMapDegreeConstruct
-import Jacobians.Discharge.Manifold.LocalKFoldMultiplicityUnconditional
-import Jacobians.Discharge.Manifold.AnalyticLocalFactorization
-import Jacobians.Discharge.Manifold.RoucheBridge
-import Jacobians.Discharge.Manifold.LocalNormalForm
+import KirovDolbeault.ProperMapDegreeConstruct
+import KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicityUnconditional
+import KirovDolbeault.Discharge.Manifold.AnalyticLocalFactorization
+import KirovDolbeault.Discharge.Manifold.RoucheBridge
+import KirovDolbeault.Discharge.Manifold.LocalNormalForm
 import Mathlib.Algebra.BigOperators.Finprod
 
 /-!

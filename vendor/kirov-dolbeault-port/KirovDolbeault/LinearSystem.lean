@@ -16,8 +16,8 @@
   `MeromorphicFunction X` (`Module ℂ`); `orderW` and its faithfulness/identity theorems; and the
   linear system `linearSystem D`, the germ-zero junk submodule `germZeroSubmodule`, and `lDim`.
 -/
-import Jacobians.Abel
-import Jacobians.MeromorphicLiouville
+import KirovDolbeault.Abel
+import KirovDolbeault.MeromorphicLiouville
 
 set_option linter.unusedSectionVars false
 

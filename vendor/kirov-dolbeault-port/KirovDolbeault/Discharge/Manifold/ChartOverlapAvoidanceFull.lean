@@ -19,7 +19,7 @@ import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Topology.OpenPartialHomeomorph.Basic
-import Jacobians.Discharge.Manifold.ChartRestrictionToBall
+import KirovDolbeault.Discharge.Manifold.ChartRestrictionToBall
 
 noncomputable section
 

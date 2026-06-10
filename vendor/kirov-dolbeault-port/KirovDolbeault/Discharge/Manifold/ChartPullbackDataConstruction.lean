@@ -3,8 +3,8 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.AnalyticFiberDiscrete
-import Jacobians.Discharge.Manifold.ContMDiffOmegaAnalytic
+import KirovDolbeault.Discharge.Manifold.AnalyticFiberDiscrete
+import KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
 import Mathlib.Topology.OpenPartialHomeomorph.Constructions
 
 set_option autoImplicit true

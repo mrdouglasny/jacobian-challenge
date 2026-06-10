@@ -15,8 +15,8 @@
   Sorry-free.  The snake-lemma data (`f₃`, `exact₂`, `exact₃`, `surj₄`) and the final
   `exists_skyscraperLES` assembly are OUT OF SCOPE here.
 -/
-import Jacobians.Dolbeault.LocalRealization
-import Jacobians.Dolbeault.SkyscraperLESBase
+import KirovDolbeault.Dolbeault.LocalRealization
+import KirovDolbeault.Dolbeault.SkyscraperLESBase
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

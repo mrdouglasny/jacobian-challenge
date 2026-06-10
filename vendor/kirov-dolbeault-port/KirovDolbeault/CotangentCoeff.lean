@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.LineIntegral
-import Jacobians.Genus
+import KirovDolbeault.LineIntegral
+import KirovDolbeault.Genus
 
 /-!
 # Cotangent-bundle coefficient continuity (the *local* coefficient is the right object)
@@ -16,7 +16,7 @@ is **discontinuous** in general: `1 : TangentSpace 𝓘(ℂ) x` is the `∂/∂z
 chart at `x`*, and since the chart varies with `x` and chart transitions are general
 biholomorphisms (derivatives ≠ 1), the constant-`1` tangent section is not continuous (it is
 continuous iff the tangent bundle is trivialized by the atlas, i.e. parallelizable — false for
-genus ≥ 2). Pairing it with a form nonzero at a point gives a discontinuous map. The
+kirovGenus ≥ 2). Pairing it with a form nonzero at a point gives a discontinuous map. The
 obstruction is isolated below (`const_one_section_continuous_of_coordChange_fixes_one`,
 `target_eq_inCoordinates_of_w`).
 
@@ -66,7 +66,7 @@ theorem continuousAt_localCoeff (α : HolomorphicOneForms X) (x₀ : X) :
 /-- **The obstruction, isolated.** Continuity of the constant-`1` tangent section is implied by
 (in fact equivalent to, via `FiberBundleCore.continuous_const_section`) the constant `1 : ℂ`
 being invariant under EVERY chart-transition derivative, `coordChange i j x 1 = 1`. That
-hypothesis is false for a complex 1-manifold with non-trivial tangent bundle (genus ≥ 2):
+hypothesis is false for a complex 1-manifold with non-trivial tangent bundle (kirovGenus ≥ 2):
 chart transitions are general biholomorphisms whose derivatives do not fix `1`. Hence the
 constant-`1` section is discontinuous, and `x ↦ α x (1 : TangentSpace x)` is discontinuous. -/
 theorem const_one_section_continuous_of_coordChange_fixes_one

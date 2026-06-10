@@ -6,7 +6,7 @@
   refinement maps.  The analytic Leray assertions for strict refinements stay in
   `CechRefinementLeray`.
 -/
-import Jacobians.Dolbeault.CechRefinementLeray
+import KirovDolbeault.Dolbeault.CechRefinementLeray
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

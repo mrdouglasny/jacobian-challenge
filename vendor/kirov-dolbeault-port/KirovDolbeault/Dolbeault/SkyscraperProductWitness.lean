@@ -29,9 +29,9 @@
   use).  It is isolated here as the single named obligation `locallyRealizable_chartDiskCover`; closing
   it makes the entire χ-side (`cohomological_riemannRoch`) fully complete on the canonical cover.
 -/
-import Jacobians.Dolbeault.SkyscraperConeRealization
-import Jacobians.Dolbeault.LerayCoverExists
-import Jacobians.Dolbeault.CechModelManifold
+import KirovDolbeault.Dolbeault.SkyscraperConeRealization
+import KirovDolbeault.Dolbeault.LerayCoverExists
+import KirovDolbeault.Dolbeault.CechModelManifold
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 
 open scoped Manifold ContDiff Topology

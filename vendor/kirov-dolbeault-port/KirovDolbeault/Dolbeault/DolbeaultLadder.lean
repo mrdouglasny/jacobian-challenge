@@ -20,10 +20,10 @@
   All five are unproved obligations here; the first three are the genuine analytic wall, the last two are the
   remaining (Serre / bookkeeping) pieces for wiring to `exists_riemannRoch_divisor`.
 -/
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.CohomologicalRR
-import Jacobians.Dolbeault.SerreDualityPairing
-import Jacobians.Dolbeault.CechFinitenessWiring
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CohomologicalRR
+import KirovDolbeault.Dolbeault.SerreDualityPairing
+import KirovDolbeault.Dolbeault.CechFinitenessWiring
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)
@@ -49,12 +49,12 @@ theorem finiteDimensional_cechH1 (𝔘 : FiniteCover X) (D : Divisor X) :
 map + `skyDim=1`); base `h⁰(0)=1` + divisor induction + the 6-term alternating-sum crank are axiom-clean.
 So `cohomological_riemannRoch` is in scope here via the import — no longer an unproved leaf of this file. -/
 
-/-- **Serre duality at `D = 0` — arithmetic genus = geometric genus.** `h¹(X, 𝒪) = dim Ω(X) = genus X`.
+/-- **Serre duality at `D = 0` — arithmetic kirovGenus = geometric kirovGenus.** `h¹(X, 𝒪) = dim Ω(X) = kirovGenus X`.
 Now PROVEN via the **direct Forster §17 route** (`SerreDualityPairing`, the residue-pairing perfectness),
 modulo the single §17 instantiation input `exists_serreDualityData` — **no `hodge_symmetry`, no Dolbeault
 comparison** (Forster §16–17 are PDE-free; the comparison/conjugation detour is not needed). -/
 theorem arithmeticGenus_eq_genus (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
-    𝔘.h1Dim 0 = genus X :=
+    𝔘.h1Dim 0 = kirovGenus X :=
   arithmeticGenus_eq_genus_serre 𝔘 hL
 
 /-- **General Serre duality.** `h¹(D) = l(K − D)` for a canonical divisor `K` (the perfect residue
@@ -78,7 +78,7 @@ are discharged, `exists_riemannRoch_divisor` follows (modulo existence of a Lera
 theorem riemannRoch_equality_of_ladder (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
     (hR : 𝔘.LocallyRealizable) :
     ∃ K : Divisor X, ∀ D : Divisor X,
-      (lDim D : ℤ) - lDim (K - D) = Divisor.deg X D + 1 - genus X := by
+      (lDim D : ℤ) - lDim (K - D) = Divisor.deg X D + 1 - kirovGenus X := by
   obtain ⟨K, hK⟩ := serre_h1_eq 𝔘 hL
   refine ⟨K, fun D => ?_⟩
   have h := cohomological_riemannRoch 𝔘 hR D

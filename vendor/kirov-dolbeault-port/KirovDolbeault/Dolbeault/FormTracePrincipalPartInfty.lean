@@ -3,15 +3,15 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTracePrincipalPart
-import Jacobians.Dolbeault.FormTraceInftyRecip
+import KirovDolbeault.Dolbeault.FormTracePrincipalPart
+import KirovDolbeault.Dolbeault.FormTraceInftyRecip
 
 /-!
 # Principal-part extraction across `∞` for the global trace (Gate A, §VIII.3 step 3 — `∞` part)
 
 `Jacobians.Dolbeault.FormTracePrincipalPart` extracts the finite principal parts of the global trace
 coefficient `T : ℂ → ℂ`.  Miranda §VIII.3 step 3 also subtracts the **polynomial part at `∞`** to leave
-a *global* holomorphic form on the compact `ℂℙ¹`, vanishing by genus-`0` Liouville
+a *global* holomorphic form on the compact `ℂℙ¹`, vanishing by kirovGenus-`0` Liouville
 (`FormTraceLiouville`).  The `∞` chart is the reciprocal chart `ζ = 1/z`, in which the coefficient is
 `recipCoeff T` (`FormTraceInftyRecip`); holomorphy at `∞` is continuity of `recipCoeff (T − L.R)` at
 `0` (the `GlobalTrace.hrecip` field).
@@ -21,7 +21,7 @@ value at `0` is always the junk `0` (the `0^{-2}` Jacobian), and a reciprocal-ch
 analytic continuation **vanishes at `0`** is continuous at `0` (continuity to that junk value).  The
 last fact is the precise, honest shape of `GlobalTrace.hrecip`: the `hrecip` continuity is *equivalent*
 to the analytic continuation of `recipCoeff (T − L.R)` vanishing at `0`, i.e. the holomorphic remainder
-having no `dζ`-term at `∞`.  Because a holomorphic `1`-form on `ℂℙ¹` is `0` (genus `0`), this is
+having no `dζ`-term at `∞`.  Because a holomorphic `1`-form on `ℂℙ¹` is `0` (kirovGenus `0`), this is
 genuine §VIII.3 content — not mechanically dischargeable from meromorphy alone — so `hrecip` correctly
 remains part of the irreducible global-trace obligation (its analogue `hentire` is dischargeable once
 `T` is junk-free, via `exists_entire_of_finitePoles`).
@@ -65,7 +65,7 @@ theorem recipCoeff_sub (R₁ R₂ : ℂ → ℂ) :
 `recipCoeff h 0 = 0` for every `h` (the `0^{-2}` Jacobian factor is junk-zero in Lean).  Hence the
 `GlobalTrace.hrecip` condition `ContinuousAt (recipCoeff (T − L.R)) 0` is precisely "`recipCoeff
 (T − L.R)` *tends to `0`* at `0`", i.e. the analytic continuation of the reciprocal coefficient of the
-holomorphic remainder *vanishes at `∞`* — the genus-`0` holomorphic-remainder content (a holomorphic
+holomorphic remainder *vanishes at `∞`* — the kirovGenus-`0` holomorphic-remainder content (a holomorphic
 `1`-form on `ℂℙ¹` has no `dζ`-term at `∞` only if it is `0`).  This is the irreducible §VIII.3 input
 that `FormTraceLiouville` consumes; it is *not* mechanically dischargeable from meromorphy alone. -/
 
@@ -79,7 +79,7 @@ that `FormTraceLiouville` consumes; it is *not* mechanically dischargeable from 
 `MeromorphicAt 0`, with reciprocal-chart principal part `negTail 0 b N` (from
 `exists_principalPart_meromorphicAt`) and analytic continuation `R` of the remainder.  If that analytic
 continuation *vanishes at `0`* (`hR0 : R 0 = 0` — the holomorphic remainder has no `dζ`-term at `∞`,
-the genus-`0` content), then `recipCoeff T − negTail 0 b N` is **continuous at `0`** (continuity to the
+the kirovGenus-`0` content), then `recipCoeff T − negTail 0 b N` is **continuous at `0`** (continuity to the
 junk value `0`).  This is the precise, honest shape of `GlobalTrace.hrecip`: it isolates `R 0 = 0` as
 the single irreducible §VIII.3 obligation at `∞`. -/
 theorem continuousAt_recipRemainder_of_vanishing {T : ℂ → ℂ} {N : ℕ} {b : ℕ → ℂ} {R : ℂ → ℂ}

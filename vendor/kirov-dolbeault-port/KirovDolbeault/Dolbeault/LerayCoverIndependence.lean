@@ -34,8 +34,8 @@
   So this is a sound, complete *enlargement* of the acyclic-case discharge — every `𝔘` mutually
   refining an acyclic shared-chart cover is now covered — banked toward the eventual general node.
 -/
-import Jacobians.Dolbeault.CechModelConstruction
-import Jacobians.Dolbeault.CechRefinementLeray
+import KirovDolbeault.Dolbeault.CechModelConstruction
+import KirovDolbeault.Dolbeault.CechRefinementLeray
 
 open scoped Manifold ContDiff Topology
 

@@ -9,11 +9,11 @@
   this file off that import makes it fast to elaborate. The final assembly into the `ℝ`-linear
   equivalence (which needs the forward map `dolbeault_to_cech`) lives in `DolbeaultComparisonEquiv`.
 -/
-import Jacobians.Dolbeault.DolbeaultComparison
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.HoloRep
-import Jacobians.Dolbeault.ChartDiskCover
-import Jacobians.MeromorphicNFRepair
+import KirovDolbeault.Dolbeault.DolbeaultComparison
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.HoloRep
+import KirovDolbeault.Dolbeault.ChartDiskCover
+import KirovDolbeault.MeromorphicNFRepair
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.BumpFunction
 

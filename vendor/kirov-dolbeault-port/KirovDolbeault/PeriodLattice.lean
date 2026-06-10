@@ -1,16 +1,16 @@
-import Jacobians.LineIntegral
+import KirovDolbeault.LineIntegral
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import Mathlib.Algebra.Module.ZLattice.Basic
 import Mathlib.Topology.Connected.LocPathConnected
 import Mathlib.Topology.Maps.Proper.Basic
 import Mathlib.Topology.Covering.Basic
-import Jacobians.Discharge.Manifold.CriticalValuesFiniteGeneral
-import Jacobians.Discharge.Manifold.RegularValueExistsRegUnconditional
-import Jacobians.ManifoldIFT
-import Jacobians.SmoothPath
-import Jacobians.SmoothPathCore
-import Jacobians.CutSurfaceRelations
-import Jacobians.ZLatticeQuotient
+import KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
+import KirovDolbeault.ManifoldIFT
+import KirovDolbeault.SmoothPath
+import KirovDolbeault.SmoothPathCore
+import KirovDolbeault.CutSurfaceRelations
+import KirovDolbeault.ZLatticeQuotient
 import Mathlib.Analysis.Complex.OpenMapping
 
 /-!
@@ -80,7 +80,7 @@ loops. -/
 noncomputable def truePeriodLattice (X : Type*) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
-    Submodule ℤ (Fin (genus X) → ℂ) :=
+    Submodule ℤ (Fin (kirovGenus X) → ℂ) :=
   Submodule.span ℤ (closedLoopPeriods X)
 
 /-- Any closed-smooth-loop period vector is in the period lattice. -/
@@ -114,20 +114,20 @@ basis forms. Hypotheses (integrability per basis form + pointwise
 a.e. identities from the `pathSpeed` chain rule on each half) are
 per-i quantified versions of `lineIntegral_concat`'s hypotheses. -/
 theorem periodVec_concat (γ γ' : ℝ → X)
-    (hint_γ : ∀ i : Fin (genus X), IntervalIntegrable
+    (hint_γ : ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun u => (periodBasisForm X i).toFun (γ u) (pathSpeed γ u)) volume 0 1)
-    (hint_γ' : ∀ i : Fin (genus X), IntervalIntegrable
+    (hint_γ' : ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun u => (periodBasisForm X i).toFun (γ' u) (pathSpeed γ' u)) volume 0 1)
-    (hint_concat_left : ∀ i : Fin (genus X), IntervalIntegrable
+    (hint_concat_left : ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun t => (periodBasisForm X i).toFun ((concat γ γ') t)
         (pathSpeed (concat γ γ') t)) volume 0 (1/2))
-    (hint_concat_right : ∀ i : Fin (genus X), IntervalIntegrable
+    (hint_concat_right : ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun t => (periodBasisForm X i).toFun ((concat γ γ') t)
         (pathSpeed (concat γ γ') t)) volume (1/2) 1)
-    (h_ae_left : ∀ i : Fin (genus X), ∀ᵐ t ∂(volume.restrict (Set.uIoc (0 : ℝ) (1/2))),
+    (h_ae_left : ∀ i : Fin (kirovGenus X), ∀ᵐ t ∂(volume.restrict (Set.uIoc (0 : ℝ) (1/2))),
       (periodBasisForm X i).toFun ((concat γ γ') t) (pathSpeed (concat γ γ') t) =
         (2 : ℂ) * (periodBasisForm X i).toFun (γ (2 * t)) (pathSpeed γ (2 * t)))
-    (h_ae_right : ∀ i : Fin (genus X), ∀ᵐ t ∂(volume.restrict (Set.uIoc ((1 : ℝ)/2) 1)),
+    (h_ae_right : ∀ i : Fin (kirovGenus X), ∀ᵐ t ∂(volume.restrict (Set.uIoc ((1 : ℝ)/2) 1)),
       (periodBasisForm X i).toFun ((concat γ γ') t) (pathSpeed (concat γ γ') t) =
         (2 : ℂ) * (periodBasisForm X i).toFun (γ' (2 * t - 1)) (pathSpeed γ' (2 * t - 1))) :
     periodVec (concat γ γ') = periodVec γ + periodVec γ' := by
@@ -142,7 +142,7 @@ integrating any form along a closed smooth loop gives an element of
 the period lattice, which is the zero class in the Jacobian quotient. -/
 theorem mk_periodVec_closed_loop_zero (γ : ℝ → X) (hγ : IsClosedSmoothLoop γ) :
     (QuotientAddGroup.mk (periodVec γ) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) = 0 :=
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) = 0 :=
   (QuotientAddGroup.eq_zero_iff _).mpr
     (periodVec_mem_truePeriodLattice_of_closed γ hγ)
 
@@ -150,7 +150,7 @@ theorem mk_periodVec_closed_loop_zero (γ : ℝ → X) (hγ : IsClosedSmoothLoop
 `periodVec_const`: the quotient class of the zero vector is zero. -/
 theorem mk_periodVec_const_zero (P : X) :
     (QuotientAddGroup.mk (periodVec (fun _ : ℝ => P)) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) = 0 := by
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) = 0 := by
   rw [periodVec_const]
   exact QuotientAddGroup.mk_zero _
 
@@ -161,7 +161,7 @@ hypotheses as `periodVec_concat`. -/
 theorem mk_periodVec_concat_eq_add
     (γ γ' : ℝ → X) (hperiod : periodVec (concat γ γ') = periodVec γ + periodVec γ') :
     (QuotientAddGroup.mk (periodVec (concat γ γ')) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
       QuotientAddGroup.mk (periodVec γ) + QuotientAddGroup.mk (periodVec γ') := by
   rw [hperiod]
   rfl
@@ -196,14 +196,14 @@ theorem periodVec_sub_mem_truePeriodLattice
 
 /-- **Abel–Jacobi well-definedness (quotient form).** Two smooth
 paths sharing both endpoints map to the same element of
-`(Fin (genus X) → ℂ) ⧸ truePeriodLattice X`. -/
+`(Fin (kirovGenus X) → ℂ) ⧸ truePeriodLattice X`. -/
 theorem mk_periodVec_eq_of_endpoints
     (γ₁ γ₂ : ℝ → X) (h0 : γ₁ 0 = γ₂ 0)
     (hsmooth : IsClosedSmoothLoop (concat γ₁ (reverse γ₂)))
     (hconcat : periodVec (concat γ₁ (reverse γ₂)) =
       periodVec γ₁ - periodVec γ₂) :
     (QuotientAddGroup.mk (periodVec γ₁) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
       QuotientAddGroup.mk (periodVec γ₂) := by
   rw [QuotientAddGroup.eq]
   have h := periodVec_sub_mem_truePeriodLattice γ₁ γ₂ h0 hsmooth hconcat
@@ -559,7 +559,7 @@ theorem exists_smoothPath_family
       (∀ P Q, IsSmoothPath P Q (sp P Q)) ∧
       (∀ P P₀ A,
         (QuotientAddGroup.mk (periodVec (sp P₀ A)) :
-          (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+          (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
         QuotientAddGroup.mk (periodVec (sp P A)) +
         QuotientAddGroup.mk (periodVec (sp P₀ P))) := by
   choose sp hS hv0 hv1 using fun P Q => exists_zeroVel_smoothPath (X := X) P Q
@@ -588,7 +588,7 @@ theorem exists_smoothPath_family
       -periodVec (Jacobians.concat (sp P₀ P) (sp P A)) :=
     Jacobians.periodVec_reverse _ (fun t ht => hcc.diff (1 - t) (one_sub_mem_uIcc ht))
   have hep : (QuotientAddGroup.mk (periodVec (sp P₀ A)) :
-        (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+        (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
       QuotientAddGroup.mk (periodVec (Jacobians.concat (sp P₀ P) (sp P A))) := by
     refine mk_periodVec_eq_of_endpoints (sp P₀ A) (Jacobians.concat (sp P₀ P) (sp P A))
       ?_ hloop ?_
@@ -626,7 +626,7 @@ theorem periodVec_smoothPath_self_mem_lattice (P : X) :
 `exists_smoothPath_family`. -/
 theorem smoothPath_basepoint_change (P P₀ A : X) :
     (QuotientAddGroup.mk (periodVec (smoothPath P₀ A)) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
     QuotientAddGroup.mk (periodVec (smoothPath P A)) +
     QuotientAddGroup.mk (periodVec (smoothPath P₀ P)) :=
   (exists_smoothPath_family X).choose_spec.2 P P₀ A
@@ -647,17 +647,17 @@ basis coordinates.** Classical linear-algebra identity tying
 `pullbackForm` to `ambientPsi`. Pure manipulation of the
 `ambientIso`-based definitions; no analytic content. -/
 theorem pullbackForm_periodBasisForm_eq (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
-    (j : Fin (genus Y)) :
+    (j : Fin (kirovGenus Y)) :
     pullbackForm f hf (periodBasisForm Y j) =
-      ambientIso X (ambientPsi (gX := genus X) (gY := genus Y) f hf
-        (Pi.basisFun ℂ (Fin (genus Y)) j)) := by
+      ambientIso X (ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (Pi.basisFun ℂ (Fin (kirovGenus Y)) j)) := by
   unfold ambientPsi
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
   show pullbackForm f hf (periodBasisForm Y j) =
     ambientIso X (((ambientIso X).symm.toLinearMap.comp
       ((pullbackForm f hf).comp (ambientIso Y).toLinearMap) : _ →ₗ[_] _)
-        (Pi.basisFun ℂ (Fin (genus Y)) j))
+        (Pi.basisFun ℂ (Fin (kirovGenus Y)) j))
   simp [periodBasisForm, LinearMap.comp_apply]
 
 /-- **Smooth loops compose with smooth maps.** If `γ : ℝ → X` is a
@@ -724,7 +724,7 @@ theorem IsClosedSmoothLoop.comp (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ
 form against `f ∘ γ` equals evaluating its pullback against `γ`.
 Requires path regularity hypotheses (inherited from `lineIntegral_pullback`). -/
 theorem periodVec_comp_eq_lineIntegral_pullback
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (γ : ℝ → X) (j : Fin (genus Y))
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (γ : ℝ → X) (j : Fin (kirovGenus Y))
     (hγ_cont : Continuous γ)
     (hγ_diff : ∀ t ∈ Set.uIcc (0 : ℝ) 1,
       DifferentiableAt ℝ ((chartAt (H := ℂ) (γ t)).toFun ∘ γ) t) :
@@ -755,22 +755,22 @@ theorem periodVec_pushforward
     (hγ_cont : Continuous γ)
     (hγ_diff : ∀ t ∈ Set.uIcc (0 : ℝ) 1,
       DifferentiableAt ℝ ((chartAt (H := ℂ) (γ t)).toFun ∘ γ) t)
-    (hint_X : ∀ i : Fin (genus X), IntervalIntegrable
+    (hint_X : ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun t => (periodBasisForm X i).toFun (γ t) (pathSpeed γ t))
         MeasureTheory.volume 0 1) :
     periodVec (f ∘ γ) =
-      ambientPhi (gX := genus X) (gY := genus Y) f hf (periodVec γ) := by
+      ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec γ) := by
   funext j
   show lineIntegral (periodBasisForm Y j) (f ∘ γ) =
-    ambientPhi (gX := genus X) (gY := genus Y) f hf (periodVec γ) j
+    ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec γ) j
   rw [lineIntegral_pullback f hf _ γ hγ_cont hγ_diff]
   rw [pullbackForm_periodBasisForm_eq]
   -- Goal: lineIntegral (ambientIso X (ambientPsi f hf e_j^Y)) γ = (ambientPhi f hf (periodVec γ)) j
-  set v := ambientPsi (gX := genus X) (gY := genus Y) f hf
-    (Pi.basisFun ℂ (Fin (genus Y)) j) with hv_def
+  set v := ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+    (Pi.basisFun ℂ (Fin (kirovGenus Y)) j) with hv_def
   -- Step 1: ambientIso X v = ∑ i, v i • periodBasisForm X i
   have h_iso_sum : ambientIso X v = ∑ i, v i • periodBasisForm X i := by
-    have h_v_decomp : v = ∑ i, v i • Pi.basisFun ℂ (Fin (genus X)) i := by
+    have h_v_decomp : v = ∑ i, v i • Pi.basisFun ℂ (Fin (kirovGenus X)) i := by
       have := pi_eq_sum_univ' v
       convert this using 2
       simp [Pi.basisFun_apply]
@@ -788,7 +788,7 @@ theorem periodVec_pushforward
           ∑ i, v i * (periodBasisForm X i).toFun (γ t) (pathSpeed γ t) := by
       intro t
       -- Unfold toFun on a finset sum of smul'd sections.
-      induction (Finset.univ : Finset (Fin (genus X))) using Finset.induction_on with
+      induction (Finset.univ : Finset (Fin (kirovGenus X))) using Finset.induction_on with
       | empty =>
         rw [Finset.sum_empty, Finset.sum_empty]
         show (0 : HolomorphicOneForms X).toFun (γ t) (pathSpeed γ t) = 0
@@ -818,7 +818,7 @@ theorem periodVec_pushforward
     (ambientPhi f hf (periodVec γ)) j
   have h_ambientPhi : (ambientPhi f hf (periodVec γ)) j = ∑ i, v i * (periodVec γ) i := by
     show (Matrix.transpose (LinearMap.toMatrix
-      (Pi.basisFun ℂ (Fin (genus Y))) (Pi.basisFun ℂ (Fin (genus X)))
+      (Pi.basisFun ℂ (Fin (kirovGenus Y))) (Pi.basisFun ℂ (Fin (kirovGenus X)))
       (ambientPsi f hf).toLinearMap)).mulVecLin (periodVec γ) j =
       ∑ i, v i * (periodVec γ) i
     rw [Matrix.mulVecLin_apply]
@@ -826,11 +826,11 @@ theorem periodVec_pushforward
       ∑ i, v i * (periodVec γ) i
     refine Finset.sum_congr rfl (fun i _ => ?_)
     congr 1
-    show (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (genus Y)))
-      (Pi.basisFun ℂ (Fin (genus X))) (ambientPsi f hf).toLinearMap) i j = v i
+    show (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (kirovGenus Y)))
+      (Pi.basisFun ℂ (Fin (kirovGenus X))) (ambientPsi f hf).toLinearMap) i j = v i
     rw [LinearMap.toMatrix_apply]
-    show ((Pi.basisFun ℂ (Fin (genus X))).repr
-      (ambientPsi f hf (Pi.basisFun ℂ (Fin (genus Y)) j))) i = v i
+    show ((Pi.basisFun ℂ (Fin (kirovGenus X))).repr
+      (ambientPsi f hf (Pi.basisFun ℂ (Fin (kirovGenus Y)) j))) i = v i
     rw [Pi.basisFun_repr]
   rw [h_ambientPhi]
   -- Goal: ∑ i, v i * lineIntegral (periodBasisForm X i) γ = ∑ i, v i * (periodVec γ) i
@@ -839,7 +839,7 @@ theorem periodVec_pushforward
 /-- **Existence of a period ℝ-basis** — the *single* classical input behind the
 Jacobian-as-complex-torus structure (the Riemann bilinear relations, Forster §§20–21).
 It states the period lattice is generated, as a `ℤ`-module, by a **real basis** of
-`ℂ^(genus X) ≅ ℝ^(2·genus X)`: the `2g` periods of a symplectic homology basis are
+`ℂ^(kirovGenus X) ≅ ℝ^(2·kirovGenus X)`: the `2g` periods of a symplectic homology basis are
 `ℝ`-linearly independent and `ℤ`-generate the lattice.
 
 From this, **both** the discreteness and the full-rank-`ℤ`-lattice instances below are
@@ -853,7 +853,7 @@ only remaining classical content; everything downstream is unconditional given i
 canonical dissection + period homology-invariance) and `periodVec_linearIndependent` (the analytic
 pillar — the Riemann bilinear relations, to be built via cut-surface + Green's theorem). -/
 theorem exists_periodLattice_realBasis :
-    ∃ b : Module.Basis (Fin (2 * genus X)) ℝ (Fin (genus X) → ℂ),
+    ∃ b : Module.Basis (Fin (2 * kirovGenus X)) ℝ (Fin (kirovGenus X) → ℂ),
       truePeriodLattice X = Submodule.span ℤ (Set.range ⇑b) := by
   obtain ⟨D⟩ := exists_canonicalDissection X
   obtain ⟨b, hb⟩ := realBasis_of_canonicalDissection D
@@ -866,8 +866,8 @@ instance : DiscreteTopology (truePeriodLattice X) := by
   obtain ⟨b, hb⟩ := exists_periodLattice_realBasis (X := X)
   rw [hb]; infer_instance
 
-/-- **Period lattice is a `ℤ`-lattice of full real rank** `2 * genus X` in
-`ℂ^(genus X) = ℝ^(2g)`. Mechanical from `exists_periodLattice_realBasis`: a `ℤ`-span
+/-- **Period lattice is a `ℤ`-lattice of full real rank** `2 * kirovGenus X` in
+`ℂ^(kirovGenus X) = ℝ^(2g)`. Mechanical from `exists_periodLattice_realBasis`: a `ℤ`-span
 of a real basis is a full-rank `ℤ`-lattice (`instIsZLatticeRealSpan`). -/
 instance : IsZLattice ℝ (truePeriodLattice X) := by
   obtain ⟨b, hb⟩ := exists_periodLattice_realBasis (X := X)
@@ -887,12 +887,12 @@ theorem ambientPhi_preserves_truePeriodLattice
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (truePeriodLattice X).toAddSubgroup ≤
       (truePeriodLattice Y).toAddSubgroup.comap
-        (ambientPhi (gX := genus X) (gY := genus Y) f hf).toAddMonoidHom := by
+        (ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toAddMonoidHom := by
   show ∀ v ∈ truePeriodLattice X,
-    ambientPhi (gX := genus X) (gY := genus Y) f hf v ∈ truePeriodLattice Y
+    ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf v ∈ truePeriodLattice Y
   intro v hv
   refine Submodule.span_induction
-    (p := fun v _ => ambientPhi (gX := genus X) (gY := genus Y) f hf v ∈
+    (p := fun v _ => ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf v ∈
       truePeriodLattice Y) ?_ ?_ ?_ ?_ hv
   · -- member case: γ ∈ closedLoopPeriods carries IsClosedSmoothLoop.
     rintro _ ⟨γ, hγ, rfl⟩
@@ -950,7 +950,7 @@ and composition with zero is zero. -/
 theorem ambientPsi_eq_zero_of_const
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (hconst : ∃ y₀ : Y, ∀ x, f x = y₀) :
-    ambientPsi (gX := genus X) (gY := genus Y) f hf = 0 := by
+    ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf = 0 := by
   unfold ambientPsi
   simp only [dite_true]
   rw [pullbackForm_eq_zero_of_const f hf hconst]

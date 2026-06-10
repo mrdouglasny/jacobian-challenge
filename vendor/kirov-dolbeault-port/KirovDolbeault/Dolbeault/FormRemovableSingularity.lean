@@ -5,7 +5,7 @@
   (i.e. `α ∈ omegaD 0`) is — modulo the removable-singularity germ-junk — a genuine *holomorphic*
   1-form.  This is the reverse map `Ω_0 → HolomorphicOneForms` inverse to the injection
   `holToMeroₗ : HolomorphicOneForms ↪ Ω_0` (`MeromorphicOneFormSystem.lean`), giving the §17.4
-  equality `omegaDim 0 = genus X` UNCONDITIONALLY and `FiniteDimensional ℂ (omegaDModule 0)`.
+  equality `omegaDim 0 = kirovGenus X` UNCONDITIONALLY and `FiniteDimensional ℂ (omegaDModule 0)`.
 
   ## The math
 
@@ -26,16 +26,16 @@
   `HolomorphicOneForms X ≃ₗ omegaDModule 0`, whence:
 
   * `FiniteDimensional ℂ (omegaDModule 0)` (transported from `HolomorphicOneForms`, finite-dim);
-  * `omegaDim 0 = genus X` (the §17.4 equality, both directions now proven).
+  * `omegaDim 0 = kirovGenus X` (the §17.4 equality, both directions now proven).
 
   Chaining with `CanonicalForm17Data.hKgenus` (`CanonicalFormIso.lean`) makes the Serre-duality
-  input `lDim K = genus X` UNCONDITIONAL.
+  input `lDim K = kirovGenus X` UNCONDITIONAL.
 
   Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §17.4; Mathlib's
   `MeromorphicAt.analyticAt` / `toMeromorphicNFAt` removable singularity.
 -/
-import Jacobians.Dolbeault.CanonicalFormDifferential
-import Jacobians.Montel
+import KirovDolbeault.Dolbeault.CanonicalFormDifferential
+import KirovDolbeault.Montel
 
 open scoped Manifold ContDiff Topology Bundle
 open Module Filter
@@ -496,7 +496,7 @@ attribute [local irreducible] repVal frameCovector repairedSection repairedHOF
 every centre), so `holToMero (repairedHOF hα) − α ∈ formGermZeroSubmodule`.  Hence the injection
 `holToOmega0Module : HolomorphicOneForms X → omegaDModule 0` is **surjective**, giving a `LinearEquiv`,
 finite-dimensionality of `omegaDModule 0` (transported from `HolomorphicOneForms`), and the §17.4
-equality `omegaDim 0 = genus X`.  Chaining with `CanonicalForm17Data.hKgenus` makes `lDim K = genus X`
+equality `omegaDim 0 = kirovGenus X`.  Chaining with `CanonicalForm17Data.hKgenus` makes `lDim K = kirovGenus X`
 unconditional. -/
 
 set_option maxHeartbeats 1000000 in
@@ -547,41 +547,41 @@ finite-dimensional `HolomorphicOneForms X` (Montel/Cartan–Serre). -/
 instance : FiniteDimensional ℂ (omegaDModule (X := X) 0) :=
   LinearEquiv.finiteDimensional holOmega0Equiv
 
-/-- **`omegaDim 0 = genus X`** (Forster §17.4 at `D = 0`), UNCONDITIONAL: the isomorphism
-`Ω_0 ≅ HolomorphicOneForms X` preserves finrank, and `genus X = finrank ℂ (HolomorphicOneForms X)`
+/-- **`omegaDim 0 = kirovGenus X`** (Forster §17.4 at `D = 0`), UNCONDITIONAL: the isomorphism
+`Ω_0 ≅ HolomorphicOneForms X` preserves finrank, and `kirovGenus X = finrank ℂ (HolomorphicOneForms X)`
 by definition. -/
-theorem omegaDim_zero_eq_genus : omegaDim (X := X) 0 = genus X := by
+theorem omegaDim_zero_eq_genus : omegaDim (X := X) 0 = kirovGenus X := by
   rw [omegaDim_eq_finrank, ← holOmega0Equiv.finrank_eq]
   rfl
 
-/-- **The reverse bound `omegaDim 0 ≤ genus X`** (Gate C's removable-singularity direction). -/
-theorem omegaDim_zero_le_genus : omegaDim (X := X) 0 ≤ genus X :=
+/-- **The reverse bound `omegaDim 0 ≤ kirovGenus X`** (Gate C's removable-singularity direction). -/
+theorem omegaDim_zero_le_genus : omegaDim (X := X) 0 ≤ kirovGenus X :=
   le_of_eq omegaDim_zero_eq_genus
 
 end Jacobians.Dolbeault
 
 /-! ## Part 4: the unconditional `hKgenus` headline (Forster §17.4)
 
-`CanonicalForm17Data.hKgenus` takes `FiniteDimensional ℂ (omegaDModule 0)` + `omegaDim 0 ≤ genus X`
+`CanonicalForm17Data.hKgenus` takes `FiniteDimensional ℂ (omegaDModule 0)` + `omegaDim 0 ≤ kirovGenus X`
 as hypotheses.  Both are now proven unconditionally, so for any `CanonicalForm17Data` (which
-`nonempty_canonicalForm17Data` supplies) we get `lDim K = genus X` with no remaining gaps. -/
+`nonempty_canonicalForm17Data` supplies) we get `lDim K = kirovGenus X` with no remaining gaps. -/
 
 namespace Jacobians.Dolbeault
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
-/-- **Unconditional `hKgenus`** for a given §17.4 datum: `lDim data.K = genus X`, with the two
-removable-singularity inputs (`Ω_0` finite-dimensional and `omegaDim 0 ≤ genus X`) now discharged. -/
+/-- **Unconditional `hKgenus`** for a given §17.4 datum: `lDim data.K = kirovGenus X`, with the two
+removable-singularity inputs (`Ω_0` finite-dimensional and `omegaDim 0 ≤ kirovGenus X`) now discharged. -/
 theorem CanonicalForm17Data.hKgenus_unconditional (data : CanonicalForm17Data X) :
-    lDim (X := X) data.K = genus X :=
+    lDim (X := X) data.K = kirovGenus X :=
   data.hKgenus omegaDim_zero_le_genus
 
-/-- **The unconditional Serre-duality input** `∃ data, lDim data.K = genus X` (Forster §17.4).  Chains
+/-- **The unconditional Serre-duality input** `∃ data, lDim data.K = kirovGenus X` (Forster §17.4).  Chains
 the proven existence of a §17.4 datum (`nonempty_canonicalForm17Data`) with the now-unconditional
 `hKgenus`.  This discharges the `SerreDualityData.hKgenus` field with no hypotheses. -/
 theorem exists_canonicalForm17Data_hKgenus :
-    ∃ data : CanonicalForm17Data X, lDim (X := X) data.K = genus X := by
+    ∃ data : CanonicalForm17Data X, lDim (X := X) data.K = kirovGenus X := by
   obtain ⟨data⟩ := nonempty_canonicalForm17Data (X := X)
   exact ⟨data, data.hKgenus_unconditional⟩
 

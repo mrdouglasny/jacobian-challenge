@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedRealSlitRegular
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedRealSlitRegular
 
 /-!
 # Assembling `RealCenterClusterFamily` from the §5 normal-form section facts (the precise residual)

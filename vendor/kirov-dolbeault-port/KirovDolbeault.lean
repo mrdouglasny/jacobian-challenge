@@ -13,22 +13,22 @@ import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 import Mathlib.Topology.Category.TopCat.Limits.Basic
-import Jacobians.Genus
-import Jacobians.DegreeOneSphere
-import Jacobians.GenusSphereHeadline
-import Jacobians.ZLatticeQuotient
-import Jacobians.ChartedSpaceOfLocalHomeomorph
-import Jacobians.HolomorphicForms
-import Jacobians.LineIntegral
-import Jacobians.SmoothPathCore
-import Jacobians.LoopOffBranch
-import Jacobians.ManifoldIFT
-import Jacobians.PeriodLattice
-import Jacobians.TracePullback
-import Jacobians.Abel
-import Jacobians.Degree
-import Jacobians.OfCurveAnalyticitySkeleton
-import Jacobians.ULiftManifold
+import KirovDolbeault.Genus
+import KirovDolbeault.DegreeOneSphere
+import KirovDolbeault.GenusSphereHeadline
+import KirovDolbeault.ZLatticeQuotient
+import KirovDolbeault.ChartedSpaceOfLocalHomeomorph
+import KirovDolbeault.HolomorphicForms
+import KirovDolbeault.LineIntegral
+import KirovDolbeault.SmoothPathCore
+import KirovDolbeault.LoopOffBranch
+import KirovDolbeault.ManifoldIFT
+import KirovDolbeault.PeriodLattice
+import KirovDolbeault.TracePullback
+import KirovDolbeault.Abel
+import KirovDolbeault.Degree
+import KirovDolbeault.OfCurveAnalyticitySkeleton
+import KirovDolbeault.ULiftManifold
 
 /-
 

@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.Residue
+import KirovDolbeault.Dolbeault.Residue
 
 /-!
 # The residue theorem on `ℂℙ¹` (the trace-to-`ℙ¹` route, Miranda §VIII.3, pillar 2)

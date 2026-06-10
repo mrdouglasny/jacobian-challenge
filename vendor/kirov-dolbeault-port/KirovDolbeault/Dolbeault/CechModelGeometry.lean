@@ -28,8 +28,8 @@
 -- Only the model TYPES (`DiskOverlapData`) are needed here, so we import `CechModelBase` (not
 -- `CechFinitenessWiring`); this keeps the `CechFinitenessWiring → CechFinitenessDtwist → … →
 -- CechModelGeometry` chain acyclic.
-import Jacobians.Dolbeault.CechModelBase
-import Jacobians.Montel.Cover
+import KirovDolbeault.Dolbeault.CechModelBase
+import KirovDolbeault.Montel.Cover
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

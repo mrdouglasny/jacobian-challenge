@@ -28,7 +28,7 @@
   Dolbeault-comparison chain), so it builds cheaply.  Sorry-free: the cochain SPACES + their Banach
   instances (below).  The cross-chart δ maps are stated as the next pieces (prose, not gap tactics).
 -/
-import Jacobians.Dolbeault.CechModelGeometry
+import KirovDolbeault.Dolbeault.CechModelGeometry
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

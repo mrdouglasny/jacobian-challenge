@@ -30,10 +30,10 @@
   `ℝ`-linear equivalence `comparison_linearEquiv`, the target `cechH1_dolbeault_comparison_proof`, and
   the closing honest-status summary live in `Jacobians.Dolbeault.DolbeaultComparisonInverse`.
 -/
-import Jacobians.Dolbeault.DolbeaultComparison
-import Jacobians.Dolbeault.DbarLocal
-import Jacobians.Dolbeault.ChartDiskCover
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.DolbeaultComparison
+import KirovDolbeault.Dolbeault.DbarLocal
+import KirovDolbeault.Dolbeault.ChartDiskCover
+import KirovDolbeault.Dolbeault.CechH0
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.BumpFunction
 

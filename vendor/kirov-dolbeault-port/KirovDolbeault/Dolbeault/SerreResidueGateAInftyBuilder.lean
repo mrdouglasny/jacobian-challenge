@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedFullFibreBuilder
-import Jacobians.Dolbeault.SerreResidueGateAClosed
-import Jacobians.Dolbeault.SerreResidueInftyCoherence
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFullFibreBuilder
+import KirovDolbeault.Dolbeault.SerreResidueGateAClosed
+import KirovDolbeault.Dolbeault.SerreResidueInftyCoherence
 
 /-!
 # The Gate-A off-centre/∞ bundle `GateAInftyData` from an adapted cover (TARGET 2)

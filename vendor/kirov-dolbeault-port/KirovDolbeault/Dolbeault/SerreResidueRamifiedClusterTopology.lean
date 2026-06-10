@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedClusterPartition
-import Jacobians.Dolbeault.SerreResidueRamifiedMultiplicityBridge
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedClusterPartition
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedMultiplicityBridge
 
 /-!
 # The fibre-cluster topology: reducing `ClusterReindexData` to the conservation-of-number datum

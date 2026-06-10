@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceMovingFibre
+import KirovDolbeault.Dolbeault.FormTraceMovingFibre
 
 /-!
 # Building `CoherentTraceSelection` from the moving-fibre self-coherence (Gate A, §VIII.3)
@@ -24,12 +24,12 @@ remaining geometry explicit and *minimal*:
 * the **off-exceptional coherence** `hreg z` is the local self-coherence at a regular value `z` with a
   regular fibre `Dreg z` (with `g`'s chart-pullback analytic at each fibre point);
 * the **`∞` glue** `hglue_inf` is the reciprocal-chart analogue (the `∞`-fibre trace);
-* the **genus-`0` `∞`-vanishing** `R₀ 0 = 0` is `coeffAt_eq_zero_of_sphereForm` (`H⁰(ℂℙ¹, Ω) = 0`).
+* the **kirovGenus-`0` `∞`-vanishing** `R₀ 0 = 0` is `coeffAt_eq_zero_of_sphereForm` (`H⁰(ℂℙ¹, Ω) = 0`).
 
 We bundle these as a `MovingCoherenceFamily` and prove it produces a `CoherentTraceSelection`, hence Gate
 A `∑Res = 0` *unconditionally* (modulo the family's existence).  This isolates the remaining work to a
 single structure whose fields are, individually, either proved (the per-value local self-coherence from
-`MovingCoherenceDatum`, the genus-`0` vanishing) or the precise residual (the `∞`-glue + junk-freeness +
+`MovingCoherenceDatum`, the kirovGenus-`0` vanishing) or the precise residual (the `∞`-glue + junk-freeness +
 the family-existence = the continuously-varying index bijections + the pole/regular separation
 genericity).
 
@@ -98,13 +98,13 @@ theorem hreg_of_movingDatum {Φ : (b : ℂ) → FibreRegularData g f b} {z : ℂ
 We bundle: the global selection `Φ`, the adapted-cover finite/∞ bookkeeping (verbatim from
 `CoherentTraceSelection`), the **per-pole-value moving data** (whose fixed fibre is the pole sub-fibre),
 the **per-regular-value moving data** (regular fibre + `g`-analyticity), the `∞`-glue, junk-freeness, and
-the genus-`0` continuation.  The finite glue and off-exceptional coherence are then *derived* from the
+the kirovGenus-`0` continuation.  The finite glue and off-exceptional coherence are then *derived* from the
 moving data (`glue_fin_of_movingDatum`/`hreg_of_movingDatum`); the rest is carried verbatim. -/
 
 /-- **A moving-fibre coherence family** for `α = ω₀·g` over `poles`, relative to an adapted cover `hac`.
 The Gate-A input assembled from the §VIII.3 monodromy data: the global selection `Φ`, the finite/∞
 enumeration bookkeeping, the per-value moving-fibre self-coherence data (finite pole-values against the
-pole sub-fibre, regular values against a regular fibre), the `∞`-glue, junk-freeness, and the genus-`0`
+pole sub-fibre, regular values against a regular fibre), the `∞`-glue, junk-freeness, and the kirovGenus-`0`
 continuation.  Produces a `CoherentTraceSelection` (hence Gate A `∑Res = 0`). -/
 structure MovingCoherenceFamily (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f : MeromorphicFunction X)
     (poles : Finset X) (hac : AdaptedCover ω₀ g f poles) where
@@ -149,7 +149,7 @@ structure MovingCoherenceFamily (ω₀ : HolomorphicOneForms X) (g : X → ℂ) 
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTrace ω₀ f Φ - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -189,7 +189,7 @@ noncomputable def MovingCoherenceFamily.toCoherentTraceSelection {hac : AdaptedC
 `MovingCoherenceFamily.toCoherentTraceSelection` and the proved
 `residueSum_eq_zero_of_coherentSelection`, a moving-fibre coherence family closes Gate A's 1-form
 residue theorem for `α = ω₀·g`.  This is the §VIII.3-monodromy reduction of Gate A: every field is
-either proved (the per-value self-coherence, the genus-`0` vanishing) or the precise residual (the
+either proved (the per-value self-coherence, the kirovGenus-`0` vanishing) or the precise residual (the
 `∞`-glue, junk-freeness, and the family-existence = the continuously-varying index bijections + the
 pole/regular separation genericity). -/
 theorem residueSum_eq_zero_of_movingCoherenceFamily (hac : AdaptedCover ω₀ g f poles)
@@ -202,12 +202,12 @@ theorem residueSum_eq_zero_of_movingCoherenceFamily (hac : AdaptedCover ω₀ g 
 The `MovingCoherenceFamily` obligation is *satisfiable*, not a disguised `False`: for the **empty pole
 set** (`α = ω₀·g` globally holomorphic) the empty fibre selection gives a family — the per-regular-value
 data is the empty datum (`movingCoherenceDatum_empty`, `valueChartTrace ≡ 0`), no finite pole-values, the
-empty `∞`-trace (`recipCoeff 0 ≡ 0`), vacuous junk-freeness, and the vanishing genus-`0` continuation.
+empty `∞`-trace (`recipCoeff 0 ≡ 0`), vacuous junk-freeness, and the vanishing kirovGenus-`0` continuation.
 This confirms the family produces a genuine `∑Res = 0`, mirroring `coherentTraceSelection_empty`. -/
 
 /-- **The empty moving coherence family.**  For the empty pole set, the empty fibre selection assembles
 into a `MovingCoherenceFamily`: per-regular-value empty data, vacuous finite/∞-pole fields, and the
-vanishing genus-`0` continuation.  The honest non-vacuity witness. -/
+vanishing kirovGenus-`0` continuation.  The honest non-vacuity witness. -/
 noncomputable def movingCoherenceFamily_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :
     MovingCoherenceFamily ω₀ g f ∅ (adaptedCover_empty ω₀ g f hdiv) where

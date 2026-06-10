@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalGeometric
-import Jacobians.Dolbeault.FormTraceSheetFibreBridge
-import Jacobians.ProjectiveLine
+import KirovDolbeault.Dolbeault.FormTraceGlobalGeometric
+import KirovDolbeault.Dolbeault.FormTraceSheetFibreBridge
+import KirovDolbeault.ProjectiveLine
 
 /-!
 # The coherent fibre selection bundling the Gate-A germ-coherence (Miranda §VIII.3)
@@ -18,7 +18,7 @@ selection `Φ : (b : ℂ) → FibreRegularData g f b`:
   finite pole-value;
 * `hglue_inf` — `recipCoeff (valueChartTrace)` germ-equals the `∞`-fibre trace off `0`;
 * `hreg` — at each value off the centres, `valueChartTrace` germ-equals a fixed *regular* fibre trace;
-* junk-freeness + the genus-`0` `∞`-vanishing.
+* junk-freeness + the kirovGenus-`0` `∞`-vanishing.
 
 This file packages those into one **`CoherentTraceSelection`** structure — the minimal honest §VIII.3
 input — and proves it turns the key on Gate A `∑Res = 0` via the proved
@@ -41,7 +41,7 @@ We additionally prove the **section-identification reduction** that connects the
 covector linchpin (`FormTraceSheetFibreBridge.fibreTrace_sheet_eventuallyEq`) to the self-coherence
 content (`traceCoeff_eventuallyEq_of_sheets_eventuallyEq`: if two fibre selections' planar sheets +
 fibre points germ-match index-by-index near a base value, their trace coefficients germ-agree there),
-and the **genus-`0` `∞`-vanishing as a sphere-form corollary** (`coeffAt_eq_zero_of_sphereForm`).
+and the **kirovGenus-`0` `∞`-vanishing as a sphere-form corollary** (`coeffAt_eq_zero_of_sphereForm`).
 
 ## What is proved (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
@@ -159,15 +159,15 @@ theorem traceCoeff_eventuallyEq_sum_rightInverse (ω₀ : HolomorphicOneForms X)
   filter_upwards [hsum] with w hw
   simpa only [Finset.sum_apply] using hw
 
-/-! ### The genus-`0` `∞`-vanishing as a sphere-form corollary
+/-! ### The kirovGenus-`0` `∞`-vanishing as a sphere-form corollary
 
-The genus-`0` `∞`-vanishing input `R₀ 0 = 0` is, conceptually, "the holomorphic remainder `Tr_F α −
+The kirovGenus-`0` `∞`-vanishing input `R₀ 0 = 0` is, conceptually, "the holomorphic remainder `Tr_F α −
 L.R` is a holomorphic `1`-form on `ℂℙ¹`, hence `0` (`H⁰(ℂℙ¹, Ω) = 0`), hence its `∞`-coefficient is
 `0`".  We record the reusable consequence: *any* holomorphic `1`-form on `RiemannSphere` has identically
 zero chart coefficient `coeffAt` at every point (it is the zero section by
 `ProjectiveLine.holomorphicOneForm_eq_zero`).  Once the remainder is packaged as such a sphere form,
 its value-chart coefficient (and via the reciprocal-chart Jacobian, `R₀`) vanishes — discharging the
-genus-`0` field of `CoherentTraceSelection`. -/
+kirovGenus-`0` field of `CoherentTraceSelection`. -/
 
 /-- **A holomorphic `1`-form on `ℂℙ¹` has zero chart coefficient everywhere.**  Every
 `s : HolomorphicOneForms RiemannSphere` is the zero section (`holomorphicOneForm_eq_zero`,
@@ -175,7 +175,7 @@ genus-`0` field of `CoherentTraceSelection`. -/
 
 > `coeffAt s a z = 0`   for all `a : RiemannSphere`, `z : ℂ`.
 
-This is the genus-`0` engine for the `∞`-vanishing: the holomorphic remainder of the trace, once
+This is the kirovGenus-`0` engine for the `∞`-vanishing: the holomorphic remainder of the trace, once
 realized as a sphere `1`-form, has vanishing coefficient in every chart (finite and reciprocal). -/
 theorem coeffAt_eq_zero_of_sphereForm (s : HolomorphicOneForms RiemannSphere) (a : RiemannSphere)
     (z : ℂ) : Jacobians.Dolbeault.coeffAt s a z = 0 := by
@@ -190,7 +190,7 @@ scaffolding `cs`/`ρ`/`Dinf`/enumeration) into a single structure.  The genuinel
 is the §VIII.3 monodromy: the geometric trace `valueChartTrace ω₀ f Φ` (which at each base value `b'`
 re-selects the fibre `Φ b'`) germ-equals a **single fixed** local fibre trace near each value — the
 finite pole-values (against the pole sub-fibre `fibreReg hac`), `∞`, and every regular value.  Plus
-junk-freeness and the genus-`0` `∞`-vanishing. -/
+junk-freeness and the kirovGenus-`0` `∞`-vanishing. -/
 
 /-- **A coherent fibre selection** for `α = ω₀·g` over the pole set `poles`, relative to an adapted
 cover `hac`.  Bundles the global fibre selection `Φ`, the finite-pole-value bookkeeping (`cs`/`ρ`/
@@ -204,7 +204,7 @@ geometric trace `valueChartTrace ω₀ f Φ` with the local fibre traces:
   chart-pullback analytic at each of its fibre points);
 * `hcont_int` — junk-freeness (continuity of the remainder at each centre, for any internally-built
   `LaurentForm L`);
-* `R₀` + `hR₀_*` — the genus-`0` `∞`-vanishing (the analytic continuation of the reciprocal remainder
+* `R₀` + `hR₀_*` — the kirovGenus-`0` `∞`-vanishing (the analytic continuation of the reciprocal remainder
   vanishes at `0`).
 
 These are *exactly* the irreducible §VIII.3 inputs; the rest of Gate A is discharged.  A coherent
@@ -252,7 +252,7 @@ structure CoherentTraceSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTrace ω₀ f Φ - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -263,7 +263,7 @@ structure CoherentTraceSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     recipCoeff (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] 0] R₀
 
 /-- **Gate A `∑Res = 0` from a coherent fibre selection.**  A `CoherentTraceSelection` supplies
-*exactly* the germ-coherence + genus-`0` inputs of `residueSum_eq_zero_of_geometricSelection_coh`,
+*exactly* the germ-coherence + kirovGenus-`0` inputs of `residueSum_eq_zero_of_geometricSelection_coh`,
 so the 1-form residue theorem `∑ₐ Resₐ(α) = 0` holds for `α = ω₀·g`.  This is the honest reduction of
 Gate A to the single coherent-selection obligation. -/
 theorem CoherentTraceSelection.residueSum_eq_zero {hac : AdaptedCover ω₀ g f poles}
@@ -286,13 +286,13 @@ The `CoherentTraceSelection` obligation is *satisfiable*, not a disguised `False
 set** (`α = ω₀·g` globally holomorphic) the **empty fibre selection** `Φ p := emptyFibreRegularData g
 f p` gives `valueChartTrace ω₀ f Φ ≡ 0` (an empty fibre sum), with all the deep germ-coherence inputs
 (finite/∞ glue, off-exceptional coherence, junk-freeness) vacuous over the empty centre set, the
-`∞`-glue `recipCoeff 0 ≡ 0` matching the empty `∞`-trace, and the genus-`0` continuation `R₀ ≡ 0`
+`∞`-glue `recipCoeff 0 ≡ 0` matching the empty `∞`-trace, and the kirovGenus-`0` continuation `R₀ ≡ 0`
 vanishing.  This confirms the structure produces a genuine `∑Res = 0`. -/
 
 /-- **A coherent fibre selection for the empty pole set.**  The empty fibre selection (no fibre points
 over any value, `valueChartTrace ≡ 0`) is a coherent selection for the globally-holomorphic case: no
 finite centres (every glue/junk-free field vacuous), the empty `∞`-fibre (`recipCoeff 0 ≡ 0`), and the
-vanishing genus-`0` continuation `R₀ ≡ 0`.  The honest non-vacuity witness. -/
+vanishing kirovGenus-`0` continuation `R₀ ≡ 0`.  The honest non-vacuity witness. -/
 noncomputable def coherentTraceSelection_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :
     CoherentTraceSelection ω₀ g f ∅ (adaptedCover_empty ω₀ g f hdiv) where

@@ -18,7 +18,7 @@ is that for each `y` we use the ball-restricted chart `φ_y` from
 
 No `axiom`, no gaps.
 -/
-import Jacobians.Discharge.Manifold.ChartRestrictionToBall
+import KirovDolbeault.Discharge.Manifold.ChartRestrictionToBall
 import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.OpenPartialHomeomorph.Basic
 import Mathlib.Topology.UnitInterval

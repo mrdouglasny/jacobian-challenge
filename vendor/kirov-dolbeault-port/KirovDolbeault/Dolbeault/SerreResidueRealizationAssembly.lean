@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreCupProduct
-import Jacobians.Dolbeault.SerreResiduePairing
+import KirovDolbeault.Dolbeault.SerreCupProduct
+import KirovDolbeault.Dolbeault.SerreResiduePairing
 
 /-!
 # Forster §17.5/17.6 — assembling `SerreResidueRealization` from the cup product + global residue
@@ -132,7 +132,7 @@ externally-named inputs are `hKgenus` (Forster §17.4, proven via `CanonicalForm
 surjectivity (the HARD half, supplied separately), and finiteness (Forster §14, `finiteDimensional_cechH1`).
 This exhibits the residue pairing's contribution to the ladder, not in isolation. -/
 def toSerreDualityData (R : GlobalResidue 𝔘 K)
-    (hKgenus : lDim (X := X) K = genus X)
+    (hKgenus : lDim (X := X) K = kirovGenus X)
     (ι_surj : ∀ D : Divisor X, Function.Surjective (R.pairing D))
     (finH1 : ∀ D : Divisor X, FiniteDimensional ℂ (𝔘.toFiniteFamily.cechH1 D)) :
     SerreDualityData 𝔘 :=

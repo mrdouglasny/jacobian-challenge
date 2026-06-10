@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceCoherentFromMoving
+import KirovDolbeault.Dolbeault.FormTraceCoherentFromMoving
 
 /-!
 # The moving-fibre coherence datum from a sheet system (Gate A, §VIII.3 — global index bijection)
@@ -227,12 +227,12 @@ noncomputable def MovingCoherenceDatum.ofLocalSheetSystem
 per-value moving data, reducing it to the §VIII.3 **re-selection bijection** `hsel` plus the moving
 sections.  We bundle the *whole* Gate-A input — the global selection `Φ`, the per-pole-value and
 per-regular-value sheet sections with their re-selection bijections, the finite/∞ enumeration
-bookkeeping, the `∞`-glue, junk-freeness, and the genus-`0` continuation — into one structure
+bookkeeping, the `∞`-glue, junk-freeness, and the kirovGenus-`0` continuation — into one structure
 `MovingSheetSelection`, and show it produces a `MovingCoherenceFamily` (hence Gate A `∑Res = 0`).
 
 This is the honest minimal obligation: every field is either *proved* infrastructure or the genuine
 residual (the continuously-varying sheet sections + re-selection bijections at each value, the `∞`-glue,
-junk-freeness, and the genus-`0` vanishing).  The per-value moving data `Cfin`/`Creg` are *derived* from
+junk-freeness, and the kirovGenus-`0` vanishing).  The per-value moving data `Cfin`/`Creg` are *derived* from
 the sheet sections via `ofSheetSections`. -/
 
 /-- **A moving-fibre sheet selection** for `α = ω₀·g` over `poles`, relative to an adapted cover `hac`.
@@ -240,7 +240,7 @@ The Gate-A input with the per-value moving data presented in *sheet form*: at ea
 each regular value `z`, continuously-varying manifold sections `sec` of `f.holoRepr` (the branched-cover
 sheets) through the fixed fibre, with the §VIII.3 re-selection bijection `hsel` (near the base value,
 `Φ b'` is enumerated by the moving sections).  The remaining fields (finite/∞ enumeration, `∞`-glue,
-junk-freeness, genus-`0`) carry over verbatim from `MovingCoherenceFamily`.  Produces a
+junk-freeness, kirovGenus-`0`) carry over verbatim from `MovingCoherenceFamily`.  Produces a
 `MovingCoherenceFamily` via `MovingCoherenceDatum.ofSheetSections`. -/
 structure MovingSheetSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f : MeromorphicFunction X)
     (poles : Finset X) (hac : AdaptedCover ω₀ g f poles) where
@@ -307,7 +307,7 @@ structure MovingSheetSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTrace ω₀ f Φ - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -353,7 +353,7 @@ noncomputable def MovingSheetSelection.toMovingCoherenceFamily {hac : AdaptedCov
 `MovingSheetSelection.toMovingCoherenceFamily` and the proved
 `residueSum_eq_zero_of_movingCoherenceFamily`, a moving-fibre sheet selection closes Gate A's 1-form
 residue theorem for `α = ω₀·g`.  This is the sheet-form §VIII.3 reduction of Gate A: every field is
-either proved (the per-value self-coherence from the re-selection bijection, the genus-`0` vanishing) or
+either proved (the per-value self-coherence from the re-selection bijection, the kirovGenus-`0` vanishing) or
 the precise residual (the continuously-varying sheets + re-selection bijections, the `∞`-glue,
 junk-freeness). -/
 theorem residueSum_eq_zero_of_movingSheetSelection (hac : AdaptedCover ω₀ g f poles)
@@ -367,13 +367,13 @@ The `MovingSheetSelection` obligation is *satisfiable*, not a disguised `False`:
 set** (`α = ω₀·g` globally holomorphic) the empty fibre selection assembles into a
 `MovingSheetSelection` — no finite pole-values (the per-pole sheet fields vacuous), the per-regular-value
 reference fibre is the empty fibre (`secReg` vacuous, the re-selection bijection the empty equiv), the
-empty `∞`-trace, vacuous junk-freeness, and the vanishing genus-`0` continuation.  Its
+empty `∞`-trace, vacuous junk-freeness, and the vanishing kirovGenus-`0` continuation.  Its
 `residueSum_eq_zero_of_movingSheetSelection` yields `∑Res = 0`, confirming the sheet-form reduction is
 honest. -/
 
 /-- **The empty moving sheet selection.**  For the empty pole set, the empty fibre selection assembles
 into a `MovingSheetSelection`: per-regular-value empty fibre + empty sections + the empty re-selection
-equiv, vacuous finite/∞-pole fields, and the vanishing genus-`0` continuation.  The honest non-vacuity
+equiv, vacuous finite/∞-pole fields, and the vanishing kirovGenus-`0` continuation.  The honest non-vacuity
 witness. -/
 noncomputable def movingSheetSelection_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :

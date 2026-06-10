@@ -28,8 +28,8 @@
   Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §17.4; Mathlib `mfderiv`,
   `MeromorphicAt.deriv`, `TangentBundle.symmL_trivializationAt`, `mdifferentiableAt_iff_of_mem_source`.
 -/
-import Jacobians.Dolbeault.CanonicalFormIso
-import Jacobians.Dolbeault.SerreOmega0
+import KirovDolbeault.Dolbeault.CanonicalFormIso
+import KirovDolbeault.Dolbeault.SerreOmega0
 
 open scoped Manifold ContDiff Topology Bundle
 open Module

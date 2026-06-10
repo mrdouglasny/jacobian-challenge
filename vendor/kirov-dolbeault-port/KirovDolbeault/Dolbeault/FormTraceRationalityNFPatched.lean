@@ -3,18 +3,18 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFullFibreRationalityNF
-import Jacobians.Dolbeault.FormTraceCoherenceFromMoving
-import Jacobians.Dolbeault.FormTraceGlobalTPatched
-import Jacobians.Dolbeault.FormTraceBundleBranchBound
-import Jacobians.Dolbeault.FormTraceBundleBridge
+import KirovDolbeault.Dolbeault.FormTraceFullFibreRationalityNF
+import KirovDolbeault.Dolbeault.FormTraceCoherenceFromMoving
+import KirovDolbeault.Dolbeault.FormTraceGlobalTPatched
+import KirovDolbeault.Dolbeault.FormTraceBundleBranchBound
+import KirovDolbeault.Dolbeault.FormTraceBundleBridge
 
 /-!
 # Gate A `∑Res = 0` from the **branch-patched** geometric trace, *sound* `∞` fibre (Miranda §VIII.3)
 
 `Jacobians.Dolbeault.FormTraceFullFibre.traceRationalityDataNF_ofMovingData`
 (`FormTraceCoherenceFromMovingNF`) builds the sound full-fibre reduction target `TraceRationalityDataNF`
-from a global selection `Φ`, per-pole moving data, and — as *caller hypotheses* — the genus-`0`
+from a global selection `Φ`, per-pole moving data, and — as *caller hypotheses* — the kirovGenus-`0`
 remainder vanishing `hentire`/`hrecip_cont` against the **raw** trace `valueChartTrace ω₀ f Φ`.
 
 That `hentire` (`AnalyticOnNhd ℂ (valueChartTrace ω₀ f Φ - L.R) Set.univ`) is, however, a
@@ -33,11 +33,11 @@ which equals `valueChartTrace` off the finite branch values `br` and the removab
 each of them — the *planar shadow* of the proven bundle trace `traceFun` extension
 (`TraceForm.traceExtendsAt_branchPoint`, axiom-clean).  With this `T`:
 
-* the genus-`0` `hentire` is **proven internally** (not assumed) via the off-centre analyticity
+* the kirovGenus-`0` `hentire` is **proven internally** (not assumed) via the off-centre analyticity
   `analyticAt_valueChartTracePatched_off_centres` (regular values by the moving coherence; branch values
   by the value-correct removable extension `tendsto_zero_valueChartTrace_of_bundleGerm`/the boundedness
   crux) + the junk-freeness `hcont_int`, through `analyticOnNhd_remainder_of_junkFree'`;
-* `hrecip_cont` is `continuousAt_recipCoeff_of_vanishing` (the genus-`0` `R₀ 0 = 0` `∞`-vanishing);
+* `hrecip_cont` is `continuousAt_recipCoeff_of_vanishing` (the kirovGenus-`0` `R₀ 0 = 0` `∞`-vanishing);
 * `agree` (finite) uses `valueChartTracePatched =ᶠ[𝓝[≠] p] valueChartTrace` (the patch is inert off the
   branch values) chained with the per-pole moving coherence `hcoh_fin_of_movingDatum`;
 * `agree_infty` uses `recipCoeff (valueChartTracePatched) =ᶠ[𝓝[≠] 0] recipCoeff (valueChartTrace)`
@@ -51,7 +51,7 @@ them by the genuinely-satisfiable boundedness-crux/junk-free inputs, and keeps t
 
 * `traceRationalityDataNF_ofPatched` — a sound `TraceRationalityDataNF` from a global selection `Φ`, the
   branch set `br`, the off-centre analyticity inputs (`hreg` regular-value analyticity + `hbnd`
-  branch-value boundedness), per-pole moving data, junk-freeness `hcont_int`, the genus-`0`
+  branch-value boundedness), per-pole moving data, junk-freeness `hcont_int`, the kirovGenus-`0`
   `∞`-vanishing `R₀`, and the **sound** `∞`-fibre data + coherence;
 * `residueSum_eq_zero_of_patchedTraceRationalityNF` — Gate A `∑Res = 0` from it;
 * `traceRationalityDataNF_ofPatched_holomorphic` — end-to-end non-vacuity (empty-pole), confirming the
@@ -132,10 +132,10 @@ theorem hT_off_patched {Φ : (b : ℂ) → FibreRegularData g f b} {m : ℕ} {cs
 /-! ### The sound `TraceRationalityDataNF` from the patched trace
 
 We assemble `TraceRationalityDataNF` with `T := valueChartTracePatched ω₀ f Φ br`.  The internal
-`LaurentForm L` is `T`'s finite principal parts; the genus-`0` Liouville agreement `T = L.R` is proven
+`LaurentForm L` is `T`'s finite principal parts; the kirovGenus-`0` Liouville agreement `T = L.R` is proven
 from the *internally-discharged* `hentire` (`analyticOnNhd_remainder_of_junkFree'` from `hT_off_patched`
 + the junk-freeness `hcont_int`) and `hrecip_cont` (`continuousAt_recipCoeff_of_vanishing` from the
-genus-`0` `∞`-vanishing `R₀`).  Then `agree`/`agree_infty` follow from `T = L.R` + the per-pole moving
+kirovGenus-`0` `∞`-vanishing `R₀`).  Then `agree`/`agree_infty` follow from `T = L.R` + the per-pole moving
 coherence / the sound `∞`-coherence. -/
 
 /-- **A sound `TraceRationalityDataNF` from the branch-patched geometric trace.**  With
@@ -148,7 +148,7 @@ coherence / the sound `∞`-coherence. -/
   the meromorphy at the centres and the finite coherence;
 * `hcont_int` — junk-freeness (`T − L.R` continuous at each centre), giving `hentire` via
   `analyticOnNhd_remainder_of_junkFree'`;
-* `R₀` (`hR₀_an`/`hR₀0`/`hR₀_eq`) — the genus-`0` `∞`-vanishing, giving `hrecip_cont` via
+* `R₀` (`hR₀_an`/`hR₀0`/`hR₀_eq`) — the kirovGenus-`0` `∞`-vanishing, giving `hrecip_cont` via
   `continuousAt_recipCoeff_of_vanishing`;
 * `Dinf` (sound `InftyFibreDataNF`) + `hcoh_inf` — the sound `∞`-fibre data and coherence against
   `inftyFibreTraceNF`.
@@ -211,7 +211,7 @@ noncomputable def traceRationalityDataNF_ofPatched
     hcont_int L hLcenters hLrem
   have hentire : AnalyticOnNhd ℂ (T - L.R) Set.univ :=
     analyticOnNhd_remainder_of_junkFree' hT_off hrem hcont
-  -- `hrecip_cont`: the genus-`0` `∞`-vanishing.
+  -- `hrecip_cont`: the kirovGenus-`0` `∞`-vanishing.
   have hrecip : ContinuousAt (recipCoeff (T - L.R)) 0 :=
     continuousAt_recipCoeff_of_vanishing hR₀_an hR₀0 (hR₀_eq L hLcenters)
   -- The Liouville agreement `T = L.R`.
@@ -294,7 +294,7 @@ atoms, to the standard regular-value geometry — *no* Puiseux frame:
   discharged from the eventual sphere-sheet coherence `hbridgeBr_of_eventual_sphereCoherence` — Miranda's
   "the SUM extends across branch points", never an individual colliding sheet.
 
-This is the `T := traceFun` discharge of the genus-`0` analyticity content: the planar trace inherits
+This is the `T := traceFun` discharge of the kirovGenus-`0` analyticity content: the planar trace inherits
 analyticity across branch points from the proven bundle trace `traceFun` extension. -/
 
 /-- **`hbnd` (branch-value boundedness) from the eventual sphere coherence + a local form `αBr`.**  At a
@@ -445,10 +445,10 @@ geometric residuals**, with `f` a nonconstant cover (`hncF`):
   proven bundle SUM);
 * `xsInf`/`hsimpleInf` (simple `∞`-poles) — the sound `∞`-fibre data `InftyFibreDataNF.ofRegular`;
 * `hcoh` — the `∞`-moving coherence (the `∞`-single-valuedness; giving `hcoh_inf`);
-* `hcont_int`, `R₀`/`hR₀_*` — junk-freeness + the genus-`0` `∞`-vanishing.
+* `hcont_int`, `R₀`/`hR₀_*` — junk-freeness + the kirovGenus-`0` `∞`-vanishing.
 
 This is the sound replacement of the *raw*-trace route: `hentire` is **proven** (not assumed), the
-`∞`-fibre is the sound `InftyFibreDataNF`, and the genus-`0` analyticity rides on the proven bundle trace
+`∞`-fibre is the sound `InftyFibreDataNF`, and the kirovGenus-`0` analyticity rides on the proven bundle trace
 `traceFun` extension (`TraceForm.traceExtendsAt_branchPoint`, axiom-clean). -/
 theorem residueSum_eq_zero_of_patchedGeometry
     (hncF : ¬ ∃ y₀ : RiemannSphere, ∀ x, f.toRiemannSphere x = y₀)
@@ -522,7 +522,7 @@ theorem residueSum_eq_zero_of_patchedGeometry
 For the empty pole set the empty fibre selection assembles into a `TraceRationalityDataNF` through the
 patched constructor: no finite pole-values (the per-pole moving data vacuous), no branch values (`br = ∅`,
 so the patch is inert and the raw/patched traces coincide and are the zero function), the empty sound
-`∞`-fibre, the zero trace, and the trivially-true genus-`0`/`∞` fields.  Confirms the sound *value-correct*
+`∞`-fibre, the zero trace, and the trivially-true kirovGenus-`0`/`∞` fields.  Confirms the sound *value-correct*
 reduction is honest (not a disguised `False`). -/
 
 /-- **Non-vacuity of the patched sound `TraceRationalityDataNF` reduction.**  For the empty pole set the
@@ -558,7 +558,7 @@ theorem residueSum_eq_zero_of_patchedTraceRationalityNF_holomorphic (ω₀ : Hol
     rw [hpatch0, hLR0]
     have h0 : ((fun _ => (0 : ℂ)) - fun _ => (0 : ℂ)) = fun _ : ℂ => (0 : ℂ) := by funext z; simp
     rw [h0]; exact continuousAt_const
-  · -- genus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
+  · -- kirovGenus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
     intro L hLa
     have hLR0 : L.R = fun _ => (0 : ℂ) :=
       laurentForm_R_eq_zero_of_emptyImage

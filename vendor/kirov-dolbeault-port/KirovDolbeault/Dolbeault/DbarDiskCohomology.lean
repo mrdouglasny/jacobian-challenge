@@ -19,7 +19,7 @@
   `H¹(disk, 𝒪) = 0`.  The `∂̄ = 0 ⇒ holomorphic` direction is supplied by the Wirtinger
   characterisation `differentiableAt_complex_iff_differentiableAt_real`.
 -/
-import Jacobians.Dolbeault.DbarLocal
+import KirovDolbeault.Dolbeault.DbarLocal
 
 open Complex MeasureTheory Metric
 open scoped Topology

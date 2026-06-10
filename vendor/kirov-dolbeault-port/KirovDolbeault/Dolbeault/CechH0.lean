@@ -17,7 +17,7 @@
     meromorphic normal form read in the shared ambient chart, so they agree *honestly* (not just
     codiscretely) on overlaps; the patch is then chart-locally a single normal-form function.
 -/
-import Jacobians.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.CechComplex
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

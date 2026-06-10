@@ -17,7 +17,7 @@
   importable here.  Per the task FALLBACK we therefore REUSE the `CechDiskAcyclicProof` machinery by
   import, and isolate the remaining ball-solve obligation as an honest hypothesis (never a gap tactic).
 -/
-import Jacobians.Dolbeault.CechDiskAcyclicProof
+import KirovDolbeault.Dolbeault.CechDiskAcyclicProof
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

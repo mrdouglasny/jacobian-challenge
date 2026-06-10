@@ -20,8 +20,8 @@
   PROVEN downstream: `cechH1_dolbeault_comparison_proof` (`DolbeaultComparisonEquiv.lean`, via the
   explicit `ℝ`-linear equivalence) and the `IsLeray`-free `GoodCover.cechH1_dolbeault_comparison'`.
 -/
-import Jacobians.Dolbeault.DolbeaultH01
-import Jacobians.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.DolbeaultH01
+import KirovDolbeault.Dolbeault.CechComplex
 
 open scoped Manifold ContDiff Bundle
 
@@ -196,7 +196,7 @@ are a holomorphic Čech cocycle. PDE-free given local solvability. PROVEN downst
 `GoodCover.cechH1_dolbeault_comparison'`).
 
 **SCALAR NOTE (the ℂ-vs-ℝ question, resolved).** `cechH1 𝔘 0 = H¹(X, 𝒪)` is a `Module ℂ`; on a
-compact Riemann surface of genus `g` it has `finrank ℂ = g`. `DolbeaultH01 X` is, *as built here*,
+compact Riemann surface of kirovGenus `g` it has `finrank ℂ = g`. `DolbeaultH01 X` is, *as built here*,
 only a `Module ℝ`: the hom-bundle fiber `ℂ →L[ℝ] ℂ` is `Module ℂ` (via its codomain), but that
 ℂ-action is **not** propagated to the `ContMDiffSection` space `A¹` (Mathlib synthesises neither
 `SMul ℂ (SmoothCOneForms X)` nor `Module ℂ`), so the quotient inherits only `Module ℝ`. The honest

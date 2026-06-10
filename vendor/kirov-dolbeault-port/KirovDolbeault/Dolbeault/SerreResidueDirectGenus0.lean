@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirect
+import KirovDolbeault.Dolbeault.SerreResidueDirect
 import Mathlib.Analysis.Complex.HasPrimitives
 
 /-!
@@ -11,7 +11,7 @@ import Mathlib.Analysis.Complex.HasPrimitives
 
 `Jacobians.Dolbeault.SerreResidueTheorem.residueTheorem_of_directGeometry`
 (`SerreResidueDirect.lean`) closes Gate A `∑Res = 0` from the residue-level §VIII.3 geometry, but takes
-as caller hypotheses the **genus-`0` `∞`-vanishing** field-group `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` (the
+as caller hypotheses the **kirovGenus-`0` `∞`-vanishing** field-group `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` (the
 analytic continuation of `recipCoeff (T − L.R)` off `0`, **vanishing at `0`**) — the "residual #5"
 that, before this file, was discharged *only* for the empty-pole case.
 
@@ -104,7 +104,7 @@ reciprocal chart as `resAt (recipCoeff h) 0`) is `0`.  This is *Cauchy's theorem
 h (ζ) = −h(ζ⁻¹)·ζ⁻² = d/dζ [H(ζ⁻¹)]` for a global primitive `H` of `h`, so on any small circle `C(0, r)`
 the integral of `recipCoeff h` is the integral of a derivative around a closed loop avoiding `0`, hence
 `0` (`circleIntegral.integral_eq_zero_of_hasDerivWithinAt`).  This is the **non-circular** replacement
-of the genus-`0` `∞`-vanishing `R₀ 0 = 0`: it uses *only* entire-ness, never `∑Res = 0`. -/
+of the kirovGenus-`0` `∞`-vanishing `R₀ 0 = 0`: it uses *only* entire-ness, never `∑Res = 0`. -/
 
 /-- **Cauchy at infinity (the `∞`-residue of an entire `1`-form coefficient is `0`).**  For an entire
 `h : ℂ → ℂ` (`AnalyticOnNhd ℂ h Set.univ`), `resAt (recipCoeff h) 0 = 0`.
@@ -199,7 +199,7 @@ theorem resAt_eq_laurentR_of_principalPart {T : ℂ → ℂ} {L : LaurentForm} {
   `resAt (recipCoeff (T − L.R)) 0 = 0` — Cauchy at `∞` for the entire `T − L.R`);
 * the `∞`-fibre Lemma 3.2 `resAt (recipCoeff T) 0 = ∑_{F a = ∞} formFnResidue` (via `hcoh_full`).
 
-No step assumes `∑Res = 0`: the genus-`0` content is `hcoh_full` (the geometric `∞`-coherence) and the
+No step assumes `∑Res = 0`: the kirovGenus-`0` content is `hcoh_full` (the geometric `∞`-coherence) and the
 entire-ness of the remainder; the residue-zero step is Cauchy. -/
 
 /-- **The `∞`-residue identity from the entire remainder + the `∞`-coherence (non-circular).**  Given:
@@ -358,7 +358,7 @@ noncomputable def globalTraceData_of_genus0
 
 /-- **Gate A `∑Res = 0` from the residue-level geometry, residual-#5 group discharged.**  The total
 residue of `α = ω₀·g` over its poles vanishes, from the residue-level §VIII.3 geometry with the
-`R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` field-group **dropped** — the genus-`0` `∞`-vanishing is re-derived
+`R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` field-group **dropped** — the kirovGenus-`0` `∞`-vanishing is re-derived
 internally (Cauchy at `∞` for the entire remainder + the `∞`-coherence `hcoh_full`).  Only the finite
 junk-freeness `hcont_int` and the `∞`-coherence `hcoh_full` remain. -/
 theorem residueTheorem_of_directGeometry_genus0

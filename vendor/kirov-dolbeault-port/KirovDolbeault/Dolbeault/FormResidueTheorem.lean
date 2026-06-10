@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.ResidueTheoremX
-import Jacobians.ResidueChangeOfVariables
-import Jacobians.Dolbeault.MittagLeffler
+import KirovDolbeault.ResidueTheoremX
+import KirovDolbeault.ResidueChangeOfVariables
+import KirovDolbeault.Dolbeault.MittagLeffler
 
 /-!
 # The general 1-form residue theorem `∑ₐ Resₐ(α) = 0` (Gate A, node A-ii)

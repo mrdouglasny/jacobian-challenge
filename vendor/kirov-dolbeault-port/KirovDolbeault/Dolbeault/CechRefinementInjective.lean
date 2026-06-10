@@ -26,8 +26,8 @@
 
   No gaps in this file.
 -/
-import Jacobians.Dolbeault.CechRefinementLeray
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechRefinementLeray
+import KirovDolbeault.Dolbeault.CechH0
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

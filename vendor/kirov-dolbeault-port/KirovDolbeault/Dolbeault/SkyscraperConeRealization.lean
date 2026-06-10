@@ -30,9 +30,9 @@
 
   Everything here is axiom-clean modulo the `LocallyRealizable` hypothesis (no finiteness, no gaps).
 -/
-import Jacobians.Dolbeault.SkyscraperAssembly
-import Jacobians.Dolbeault.CechFinitenessDtwist
-import Jacobians.Dolbeault.CohomologicalH0Finiteness
+import KirovDolbeault.Dolbeault.SkyscraperAssembly
+import KirovDolbeault.Dolbeault.CechFinitenessDtwist
+import KirovDolbeault.Dolbeault.CohomologicalH0Finiteness
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

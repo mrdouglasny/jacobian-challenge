@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueTheorem
-import Jacobians.Dolbeault.FormTraceCoherenceFromMoving
+import KirovDolbeault.Dolbeault.SerreResidueTheorem
+import KirovDolbeault.Dolbeault.FormTraceCoherenceFromMoving
 
 /-!
 # The residue-level direct close of Gate A `∑ₐ Resₐ(α) = 0` (Miranda §VIII.3, no germ `agree`)
@@ -38,7 +38,7 @@ identity `hL32` holds with the pole-only `D` — it is **true and satisfiable**,
 The construction is in two honest levels.
 
 * **The genuine rational trace** `genuineTrace_ofPatched` — from the *sound prefix* of
-  `traceRationalityDataNF_ofPatched` (the principal-part `LaurentForm L`, the genus-`0` entire remainder
+  `traceRationalityDataNF_ofPatched` (the principal-part `LaurentForm L`, the kirovGenus-`0` entire remainder
   `hentire`, the `∞`-vanishing `hrecip`, and the Liouville agreement `T = L.R`), but **without** its
   poisoned `agree` field.  The output is just the genuine `L` and `hTL : valueChartTracePatched ω₀ f Φ
   br = L.R` (Liouville: `Tr_F α` *is* the rational `L.R`).  This reuses the proven analytic engines
@@ -114,12 +114,12 @@ variable {ω₀ : HolomorphicOneForms X} {g : X → ℂ} {f : MeromorphicFunctio
 
 /-! ## The genuine rational trace `T = L.R` (sound prefix, no germ `agree`)
 
-The genus-`0` content of Miranda Step 1 — that the branch-patched trace `T := valueChartTracePatched
+The kirovGenus-`0` content of Miranda Step 1 — that the branch-patched trace `T := valueChartTracePatched
 ω₀ f Φ br` *is* a rational form `L.R` — is the **sound prefix** of
 `FormTraceFullFibre.traceRationalityDataNF_ofPatched`: the principal-part `LaurentForm L`, the
-internally-discharged genus-`0` entire remainder `hentire` (`analyticOnNhd_remainder_of_junkFree'` from
+internally-discharged kirovGenus-`0` entire remainder `hentire` (`analyticOnNhd_remainder_of_junkFree'` from
 the off-centre analyticity `hreg`/`hbnd` + junk-freeness `hcont_int`), the `∞`-vanishing `hrecip`
-(`continuousAt_recipCoeff_of_vanishing` from the genus-`0` `R₀`), and the Liouville agreement `T = L.R`
+(`continuousAt_recipCoeff_of_vanishing` from the kirovGenus-`0` `R₀`), and the Liouville agreement `T = L.R`
 (`coeff_eq_of_entire_diff_of_recipCoeff_continuousAt`).
 
 We extract *exactly* that — the genuine `L` and `hTL : T = L.R` — **without** the poisoned `agree`
@@ -129,7 +129,7 @@ datum's fixed fibre is irrelevant here — only `MeromorphicAt T (cs i)` is used
 
 /-- **The genuine rational trace from the patched geometry.**  With `T := valueChartTracePatched ω₀ f Φ
 br`, the off-centre analyticity inputs `hreg`/`hbnd` (giving the value-correct `hT_off`), the meromorphy
-of `T` at the centres `hT_mero`, junk-freeness `hcont_int`, and the genus-`0` `∞`-vanishing `R₀`, there
+of `T` at the centres `hT_mero`, junk-freeness `hcont_int`, and the kirovGenus-`0` `∞`-vanishing `R₀`, there
 is a `LaurentForm L` whose centres are the `cs` (`hLcenters`) with `T = L.R` (the Liouville agreement —
 `Tr_F α` *is* the rational form `L.R`).
 
@@ -178,7 +178,7 @@ theorem genuineTrace_ofPatched
     hcont_int L hLcenters hLrem
   have hentire : AnalyticOnNhd ℂ (T - L.R) Set.univ :=
     analyticOnNhd_remainder_of_junkFree' hT_off hrem hcont
-  -- `hrecip`: the genus-`0` `∞`-vanishing.
+  -- `hrecip`: the kirovGenus-`0` `∞`-vanishing.
   have hrecip : ContinuousAt (recipCoeff (T - L.R)) 0 :=
     continuousAt_recipCoeff_of_vanishing hR₀_an hR₀0 (hR₀_eq L hLcenters)
   -- The Liouville agreement `T = L.R`.
@@ -252,7 +252,7 @@ the patched trace **plus** the two RESIDUE identities (Lemma 3.2 at the finite c
 `T := valueChartTracePatched ω₀ f Φ br`:
 
 * `Φ`, `cs`/`ρ`, `br`, the off-centre analyticity `hreg`/`hbnd`, `Cfin`/`hCfin_D`, junk-freeness
-  `hcont_int`, the genus-`0` `∞`-vanishing `R₀` — the inputs of the *genuine rational trace*
+  `hcont_int`, the kirovGenus-`0` `∞`-vanishing `R₀` — the inputs of the *genuine rational trace*
   `genuineTrace_ofPatched` (`Tr_F α = L.R`, the sound prefix, no `agree`);
 * `D`/`hxs_*`, `hcenters_cs` — the pole-only fibre data + centre bookkeeping;
 * `hres_fin i : resAt T (cs i) = ∑ⱼ formFnResidue ω₀ g ((D (cs i)).xs j)` — the **finite Lemma-3.2
@@ -390,7 +390,7 @@ theorem serreTraceExists_of_residueGeometry_holomorphic (ω₀ : HolomorphicOneF
     rw [hpatch0, hLR0]
     have h0 : ((fun _ => (0 : ℂ)) - fun _ => (0 : ℂ)) = fun _ : ℂ => (0 : ℂ) := by funext z; simp
     rw [h0]; exact continuousAt_const
-  · -- genus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
+  · -- kirovGenus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
     intro L hLa
     have hLR0 : L.R = fun _ => (0 : ℂ) :=
       laurentForm_R_eq_zero_of_emptyImage
@@ -601,7 +601,7 @@ Inputs (the genuine genericity for a nonconstant cover `f`):
 * `hfull_inj i` / `hpole_image i` / `hnonpole_an i` — the full-fibre enumeration is injective, its pole
   points are exactly the pole-only enumeration `(D (cs i)).xs`, and its non-pole points have analytic
   `g`-pullback (⟹ residue `0`);
-* `hcont_int`, `R₀`/`hR₀_*` — junk-freeness + the genus-`0` `∞`-vanishing;
+* `hcont_int`, `R₀`/`hR₀_*` — junk-freeness + the kirovGenus-`0` `∞`-vanishing;
 * the `∞`-fibre data: `Dinf_full` (full `∞`-fibre, sound) + `hcoh_full` (the `∞`-single-valuedness),
   `hfullInf_inj`, the pole-only `xsInf_po`/`hpoInf_*`, `hpole_image_inf`, `hnonpole_inf_an`.
 
@@ -721,7 +721,7 @@ theorem residueTheorem_of_directGeometry_holomorphic (ω₀ : HolomorphicOneForm
     rw [hpatch0, hLR0]
     have h0 : ((fun _ => (0 : ℂ)) - fun _ => (0 : ℂ)) = fun _ : ℂ => (0 : ℂ) := by funext z; simp
     rw [h0]; exact continuousAt_const
-  · -- genus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
+  · -- kirovGenus-`0` `∞`-vanishing: `recipCoeff (0 − 0) =ᶠ 0`.
     intro L hLa
     have hLR0 : L.R = fun _ => (0 : ℂ) :=
       laurentForm_R_eq_zero_of_emptyImage
@@ -749,7 +749,7 @@ disguised `False` at mixed fibres), `DirectTraceGeometry` is **honest** — its 
 /-- **The residue-level §VIII.3 trace geometry** for a nonconstant cover `f` and `α = ω₀·g`.  Bundles
 exactly the inputs of `residueTheorem_of_directGeometry`: the global selection, the **full-fibre**
 moving coherence (sound), the pole-only finite/`∞` fibre data, the per-centre pole-image matching + the
-**non-pole analyticity** (giving residue `0`), junk-freeness, and the genus-`0` `∞`-vanishing.  The germ
+**non-pole analyticity** (giving residue `0`), junk-freeness, and the kirovGenus-`0` `∞`-vanishing.  The germ
 `agree`/`agree_infty` is **absent** — this is the honest residue-level genericity obligation. -/
 structure DirectTraceGeometry (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (poles : Finset X) where
@@ -800,7 +800,7 @@ structure DirectTraceGeometry (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTracePatched ω₀ f Φ br - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTracePatched ω₀ f Φ br - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0

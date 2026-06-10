@@ -3,14 +3,14 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirectGenus0GermDischarge
-import Jacobians.Discharge.Manifold.CriticalSetDerivBridge
+import KirovDolbeault.Dolbeault.SerreResidueDirectGenus0GermDischarge
+import KirovDolbeault.Discharge.Manifold.CriticalSetDerivBridge
 
 /-!
 # Gate A `∑Res = 0` — the `∞`-coherence engine (§VIII.3 at `∞`, reciprocal chart)
 
 `Jacobians.Dolbeault.SerreResidueTheorem.residueTheorem_ofCanonicalSimpleInfty_genus0_germ_CfullHreg`
-(`SerreResidueDirectGenus0GermDischarge.lean`) reduced Gate A `∑Res = 0` (genus `0`, simple `∞`-poles,
+(`SerreResidueDirectGenus0GermDischarge.lean`) reduced Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles,
 canonical full-fibre selection) to *exactly* the genericity bookkeeping, the branch-value boundedness
 `hbnd`, and the **`∞`-coherence** `hcoh_geom`:
 
@@ -1012,18 +1012,18 @@ noncomputable def InftyMovingCoherenceData.ofInftySheetSystem
       intro i
       exact transition_differentiableAt_overlap (hmemSrc i) (mem_chart_source ℂ _)
 
-/-! ## Step (5): wiring the `∞`-coherence datum into the genus-`0` capstone
+/-! ## Step (5): wiring the `∞`-coherence datum into the kirovGenus-`0` capstone
 
 Replacing the bare `∞`-coherence hypothesis `hcoh_geom` of
 `residueTheorem_ofCanonicalSimpleInfty_genus0_germ_CfullHreg` by an
 `InftyMovingCoherenceData` (at `Φ := canonicalFibreSelection`, `Dinf := inftyFibreDataNF_full`), the deep
 `∞`-coherence is now reduced — *soundly* — to the genuine §VIII.3 `∞`-monodromy datum (the
 continuously-varying index bijection at `∞`), the reciprocal-chart analogue of the finite `Cfull` datum.
-This is the most-reduced genus-`0` Gate A capstone: every analytic heart is now a *geometric datum* (the
+This is the most-reduced kirovGenus-`0` Gate A capstone: every analytic heart is now a *geometric datum* (the
 finite `Cfull`/`hreg` discharged by the symmetric lever; the `∞`-coherence reduced to its monodromy
 datum), with only `hbnd` and the discrete genericity bookkeeping remaining as named obligations. -/
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) with the `∞`-coherence reduced
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) with the `∞`-coherence reduced
 to its moving-coherence datum.**  Identical to `residueTheorem_ofCanonicalSimpleInfty_genus0_germ_CfullHreg`
 except the bare `∞`-coherence `hcoh_geom` is replaced by an `InftyMovingCoherenceData` `Cinf` (at the
 canonical selection and the full `∞`-fibre data) — the §VIII.3 `∞`-monodromy obligation (the
@@ -1116,7 +1116,7 @@ theorem inftyFibreEnum_range (f : MeromorphicFunction X) :
   simp only [Set.mem_range, Set.mem_preimage, Set.mem_singleton_iff]
   exact ⟨fun ⟨i, hi⟩ => hi ▸ inftyFibreEnum_mem f i, fun hx => inftyFibreEnum_surj f hx⟩
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) — `∞`-coherence FULLY
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) — `∞`-coherence FULLY
 CLOSED.**  Identical hypotheses to `residueTheorem_ofCanonicalSimpleInfty_genus0_germ_CfullHreg`, with
 the bare `∞`-coherence `hcoh_geom` **constructed internally** from the `∞`-sheet system
 (`exists_inftySheetSystem`, gated by the simple `∞`-poles `hsimpleInf`) via

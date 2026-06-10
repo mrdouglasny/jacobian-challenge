@@ -19,8 +19,8 @@
     * `cechH1_linearEquiv_supH1` — the correctly-scoped comparison consumer.
     * `finiteDimensional_cechH1_wired` — the finiteness node (`DolbeaultLadder.finiteDimensional_cechH1`).
 -/
-import Jacobians.Dolbeault.CechModelBase
-import Jacobians.Dolbeault.CechFinitenessDtwist
+import KirovDolbeault.Dolbeault.CechModelBase
+import KirovDolbeault.Dolbeault.CechFinitenessDtwist
 
 open Jacobians.Dolbeault.CechFiniteness ContinuousLinearMap
 open BoundedContinuousFunction
@@ -59,7 +59,7 @@ theorem exists_cechModel (𝔘 : FiniteCover X) (D : Divisor X) :
 SOUNDNESS NOTE.  The comparison is bundled into `exists_cechModel`'s conclusion (above) rather than
 stated as a standalone equivalence `(𝔘 D d c) → 𝔘.cechH1 D ≃ₗ c.supH1`.  The latter is FALSE for a
 free `c`: `supH1` depends only on the model `c` while `cechH1 D` depends only on `(𝔘, D)`, so for an
-unrelated acyclic model (e.g. one chart-disk with `supH1 = 0`) against a high-genus `(𝔘, D)` the two
+unrelated acyclic model (e.g. one chart-disk with `supH1 = 0`) against a high-kirovGenus `(𝔘, D)` the two
 sides have different dimensions.  The equivalence holds only for the model that is *built from*
 `(𝔘, D)` — hence the existential `∃ d c, …` tying `c` to `(𝔘, D)`.  `cechH1_linearEquiv_supH1` below
 is the corresponding correctly-scoped *consumer* (it extracts the bundled equivalence), kept as a

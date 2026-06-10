@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.GeneralMittagLeffler
-import Jacobians.Dolbeault.SerreCupProduct
+import KirovDolbeault.Dolbeault.GeneralMittagLeffler
+import KirovDolbeault.Dolbeault.SerreCupProduct
 
 /-!
 # Forster §17.2–17.3 — the Mittag–Leffler connecting map `cocycle ↦ residue`, isolated

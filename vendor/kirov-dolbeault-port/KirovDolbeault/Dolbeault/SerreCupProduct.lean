@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.CanonicalFormIso
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CanonicalFormIso
 
 /-!
 # Forster §17.5 — the cup product `L(K−D) × H¹(𝒪_D) → H¹(𝒪_K)` (the residue-pairing's product)

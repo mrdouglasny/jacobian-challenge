@@ -1,4 +1,4 @@
-import Jacobians.HolomorphicForms
+import KirovDolbeault.HolomorphicForms
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Defs
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
@@ -64,7 +64,7 @@ noncomputable def lineIntegral (α : HolomorphicOneForms X) (γ : ℝ → X) : �
 /-! ### Phase 1a of the Abel–Jacobi plan: vector line integral -/
 
 /-- Vector line integral of a tuple of holomorphic 1-forms along `γ`.
-The building block for the "period map" `Fin (genus X) → ℂ` whose
+The building block for the "period map" `Fin (kirovGenus X) → ℂ` whose
 image (over closed loops at a basepoint) is the period lattice. -/
 noncomputable def lineIntegralVec {n : ℕ} (forms : Fin n → HolomorphicOneForms X)
     (γ : ℝ → X) : Fin n → ℂ :=

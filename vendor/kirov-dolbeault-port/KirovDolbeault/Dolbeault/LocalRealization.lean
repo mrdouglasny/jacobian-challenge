@@ -24,8 +24,8 @@
 
   Everything here is complete.
 -/
-import Jacobians.Dolbeault.CechSection
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechSection
+import KirovDolbeault.Dolbeault.CechH0
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

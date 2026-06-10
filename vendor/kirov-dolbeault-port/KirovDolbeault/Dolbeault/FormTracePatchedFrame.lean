@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalTPatched
-import Jacobians.Dolbeault.FormTraceRegularValueDatum
+import KirovDolbeault.Dolbeault.FormTraceGlobalTPatched
+import KirovDolbeault.Dolbeault.FormTraceRegularValueDatum
 
 /-!
 # Assembling the `PatchedTraceSelection` from the global full-fibre sheet frame (Gate A, §VIII.3 — close)
@@ -23,13 +23,13 @@ to `residueSum_eq_zero_of_glue`.  Every conceptual wall is down; the proven engi
 This file performs the **final wiring**: a single constructor `patchedTraceSelection_ofFrame` that takes
 the genuine §VIII.3 geometric data — the global selection `Φ`, the per-pole/per-regular sphere sheet
 systems with the canonical-fibre condition, the per-branch-value **branched full-fibre frame** (smooth
-sheets through *all* preimages, including the colliding ramified ones), and the `∞`/junk/genus-`0`
+sheets through *all* preimages, including the colliding ramified ones), and the `∞`/junk/kirovGenus-`0`
 bookkeeping — and discharges every field of `PatchedTraceSelection` from the proven engines:
 
 * `Cfin i` / `Creg z` ← `MovingCoherenceDatum.ofSphereSheetSystemCanon` (the symmetric lever);
 * `hbnd b₀` ← `tendsto_zero_valueChartTrace_of_sheetSections` (the branched-frame boundedness port);
 * the finite/`∞` enumeration, `hglue_inf`, `hcont_int`, `R₀ 0 = 0` ← supplied (the cover's `∞`-adaptedness
-  + rationality bookkeeping + the genus-`0` `H⁰(ℂℙ¹, Ω) = 0`).
+  + rationality bookkeeping + the kirovGenus-`0` `H⁰(ℂℙ¹, Ω) = 0`).
 
 `residueSum_eq_zero_of_patchedTraceSelection` then yields Gate A `∑Res = 0`.  We do **not** introduce a
 new reduction structure: the constructor's hypotheses are the genuine residual geometric inputs (the
@@ -131,7 +131,7 @@ the three substantial fields discharged from the proven engines:
 * **`hbnd b₀`** — the branch-value boundedness crux, via `hbnd_of_sheetFrame` from the branched
   full-fibre frame `secBr b₀` (the `m`-sheet Puiseux frame through `b₀`'s preimages).
 
-The finite/`∞` enumeration, `hglue_inf`, `hcont_int`, and the genus-`0` `R₀ 0 = 0` are carried as the
+The finite/`∞` enumeration, `hglue_inf`, `hcont_int`, and the kirovGenus-`0` `R₀ 0 = 0` are carried as the
 genuine residual inputs (the cover's `∞`-adaptedness and the rationality bookkeeping). -/
 
 /-- **The `PatchedTraceSelection` from the global full-fibre sheet frame.**  The single wiring closing
@@ -140,7 +140,7 @@ genuine §VIII.3 residual.  The per-pole moving data come from the pole-sub-fibr
 `hselFin`) via `ofSheetSections`; the per-regular data from the sphere sheet systems (`Sreg`) + the
 canonical-fibre condition (`hΦinjReg`, `hΦrangeReg`) via `ofSphereSheetSystemCanon`; the branch-value
 boundedness from the branched full-fibre frames (`secBr`, …, `hgermBr`) via `hbnd_of_sheetFrame`.  The
-`∞`/junk/genus-`0` fields are carried verbatim.  `residueSum_eq_zero_of_patchedTraceSelection` then gives
+`∞`/junk/kirovGenus-`0` fields are carried verbatim.  `residueSum_eq_zero_of_patchedTraceSelection` then gives
 Gate A `∑Res = 0`. -/
 noncomputable def patchedTraceSelection_ofFrame (hac : AdaptedCover ω₀ g f poles)
     -- The global fibre selection and the finite/`∞` enumeration bookkeeping.
@@ -206,7 +206,7 @@ noncomputable def patchedTraceSelection_ofFrame (hac : AdaptedCover ω₀ g f po
         fun z => ∑ j, chartIntegrand ω₀ g (secBr b₀ j b₀)
           ((chartAt ℂ (secBr b₀ j b₀)) (secBr b₀ j z))
             * deriv (fun w => (chartAt ℂ (secBr b₀ j b₀)) (secBr b₀ j w)) z)
-    -- The `∞`-glue / junk-freeness / genus-`0` `∞`-vanishing (the rationality bookkeeping).
+    -- The `∞`-glue / junk-freeness / kirovGenus-`0` `∞`-vanishing (the rationality bookkeeping).
     (hglue_inf : recipCoeff (valueChartTracePatched ω₀ f Φ br)
       =ᶠ[𝓝[≠] 0] (inftyFibreTrace ω₀ f Dinf).traceCoeff)
     (hcont_int : ∀ (L : LaurentForm), Finset.univ.image L.a = Finset.univ.image cs →
@@ -253,7 +253,7 @@ noncomputable def patchedTraceSelection_ofFrame (hac : AdaptedCover ω₀ g f po
 /-- **Gate A `∑Res = 0` from the global full-fibre sheet frame.**  Composing
 `patchedTraceSelection_ofFrame` with the proven `residueSum_eq_zero_of_patchedTraceSelection`: once the
 global full-fibre frame data is supplied (the per-pole/per-regular sheet systems with the canonical-fibre
-condition, the per-branch-value branched Puiseux frames, and the `∞`/junk/genus-`0` bookkeeping), the
+condition, the per-branch-value branched Puiseux frames, and the `∞`/junk/kirovGenus-`0` bookkeeping), the
 1-form residue theorem `∑ₐ Resₐ(α) = 0` holds for `α = ω₀·g`.  The unramified + branched analytic content
 (the symmetric-lever coherence, the branch-value boundedness) is discharged from the proven engines; the
 remaining hypotheses are the genuine §VIII.3 residual (the global frame). -/

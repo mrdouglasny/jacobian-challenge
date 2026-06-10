@@ -10,8 +10,8 @@ Original code MIT-licensed by Bryan Sanchez (2026); audit verifies
 `#print axioms` returns only `[propext, Classical.choice, Quot.sound]`.
 Axiom-verified clean (`#print axioms` returns only `[propext, Classical.choice, Quot.sound]`).
 -/
-import Jacobians.Discharge.Manifold.RegularValueExistsRegUnconditional
-import Jacobians.Discharge.Manifold.DegreeWellDefined
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
+import KirovDolbeault.Discharge.Manifold.DegreeWellDefined
 
 open scoped Manifold ContDiff
 

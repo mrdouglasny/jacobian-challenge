@@ -1,7 +1,7 @@
-import Jacobians.LineIntegral
-import Jacobians.SmoothPath
-import Jacobians.Genus
-import Jacobians.CotangentCoeff
+import KirovDolbeault.LineIntegral
+import KirovDolbeault.SmoothPath
+import KirovDolbeault.Genus
+import KirovDolbeault.CotangentCoeff
 import Mathlib.Topology.Connected.LocPathConnected
 
 /-!
@@ -94,11 +94,11 @@ aligns the period pairing with the matrix structure of `ambientPhi`
 and `ambientPsi`, which are expressed in the `Pi.basisFun` basis. -/
 noncomputable def periodBasisForm (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (i : Fin (genus X)) : HolomorphicOneForms X :=
-  ambientIso X (Pi.basisFun ℂ (Fin (genus X)) i)
+    [IsManifold 𝓘(ℂ) ω X] (i : Fin (kirovGenus X)) : HolomorphicOneForms X :=
+  ambientIso X (Pi.basisFun ℂ (Fin (kirovGenus X)) i)
 
 /-- Period vector of a path `γ`: line integrals of each basis form. -/
-noncomputable def periodVec (γ : ℝ → X) : Fin (genus X) → ℂ :=
+noncomputable def periodVec (γ : ℝ → X) : Fin (kirovGenus X) → ℂ :=
   fun i => lineIntegral (periodBasisForm X i) γ
 
 /-- Regularity predicate for a closed loop in `X`: closed endpoints
@@ -120,7 +120,7 @@ field): derived from the geometric `velCont` field via
 `intervalIntegrable_form_pathSpeed_of_velContinuous`. Same signature as the old field, so all
 consumers are unchanged. -/
 theorem IsClosedSmoothLoop.integrable {γ : ℝ → X} (h : IsClosedSmoothLoop γ) :
-    ∀ i : Fin (genus X), IntervalIntegrable
+    ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun t => (periodBasisForm X i).toFun (γ t) (pathSpeed γ t))
         MeasureTheory.volume 0 1 :=
   fun i => intervalIntegrable_form_pathSpeed_of_velContinuous (periodBasisForm X i) γ h.velCont
@@ -130,7 +130,7 @@ any basepoint). Requires `IsClosedSmoothLoop` regularity so that the
 Phase 1 line-integral identities + chain rule apply. -/
 def closedLoopPeriods (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Set (Fin (genus X) → ℂ) :=
+    [IsManifold 𝓘(ℂ) ω X] : Set (Fin (kirovGenus X) → ℂ) :=
   {v | ∃ (γ : ℝ → X), IsClosedSmoothLoop γ ∧ v = periodVec γ}
 
 /-- **Smooth path between two points** with `periodVec`-integrability.
@@ -157,7 +157,7 @@ field): derived from the geometric `velCont` field via
 `intervalIntegrable_form_pathSpeed_of_velContinuous`. Same signature as the old field, so all
 consumers are unchanged. -/
 theorem IsSmoothPath.integrable {P Q : X} {γ : ℝ → X} (h : IsSmoothPath P Q γ) :
-    ∀ i : Fin (genus X), IntervalIntegrable
+    ∀ i : Fin (kirovGenus X), IntervalIntegrable
       (fun t => (periodBasisForm X i).toFun (γ t) (pathSpeed γ t))
         MeasureTheory.volume 0 1 :=
   fun i => intervalIntegrable_form_pathSpeed_of_velContinuous (periodBasisForm X i) γ h.velCont
@@ -430,7 +430,7 @@ The local representative `localRep α x₀ y` evaluates `α.toFun y` at
 the canonical tangent vector at `y` induced by the trivialization of
 the tangent bundle at `x₀` (applied to the unit `1 : ℂ`). It is the
 coefficient of `dz` in the chart-coord expression of `α`. -/
-noncomputable def chartFormCoeff (Q₀ : X) (i : Fin (genus X)) (z : ℂ) : ℂ :=
+noncomputable def chartFormCoeff (Q₀ : X) (i : Fin (kirovGenus X)) (z : ℂ) : ℂ :=
   Jacobians.Montel.localRep (periodBasisForm X i) Q₀
     ((chartAt (H := ℂ) Q₀).symm z)
 
@@ -439,7 +439,7 @@ noncomputable def chartFormCoeff (Q₀ : X) (i : Fin (genus X)) (z : ℂ) : ℂ 
 PROVEN: direct corollary of `Jacobians.Montel.localRep_analyticOn_chartTarget`
 (the existing chart-coord analyticity of `localRep`, proven via
 `localRep_contMDiffOn` + `contDiffOn_omega_iff_analyticOn`). -/
-theorem chartFormCoeff_differentiableOn (Q₀ : X) (i : Fin (genus X)) :
+theorem chartFormCoeff_differentiableOn (Q₀ : X) (i : Fin (kirovGenus X)) :
     DifferentiableOn ℂ (chartFormCoeff (X := X) Q₀ i)
       ((chartAt (H := ℂ) Q₀).target) :=
   (Jacobians.Montel.localRep_analyticOn_chartTarget
@@ -457,8 +457,8 @@ lift of `ofCurve P` at `Q₀` is
 where `z₀ = e Q₀` and `constant_i := periodVec(some-fixed-path P → Q₀) i`.
 
 For now, we only need that `Φ̃_{Q₀, i}` is `AnalyticAt ℂ` at `z₀`. -/
-noncomputable def localLiftChart (Q₀ : X) (constants : Fin (genus X) → ℂ)
-    (i : Fin (genus X)) (z : ℂ) : ℂ :=
+noncomputable def localLiftChart (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ)
+    (i : Fin (kirovGenus X)) (z : ℂ) : ℂ :=
   constants i +
     ∫ t in (0 : ℝ)..1,
       (chartFormCoeff (X := X) Q₀ i
@@ -466,8 +466,8 @@ noncomputable def localLiftChart (Q₀ : X) (constants : Fin (genus X) → ℂ)
        * (z - (chartAt (H := ℂ) Q₀) Q₀))
 
 /-- **Vector-valued local lift** at `Q₀`. -/
-noncomputable def localLift (Q₀ : X) (constants : Fin (genus X) → ℂ)
-    (Q : X) : Fin (genus X) → ℂ :=
+noncomputable def localLift (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ)
+    (Q : X) : Fin (kirovGenus X) → ℂ :=
   fun i => localLiftChart (X := X) Q₀ constants i ((chartAt (H := ℂ) Q₀) Q)
 
 /-- **Chart-Q₀ tangent vector via the trivialization**: at any point
@@ -551,7 +551,7 @@ where `z = (chartAt Q₀) Q`, `z₀ = (chartAt Q₀) Q₀`.
 This is the heart of sub-lemma (a) in the docstring above. The proof
 uses the chain rule for `pathSpeed`, `trivAt_symmL_one_eq_fderiv_C`,
 and ℂ-linearity of `α.toFun`. -/
-lemma chartFrame_cancel (Q₀ Q : X) (i : Fin (genus X)) (t : ℝ)
+lemma chartFrame_cancel (Q₀ Q : X) (i : Fin (kirovGenus X)) (t : ℝ)
     (h_target_nbhd : ∀ᶠ s : ℝ in nhds t,
       ((1 - (s : ℂ)) * (chartAt ℂ Q₀) Q₀ + (s : ℂ) * (chartAt ℂ Q₀) Q)
         ∈ (chartAt (H := ℂ) Q₀).target) :
@@ -784,7 +784,7 @@ componentwise, provided the affine path stays in chart target on `[0,1]`.
 
 This is sub-lemma (a) in the docstring above. -/
 lemma localLift_eq_const_add_periodVec_ChartBallPath
-    (Q₀ Q : X) (c : Fin (genus X) → ℂ)
+    (Q₀ Q : X) (c : Fin (kirovGenus X) → ℂ)
     (h_target_Icc : ∀ s ∈ Set.Icc (0 : ℝ) 1,
       ((1 - (s : ℂ)) * (chartAt (H := ℂ) Q₀) Q₀ +
         (s : ℂ) * (chartAt (H := ℂ) Q₀) Q) ∈ (chartAt (H := ℂ) Q₀).target) :

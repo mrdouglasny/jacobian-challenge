@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceRationalAssemble
-import Jacobians.Dolbeault.FormTraceLiouville
+import KirovDolbeault.Dolbeault.FormTraceRationalAssemble
+import KirovDolbeault.Dolbeault.FormTraceLiouville
 
 /-!
 # `TraceAgreementData` from a global trace datum (Gate A, §VIII.3 — steps 1–3 assembled)
@@ -25,7 +25,7 @@ datum** `GlobalTrace`:
 2. **The principal parts** `L : LaurentForm` — the partial-fraction expansion at the finite poles
    (`hcenters`), chosen so the **remainder `T − L.R` is a global holomorphic `1`-form**: entire on
    `ℂ` (`hentire`) and holomorphic across `∞` (`hrecip` — `recipCoeff (T − L.R)` continuous at `0`).
-3. **The remainder vanishes** — by the genus-`0` Liouville vanishing
+3. **The remainder vanishes** — by the kirovGenus-`0` Liouville vanishing
    (`FormTraceLiouville.coeff_eq_zero_of_entire_of_recipCoeff_continuousAt`), `T − L.R = 0`, so
    `L.R = T = Tr_F α` everywhere; the `hagree_*` fields of `TraceAgreementData` then follow from the
    glue fields by rewriting `L.R = T`.
@@ -86,7 +86,7 @@ expansion `L` at the finite poles and the **holomorphic-remainder** data: the pr
 subtraction `T − L.R` is a global holomorphic `1`-form on the compact `ℂℙ¹`.  Splitting the
 `TraceAgreementData.hagree_*` (which demand `L.R =ᶠ Tr_F α`) into the **glue** of `T` with the local
 fibre traces (`hglue_fin`/`hglue_inf`, the definition of the trace) and the **remainder vanishing**
-(`hentire`/`hrecip`, the genus-`0` Liouville input) isolates the genuine §VIII.3 content. -/
+(`hentire`/`hrecip`, the kirovGenus-`0` Liouville input) isolates the genuine §VIII.3 content. -/
 structure GlobalTrace (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f : MeromorphicFunction X)
     (poles : Finset X) (hac : AdaptedCover ω₀ g f poles) where
   /-- The global value-chart `dz`-coefficient of the trace `Tr_F α` on the finite part of `ℂℙ¹`. -/
@@ -115,14 +115,14 @@ structure GlobalTrace (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f : Merom
   principal parts, has no finite poles. -/
   hentire : AnalyticOnNhd ℂ (T - L.R) Set.univ
   /-- **The remainder is holomorphic across `∞`**: the reciprocal coefficient of `T − L.R` is
-  continuous at `0` (the genus-`0` Liouville input). -/
+  continuous at `0` (the kirovGenus-`0` Liouville input). -/
   hrecip : ContinuousAt (recipCoeff (T - L.R)) 0
 
 namespace GlobalTrace
 
 variable {hac : AdaptedCover ω₀ g f poles}
 
-/-- **The trace equals its rational part** (the remainder vanishes by genus-`0` Liouville).  From the
+/-- **The trace equals its rational part** (the remainder vanishes by kirovGenus-`0` Liouville).  From the
 holomorphic-remainder fields `hentire`/`hrecip`, `T − L.R` is a global holomorphic `1`-form on `ℂℙ¹`,
 hence `0` (`FormTraceLiouville.coeff_eq_zero_of_entire_of_recipCoeff_continuousAt`), so `T = L.R`. -/
 theorem T_eq_R (G : GlobalTrace ω₀ g f poles hac) : G.T = G.L.R :=

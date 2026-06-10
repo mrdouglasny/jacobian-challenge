@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueGateAInftyBuilder
-import Jacobians.Dolbeault.SerreResidueRamifiedRealCover
-import Jacobians.Discharge.Manifold.RegularValueExistsRegUnconditional
+import KirovDolbeault.Dolbeault.SerreResidueGateAInftyBuilder
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedRealCover
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
 
 /-!
 # Gate-A TARGET 2: the off-centre/∞ genericity selection `ExistsAdaptedFRamified` (Miranda §VIII.3)

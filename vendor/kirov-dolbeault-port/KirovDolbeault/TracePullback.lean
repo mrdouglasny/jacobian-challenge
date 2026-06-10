@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.TraceForm
-import Jacobians.LoopOffBranch
+import KirovDolbeault.TraceForm
+import KirovDolbeault.LoopOffBranch
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 import Mathlib.MeasureTheory.Function.JacobianOneDim
@@ -67,15 +67,15 @@ opaque stub. -/
 
 /-- Coordinate form of the trace `f₊`, parallel to `ambientPsi` for `pullbackForm`:
 `ambientTrace = (ambientIso Y)⁻¹ ∘ traceFormTotal f hf ∘ (ambientIso X)` (matrix
-`T`, direction `gX → gY`; zero on the unused off-genus branch). Built from the
+`T`, direction `gX → gY`; zero on the unused off-kirovGenus branch). Built from the
 genuine geometric trace `traceFormTotal` (which is `traceForm` off the constant
 locus and `0` on constant maps). -/
 noncomputable def ambientTrace {gX gY : ℕ}
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (Fin gX → ℂ) →L[ℂ] (Fin gY → ℂ) := by
   classical
-  by_cases hX : gX = genus X
-  · by_cases hY : gY = genus Y
+  by_cases hX : gX = kirovGenus X
+  · by_cases hY : gY = kirovGenus Y
     · subst hX; subst hY
       refine LinearMap.toContinuousLinearMap
         ((ambientIso Y).symm.toLinearMap.comp
@@ -97,8 +97,8 @@ noncomputable def ambientPullbackJac {gX gY : ℕ}
         (ambientTrace f hf).toLinearMap).transpose.mulVecLin
 
 /-- `ambientTrace id = id`. Proven via `traceFormTotal_id`. -/
-theorem ambientTrace_id (x : Fin (genus X) → ℂ) :
-    ambientTrace (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id x = x := by
+theorem ambientTrace_id (x : Fin (kirovGenus X) → ℂ) :
+    ambientTrace (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id x = x := by
   unfold ambientTrace
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
@@ -114,10 +114,10 @@ theorem ambientTrace_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactS
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (hgf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (g ∘ f))
-    (x : Fin (genus X) → ℂ) :
-    ambientTrace (gX := genus X) (gY := genus Z) (g ∘ f) hgf x =
-      ambientTrace (gX := genus Y) (gY := genus Z) g hg
-        (ambientTrace (gX := genus X) (gY := genus Y) f hf x) := by
+    (x : Fin (kirovGenus X) → ℂ) :
+    ambientTrace (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf x =
+      ambientTrace (gX := kirovGenus Y) (gY := kirovGenus Z) g hg
+        (ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf x) := by
   unfold ambientTrace
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
@@ -128,14 +128,14 @@ theorem ambientTrace_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactS
 
 /-- `ambientPullbackJac id = id` — transpose of the identity matrix is the
 identity, via `ambientTrace_id`. -/
-theorem ambientPullbackJac_id (y : Fin (genus X) → ℂ) :
-    ambientPullbackJac (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id y = y := by
-  have htr : ambientTrace (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id
-      = ContinuousLinearMap.id ℂ (Fin (genus X) → ℂ) :=
+theorem ambientPullbackJac_id (y : Fin (kirovGenus X) → ℂ) :
+    ambientPullbackJac (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id y = y := by
+  have htr : ambientTrace (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id
+      = ContinuousLinearMap.id ℂ (Fin (kirovGenus X) → ℂ) :=
     ContinuousLinearMap.ext (fun x => ambientTrace_id x)
   unfold ambientPullbackJac
-  rw [show (ambientTrace (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id).toLinearMap
-      = LinearMap.id (R := ℂ) (M := Fin (genus X) → ℂ) from by rw [htr]; rfl]
+  rw [show (ambientTrace (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id).toLinearMap
+      = LinearMap.id (R := ℂ) (M := Fin (kirovGenus X) → ℂ) from by rw [htr]; rfl]
   simp [Matrix.transpose_one, Matrix.mulVecLin_one]
 
 /-- Contravariant composition: `ambientPullbackJac (g ∘ f) = ambientPullbackJac f ∘ ambientPullbackJac g`.
@@ -145,20 +145,20 @@ theorem ambientPullbackJac_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [Co
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (hgf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (g ∘ f))
-    (z : Fin (genus Z) → ℂ) :
-    ambientPullbackJac (gX := genus X) (gY := genus Z) (g ∘ f) hgf z =
-      ambientPullbackJac (gX := genus X) (gY := genus Y) f hf
-        (ambientPullbackJac (gX := genus Y) (gY := genus Z) g hg z) := by
-  have htr : ambientTrace (gX := genus X) (gY := genus Z) (g ∘ f) hgf =
-      (ambientTrace (gX := genus Y) (gY := genus Z) g hg).comp
-        (ambientTrace (gX := genus X) (gY := genus Y) f hf) :=
+    (z : Fin (kirovGenus Z) → ℂ) :
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf z =
+      ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (ambientPullbackJac (gX := kirovGenus Y) (gY := kirovGenus Z) g hg z) := by
+  have htr : ambientTrace (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf =
+      (ambientTrace (gX := kirovGenus Y) (gY := kirovGenus Z) g hg).comp
+        (ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf) :=
     ContinuousLinearMap.ext (fun x => ambientTrace_comp f hf g hg hgf x)
   unfold ambientPullbackJac
-  rw [show (ambientTrace (gX := genus X) (gY := genus Z) (g ∘ f) hgf).toLinearMap =
-      (ambientTrace (gX := genus Y) (gY := genus Z) g hg).toLinearMap ∘ₗ
-      (ambientTrace (gX := genus X) (gY := genus Y) f hf).toLinearMap from by rw [htr]; rfl]
-  rw [LinearMap.toMatrix_comp (Pi.basisFun ℂ (Fin (genus X))) (Pi.basisFun ℂ (Fin (genus Y)))
-    (Pi.basisFun ℂ (Fin (genus Z)))]
+  rw [show (ambientTrace (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf).toLinearMap =
+      (ambientTrace (gX := kirovGenus Y) (gY := kirovGenus Z) g hg).toLinearMap ∘ₗ
+      (ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toLinearMap from by rw [htr]; rfl]
+  rw [LinearMap.toMatrix_comp (Pi.basisFun ℂ (Fin (kirovGenus X))) (Pi.basisFun ℂ (Fin (kirovGenus Y)))
+    (Pi.basisFun ℂ (Fin (kirovGenus Z)))]
   rw [Matrix.transpose_mul, Matrix.mulVecLin_mul]
   rfl
 
@@ -166,7 +166,7 @@ theorem ambientPullbackJac_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [Co
 (mirrors `ambientPsi_eq_zero_of_const`). -/
 theorem ambientTrace_eq_zero_of_const (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (hconst : ∃ y₀ : Y, ∀ x, f x = y₀) :
-    ambientTrace (gX := genus X) (gY := genus Y) f hf = 0 := by
+    ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf = 0 := by
   unfold ambientTrace
   simp only [dite_true]
   rw [traceFormTotal_eq_zero_of_const f hf hconst]
@@ -177,10 +177,10 @@ theorem ambientTrace_eq_zero_of_const (f : X → Y) (hf : ContMDiff 𝓘(ℂ) �
 The constant-case input to `ambientPullbackJac_preserves_truePeriodLattice`. -/
 theorem ambientPullbackJac_eq_zero_of_const (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (hconst : ∃ y₀ : Y, ∀ x, f x = y₀) :
-    ambientPullbackJac (gX := genus X) (gY := genus Y) f hf = 0 := by
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf = 0 := by
   unfold ambientPullbackJac
-  rw [show (ambientTrace (gX := genus X) (gY := genus Y) f hf).toLinearMap
-      = (0 : (Fin (genus X) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ)) from by
+  rw [show (ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toLinearMap
+      = (0 : (Fin (kirovGenus X) → ℂ) →ₗ[ℂ] (Fin (kirovGenus Y) → ℂ)) from by
     rw [ambientTrace_eq_zero_of_const f hf hconst]; rfl]
   ext v i
   simp
@@ -198,33 +198,33 @@ and `traceFormTotal f hf ωᵢ^X = ambientIso Y w = ∑ⱼ wⱼ • ωⱼ^Y`, so
 integral is `∑ⱼ wⱼ ∫_δ ωⱼ^Y = ∑ⱼ wⱼ (periodVec δ)ⱼ` by linearity. The integrability
 hypothesis is the per-basis-form regularity of a closed smooth loop. -/
 theorem ambientPullbackJac_periodVec_apply_eq_lineIntegral_traceFormTotal
-    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (δ : ℝ → Y) (i : Fin (genus X))
-    (hint_Y : ∀ j : Fin (genus Y), IntervalIntegrable
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (δ : ℝ → Y) (i : Fin (kirovGenus X))
+    (hint_Y : ∀ j : Fin (kirovGenus Y), IntervalIntegrable
       (fun t => (periodBasisForm Y j).toFun (δ t) (pathSpeed δ t)) MeasureTheory.volume 0 1) :
-    ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) i =
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) i =
       lineIntegral (traceFormTotal f hf (periodBasisForm X i)) δ := by
   classical
   set w := (ambientIso Y).symm (traceFormTotal f hf (periodBasisForm X i)) with hw_def
   -- The matrix-transpose action `(Tᵀ · periodVec δ)ᵢ = ∑ⱼ wⱼ (periodVec δ)ⱼ`.
-  have hLHS : ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) i
+  have hLHS : ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) i
       = ∑ j, w j * (periodVec δ) j := by
-    show (Matrix.transpose (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (genus X)))
-        (Pi.basisFun ℂ (Fin (genus Y))) (ambientTrace f hf).toLinearMap)).mulVecLin
+    show (Matrix.transpose (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (kirovGenus X)))
+        (Pi.basisFun ℂ (Fin (kirovGenus Y))) (ambientTrace f hf).toLinearMap)).mulVecLin
         (periodVec δ) i = ∑ j, w j * (periodVec δ) j
     rw [Matrix.mulVecLin_apply]
     show ∑ j, (Matrix.transpose (LinearMap.toMatrix _ _ _)) i j * (periodVec δ) j
         = ∑ j, w j * (periodVec δ) j
     refine Finset.sum_congr rfl (fun j _ => ?_)
     congr 1
-    show (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (genus X)))
-      (Pi.basisFun ℂ (Fin (genus Y))) (ambientTrace f hf).toLinearMap) j i = w j
+    show (LinearMap.toMatrix (Pi.basisFun ℂ (Fin (kirovGenus X)))
+      (Pi.basisFun ℂ (Fin (kirovGenus Y))) (ambientTrace f hf).toLinearMap) j i = w j
     rw [LinearMap.toMatrix_apply]
-    show ((Pi.basisFun ℂ (Fin (genus Y))).repr
-      (ambientTrace f hf (Pi.basisFun ℂ (Fin (genus X)) i))) j = w j
+    show ((Pi.basisFun ℂ (Fin (kirovGenus Y))).repr
+      (ambientTrace f hf (Pi.basisFun ℂ (Fin (kirovGenus X)) i))) j = w j
     rw [Pi.basisFun_repr]
     -- `ambientTrace f hf eᵢ^X = w` (ambientIso-conjugate of traceFormTotal).
-    have hat : ambientTrace (gX := genus X) (gY := genus Y) f hf
-        (Pi.basisFun ℂ (Fin (genus X)) i) = w := by
+    have hat : ambientTrace (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (Pi.basisFun ℂ (Fin (kirovGenus X)) i) = w := by
       rw [hw_def]
       unfold ambientTrace
       set_option linter.unusedSimpArgs false in simp only [dif_pos rfl]
@@ -237,7 +237,7 @@ theorem ambientPullbackJac_periodVec_apply_eq_lineIntegral_traceFormTotal
       rw [hw_def]; exact ((ambientIso Y).apply_symm_apply _).symm
     rw [h_iso]
     have h_iso_sum : ambientIso Y w = ∑ j, w j • periodBasisForm Y j := by
-      have h_w_decomp : w = ∑ j, w j • Pi.basisFun ℂ (Fin (genus Y)) j := by
+      have h_w_decomp : w = ∑ j, w j • Pi.basisFun ℂ (Fin (kirovGenus Y)) j := by
         have := pi_eq_sum_univ' w
         convert this using 2
         simp [Pi.basisFun_apply]
@@ -253,7 +253,7 @@ theorem ambientPullbackJac_periodVec_apply_eq_lineIntegral_traceFormTotal
           (∑ j, w j • periodBasisForm Y j).toFun (δ t) (pathSpeed δ t) =
             ∑ j, w j * (periodBasisForm Y j).toFun (δ t) (pathSpeed δ t) := by
         intro t
-        induction (Finset.univ : Finset (Fin (genus Y))) using Finset.induction_on with
+        induction (Finset.univ : Finset (Fin (kirovGenus Y))) using Finset.induction_on with
         | empty =>
           rw [Finset.sum_empty, Finset.sum_empty]
           show (0 : HolomorphicOneForms Y).toFun (δ t) (pathSpeed δ t) = 0
@@ -315,7 +315,7 @@ structure PreimageCycle (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
   /-- **Pullback identity** (projection formula): the genuine Jacobian pullback
   `ambientPullbackJac` (= `Tᵀ`) on `periodVec δ` equals the ℤ-combination of the
   lifts' period vectors `periodVec(Γ) = Tᵀ·periodVec δ`. -/
-  pullback_eq : ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) =
+  pullback_eq : ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) =
     ∑ i, coeffs i • periodVec (loops i)
   /-- **Pushforward identity** (`f∘Γ = sheets·δ` on periods): the lifts project to
   `δ` with multiplicities summing to `sheets`. Feeds the S8 connection keystone. -/
@@ -330,7 +330,7 @@ lattice is closed under ℤ-linear combinations. -/
 theorem ambientPullbackJac_periodVec_mem_truePeriodLattice_of_preimageCycle
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (δ : ℝ → Y) (c : PreimageCycle f hf δ) :
-    ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) ∈
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) ∈
       truePeriodLattice X := by
   rw [c.pullback_eq]
   exact Submodule.sum_mem _ fun i _ =>
@@ -922,7 +922,7 @@ theorem exists_loop_off_branchLocus (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘
   -- 4. PERIOD EQUALITY via the per-piece correction telescope.
   -- the uniform partition and the intrinsic correction term.
   set sfun : ℕ → ℝ := fun k => (k:ℝ)/n with hsfun
-  set corr : Fin (genus Y) → ℕ → ℂ := fun i k =>
+  set corr : Fin (kirovGenus Y) → ℕ → ℂ := fun i k =>
     if h : k < n then lineIntegral (periodBasisForm Y i) (cc ⟨k, h⟩)
     else lineIntegral (periodBasisForm Y i) (cc ⟨0, hn⟩) with hcorr
   have hs0 : sfun 0 = 0 := by simp [hsfun]
@@ -941,7 +941,7 @@ theorem exists_loop_off_branchLocus (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘
   have hcorr_per : ∀ i, corr i n = corr i 0 := by
     intro i; simp only [hcorr, dif_neg (lt_irrefl n), dif_pos hn]
   -- the per-piece correction identity.
-  have hpiece_corr : ∀ (i : Fin (genus Y)) (k : ℕ), k < n →
+  have hpiece_corr : ∀ (i : Fin (kirovGenus Y)) (k : ℕ), k < n →
       (∫ t in (sfun k)..(sfun (k+1)), (periodBasisForm Y i).toFun (δ' t) (pathSpeed δ' t)) =
       (∫ t in (sfun k)..(sfun (k+1)), (periodBasisForm Y i).toFun (δ t) (pathSpeed δ t))
         + corr i (k+1) - corr i k := by
@@ -2050,7 +2050,7 @@ covector with `(mfderiv f)⁻¹ (δr' t) = pathSpeed (Γ i) t`). -/
 theorem lineIntegral_traceFormTotal_eq_sum_periodVec (f : X → Y)
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (hnonconst : ¬ ∃ y₀ : Y, ∀ x, f x = y₀)
     (δ : ℝ → Y) (hδ : IsClosedSmoothLoop δ) (havoid : ∀ t : ℝ, δ t ∉ branchLocus f)
-    (M : MonodromyLiftFamily f δ) (j : Fin (genus X)) :
+    (M : MonodromyLiftFamily f δ) (j : Fin (kirovGenus X)) :
     lineIntegral (traceFormTotal f hf (periodBasisForm X j)) δ
       = ∑ i, periodVec (M.Γ i) j := by
   classical
@@ -2489,7 +2489,7 @@ theorem exists_preimageCycle_of_off_branchLocus (f : X → Y) (hf : ContMDiff �
     exists_preimageLoopFamily f hf hnonconst δ hδ havoid
   refine ⟨⟨m, loops, hclosed, coeffs, sheets, ?_, hpush⟩⟩
   -- Convert the projection identity to the ambient pullback via the proven bridge.
-  have hb : ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) =
+  have hb : ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) =
       (fun j => lineIntegral (traceFormTotal f hf (periodBasisForm X j)) δ) := by
     funext j
     exact ambientPullbackJac_periodVec_apply_eq_lineIntegral_traceFormTotal f hf δ j hδ.integrable
@@ -2546,7 +2546,7 @@ theorem exists_preimageCycle_sheets_eq_fibreCard_of_off_branchLocus
   obtain ⟨M⟩ := exists_monodromyLiftFamily f hf hnonconst δ hδ havoid
   obtain ⟨m, loops, coeffs, hclosed, hper, hpush⟩ :=
     exists_orbitLoops_of_monodromyLiftFamily f hf δ hδ M
-  have hb : ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) =
+  have hb : ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) =
       (fun j => lineIntegral (traceFormTotal f hf (periodBasisForm X j)) δ) := by
     funext j
     exact ambientPullbackJac_periodVec_apply_eq_lineIntegral_traceFormTotal f hf δ j hδ.integrable
@@ -2586,7 +2586,7 @@ in `truePeriodLattice X`. Case-splits on constancy of `f`:
 theorem ambientPullbackJac_periodVec_mem_truePeriodLattice
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (δ : ℝ → Y) (hδ : IsClosedSmoothLoop δ) :
-    ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (periodVec δ) ∈
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (periodVec δ) ∈
       truePeriodLattice X := by
   by_cases hconst : ∃ y₀ : Y, ∀ x, f x = y₀
   · -- Constant case: ambientPullbackJac = 0.
@@ -2605,12 +2605,12 @@ theorem ambientPullbackJac_preserves_truePeriodLattice
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (truePeriodLattice Y).toAddSubgroup ≤
       (truePeriodLattice X).toAddSubgroup.comap
-        (ambientPullbackJac (gX := genus X) (gY := genus Y) f hf).toAddMonoidHom := by
+        (ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toAddMonoidHom := by
   show ∀ v ∈ truePeriodLattice Y,
-    ambientPullbackJac (gX := genus X) (gY := genus Y) f hf v ∈ truePeriodLattice X
+    ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf v ∈ truePeriodLattice X
   intro v hv
   refine Submodule.span_induction
-    (p := fun v _ => ambientPullbackJac (gX := genus X) (gY := genus Y) f hf v ∈
+    (p := fun v _ => ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf v ∈
       truePeriodLattice X) ?_ ?_ ?_ ?_ hv
   · -- Generator case: v = periodVec δ for a closed smooth loop δ in Y.
     rintro _ ⟨δ, hδ, rfl⟩

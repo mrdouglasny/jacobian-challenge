@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalFunction
-import Jacobians.Dolbeault.FormTraceMeromorphic
-import Jacobians.Dolbeault.FormTraceGlobalTAssemble
+import KirovDolbeault.Dolbeault.FormTraceGlobalFunction
+import KirovDolbeault.Dolbeault.FormTraceMeromorphic
+import KirovDolbeault.Dolbeault.FormTraceGlobalTAssemble
 
 /-!
 # The geometric global trace function `T` from a global fibre selection (Gate A, §VIII.3 — geometry)
@@ -44,7 +44,7 @@ here we lay the definition and the honest reduction, leaving the coherence as th
   the germ-coherence hypotheses, wired into `residueSum_eq_zero_of_glue`.  This is the honest reduction:
   with `T := valueChartTrace ω₀ f Φ`, every glue field of `globalTrace_of_glue` is supplied from the
   geometric selection and the precisely-named coherence, so Gate A holds unconditionally modulo the
-  branched-cover germ-coherence + genus-`0` `∞`-vanishing.
+  branched-cover germ-coherence + kirovGenus-`0` `∞`-vanishing.
 
 ## The honest soundness note (pole sub-fibre vs full fibre)
 
@@ -142,16 +142,16 @@ geometric selection and the germ-coherence:
   (`analyticAt_valueChartTrace_of_eventuallyEq`), here packaged as a direct hypothesis `hT_off`
   (the off-exceptional half is `analyticAt_valueChartTrace_of_eventuallyEq` applied at each regular
   value);
-* `hcont_int` / `hR₀_eq` — junk-freeness and the genus-`0` `∞`-vanishing, as in `globalTrace_of_glue`.
+* `hcont_int` / `hR₀_eq` — junk-freeness and the kirovGenus-`0` `∞`-vanishing, as in `globalTrace_of_glue`.
 
 This theorem packages those into `residueSum_eq_zero_of_glue`, so Gate A holds unconditionally modulo
-the branched-cover germ-coherence + the genus-`0` `∞`-vanishing — the precise minimal obligation. -/
+the branched-cover germ-coherence + the kirovGenus-`0` `∞`-vanishing — the precise minimal obligation. -/
 
 /-- **Gate A `∑Res = 0` from the geometric global trace `valueChartTrace`.**  Taking
 `T := valueChartTrace ω₀ f Φ` (the geometric trace from a global fibre selection `Φ`), Gate A's
 1-form residue theorem holds *unconditionally* for `α = ω₀·g` given the germ-coherence of the
 geometric trace with the local fibre traces (`hglue_fin`/`hglue_inf`), its analyticity off the finite
-centres (`hT_off`), junk-freeness (`hcont_int`), and the genus-`0` `∞`-vanishing (`hR₀_*`).  This is
+centres (`hT_off`), junk-freeness (`hcont_int`), and the kirovGenus-`0` `∞`-vanishing (`hR₀_*`).  This is
 `residueSum_eq_zero_of_glue` specialised to the geometric `T`.
 
 The deep §VIII.3 monodromy content is exactly the two coherence inputs `hglue_fin`/`hglue_inf` (the
@@ -190,7 +190,7 @@ regular fibre `Dreg z` over `z` (the off-branch sheet-gluing), and that regular 
 chart-pullback analytic at each fibre point (`z` is a regular value off the poles of `α`).  Packaging
 that per-value coherence as `hreg` discharges `hT_off` via `analyticAt_valueChartTrace_of_eventuallyEq`,
 so the *only* inputs left are the finite/∞ glue, the per-value off-exceptional coherence, junk-freeness,
-and the genus-`0` `∞`-vanishing — the minimal §VIII.3 obligation. -/
+and the kirovGenus-`0` `∞`-vanishing — the minimal §VIII.3 obligation. -/
 
 /-- **Gate A from the geometric selection with `hT_off` discharged from coherence.**  Identical to
 `residueSum_eq_zero_of_geometricSelection` except the off-centre analyticity `hT_off` is *replaced* by
@@ -198,7 +198,7 @@ the per-regular-value coherence `hreg`: for every `z` off the finite centres, a 
 over `z` with `g`'s chart-pullback analytic at each fibre point and the geometric trace germ-equal to
 `(fibreTrace ω₀ f (Dreg z)).traceCoeff` near `z`.  `hT_off` is then
 `analyticAt_valueChartTrace_of_eventuallyEq`.  This isolates the irreducible content to exactly the
-germ-coherence (finite, `∞`, and off-exceptional) + junk-freeness + the genus-`0` `∞`-vanishing. -/
+germ-coherence (finite, `∞`, and off-exceptional) + junk-freeness + the kirovGenus-`0` `∞`-vanishing. -/
 theorem residueSum_eq_zero_of_geometricSelection_coh (hac : AdaptedCover ω₀ g f poles)
     (Φ : (b : ℂ) → FibreRegularData g f b) {m : ℕ} (cs : Fin m → ℂ) (ρ : ℝ)
     (hcs_ball : ∀ i, cs i ∈ ball (0 : ℂ) ρ) (hcs_inj : Function.Injective cs)
@@ -236,7 +236,7 @@ The geometric constructors are *satisfiable*, not a disguised `False`: in the gl
 (empty-pole) case the **empty fibre selection** `Φ p := emptyFibreRegularData g f p` gives
 `valueChartTrace ω₀ f Φ ≡ 0` (an empty fibre sum), with all the deep inputs (glue, off-exceptional
 coherence, junk-freeness) vacuous over the empty centre set, the `∞`-glue `recipCoeff 0 ≡ 0` matching
-the empty `∞`-trace, and the genus-`0` continuation `R₀ ≡ 0` vanishing.  This confirms the geometric
+the empty `∞`-trace, and the kirovGenus-`0` continuation `R₀ ≡ 0` vanishing.  This confirms the geometric
 reduction produces a genuine `∑Res = 0`. -/
 
 /-- **The empty fibre selection gives the zero geometric trace.**  With `Φ p := emptyFibreRegularData

@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedNormalForm
-import Jacobians.Dolbeault.SerreResidueGateAClosed
-import Jacobians.Dolbeault.SerreOmega0
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedNormalForm
+import KirovDolbeault.Dolbeault.SerreResidueGateAClosed
+import KirovDolbeault.Dolbeault.SerreOmega0
 
 /-!
 # Gate A end-to-end via the real cover — the `hoff_cs`-free sheet-data route

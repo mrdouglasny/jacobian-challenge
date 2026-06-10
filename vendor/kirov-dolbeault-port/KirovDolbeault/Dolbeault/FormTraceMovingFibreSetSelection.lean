@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceMovingFibreSymm
+import KirovDolbeault.Dolbeault.FormTraceMovingFibreSymm
 
 /-!
 # The set-form moving-fibre sheet selection (Gate A, §VIII.3 — no global labeling)
@@ -67,7 +67,7 @@ variable {ω₀ : HolomorphicOneForms X} {g : X → ℂ} {f : MeromorphicFunctio
 The whole Gate-A input in **set form**: the per-pole-value and per-regular-value moving data is
 presented through the labeling-independent re-selection `hsetFin`/`hsetReg` — near each base value the
 moving fibre `Φ b'` and the section values enumerate the same set (both injective).  Everything else
-(finite/∞ enumeration, `∞`-glue, junk-freeness, genus-`0`) is verbatim from `MovingSheetSelection`. -/
+(finite/∞ enumeration, `∞`-glue, junk-freeness, kirovGenus-`0`) is verbatim from `MovingSheetSelection`. -/
 
 /-- **A set-form moving-fibre sheet selection** for `α = ω₀·g` over `poles`, relative to an adapted
 cover `hac`.  The Gate-A input with the per-value re-selection in *set form*: at each pole-value `cs i`
@@ -149,7 +149,7 @@ structure MovingSheetSelectionSet (ω₀ : HolomorphicOneForms X) (g : X → ℂ
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTrace ω₀ f Φ - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -207,12 +207,12 @@ theorem residueSum_eq_zero_of_movingSheetSelectionSet (hac : AdaptedCover ω₀ 
 For the **empty pole set** the empty fibre selection assembles into a `MovingSheetSelectionSet`: the
 per-regular-value reference fibre is the empty fibre, the set-form re-selection holds vacuously (both
 ranges are `∅`, both maps injective on the empty index), the empty `∞`-trace, vacuous junk-freeness, and
-the vanishing genus-`0` continuation.  Confirms the set-form reduction is honest. -/
+the vanishing kirovGenus-`0` continuation.  Confirms the set-form reduction is honest. -/
 
 /-- **The empty set-form moving sheet selection.**  For the empty pole set, the empty fibre selection
 assembles into a `MovingSheetSelectionSet`: per-regular-value empty fibre + empty sections + the
 trivially-satisfied set-form re-selection (both ranges `∅`), vacuous finite/∞-pole fields, and the
-vanishing genus-`0` continuation.  The honest non-vacuity witness. -/
+vanishing kirovGenus-`0` continuation.  The honest non-vacuity witness. -/
 noncomputable def movingSheetSelectionSet_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :
     MovingSheetSelectionSet ω₀ g f ∅ (adaptedCover_empty ω₀ g f hdiv) where

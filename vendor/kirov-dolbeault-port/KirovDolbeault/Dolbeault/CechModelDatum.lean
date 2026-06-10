@@ -45,7 +45,7 @@
   `closure_inter_subset_inter_closure`).  Result: `(overlapChartDatum).cochainToCcov` is the finished
   forward `germ → BddHol` cochain map for the model.
 -/
-import Jacobians.Dolbeault.CechModelCochain
+import KirovDolbeault.Dolbeault.CechModelCochain
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

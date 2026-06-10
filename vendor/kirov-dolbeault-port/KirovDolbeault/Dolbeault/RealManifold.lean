@@ -12,7 +12,7 @@
   defeq-transparency issue, handled exactly as Mathlib's own `Analysis/Complex/RealDeriv.lean` does:
   `set_option backward.isDefEq.respectTransparency false`.
 -/
-import Jacobians.Genus
+import KirovDolbeault.Genus
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Complex.Basic
 

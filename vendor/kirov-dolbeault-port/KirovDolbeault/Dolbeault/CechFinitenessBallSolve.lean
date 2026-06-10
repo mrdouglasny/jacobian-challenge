@@ -23,13 +23,13 @@
 
   No gaps anywhere: everything not yet closed is a hypothesis predicate or written prose.
 -/
-import Jacobians.Dolbeault.CechDiskAcyclicAssembly
-import Jacobians.Dolbeault.CechDiskAcyclicProof
-import Jacobians.Dolbeault.DiskAcyclicCore
-import Jacobians.Dolbeault.HoloRep
-import Jacobians.Dolbeault.DolbeaultComparison
-import Jacobians.Dolbeault.DbarDiskCohomology
-import Jacobians.Dolbeault.ChartDiskCover
+import KirovDolbeault.Dolbeault.CechDiskAcyclicAssembly
+import KirovDolbeault.Dolbeault.CechDiskAcyclicProof
+import KirovDolbeault.Dolbeault.DiskAcyclicCore
+import KirovDolbeault.Dolbeault.HoloRep
+import KirovDolbeault.Dolbeault.DolbeaultComparison
+import KirovDolbeault.Dolbeault.DbarDiskCohomology
+import KirovDolbeault.Dolbeault.ChartDiskCover
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 open scoped Manifold ContDiff Topology

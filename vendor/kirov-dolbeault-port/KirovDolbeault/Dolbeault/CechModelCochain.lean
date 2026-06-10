@@ -21,9 +21,9 @@
   Sorry-free; depends only on the axiom-clean K-bridge atom (`holoSectionToBddHol`), the analytic
   representative API (`holoFn`), and the geometric overlap data (`chartCoverOverlapData`).
 -/
-import Jacobians.Dolbeault.CechModelGeometry
-import Jacobians.Dolbeault.CechModelManifold
-import Jacobians.Dolbeault.CechFinitenessBallSolve
+import KirovDolbeault.Dolbeault.CechModelGeometry
+import KirovDolbeault.Dolbeault.CechModelManifold
+import KirovDolbeault.Dolbeault.CechFinitenessBallSolve
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

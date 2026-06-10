@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceCoherentSelection
-import Jacobians.Dolbeault.FormTraceSheetFibreBridge
-import Jacobians.TraceForm
+import KirovDolbeault.Dolbeault.FormTraceCoherentSelection
+import KirovDolbeault.Dolbeault.FormTraceSheetFibreBridge
+import KirovDolbeault.TraceForm
 
 /-!
 # The moving fibre selection `Φ` and its self-coherence (Gate A, §VIII.3 monodromy)

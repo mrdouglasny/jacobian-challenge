@@ -40,8 +40,8 @@
 
   Everything is complete and axiom-clean (`[propext, Classical.choice, Quot.sound]`).
 -/
-import Jacobians.Dolbeault.CechFinitenessAssembly
-import Jacobians.Dolbeault.SkyscraperArrow
+import KirovDolbeault.Dolbeault.CechFinitenessAssembly
+import KirovDolbeault.Dolbeault.SkyscraperArrow
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

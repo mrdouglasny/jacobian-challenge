@@ -25,7 +25,7 @@
   downstream `CechFinitenessWiring`.)
 
   WHY THE GENERAL `exists_cechModel` STAYS A SORRY (the exact remaining obstruction):  an arbitrary
-  Leray `𝔘` is NOT a `SharedChartCover` and its `cechH1 𝔘 D` is NOT a subsingleton (for high genus /
+  Leray `𝔘` is NOT a `SharedChartCover` and its `cechH1 𝔘 D` is NOT a subsingleton (for high kirovGenus /
   general `D`), so the subsingleton route does not apply.  Closing the general statement needs the
   comparison `cechH1 𝔘 D ≃ₗ supH1` for a NON-acyclic `supH1` — the genuine Montel-model comparison +
   Leray cover-independence STEP B (`CechRefinement.lean`'s `## PLAN`, `CechRefinementLeray.lean`'s
@@ -40,12 +40,12 @@
 -- `DolbeaultComparisonInverse` (pulled in by the now-`CechFinitenessDtwist`-importing
 -- `CechFinitenessWiring`) out of this file's import closure, avoiding the ported-twin name
 -- collisions with `CechFinitenessBallSolve` (imported below).
-import Jacobians.Dolbeault.CechModelBase
-import Jacobians.Dolbeault.CechModelDifferential
-import Jacobians.Dolbeault.GluedDbarDatum
-import Jacobians.Dolbeault.ChartCoverDbarGlue
-import Jacobians.Dolbeault.CechModelHolomorphic
-import Jacobians.Dolbeault.CechFinitenessBallSolve
+import KirovDolbeault.Dolbeault.CechModelBase
+import KirovDolbeault.Dolbeault.CechModelDifferential
+import KirovDolbeault.Dolbeault.GluedDbarDatum
+import KirovDolbeault.Dolbeault.ChartCoverDbarGlue
+import KirovDolbeault.Dolbeault.CechModelHolomorphic
+import KirovDolbeault.Dolbeault.CechFinitenessBallSolve
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

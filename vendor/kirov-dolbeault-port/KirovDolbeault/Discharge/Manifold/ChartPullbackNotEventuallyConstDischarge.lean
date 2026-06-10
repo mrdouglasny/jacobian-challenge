@@ -3,7 +3,7 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.ChartBallOffCentreWitnessDischarge
+import KirovDolbeault.Discharge.Manifold.ChartBallOffCentreWitnessDischarge
 
 set_option autoImplicit true
 

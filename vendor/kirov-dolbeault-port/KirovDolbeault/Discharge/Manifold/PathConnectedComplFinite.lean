@@ -29,13 +29,13 @@ Strategy:
 
 No `axiom`, no gaps.
 -/
-import Jacobians.Discharge.Manifold.ChartedSpaceLocPathConnected
-import Jacobians.Discharge.Manifold.ConnectedManifoldPathConnected
-import Jacobians.Discharge.Manifold.ChartLocalDetour
-import Jacobians.Discharge.Manifold.IsPathConnectedBallMinusCountable
-import Jacobians.Discharge.Manifold.ChartRestrictionToBall
-import Jacobians.Discharge.Manifold.PathSubdivisionByBallCharts
-import Jacobians.Discharge.Manifold.ChartOverlapAvoidanceFull
+import KirovDolbeault.Discharge.Manifold.ChartedSpaceLocPathConnected
+import KirovDolbeault.Discharge.Manifold.ConnectedManifoldPathConnected
+import KirovDolbeault.Discharge.Manifold.ChartLocalDetour
+import KirovDolbeault.Discharge.Manifold.IsPathConnectedBallMinusCountable
+import KirovDolbeault.Discharge.Manifold.ChartRestrictionToBall
+import KirovDolbeault.Discharge.Manifold.PathSubdivisionByBallCharts
+import KirovDolbeault.Discharge.Manifold.ChartOverlapAvoidanceFull
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Defs

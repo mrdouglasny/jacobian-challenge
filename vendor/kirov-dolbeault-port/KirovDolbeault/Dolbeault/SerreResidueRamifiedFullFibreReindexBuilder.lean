@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedFullFibreReindex
-import Jacobians.Dolbeault.SerreResidueRamifiedClusterTopology
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFullFibreReindex
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedClusterTopology
 
 /-!
 # Building the SOUND `FullFibreCenterReindex` from the per-slit conservation-of-number geometry

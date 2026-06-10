@@ -3,10 +3,10 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceBundleBridge
-import Jacobians.Dolbeault.FormTraceSphereSheetTranslate
-import Jacobians.Dolbeault.SerreOmega0
-import Jacobians.Discharge.Manifold.RegularValueExistsRegUnconditional
+import KirovDolbeault.Dolbeault.FormTraceBundleBridge
+import KirovDolbeault.Dolbeault.FormTraceSphereSheetTranslate
+import KirovDolbeault.Dolbeault.SerreOmega0
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
 
 /-!
 # Gate A `∑Res = 0`: global-cover selection assembly (Miranda §VIII.3)

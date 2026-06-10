@@ -36,10 +36,10 @@
   proven Dolbeault-comparison machinery (`diskVal`/`planarPrimitive`/`dolbeaultToCechCocycle`,
   `DolbeaultComparisonProof`/`Inverse`/`Equiv`) and the shrinking-level PoU `shrinkPoU` (`ChartDiskLeray`).
 -/
-import Jacobians.Dolbeault.ChartDiskFiniteness
-import Jacobians.Dolbeault.ChartDiskLeray
-import Jacobians.Dolbeault.CechModelHolomorphicDelta
-import Jacobians.Dolbeault.CechRefinementInjective
+import KirovDolbeault.Dolbeault.ChartDiskFiniteness
+import KirovDolbeault.Dolbeault.ChartDiskLeray
+import KirovDolbeault.Dolbeault.CechModelHolomorphicDelta
+import KirovDolbeault.Dolbeault.CechRefinementInjective
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

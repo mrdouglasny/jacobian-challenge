@@ -1,6 +1,6 @@
 /-
   Forster §17.4 — the canonical-form multiplication isomorphism `ω₀·: 𝒪_{D+K} ≅ Ω_D`, the
-  canonical divisor `K = div ω₀`, and `lDim K = genus X` (17.4 at `D = 0`).
+  canonical divisor `K = div ω₀`, and `lDim K = kirovGenus X` (17.4 at `D = 0`).
 
   Built directly on **Gate (C)** (`Jacobians.Dolbeault.MeromorphicOneFormSystem`): the
   meromorphic-1-form linear system `Ω_D = omegaD D`, its junk-free module `omegaDModule D`,
@@ -24,7 +24,7 @@
   meromorphic, with `div f₀ = div α − K`, placing `f₀ ∈ L(D + K)`.
 
   At `D = 0` this is `𝒪_K ≅ Ω_0`, and composing with `Ω_0 ≅ HolomorphicOneForms` (Gate C's
-  `omegaDim_zero_eq_genus_of_le`) gives `lDim K = genus X` — the `hKgenus` field of
+  `omegaDim_zero_eq_genus_of_le`) gives `lDim K = kirovGenus X` — the `hKgenus` field of
   `SerreDualityData`.
 
   ## The one isolated analytic input
@@ -38,13 +38,13 @@
   itself (`ω₀ = df`) is the analytic differential. Both are bundled, with `ω₀ ≠ 0`, into the isolated
   hypothesis structure `CanonicalForm17Data` below; **every theorem built on it is genuine** (the
   structure is non-vacuous — `df` of a nonconstant `f` witnesses it — and at `D = 0` both sides of
-  the iso have dimension `genus X`, so the iso is non-vacuous, not a junk identity).
+  the iso have dimension `kirovGenus X`, so the iso is non-vacuous, not a junk identity).
 
   Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §17.4 (`ω·: 𝒪_{D+K} ≅ Ω_D`); the
   `linearSystem`/`lSysModule`/`lDim` pattern in `Jacobians.LinearSystem`; the `Ω_D` Gate-C build in
   `Jacobians.Dolbeault.MeromorphicOneFormSystem`.
 -/
-import Jacobians.Dolbeault.MeromorphicOneFormSystem
+import KirovDolbeault.Dolbeault.MeromorphicOneFormSystem
 
 open scoped Manifold ContDiff Topology
 open Module
@@ -608,12 +608,12 @@ theorem lDim_add_K_eq_omegaDim (D : Divisor X) :
   rwa [show lDim (X := X) (D + data.K) = finrank ℂ (lSysModule (X := X) (D + data.K)) from rfl,
     show omegaDim (X := X) D = finrank ℂ (omegaDModule (X := X) D) from rfl]
 
-/-! ## Part 5: `lDim K = genus X` (Forster §17.4 at `D = 0`)
+/-! ## Part 5: `lDim K = kirovGenus X` (Forster §17.4 at `D = 0`)
 
 At `D = 0` the §17.4 iso is `𝒪_K ≅ Ω_0`, giving `lDim K = omegaDim 0` **unconditionally** (no gaps).
 Composing with Gate C's `Ω_0 ≅ HolomorphicOneForms` (`omegaDim_zero_eq_genus_of_le`) gives
-`lDim K = genus X` — the `hKgenus` field of `SerreDualityData`.  The remaining input is exactly Gate
-C's isolated removable-singularity reverse bound `omegaDim 0 ≤ genus X` (an order-`≥ 0` meromorphic
+`lDim K = kirovGenus X` — the `hKgenus` field of `SerreDualityData`.  The remaining input is exactly Gate
+C's isolated removable-singularity reverse bound `omegaDim 0 ≤ kirovGenus X` (an order-`≥ 0` meromorphic
 1-form is, modulo germ-junk, holomorphic). -/
 
 /-- **`lDim K = omegaDim 0`** (Forster §17.4 at `D = 0`, the iso `𝒪_K ≅ Ω_0`) — UNCONDITIONAL.
@@ -622,29 +622,29 @@ theorem lDim_K_eq_omegaDim_zero : lDim (X := X) data.K = omegaDim (X := X) 0 := 
   have h := data.lDim_add_K_eq_omegaDim 0
   rwa [zero_add] at h
 
-/-- **`hKgenus` — `lDim K = genus X`** (Forster §17.4 at `D = 0`).  Chains the unconditional
-`lDim K = omegaDim 0` with `omegaDim 0 = genus X` (Gate C's `omegaDim_zero_eq_genus_of_le`).  The two
+/-- **`hKgenus` — `lDim K = kirovGenus X`** (Forster §17.4 at `D = 0`).  Chains the unconditional
+`lDim K = omegaDim 0` with `omegaDim 0 = kirovGenus X` (Gate C's `omegaDim_zero_eq_genus_of_le`).  The two
 hypotheses are exactly Gate C's isolated removable-singularity inputs: finiteness of `Ω_0` and the
-reverse bound `omegaDim 0 ≤ genus X` (an order-`≥ 0` meromorphic 1-form is holomorphic modulo
+reverse bound `omegaDim 0 ≤ kirovGenus X` (an order-`≥ 0` meromorphic 1-form is holomorphic modulo
 germ-junk).  This is the `SerreDualityData.hKgenus` field. -/
 theorem hKgenus [FiniteDimensional ℂ (omegaDModule (X := X) 0)]
-    (hle : omegaDim (X := X) 0 ≤ genus X) :
-    lDim (X := X) data.K = genus X := by
+    (hle : omegaDim (X := X) 0 ≤ kirovGenus X) :
+    lDim (X := X) data.K = kirovGenus X := by
   rw [data.lDim_K_eq_omegaDim_zero]
   exact omegaDim_zero_eq_genus_of_le hle
 
 /-! ### Non-vacuity / soundness sanity check
 
-The §17.4 iso is genuine (not a junk dimension-identity): the genus-dimensional holomorphic forms
-inject into `Ω_0 ≅ 𝒪_K`, so `genus X ≤ lDim K`.  In particular, for a positive-genus surface both
-sides of the `D = 0` iso have dimension `≥ genus ≥ 1`, so it is a non-vacuous isomorphism of nonzero
+The §17.4 iso is genuine (not a junk dimension-identity): the kirovGenus-dimensional holomorphic forms
+inject into `Ω_0 ≅ 𝒪_K`, so `kirovGenus X ≤ lDim K`.  In particular, for a positive-kirovGenus surface both
+sides of the `D = 0` iso have dimension `≥ kirovGenus ≥ 1`, so it is a non-vacuous isomorphism of nonzero
 modules. -/
 
-/-- **Soundness lower bound:** `genus X ≤ lDim K` (when `Ω_0` is finite-dimensional).  The §17.4 iso
-sends the genus-dimensional holomorphic forms faithfully into `𝒪_K`, so `lSysModule K` is at least
-genus-dimensional — the iso is non-vacuous. -/
+/-- **Soundness lower bound:** `kirovGenus X ≤ lDim K` (when `Ω_0` is finite-dimensional).  The §17.4 iso
+sends the kirovGenus-dimensional holomorphic forms faithfully into `𝒪_K`, so `lSysModule K` is at least
+kirovGenus-dimensional — the iso is non-vacuous. -/
 theorem genus_le_lDim_K [FiniteDimensional ℂ (omegaDModule (X := X) 0)] :
-    genus X ≤ lDim (X := X) data.K := by
+    kirovGenus X ≤ lDim (X := X) data.K := by
   rw [data.lDim_K_eq_omegaDim_zero]
   exact genus_le_omegaDim_zero
 

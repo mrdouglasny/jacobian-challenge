@@ -1,4 +1,4 @@
-import Jacobians.Montel.ChartNorm
+import KirovDolbeault.Montel.ChartNorm
 
 /-!
 # Montel path — assembled sup-norm `supNormK`

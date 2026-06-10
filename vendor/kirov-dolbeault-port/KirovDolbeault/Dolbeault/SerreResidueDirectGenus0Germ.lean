@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirectGenus0Assemble
+import KirovDolbeault.Dolbeault.SerreResidueDirectGenus0Assemble
 
 /-!
 # Gate A `∑Res = 0` — eliminating the false junk-freeness `hcont_int` (germ-Cauchy at `∞`)
@@ -41,7 +41,7 @@ route cannot repair it.
 
 ## The non-circular fix (germ-Cauchy: literal-entire is not needed)
 
-The genus-`0` close (`SerreResidueDirectGenus0.lean`) used `hcont_int` *only* to obtain `hentire :
+The kirovGenus-`0` close (`SerreResidueDirectGenus0.lean`) used `hcont_int` *only* to obtain `hentire :
 AnalyticOnNhd ℂ (T − L.R) Set.univ` (the **literal**-entire remainder), feeding the Cauchy-at-`∞`
 residue `resAt (recipCoeff (T − L.R)) 0 = 0` (`resAt_recipCoeff_eq_zero_of_entire`, global primitive).
 But the `∞`-residue depends only on the *germ* of `T − L.R` for large `z` — the junk values at the
@@ -57,7 +57,7 @@ The germ-Cauchy lemma (`resAt_recipCoeff_eq_zero_of_regular`): from germ-regular
 h') 0 = 0` by the *existing* Cauchy-at-`∞` for the entire `h'`.  This is sound and non-circular — it
 uses only analytic continuation + Cauchy for a genuinely-entire function, never `∑Res = 0`.
 
-So this file **eliminates `hcont_int`** from the genus-`0` Gate-A capstones, replacing it with the free
+So this file **eliminates `hcont_int`** from the kirovGenus-`0` Gate-A capstones, replacing it with the free
 germ-regularity already supplied by the principal-part extraction.
 
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
@@ -530,7 +530,7 @@ theorem residueTheorem_ofAdaptedSimpleInfty_genus0_germ
 /-- **Gate A `∑Res = 0` from the canonical selection with simple `∞`-poles, `hcont_int`-free.**  The
 sound, `hcont_int`-eliminated form of the most-wired capstone
 `residueTheorem_ofCanonicalSimpleInfty_genus0`: the canonical full-fibre selection + simple `∞`-poles,
-with the genus-`0` `∞`-vanishing discharged internally (germ-Cauchy) **and** the finite junk-freeness
+with the kirovGenus-`0` `∞`-vanishing discharged internally (germ-Cauchy) **and** the finite junk-freeness
 `hcont_int` removed (replaced by the free germ-regularity of the trace remainder).  Gate A rests on
 *exactly* the per-centre full-fibre coherence `Cfull`, the off-centre analyticity `hreg`/`hbnd`, and the
 `∞`-coherence `hcoh_full` — the false `hcont_int` is **gone**. -/

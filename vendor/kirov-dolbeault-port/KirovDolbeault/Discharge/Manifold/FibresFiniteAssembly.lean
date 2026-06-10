@@ -3,11 +3,11 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.AnalyticFiberDiscrete
-import Jacobians.Discharge.Manifold.AnalyticContinuationGlobalization
-import Jacobians.Discharge.Manifold.ChartPullbackDataConstruction
-import Jacobians.Discharge.Manifold.ContMDiffOmegaAnalytic
-import Jacobians.Discharge.Manifold.Degree
+import KirovDolbeault.Discharge.Manifold.AnalyticFiberDiscrete
+import KirovDolbeault.Discharge.Manifold.AnalyticContinuationGlobalization
+import KirovDolbeault.Discharge.Manifold.ChartPullbackDataConstruction
+import KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
+import KirovDolbeault.Discharge.Manifold.Degree
 
 set_option autoImplicit true
 

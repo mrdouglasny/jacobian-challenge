@@ -38,7 +38,7 @@
   and all the §0–§5 machinery of `CechFinitenessBallSolve` (`coverPrim` / `chartPrim` / `holoFn` /
   `rhoC` / `holoFn_cocycle_sub` / `SharedChartCover` / `HasGluedDbarDatum`).
 -/
-import Jacobians.Dolbeault.CechFinitenessBallSolve
+import KirovDolbeault.Dolbeault.CechFinitenessBallSolve
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

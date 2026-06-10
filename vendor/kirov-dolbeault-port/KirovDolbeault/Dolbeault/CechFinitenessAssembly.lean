@@ -17,10 +17,10 @@
   The Montel finiteness is taken in the assembly lemmas as an explicit HYPOTHESIS `hMontel` (so they
   are parametric in the analytic input); the wiring below discharges `hMontel` with that theorem.
 -/
-import Jacobians.Dolbeault.CechRefinementInjective
-import Jacobians.Dolbeault.ChartDiskRefinement
-import Jacobians.Dolbeault.CechModelArtificial
-import Jacobians.Dolbeault.ChartDiskFinitenessComplete
+import KirovDolbeault.Dolbeault.CechRefinementInjective
+import KirovDolbeault.Dolbeault.ChartDiskRefinement
+import KirovDolbeault.Dolbeault.CechModelArtificial
+import KirovDolbeault.Dolbeault.ChartDiskFinitenessComplete
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

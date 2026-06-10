@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceBranchValueOff
-import Jacobians.Dolbeault.FormTraceBranchAwareSelection
+import KirovDolbeault.Dolbeault.FormTraceBranchValueOff
+import KirovDolbeault.Dolbeault.FormTraceBranchAwareSelection
 
 /-!
 # The branch-value-patched global trace `Tᵉˣᵗ` and Gate A `∑Res = 0` (Miranda §VIII.3 — the close)
@@ -44,7 +44,7 @@ junk is repaired to the limit).
 * `PatchedTraceSelection` — the assembled Gate-A input using `Tᵉˣᵗ`: the per-value moving-sheet
   coherence (no labeling, via the symmetric lever), the **branch-value boundedness crux** (the genuine
   §VIII.3 analytic content, reduced sheet-by-sheet to the proven ratio atom), the `∞`-glue,
-  junk-freeness, and the genus-`0` `∞`-vanishing.
+  junk-freeness, and the kirovGenus-`0` `∞`-vanishing.
 * `residueSum_eq_zero_of_patchedTraceSelection` — **Gate A `∑Res = 0`** from it, via the proven
   `residueSum_eq_zero_of_glue`.
 * `patchedTraceSelection_empty` / `…_holomorphic` — end-to-end non-vacuity (empty-pole case).
@@ -58,7 +58,7 @@ Miranda's §VIII.3 geometry:
    reduced sheet-by-sheet to the proven `FormTraceBranchPlanarExtend.tendsto_zero_section_deriv`);
 2. the **germ-coherence** (the per-value moving-sheet data + the `∞`-glue) — the branched-cover
    monodromy, handled labeling-free by the symmetric lever; and
-3. the genus-`0` `∞`-vanishing + junk-freeness.
+3. the kirovGenus-`0` `∞`-vanishing + junk-freeness.
 
 The false `hbranch` continuity route is *not* revived: branch values are handled by the value-correct
 patch, whose analyticity rests on the boundedness crux (genuine, partially proven) — never on
@@ -435,7 +435,7 @@ We bundle the genuine §VIII.3 geometry into one structure, feeding the value-co
   coherence (patch inert), branch values via the value-correct removable extension (whose analyticity
   rests on `hbnd`, never on continuity).
 
-The finite glue / `∞`-glue / junk-freeness / genus-`0` for `Tᵉˣᵗ` are transported from `valueChartTrace`
+The finite glue / `∞`-glue / junk-freeness / kirovGenus-`0` for `Tᵉˣᵗ` are transported from `valueChartTrace`
 along the germ-equalities (`valueChartTracePatched_eventuallyEq`,
 `recipCoeff_valueChartTracePatched_eventuallyEq`) — `Tᵉˣᵗ` differs only at the finitely-many branch
 values, so it shares every germ at the centres and at `∞`. -/
@@ -452,7 +452,7 @@ The honest §VIII.3 Gate-A input feeding the value-correct **patched** trace to
   `g`'s chart-pullback analytic at its fibre points (regular-value analyticity);
 * `hbnd` — at each branch value off the centres, the §VIII.3 **boundedness crux** `(z − b₀)·valueChartTrace
   z → 0` (the genuine analytic content; reduced sheet-by-sheet to the proven ratio atom);
-* `hglue_inf` / `hcont_int` / `R₀`+`hR₀_*` — the `∞`-glue, junk-freeness, genus-`0` `∞`-vanishing,
+* `hglue_inf` / `hcont_int` / `R₀`+`hR₀_*` — the `∞`-glue, junk-freeness, kirovGenus-`0` `∞`-vanishing,
   all phrased for the **patched** trace `Tᵉˣᵗ` (= `valueChartTracePatched ω₀ f Φ br`).
 
 Produces Gate A `∑Res = 0` via `residueSum_eq_zero_of_glue`. -/
@@ -506,7 +506,7 @@ structure PatchedTraceSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTracePatched ω₀ f Φ br - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTracePatched ω₀ f Φ br - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -550,7 +550,7 @@ theorem PatchedTraceSelection.hT_off {hac : AdaptedCover ω₀ g f poles}
 `T := valueChartTracePatched ω₀ f Φ br` (the value-correct patched trace): the finite glue from the
 per-pole moving datum (transported to `Tᵉˣᵗ`), the off-centre analyticity from the regular-value
 coherence ⊕ the value-correct branch extension (resting on the boundedness crux), and the
-`∞`/junk/genus-`0` data.  This is the §VIII.3 reduction of Gate A **with the symmetric lever (no
+`∞`/junk/kirovGenus-`0` data.  This is the §VIII.3 reduction of Gate A **with the symmetric lever (no
 labeling) and branch values via the value-correct removable patch** — no revived `hbranch`. -/
 theorem residueSum_eq_zero_of_patchedTraceSelection (hac : AdaptedCover ω₀ g f poles)
     (S : PatchedTraceSelection ω₀ g f poles hac) :
@@ -565,7 +565,7 @@ The `PatchedTraceSelection` obligation is *satisfiable*, not a disguised `False`
 set** (`α = ω₀·g` globally holomorphic) the empty fibre selection assembles into one, with `br = ∅` (no
 branch values, so `hbnd` is vacuous and the patch is inert: `valueChartTracePatched … ∅ = valueChartTrace
 … ≡ 0`), the per-regular-value empty moving datum, the empty `∞`-trace, vacuous junk-freeness, and the
-vanishing genus-`0` continuation.  Its `residueSum_eq_zero_of_patchedTraceSelection` yields `∑Res = 0`,
+vanishing kirovGenus-`0` continuation.  Its `residueSum_eq_zero_of_patchedTraceSelection` yields `∑Res = 0`,
 confirming the reduction is honest. -/
 
 /-- With `br = ∅` the patch is inert: `valueChartTracePatched ω₀ f Φ ∅ = valueChartTrace ω₀ f Φ`
@@ -578,7 +578,7 @@ confirming the reduction is honest. -/
 /-- **The empty patched-trace selection.**  For the empty pole set, the empty fibre selection assembles
 into a `PatchedTraceSelection`: `br = ∅` (the patch inert, `valueChartTrace ≡ 0`), per-regular-value
 empty moving datum (`movingCoherenceDatum_empty`), vacuous finite/branch fields, and the vanishing
-genus-`0` continuation.  The honest non-vacuity witness. -/
+kirovGenus-`0` continuation.  The honest non-vacuity witness. -/
 noncomputable def patchedTraceSelection_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :
     PatchedTraceSelection ω₀ g f ∅ (adaptedCover_empty ω₀ g f hdiv) where

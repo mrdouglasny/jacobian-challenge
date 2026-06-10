@@ -1,4 +1,4 @@
-import Jacobians.PeriodLattice
+import KirovDolbeault.PeriodLattice
 import Mathlib.Analysis.Meromorphic.Basic
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Data.Finsupp.Weight
@@ -579,7 +579,7 @@ and sums `periodVec` of paths from a fixed basepoint `P₀` to each
 point in the support of `D`, weighted by multiplicities, projected
 to the Jacobian quotient. -/
 noncomputable def abelJacobi (D : DivisorOfDegZero X) :
-    (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup := by
+    (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup := by
   classical
   exact ∑ P ∈ (D : Divisor X).support,
     ((D : Divisor X) P) •
@@ -637,9 +637,9 @@ work to formalize divisor theory + residue theorem + Abel's proof. -/
 -- `HasAbelsTheorem` class removed: reverted to hypothesis-based
 -- `abelJacobi_twoPoint_ne_zero` below.
 
-/-! ### Consequence: two-point divisors on positive-genus surfaces
+/-! ### Consequence: two-point divisors on positive-kirovGenus surfaces
 
-For `X` of genus ≥ 1, the divisor `P - Q` with `P ≠ Q` is NOT
+For `X` of kirovGenus ≥ 1, the divisor `P - Q` with `P ≠ Q` is NOT
 principal (Forster §21.5 / Miranda Ch. V §2.8). The classical
 argument:
 
@@ -647,7 +647,7 @@ A principal divisor `P - Q` with `P ≠ Q` means some meromorphic
 function `f` has a simple zero at `P` and a simple pole at `Q` and
 no other zeros/poles. Such an `f` is a degree-1 map `X → ℙ¹`, which
 must be a biholomorphism (by Riemann-Hurwitz: deg-1 covers are
-isomorphisms). But then `X ≃ ℙ¹`, which has genus 0 — contradiction.
+isomorphisms). But then `X ≃ ℙ¹`, which has kirovGenus 0 — contradiction.
 
 Axiomatized as a typeclass field `twoPointDivisor_not_principal_of_pos_genus`,
 alongside Abel's theorem itself. This is the piece that, combined
@@ -656,17 +656,17 @@ with Abel, implies `abelJacobi (P - Q) ≠ 0`, the lemma needed for
 
 variable {X} in
 /-- **Consequence of Abel's theorem + non-existence of degree-1 maps
-to ℙ¹ on positive-genus surfaces**: the Abel–Jacobi image of a
+to ℙ¹ on positive-kirovGenus surfaces**: the Abel–Jacobi image of a
 two-point divisor `P - Q` is nonzero when `P ≠ Q` on a surface of
-positive genus.
+positive kirovGenus.
 
 Classical argument: if `abelJacobi (P - Q) = 0`, then by Abel's theorem
 `P - Q` is principal — some meromorphic function `f` has a simple zero
 at `P` and a simple pole at `Q` and no other zeros/poles. Such an `f`
 is a degree-1 map `X → ℙ¹`, hence a biholomorphism (Riemann-Hurwitz).
-But then `X ≃ ℙ¹`, which has genus 0 — contradiction. -/
+But then `X ≃ ℙ¹`, which has kirovGenus 0 — contradiction. -/
 theorem abelJacobi_twoPoint_ne_zero
-    (h : 0 < genus X) {P Q : X} (hPQ : P ≠ Q) :
+    (h : 0 < kirovGenus X) {P Q : X} (hPQ : P ≠ Q) :
     abelJacobi ⟨twoPointDivisor X P Q, twoPointDivisor_mem_degZero X P Q⟩ ≠ 0 :=
   sorry
 
@@ -682,13 +682,13 @@ which needs real `abelJacobi` connected to `ofCurve`. -/
 /-! ### Derivation of `ofCurve_inj` from Abel's theorem
 
 **Sketch** (Forster §21.5): if `ofCurve P Q = ofCurve P Q'` for
-`Q ≠ Q'` on a surface with genus ≥ 1, then `Q - Q'` is a degree-0
+`Q ≠ Q'` on a surface with kirovGenus ≥ 1, then `Q - Q'` is a degree-0
 divisor whose Abel–Jacobi image is zero. By Abel, `Q - Q'` is
 principal: there exists a meromorphic `f` with a simple zero at `Q`
 and a simple pole at `Q'`. Such an `f` defines a degree-1 map
 `X → ℙ¹`, which is a biholomorphism (by Riemann-Hurwitz / the
-hyperelliptic argument), making `X` of genus 0 — contradicting
-`0 < genus X`.
+hyperelliptic argument), making `X` of kirovGenus 0 — contradicting
+`0 < kirovGenus X`.
 
 Formalizing this fully requires:
 * `ofCurve` to be the real path-integrated map.

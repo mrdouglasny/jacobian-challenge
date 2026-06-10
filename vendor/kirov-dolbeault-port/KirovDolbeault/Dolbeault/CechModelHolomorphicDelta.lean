@@ -20,8 +20,8 @@
   separately downstream (see `HolomorphicCoboundaries.leray`); this file delivers the structural
   δ-complex data `δ⁰`, `δ¹`, `δ¹cov`, `δ²=0`, and `hcomm`.
 -/
-import Jacobians.Dolbeault.CechModelHolomorphic
-import Jacobians.Dolbeault.CechModelDifferential
+import KirovDolbeault.Dolbeault.CechModelHolomorphic
+import KirovDolbeault.Dolbeault.CechModelDifferential
 
 open scoped Manifold ContDiff Topology
 open Jacobians.Montel ContinuousLinearMap

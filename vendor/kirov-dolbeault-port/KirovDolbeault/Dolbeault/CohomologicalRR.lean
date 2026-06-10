@@ -32,8 +32,8 @@
   So: `cohomological_riemannRoch` is proven modulo the single named obligation `exists_skyscraperLES`;
   everything else (base, the LES crank, the structural arrows, the induction skeleton) is complete.
 -/
-import Jacobians.Dolbeault.CohomologicalRRChartDisk
-import Jacobians.Dolbeault.SkyscraperConeRealization
+import KirovDolbeault.Dolbeault.CohomologicalRRChartDisk
+import KirovDolbeault.Dolbeault.SkyscraperConeRealization
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

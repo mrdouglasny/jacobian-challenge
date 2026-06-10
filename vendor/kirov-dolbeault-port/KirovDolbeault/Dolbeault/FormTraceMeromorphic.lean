@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalFunction
-import Jacobians.Dolbeault.FormTraceInftyFibre
+import KirovDolbeault.Dolbeault.FormTraceGlobalFunction
+import KirovDolbeault.Dolbeault.FormTraceInftyFibre
 
 /-!
 # Meromorphy of the local fibre trace at its base (Gate A, §VIII.3 step 1 — foundation)

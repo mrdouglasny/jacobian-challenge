@@ -11,8 +11,8 @@
   `η̂ᵢ = openChartPrimᵢ − u` are the holomorphic correctors that `analyticAt_compChart_of_differentiableOn`
   turns into `HasChartAnalyticCorrectors` ⟹ `H¹(disk,𝒪)=0`.
 -/
-import Jacobians.Dolbeault.CechFinitenessBallSolve
-import Jacobians.Dolbeault.DbarOpenDisk
+import KirovDolbeault.Dolbeault.CechFinitenessBallSolve
+import KirovDolbeault.Dolbeault.DbarOpenDisk
 
 open scoped Manifold ContDiff Topology
 open Complex Metric Filter

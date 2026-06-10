@@ -47,7 +47,7 @@
 
   `#print axioms` on every declaration below is `[propext, Classical.choice, Quot.sound]`.
 -/
-import Jacobians.Dolbeault.DolbeaultComparisonEquiv
+import KirovDolbeault.Dolbeault.DolbeaultComparisonEquiv
 
 open scoped Manifold ContDiff Bundle Topology
 open TopologicalSpace (Opens)

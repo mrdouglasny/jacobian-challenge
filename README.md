@@ -8,10 +8,10 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 
 | | |
 |---|---|
-| **Build** | `lake build Jacobians` green (8602 jobs) |
+| **Build** | `lake build Jacobians` green (8737 jobs, incl. the Kirov Dolbeault port closure) |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 41 (RR + Serre **and** the Riemann-bilinear/period-lattice cluster now **theorems** over the Layer-3 scaffold — 7 cohomology axioms + 2 statement-vetted period primitives, all cross-model-vetted), all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 37 (RR + Serre **and** the Riemann-bilinear/period-lattice cluster now **theorems** over the Layer-3 scaffold; Phase D discharged `H1coh`+3 instances to the real Čech cohomology of the vendored Kirov Dolbeault port — 3 cohomology axioms + 2 statement-vetted period primitives remain, all cross-model-vetted), all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 3 in an optional adelic `H¹` construction (kept around, not on the critical path) |
 | **Provenance** | ~26k LOC our own Lean (103 files) + vendored Kirov (Apache 2.0) & Wallace (MIT) |
 

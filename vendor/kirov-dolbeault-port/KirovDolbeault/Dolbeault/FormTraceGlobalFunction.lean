@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFibre
+import KirovDolbeault.Dolbeault.FormTraceFibre
 
 /-!
 # The global trace function `Tr_F α` and its holomorphy off the exceptional set (Gate A, §VIII.3)

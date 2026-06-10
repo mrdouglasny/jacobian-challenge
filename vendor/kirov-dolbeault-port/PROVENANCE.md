@@ -85,3 +85,34 @@ build: `Montel/`, `HolomorphicForms`, `LineIntegral`, `ZLatticeQuotient`,
 repository at a much later commit (1,010+ upstream commits later) and is
 intended as a **reference copy only** — nothing from this directory is compiled
 into our build as of 2026-06-10.
+
+## S2 integration (2026-06-10) — this copy IS compiled into our build
+
+The paragraph above described the verbatim snapshot, which now lives at
+`vendor/kirov-jacobian-claude-dolbeault/` (reference copy only). THIS
+directory is the **forward-port** (Mathlib `c5ea003`, toolchain `v4.30.0`)
+and, as of the S2 integration (`docs/planning/PHASE_D_BRIDGE_PLAN.md`), is a
+**Lake path dependency of the root package**: modules imported by our bridge
+files are compiled into the build.
+
+Deviations from the verbatim snapshot, beyond the 7-file forward-port:
+
+1. **Module root renamed** `Jacobians/` → `KirovDolbeault/` (file moves +
+   `import` sed only), so the port's module tree can coexist with the root
+   package's `Jacobians` lib. Declaration names were NOT renamed — the
+   port's declarations keep their upstream `Jacobians.*` namespaces.
+2. **Two declaration renames** to clear the only full-name collisions with
+   our library (5 declarations total, found by exhaustive environment
+   intersection):
+   - root `genus` → `kirovGenus` (collided with our Buzzard-interface
+     `genus` from `Jacobians/Challenge.lean`; word-boundary rename, so
+     `genus_…`/`…_genus_…` compound names are untouched);
+   - `chartAtPreimage` → `chartAtPreimageKirov` (substring rename covering
+     the 4-declaration `IsLocalHomeomorph.chartAtPreimage` family, which we
+     had already adopted verbatim in
+     `Jacobians/Vendor/Kirov/ChartedSpaceOfLocalHomeomorph.lean`).
+
+Bridge rule (PHASE_D_BRIDGE_PLAN.md): bridges may consume only the port's
+sorry-free results, and every bridge headline must be `#print axioms`
+checked — the port's 4 remaining sorries make `sorryAx` reachable from its
+gated results.

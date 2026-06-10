@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.PeriodLattice
-import Jacobians.Discharge.Manifold.IsPathConnectedBallMinusCountable
+import KirovDolbeault.PeriodLattice
+import KirovDolbeault.Discharge.Manifold.IsPathConnectedBallMinusCountable
 
 /-!
 # Trace (pushforward) of a holomorphic 1-form along a branched cover
@@ -719,7 +719,7 @@ theorem traceLocalCoeff_smul (a : ℂ) (g : Y → (ℂ →L[ℂ] ℂ)) (y₀ y :
 
 /-- **Branch value of the trace, in the fixed `y₀`-frame.** At a branch point `y₀` the operator
 `traceFun f α y` (read in the *varying* chart at `y`) is genuinely discontinuous as `y → y₀` for a
-non-trivial tangent bundle (genus ≥ 2; the `CotangentCoeff.lean` obstruction), so the naive
+non-trivial tangent bundle (kirovGenus ≥ 2; the `CotangentCoeff.lean` obstruction), so the naive
 operator `limUnder` is junk. The geometrically-correct value is built from the **local
 coefficient** read in the FIXED `y₀`-chart: take its removable-singularity limit `L` (a scalar in
 `ℂ`, the chart-pullback `limUnder` of `z ↦ traceLocalCoeff (traceFun f α) y₀ (chart⁻¹ z)`) and
@@ -842,7 +842,7 @@ analytic input. The input, `hext`, packages — for each form `α` and each bran
 
 **Crucial soundness point.** `hcont` is phrased in the FIXED frame (the local coefficient),
 NOT as continuity of the raw operator `traceFunExt f α : Y → (ℂ →L[ℂ] ℂ)` in the model fibre.
-The latter is *provably false* for a non-trivial tangent bundle (genus ≥ 2): the operator is read
+The latter is *provably false* for a non-trivial tangent bundle (kirovGenus ≥ 2): the operator is read
 in the *varying* chart at `y`, whose transition factor is discontinuous (`CotangentCoeff.lean`).
 The ℂ-linearity argument below is therefore re-derived in the fixed frame: at a branch point each
 operator equals `(local coefficient) • id` (`traceFunExt_branchPoint_eq_smul_id`), and the scalar
@@ -891,7 +891,7 @@ theorem exists_traceForm_of_branchExtension (f : X → Y) (hf : ContMDiff 𝓘(�
   -- At a branch point `y₀`, the *fixed-frame* local coefficient of the raw trace converges to
   -- that of the extension: `hext`'s fixed-frame continuity gives the limit, and on the punctured
   -- neighborhood the extended local coefficient agrees with the raw one (off-branch they are
-  -- equal). NB the raw OPERATOR does NOT converge in `ℂ →L[ℂ] ℂ` (genus ≥ 2 obstruction); only
+  -- equal). NB the raw OPERATOR does NOT converge in `ℂ →L[ℂ] ℂ` (kirovGenus ≥ 2 obstruction); only
   -- this fixed-frame scalar does — which is exactly what powers ℂ-linearity at branch points.
   have htendstoLC : ∀ (α : HolomorphicOneForms X) {y₀ : Y}, y₀ ∈ branchLocus f →
       Filter.Tendsto (fun y => traceLocalCoeff (traceFun f α) y₀ y) (𝓝[≠] y₀)
@@ -1243,7 +1243,7 @@ theorem sub_div_deriv_tendsto_zero {F : ℂ → ℂ} {w₀ z₀ : ℂ}
 The trace's local coefficient, off the critical set, factors *per preimage* in one fixed chart
 as `(α's local coefficient) / F'`, where `F = chartAt ℂ y₀ ∘ f ∘ (chartAt ℂ x₀).symm` reads `f` in
 charts. The `symmL`/`(mfderiv f)⁻¹` obstruction factors **cancel** in the common `chartAt ℂ x₀`
-frame — this is what makes the local coefficient continuous (genus ≥ 2) despite each factor being
+frame — this is what makes the local coefficient continuous (kirovGenus ≥ 2) despite each factor being
 discontinuous. From this exact value, the per-preimage growth `(c (f x) − c y₀) · (local coeff) →
 0` is immediate from the one-variable `sub_div_deriv_tendsto_zero`. -/
 
@@ -1630,7 +1630,7 @@ remaining input.
 
 ⚠ **A naive `‖traceLocalCoeff coeff y₀ y‖ ≤ B·‖coeff y‖` with a uniform `B` is UNSOUND** (verified
 2026-05-31). For arbitrary operators it is *equivalent* to local boundedness of the bare-fibre
-coordinate `symmL(tangentTriv y₀) y 1`, which is exactly the **genus ≥ 2 obstruction**
+coordinate `symmL(tangentTriv y₀) y 1`, which is exactly the **kirovGenus ≥ 2 obstruction**
 (`CotangentCoeff.lean` `const_one_section_continuous_of_coordChange_fixes_one`): the constant
 native-frame section is discontinuous and not locally bounded (no Riemannian metric is placed on
 `TY`, so no compactness rescue). Hence one must NOT peel the `inCoordinates`/`symmL` factor off
@@ -1815,7 +1815,7 @@ puncture, and it is now a **definitional consequence of the center-frame identit
 `traceLocalCoeff_center` (`traceLocalCoeff (L • id) y₀ y₀ = (L • id) 1 = L`) — it requires *no*
 boundedness/analytic input. (The old, design-flawed "raw convergence" conjunct — `ContinuousAt`
 of the raw operator in the model fibre — was *provably false* for a non-trivial tangent bundle,
-genus ≥ 2; it has been removed, and `traceExtendsAt_branchPoint` now expresses continuity in the
+kirovGenus ≥ 2; it has been removed, and `traceExtendsAt_branchPoint` now expresses continuity in the
 geometrically-correct *fixed frame*, see its statement.) -/
 theorem traceFunExt_branchValue_correct (f : X → Y)
     (α : HolomorphicOneForms X) {y₀ : Y} (hy₀ : y₀ ∈ branchLocus f) :
@@ -1835,7 +1835,7 @@ extension `traceFunExt f α` is, at `y₀`:
 
 **Why the second conjunct is the *local coefficient*, not the raw operator.** The naive
 "`ContinuousAt (traceFunExt f α) y₀`" — continuity of the operator read in the *model fibre*
-`ℂ →L[ℂ] ℂ` — is **provably false** for a non-trivial tangent bundle (genus ≥ 2): the raw
+`ℂ →L[ℂ] ℂ` — is **provably false** for a non-trivial tangent bundle (kirovGenus ≥ 2): the raw
 operator `traceFun f α y` is `inCoordinates(…) ∘ clmAt(tangentTriv y₀) y`, whose chart-transition
 factor is discontinuous (the `CotangentCoeff.lean` obstruction). The geometrically-correct
 continuity statement is continuity of the section *in the bundle*, equivalently continuity of
@@ -2270,7 +2270,7 @@ theorem isInvertible_mfderiv_of_notMem_criticalSet (g : Y → X) (hg : ContMDiff
 
 /-- **Covariance of the trace: `(g ∘ f)₊ = g₊ ∘ f₊`** (Griffiths–Harris Ch. 2 §2.7). Both sides
 are smooth forms; their **fixed-frame local coefficients** (not the discontinuous raw fibre
-components — the genus≥2 `CotangentCoeff` obstruction) agree off the finite bad set
+components — the kirovGenus≥2 `CotangentCoeff` obstruction) agree off the finite bad set
 `B = branchLocus (g∘f) ∪ branchLocus g ∪ g '' branchLocus f` via the off-branch fibre
 factorization `traceFun (g∘f) α z = traceFun g (traceForm f α) z` (partition
 `(g∘f)⁻¹{z} = ⊔_{y∈g⁻¹z} f⁻¹{y}` + chain rule `(mfderiv (g∘f))⁻¹ = (mfderiv f)⁻¹∘(mfderiv g)⁻¹` +
