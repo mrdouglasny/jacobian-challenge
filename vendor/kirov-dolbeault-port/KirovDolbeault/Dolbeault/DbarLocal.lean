@@ -13,7 +13,7 @@
   Main result: `DbarLocal.dbar_solvable_locally`.
 -/
 import Mathlib
-import Jacobians.DbarDisk
+import KirovDolbeault.DbarDisk
 
 open Complex MeasureTheory
 open scoped Topology

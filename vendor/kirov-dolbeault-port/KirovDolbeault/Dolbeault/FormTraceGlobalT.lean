@@ -3,10 +3,10 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalConstruct
-import Jacobians.Dolbeault.FormTraceMeromorphic
-import Jacobians.Dolbeault.FormTracePrincipalPart
-import Jacobians.Dolbeault.FormTracePrincipalPartInfty
+import KirovDolbeault.Dolbeault.FormTraceGlobalConstruct
+import KirovDolbeault.Dolbeault.FormTraceMeromorphic
+import KirovDolbeault.Dolbeault.FormTracePrincipalPart
+import KirovDolbeault.Dolbeault.FormTracePrincipalPartInfty
 
 /-!
 # The global trace function `T : ℂ → ℂ` over a fibre family (Gate A, §VIII.3 step 1)
@@ -29,7 +29,7 @@ regular value, the *full* fibre `F⁻¹(coe b)` (all `deg f` sheets); at a finit
 fibre is the *pole* sub-fibre (`fibreReg hac`), so `T` carries exactly the principal part of the
 trace there (the regular sheets are holomorphic).
 
-The deep §VIII.3 content (the glue across fibres into a single rational function, the genus-`0`
+The deep §VIII.3 content (the glue across fibres into a single rational function, the kirovGenus-`0`
 remainder vanishing) is *not* in this file; here we prove only the local-singularity inputs the
 `GlobalTrace` assembly consumes:
 
@@ -313,7 +313,7 @@ theorem analyticOnNhd_remainder_of_junkFree {T : ℂ → ℂ} {m : ℕ} {cs : Fi
 The reciprocal-chart analogue of `hentire`.  `recipCoeff h 0 = 0` always (the junk `0^{-2}` Jacobian,
 `recipCoeff_zero_eval`), so `ContinuousAt (recipCoeff h) 0` is exactly "`recipCoeff h` *tends to* `0`
 at `0`".  When the analytic continuation of `recipCoeff h` off `0` is an analytic function `R₀`
-**vanishing at `0`** (`R₀ 0 = 0` — the holomorphic remainder has no `dζ`-term at `∞`, the genus-`0`
+**vanishing at `0`** (`R₀ 0 = 0` — the holomorphic remainder has no `dζ`-term at `∞`, the kirovGenus-`0`
 content), the continuity to `0` holds.  This is the `GlobalTrace.hrecip` field; it isolates `R₀ 0 = 0`
 as the single irreducible `∞` obligation.  (Specialisation of
 `continuousAt_recipRemainder_of_vanishing` to a trivial recip-chart principal part `negTail 0 0 0`.) -/
@@ -321,7 +321,7 @@ as the single irreducible `∞` obligation.  (Specialisation of
 /-- **The remainder is holomorphic across `∞`, from a vanishing analytic continuation.**  If
 `recipCoeff h` germ-agrees off `0` with an analytic function `R₀` (`hR_eq`) that vanishes at `0`
 (`hR0 : R₀ 0 = 0`), then `recipCoeff h` is **continuous at `0`** (continuity to the junk value `0`).
-This is the honest `GlobalTrace.hrecip` shape — `R₀ 0 = 0` is the genus-`0` "no `dζ`-term at `∞`"
+This is the honest `GlobalTrace.hrecip` shape — `R₀ 0 = 0` is the kirovGenus-`0` "no `dζ`-term at `∞`"
 input.  *Proof.*  Along `𝓝[≠] 0` agreement with the continuous `R₀`; at `0` the value is `0 = R₀ 0`. -/
 theorem continuousAt_recipCoeff_of_vanishing {h : ℂ → ℂ} {R₀ : ℂ → ℂ}
     (hR_an : AnalyticAt ℂ R₀ 0) (hR0 : R₀ 0 = 0) (hR_eq : recipCoeff h =ᶠ[𝓝[≠] 0] R₀) :

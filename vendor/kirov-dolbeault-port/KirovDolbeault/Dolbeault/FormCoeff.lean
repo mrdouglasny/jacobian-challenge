@@ -15,9 +15,9 @@
 
   Everything here is complete and depends on no unproved lemma.
 -/
-import Jacobians.Montel.Compactness
-import Jacobians.Genus
-import Jacobians.Dolbeault.Residue
+import KirovDolbeault.Montel.Compactness
+import KirovDolbeault.Genus
+import KirovDolbeault.Dolbeault.Residue
 
 open scoped Manifold ContDiff Topology
 open Complex Metric

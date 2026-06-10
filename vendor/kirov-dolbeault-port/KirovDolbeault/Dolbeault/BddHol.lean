@@ -16,7 +16,7 @@
   induced by the isometric embedding into the Banach space `↥U →ᵇ ℂ`; completeness comes from
   closedness of the holomorphic subspace under `analyticOn_of_tendstoLocallyUniformlyOn`.
 -/
-import Jacobians.Dolbeault.CechFiniteness
+import KirovDolbeault.Dolbeault.CechFiniteness
 
 open Metric Topology BoundedContinuousFunction
 open Jacobians.Montel

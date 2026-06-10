@@ -8,8 +8,8 @@
   its own (small) file means edits to the inverse construction don't pay the forward file's
   elaboration cost.
 -/
-import Jacobians.Dolbeault.DolbeaultComparisonProof
-import Jacobians.Dolbeault.DolbeaultComparisonInverse
+import KirovDolbeault.Dolbeault.DolbeaultComparisonProof
+import KirovDolbeault.Dolbeault.DolbeaultComparisonInverse
 
 open scoped Manifold ContDiff Bundle Topology
 open TopologicalSpace (Opens)

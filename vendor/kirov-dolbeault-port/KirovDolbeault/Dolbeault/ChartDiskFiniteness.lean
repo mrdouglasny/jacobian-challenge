@@ -36,12 +36,12 @@
   `ChartDiskFinitenessComplete.lean` (`finiteDimensional_cechH1_chartDisk_complete`, complete and
   axiom-clean).
 -/
-import Jacobians.Dolbeault.CechModelHolomorphic
-import Jacobians.Dolbeault.CechModelManifold
-import Jacobians.Dolbeault.DbarDiskCohomology
-import Jacobians.Dolbeault.CechDiskAcyclic
-import Jacobians.Dolbeault.GoodCover
-import Jacobians.Dolbeault.DbarOpenDisk
+import KirovDolbeault.Dolbeault.CechModelHolomorphic
+import KirovDolbeault.Dolbeault.CechModelManifold
+import KirovDolbeault.Dolbeault.DbarDiskCohomology
+import KirovDolbeault.Dolbeault.CechDiskAcyclic
+import KirovDolbeault.Dolbeault.GoodCover
+import KirovDolbeault.Dolbeault.DbarOpenDisk
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

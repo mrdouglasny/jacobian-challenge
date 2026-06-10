@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalGeometric
+import KirovDolbeault.Dolbeault.FormTraceGlobalGeometric
 
 /-!
 # Holomorphic extension of the trace across branch values (Gate A, §VIII.3 — removable singularity)

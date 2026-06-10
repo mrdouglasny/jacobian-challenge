@@ -14,7 +14,7 @@
   downstream. The only remaining gaps reachable from here are the two mechanical restriction leaves in
   `CechSection` plus `δ² = 0` (also mechanical).
 -/
-import Jacobians.Dolbeault.CechSection
+import KirovDolbeault.Dolbeault.CechSection
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 
 open scoped Manifold ContDiff Topology

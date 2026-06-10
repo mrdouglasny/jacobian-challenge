@@ -1,4 +1,4 @@
-import Jacobians.Montel.SupNorm
+import KirovDolbeault.Montel.SupNorm
 import Mathlib.Topology.ContinuousMap.Compact
 import Mathlib.Topology.ContinuousMap.Bounded.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Defs

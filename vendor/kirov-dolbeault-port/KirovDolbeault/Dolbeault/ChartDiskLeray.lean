@@ -31,8 +31,8 @@
   `DbarOpenDisk.dbar_solvable_open_disk`) yields `x_{ab} = h_b∘τ − h_a` holomorphic on the FULL `Uov`
   — the ball geometry's genuine unblock over the Montel cover.
 -/
-import Jacobians.Dolbeault.ChartDiskFiniteness
-import Jacobians.Dolbeault.DiskAcyclicCore
+import KirovDolbeault.Dolbeault.ChartDiskFiniteness
+import KirovDolbeault.Dolbeault.DiskAcyclicCore
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

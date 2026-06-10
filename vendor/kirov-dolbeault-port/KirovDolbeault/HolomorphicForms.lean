@@ -9,8 +9,8 @@ import Mathlib.LinearAlgebra.Dimension.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Analysis.Normed.Module.FiniteDimension
-import Jacobians.Genus
-import Jacobians.Montel
+import KirovDolbeault.Genus
+import KirovDolbeault.Montel
 
 /-!
 # Holomorphic 1-forms on a complex manifold
@@ -25,12 +25,12 @@ machinery (`Bundle.ContinuousLinearMap.fiberBundle`, `vectorBundle`,
 and `vectorPrebundle.isContMDiff`).
 
 This is the **honest** definition (compare to a placeholder that sets
-`HolomorphicOneForms X := Fin (genus X) → ℂ`).
+`HolomorphicOneForms X := Fin (kirovGenus X) → ℂ`).
 
 ## Dimension theorem (unproved)
 
 On a compact connected complex 1-manifold, `HolomorphicOneForms X` is
-a finite-dim ℂ-vector space of dimension `genus X`. This is a classical
+a finite-dim ℂ-vector space of dimension `kirovGenus X`. This is a classical
 result (Riemann–Roch) and is recorded here as an unproved obligation with TODO(math).
 
 ## References
@@ -45,7 +45,7 @@ open scoped Manifold ContDiff Bundle
 set_option linter.unusedSectionVars false
 
 -- `HolomorphicOneForms` and its `AddCommGroup` / `Module ℂ` instances are
--- defined in `Jacobians.Genus` (to allow `genus X := finrank ℂ (HOF X)`
+-- defined in `Jacobians.Genus` (to allow `kirovGenus X := finrank ℂ (HOF X)`
 -- without a circular import).
 
 section Curve
@@ -78,11 +78,11 @@ noncomputable instance : FiniteDimensional ℂ (HolomorphicOneForms X) :=
   FiniteDimensional.of_isCompact_closedBall₀ ℂ zero_lt_one
     Jacobians.Montel.HolomorphicOneForms.closedBall_isCompact
 
-/-- Dimension of holomorphic 1-forms = genus. With `genus X` defined as
+/-- Dimension of holomorphic 1-forms = kirovGenus. With `kirovGenus X` defined as
 `Module.finrank ℂ (HolomorphicOneForms X)` (see `Jacobians.Genus`), this
 is `rfl`. -/
 theorem finrank_HolomorphicOneForms_eq_genus :
-    Module.finrank ℂ (HolomorphicOneForms X) = genus X := rfl
+    Module.finrank ℂ (HolomorphicOneForms X) = kirovGenus X := rfl
 
 end Curve
 
@@ -221,7 +221,7 @@ end Functoriality
 /-! ### Ambient-space bridge
 
 Connects the forms side (`HolomorphicOneForms X`, `pullbackForm`) to
-the Jacobian-quotient ambient `(Fin (genus X) → ℂ)` via a basis
+the Jacobian-quotient ambient `(Fin (kirovGenus X) → ℂ)` via a basis
 isomorphism and dualization. This is the glue layer between
 `HolomorphicForms` and `ZLatticeQuotient` (where the quotient descent
 lives).
@@ -240,20 +240,20 @@ variable {X Y : Type*}
   [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
     [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
 
-/-- A linear isomorphism `(Fin (genus X) → ℂ) ≃ₗ[ℂ] HolomorphicOneForms X`
+/-- A linear isomorphism `(Fin (kirovGenus X) → ℂ) ≃ₗ[ℂ] HolomorphicOneForms X`
 from a choice of basis, via `Module.finBasisOfFinrankEq` + the sorried
 dimension equality `finrank_HolomorphicOneForms_eq_genus`. -/
 noncomputable def ambientIso (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    (Fin (genus X) → ℂ) ≃ₗ[ℂ] HolomorphicOneForms X :=
+    (Fin (kirovGenus X) → ℂ) ≃ₗ[ℂ] HolomorphicOneForms X :=
   (Module.finBasisOfFinrankEq ℂ (HolomorphicOneForms X)
     (finrank_HolomorphicOneForms_eq_genus X)).equivFun.symm
 
 /-- The ambient ℂ-linear map `Ψ` induced by the pullback of forms along
 `f : X → Y`. Defined via `ambientIso` + `pullbackForm`:
 `Ψ = (ambientIso X).symm ∘ pullbackForm f hf ∘ ambientIso Y` (when the
-genus sizes match; otherwise zero — this branch is never used in the
+kirovGenus sizes match; otherwise zero — this branch is never used in the
 challenge). This is a concrete definition (no gaps at this level), but
 it depends on `ambientIso` which internally depends on
 `finrank_HolomorphicOneForms_eq_genus`. -/
@@ -261,8 +261,8 @@ noncomputable def ambientPsi {gX gY : ℕ}
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (Fin gY → ℂ) →L[ℂ] (Fin gX → ℂ) := by
   classical
-  by_cases hX : gX = genus X
-  · by_cases hY : gY = genus Y
+  by_cases hX : gX = kirovGenus X
+  · by_cases hY : gY = kirovGenus Y
     · subst hX; subst hY
       -- Compose: (Fin gY → ℂ) →ₗ HOF Y →ₗ HOF X →ₗ (Fin gX → ℂ), then cast to CLM
       refine LinearMap.toContinuousLinearMap
@@ -283,8 +283,8 @@ noncomputable def ambientPhi {gX gY : ℕ}
         (ambientPsi f hf).toLinearMap).transpose.mulVecLin
 
 /-- `ambientPsi id = id`. Proven via `pullbackForm_id`. -/
-theorem ambientPsi_id (y : Fin (genus X) → ℂ) :
-    ambientPsi (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id y = y := by
+theorem ambientPsi_id (y : Fin (kirovGenus X) → ℂ) :
+    ambientPsi (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id y = y := by
   unfold ambientPsi
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
@@ -300,10 +300,10 @@ theorem ambientPsi_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpa
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (hgf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (g ∘ f))
-    (z : Fin (genus Z) → ℂ) :
-    ambientPsi (gX := genus X) (gY := genus Z) (g ∘ f) hgf z =
-      ambientPsi (gX := genus X) (gY := genus Y) f hf
-        (ambientPsi (gX := genus Y) (gY := genus Z) g hg z) := by
+    (z : Fin (kirovGenus Z) → ℂ) :
+    ambientPsi (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf z =
+      ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (ambientPsi (gX := kirovGenus Y) (gY := kirovGenus Z) g hg z) := by
   unfold ambientPsi
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
@@ -325,14 +325,14 @@ for the honest single-degree statement. -/
 
 /-- `ambientPhi id = id` — follows from `ambientPsi_id` via the transpose
 construction: transpose of identity matrix is identity. -/
-theorem ambientPhi_id (x : Fin (genus X) → ℂ) :
-    ambientPhi (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id x = x := by
-  have hpsi : ambientPsi (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id
-      = ContinuousLinearMap.id ℂ (Fin (genus X) → ℂ) :=
+theorem ambientPhi_id (x : Fin (kirovGenus X) → ℂ) :
+    ambientPhi (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id x = x := by
+  have hpsi : ambientPsi (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id
+      = ContinuousLinearMap.id ℂ (Fin (kirovGenus X) → ℂ) :=
     ContinuousLinearMap.ext (fun y => ambientPsi_id y)
   unfold ambientPhi
-  rw [show (ambientPsi (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id).toLinearMap
-      = LinearMap.id (R := ℂ) (M := Fin (genus X) → ℂ) from by rw [hpsi]; rfl]
+  rw [show (ambientPsi (X := X) (Y := X) (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id).toLinearMap
+      = LinearMap.id (R := ℂ) (M := Fin (kirovGenus X) → ℂ) from by rw [hpsi]; rfl]
   simp [Matrix.transpose_one, Matrix.mulVecLin_one]
 
 /-- Covariant composition: `ambientPhi (g ∘ f) = ambientPhi g ∘ ambientPhi f`.
@@ -342,20 +342,20 @@ theorem ambientPhi_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpa
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
     (hgf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (g ∘ f))
-    (x : Fin (genus X) → ℂ) :
-    ambientPhi (gX := genus X) (gY := genus Z) (g ∘ f) hgf x =
-      ambientPhi (gX := genus Y) (gY := genus Z) g hg
-        (ambientPhi (gX := genus X) (gY := genus Y) f hf x) := by
-  have hpsi : ambientPsi (gX := genus X) (gY := genus Z) (g ∘ f) hgf =
-      (ambientPsi (gX := genus X) (gY := genus Y) f hf).comp
-        (ambientPsi (gX := genus Y) (gY := genus Z) g hg) :=
+    (x : Fin (kirovGenus X) → ℂ) :
+    ambientPhi (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf x =
+      ambientPhi (gX := kirovGenus Y) (gY := kirovGenus Z) g hg
+        (ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf x) := by
+  have hpsi : ambientPsi (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf =
+      (ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf).comp
+        (ambientPsi (gX := kirovGenus Y) (gY := kirovGenus Z) g hg) :=
     ContinuousLinearMap.ext (fun z => ambientPsi_comp f hf g hg hgf z)
   unfold ambientPhi
-  rw [show (ambientPsi (gX := genus X) (gY := genus Z) (g ∘ f) hgf).toLinearMap =
-      (ambientPsi (gX := genus X) (gY := genus Y) f hf).toLinearMap ∘ₗ
-      (ambientPsi (gX := genus Y) (gY := genus Z) g hg).toLinearMap from by rw [hpsi]; rfl]
-  rw [LinearMap.toMatrix_comp (Pi.basisFun ℂ (Fin (genus Z))) (Pi.basisFun ℂ (Fin (genus Y)))
-    (Pi.basisFun ℂ (Fin (genus X)))]
+  rw [show (ambientPsi (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f) hgf).toLinearMap =
+      (ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toLinearMap ∘ₗ
+      (ambientPsi (gX := kirovGenus Y) (gY := kirovGenus Z) g hg).toLinearMap from by rw [hpsi]; rfl]
+  rw [LinearMap.toMatrix_comp (Pi.basisFun ℂ (Fin (kirovGenus Z))) (Pi.basisFun ℂ (Fin (kirovGenus Y)))
+    (Pi.basisFun ℂ (Fin (kirovGenus X)))]
   rw [Matrix.transpose_mul, Matrix.mulVecLin_mul]
   rfl
 

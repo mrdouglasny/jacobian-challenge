@@ -5,8 +5,8 @@ Authors: Rado Kirov
 -/
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.Analytic.Order
-import Jacobians.TraceForm
-import Jacobians.Dolbeault.FormTraceFibre
+import KirovDolbeault.TraceForm
+import KirovDolbeault.Dolbeault.FormTraceFibre
 
 /-!
 # Planar removable extension of the geometric trace across a branch value (Gate A, §VIII.3)

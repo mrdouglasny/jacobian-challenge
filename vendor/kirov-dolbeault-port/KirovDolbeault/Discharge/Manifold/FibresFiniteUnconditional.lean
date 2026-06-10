@@ -3,8 +3,8 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.ChartOverlapPropagationDischarge
-import Jacobians.Discharge.Manifold.ClopennessOfLocallyConstDischarge
+import KirovDolbeault.Discharge.Manifold.ChartOverlapPropagationDischarge
+import KirovDolbeault.Discharge.Manifold.ClopennessOfLocallyConstDischarge
 
 set_option autoImplicit true
 

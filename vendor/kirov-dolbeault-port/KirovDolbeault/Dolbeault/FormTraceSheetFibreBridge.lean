@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceSheetCovector
-import Jacobians.Dolbeault.FormTraceFibre
+import KirovDolbeault.Dolbeault.FormTraceSheetCovector
+import KirovDolbeault.Dolbeault.FormTraceFibre
 
 /-!
 # The fibre-sum bridge: bundle trace ↔ planar fibre trace (Gate A step 2/3)

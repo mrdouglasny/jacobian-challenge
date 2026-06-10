@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedFullFibreBuilder
-import Jacobians.Dolbeault.SerreResidueRamifiedMultiplicityBridge
-import Jacobians.Dolbeault.SerreResidueGateAInftyBuilder
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFullFibreBuilder
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedMultiplicityBridge
+import KirovDolbeault.Dolbeault.SerreResidueGateAInftyBuilder
 
 /-!
 # The fibre-cluster partition: reducing `FibreClusterReindex.hgeom_fibre` to the bijection (TARGET 1)

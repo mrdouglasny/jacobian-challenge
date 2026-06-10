@@ -18,14 +18,14 @@
   faithfulness/identity theorem (nonzero ⟹ order ≠ ⊤), `l(0)=1` via Liouville, `l(D)=0` for
   `deg D<0`, and the single-simple-pole extraction.
 -/
-import Jacobians.Abel
-import Jacobians.LinearSystem
-import Jacobians.MeromorphicLiouville
-import Jacobians.DegDivResidue
-import Jacobians.ProperMapDegreeSheets
-import Jacobians.Dolbeault.DolbeaultLadder
-import Jacobians.Dolbeault.LerayCoverExists
-import Jacobians.Dolbeault.SkyscraperProductWitness
+import KirovDolbeault.Abel
+import KirovDolbeault.LinearSystem
+import KirovDolbeault.MeromorphicLiouville
+import KirovDolbeault.DegDivResidue
+import KirovDolbeault.ProperMapDegreeSheets
+import KirovDolbeault.Dolbeault.DolbeaultLadder
+import KirovDolbeault.Dolbeault.LerayCoverExists
+import KirovDolbeault.Dolbeault.SkyscraperProductWitness
 
 -- Many declarations here are purely algebraic (the ℂ-module on `MeromorphicFunction`) and use
 -- only `[ChartedSpace ℂ X]`, not the full compact-manifold hypotheses carried by the consumers.
@@ -60,7 +60,7 @@ genuine analytic ladder leaves. -/
 theorem exists_riemannRoch_divisor :
     ∃ K : Divisor X, ∀ D : Divisor X,
       (lDim (X := X) D : ℤ) - (lDim (X := X) (K - D) : ℤ)
-        = Divisor.deg X D + 1 - (genus X : ℤ) := by
+        = Divisor.deg X D + 1 - (kirovGenus X : ℤ) := by
   -- A *realizable* Leray cover exists: the canonical chart-disk cover is both Leray (acyclic sets)
   -- and locally realizable (the product witness, `locallyRealizable_chartDiskCover`).
   obtain ⟨𝔘, hL, hR⟩ := Dolbeault.exists_realizableLerayCover (X := X)
@@ -128,7 +128,7 @@ theorem lDim_eq_zero_of_deg_neg (D : Divisor X) (hD : Divisor.deg X D < 0) :
 /-- `l(K) = g`, from Riemann–Roch at `D = 0` (and `l(0) = 1`). -/
 theorem lDim_canonical_eq_genus {K : Divisor X}
     (hrr : ∀ D : Divisor X, (lDim (X := X) D : ℤ) - (lDim (X := X) (K - D) : ℤ)
-      = Divisor.deg X D + 1 - (genus X : ℤ)) : lDim (X := X) K = genus X := by
+      = Divisor.deg X D + 1 - (kirovGenus X : ℤ)) : lDim (X := X) K = kirovGenus X := by
   have h := hrr 0
   rw [sub_zero, Divisor.deg_zero, lDim_zero_eq_one] at h
   omega
@@ -136,20 +136,20 @@ theorem lDim_canonical_eq_genus {K : Divisor X}
 /-- `deg K = 2g − 2`, from Riemann–Roch at `D = K`. -/
 theorem deg_canonical {K : Divisor X}
     (hrr : ∀ D : Divisor X, (lDim (X := X) D : ℤ) - (lDim (X := X) (K - D) : ℤ)
-      = Divisor.deg X D + 1 - (genus X : ℤ)) : Divisor.deg X K = 2 * (genus X : ℤ) - 2 := by
+      = Divisor.deg X D + 1 - (kirovGenus X : ℤ)) : Divisor.deg X K = 2 * (kirovGenus X : ℤ) - 2 := by
   have h := hrr K
   rw [sub_self, lDim_zero_eq_one, lDim_canonical_eq_genus hrr] at h
   omega
 
 /-! ## Part 5: the meet-in-the-middle — discharge the consumer from RR -/
 
-/-- **Touch point.** `genus X = 0` + Riemann–Roch ⟹ a meromorphic function with a single simple
+/-- **Touch point.** `kirovGenus X = 0` + Riemann–Roch ⟹ a meromorphic function with a single simple
 pole. RR at `D = P` gives `l(P) = 2 > 1 = l(0)`, so `L(P)/germZero` is not spanned by the constant
 class; a member outside that span is not germ-constant, hence (by Liouville's contrapositive
 `germ_eq_const_of_mem_linearSystem_zero`) has a pole, necessarily a *simple* pole at `P` — the only
 pole `L(P)` permits — and by faithfulness its order is finite everywhere. This discharges
 `exists_singleSimplePole_of_genus_zero` modulo `{riemannRoch, deg_div}`. -/
-theorem exists_singleSimplePole_of_genus_zero_of_rr (hg : genus X = 0) :
+theorem exists_singleSimplePole_of_genus_zero_of_rr (hg : kirovGenus X = 0) :
     ∃ (P : X) (f : MeromorphicFunction X), f.HasSingleSimplePole P := by
   obtain ⟨P⟩ := (inferInstance : Nonempty X)
   obtain ⟨K, hrr⟩ := exists_riemannRoch_divisor (X := X)

@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceMovingFibreSphereSet
-import Jacobians.Dolbeault.FormTraceBranchExtension
+import KirovDolbeault.Dolbeault.FormTraceMovingFibreSphereSet
+import KirovDolbeault.Dolbeault.FormTraceBranchExtension
 
 /-!
 # The branch-aware trace selection (Gate A, §VIII.3 — symmetric lever + removable singularity)
@@ -28,7 +28,7 @@ geometry:
 * the regular-value `g`-analyticity (so the coherence gives analyticity at regular values);
 * the finitely-many branch values `br` and the **continuity of the trace at each** (the only
   branch-specific input — Riemann extension);
-* the `∞`-glue, junk-freeness, and the genus-`0` `∞`-vanishing.
+* the `∞`-glue, junk-freeness, and the kirovGenus-`0` `∞`-vanishing.
 
 It produces Gate A `∑Res = 0` via the proved `residueSum_eq_zero_of_glue` (the low-level descent whose
 off-centre requirement is *analyticity*, exactly what the branch extension supplies — `CoherentTraceSelection`
@@ -37,7 +37,7 @@ would instead demand germ-coherence at branch values, which is false there).
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
 * `BranchAwareTraceSelection` — the Gate-A input bundling the moving-sheet coherence (no labeling), the
-  regular-value `g`-analyticity, the branch-value continuity, and the `∞`/junk/genus-`0` data.
+  regular-value `g`-analyticity, the branch-value continuity, and the `∞`/junk/kirovGenus-`0` data.
 * `residueSum_eq_zero_of_branchAwareSelection` — Gate A `∑Res = 0` from it.
 * `branchAwareTraceSelection_empty` / `residueSum_eq_zero_of_branchAwareSelection_holomorphic` —
   end-to-end non-vacuity (empty-pole case), confirming the reduction is honest.
@@ -111,7 +111,7 @@ handled by Riemann's removable singularity*:
   `g`'s chart-pullback analytic at its fibre points (giving regular-value analyticity);
 * `hbranch` — the trace is *continuous* at each branch value off the centres (the Riemann-extension
   input; the only branch-specific content);
-* `hglue_inf` / `hcont_int` / `R₀`+`hR₀_*` — the `∞`-glue, junk-freeness, genus-`0` `∞`-vanishing.
+* `hglue_inf` / `hcont_int` / `R₀`+`hR₀_*` — the `∞`-glue, junk-freeness, kirovGenus-`0` `∞`-vanishing.
 
 Produces Gate A `∑Res = 0` via `residueSum_eq_zero_of_glue`. -/
 structure BranchAwareTraceSelection (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
@@ -162,7 +162,7 @@ structure BranchAwareTraceSelection (ω₀ : HolomorphicOneForms X) (g : X → �
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧
       (valueChartTrace ω₀ f Φ - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ∀ p ∈ Finset.univ.image L.a, ContinuousAt (valueChartTrace ω₀ f Φ - L.R) p
-  /-- The genus-`0` analytic continuation of the reciprocal remainder. -/
+  /-- The kirovGenus-`0` analytic continuation of the reciprocal remainder. -/
   R₀ : ℂ → ℂ
   /-- `R₀` is analytic at `0`. -/
   hR₀_an : AnalyticAt ℂ R₀ 0
@@ -197,7 +197,7 @@ theorem BranchAwareTraceSelection.hT_off {hac : AdaptedCover ω₀ g f poles}
 /-- **Gate A `∑Res = 0` from a branch-aware trace selection.**  Via `residueSum_eq_zero_of_glue` (the
 low-level descent whose off-centre requirement is *analyticity*, supplied by the branch extension), with
 the finite glue from the per-pole moving datum, the off-centre analyticity from the regular-value
-coherence ⊕ branch extension, and the `∞`/junk/genus-`0` data.  This is the §VIII.3 reduction of Gate A
+coherence ⊕ branch extension, and the `∞`/junk/kirovGenus-`0` data.  This is the §VIII.3 reduction of Gate A
 **with the symmetric lever (no labeling) and branch values via removable singularity**. -/
 theorem residueSum_eq_zero_of_branchAwareSelection (hac : AdaptedCover ω₀ g f poles)
     (S : BranchAwareTraceSelection ω₀ g f poles hac) :
@@ -210,13 +210,13 @@ theorem residueSum_eq_zero_of_branchAwareSelection (hac : AdaptedCover ω₀ g f
 
 For the **empty pole set** the empty fibre selection assembles into a `BranchAwareTraceSelection`: no
 finite pole-values (per-pole fields vacuous), no branch values (`br = ∅`, `Creg`/`hbranch` vacuous over
-`cs ∪ ∅`), the empty `∞`-trace, vacuous junk-freeness, and the vanishing genus-`0` continuation.
+`cs ∪ ∅`), the empty `∞`-trace, vacuous junk-freeness, and the vanishing kirovGenus-`0` continuation.
 Confirms the reduction is honest. -/
 
 /-- **The empty branch-aware trace selection.**  For the empty pole set, the empty fibre selection
 assembles into a `BranchAwareTraceSelection`: per-regular-value empty moving datum
 (`movingCoherenceDatum_empty`, `valueChartTrace ≡ 0`), `br = ∅`, vacuous finite/branch fields, and the
-vanishing genus-`0` continuation.  The honest non-vacuity witness. -/
+vanishing kirovGenus-`0` continuation.  The honest non-vacuity witness. -/
 noncomputable def branchAwareTraceSelection_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) (hdiv : (f.div : Divisor X) ≠ 0) :
     BranchAwareTraceSelection ω₀ g f ∅ (adaptedCover_empty ω₀ g f hdiv) where

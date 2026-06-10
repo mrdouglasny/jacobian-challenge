@@ -3,14 +3,14 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirectGenus0Germ
-import Jacobians.Dolbeault.FormTraceRegularValueDatum
+import KirovDolbeault.Dolbeault.SerreResidueDirectGenus0Germ
+import KirovDolbeault.Dolbeault.FormTraceRegularValueDatum
 
 /-!
 # Gate A `∑Res = 0` — discharging the finite full-fibre moving coherence `Cfull` (§VIII.3)
 
 `Jacobians.Dolbeault.SerreResidueTheorem.residueTheorem_ofCanonicalSimpleInfty_genus0_germ`
-(`SerreResidueDirectGenus0Germ.lean`) reduced Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical
+(`SerreResidueDirectGenus0Germ.lean`) reduced Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical
 full-fibre selection) to *exactly*:
 
 * the per-finite-centre full-fibre moving coherence `Cfull i : MovingCoherenceDatum ω₀ g f Φ (cs i)`
@@ -207,7 +207,7 @@ theorem movingCoherenceDatum_canonical_D_image (hdiv : (f.div : Divisor X) ≠ 0
       = Set.range (fun k => S.sheet k (((c : ℂ) : RiemannSphere))) := rfl
   rw [hrange, sheetValues_range_eq_fibre S S.mem_V]
 
-/-! ## The `Cfull`-discharged genus-`0` capstone
+/-! ## The `Cfull`-discharged kirovGenus-`0` capstone
 
 Wiring `movingCoherenceDatum_canonical` (+ its combinatorial fields) into
 `residueTheorem_ofCanonicalSimpleInfty_genus0_germ`, the per-centre full-fibre moving coherence `Cfull`
@@ -217,7 +217,7 @@ is **discharged** from the per-centre genericity (off-branch pole-values + good 
 `∞`-coherence `hcoh_full`, and the discrete genericity bookkeeping — *no* `Cfull`/`hCfull_*`/`hnonpole_an`
 supplied. -/
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) with the finite full-fibre
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) with the finite full-fibre
 moving coherence `Cfull` DISCHARGED.**  The per-centre `Cfull i` is built internally by
 `movingCoherenceDatum_canonical` from:
 
@@ -305,7 +305,7 @@ which we expose as the cleaner input below.  This is *not* a disguise of `∑Res
 fibre-sum identity at `∞` (the reciprocal-chart analogue of `MovingCoherenceDatum.coherent`), never
 referencing the residue cancellation. -/
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) with `Cfull` discharged and
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) with `Cfull` discharged and
 the `∞`-coherence taken in its cleanest *unpatched* geometric form.**  Identical to
 `residueTheorem_ofCanonicalSimpleInfty_genus0_germ_Cfull` except the patched `∞`-coherence `hcoh_full` is
 replaced by the **unpatched geometric `∞`-coherence** `hcoh_geom`:
@@ -448,7 +448,7 @@ theorem hreg_canonical_of_offBranch (hdiv : (f.div : Divisor X) ≠ 0) {m : ℕ}
     rwa [Set.mem_preimage, Set.mem_singleton_iff] at this
   exact hg_an_offpoles _ (notMem_poles_of_fibrePoint_offCentres hcenters_cs hwcs hfib)
 
-/-! ## The genus-`0` capstone with both `Cfull` and `hreg` discharged
+/-! ## The kirovGenus-`0` capstone with both `Cfull` and `hreg` discharged
 
 Combining `movingCoherenceDatum_canonical` (the per-centre `Cfull`) with `hreg_canonical_of_offBranch`
 (the off-centre analyticity `hreg`), Gate A `∑Res = 0` rests on:
@@ -463,7 +463,7 @@ Combining `movingCoherenceDatum_canonical` (the per-centre `Cfull`) with `hreg_c
 
 The finite full-fibre moving coherence `Cfull` and the off-centre analyticity `hreg` are **discharged**. -/
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) with `Cfull` AND `hreg`
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) with `Cfull` AND `hreg`
 discharged.**  The most-reduced sound form: only the genericity bookkeeping, the branch-value boundedness
 `hbnd`, and the `∞`-coherence `hcoh_geom` remain.  The per-centre full-fibre moving coherence `Cfull` is
 built by `movingCoherenceDatum_canonical`; the off-centre analyticity `hreg` is discharged by

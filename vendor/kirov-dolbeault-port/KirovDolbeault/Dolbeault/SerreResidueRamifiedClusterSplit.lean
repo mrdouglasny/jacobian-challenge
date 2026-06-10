@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedNormalForm
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedNormalForm
 
 /-!
 # The Forster §5 `z = wᵐ` local normal form and the fibre-cluster split (the genuine atoms)

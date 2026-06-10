@@ -39,8 +39,8 @@
 
   No gaps in this file; everything not yet mechanized is written prose, not a tactic gap.
 -/
-import Jacobians.Dolbeault.CechRefinementHomotopy
-import Jacobians.Dolbeault.CechDiskAcyclic
+import KirovDolbeault.Dolbeault.CechRefinementHomotopy
+import KirovDolbeault.Dolbeault.CechDiskAcyclic
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

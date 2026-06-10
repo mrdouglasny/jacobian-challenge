@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dissection
-import Jacobians.CutSurface
-import Jacobians.BoundaryWordR2
+import KirovDolbeault.Dissection
+import KirovDolbeault.CutSurface
+import KirovDolbeault.BoundaryWordR2
 
 /-!
 # The cut surface and the Riemann bilinear relations as THEOREMS
@@ -59,7 +59,7 @@ Only the *existence* of such data, `exists_cutSurface`, stays isolated. -/
 structure CutSurface (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] where
   /-- The `2g` symplectic homology-basis loops `a₁,…,a_g,b₁,…,b_g`. -/
-  loop : Fin (2 * genus X) → (ℝ → X)
+  loop : Fin (2 * kirovGenus X) → (ℝ → X)
   /-- Each is a closed smooth loop. -/
   loop_closed : ∀ k, IsClosedSmoothLoop (loop k)
   /-- **Generation.** Every closed-loop period is a `ℤ`-combination of the basis loops' periods. -/
@@ -71,9 +71,9 @@ structure CutSurface (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace 
   /-- The closed box lies in `U`. -/
   hbox : wCLM '' (Set.Icc 0 1 ×ˢ Set.Icc 0 1) ⊆ U
   /-- Pullback coefficients `h_j = cut^*ω_j` (`h_j dz` is the pullback of the `j`-th basis form). -/
-  h : Fin (genus X) → ℂ → ℂ
+  h : Fin (kirovGenus X) → ℂ → ℂ
   /-- Primitives `F_i` of `h_i` on `U`. -/
-  F : Fin (genus X) → ℂ → ℂ
+  F : Fin (kirovGenus X) → ℂ → ℂ
   /-- Each `h_i` is holomorphic on `U`. -/
   hh : ∀ i, ∀ z ∈ U, HasDerivAt (h i) (deriv (h i) z) z
   /-- Each `F_i` is a primitive of `h_i` on `U`. -/
@@ -92,7 +92,7 @@ structure CutSurface (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace 
   /-- **Non-degeneracy.** A nonzero coefficient vector `v` pulls back to a function `∑ⱼ vⱼ hⱼ` that is
   nonzero somewhere in the *open* box. (`∑ⱼ vⱼ ωⱼ ≠ 0` is a nonzero holomorphic form, so its pullback
   is nonzero on the dense interior of the cut surface.) -/
-  nondeg : ∀ v : Fin (genus X) → ℂ, v ≠ 0 →
+  nondeg : ∀ v : Fin (kirovGenus X) → ℂ, v ≠ 0 →
     ∃ p ∈ Set.Ioo (0:ℝ) 1 ×ˢ Set.Ioo (0:ℝ) 1, (∑ j, v j * h j (wCLM p)) ≠ 0
 
 namespace CutSurface
@@ -109,15 +109,15 @@ lemma box_reProdIm_subset_U :
   · rw [wCLM_apply]; exact Complex.re_add_im z
 
 /-- `h_j` is differentiable on `S.U`. -/
-lemma differentiableOn_h (j : Fin (genus X)) : DifferentiableOn ℂ (S.h j) S.U :=
+lemma differentiableOn_h (j : Fin (kirovGenus X)) : DifferentiableOn ℂ (S.h j) S.U :=
   fun z hz => (S.hh j z hz).differentiableAt.differentiableWithinAt
 
 /-- `F_i` is differentiable on `S.U`. -/
-lemma differentiableOn_F (i : Fin (genus X)) : DifferentiableOn ℂ (S.F i) S.U :=
+lemma differentiableOn_F (i : Fin (kirovGenus X)) : DifferentiableOn ℂ (S.F i) S.U :=
   fun z hz => (S.hF i z hz).differentiableAt.differentiableWithinAt
 
 /-- `F_i·h_j` is differentiable on the closed box (needed for box Cauchy in R1). -/
-lemma differentiableOn_Fh (i j : Fin (genus X)) :
+lemma differentiableOn_Fh (i j : Fin (kirovGenus X)) :
     DifferentiableOn ℂ (fun z => S.F i z * S.h j z) (Set.uIcc (0:ℝ) 1 ×ℂ Set.uIcc (0:ℝ) 1) :=
   ((S.differentiableOn_F i).mul (S.differentiableOn_h j)).mono S.box_reProdIm_subset_U
 

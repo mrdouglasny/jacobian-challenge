@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedCenter
-import Jacobians.Dolbeault.FormTracePrincipalPart
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedCenter
+import KirovDolbeault.Dolbeault.FormTracePrincipalPart
 
 /-!
 # The ramified geometric-trace identification `hcoh` (Forster §5 `z = wᵐ` normal form, slit branch)
@@ -595,7 +595,7 @@ theorem existsRamifiedCenterFacts_ofSheetData {ω₀ : HolomorphicOneForms X} {g
     ExistsRamifiedCenterFacts ω₀ g f Φ poles c :=
   ⟨RamifiedCenterFacts.ofSheetData S hp_pole hp_fibre hp_unique⟩
 
-/-- **Gate A `∑Res = 0` (genus `0`) from per-centre Forster §5 sheet data — `hoff_cs`-FREE, end to
+/-- **Gate A `∑Res = 0` (kirovGenus `0`) from per-centre Forster §5 sheet data — `hoff_cs`-FREE, end to
 end.**  The cleanest fully-reduced statement: each finite pole-value centre `cs i` carries a
 `RamifiedSheetData` `Sf i` (the Forster §5 `z = wᵐ` normal-form geometry) at a single ramified
 preimage that is the unique pole of `α = ω₀·g` in the fibre `F⁻¹(coe (cs i))`, together with the

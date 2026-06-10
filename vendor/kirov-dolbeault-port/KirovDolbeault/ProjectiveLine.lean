@@ -11,8 +11,8 @@ import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.Analysis.Normed.Field.Lemmas
-import Jacobians.Genus
-import Jacobians.SmoothPathCore
+import KirovDolbeault.Genus
+import KirovDolbeault.SmoothPathCore
 
 /-!
 # The complex Riemann sphere `ℂℙ¹` as a compact complex 1-manifold
@@ -32,7 +32,7 @@ vocabulary (mirroring `Jacobians.Roadmap`):
   the holomorphic inversion `z ↦ 1/z` on `ℂˣ`;
 * a homeomorphism `RiemannSphere ≃ₜ S²` to the Euclidean 2-sphere (via Mathlib's
   `onePointEquivSphereOfFinrankEq`, since `ℂ ≃ ℝ²` has real dimension `2`);
-* `genus RiemannSphere = 0` (the space of global holomorphic 1-forms is `⊥`), by
+* `kirovGenus RiemannSphere = 0` (the space of global holomorphic 1-forms is `⊥`), by
   Liouville: a global holomorphic 1-form pulls back to an entire function on the
   affine chart that extends holomorphically over `∞`, hence is bounded, hence
   constant, and the value at `∞` forces it to vanish.
@@ -323,15 +323,15 @@ def homeoSphere : RiemannSphere ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fi
   onePointEquivSphereOfFinrankEq (V := ℂ) (ι := Fin 3) (by
     simp [Complex.finrank_real_complex])
 
-/-! ### Milestone 5 — genus zero
+/-! ### Milestone 5 — kirovGenus zero
 
 `ℂℙ¹` carries no nonzero global holomorphic 1-form, so its space of such forms is a
-subsingleton and `genus = 0` (`Module.finrank_zero_of_subsingleton`).
+subsingleton and `kirovGenus = 0` (`Module.finrank_zero_of_subsingleton`).
 
 The structural reduction below is complete:
 
 ```
-genus = finrank ℂ (HolomorphicOneForms ℂℙ¹)
+kirovGenus = finrank ℂ (HolomorphicOneForms ℂℙ¹)
       = 0                              -- finrank_zero_of_subsingleton
   ⇐  Subsingleton (HolomorphicOneForms ℂℙ¹)
   ⇐  ∀ ω : HolomorphicOneForms ℂℙ¹, ω = 0          -- subsingleton_of_forall_eq 0
@@ -356,7 +356,7 @@ pins `s.toFun (z:ℂℙ¹) = 0` at every finite point (`ext_ring`; the affine-un
 The supporting "cotangent section ↔ entire chart-coefficient with the `dz`-transformation law"
 bridge is assembled here from the existing `Montel.localRep` analyticity and the
 `trivAt_symmL_one_eq_fderiv` tangent-frame identity — a bounded computation, not the
-Dolbeault/Riemann–Roch infrastructure that gates the genus goals elsewhere. -/
+Dolbeault/Riemann–Roch infrastructure that gates the kirovGenus goals elsewhere. -/
 
 section LiouvilleVanishing
 
@@ -610,8 +610,8 @@ theorem holomorphicOneForm_eq_zero (s : HolomorphicOneForms RiemannSphere) : s =
 instance : Subsingleton (HolomorphicOneForms RiemannSphere) :=
   subsingleton_of_forall_eq 0 holomorphicOneForm_eq_zero
 
-/-- The Riemann sphere `ℂℙ¹` has genus `0`. -/
-theorem genus_eq_zero : genus RiemannSphere = 0 :=
+/-- The Riemann sphere `ℂℙ¹` has kirovGenus `0`. -/
+theorem genus_eq_zero : kirovGenus RiemannSphere = 0 :=
   Module.finrank_zero_of_subsingleton
 
 end RiemannSphere

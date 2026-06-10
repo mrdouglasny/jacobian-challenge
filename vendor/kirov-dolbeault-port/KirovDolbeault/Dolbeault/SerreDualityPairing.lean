@@ -3,11 +3,11 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreDuality
-import Jacobians.Dolbeault.CohomologicalRR
-import Jacobians.LinearSystem
-import Jacobians.Genus
-import Jacobians.Dolbeault.CanonicalFormIso
+import KirovDolbeault.Dolbeault.SerreDuality
+import KirovDolbeault.Dolbeault.CohomologicalRR
+import KirovDolbeault.LinearSystem
+import KirovDolbeault.Genus
+import KirovDolbeault.Dolbeault.CanonicalFormIso
 
 /-!
 # Serre duality on `X` — the direct Forster §17 route (the plan of record)
@@ -63,13 +63,13 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
 /-- **The Forster §17 instantiation** (the geometric data of Serre duality on `X`): a canonical divisor
-`K` with `lDim K = genus` (17.4 at `D=0`: `𝒪_K ≅ Ω`), and the residue pairing
+`K` with `lDim K = kirovGenus` (17.4 at `D=0`: `𝒪_K ≅ Ω`), and the residue pairing
 `ι_D : L(K−D) → (H¹(𝒪_D))*` which is bijective (17.6 injective + 17.9 surjective), with `H¹` finite. -/
 structure SerreDualityData (𝔘 : FiniteCover X) where
   /-- The canonical divisor `K = div ω₀` of a nonzero meromorphic 1-form. -/
   K : Divisor X
-  /-- 17.4 at `D=0`: `𝒪_K ≅ Ω` gives `lDim K = dim H⁰(Ω) = genus`. -/
-  hKgenus : lDim (X := X) K = genus X
+  /-- 17.4 at `D=0`: `𝒪_K ≅ Ω` gives `lDim K = dim H⁰(Ω) = kirovGenus`. -/
+  hKgenus : lDim (X := X) K = kirovGenus X
   /-- The residue pairing `ι_D : L(K−D) → (H¹(𝒪_D))*`, `⟨f,ξ⟩ = Res((f·ω₀)·ξ)` (Forster 17.5). -/
   ι : ∀ D : Divisor X, lSysModule (K - D) →ₗ[ℂ] Module.Dual ℂ (𝔘.cechH1 D)
   /-- **17.6 — injectivity** (the residue-1 witness). -/
@@ -106,8 +106,8 @@ theorem lDim_le_h1Dim (data : SerreDualityData 𝔘) (D : Divisor X) :
   haveI := data.finH1 D
   exact SerreDuality.finrank_le_of_injective_to_dual (data.ι D) (data.ι_inj D)
 
-/-- **Forster 17.10 at `D = 0` — `arithmeticGenus_eq_genus`.** `h1Dim 0 = genus X`. -/
-theorem arithmeticGenus (data : SerreDualityData 𝔘) : 𝔘.h1Dim 0 = genus X := by
+/-- **Forster 17.10 at `D = 0` — `arithmeticGenus_eq_genus`.** `h1Dim 0 = kirovGenus X`. -/
+theorem arithmeticGenus (data : SerreDualityData 𝔘) : 𝔘.h1Dim 0 = kirovGenus X := by
   rw [data.serre_eq 0, sub_zero]; exact data.hKgenus
 
 /-- **General Serre duality `serre_h1_eq`** from the data: a single canonical `K` works for all `D`. -/
@@ -128,7 +128,7 @@ theorem exists_serreDualityData (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
 
 /-- **`arithmeticGenus_eq_genus` via the direct §17 route** (the plan of record). -/
 theorem arithmeticGenus_eq_genus_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
-    𝔘.h1Dim 0 = genus X := by
+    𝔘.h1Dim 0 = kirovGenus X := by
   obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL
   exact data.arithmeticGenus
 

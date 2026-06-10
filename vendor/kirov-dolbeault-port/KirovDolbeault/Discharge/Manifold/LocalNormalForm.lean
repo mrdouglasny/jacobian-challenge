@@ -3,9 +3,9 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.MeromorphicAt
-import Jacobians.Discharge.Manifold.MeromorphicDivisor
-import Jacobians.Discharge.Manifold.LocalMultiplicity
+import KirovDolbeault.Discharge.Manifold.MeromorphicAt
+import KirovDolbeault.Discharge.Manifold.MeromorphicDivisor
+import KirovDolbeault.Discharge.Manifold.LocalMultiplicity
 import Mathlib.Analysis.Analytic.IsolatedZeros
 import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.Calculus.FDeriv.Analytic

@@ -15,9 +15,9 @@
 
   Sorry-free; reuses only the axiom-clean chart machinery (`contMDiffOn_chart`, `ContDiffAt.analyticAt`).
 -/
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.CechModelBridge
-import Jacobians.Dolbeault.CechDiskAcyclicAssembly
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechModelBridge
+import KirovDolbeault.Dolbeault.CechDiskAcyclicAssembly
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

@@ -3,15 +3,15 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirectGenus0
-import Jacobians.Dolbeault.SerreResidueDirectAssemble
+import KirovDolbeault.Dolbeault.SerreResidueDirectGenus0
+import KirovDolbeault.Dolbeault.SerreResidueDirectAssemble
 
 /-!
 # Gate A `∑Res = 0` for an adapted cover, residual-#5 group discharged (Miranda §VIII.3 genericity)
 
 `Jacobians.Dolbeault.SerreResidueTheorem.directTraceGeometry_ofCanonicalSimpleInfty`
 (`SerreResidueDirectAssemble.lean`) reduces Gate A's genericity for an adapted cover to a precise list
-of residuals, **including** the genus-`0` `∞`-vanishing field-group `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq`
+of residuals, **including** the kirovGenus-`0` `∞`-vanishing field-group `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq`
 (residual #5).  That group was, before `SerreResidueDirectGenus0.lean`, discharged only for the empty
 pole case (and, as that file shows, the field `hR₀0 : R₀ 0 = 0` is *circular* with the residue theorem
 when read through the global `T = L.R`).
@@ -30,14 +30,14 @@ honest "drops these from the hypothesis list" form.
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
 * `residueTheorem_ofAdapted_genus0` — Gate A `∑Res = 0` for a general adapted cover (general `Φ`), with
-  the genus-`0` `∞`-vanishing field-group dropped.
+  the kirovGenus-`0` `∞`-vanishing field-group dropped.
 * `residueTheorem_ofAdaptedSimpleInfty_genus0` — the simple-`∞` specialization (the full `∞`-fibre
   constructed from simple poles).
 * `residueTheorem_ofCanonicalSimpleInfty_genus0` — the most-wired capstone: the canonical full-fibre
   selection + simple `∞`-poles, so the `Φ`-enumeration is discharged from the single pole-value-goodness
   genericity `hgood`.  Gate A `∑Res = 0` rests on *exactly* the per-centre full-fibre coherence `Cfull`,
   the off-centre analyticity `hreg`/`hbnd`, the **finite** junk-freeness `hcont_int`, and the
-  `∞`-coherence `hcoh_full` — the genus-`0` `∞`-vanishing is **gone**.
+  `∞`-coherence `hcoh_full` — the kirovGenus-`0` `∞`-vanishing is **gone**.
 
 ## References
 
@@ -75,7 +75,7 @@ Identical proven field-groups to `directTraceGeometry_ofAdapted`, but routed thr
 /-- **Gate A `∑Res = 0` from an adapted cover, residual-#5 group discharged.**  Mirrors the proven
 field-groups of `directTraceGeometry_ofAdapted` (pole sub-fibre `D := poleSubfibre ∘ Φ`, the `∞`-pole
 sub-enumeration, the matching `hpole_image`/`hpole_image_inf`, the centre bookkeeping) and feeds them to
-`residueTheorem_of_directGeometry_genus0`.  The genus-`0` `∞`-vanishing field-group is **gone**; the
+`residueTheorem_of_directGeometry_genus0`.  The kirovGenus-`0` `∞`-vanishing field-group is **gone**; the
 remaining analytic inputs are `hreg`/`hbnd` (off-centre analyticity), the **finite** junk-freeness
 `hcont_int`, and the `∞`-coherence `hcoh_full`. -/
 theorem residueTheorem_ofAdapted_genus0
@@ -132,7 +132,7 @@ theorem residueTheorem_ofAdapted_genus0
 /-- **Gate A `∑Res = 0` from an adapted cover with simple `∞`-poles, residual-#5 group discharged.**  The
 simple-`∞` specialization of `residueTheorem_ofAdapted_genus0`: the full `∞`-fibre `Dinf_full` is
 constructed as `inftyFibreDataNF_full` (enumerating all `f`-poles, each simple), discharging the four
-`∞`-fibre-data inputs from `hsimpleInf`/`hmeroInf`.  No genus-`0` `∞`-vanishing. -/
+`∞`-fibre-data inputs from `hsimpleInf`/`hmeroInf`.  No kirovGenus-`0` `∞`-vanishing. -/
 theorem residueTheorem_ofAdaptedSimpleInfty_genus0
     (Φ : (b : ℂ) → FibreRegularData g f b)
     (hΦ_inj : ∀ p, Function.Injective (Φ p).xs)
@@ -177,7 +177,7 @@ theorem residueTheorem_ofAdaptedSimpleInfty_genus0
 
 The most-wired form: `Φ := canonicalFibreSelection g f hdiv` (the three `Φ`-enumeration inputs from the
 single pole-value-goodness genericity `hgood`), simple `∞`-poles.  Mirrors
-`residueTheorem_of_canonicalAdapted` but with the genus-`0` `∞`-vanishing field-group **removed** — the
+`residueTheorem_of_canonicalAdapted` but with the kirovGenus-`0` `∞`-vanishing field-group **removed** — the
 honest standing of Gate A after this discharge. -/
 
 /-- **Gate A `∑Res = 0` from the canonical selection with simple `∞`-poles, residual-#5 group
@@ -185,7 +185,7 @@ discharged.**  The capstone: with the canonical full-fibre selection (so the `Φ
 from the single pole-value-goodness `hgood`) and simple `∞`-poles, the residue theorem `∑_{a ∈ poles}
 formFnResidue ω₀ g a = 0` holds modulo *only* the per-centre full-fibre coherence `Cfull`, the
 off-centre analyticity `hreg`/`hbnd`, the **finite** junk-freeness `hcont_int`, and the `∞`-coherence
-`hcoh_full`.  The genus-`0` `∞`-vanishing `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` is **discharged internally**
+`hcoh_full`.  The kirovGenus-`0` `∞`-vanishing `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` is **discharged internally**
 (Cauchy at `∞` for the entire remainder + `hcoh_full`), so it is no longer a hypothesis. -/
 theorem residueTheorem_ofCanonicalSimpleInfty_genus0 (hdiv : (f.div : Divisor X) ≠ 0)
     (hgood : ∀ p, (∃ a ∈ poles, f.toRiemannSphere a = (((p : ℂ) : RiemannSphere))) →

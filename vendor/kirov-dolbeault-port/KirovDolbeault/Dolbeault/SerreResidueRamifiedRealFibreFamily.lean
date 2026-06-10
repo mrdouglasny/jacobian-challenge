@@ -3,10 +3,10 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedFullFibreReindexBuilder
-import Jacobians.Dolbeault.SerreResidueRamifiedFibreConservation
-import Jacobians.Dolbeault.SerreResidueRamifiedMultiplicityBridge
-import Jacobians.Dolbeault.SerreResidueGateAGenericity
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFullFibreReindexBuilder
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFibreConservation
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedMultiplicityBridge
+import KirovDolbeault.Dolbeault.SerreResidueGateAGenericity
 
 /-!
 # The per-centre §5-data assembly for the real cover (feeding the SOUND `∑Res = 0` capstone)

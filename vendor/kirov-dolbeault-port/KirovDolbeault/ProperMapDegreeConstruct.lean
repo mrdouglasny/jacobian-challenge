@@ -3,11 +3,11 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.ProperMapDegree
-import Jacobians.Discharge.Manifold.FibreCardLocallyConstantFromNormalForm
-import Jacobians.Discharge.Manifold.HurwitzPatchingDataConstruction
-import Jacobians.Discharge.Manifold.LocalSheetDataAtRegularValue
-import Jacobians.Discharge.Manifold.Degree
+import KirovDolbeault.ProperMapDegree
+import KirovDolbeault.Discharge.Manifold.FibreCardLocallyConstantFromNormalForm
+import KirovDolbeault.Discharge.Manifold.HurwitzPatchingDataConstruction
+import KirovDolbeault.Discharge.Manifold.LocalSheetDataAtRegularValue
+import KirovDolbeault.Discharge.Manifold.Degree
 
 /-!
 # Constructing `ProperMapDegreeData`: the conservation-of-number assembly

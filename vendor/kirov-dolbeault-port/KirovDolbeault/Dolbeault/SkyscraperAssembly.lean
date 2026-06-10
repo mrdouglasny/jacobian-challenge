@@ -31,8 +31,8 @@
   (no H⁰-finiteness lemma exists in the repo; this is the standard Forster-compactness input, kept
   honest as a hypothesis rather than re-proved here).
 -/
-import Jacobians.Dolbeault.SkyscraperSnake
-import Jacobians.Dolbeault.CechFinitenessWiring
+import KirovDolbeault.Dolbeault.SkyscraperSnake
+import KirovDolbeault.Dolbeault.CechFinitenessWiring
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

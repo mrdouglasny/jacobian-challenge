@@ -19,7 +19,7 @@
 
   Everything here is pure order/quotient bookkeeping (no analytic content), complete and axiom-clean.
 -/
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechH0
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

@@ -43,9 +43,9 @@
   (`dbarDisk_comp_holo`, proven in `CechDiskAcyclic`).  It is left for the corrected (holomorphic-`Cshr`)
   model; the single-chart telescoping in `GluedDbarDatum.dbarDatum_apply` is the prototype.
 -/
-import Jacobians.Dolbeault.CechModelGeometry
-import Jacobians.Dolbeault.DiskAcyclicCore
-import Jacobians.Dolbeault.GluedDbarDatum
+import KirovDolbeault.Dolbeault.CechModelGeometry
+import KirovDolbeault.Dolbeault.DiskAcyclicCore
+import KirovDolbeault.Dolbeault.GluedDbarDatum
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

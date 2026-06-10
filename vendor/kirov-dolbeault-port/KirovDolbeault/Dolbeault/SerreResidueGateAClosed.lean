@@ -3,14 +3,14 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueInftyCoherence
-import Jacobians.Dolbeault.FormTraceBundleBridge
-import Jacobians.Dolbeault.MittagLeffler
+import KirovDolbeault.Dolbeault.SerreResidueInftyCoherence
+import KirovDolbeault.Dolbeault.FormTraceBundleBridge
+import KirovDolbeault.Dolbeault.MittagLeffler
 
 /-!
 # Gate A — the SOUND branch-value boundedness `hbnd` for a general meromorphic `α = ω₀·g`
 
-This file discharges the branch-value boundedness `hbnd` of the genus-`0` simple-`∞` canonical
+This file discharges the branch-value boundedness `hbnd` of the kirovGenus-`0` simple-`∞` canonical
 capstone `…_germ_CfullHreg_inftyClosed` **soundly**, for a general meromorphic numerator `g`, WITHOUT
 the over-strong global-holomorphic-`αBr` route of `SerreResidueInftyClosedBnd.lean`.
 
@@ -573,7 +573,7 @@ theorem continuousAt_of_chartPullback_analyticAt {x : X}
 
 end Jacobians.Dolbeault.FormTraceGlobal
 
-/-! ## The SOUND genus-`0` capstone — `hbnd` discharged via the `g`-weighted bundle SUM
+/-! ## The SOUND kirovGenus-`0` capstone — `hbnd` discharged via the `g`-weighted bundle SUM
 
 Wiring the sound `hbnd_canonical_sound_full` into `…_germ_CfullHreg_inftyClosed`, replacing the unsound
 αBr route of `…_inftyClosed_bnd`.  The two αBr-dependent hypotheses (`αBr`/`hαBrAgree`) are **GONE**: the
@@ -600,7 +600,7 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 
 variable {ω₀ : HolomorphicOneForms X} {g : X → ℂ} {f : MeromorphicFunction X} {poles : Finset X}
 
-/-- **Gate A `∑Res = 0` (genus `0`, simple `∞`-poles, canonical selection) — `hbnd` discharged SOUNDLY.**
+/-- **Gate A `∑Res = 0` (kirovGenus `0`, simple `∞`-poles, canonical selection) — `hbnd` discharged SOUNDLY.**
 Identical to `residueTheorem_ofCanonicalSimpleInfty_germ_CfullHreg_inftyClosed` with the branch-value
 boundedness `hbnd` constructed via the **sound `g`-weighted bundle SUM** `hbnd_canonical_sound_full`
 (form = global holomorphic `ω₀`, `g` the bounded fibre weight) — NOT the unsatisfiable global-holomorphic
@@ -667,7 +667,7 @@ of `α = ω₀·g` off the branch locus, and the simple `∞`-poles.  We bundle 
 reduce the unconditional `∑Res = 0` to `∃ f, AdaptedF`. -/
 
 /-- **The adapted-cover genericity datum** for `α = ω₀·g` (genuine meromorphic `g`) over `poles`.  Bundles
-*only* the generic-position facts about a single nonconstant `f` that the sound genus-`0` capstone
+*only* the generic-position facts about a single nonconstant `f` that the sound kirovGenus-`0` capstone
 consumes; every `g`-meromorphy/holomorphy field is discharged automatically from `g`'s global meromorphy
 (`hg_an_offpoles`/`hg_mero_pt`), so they are NOT fields here. -/
 structure AdaptedF (ω₀ : HolomorphicOneForms X) (g : MeromorphicFunction X) (poles : Finset X) where
@@ -694,7 +694,7 @@ structure AdaptedF (ω₀ : HolomorphicOneForms X) (g : MeromorphicFunction X) (
     AnalyticAt ℂ (fun z => g.toFun ((chartAt ℂ x).symm z)) ((chartAt ℂ x) x)
 
 /-- **Unconditional Gate A `∑Res = 0` from an adapted cover.**  For a genuine meromorphic `g`, an
-`AdaptedF` datum discharges the SOUND genus-`0` capstone: every `g`-meromorphy field is automatic from
+`AdaptedF` datum discharges the SOUND kirovGenus-`0` capstone: every `g`-meromorphy field is automatic from
 `g.meromorphic` (g meromorphic at every point), the `g`-analyticity-off-poles is `hg_an_offpoles`, the
 off-branch good-value conditions follow from `hoff_cs`/`hg_an_offpoles`, and `br := branchValues f` makes
 the non-branch `br`-fields vacuous.  Hence `∑ a ∈ poles, formFnResidue ω₀ g.toFun a = 0`. -/

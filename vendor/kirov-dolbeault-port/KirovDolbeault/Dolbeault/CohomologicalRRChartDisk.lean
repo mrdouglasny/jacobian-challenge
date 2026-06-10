@@ -57,8 +57,8 @@
   content from that obligation but, because of the unsatisfiable `hstar`, does not itself wire to the
   headline.
 -/
-import Jacobians.Dolbeault.SkyscraperAssembly
-import Jacobians.Dolbeault.CohomologicalH0Finiteness
+import KirovDolbeault.Dolbeault.SkyscraperAssembly
+import KirovDolbeault.Dolbeault.CohomologicalH0Finiteness
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

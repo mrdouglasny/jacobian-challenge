@@ -3,13 +3,13 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirectGenus0Germ
-import Jacobians.RamifiedResidueChangeOfVariables
+import KirovDolbeault.Dolbeault.SerreResidueDirectGenus0Germ
+import KirovDolbeault.RamifiedResidueChangeOfVariables
 
 /-!
 # Gate A `∑Res = 0` — admitting *ramified* finite pole-value centres (Miranda §VIII.3 ramified)
 
-The genus-`0` close `residueTheorem_ofCanonicalSimpleInfty_genus0_germ`
+The kirovGenus-`0` close `residueTheorem_ofCanonicalSimpleInfty_genus0_germ`
 (`SerreResidueDirectGenus0Germ.lean`) consumes the per-centre full-fibre moving coherence `Cfull i`
 *only* to obtain, at each finite pole-value centre `cs i`, the **two facts** the principal-part close
 needs:
@@ -569,11 +569,11 @@ theorem residueSum_eq_zero_of_centerFacts
 
 Feeding `residueSum_eq_zero_of_centerFacts` with a per-centre `RamifiedCenterFacts` — which supplies
 facts (A)/(B) from the ramified atom (and reduces to the unramified `Cfull` route at `m = 1`) — gives the
-genus-`0` Gate A `∑Res = 0` *without* the per-centre off-branch genericity `hoff_cs`.  The finite
+kirovGenus-`0` Gate A `∑Res = 0` *without* the per-centre off-branch genericity `hoff_cs`.  The finite
 centres may be **ramified**.  The remaining per-centre obligation is exactly the geometric-trace
 identification `RamifiedCenterFacts.hcoh` (the Forster §5 `f = wᵐ` normal form). -/
 
-/-- **Gate A `∑Res = 0` (genus `0`) from per-centre ramified facts — `hoff_cs`-FREE.**  The
+/-- **Gate A `∑Res = 0` (kirovGenus `0`) from per-centre ramified facts — `hoff_cs`-FREE.**  The
 ramified-capable analogue of `residueTheorem_ofCanonicalSimpleInfty_genus0_germ_Cfull`: each finite
 pole-value centre `cs i` carries a `RamifiedCenterFacts ω₀ g f Φ poles (cs i)` (which supplies facts
 (A)/(B) through the proven ramified atom, admitting ramification — no off-branch genericity), and the
@@ -701,7 +701,7 @@ def ExistsRamifiedCenterFacts (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f
     (Φ : (b : ℂ) → FibreRegularData g f b) (poles : Finset X) (c : ℂ) : Prop :=
   Nonempty (RamifiedCenterFacts ω₀ g f Φ poles c)
 
-/-- **Gate A `∑Res = 0` (genus `0`) modulo the per-centre ramified obligation, `hoff_cs`-FREE.**  The
+/-- **Gate A `∑Res = 0` (kirovGenus `0`) modulo the per-centre ramified obligation, `hoff_cs`-FREE.**  The
 cleanest statement of the elimination: given `ExistsRamifiedCenterFacts` at every finite pole-value
 centre (the *only* remaining per-centre gap — the geometric `z = wᵐ` identification, Forster §5,
 mathematically true) plus the off-centre analyticity and the `∞`-group, Gate A holds with **no**

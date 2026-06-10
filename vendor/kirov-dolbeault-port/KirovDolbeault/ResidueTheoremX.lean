@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.MeromorphicTrace
-import Jacobians.ToSphereGeneral
-import Jacobians.DegDivResidue
+import KirovDolbeault.MeromorphicTrace
+import KirovDolbeault.ToSphereGeneral
+import KirovDolbeault.DegDivResidue
 
 /-!
 # The residue theorem on a compact Riemann surface — the global assembly (`deg_div`)

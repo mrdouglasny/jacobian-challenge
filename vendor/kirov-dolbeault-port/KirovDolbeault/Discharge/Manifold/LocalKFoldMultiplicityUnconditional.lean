@@ -3,9 +3,9 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.AnalyticKthRoot
-import Jacobians.Discharge.Manifold.LocalKFoldMultiplicity
-import Jacobians.Discharge.Manifold.LocalMultiplicityInvariance
+import KirovDolbeault.Discharge.Manifold.AnalyticKthRoot
+import KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicity
+import KirovDolbeault.Discharge.Manifold.LocalMultiplicityInvariance
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots

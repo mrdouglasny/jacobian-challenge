@@ -3,12 +3,12 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.CriticalValueSetFinite
-import Jacobians.Discharge.Manifold.LocalSheetDataAtRegularValue
-import Jacobians.Discharge.Manifold.HLcUnconditional
-import Jacobians.Discharge.Manifold.FibresFiniteUnconditional
-import Jacobians.Discharge.Manifold.RegularValueExistsRegUnconditional
-import Jacobians.Discharge.Manifold.CriticalValuesFiniteGeneral
+import KirovDolbeault.Discharge.Manifold.CriticalValueSetFinite
+import KirovDolbeault.Discharge.Manifold.LocalSheetDataAtRegularValue
+import KirovDolbeault.Discharge.Manifold.HLcUnconditional
+import KirovDolbeault.Discharge.Manifold.FibresFiniteUnconditional
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
+import KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
 
 /-! # Unconditional `h_pkg` (item 9 close — composition chip)
 

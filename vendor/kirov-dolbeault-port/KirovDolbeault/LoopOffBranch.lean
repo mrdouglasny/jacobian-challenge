@@ -1,4 +1,4 @@
-import Jacobians.SmoothPathCore
+import KirovDolbeault.SmoothPathCore
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Topology.Algebra.Module.Cardinality
@@ -67,7 +67,7 @@ This is `OfCurveSkeleton.chartFrame_cancel` generalised from `ChartBallPath` to 
 arbitrary path: the proof is the same chart-transition + ℂ-linearity computation,
 with the `ChartBallPath`-specific `chart_ChartBallPath_eq` step replaced by the
 local equality `e ∘ γ` (the chart coordinate) directly. -/
-lemma chartFrame_cancel_general (Q₀ : X) (γ : ℝ → X) (i : Fin (genus X)) (t : ℝ)
+lemma chartFrame_cancel_general (Q₀ : X) (γ : ℝ → X) (i : Fin (kirovGenus X)) (t : ℝ)
     (h_source_nbhd : ∀ᶠ s : ℝ in nhds t, γ s ∈ (chartAt (H := ℂ) Q₀).source)
     (hγ_diff : DifferentiableAt ℝ ((chartAt (H := ℂ) Q₀).toFun ∘ γ) t) :
     (periodBasisForm X i).toFun (γ t) (pathSpeed γ t) =
@@ -159,7 +159,7 @@ through its chart-coordinate endpoints `e (γ 0)`, `e (γ 1)`.
 `IsClosedSmoothLoop`/`IsSmoothPath` already supplies via
 `intervalIntegrable_form_pathSpeed_of_velContinuous`. -/
 lemma lineIntegral_eq_primitive_diff_in_ballChart
-    (Q₀ : X) (γ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ)
+    (Q₀ : X) (γ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ)
     (htgt : (chartAt (H := ℂ) Q₀).target = Metric.ball c r)
     (hγ_in : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ t ∈ (chartAt (H := ℂ) Q₀).source)
     (hγ_cont : Continuous γ)
@@ -217,7 +217,7 @@ primitive-difference (`lineIntegral_eq_primitive_diff_in_ballChart`).
 This is the local period-preservation primitive: a sub-arc and a same-endpoints
 detour inside a ball-chart contribute equally to every period. -/
 lemma lineIntegral_eq_of_chart_ball_endpoints
-    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ)
+    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ)
     (htgt : (chartAt (H := ℂ) Q₀).target = Metric.ball c r)
     (hγ₁_in : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ₁ t ∈ (chartAt (H := ℂ) Q₀).source)
     (hγ₂_in : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ₂ t ∈ (chartAt (H := ℂ) Q₀).source)
@@ -278,7 +278,7 @@ the full target, and chart-image confinement is supplied rather than derived fro
 subset of `(chartAt Q₀).target`, with the path's chart-images supplied to lie in the ball
 (`hg_ball`). The conclusion is the same primitive-difference. -/
 lemma lineIntegral_eq_primitive_diff_in_subball
-    (Q₀ : X) (γ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ)
+    (Q₀ : X) (γ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ)
     (hsub : Metric.ball c r ⊆ (chartAt (H := ℂ) Q₀).target)
     (hg_ball : ∀ t ∈ Set.Icc (0 : ℝ) 1, (chartAt (H := ℂ) Q₀) (γ t) ∈ Metric.ball c r)
     (hγ_in : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ t ∈ (chartAt (H := ℂ) Q₀).source)
@@ -331,7 +331,7 @@ common ball `Metric.ball c r ⊆ (chartAt Q₀).target` and share chart-coordina
 equal line integrals. This is the form directly usable from the subdivision machinery, where
 the relevant ball is the `chart_restrict_to_ball` ball sitting inside the chart target. -/
 lemma lineIntegral_eq_of_chart_subball_endpoints
-    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ)
+    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ)
     (hsub : Metric.ball c r ⊆ (chartAt (H := ℂ) Q₀).target)
     (hg₁_ball : ∀ t ∈ Set.Icc (0 : ℝ) 1, (chartAt (H := ℂ) Q₀) (γ₁ t) ∈ Metric.ball c r)
     (hg₂_ball : ∀ t ∈ Set.Icc (0 : ℝ) 1, (chartAt (H := ℂ) Q₀) (γ₂ t) ∈ Metric.ball c r)
@@ -386,7 +386,7 @@ sub-interval `[a,b]` of a path `γ` whose sub-arc lies in a sub-ball `Metric.bal
 target`, integrates to `F(chart γ b) − F(chart γ a)` for the Morera primitive `F`. Hence the
 partial integral depends only on the chart-coordinate endpoints `chart γ a`, `chart γ b`. -/
 lemma intervalIntegral_form_pathSpeed_eq_primitive_diff_in_subball
-    (Q₀ : X) (γ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
+    (Q₀ : X) (γ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
     (hsub : Metric.ball c r ⊆ (chartAt (H := ℂ) Q₀).target)
     (hg_ball : ∀ t ∈ Set.uIcc a b, (chartAt (H := ℂ) Q₀) (γ t) ∈ Metric.ball c r)
     (hγ_in : ∀ t ∈ Set.uIcc a b, γ t ∈ (chartAt (H := ℂ) Q₀).source)
@@ -436,7 +436,7 @@ This is what lets a *single* ball-`k` primitive `F` be reused across several con
 telescope — the line integral over each confined path is `F(chart endpoint) − F(chart start)`
 with the SAME `F`. -/
 lemma intervalIntegral_form_pathSpeed_eq_primitive_diff_of_primitive
-    (Q₀ : X) (γ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
+    (Q₀ : X) (γ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
     (F : ℂ → ℂ) (hF : ∀ w ∈ Metric.ball c r, HasDerivAt F (chartFormCoeff (X := X) Q₀ i w) w)
     (hg_ball : ∀ t ∈ Set.uIcc a b, (chartAt (H := ℂ) Q₀) (γ t) ∈ Metric.ball c r)
     (hγ_in : ∀ t ∈ Set.uIcc a b, γ t ∈ (chartAt (H := ℂ) Q₀).source)
@@ -475,7 +475,7 @@ sub-ball and share chart-coordinate endpoints (`chart γ₁ a = chart γ₂ a`, 
 have equal partial line integrals over `[a,b]`. This is the telescoping step: it lets a bad sub-arc
 be replaced by a same-chart-endpoints detour over the SAME `[a,b]` without changing the integral. -/
 lemma intervalIntegral_form_pathSpeed_eq_of_subball_endpoints
-    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (genus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
+    (Q₀ : X) (γ₁ γ₂ : ℝ → X) (i : Fin (kirovGenus X)) (c : ℂ) (r : ℝ) (a b : ℝ)
     (hsub : Metric.ball c r ⊆ (chartAt (H := ℂ) Q₀).target)
     (hg₁_ball : ∀ t ∈ Set.uIcc a b, (chartAt (H := ℂ) Q₀) (γ₁ t) ∈ Metric.ball c r)
     (hg₂_ball : ∀ t ∈ Set.uIcc a b, (chartAt (H := ℂ) Q₀) (γ₂ t) ∈ Metric.ball c r)
@@ -1732,7 +1732,7 @@ theorem periodVec_eq_of_partition_integral_eq (δ δ' : ℝ → X)
     (hδ : IsClosedSmoothLoop δ) (hδ' : IsClosedSmoothLoop δ')
     (s : ℕ → ℝ) (n : ℕ) (hs0 : s 0 = 0) (hsn : s n = 1)
     (hs_sub : ∀ k, k < n → Set.uIcc (s k) (s (k+1)) ⊆ Set.Icc (0:ℝ) 1)
-    (hpiece : ∀ (i : Fin (genus X)) (k : ℕ), k < n →
+    (hpiece : ∀ (i : Fin (kirovGenus X)) (k : ℕ), k < n →
       (∫ t in (s k)..(s (k+1)), (periodBasisForm X i).toFun (δ' t) (pathSpeed δ' t)) =
       (∫ t in (s k)..(s (k+1)), (periodBasisForm X i).toFun (δ t) (pathSpeed δ t))) :
     periodVec δ' = periodVec δ := by
@@ -1771,8 +1771,8 @@ theorem periodVec_eq_of_partition_integral_telescope (δ δ' : ℝ → X)
     (hδ : IsClosedSmoothLoop δ) (hδ' : IsClosedSmoothLoop δ')
     (s : ℕ → ℝ) (n : ℕ) (hs0 : s 0 = 0) (hsn : s n = 1)
     (hs_sub : ∀ k, k < n → Set.uIcc (s k) (s (k+1)) ⊆ Set.Icc (0:ℝ) 1)
-    (corr : Fin (genus X) → ℕ → ℂ) (hcorr_per : ∀ i, corr i n = corr i 0)
-    (hpiece : ∀ (i : Fin (genus X)) (k : ℕ), k < n →
+    (corr : Fin (kirovGenus X) → ℕ → ℂ) (hcorr_per : ∀ i, corr i n = corr i 0)
+    (hpiece : ∀ (i : Fin (kirovGenus X)) (k : ℕ), k < n →
       (∫ t in (s k)..(s (k+1)), (periodBasisForm X i).toFun (δ' t) (pathSpeed δ' t)) =
       (∫ t in (s k)..(s (k+1)), (periodBasisForm X i).toFun (δ t) (pathSpeed δ t))
         + corr i (k+1) - corr i k) :

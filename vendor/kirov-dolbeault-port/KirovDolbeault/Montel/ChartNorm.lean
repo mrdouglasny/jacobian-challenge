@@ -1,5 +1,5 @@
-import Jacobians.Montel.Cover
-import Jacobians.Montel.LocalRep
+import KirovDolbeault.Montel.Cover
+import KirovDolbeault.Montel.LocalRep
 
 /-!
 # Montel path — bounded chart-local sup-norm `chartNormK`

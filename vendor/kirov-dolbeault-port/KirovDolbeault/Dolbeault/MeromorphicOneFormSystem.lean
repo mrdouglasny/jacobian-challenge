@@ -31,8 +31,8 @@
   Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §17.4 (`ω·: 𝒪_{D+K} ≅ Ω_D`); the
   `linearSystem`/`lSysModule`/`lDim` pattern in `Jacobians.LinearSystem`.
 -/
-import Jacobians.LinearSystem
-import Jacobians.Dolbeault.FormCoeff
+import KirovDolbeault.LinearSystem
+import KirovDolbeault.Dolbeault.FormCoeff
 
 open scoped Manifold ContDiff Topology Bundle
 open Module
@@ -411,7 +411,7 @@ theorem holToMeroₗ_injective :
   exact this
 
 /-- **Non-vacuity / soundness anchor.**  `Ω_0` is non-trivial: it contains a faithful copy of the
-genus-dimensional space of holomorphic 1-forms.  Concretely, `holToMeroₗ` is an injective ℂ-linear
+kirovGenus-dimensional space of holomorphic 1-forms.  Concretely, `holToMeroₗ` is an injective ℂ-linear
 map `HolomorphicOneForms X → MeromorphicOneForm X` whose image lies in `Ω_0`.  In particular, for an
 effective `D` (all `0 ≤ D x`), `Ω_D ⊇ Ω_0 ⊇ HolomorphicOneForms`, so `Ω_D` is the genuine Forster
 object, not a junk space. -/
@@ -424,11 +424,11 @@ theorem holToMero_mem_omegaD_of_effective {D : Divisor X} (hD : ∀ x, 0 ≤ D x
 /-! ### `Ω_0 ≅ HolomorphicOneForms` — the soundness check (Forster §17.4 at `D = 0`)
 
 `Ω_0` (with the germ-junk quotiented out) is the genuine space of holomorphic 1-forms.  We prove the
-solid direction `genus X ≤ omegaDim 0`: the holomorphic forms inject into the junk-free quotient
+solid direction `kirovGenus X ≤ omegaDim 0`: the holomorphic forms inject into the junk-free quotient
 `omegaDModule 0`, because a holomorphic form that is germ-zero everywhere is the zero form (its
 chart coefficient is analytic, and an analytic germ-zero function vanishes at its centre, so by the
 identity theorem `exists_localRep_self_ne_zero` the section is `0`).  This is the non-vacuity /
-soundness anchor: `omegaDim 0` is at least `genus X`, so `Ω_D ⊇ Ω_0` is the genuine §17.4 object. -/
+soundness anchor: `omegaDim 0` is at least `kirovGenus X`, so `Ω_D ⊇ Ω_0` is the genuine §17.4 object. -/
 
 /-- **A holomorphic form that is germ-zero everywhere is the zero form.**  At each `a`, the chart
 coefficient `coeffAt α a` is analytic and (by `formOrderW = ⊤`) vanishes on a punctured
@@ -462,7 +462,7 @@ noncomputable def holInOmega0 (α : HolomorphicOneForms X) : ↥(omegaD (X := X)
 
 /-- **The holomorphic-to-`Ω_0`-module linear map** `HolomorphicOneForms X → omegaDModule 0`:
 `holToMeroₗ` landed in `Ω_0`, then projected to the junk-free quotient.  The structure map of
-Forster §17.4 at `D = 0`; its injectivity gives `genus X ≤ omegaDim 0`. -/
+Forster §17.4 at `D = 0`; its injectivity gives `kirovGenus X ≤ omegaDim 0`. -/
 noncomputable def holToOmega0Module : HolomorphicOneForms X →ₗ[ℂ] omegaDModule (X := X) 0 where
   toFun α := Submodule.Quotient.mk (holInOmega0 α)
   map_add' α β := by
@@ -484,37 +484,37 @@ theorem holToOmega0Module_injective :
   -- `(holInOmega0 α).1 = holToMero α`, so the identity theorem gives `α = 0`.
   exact holToMero_eq_zero_of_germZero α (fun x => hα x)
 
-/-- **Soundness lower bound: `genus X ≤ omegaDim 0`** (when `Ω_0` is finite-dimensional).  The
-genus-dimensional holomorphic forms inject into `omegaDModule 0` (`holToOmega0Module_injective`), so
-`finrank` is monotone: `genus X ≤ omegaDim 0`.  This confirms `Ω_0` is the genuine Forster §17.4
+/-- **Soundness lower bound: `kirovGenus X ≤ omegaDim 0`** (when `Ω_0` is finite-dimensional).  The
+kirovGenus-dimensional holomorphic forms inject into `omegaDModule 0` (`holToOmega0Module_injective`), so
+`finrank` is monotone: `kirovGenus X ≤ omegaDim 0`.  This confirms `Ω_0` is the genuine Forster §17.4
 object `H⁰(X, Ω)`, not a junk space.  (Finite-dimensionality of `Ω_0` is itself part of §17.4 —
 `Ω_0 ≅ HolomorphicOneForms`, which is finite-dim; the bound is stated under that hypothesis so it
 is unconditionally TRUE, avoiding the `finrank = 0` junk value of an a-priori unbounded quotient.) -/
 theorem genus_le_omegaDim_zero [FiniteDimensional ℂ (omegaDModule (X := X) 0)] :
-    genus X ≤ omegaDim (X := X) 0 :=
-  calc genus X = finrank ℂ (HolomorphicOneForms X) := rfl
+    kirovGenus X ≤ omegaDim (X := X) 0 :=
+  calc kirovGenus X = finrank ℂ (HolomorphicOneForms X) := rfl
     _ ≤ finrank ℂ (omegaDModule (X := X) 0) :=
           LinearMap.finrank_le_finrank_of_injective holToOmega0Module_injective
     _ = omegaDim (X := X) 0 := rfl
 
 /-- **The unconditional rank bound** `rank (HolomorphicOneForms) ≤ rank (omegaDModule 0)`.  The
 honest junk-value-free soundness statement: the holomorphic forms inject into the meromorphic-1-form
-quotient `Ω_0` (`holToOmega0Module_injective`), so its module rank is at least the genus rank — with
-no finiteness hypothesis.  (Upgrades to `genus ≤ omegaDim 0` once `Ω_0` is known finite-dim.) -/
+quotient `Ω_0` (`holToOmega0Module_injective`), so its module rank is at least the kirovGenus rank — with
+no finiteness hypothesis.  (Upgrades to `kirovGenus ≤ omegaDim 0` once `Ω_0` is known finite-dim.) -/
 theorem rank_holomorphicOneForms_le_omega0 :
     Module.rank ℂ (HolomorphicOneForms X) ≤ Module.rank ℂ (omegaDModule (X := X) 0) :=
   holToOmega0Module.rank_le_of_injective holToOmega0Module_injective
 
 /-- **`Ω_0 ≅ HolomorphicOneForms` (the full §17.4 soundness equality), conditional on the reverse
-bound.**  `omegaDim 0 = genus X` follows from the proven lower bound `genus_le_omegaDim_zero`
-together with the reverse `omegaDim 0 ≤ genus X`.  The reverse is the *removable-singularity*
+bound.**  `omegaDim 0 = kirovGenus X` follows from the proven lower bound `genus_le_omegaDim_zero`
+together with the reverse `omegaDim 0 ≤ kirovGenus X`.  The reverse is the *removable-singularity*
 direction: an order-`≥ 0` meromorphic 1-form has an analytic chart coefficient, so (modulo the
 germ-junk it is quotiented by) it is a genuine holomorphic form — the analytic-to-smooth section
 bridge.  This is the one isolated analytic input to the equality; the injection and the lower bound
 are proven above. -/
 theorem omegaDim_zero_eq_genus_of_le [FiniteDimensional ℂ (omegaDModule (X := X) 0)]
-    (hle : omegaDim (X := X) 0 ≤ genus X) :
-    omegaDim (X := X) 0 = genus X :=
+    (hle : omegaDim (X := X) 0 ≤ kirovGenus X) :
+    omegaDim (X := X) 0 = kirovGenus X :=
   le_antisymm hle genus_le_omegaDim_zero
 
 end Jacobians.Dolbeault

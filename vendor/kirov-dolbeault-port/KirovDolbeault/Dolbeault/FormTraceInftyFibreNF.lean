@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFibre
-import Jacobians.Dolbeault.FormTraceInftyRecip
-import Jacobians.ProperMapDegreeSheets
+import KirovDolbeault.Dolbeault.FormTraceFibre
+import KirovDolbeault.Dolbeault.FormTraceInftyRecip
+import KirovDolbeault.ProperMapDegreeSheets
 
 /-!
 # The `∞`-fibre trace via the *repaired* reciprocal (Gate A, §VIII.3 — sound `∞` fibre)

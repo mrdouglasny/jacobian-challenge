@@ -23,16 +23,16 @@
   independent from the class of the constant function `1`; such an element is a meromorphic function
   whose germ is NOT constant. That is the nonconstant witness.
 
-  Crucially this uses `h¹(0) = h1Dim 0` — a FINITE number (the arithmetic genus
-  `dim H¹(𝒪)`, finite by `finiteDimensional_cechH1_general`), **not** `genus X`. So it does **not**
+  Crucially this uses `h¹(0) = h1Dim 0` — a FINITE number (the arithmetic kirovGenus
+  `dim H¹(𝒪)`, finite by `finiteDimensional_cechH1_general`), **not** `kirovGenus X`. So it does **not**
   invoke `arithmeticGenus_eq_genus` / Serre duality: there is no circularity.
 
   Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §16 (the Riemann–Roch inequality
   `l(D) ≥ deg D + 1 − g` and its corollary that nonconstant meromorphic functions exist).
 -/
-import Jacobians.Dolbeault.CohomologicalRR
-import Jacobians.Dolbeault.SkyscraperProductWitness
-import Jacobians.Dolbeault.CanonicalFormIso
+import KirovDolbeault.Dolbeault.CohomologicalRR
+import KirovDolbeault.Dolbeault.SkyscraperProductWitness
+import KirovDolbeault.Dolbeault.CanonicalFormIso
 
 open scoped Manifold ContDiff Topology
 open Module

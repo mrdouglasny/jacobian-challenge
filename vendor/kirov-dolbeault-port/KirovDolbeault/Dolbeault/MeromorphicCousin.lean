@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.GeneralMittagLeffler
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.CousinResidueConnecting
+import KirovDolbeault.Dolbeault.GeneralMittagLeffler
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CousinResidueConnecting
 
 /-!
 # Forster §17.2–17.3 + §15 — the meromorphic Cousin connecting map and the Serre residue functional

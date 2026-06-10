@@ -38,7 +38,7 @@
 
   Everything in this file is complete; the snake lemma is axiom-clean linear algebra.
 -/
-import Jacobians.Dolbeault.SkyscraperArrow
+import KirovDolbeault.Dolbeault.SkyscraperArrow
 
 open scoped Manifold ContDiff Topology
 

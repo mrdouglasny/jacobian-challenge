@@ -37,8 +37,8 @@
   Everything is complete; `#print axioms finiteDimensional_globalSections` is
   `[propext, Classical.choice, Quot.sound]`.
 -/
-import Jacobians.Dolbeault.CechFinitenessDtwist
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechFinitenessDtwist
+import KirovDolbeault.Dolbeault.CechH0
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

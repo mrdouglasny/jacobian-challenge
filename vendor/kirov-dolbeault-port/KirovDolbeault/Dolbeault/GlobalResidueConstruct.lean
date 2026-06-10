@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRealizationAssembly
-import Jacobians.Dolbeault.MittagLeffler
+import KirovDolbeault.Dolbeault.SerreResidueRealizationAssembly
+import KirovDolbeault.Dolbeault.MittagLeffler
 
 /-!
 # Forster §17.2–17.3 — constructing the global residue `GlobalResidue` from the Cousin/Mittag–Leffler
@@ -206,7 +206,7 @@ theorem lDim_le_h1Dim (R : CousinResidueData 𝔘 K) (D : Divisor X)
 `CanonicalFormIso`), the §17.9 surjectivity (the HARD half, supplied separately), and finiteness
 (Forster §14, `finiteDimensional_cechH1`). -/
 def toSerreDualityData (R : CousinResidueData 𝔘 K)
-    (hKgenus : lDim (X := X) K = genus X)
+    (hKgenus : lDim (X := X) K = kirovGenus X)
     (ι_surj : ∀ D : Divisor X, Function.Surjective (R.pairing D))
     (finH1 : ∀ D : Divisor X, FiniteDimensional ℂ (𝔘.toFiniteFamily.cechH1 D)) :
     SerreDualityData 𝔘 :=

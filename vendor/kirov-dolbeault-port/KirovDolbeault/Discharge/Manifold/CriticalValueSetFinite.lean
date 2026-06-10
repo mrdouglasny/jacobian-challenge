@@ -3,9 +3,9 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.CriticalValuesFiniteGeneral
-import Jacobians.Discharge.Manifold.CriticalSetDerivBridge
-import Jacobians.Discharge.Manifold.Degree
+import KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
+import KirovDolbeault.Discharge.Manifold.CriticalSetDerivBridge
+import KirovDolbeault.Discharge.Manifold.Degree
 
 set_option autoImplicit true
 

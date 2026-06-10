@@ -42,9 +42,9 @@
   No gaps anywhere in this file: everything not yet closed is a hypothesis predicate or written
   prose, never a gap tactic.
 -/
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.DbarDiskCohomology
-import Jacobians.Dolbeault.ChartDiskCover
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.DbarDiskCohomology
+import KirovDolbeault.Dolbeault.ChartDiskCover
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

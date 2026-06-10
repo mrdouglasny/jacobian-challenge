@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceInftyRecip
+import KirovDolbeault.Dolbeault.FormTraceInftyRecip
 import Mathlib.Analysis.Complex.Liouville
 
 /-!
@@ -12,7 +12,7 @@ import Mathlib.Analysis.Complex.Liouville
 The deep §VIII.3 trace-rationality argument closes with the **vanishing of the holomorphic remainder**:
 after subtracting the finite principal parts of the meromorphic trace `Tr_F α` (a `LaurentForm L`)
 one obtains a global *holomorphic* `1`-form on the compact `ℂℙ¹`, which must be **zero** (the sphere
-has genus `0`, `H⁰(ℂℙ¹, Ω) = 0`).  This file proves that vanishing at the level of `dz`-coefficient
+has kirovGenus `0`, `H⁰(ℂℙ¹, Ω) = 0`).  This file proves that vanishing at the level of `dz`-coefficient
 functions `ℂ → ℂ`, the representation the trace machinery (`FormTraceFibre`, `FormTraceInftyFibre`,
 `recipCoeff`) actually uses.
 
@@ -24,7 +24,7 @@ extends **analytically across `0`**.  The transition forces `h(z) = O(z⁻²) �
 `Differentiable.eq_const_of_tendsto_cocompact`) `h ≡ 0`.
 
 This is the *coefficient-level* form of `Jacobians.holomorphicOneForm_eq_zero`
-(`Jacobians/ProjectiveLine.lean`, the genus-`0` vanishing proven for honest cotangent-bundle
+(`Jacobians/ProjectiveLine.lean`, the kirovGenus-`0` vanishing proven for honest cotangent-bundle
 sections); we re-prove the analytic core directly for raw coefficient functions, so the trace remainder
 (a `ℂ → ℂ` coefficient, *not* packaged as a `HolomorphicOneForms RiemannSphere` section) can be
 concluded zero without first building a bundle section.

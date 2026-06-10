@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueRamifiedFullFibre
-import Jacobians.Dolbeault.SerreResidueGateAInftyBuilder
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedFullFibre
+import KirovDolbeault.Dolbeault.SerreResidueGateAInftyBuilder
 
 /-!
 # The SOUND full-fibre residue close of Gate A (whole-fibre `D`, non-poles → residue `0`)

@@ -53,7 +53,7 @@ two subspaces: `Λ n ≅ H⁰(𝒪_{nP})` with `dim ≥ 1 - g + n` (Lemma 17.8 +
 `dim (V n) = n + g - 1 - deg D` once `n > deg D`.  Then for all sufficiently large `n` the two
 subspaces meet nontrivially — Forster's `Λ ∩ Im ι_{D_n} ≠ 0`, the surjectivity witness.
 
-`g` (genus), `d = deg D`, `k₀` (the constant of Lemma 17.4) are arbitrary integers here; the result
+`g` (kirovGenus), `d = deg D`, `k₀` (the constant of Lemma 17.4) are arbitrary integers here; the result
 is purely the linear-algebra/arithmetic skeleton, so it stays valid for whatever the geometric build
 supplies. -/
 theorem serre_surjectivity_dim_core
@@ -82,7 +82,7 @@ theorem serre_surjectivity_dim_core
 /-- **§17.6 injectivity — abstract finite-dim core (the EASY half).**  An injective linear map from
 `V` into the dual of a finite-dimensional `W` forces `dim V ≤ dim W`.  This is the linear-algebra
 content of Forster's `ι_D` *injectivity* step: at `D = 0`, `ι₀ : H⁰(X,Ω) → H¹(X,𝒪)*` injective gives
-`genus = dim H⁰(X,Ω) ≤ dim H¹(X,𝒪) = h1Dim 0` — the PDE-free, one-directional inequality.  Counterpart
+`kirovGenus = dim H⁰(X,Ω) ≤ dim H¹(X,𝒪) = h1Dim 0` — the PDE-free, one-directional inequality.  Counterpart
 to `serre_surjectivity_dim_core` (which supplies the reverse inequality from surjectivity). -/
 theorem finrank_le_of_injective_to_dual
     {K V W : Type*} [Field K] [AddCommGroup V] [Module K V] [AddCommGroup W] [Module K W]

@@ -3,27 +3,27 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.GenusSphereBackward
-import Jacobians.VanKampen
+import KirovDolbeault.GenusSphereBackward
+import KirovDolbeault.VanKampen
 import Mathlib.Geometry.Manifold.Complex
 
 /-!
-# Backward headline `#1b`: a surface `≃ₜ S²` has genus `0` — assembled route
+# Backward headline `#1b`: a surface `≃ₜ S²` has kirovGenus `0` — assembled route
 
 Target (`Jacobians/DegreeOneSphere.lean`):
 ```
 theorem genus_zero_of_nonempty_homeo_sphere
-    (h : Nonempty (X ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) : genus X = 0
+    (h : Nonempty (X ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) : kirovGenus X = 0
 ```
-with `genus X = Module.finrank ℂ (HolomorphicOneForms X)`.
+with `kirovGenus X = Module.finrank ℂ (HolomorphicOneForms X)`.
 
 ## What this file does
 
-`genus X` is the **analytic** invariant `finrank ℂ (HolomorphicOneForms X)`, whereas the
+`kirovGenus X` is the **analytic** invariant `finrank ℂ (HolomorphicOneForms X)`, whereas the
 hypothesis `X ≃ₜ S²` is **purely topological** (a homeomorphism does not preserve the complex
 structure). The bridge is the classical contrapositive route from `Jacobians.GenusSphereBackward`:
 
-> `genus X ≥ 1 ⟹ ∃ ω ≠ 0` closed holomorphic 1-form `⟹` `ω` has a nonzero period `⟹` `X` is
+> `kirovGenus X ≥ 1 ⟹ ∃ ω ≠ 0` closed holomorphic 1-form `⟹` `ω` has a nonzero period `⟹` `X` is
 > not simply connected `⟹` `X ̸≃ₜ S²` (since `S²` is simply connected).
 
 Since the original scaffolding was written, **two of its three walls have fallen**:
@@ -49,7 +49,7 @@ primitive on an abstract `X`; that is the remaining de Rham wall.
 
 Given `HasHolomorphicPrimitives X`, this file discharges **everything else completely**:
 the primitive `F` is constant (Mathlib, compactness), so `mfderiv F = 0`, so `η = 0`; hence
-`genus X = 0`. The capstone `genus_zero_of_nonempty_homeo_sphere_of_hasPrimitives` takes the de Rham
+`kirovGenus X = 0`. The capstone `genus_zero_of_nonempty_homeo_sphere_of_hasPrimitives` takes the de Rham
 input *and the homeomorphism* and proves the exact target statement, axiom-clean. This mirrors the
 repo's established "isolate the one missing classical input as an explicit hypothesis" pattern
 (`simplyConnectedSpace_sphere_of_vanKampen`, `AbelStatement`).
@@ -118,18 +118,18 @@ theorem holomorphicOneForm_eq_zero_of_hasPrimitive
 /-! ### The route capstones -/
 
 /-- **`#1b`, abstract form.** Given the de Rham input `HasHolomorphicPrimitives X` and that `X` is
-simply connected, `genus X = 0`. Every holomorphic `1`-form has a primitive (input), hence vanishes
-(`holomorphicOneForm_eq_zero_of_hasPrimitive`), so the genus — `finrank ℂ` of the space of such
+simply connected, `kirovGenus X = 0`. Every holomorphic `1`-form has a primitive (input), hence vanishes
+(`holomorphicOneForm_eq_zero_of_hasPrimitive`), so the kirovGenus — `finrank ℂ` of the space of such
 forms — is `0`. -/
 theorem genus_eq_zero_of_hasPrimitives_of_simplyConnected
     (hPrim : HasHolomorphicPrimitives X) (hSC : SimplyConnectedSpace X) :
-    genus X = 0 := by
+    kirovGenus X = 0 := by
   apply genus_eq_zero_of_forall_holomorphicOneForm_eq_zero
   intro η
   obtain ⟨F, hF, hprim⟩ := hPrim hSC η
   exact holomorphicOneForm_eq_zero_of_hasPrimitive η F hF hprim
 
-/-- **`#1b`, the exact target — assembled.** A surface homeomorphic to `S²` has `genus 0`, given the
+/-- **`#1b`, the exact target — assembled.** A surface homeomorphic to `S²` has `kirovGenus 0`, given the
 single remaining de Rham input `HasHolomorphicPrimitives X`.
 
 The simple-connectivity input is supplied *unconditionally* by the repo: `X ≃ₜ S²` transports
@@ -143,7 +143,7 @@ This has the exact signature of `genus_zero_of_nonempty_homeo_sphere`
 theorem genus_zero_of_nonempty_homeo_sphere_of_hasPrimitives
     (hPrim : HasHolomorphicPrimitives X)
     (h : Nonempty (X ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :
-    genus X = 0 := by
+    kirovGenus X = 0 := by
   obtain ⟨e⟩ := h
   -- `S²` is simply connected (repo, unconditional), so `X` is too (transport).
   have hSC : SimplyConnectedSpace X := simplyConnectedSpace_of_homeo e

@@ -10,7 +10,7 @@
   unproved obligation. The manifold side (chart-pullback of an `𝒪_D` section is analytic) reuses the
   axiom-clean `CechH0.analyticAt_chart_change`.
 -/
-import Jacobians.Dolbeault.BddHol
+import KirovDolbeault.Dolbeault.BddHol
 
 open Metric Topology BoundedContinuousFunction
 

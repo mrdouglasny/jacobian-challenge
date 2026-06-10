@@ -12,7 +12,7 @@
   plus the single instance the hom-bundle needs but doesn't auto-derive for the *sub*-field ℝ:
   `ContinuousSMul ℝ (Trivial X ℂ)` (the trivial fiber `Trivial X ℂ x` is defeq `ℂ`).
 -/
-import Jacobians.Dolbeault.RealManifold
+import KirovDolbeault.Dolbeault.RealManifold
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection

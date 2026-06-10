@@ -58,8 +58,8 @@
 
   All declarations are gap-free; `#print axioms` is `[propext, Classical.choice, Quot.sound]`.
 -/
-import Jacobians.Dolbeault.CechComplex
-import Jacobians.Dolbeault.ChartDiskCover
+import KirovDolbeault.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.ChartDiskCover
 import Mathlib.Analysis.Normed.Module.Connected
 
 open scoped Manifold ContDiff Topology

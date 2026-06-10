@@ -3,8 +3,8 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.LocalKFoldMultiplicityUnconditional
-import Jacobians.Discharge.Manifold.AnalyticLocalFactorization
+import KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicityUnconditional
+import KirovDolbeault.Discharge.Manifold.AnalyticLocalFactorization
 
 set_option autoImplicit true
 

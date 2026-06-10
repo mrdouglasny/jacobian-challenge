@@ -1907,7 +1907,7 @@ lemma chartAt_symm_contMDiffOn (P : X) :
 /-! ## Joint smoothness obstacle (documentation continues)
 
 For full closure of `exists_smoothPath_family`'s third conjunct
-(`∀ P, ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω (fun Q => periodVec (sp P Q))`),
+(`∀ P, ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω (fun Q => periodVec (sp P Q))`),
 the witness `sp` must vary smoothly with Q. Two analyses:
 
 **Why Classical.choice fails.** The natural witness `smoothPathRaw` uses

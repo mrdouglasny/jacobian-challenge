@@ -18,8 +18,8 @@
   and a closed `C ⊆ ⋃ Uᵢ` (so they are independent of the `SharedChartCover` packaging and reusable for
   any closed-core globalization).  No gaps.
 -/
-import Jacobians.Dolbeault.CechComplex
-import Jacobians.Dolbeault.RealManifold
+import KirovDolbeault.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.RealManifold
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 open scoped Manifold ContDiff Topology

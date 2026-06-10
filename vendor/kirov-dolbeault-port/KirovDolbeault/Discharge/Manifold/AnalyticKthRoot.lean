@@ -6,7 +6,7 @@ Authors: Bryan Sanchez
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.Analytic.Constructions
-import Jacobians.Discharge.Manifold.LocalKFoldMultiplicity
+import KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicity
 
 set_option autoImplicit true
 

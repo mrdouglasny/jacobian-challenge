@@ -1,13 +1,13 @@
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Analysis.Normed.Group.Seminorm
-import Jacobians.Genus
-import Jacobians.Montel.Cover
-import Jacobians.Montel.LocalRep
-import Jacobians.Montel.ChartNorm
-import Jacobians.Montel.SupNorm
-import Jacobians.Montel.Compactness
-import Jacobians.Montel.ChartTransition
-import Jacobians.Montel.Complete
+import KirovDolbeault.Genus
+import KirovDolbeault.Montel.Cover
+import KirovDolbeault.Montel.LocalRep
+import KirovDolbeault.Montel.ChartNorm
+import KirovDolbeault.Montel.SupNorm
+import KirovDolbeault.Montel.Compactness
+import KirovDolbeault.Montel.ChartTransition
+import KirovDolbeault.Montel.Complete
 
 /-!
 # Montel path to finite-dimensionality of `HolomorphicOneForms`

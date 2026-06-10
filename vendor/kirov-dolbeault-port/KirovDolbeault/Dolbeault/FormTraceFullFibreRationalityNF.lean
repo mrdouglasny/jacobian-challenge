@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFullFibreRationality
-import Jacobians.Dolbeault.FormTraceInftyFibreNF
+import KirovDolbeault.Dolbeault.FormTraceFullFibreRationality
+import KirovDolbeault.Dolbeault.FormTraceInftyFibreNF
 
 /-!
 # Gate A `∑Res = 0` from full-fibre trace rationality, *sound* `∞` fibre (Miranda §VIII.3)

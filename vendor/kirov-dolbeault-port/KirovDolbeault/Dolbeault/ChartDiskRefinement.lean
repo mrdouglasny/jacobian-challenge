@@ -24,8 +24,8 @@
   All declarations are complete; `#print axioms exists_chartDiskCover_refinement` is
   `[propext, Classical.choice, Quot.sound]`.
 -/
-import Jacobians.Dolbeault.ChartDiskCover
-import Jacobians.Dolbeault.CechRefinement
+import KirovDolbeault.Dolbeault.ChartDiskCover
+import KirovDolbeault.Dolbeault.CechRefinement
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

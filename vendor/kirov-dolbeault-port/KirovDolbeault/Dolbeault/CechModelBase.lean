@@ -39,11 +39,11 @@
   `leray_surjective` then unpacks it, and the honest analytic obligation is concentrated
   where the model is CONSTRUCTED — discharged in `CechFinitenessDtwist.exists_cechModel_general`.
 -/
-import Jacobians.Dolbeault.CechFinitenessAbstract
-import Jacobians.Dolbeault.BddHol
-import Jacobians.Dolbeault.CechModelBridge
-import Jacobians.Dolbeault.DbarDiskCohomology
-import Jacobians.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.CechFinitenessAbstract
+import KirovDolbeault.Dolbeault.BddHol
+import KirovDolbeault.Dolbeault.CechModelBridge
+import KirovDolbeault.Dolbeault.DbarDiskCohomology
+import KirovDolbeault.Dolbeault.CechH0
 
 open Jacobians.Dolbeault.CechFiniteness ContinuousLinearMap
 open BoundedContinuousFunction

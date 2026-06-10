@@ -5,7 +5,7 @@ import Mathlib.Topology.LocallyConstant.Basic
 import Mathlib.Geometry.Manifold.Algebra.LieGroup
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.LinearAlgebra.Complex.FiniteDimensional
-import Jacobians.ChartedSpaceOfLocalHomeomorph
+import KirovDolbeault.ChartedSpaceOfLocalHomeomorph
 
 /-!
 # Quotient of a finite-dimensional normed space by a `ZLattice`
@@ -239,12 +239,12 @@ noncomputable instance instIsManifoldQuotient :
   obtain ⟨q₂, rfl⟩ := he'
   set x₁ := Classical.choose (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q₁)
   set x₂ := Classical.choose (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q₂)
-  set P₁ := IsLocalHomeomorph.chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁
-  set P₂ := IsLocalHomeomorph.chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂
+  set P₁ := IsLocalHomeomorph.chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁
+  set P₂ := IsLocalHomeomorph.chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂
   have hP₁ : (P₁ : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁).symm
   have hP₂ : (P₂ : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂).symm
   -- Simplify away the trivial model / range-of-model
   simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
     Function.comp_id, Set.range_id, Set.preimage_id,
@@ -267,12 +267,12 @@ theorem contDiffOn_symm_mk
       ((QuotientAddGroup.mk : E → E ⧸ Λ.toAddSubgroup) ⁻¹' P.target) := by
   intro y₀ hy₀
   -- Choose a local chart P₀ around y₀ agreeing with mk
-  set P₀ := IsLocalHomeomorph.chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) y₀
+  set P₀ := IsLocalHomeomorph.chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) y₀
   have hP₀ : (P₀ : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) y₀).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) y₀).symm
   -- y₀ is in the transition's source
   have hy₀_P₀ : y₀ ∈ P₀.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   have hy₀_src : y₀ ∈ (P₀ ≫ₕ P.symm).source := by
     rw [OpenPartialHomeomorph.trans_source, Set.mem_inter_iff,
         OpenPartialHomeomorph.symm_source]
@@ -330,12 +330,12 @@ theorem contMDiff_mk : ContMDiff 𝓘(𝕜, E) 𝓘(𝕜, E) n
     (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q) with hxc_def
   have hqc : QuotientAddGroup.mk x_c = q :=
     Classical.choose_spec (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) q)
-  set P := IsLocalHomeomorph.chartAtPreimage
+  set P := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c with hP_def
   have hP : (P : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c).symm
   have hxc_mem : x_c ∈ P.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   -- mk x₀ ∈ P.target: P x_c = mk x_c = q = mk x₀, and P maps source to target.
   have hq_in_P : q ∈ P.target := by
     have : P x_c = q := by rw [hP]; exact hqc
@@ -382,22 +382,22 @@ theorem contMDiff_neg :
   have hync : QuotientAddGroup.mk y_c = -q₀ :=
     Classical.choose_spec (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) (-q₀))
   -- Chart P around x_c, chart Q around y_c
-  set P := IsLocalHomeomorph.chartAtPreimage
+  set P := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c with hP_def
-  set Q := IsLocalHomeomorph.chartAtPreimage
+  set Q := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) y_c with hQ_def
   have hP : (P : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x_c).symm
   have hQ : (Q : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) y_c).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) y_c).symm
   have hxc_mem : x_c ∈ P.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   have hyc_mem : y_c ∈ Q.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   -- Apply contMDiffAt_iff to reduce to chart pullback smoothness
   rw [contMDiffAt_iff]
   refine ⟨continuous_neg.continuousAt, ?_⟩
-  -- chartAt on our ChartedSpace: chartAt q₀ = P.symm (since P := chartAtPreimage x_c
+  -- chartAt on our ChartedSpace: chartAt q₀ = P.symm (since P := chartAtPreimageKirov x_c
   -- and x_c = Classical.choose (mk_surjective q₀))
   -- extChartAt with trivial model coincides with chartAt as a function.
   -- Range 𝓘(𝕜, E) = univ.
@@ -487,24 +487,24 @@ theorem contMDiff_add :
   have hq₃ : QuotientAddGroup.mk x₃ = q₁ + q₂ :=
     Classical.choose_spec (QuotientAddGroup.mk_surjective (s := Λ.toAddSubgroup) (q₁ + q₂))
   -- Charts
-  set P₁ := IsLocalHomeomorph.chartAtPreimage
+  set P₁ := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁
-  set P₂ := IsLocalHomeomorph.chartAtPreimage
+  set P₂ := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂
-  set R := IsLocalHomeomorph.chartAtPreimage
+  set R := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk Λ.toAddSubgroup) x₃
   have hP₁ : (P₁ : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₁).symm
   have hP₂ : (P₂ : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₂).symm
   have hR : (R : E → E ⧸ Λ.toAddSubgroup) = QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage (isLocalHomeomorph_mk Λ.toAddSubgroup) x₃).symm
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov (isLocalHomeomorph_mk Λ.toAddSubgroup) x₃).symm
   have hx₁_mem : x₁ ∈ P₁.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   have hx₂_mem : x₂ ∈ P₂.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   have hx₃_mem : x₃ ∈ R.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   -- Reduce to chart pullback ContDiffAt
   rw [contMDiffAt_iff]
   refine ⟨continuous_add.continuousAt, ?_⟩
@@ -697,22 +697,22 @@ theorem pushforward_contMDiff_of_ambient {gX gY : ℕ}
   have hyc : QuotientAddGroup.mk y_c = target_q :=
     Classical.choose_spec
       (QuotientAddGroup.mk_surjective (s := ΛY.toAddSubgroup) target_q)
-  set P := IsLocalHomeomorph.chartAtPreimage
+  set P := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk ΛX.toAddSubgroup) x_c
-  set R := IsLocalHomeomorph.chartAtPreimage
+  set R := IsLocalHomeomorph.chartAtPreimageKirov
     (isLocalHomeomorph_mk ΛY.toAddSubgroup) y_c
   have hP : (P : (Fin gX → ℂ) → (Fin gX → ℂ) ⧸ ΛX.toAddSubgroup) =
       QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov
       (isLocalHomeomorph_mk ΛX.toAddSubgroup) x_c).symm
   have hR : (R : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) =
       QuotientAddGroup.mk :=
-    (IsLocalHomeomorph.eq_chartAtPreimage
+    (IsLocalHomeomorph.eq_chartAtPreimageKirov
       (isLocalHomeomorph_mk ΛY.toAddSubgroup) y_c).symm
   have hxc_mem : x_c ∈ P.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   have hyc_mem : y_c ∈ R.source :=
-    IsLocalHomeomorph.mem_source_chartAtPreimage _ _
+    IsLocalHomeomorph.mem_source_chartAtPreimageKirov _ _
   rw [contMDiffAt_iff]
   refine ⟨?_, ?_⟩
   · exact (continuous_quot_lift _

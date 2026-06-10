@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFullFibreRationalityAssemble
-import Jacobians.Dolbeault.FormTraceMovingFibreSphereSet
+import KirovDolbeault.Dolbeault.FormTraceFullFibreRationalityAssemble
+import KirovDolbeault.Dolbeault.FormTraceMovingFibreSphereSet
 
 /-!
 # Discharging `TraceCoherenceData`'s pole-centre coherence from the moving-fibre engine (Gate A, §VIII.3)
@@ -12,14 +12,14 @@ import Jacobians.Dolbeault.FormTraceMovingFibreSphereSet
 `Jacobians.Dolbeault.FormTraceFullFibreRationalityAssemble.TraceCoherenceData` is the cleanest Gate-A
 target: a single global geometric trace `T : ℂ → ℂ` (the value-chart `dz`-coefficient of `Tr_F α`) with
 the honest §VIII.3 inputs.  Constructing one closes the 1-form residue theorem `∑ₐ Resₐ(α) = 0`
-*unconditionally* (the principal-part extraction and the genus-`0` Liouville vanishing are *proved*
+*unconditionally* (the principal-part extraction and the kirovGenus-`0` Liouville vanishing are *proved*
 inside `TraceCoherenceData`).  Its fields split into
 
 * the **pole-centre coherence** `hcoh_fin` (`T =ᶠ[𝓝 (cs i)] (fibreTrace ω₀ f (D (cs i))).traceCoeff`) and
   the `∞`-coherence `hcoh_inf` — the §VIII.3 *single-valuedness of the trace* at the finitely-many
   pole-values;
 * the off-centre **meromorphy** `hT_mero`;
-* the genus-`0` **remainder vanishing** `hentire`/`hrecip_cont` (the `H⁰(ℂℙ¹, Ω) = 0` content);
+* the kirovGenus-`0` **remainder vanishing** `hentire`/`hrecip_cont` (the `H⁰(ℂℙ¹, Ω) = 0` content);
 * the discrete fibre **enumeration** bookkeeping.
 
 This file discharges the *pole-centre coherence* `hcoh_fin` (and the off-centre meromorphy `hT_mero`)
@@ -33,14 +33,14 @@ continuously-varying sheet sections *with no global labeling* — the **symmetri
 set-equality of the two fibre enumerations.
 
 So the pole-centre coherence — the genuine §VIII.3 residual the `TraceCoherenceData` route isolates — is
-**discharged here from the proved engine**, leaving the precise remaining obligation as the genus-`0`
+**discharged here from the proved engine**, leaving the precise remaining obligation as the kirovGenus-`0`
 remainder vanishing (`hentire`/`hrecip_cont`) and the `∞`-bookkeeping (`hcoh_inf`, the `∞`-fibre data).
 
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
 * `traceCoherenceData_ofMovingData` — a `TraceCoherenceData` from a global selection `Φ` with `T :=
   valueChartTrace ω₀ f Φ`, the per-pole-value moving data `Cfin` (whose fixed fibre is the per-centre
-  data `D (cs i)`), and the genus-`0`/`∞`/enumeration inputs.  **`hcoh_fin` and `hT_mero` are proved**
+  data `D (cs i)`), and the kirovGenus-`0`/`∞`/enumeration inputs.  **`hcoh_fin` and `hT_mero` are proved**
   from `MovingCoherenceDatum.coherent` + `meromorphicAt_traceCoeff_fibreTrace`.
 * `traceCoherenceData_ofSheetSections` — the *sheet-form* constructor: the per-pole moving data is built
   from continuously-varying smooth sheet sections + the **symmetric-lever set-form re-selection**
@@ -54,7 +54,7 @@ remainder vanishing (`hentire`/`hrecip_cont`) and the `∞`-bookkeeping (`hcoh_i
 ## The single minimal remaining obligation (precise diagnosis)
 
 After this file, the `TraceCoherenceData` route to Gate A `∑Res = 0` rests — axiom-clean — on exactly the
-**genus-`0` remainder vanishing** (`hentire`: `T − L.R` entire after subtracting the finite principal
+**kirovGenus-`0` remainder vanishing** (`hentire`: `T − L.R` entire after subtracting the finite principal
 parts; `hrecip_cont`: holomorphic across `∞`) together with the `∞`-coherence `hcoh_inf` and the
 `∞`-fibre enumeration `Dinf`.  The pole-centre coherence (the §VIII.3 single-valuedness at the finite
 pole-values) and the off-centre meromorphy are **discharged** from the moving-fibre engine.  These
@@ -141,14 +141,14 @@ may enumerate the **full** fibre (so `T = Tr_F α`), while `D (cs i)` enumerates
 fibre over `cs i` (the `TraceCoherenceData` enumeration fields demand `D p` be pole-enumerating).  The
 finite glue `hcoh_fin i : T =ᶠ[𝓝 (cs i)] (fibreTrace ω₀ f (D (cs i))).traceCoeff` is then the moving
 datum `Cfin i` (with fixed fibre `(Cfin i).D = D (cs i)` the pole sub-fibre) — *no full-fibre =
-pole-fibre separation is built into this constructor*.  The `∞`-coherence `hcoh_inf`, the genus-`0`
+pole-fibre separation is built into this constructor*.  The `∞`-coherence `hcoh_inf`, the kirovGenus-`0`
 remainder vanishing `hentire`/`hrecip_cont`, and the fibre enumeration bookkeeping are the genuine
 residual inputs. -/
 
 /-- **A `TraceCoherenceData` from a global selection and per-pole moving data.**  Given a global fibre
 selection `Φ` (giving the geometric trace `T := valueChartTrace ω₀ f Φ`), a per-centre fibre enumeration
 `D` (the poles in each fibre), the per-pole-value moving data `Cfin i` (a `MovingCoherenceDatum` at
-`cs i` whose fixed fibre is `D (cs i)`), and the `∞`/genus-`0`/enumeration residual inputs, this
+`cs i` whose fixed fibre is `D (cs i)`), and the `∞`/kirovGenus-`0`/enumeration residual inputs, this
 assembles a `TraceCoherenceData ω₀ g f poles`.
 
 **The pole-centre coherence `hcoh_fin` and the off-centre meromorphy `hT_mero` are *proved*** from
@@ -256,7 +256,7 @@ smooth sheet sections `secFin` and the **set-form re-selection** `hsetFin`
 (`MovingCoherenceDatum.ofSheetSectionsSet`): at each pole-value `cs i`, the section values pass through
 the fibre points of `Φ (cs i)` at the base, are smooth + sections of `f.holoRepr` near the base, and
 enumerate the *same fibre set* as `Φ b'` (no labeling).  The pole-centre coherence `hcoh_fin` is thereby
-discharged **labeling-free** (Miranda §VIII.3, single-valued by symmetry); the genus-`0`/`∞` inputs
+discharged **labeling-free** (Miranda §VIII.3, single-valued by symmetry); the kirovGenus-`0`/`∞` inputs
 remain the precise residual. -/
 noncomputable def traceCoherenceData_ofSheetSections
     (Φ : (b : ℂ) → FibreRegularData g f b)
@@ -301,7 +301,7 @@ noncomputable def traceCoherenceData_ofSheetSections
 
 /-- **Gate A `∑Res = 0` from sheet sections (the symmetric lever).**  The sheet-form analogue of
 `residueSum_eq_zero_of_movingTraceCoherence`: the pole-centre coherence is discharged labeling-free from
-the smooth sheet sections + the set-form re-selection, and the genus-`0`/`∞` residual closes the rest. -/
+the smooth sheet sections + the set-form re-selection, and the kirovGenus-`0`/`∞` residual closes the rest. -/
 theorem residueSum_eq_zero_of_sheetTraceCoherence
     (Φ : (b : ℂ) → FibreRegularData g f b)
     (m : ℕ) (cs : Fin m → ℂ) (ρ : ℝ) (hcs_ball : ∀ i, cs i ∈ ball (0 : ℂ) ρ)
@@ -345,13 +345,13 @@ theorem residueSum_eq_zero_of_sheetTraceCoherence
 The moving/sheet `TraceCoherenceData` constructors are *satisfiable*, not a disguised `False`: for the
 **empty pole set** (`α = ω₀·g` globally holomorphic) the empty fibre selection assembles into a
 `TraceCoherenceData` — no finite pole-values (the per-pole moving data vacuous), the empty `∞`-fibre data,
-the zero geometric trace, and the trivially-true genus-`0`/`∞` fields.  This confirms the reduction is
+the zero geometric trace, and the trivially-true kirovGenus-`0`/`∞` fields.  This confirms the reduction is
 honest. -/
 
 /-- **The empty moving `TraceCoherenceData`.**  For the empty pole set, the empty fibre selection
 (`emptyFibreRegularData`) gives a `TraceCoherenceData` through `traceCoherenceData_ofMovingData`: no
 finite pole-values (the per-pole moving data `Cfin` vacuous), the empty `∞`-fibre data, the zero
-geometric trace (`valueChartTrace_emptySelection`), and the vacuous/trivially-true genus-`0`/`∞`
+geometric trace (`valueChartTrace_emptySelection`), and the vacuous/trivially-true kirovGenus-`0`/`∞`
 fields.  The honest non-vacuity witness. -/
 noncomputable def traceCoherenceData_ofMovingData_empty (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
     (f : MeromorphicFunction X) : TraceCoherenceData ω₀ g f ∅ :=

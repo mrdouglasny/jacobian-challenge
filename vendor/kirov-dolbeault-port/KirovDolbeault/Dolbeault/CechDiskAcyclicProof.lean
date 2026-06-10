@@ -28,8 +28,8 @@
 
   No gaps: everything not yet closed is a hypothesis predicate or written prose, never a gap tactic.
 -/
-import Jacobians.Dolbeault.CechDiskAcyclic
-import Jacobians.Dolbeault.HoloRep
+import KirovDolbeault.Dolbeault.CechDiskAcyclic
+import KirovDolbeault.Dolbeault.HoloRep
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

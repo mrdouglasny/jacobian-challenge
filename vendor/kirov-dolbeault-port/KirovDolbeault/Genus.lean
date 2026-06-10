@@ -10,7 +10,7 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 # Genus of a compact Riemann surface
 
 Defined as the ℂ-dimension of global holomorphic 1-forms:
-`genus X := Module.finrank ℂ (HolomorphicOneForms X)`.
+`kirovGenus X := Module.finrank ℂ (HolomorphicOneForms X)`.
 
 This matches the analytic definition; with real content
 (`FiniteDimensional ℂ (HOF X)` from Cartan–Serre) it agrees with the
@@ -30,7 +30,7 @@ open scoped Manifold ContDiff Bundle
 of a compact connected complex 1-manifold.
 
 Mathematically: global holomorphic 1-forms on `X`. Defined here (rather
-than in `HolomorphicForms.lean`) so that `genus` below can refer to it. -/
+than in `HolomorphicForms.lean`) so that `kirovGenus` below can refer to it. -/
 def HolomorphicOneForms (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type _ :=
   ContMDiffSection 𝓘(ℂ) (ℂ →L[ℂ] ℂ) ω
@@ -57,18 +57,18 @@ end Jacobians
 
 open scoped Manifold ContDiff
 
-/-- The genus of a compact Riemann surface, defined as the ℂ-dimension of
+/-- The kirovGenus of a compact Riemann surface, defined as the ℂ-dimension of
 global holomorphic 1-forms. Since `Module.finrank` returns `0` for
 non-finite-dimensional modules, this is well-defined unconditionally;
 the `FiniteDimensional ℂ (HolomorphicOneForms X)` instance (in
-`HolomorphicForms.lean`, content-gated) is required for `genus` to be
+`HolomorphicForms.lean`, content-gated) is required for `kirovGenus` to be
 the "right" number. -/
-noncomputable def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
+noncomputable def kirovGenus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
   Module.finrank ℂ (Jacobians.HolomorphicOneForms X)
 
--- The challenge theorem `genus_eq_zero_iff_homeo` (genus 0 ⟺ `X ≃ₜ S²`) is declared in
--- `Jacobians/DegreeOneSphere.lean` (root namespace, like `genus`), NOT here: its forward direction
+-- The challenge theorem `genus_eq_zero_iff_homeo` (kirovGenus 0 ⟺ `X ≃ₜ S²`) is declared in
+-- `Jacobians/DegreeOneSphere.lean` (root namespace, like `kirovGenus`), NOT here: its forward direction
 -- needs the degree-one endgame, which lives downstream of `Genus` (via `ProjectiveLine → Genus`).
 -- Declaring it there breaks the import cycle an in-`Genus` proof would create. `Nonempty X` comes
 -- free from `[ConnectedSpace X]`, so the spec signature is unchanged.

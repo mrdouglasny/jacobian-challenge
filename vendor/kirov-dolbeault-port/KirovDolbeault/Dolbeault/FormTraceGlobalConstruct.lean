@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobal
-import Jacobians.Discharge.Manifold.CriticalValuesFiniteGeneral
+import KirovDolbeault.Dolbeault.FormTraceGlobal
+import KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
 
 /-!
 # Constructing `GlobalTraceData` — discharging the routine fields (Gate A, node A-ii bridge (e))

@@ -2,9 +2,9 @@
 Copyright (c) 2026.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Jacobians.PeriodLattice
-import Jacobians.Discharge.Manifold.ContMDiffOmegaAnalytic
-import Jacobians.Montel.Compactness
+import KirovDolbeault.PeriodLattice
+import KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
+import KirovDolbeault.Montel.Compactness
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
@@ -185,8 +185,8 @@ g(z₀)` is analytic in `z` because `g` is analytic.
 
 Locally on the chart-ball `Metric.ball ((chartAt ℂ Q₀) Q₀) r`
 contained in `e.target`. -/
-theorem localLiftChart_analyticAt (Q₀ : X) (constants : Fin (genus X) → ℂ)
-    (i : Fin (genus X)) :
+theorem localLiftChart_analyticAt (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ)
+    (i : Fin (kirovGenus X)) :
     AnalyticAt ℂ (localLiftChart (X := X) Q₀ constants i)
       ((chartAt (H := ℂ) Q₀) Q₀) := by
   -- Step 1: pick a chart ball `Metric.ball z₀ r ⊆ chart.target`.
@@ -246,8 +246,8 @@ theorem localLiftChart_analyticAt (Q₀ : X) (constants : Fin (genus X) → ℂ)
 
 /-! ### Bridge: analyticAt of chart-coord lift ⇒ `ContMDiffAt` on the manifold
 
-The vector-valued local lift, expressed as a function `X → (Fin (genus
-X) → ℂ)`, is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω` at `Q₀`.
+The vector-valued local lift, expressed as a function `X → (Fin (kirovGenus
+X) → ℂ)`, is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω` at `Q₀`.
 
 This is the analytic→ContMDiffAt bridge: from `AnalyticAt` of each
 chart-coord component, we get `ContDiffAt ℂ ω` (Mathlib's
@@ -258,13 +258,13 @@ chart-coord component, we get `ContDiffAt ℂ ω` (Mathlib's
 -- (same namespace); available here transitively.
 
 /-- **The chart-coord function** of the local lift, as a vector-valued
-map `ℂ → (Fin (genus X) → ℂ)`. -/
-noncomputable def localLiftChartVec (Q₀ : X) (constants : Fin (genus X) → ℂ)
-    (z : ℂ) : Fin (genus X) → ℂ :=
+map `ℂ → (Fin (kirovGenus X) → ℂ)`. -/
+noncomputable def localLiftChartVec (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ)
+    (z : ℂ) : Fin (kirovGenus X) → ℂ :=
   fun i => localLiftChart (X := X) Q₀ constants i z
 
 /-- **The chart-coord vector lift is `AnalyticAt`** at the chart point. -/
-theorem localLiftChartVec_analyticAt (Q₀ : X) (constants : Fin (genus X) → ℂ) :
+theorem localLiftChartVec_analyticAt (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ) :
     AnalyticAt ℂ (localLiftChartVec (X := X) Q₀ constants)
       ((chartAt (H := ℂ) Q₀) Q₀) := by
   -- Bundle the per-component analyticAt into a `Pi`-valued analyticAt.
@@ -275,7 +275,7 @@ theorem localLiftChartVec_analyticAt (Q₀ : X) (constants : Fin (genus X) → �
   exact AnalyticAt.pi fun i => localLiftChart_analyticAt Q₀ constants i
 
 /-- **The chart-coord vector lift is `ContDiffAt`** at the chart point. -/
-theorem localLiftChartVec_contDiffAt (Q₀ : X) (constants : Fin (genus X) → ℂ) :
+theorem localLiftChartVec_contDiffAt (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ) :
     ContDiffAt ℂ ω (localLiftChartVec (X := X) Q₀ constants)
       ((chartAt (H := ℂ) Q₀) Q₀) :=
   (localLiftChartVec_analyticAt Q₀ constants).contDiffAt
@@ -287,9 +287,9 @@ The chart map `chartAt ℂ Q₀` is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ) ω` at `Q�
 (Mathlib's `contMDiffAt_extChartAt`), and the chart-coord function is
 `ContDiffAt ℂ ω` at `(chartAt ℂ Q₀) Q₀` (above). Mathlib's
 `ContDiffAt.comp_contMDiffAt` glues these into `ContMDiffAt 𝓘(ℂ)
-𝓘(ℂ, Fin (genus X) → ℂ) ω` of the composition. -/
-theorem localLift_contMDiffAt (Q₀ : X) (constants : Fin (genus X) → ℂ) :
-    ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω
+𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω` of the composition. -/
+theorem localLift_contMDiffAt (Q₀ : X) (constants : Fin (kirovGenus X) → ℂ) :
+    ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω
       (localLift (X := X) Q₀ constants) Q₀ := by
   -- Step 1: `chartAt ℂ Q₀` is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ) ω` at `Q₀`.
   -- Use `contMDiffAt_extChartAt` and the fact that `extChartAt 𝓘(ℂ)` agrees
@@ -314,7 +314,7 @@ theorem localLift_contMDiffAt (Q₀ : X) (constants : Fin (genus X) → ℂ) :
   -- equals `ContMDiffAt ... (localLift ...) Q₀` by definition unfolding.
   have h_comp := h_chartVec.comp_contMDiffAt (x := Q₀) h_chart
   -- `localLift Q₀ constants = localLiftChartVec Q₀ constants ∘ chartAt ℂ Q₀`.
-  change ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω
+  change ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω
     (localLiftChartVec (X := X) Q₀ constants ∘ (chartAt (H := ℂ) Q₀)) Q₀
   exact h_comp
 
@@ -485,7 +485,7 @@ The substitution lemma's hypotheses:
 lemma periodVec_smoothStep01_comp_eq_generic (γ : ℝ → X)
     (hγ_diff : ∀ s ∈ Set.Icc (0 : ℝ) 1,
       DifferentiableAt ℝ ((chartAt (H := ℂ) (γ s)).toFun ∘ γ) s)
-    (hg_cont : ∀ i : Fin (genus X),
+    (hg_cont : ∀ i : Fin (kirovGenus X),
       ContinuousOn (fun u => (periodBasisForm X i).toFun (γ u)
         (Jacobians.pathSpeed γ u)) (Set.Icc (0 : ℝ) 1)) :
     Jacobians.periodVec (γ ∘ Jacobians.smoothStep01) = Jacobians.periodVec γ := by
@@ -1300,7 +1300,7 @@ lemma chartBallPath_smoothPath_endpoints_eq_in_quotient
       ((1 - (s : ℂ)) * (chartAt (H := ℂ) Q₀) Q₀ +
         (s : ℂ) * (chartAt (H := ℂ) Q₀) Q) ∈ (chartAt (H := ℂ) Q₀).target) :
     (QuotientAddGroup.mk (Jacobians.periodVec (Jacobians.ChartBallPath Q₀ Q₀ Q)) :
-      (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
+      (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =
     QuotientAddGroup.mk (Jacobians.periodVec (Jacobians.smoothPath Q₀ Q)) := by
   -- Step 1: replace ChartBallPath by ChartBallPathSmooth (reparam-invariant periodVec).
   rw [← periodVec_ChartBallPathSmooth_eq Q₀ Q h_chart_ball]
@@ -1323,7 +1323,7 @@ theorem localLift_quotient_eq_ofCurve_eventually
     (P Q₀ : X) :
     (fun Q => QuotientAddGroup.mk
         (localLift (X := X) Q₀ (periodVec (smoothPath P Q₀)) Q) :
-      X → (Fin (genus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =ᶠ[nhds Q₀]
+      X → (Fin (kirovGenus X) → ℂ) ⧸ (truePeriodLattice X).toAddSubgroup) =ᶠ[nhds Q₀]
       (fun Q => QuotientAddGroup.mk (periodVec (smoothPath P Q))) := by
   filter_upwards [affine_in_target_eventually Q₀, Q_in_chart_source_eventually Q₀]
     with Q hQ hQ_src
@@ -1357,7 +1357,7 @@ The function `Jacobians.OfCurveSkeleton.ofCurveContMDiff_via_localLift`
 below packages the complete proof skeleton at the level of `Jacobians.
 PeriodLattice`'s `truePeriodLattice` (since the quotient instance lives
 there); the actual wiring into `Jacobians.ofCurve_contMDiff` in
-`Jacobians.lean` requires the `Jacobian X = (Fin (genus X) → ℂ) ⧸
+`Jacobians.lean` requires the `Jacobian X = (Fin (kirovGenus X) → ℂ) ⧸
 (periodLattice X)...` chartedSpace instance, which is `truePeriodLattice`
 in different clothing — see `Jacobians.lean:periodLattice`. -/
 

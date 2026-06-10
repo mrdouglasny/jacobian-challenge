@@ -12,8 +12,8 @@
   STATUS: the compact-restriction atom is proven here; the cochain-rep + Leray + comparison layers
   that discharge `DolbeaultLadder.finiteDimensional_cechH1` are scaffolded as explicit obligations below.
 -/
-import Jacobians.Montel.Compactness
-import Jacobians.Dolbeault.SchwartzFiniteness
+import KirovDolbeault.Montel.Compactness
+import KirovDolbeault.Dolbeault.SchwartzFiniteness
 
 open Metric Topology BoundedContinuousFunction
 open Jacobians.Montel

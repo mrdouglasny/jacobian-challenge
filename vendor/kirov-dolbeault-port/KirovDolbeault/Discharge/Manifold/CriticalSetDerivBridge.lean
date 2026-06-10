@@ -3,9 +3,9 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.LocalKFoldMultiplicityFullyUnconditional
-import Jacobians.Discharge.Manifold.LocalMultiplicityInvariance
-import Jacobians.Discharge.Manifold.AnalyticLocalFactorization
+import KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicityFullyUnconditional
+import KirovDolbeault.Discharge.Manifold.LocalMultiplicityInvariance
+import KirovDolbeault.Discharge.Manifold.AnalyticLocalFactorization
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Analytic

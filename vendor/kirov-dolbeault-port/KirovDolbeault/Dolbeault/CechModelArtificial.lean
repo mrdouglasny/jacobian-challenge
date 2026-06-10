@@ -29,7 +29,7 @@
 -- Only the model TYPES / abstract spine (`DiskOverlapData`, `Coboundaries`, `supH1`) are needed
 -- here, so we import `CechModelBase` (not `CechFinitenessWiring`); this is what keeps
 -- `CechFinitenessWiring → CechFinitenessDtwist → … → CechModelArtificial` acyclic.
-import Jacobians.Dolbeault.CechModelBase
+import KirovDolbeault.Dolbeault.CechModelBase
 
 open Jacobians.Dolbeault
 open BoundedContinuousFunction

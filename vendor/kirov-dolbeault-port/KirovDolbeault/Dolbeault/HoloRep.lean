@@ -18,9 +18,9 @@
   (`holoFn_eq_of_tendsto`, `holoFn_eq_holoRep_of_chart_analyticAt`); and `toGerm_holoFn` (reads back the
   germ).  The `∂̄`/`ContMDiff`/algebra lemmas built on top stay with their analytic consumers.
 -/
-import Jacobians.Dolbeault.CechH0
-import Jacobians.Dolbeault.RealManifold
-import Jacobians.Dolbeault.RealForms
+import KirovDolbeault.Dolbeault.CechH0
+import KirovDolbeault.Dolbeault.RealManifold
+import KirovDolbeault.Dolbeault.RealForms
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

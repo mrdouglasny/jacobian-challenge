@@ -3,7 +3,7 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.ProjectiveLine
+import KirovDolbeault.ProjectiveLine
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 import Mathlib.Analysis.Convex.Contractible
 import Mathlib.Analysis.Normed.Module.Connected

@@ -3,12 +3,12 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.Degree
-import Jacobians.Discharge.Manifold.RegularValueExistsUnconditional
-import Jacobians.Discharge.Manifold.CriticalValuesFiniteGeneral
-import Jacobians.Discharge.Manifold.FibresFiniteUnconditional
-import Jacobians.Discharge.Manifold.ContMDiffOmegaAnalytic
-import Jacobians.Discharge.Manifold.CriticalSetDerivBridge
+import KirovDolbeault.Discharge.Manifold.Degree
+import KirovDolbeault.Discharge.Manifold.RegularValueExistsUnconditional
+import KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
+import KirovDolbeault.Discharge.Manifold.FibresFiniteUnconditional
+import KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
+import KirovDolbeault.Discharge.Manifold.CriticalSetDerivBridge
 import Mathlib.Topology.Separation.Basic
 
 set_option autoImplicit true

@@ -9,10 +9,10 @@
   The file is intentionally small: it only defines the corrected data bundle and the raw restriction
   operator.  The compactness theorem and the Leray discharge will be built on top of this branch.
 -/
-import Jacobians.Dolbeault.CechFinitenessAbstract
-import Jacobians.Dolbeault.CechModelBridge
-import Jacobians.Dolbeault.CechComplex
-import Jacobians.Montel.Cover
+import KirovDolbeault.Dolbeault.CechFinitenessAbstract
+import KirovDolbeault.Dolbeault.CechModelBridge
+import KirovDolbeault.Dolbeault.CechComplex
+import KirovDolbeault.Montel.Cover
 
 open scoped Manifold ContDiff Topology
 open Metric Topology BoundedContinuousFunction

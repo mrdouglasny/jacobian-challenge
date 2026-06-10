@@ -3,10 +3,10 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceFullFibreRationality
-import Jacobians.Dolbeault.FormTraceGlobalT
-import Jacobians.Dolbeault.FormTraceLiouville
-import Jacobians.Dolbeault.FormTraceCoherentSelection
+import KirovDolbeault.Dolbeault.FormTraceFullFibreRationality
+import KirovDolbeault.Dolbeault.FormTraceGlobalT
+import KirovDolbeault.Dolbeault.FormTraceLiouville
+import KirovDolbeault.Dolbeault.FormTraceCoherentSelection
 
 /-!
 # Building a `TraceRationalityData` from the geometric trace (Gate A, Miranda §VIII.3 step 1 assembly)
@@ -27,7 +27,7 @@ its honest analytic inputs, by **wiring the already-proven step-2/step-3 atoms**
 * **Step 2 — principal-part extraction.**  `T` is meromorphic at each finite centre, so
   `FormTraceGlobalT.exists_laurentForm_principalPart` extracts a `LaurentForm L` with `T − L.R`
   germ-analytic (the pole removed) at each centre.
-* **Step 3 — the holomorphic remainder vanishes (genus `0`).**  After subtracting the finite principal
+* **Step 3 — the holomorphic remainder vanishes (kirovGenus `0`).**  After subtracting the finite principal
   parts, `T − L.R` is **entire** and holomorphic across `∞`; a holomorphic `1`-form on `ℂℙ¹` is `0`
   (`H⁰(ℂℙ¹, Ω) = 0`), so the *coefficient-level* Liouville vanishing
   `FormTraceLiouville.coeff_eventuallyEq_of_entire_diff` forces `T = L.R` everywhere — giving
@@ -42,7 +42,7 @@ Chaining: `L.R =ᶠ T =ᶠ (fibreTrace …).traceCoeff` (step 3 + step 1) is `ag
 is `agree_infty`.  So a `TraceRationalityData` — and hence Gate A `∑Res = 0` — follows from the
 **honest reduced inputs** carried by `TraceCoherenceData`: the per-centre coherence (`hcoh_fin`), the
 `∞`-coherence (`hcoh_inf`), the entire-remainder + holomorphy-across-`∞` (`hentire`/`hrecip_cont`,
-the genus-`0` content), and the discrete fibre bookkeeping.  Everything *below* those inputs is
+the kirovGenus-`0` content), and the discrete fibre bookkeeping.  Everything *below* those inputs is
 complete and axiom-clean.
 
 ## The single minimal remaining obligation (precise diagnosis)
@@ -55,18 +55,18 @@ complete and axiom-clean.
    monodromy/index-bijection content packaged in `FormTraceGlobal.MovingCoherenceDatum` — its
    `.coherent` field gives exactly this), and the `∞`-analogue `hcoh_inf`;
 2. the **holomorphic remainder vanishing** `hentire`/`hrecip_cont` — that after subtracting the finite
-   principal parts the remainder `T − L.R` is entire and holomorphic across `∞` (the genus-`0`
+   principal parts the remainder `T − L.R` is entire and holomorphic across `∞` (the kirovGenus-`0`
    `H⁰(ℂℙ¹, Ω) = 0` content, available as a sphere-form corollary
    `FormTraceCoherentSelection.coeffAt_eq_zero_of_sphereForm` once the remainder is realized as such a
    form).
 
-These are exactly the two §VIII.3 walls (the trace's *single-valuedness* and the genus-`0`
+These are exactly the two §VIII.3 walls (the trace's *single-valuedness* and the kirovGenus-`0`
 *remainder vanishing*); the principal-part extraction and the Liouville vanishing are *proved here*.
 
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
 * `TraceCoherenceData` — the reduced honest input (geometric trace + per-centre/∞ coherence + the
-  genus-`0` remainder vanishing + fibre bookkeeping);
+  kirovGenus-`0` remainder vanishing + fibre bookkeeping);
 * `TraceCoherenceData.toTraceRationalityData` — assembles the full `TraceRationalityData` (the two
   agreements *proved* from the Liouville engine + the coherence);
 * `TraceCoherenceData.residueSum_eq_zero` — Gate A `∑Res = 0` from a `TraceCoherenceData`;
@@ -115,14 +115,14 @@ global geometric trace `T : ℂ → ℂ` (the value-chart `dz`-coefficient of `T
   the **`∞`-coherence** `hcoh_inf` (`recipCoeff T =ᶠ[𝓝[≠] 0] (inftyFibreTrace ω₀ f Dinf).traceCoeff`) —
   the genuine §VIII.3 single-valuedness residual (supplied by `MovingCoherenceDatum.coherent`);
 * the **off-centre meromorphy** `hT_mero` (so the principal-part extraction applies);
-* the genus-`0` **remainder vanishing** `hentire`/`hrecip_cont` — that after subtracting the finite
+* the kirovGenus-`0` **remainder vanishing** `hentire`/`hrecip_cont` — that after subtracting the finite
   principal parts of `T` the remainder is entire and holomorphic across `∞`.
 
 `toTraceRationalityData` produces the full `TraceRationalityData` from this. -/
 
 /-- **The trace-coherence datum** for `α = ω₀·g` along the cover `F = f.toRiemannSphere`, over the pole
 set `poles`.  Bundles the geometric trace `T` (the value-chart `dz`-coefficient of `Tr_F α`) with the
-honest §VIII.3 inputs (per-centre/∞ coherence + genus-`0` remainder vanishing) and the discrete fibre
+honest §VIII.3 inputs (per-centre/∞ coherence + kirovGenus-`0` remainder vanishing) and the discrete fibre
 bookkeeping.  Constructing one ⇒ a `TraceRationalityData` ⇒ Gate A `∑Res = 0`. -/
 structure TraceCoherenceData (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f : MeromorphicFunction X)
     (poles : Finset X) where
@@ -165,14 +165,14 @@ structure TraceCoherenceData (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f 
   /-- **Step 2 input.**  `T` is meromorphic at each finite centre (so the principal-part extraction
   applies; automatic from `meromorphicAt_traceCoeff_fibreTrace` + `hcoh_fin`). -/
   hT_mero : ∀ i, MeromorphicAt T (cs i)
-  /-- **Step 3 (genus `0`).**  After subtracting the finite principal parts (the `LaurentForm L` built
+  /-- **Step 3 (kirovGenus `0`).**  After subtracting the finite principal parts (the `LaurentForm L` built
   internally from `T`'s principal parts), the remainder `T − L.R` is **entire** — a holomorphic
   `1`-form on `ℂℙ¹` minus its principal parts. -/
   hentire : ∀ (L : LaurentForm), Finset.univ.image L.a = Finset.univ.image cs →
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧ (T - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     AnalyticOnNhd ℂ (T - L.R) Set.univ
-  /-- **Step 3 (genus `0`, across `∞`).**  The remainder is holomorphic across `∞`:
-  `recipCoeff (T − L.R)` is continuous at `0` (the genus-`0` `H⁰(ℂℙ¹, Ω) = 0` content). -/
+  /-- **Step 3 (kirovGenus `0`, across `∞`).**  The remainder is holomorphic across `∞`:
+  `recipCoeff (T − L.R)` is continuous at `0` (the kirovGenus-`0` `H⁰(ℂℙ¹, Ω) = 0` content). -/
   hrecip_cont : ∀ (L : LaurentForm), Finset.univ.image L.a = Finset.univ.image cs →
     (∀ j, ∃ R : ℂ → ℂ, AnalyticAt ℂ R (cs j) ∧ (T - L.R) =ᶠ[𝓝[≠] (cs j)] R) →
     ContinuousAt (recipCoeff (T - L.R)) 0
@@ -266,7 +266,7 @@ end TraceCoherenceData
 
 /-- **The Gate-A reduction, existential form (trace-coherence route).**  If a `TraceCoherenceData ω₀ g f
 poles` exists — i.e. the geometric trace `Tr_F α` coheres to the per-fibre traces (single-valuedness)
-and the holomorphic remainder vanishes (genus `0`) — then the represented `α = ω₀·g` satisfies the
+and the holomorphic remainder vanishes (kirovGenus `0`) — then the represented `α = ω₀·g` satisfies the
 1-form residue theorem `∑ₐ Resₐ(α) = 0` *unconditionally* (the principal-part extraction and the
 Liouville vanishing are discharged here; the entire downstream is proven). -/
 theorem residueSum_eq_zero_of_traceCoherenceData (ω₀ : HolomorphicOneForms X) (g : X → ℂ)

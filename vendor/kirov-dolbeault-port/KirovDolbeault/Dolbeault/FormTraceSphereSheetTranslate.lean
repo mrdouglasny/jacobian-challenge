@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceMovingFibreSheet
-import Jacobians.ToSphereGeneral
+import KirovDolbeault.Dolbeault.FormTraceMovingFibreSheet
+import KirovDolbeault.ToSphereGeneral
 
 /-!
 # Translating sphere-sheets to `holoRepr`-sections (Gate A, §VIII.3 — part (A))

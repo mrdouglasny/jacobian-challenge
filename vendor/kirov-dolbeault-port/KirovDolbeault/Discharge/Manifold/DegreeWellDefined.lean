@@ -3,9 +3,9 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.HPkgUnconditional
-import Jacobians.Discharge.Manifold.HurwitzWellDefinedUnconditionalTopo
-import Jacobians.Discharge.Manifold.Degree
+import KirovDolbeault.Discharge.Manifold.HPkgUnconditional
+import KirovDolbeault.Discharge.Manifold.HurwitzWellDefinedUnconditionalTopo
+import KirovDolbeault.Discharge.Manifold.Degree
 
 /-! # `degreeFiber` is well-defined across regular witnesses
 

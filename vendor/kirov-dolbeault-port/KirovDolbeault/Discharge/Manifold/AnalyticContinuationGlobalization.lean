@@ -3,8 +3,8 @@ Copyright (c) 2026 Bryan Sanchez. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bryan Sanchez
 -/
-import Jacobians.Discharge.Manifold.AnalyticFiberDiscrete
-import Jacobians.Discharge.Manifold.LocalMultiplicity
+import KirovDolbeault.Discharge.Manifold.AnalyticFiberDiscrete
+import KirovDolbeault.Discharge.Manifold.LocalMultiplicity
 import Mathlib.Analysis.Analytic.Uniqueness
 import Mathlib.Analysis.Analytic.IsolatedZeros
 

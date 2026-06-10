@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueDirect
-import Jacobians.Dolbeault.FormTraceGlobalFibreSelection
+import KirovDolbeault.Dolbeault.SerreResidueDirect
+import KirovDolbeault.Dolbeault.FormTraceGlobalFibreSelection
 
 /-!
 # Assembling `DirectTraceGeometry` for an adapted cover (Gate A, Miranda §VIII.3 genericity)
@@ -20,7 +20,7 @@ pole↔full-fibre matching (`hpole_image`/`hpole_image_inf`), the non-pole resid
 (`hnonpole_an`/`hnonpole_inf_an`), and the centre bookkeeping — from concrete pole-enumeration inputs,
 and packaging the **deep analytic residuals** (the per-centre full-fibre moving coherence `Cfull`, the
 off-centre regular-value analyticity `hreg`, the branch boundedness `hbnd`, the junk-freeness
-`hcont_int`, and the genus-`0` `∞`-vanishing `R₀`) as explicit hypotheses.
+`hcont_int`, and the kirovGenus-`0` `∞`-vanishing `R₀`) as explicit hypotheses.
 
 ## What this file proves (axiom-clean `[propext, Classical.choice, Quot.sound]`)
 
@@ -50,8 +50,8 @@ enumeration (`hpole_image`).  This is the pole↔full matching the honest residu
 ## Honest scope (this is a 38-field assembly)
 
 A *full* closure of `DirectTraceGeometry` for general `poles` is **not** delivered here: the fields
-`hcont_int` (junk-freeness) and `R₀`/`hR₀0`/`hR₀_eq` (genus-`0` `∞`-vanishing) are residual *everywhere
-in the repo* — only the empty-pole case discharges them (the genus-`0` `H⁰(ℂℙ¹,Ω)=0` content applied to
+`hcont_int` (junk-freeness) and `R₀`/`hR₀0`/`hR₀_eq` (kirovGenus-`0` `∞`-vanishing) are residual *everywhere
+in the repo* — only the empty-pole case discharges them (the kirovGenus-`0` `H⁰(ℂℙ¹,Ω)=0` content applied to
 a *nonempty* trace is genuinely-open analytic content, never built), and the per-centre full-fibre moving
 coherence `Cfull` requires a per-centre `LocalSheetSystem` + the regular-value `g`-meromorphy wiring.
 `directTraceGeometry_ofAdapted` takes these as hypotheses, so the residual is *precisely* those
@@ -356,18 +356,18 @@ The honest reduction of Miranda's genericity for a *general* adapted cover `f`. 
   enumerates exactly the `∞`-fibre, catching all `∞`-poles) and `hnonpole_inf_an`;
 
 and the **deep analytic residuals** — `hreg` (regular-value analyticity), `hbnd` (branch boundedness),
-`hcont_int` (junk-freeness), `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` (genus-`0` `∞`-vanishing), `hcoh_full`
+`hcont_int` (junk-freeness), `R₀`/`hR₀_an`/`hR₀0`/`hR₀_eq` (kirovGenus-`0` `∞`-vanishing), `hcoh_full`
 (`∞`-single-valuedness) — as explicit hypotheses,
 
 this constructs a `DirectTraceGeometry ω₀ g f poles`.  The pole-only fibre `D := poleSubfibre ∘ Φ` and
 the `∞`-pole sub-enumeration are **proven** (via the `poleSubfibre`/`poleSubEnum` combinatorics); the
 matching fields `hpole_image`/`hpole_image_inf` follow.  This reduces Gate A to *precisely* the deep
-analytic residuals (the genus-`0` content + the per-centre/`∞` coherence), with **no false field**. -/
+analytic residuals (the kirovGenus-`0` content + the per-centre/`∞` coherence), with **no false field**. -/
 
 /-- **`DirectTraceGeometry` from an adapted cover (maximal proven prefix).**  Builds the pole-only
 finite/`∞` fibre groups, the pole↔full matching, and the centre bookkeeping from `Φ` + the concrete
 enumeration data; the deep analytic content (regular-value analyticity, branch boundedness,
-junk-freeness, genus-`0` `∞`-vanishing, the full-fibre/`∞` coherence) is taken as named hypotheses.
+junk-freeness, kirovGenus-`0` `∞`-vanishing, the full-fibre/`∞` coherence) is taken as named hypotheses.
 Reduces Gate A's genericity to the smallest honest residual. -/
 noncomputable def directTraceGeometry_ofAdapted
     (Φ : (b : ℂ) → FibreRegularData g f b)
@@ -391,7 +391,7 @@ noncomputable def directTraceGeometry_ofAdapted
     (hnonpole_inf_an : ∀ k, Dinf_full.xs k ∉ poles →
       AnalyticAt ℂ (fun z => g ((chartAt ℂ (Dinf_full.xs k)).symm z))
         ((chartAt ℂ (Dinf_full.xs k)) (Dinf_full.xs k)))
-    -- The deep analytic residuals (genus-`0` content + coherence), exposed as hypotheses.
+    -- The deep analytic residuals (kirovGenus-`0` content + coherence), exposed as hypotheses.
     (hreg : ∀ w ∉ Finset.univ.image cs ∪ br, AnalyticAt ℂ (valueChartTrace ω₀ f Φ) w)
     (hbnd : ∀ b₀ ∈ br, b₀ ∉ Finset.univ.image cs →
       Tendsto (fun z => (z - b₀) * valueChartTrace ω₀ f Φ z) (𝓝[≠] b₀) (𝓝 0))
@@ -479,7 +479,7 @@ noncomputable def directTraceGeometry_ofAdaptedSimpleInfty
     (hnonpole_inf_an : ∀ k, inftyFibreEnum f k ∉ poles →
       AnalyticAt ℂ (fun z => g ((chartAt ℂ (inftyFibreEnum f k)).symm z))
         ((chartAt ℂ (inftyFibreEnum f k)) (inftyFibreEnum f k)))
-    -- The deep analytic residuals (genus-`0` content + coherence), exposed as hypotheses.
+    -- The deep analytic residuals (kirovGenus-`0` content + coherence), exposed as hypotheses.
     (hreg : ∀ w ∉ Finset.univ.image cs ∪ br, AnalyticAt ℂ (valueChartTrace ω₀ f Φ) w)
     (hbnd : ∀ b₀ ∈ br, b₀ ∉ Finset.univ.image cs →
       Tendsto (fun z => (z - b₀) * valueChartTrace ω₀ f Φ z) (𝓝[≠] b₀) (𝓝 0))
@@ -550,7 +550,7 @@ constructor: `Φ := canonicalFibreSelection g f hdiv` (so the three `Φ`-enumera
 discharged from the single pole-value-goodness genericity `hgood`), and the full `∞`-fibre is
 constructed from simple poles.  The *remaining* inputs are the finite centre data + the deep analytic
 residuals (per-centre full-fibre coherence `Cfull`, regular-value analyticity `hreg`, branch
-boundedness `hbnd`, junk-freeness `hcont_int`, genus-`0` `∞`-vanishing `R₀`, `∞`-single-valuedness
+boundedness `hbnd`, junk-freeness `hcont_int`, kirovGenus-`0` `∞`-vanishing `R₀`, `∞`-single-valuedness
 `hcoh_full`) — the smallest honest residual of Gate A's genericity. -/
 noncomputable def directTraceGeometry_ofCanonicalSimpleInfty (hdiv : (f.div : Divisor X) ≠ 0)
     (hgood : ∀ p, (∃ a ∈ poles, f.toRiemannSphere a = (((p : ℂ) : RiemannSphere))) →
@@ -603,7 +603,7 @@ Chaining `directTraceGeometry_ofCanonicalSimpleInfty` into the proven `residueTh
 gives Gate A `∑Res = 0` directly from the residual hypotheses — making the standing of Gate A crisp:
 all the combinatorial / pole-only / `∞`-fibre / centre-bookkeeping content is *proven*, and the residue
 theorem holds for `α = ω₀·g` modulo *exactly* the per-centre full-fibre coherence + the deep analytic
-genus-`0` content. -/
+kirovGenus-`0` content. -/
 
 /-- **Gate A `∑Res = 0` from the canonical-selection residuals.**  With the canonical full-fibre
 selection, simple `∞`-poles, and pole-value goodness, the residue theorem `∑_{a ∈ poles} formFnResidue

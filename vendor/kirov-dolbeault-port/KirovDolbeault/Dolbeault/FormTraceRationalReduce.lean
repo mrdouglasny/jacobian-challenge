@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobalConstruct
-import Jacobians.Dolbeault.FormTraceGlobalFunction
-import Jacobians.Dolbeault.FormTraceInftyRecip
+import KirovDolbeault.Dolbeault.FormTraceGlobalConstruct
+import KirovDolbeault.Dolbeault.FormTraceGlobalFunction
+import KirovDolbeault.Dolbeault.FormTraceInftyRecip
 
 /-!
 # Reducing `TraceRationalityWitness` to the trace-representation agreement (Gate A, §VIII.3 step 4)

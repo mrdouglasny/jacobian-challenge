@@ -3,12 +3,12 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.SerreResidueGateAClosed
-import Jacobians.Dolbeault.SerreResidueRamifiedRealSlitGeometry
-import Jacobians.Dolbeault.FormRemovableSingularity
-import Jacobians.Dolbeault.SerreDuality
-import Jacobians.Dolbeault.CechComplex
-import Jacobians.Dolbeault.SerreDualityPairing
+import KirovDolbeault.Dolbeault.SerreResidueGateAClosed
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedRealSlitGeometry
+import KirovDolbeault.Dolbeault.FormRemovableSingularity
+import KirovDolbeault.Dolbeault.SerreDuality
+import KirovDolbeault.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.SerreDualityPairing
 
 /-!
 # Forster §17.5 residue pairing + §17.6 injectivity — the global `Res` descent and `ι_D`
@@ -16,7 +16,7 @@ import Jacobians.Dolbeault.SerreDualityPairing
 This file builds the next genuinely-Serre piece (Forster §17.5, step 4): the global
 residue functional `Res` on the Mittag–Leffler distribution picture (Forster §17.2–17.3), the residue
 **pairing** `ι_D : L(K−D) → (H¹(X,𝒪_D))*` (Forster §17.5), and the §17.6 **injectivity** of `ι_D`
-(the EASY half), giving `lDim (K−D) ≤ h1Dim D` — at `D = 0`, `genus ≤ h1Dim 0`.
+(the EASY half), giving `lDim (K−D) ≤ h1Dim D` — at `D = 0`, `kirovGenus ≤ h1Dim 0`.
 
 ## What is PROVEN here (complete, axiom-clean)
 
@@ -211,7 +211,7 @@ theorem pairing_injective (R : SerreResidueRealization 𝔘 K) (D : Divisor X) :
   injective_of_residueOne_witness (R.pairing D) (R.witness D)
 
 /-- **§17.6 — the EASY-half dimension bound `lDim (K−D) ≤ h1Dim D`.**  From injectivity of the residue
-pairing into the (finite-dimensional, via `finH1`) dual of `H¹(𝒪_D)`.  At `D = 0`: `genus ≤ h1Dim 0`. -/
+pairing into the (finite-dimensional, via `finH1`) dual of `H¹(𝒪_D)`.  At `D = 0`: `kirovGenus ≤ h1Dim 0`. -/
 theorem lDim_le_h1Dim (R : SerreResidueRealization 𝔘 K) (D : Divisor X)
     (hfin : FiniteDimensional ℂ (𝔘.cechH1 D)) :
     lDim (X := X) (K - D) ≤ 𝔘.h1Dim D := by
@@ -226,7 +226,7 @@ and finiteness assembles into the full `SerreDualityData 𝔘` that the Riemann�
 `hKgenus` (now proven) and surjectivity remain externally.  This wires the residue pairing into the
 downstream target rather than leaving it isolated. -/
 def toSerreDualityData (R : SerreResidueRealization 𝔘 K)
-    (hKgenus : lDim (X := X) K = genus X)
+    (hKgenus : lDim (X := X) K = kirovGenus X)
     (ι_surj : ∀ D : Divisor X, Function.Surjective (R.pairing D))
     (finH1 : ∀ D : Divisor X, FiniteDimensional ℂ (𝔘.cechH1 D)) :
     SerreDualityData 𝔘 where

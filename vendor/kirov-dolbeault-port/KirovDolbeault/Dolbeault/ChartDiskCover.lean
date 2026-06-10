@@ -11,7 +11,7 @@
   that `U_i` is exactly the chart-preimage of a Euclidean ball. All existing `𝔘.cechH1 / cocycles1`
   machinery applies verbatim through `toFiniteCover`.
 -/
-import Jacobians.Dolbeault.CechComplex
+import KirovDolbeault.Dolbeault.CechComplex
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)

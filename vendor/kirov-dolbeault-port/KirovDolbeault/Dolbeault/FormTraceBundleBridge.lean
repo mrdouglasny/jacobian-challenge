@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceBundleBranchBound
-import Jacobians.Dolbeault.FormTraceSheetFibreBridge
-import Jacobians.Dolbeault.FormTraceCoherentSelection
+import KirovDolbeault.Dolbeault.FormTraceBundleBranchBound
+import KirovDolbeault.Dolbeault.FormTraceSheetFibreBridge
+import KirovDolbeault.Dolbeault.FormTraceCoherentSelection
 
 /-!
 # The bundle-trace germ bridge `hbridgeBr` (Gate A close, Miranda §VIII.3)
@@ -286,7 +286,7 @@ Wiring `hbridgeBr_of_eventual_sphereCoherence` into `residueSum_eq_zero_ofBundle
 branch-value input to Gate A is now the **standard regular-value sphere coherence** — the monodromy /
 colliding-Puiseux frame is fully gone, replaced by the value-correct symmetric-SUM germ identification
 (proven above).  Every other input (the cover scaffolding `cs`/`ρ`/`Dinf`/`Sreg`, the pole sub-fibre
-sections, the `∞`/junk/genus-`0` bookkeeping) is unchanged from `residueSum_eq_zero_ofBundleBranch`. -/
+sections, the `∞`/junk/kirovGenus-`0` bookkeeping) is unchanged from `residueSum_eq_zero_ofBundleBranch`. -/
 
 /-- **Gate A `∑Res = 0` from the bundle-branch boundedness with the standard sphere coherence.**
 Identical to `residueSum_eq_zero_ofBundleBranch` except the per-branch bundle-trace germ bridge

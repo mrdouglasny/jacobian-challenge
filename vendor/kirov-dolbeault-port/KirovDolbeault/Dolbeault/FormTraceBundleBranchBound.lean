@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTracePatchedFrame
-import Jacobians.ProjectiveLine
+import KirovDolbeault.Dolbeault.FormTracePatchedFrame
+import KirovDolbeault.ProjectiveLine
 
 /-!
 # The branch-value boundedness crux from the bundle **trace SUM** (Gate A, Miranda §VIII.3 — close)
@@ -158,7 +158,7 @@ from the pole-sub-fibre sheets (`secFin`, `hselFin`) via `MovingCoherenceDatum.o
 per-regular data from the sphere sheet systems (`Sreg`) + the canonical-fibre condition via
 `MovingCoherenceDatum.ofSphereSheetSystemCanon`; the branch-value boundedness `hbnd` from the **bundle
 trace SUM** (`tendsto_zero_valueChartTrace_of_bundleGerm`) — *not* from a colliding-sheet Puiseux frame.
-The `∞`/junk/genus-`0` fields are carried verbatim.  `residueSum_eq_zero_of_patchedTraceSelection` then
+The `∞`/junk/kirovGenus-`0` fields are carried verbatim.  `residueSum_eq_zero_of_patchedTraceSelection` then
 gives Gate A `∑Res = 0`. -/
 noncomputable def patchedTraceSelection_ofBundleBranch (hac : AdaptedCover ω₀ g f poles)
     -- The global fibre selection and the finite/`∞` enumeration bookkeeping.
@@ -215,7 +215,7 @@ noncomputable def patchedTraceSelection_ofBundleBranch (hac : AdaptedCover ω₀
       valueChartTrace ω₀ f Φ =ᶠ[𝓝[≠] b₀]
         fun z : ℂ => traceLocalCoeff (traceFun f.toRiemannSphere (αBr b₀))
           (((b₀ : ℂ) : RiemannSphere)) (((z : ℂ) : RiemannSphere)))
-    -- The `∞`-glue / junk-freeness / genus-`0` `∞`-vanishing (the rationality bookkeeping).
+    -- The `∞`-glue / junk-freeness / kirovGenus-`0` `∞`-vanishing (the rationality bookkeeping).
     (hglue_inf : recipCoeff (valueChartTracePatched ω₀ f Φ br)
       =ᶠ[𝓝[≠] 0] (inftyFibreTrace ω₀ f Dinf).traceCoeff)
     (hcont_int : ∀ (L : LaurentForm), Finset.univ.image L.a = Finset.univ.image cs →
@@ -258,7 +258,7 @@ noncomputable def patchedTraceSelection_ofBundleBranch (hac : AdaptedCover ω₀
 /-- **Gate A `∑Res = 0` from the bundle-branch boundedness.**  Composing
 `patchedTraceSelection_ofBundleBranch` with the proven `residueSum_eq_zero_of_patchedTraceSelection`:
 once the global selection, the per-pole/per-regular sphere data, the per-branch-value bundle-trace germ
-bridges, and the `∞`/junk/genus-`0` bookkeeping are supplied, the 1-form residue theorem
+bridges, and the `∞`/junk/kirovGenus-`0` bookkeeping are supplied, the 1-form residue theorem
 `∑ₐ Resₐ(α) = 0` holds for `α = ω₀·g`.  The branch-value boundedness is discharged via the **proven
 bundle trace SUM** (no colliding Puiseux frame); the regular-value coherence via the symmetric lever. -/
 theorem residueSum_eq_zero_ofBundleBranch (hac : AdaptedCover ω₀ g f poles)

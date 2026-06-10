@@ -3,8 +3,8 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormResidueTheorem
-import Jacobians.Dolbeault.FormTraceRationalityNFPatched
+import KirovDolbeault.Dolbeault.FormResidueTheorem
+import KirovDolbeault.Dolbeault.FormTraceRationalityNFPatched
 
 /-!
 # Miranda's algebraic proof of the residue theorem `∑ₐ Resₐ(α) = 0` (§VIII.3, pp. 251–256)
@@ -27,7 +27,7 @@ Pick a nonconstant meromorphic `f : X → ℂℙ¹`, giving a branched cover `F 
 the **trace** `Tr_F α` of `α = ω₀·g`, a 1-form on `ℂℙ¹`. Then:
 
 * **Step 1** — *"Tr_F α extends to a meromorphic 1-form on `ℂℙ¹`"* (Miranda p. 252–253, formula
-  **(3.1)** `Tr(ω) = Σₖ c_{km−1} z^{k−1} dz`). Since `ℂℙ¹` has genus `0`, a global meromorphic 1-form
+  **(3.1)** `Tr(ω) = Σₖ c_{km−1} z^{k−1} dz`). Since `ℂℙ¹` has kirovGenus `0`, a global meromorphic 1-form
   is **rational** — a partial-fraction `LaurentForm L` with `Tr_F α = L.R`.
 * **Step 2** — **Lemma 3.2** (Miranda p. 253): `Res_y(Tr_F α) = Σ_{x ∈ F⁻¹(y)} Res_x(α)` at every
   `y ∈ ℂℙ¹` (ramified or not, by (3.1)).
@@ -52,7 +52,7 @@ representation split.
 
 * `tr_isRational` — **Step 1**: the trace `Tr_F α` is the rational `LaurentForm L`. (Definitional in
   the packaging: `L` *is* `Tr_F α`. The analytic content of (3.1) — meromorphy across branch points
-  + genus-`0` rationality — is what *constructs* a `SerreTraceData`; see "the substrate gap" below.)
+  + kirovGenus-`0` rationality — is what *constructs* a `SerreTraceData`; see "the substrate gap" below.)
 * `lemma_3_2` — **Step 2**: at each finite centre, `Res_p(Tr_F α) = Σ_{x ∈ F⁻¹(p)} Res_x(α)`. Proved
   from the **unconditional** `FibreTrace.resAt_traceCoeff'` (Miranda Lemma 3.2, axiom-clean) + the
   packaging's `hL32`.
@@ -62,7 +62,7 @@ representation split.
   `residueSum_eq_infty_add_finite` + Steps 2–3, via `residueSum_eq_zero_of_formResidueTrace`.
 
 Steps 2, 3, 4 are **fully proven, axiom-clean** from the one-variable engines. Step 1 (the trace's
-meromorphy-across-branch-points + genus-`0` rationality) is **now also proven and wired in** (see
+meromorphy-across-branch-points + kirovGenus-`0` rationality) is **now also proven and wired in** (see
 below); the remaining substrate gap is just the genericity *"a nonconstant adapted `f` exists"*. The
 trace object is isolated as the **existence of a `SerreTraceData`** (`SerreTraceExists`, below), with a
 precise diagnosis and a **non-vacuity witness** (the empty-pole, globally-holomorphic case,
@@ -74,7 +74,7 @@ precise diagnosis and a **non-vacuity witness** (the empty-pole, globally-holomo
 assumes but does not prove from scratch. **(b) Step-1 rationality is no longer a gap:**
 
 * **(b) Step-1 rationality** — that `Tr_F α` extends meromorphically across the branch points (formula
-  (3.1)) and is therefore a rational `LaurentForm` — is **PROVEN** (genus-`0` `hentire` proven, not
+  (3.1)) and is therefore a rational `LaurentForm` — is **PROVEN** (kirovGenus-`0` `hentire` proven, not
   assumed; sound `∞`-fibre `InftyFibreDataNF`) in
   `FormTraceFullFibre.traceRationalityDataNF_ofPatched` (`FormTraceRationalityNFPatched.lean`, on the
   axiom-clean branch-point extension `TraceForm.traceExtendsAt_branchPoint`). This file **bridges** that
@@ -101,7 +101,7 @@ No `axiom`, no gap on a false statement, no false structure field. The reused `S
 (= `FormResidueTrace`) fields are each a *true, satisfiable* statement (Miranda's honest geometric
 content), witnessed non-vacuously by `serreTraceExists_of_holomorphic` / `traceRationalityExists_of_holomorphic`
 (empty poles). The bridge rides on the **sound** trace-rationality assembly
-`traceRationalityDataNF_ofPatched` (genus-`0` `hentire` *proven*, sound `∞`-fibre `InftyFibreDataNF` —
+`traceRationalityDataNF_ofPatched` (kirovGenus-`0` `hentire` *proven*, sound `∞`-fibre `InftyFibreDataNF` —
 never the unsatisfiable `InftyFibreData`; the campaign's five false fields all avoided). All public
 declarations are authoritatively `[propext, Classical.choice, Quot.sound]` (`#print axioms`).
 
@@ -142,7 +142,7 @@ book-faithful name `SerreTraceData`. Its fields are exactly Miranda's output for
 * `f` — the nonconstant cover `F = f.toRiemannSphere`;
 * `poles` — the finite pole set of `α = ω₀·g`;
 * `L : LaurentForm` — the **rational** trace (`Tr_F α = L.R`, the partial-fraction form on `ℂℙ¹`,
-  the genus-`0` content of Step 1);
+  the kirovGenus-`0` content of Step 1);
 * `fibre p : FibreTrace` — Miranda's local fibre datum over each finite centre `p`;
 * `hL32` — Lemma 3.2 at the finite centres: the fibre residue sum equals `L`'s residue there
   (`Σ_i Res_{pre i}(coeff i) = Res_p(L.R)`); this is the **value-correct** identification of `L.R`
@@ -164,12 +164,12 @@ variable {ω₀ : HolomorphicOneForms X} {g : X → ℂ} {poles : Finset X}
 /-! ## Step 1 (Miranda (3.1)): `Tr_F α` is the rational form `L`
 
 Miranda formula (3.1) (p. 253) shows `Tr(ω)` extends meromorphically across every `y ∈ ℂℙ¹`
-(ramified fibres handled by the `z = wᵐ` normal form), hence — `ℂℙ¹` having genus `0` — is a
+(ramified fibres handled by the `z = wᵐ` normal form), hence — `ℂℙ¹` having kirovGenus `0` — is a
 **rational** 1-form, a partial-fraction `LaurentForm`. In the packaging this rationality is recorded
 by the field `T.L`: the trace `Tr_F α` *is* the rational form `T.L.R`.
 
 The *construction* of such a `T` (the analytic content of (3.1): the branch-point extension
-`TraceForm.traceExtendsAt_branchPoint`, the principal-part extraction, and the genus-`0`
+`TraceForm.traceExtendsAt_branchPoint`, the principal-part extraction, and the kirovGenus-`0`
 remainder-vanishing) is the substrate gap, isolated as `SerreTraceExists`; here Step 1 is the
 statement that, *given* the trace object, the trace is the rational form. -/
 
@@ -213,7 +213,7 @@ theorem lemma_3_2 (T : SerreTraceData ω₀ g) {p : ℂ} (hp : p ∈ Finset.univ
 
 /-! ## Step 3 (the `ℂℙ¹` residue theorem): `(Σ_y Res_y(L)) + Res_∞(L) = 0`
 
-On the sphere `ℂℙ¹` (genus `0`), the sum of *all* residues of a rational 1-form — the finite
+On the sphere `ℂℙ¹` (kirovGenus `0`), the sum of *all* residues of a rational 1-form — the finite
 centres plus the residue at infinity — vanishes. This is the **proven, axiom-clean**
 `TraceResidue.LaurentForm.finiteResidueSum_add_resAtInfty_eq_zero`. -/
 
@@ -318,8 +318,8 @@ The substrate gap `SerreTraceExists` packages two things (module docstring): **(
 nonconstant adapted `f`) and **(b)** Step-1 rationality (`Tr_F α` is the rational `LaurentForm T.L`).
 
 **Step-1 rationality is no longer assumed — it is PROVEN.**  The §VIII.3 trace's meromorphy across
-branch points (formula (3.1)) and the consequent genus-`0` rationality are assembled, *with the
-genus-`0` entire-remainder field `hentire` proven (not a caller hypothesis)* and a **sound** `∞`-fibre
+branch points (formula (3.1)) and the consequent kirovGenus-`0` rationality are assembled, *with the
+kirovGenus-`0` entire-remainder field `hentire` proven (not a caller hypothesis)* and a **sound** `∞`-fibre
 (the repaired reciprocal `InftyFibreDataNF`, never the unsatisfiable `InftyFibreData`), in
 `FormTraceFullFibre.traceRationalityDataNF_ofPatched`
 (`FormTraceRationalityNFPatched.lean`).  Its output is a `TraceRationalityDataNF`, which is exactly the
@@ -358,7 +358,7 @@ theorem serreTraceExists_of_globalTraceData {f : MeromorphicFunction X}
 
 /-- **The §VIII.3 trace object from the branch-patched geometric trace (Step-1 rationality wired).**
 With the branch-patched trace `T := valueChartTracePatched ω₀ f Φ br`, the *proven* trace-rationality
-assembly `traceRationalityDataNF_ofPatched` (where the genus-`0` `hentire` is **proven internally** via
+assembly `traceRationalityDataNF_ofPatched` (where the kirovGenus-`0` `hentire` is **proven internally** via
 the off-centre analyticity `hreg`/`hbnd` + junk-freeness `hcont_int`, and the `∞`-fibre is the **sound**
 `InftyFibreDataNF.ofRegular`) builds a `TraceRationalityDataNF`; bridging it gives a `SerreTraceData`,
 hence `SerreTraceExists ω₀ g poles`.
@@ -368,7 +368,7 @@ The hypotheses are exactly the §VIII.3 geometric inputs of `residueSum_eq_zero_
 regular-value moving coherence `Creg`/`hCreg_g` (giving `hreg`), the branch-value sphere coherence
 `αBr`/`hbr`/`hevBr` (giving `hbnd` via the proven bundle SUM `traceExtendsAt_branchPoint`), the simple
 `∞`-poles `xsInf`/`hsimpleInf`, the `∞`-moving coherence `hcoh`, junk-freeness `hcont_int`, and the
-genus-`0` `∞`-vanishing `R₀`.  Producing them is the residual **genericity** (a nonconstant adapted `f`);
+kirovGenus-`0` `∞`-vanishing `R₀`.  Producing them is the residual **genericity** (a nonconstant adapted `f`);
 the trace's rationality is no longer assumed. -/
 theorem serreTraceExists_of_patchedGeometry {f : MeromorphicFunction X}
     (hncF : ¬ ∃ y₀ : RiemannSphere, ∀ x, f.toRiemannSphere x = y₀)

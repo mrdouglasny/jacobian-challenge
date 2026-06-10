@@ -3,9 +3,9 @@ Copyright (c) 2026 Rado Kirov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rado Kirov
 -/
-import Jacobians.Dolbeault.FormTraceGlobal
-import Jacobians.Dolbeault.FormTraceInftyFibre
-import Jacobians.Dolbeault.FormTraceInftyRecip
+import KirovDolbeault.Dolbeault.FormTraceGlobal
+import KirovDolbeault.Dolbeault.FormTraceInftyFibre
+import KirovDolbeault.Dolbeault.FormTraceInftyRecip
 
 /-!
 # Gate A `∑ₐ Resₐ(α) = 0` from the full-fibre trace rationality (Miranda §VIII.3, clean assembly)
