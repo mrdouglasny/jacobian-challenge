@@ -1,6 +1,6 @@
 # Jacobians of Compact Riemann Surfaces
 
-A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.2, April 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as a **classified, audited axiom layer**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
+A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.4, May 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as a **classified, audited axiom layer**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
 
 > **What this is, honestly.** A scaffold that *closes Buzzard's interface* and proves real theorems on it, with the deep classical inputs isolated as a classified, discharge-planned axiom layer — **not** a from-first-principles proof of Jacobian theory. The axioms are LLM-authored and **have not had independent human-mathematician review**. See [Caveats](#caveats--read-before-relying-on-this) before relying on any result.
 
@@ -105,7 +105,9 @@ The construction takes the **period-lattice route** — `Jac X = (HolomorphicOne
 
 | Path | Contents |
 |------|----------|
-| [`Jacobians/Challenge.lean`](Jacobians/Challenge.lean) | Buzzard's v0.2 file verbatim (pinned), all 24 `sorry`s closed downstream |
+| [`Jacobians/Challenge.lean`](Jacobians/Challenge.lean) | Buzzard's v0.4 statements verbatim, all 24 `sorry`s closed downstream |
+| [`challenge_spec_v0.4.lean`](challenge_spec_v0.4.lean) | Buzzard's v0.4 spec pinned byte-identical (gist rev `cdc146c3`; uncompiled reference) |
+| [`Jacobians/ChallengeConformance.lean`](Jacobians/ChallengeConformance.lean) | machine-check: each v0.4 signature restated as an `example`, discharged by our decls |
 | [`Jacobians/AbelianVariety/`](Jacobians/AbelianVariety/) | `ComplexTorus` (axiom-free) |
 | [`Jacobians/RiemannSurface/`](Jacobians/RiemannSurface/) | period lattice, line integrals, `riemannRochSpace`, the RR/Serre/Plücker anchor APIs |
 | [`Jacobians/ProjectiveCurve/`](Jacobians/ProjectiveCurve/) | concrete curves + the hyperelliptic 1-form framework |

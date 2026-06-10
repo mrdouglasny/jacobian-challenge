@@ -19,7 +19,7 @@ import Jacobians.Axioms.Uniformization0
 
 # Jacobians
 
-An AI challenge to make an API for Jacobians, by Kevin Buzzard. v0.2.
+An AI challenge to make an API for Jacobians, by Kevin Buzzard. v0.4.
 
 ## Main missing definitions
 
@@ -45,6 +45,9 @@ An AI challenge to make an API for Jacobians, by Kevin Buzzard. v0.2.
 
 ## Changelog
 
+* v0.4: use notation `𝓘(ℂ, E)` instead of `modelWithCornersSelf ℂ E` (note in particular
+  that v0.4 is syntactically identical to v0.3)
+* v0.3: drop `[Nonempty X]` in the presence of `[ConnectedSpace X]` (connected => nonempty).
 * v0.2: `Type*` not `Type u`; use `𝓘(ℂ)` instead of `modelWithCornersSelf ℂ ℂ`; docstrings
   and comments
 * v0.1: initial public release
@@ -56,7 +59,7 @@ open scoped Manifold -- for 𝓘 notation
 
 /-- The genus of a compact Riemann surface. -/
 noncomputable def genus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
+  [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : ℕ :=
   Jacobians.RiemannSurface.genus X
 
 -- let X be a compact Riemann surface
@@ -76,7 +79,7 @@ universe u in
 -- data
 /-- The Jacobian of a compact Riemann surface. -/
 noncomputable def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
-  [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type u :=
+  [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type u :=
   Jacobians.Jacobian X
 
 namespace Jacobian
@@ -112,13 +115,13 @@ noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) := by
   infer_instance
 
 -- Prop
-instance : IsManifold (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
+instance : IsManifold 𝓘(ℂ, Fin (genus X) → ℂ) ω (Jacobian X) := by
   change IsManifold (modelWithCornersSelf ℂ (Fin (Jacobians.RiemannSurface.genus X) → ℂ))
     ω (Jacobians.Jacobian X)
   infer_instance
 
 -- Prop
-instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Jacobian X) := by
+instance : LieAddGroup 𝓘(ℂ, Fin (genus X) → ℂ) ω (Jacobian X) := by
   change LieAddGroup (modelWithCornersSelf ℂ (Fin (Jacobians.RiemannSurface.genus X) → ℂ))
     ω (Jacobians.Jacobian X)
   infer_instance
@@ -127,8 +130,7 @@ instance : LieAddGroup (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (Ja
 noncomputable def ofCurve (P : X) : X → Jacobian X :=
   Jacobians.Axioms.ofCurveImpl X P
 
-lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ)
-    (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (ofCurve P) :=
+lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω (ofCurve P) :=
   Jacobians.Axioms.AX_ofCurve_contMDiff P
 
 lemma ofCurve_self (P : X) : ofCurve P P = 0 :=
@@ -139,7 +141,7 @@ lemma ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) :=
   Jacobians.Axioms.AX_ofCurve_inj P h
 
 variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
-  [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
+  [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
 
 variable (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
 
@@ -151,8 +153,7 @@ noncomputable def pushforward (f : X → Y)
 
 -- pushforward is holomorphic
 theorem pushforward_contMDiff :
-  ContMDiff (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
-  (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ)) ω (pushforward f hf) :=
+  ContMDiff 𝓘(ℂ, Fin (genus X) → ℂ) 𝓘(ℂ, Fin (genus Y) → ℂ) ω (pushforward f hf) :=
   Jacobians.Axioms.AX_pushforward_contMDiff f hf
 
 -- functoriality
@@ -160,7 +161,7 @@ lemma pushforward_id_apply (P : Jacobian X) : pushforward id contMDiff_id P = P 
   Jacobians.Axioms.AX_pushforward_id_apply P
 
 variable {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpace Z] [ConnectedSpace Z]
-  [Nonempty Z] [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
+  [ChartedSpace ℂ Z] [IsManifold 𝓘(ℂ) ω Z]
 
 variable (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g)
 
@@ -178,8 +179,7 @@ noncomputable def pullback (f : X → Y)
 
 -- pullback is holomorphic
 theorem pullback_contMDiff :
-    ContMDiff (modelWithCornersSelf ℂ (Fin (genus Y) → ℂ))
-      (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω (pullback f hf) :=
+    ContMDiff 𝓘(ℂ, Fin (genus Y) → ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω (pullback f hf) :=
   Jacobians.Axioms.AX_pullback_contMDiff f hf
 
 -- functoriality
