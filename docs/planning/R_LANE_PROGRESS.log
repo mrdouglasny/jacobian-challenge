@@ -1,0 +1,23 @@
+# Lane R progress log — feat/keystone-r0-signtest
+# Scope: R0 (sign test) + R1 (germ→chart-coefficient layer) + R2 (PoU split), per
+# docs/planning/S3_FINESHEAF_RES_SCOPING.md.
+
+[2026-06-10 ~start] Session start. Read S3 scoping in full; surveyed
+DbarDisk.lean (cauchyPompeiu_area : ∫ dbar g / (ζ−z) = −π·g z, PROVEN),
+DolbeaultComparisonInverse.lean (cechPoU/rhoC/dbarRho), port layout
+(vendor/kirov-dolbeault-port, lean4 v4.30.0, mathlib c5ea0035, build cache hot).
+R0 plan: dbar Leibniz (fderiv_mul) + dbar_eq_zero_of_differentiableAt away from
+the pole ⇒ dbar(χ·(z−a)⁻¹) =ᵐ (dbar χ)/(ζ−a) ⇒ integral = −π·χ(a) by
+cauchyPompeiu_area at z = a.  Expected convention: ∫_ℂ ∂̄(χ·(·−a)⁻¹) dA_Leb = −π,
+so the normalization constant for the residue ladder is −π⁻¹ = (2πi)⁻¹·(−2i),
+i.e. Forster's (2πi)⁻¹∬τ with τ read against dz∧dz̄ = −2i·dA.  Writing
+KirovDolbeault/Dolbeault/FineResidue/SignTest.lean now.
+
+[R0 DONE] SignTest.lean compiles clean (lake env lean), all 6 decls
+#print-axioms-clean ([propext, Classical.choice, Quot.sound]).
+PINNED CONVENTION: ∫_ℂ ∂̄(χ·(z−a)⁻¹) dA_Leb = −π·χ(a)  (integral_dbar_smearedSimplePole);
+normalizer resNormalization := −π⁻¹ = (2πi)⁻¹·(−2i) gives
+resNormalization · ∫ = 1 for χ(a)=1 (resNormalization_integral_eq_one).
+No fudge: raw Forster (2πi)⁻¹ on the Lebesgue integral would give i/2; the −2i Jacobian
+(dz∧dz̄ = −2i·dA) is recorded as resNormalization_eq_two_pi_I_inv_mul.
+Non-vacuity witness via ContDiffBump (exists_signTest_witness). Committing R0; next R1.
