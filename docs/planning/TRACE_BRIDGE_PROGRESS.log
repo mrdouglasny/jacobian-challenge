@@ -9,3 +9,28 @@
                Affected headline wrappers (from docs/axiom-report.txt): Jacobian.pullback,
                pullback_contMDiff, pullback_id_apply, pullback_comp_apply,
                pushforward_pullback.
+
+2026-06-10 T1  Bridge/KirovDolbeaultTrace.lean compiled FIRST TRY: kdFormAlign =
+               LinearEquiv.refl on the shared ContMDiffSection type (no instance
+               diamond — Gemini's flagged high-risk item did not materialize);
+               bridgeKDFormEquiv = bridgeFormEquiv.trans kdFormAlign.
+               In-place conversion in Axioms/AbelJacobiMap.lean: pushforwardOneForm
+               axiom -> def (signature unchanged), AX_pushforwardOneForm_id/_comp
+               axiom -> theorem (unfold; rw [traceFormTotal_id/_comp]; ext; simp).
+               lake env lean on both files: 0 errors, warnings identical to base.
+               Commit ee32a55.
+
+2026-06-10 T2  Full lake build (8750 jobs) GREEN — no downstream shadowing fallout
+               from the port import reaching the Axioms layer. #print axioms:
+               pushforwardOneForm, AX_pushforwardOneForm_id, AX_pushforwardOneForm_comp,
+               bridgeKDFormEquiv, kdFormAlign all = [propext, Classical.choice,
+               Quot.sound]. Port chain (traceFormTotal{,_id,_comp,_eq_zero_of_const})
+               re-verified standard-3 from OUR build env. pullbackAmbientLinear now
+               standard-3; pullbackImpl lost Axioms.pushforwardOneForm.
+               Regenerated docs/axiom-report.txt (3 axioms vanish from all 5 pullback*
+               / pushforward_pullback headlines; 0 sorryAx). Doc reconcile:
+               AXIOM_AUDIT (33, history clause, 2a/2b DISCHARGED rows, breakdown
+               4/4, Recently-discharged entry, verification block), README (33;
+               challenge-critical 13 -> 10; Functoriality 7 -> 4; Total 33),
+               CHALLENGE_AXIOM_CLOSURE Cluster-C status note.
+               Guard: bash scripts/check_axiom_consistency.sh -> "✓ ... (= 33)".

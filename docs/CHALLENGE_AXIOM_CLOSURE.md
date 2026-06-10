@@ -124,6 +124,14 @@ within the cluster is more nuanced than "all follow from one root":
 | `AX_pullbackAmbient_preserves_lattice` | `pushforwardOneForm` (trace, axiom) | `pullbackAmbientLinear` is defined as the dual of `pushforwardOneForm f` — so the trace IS the dependency. Content: `∫_γ f*ω = ∫_{f_*(γ)} ω` from the other side. **Trace-gated.** |
 | `AX_pushforward_pullback` | trace-norm relation | `pushforward_f ∘ pullback_f = [deg f]` on Jac(Y): follows from `Tr_f(f*ω) = deg(f)·ω`. Forster §12 / Miranda. |
 
+> **Status 2026-06-10:** the first three rows — `pushforwardOneForm`,
+> `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` — are **DISCHARGED**
+> (#26/#27/#28): real def/theorems via the Kirov-Dolbeault port's fibre-sum trace
+> `traceFormTotal`, transported across `Bridge/KirovDolbeaultTrace.lean`
+> (standard-3). The challenge-critical count is now **10**;
+> `AX_pullbackAmbient_preserves_lattice` is no longer trace-gated by an axiom —
+> it is the dual of a REAL trace.
+
 The key discharge order: `pushforwardOneForm` (trace across ramification) gates
 `pullback` type, both id/comp laws, `AX_pullbackAmbient_preserves_lattice`, and
 push-pull. `AX_pushforwardAmbient_preserves_lattice` is independent of the trace:

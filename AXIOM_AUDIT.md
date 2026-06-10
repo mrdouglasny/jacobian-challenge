@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-07.*
+*Last updated 2026-06-10.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,11 +10,14 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 36** — all **36** in our own modules (Phase D
+**Active project axioms: 33** — all **33** in our own modules (Phase D
 discharged the Layer-3 `H1coh` + its 3 instances to real definitions backed by
 the Kirov Dolbeault port's Čech cohomology (`Layer3/CechH1Bridge.lean`,
 2026-06-10, `#print axioms` standard-3, net −4), then `cohomologyLES` to a real
-construction — the skyscraper LES transported through the new L(D) bridge
+construction, then the **trace cluster** — `pushforwardOneForm` +
+`AX_pushforwardOneForm_id`/`_comp` → real def/theorems via the port's fibre-sum
+trace `traceFormTotal` transported across `Bridge/KirovDolbeaultTrace.lean`
+(issues #26/#27/#28, 2026-06-10, standard-3, net −3, 36 → 33) — the skyscraper LES transported through the new L(D) bridge
 `riemannRochSpaceEquivGlobalSections` (`Layer3/LinearSystemBridge.lean` +
 `CohomologyLESBridge.lean`, 2026-06-10, standard-3, net −1; `riemannRochL3`
 now depends on the single axiom `h1coh_zero_finrank`); Layer-3 Phase C
@@ -289,7 +292,7 @@ primitives that are statement-vetted but not yet discharged.
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (22 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (19 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -302,8 +305,8 @@ primitives that are statement-vetted but not yet discharged.
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 10 | classical theorems, citable | high |
-| 2a — data-existence | 5 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 6 | "my construction has good property P" | **may mask a bad def** |
+| 2a — data-existence | 4 | "this function/object exists with spec S" | spec needs review |
+| 2b — definition-asserting | 4 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 11 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 2 | `h1coh_zero_finrank`+`serreDuality_equiv` (keystone-gated: port's `exists_serreDualityData`) — **re-stamped vs the now-CONCRETE `H1coh` 2026-06-10 (`DT`): both Standard** — chart disks are Stein/∂̄-acyclic, so the one-cover Čech H¹ IS genuine H¹(X,𝒪_D) (Cartan; twisting by the finite-support D preserves chart-disk acyclicity), making `h1coh_zero_finrank` exactly the Hodge/Serre h¹(𝒪)=g base case and `serreDuality_equiv` Forster §17 at the right strength (opaque K satisfiable as div(ω)). `H1coh`(+3 instances) and `cohomologyLES` **DISCHARGED 2026-06-10** via the Kirov Dolbeault port (`Layer3/CechH1Bridge.lean`, `LinearSystemBridge.lean`, `CohomologyLESBridge.lean`; all standard-3) | research |
@@ -346,7 +349,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `pushforwardOneForm` 🅒 | `Axioms/AbelJacobiMap.lean:143` | trace of 1-forms |
+| `pushforwardOneForm` 🅒 | ✅ **DISCHARGED 2026-06-10** (#26) — now a real `def` via the Kirov-Dolbeault port's fibre-sum trace `traceFormTotal` (genuine `traceForm` off constants, `0` for constant maps — the docstring convention realized definitionally), transported across `Bridge/KirovDolbeaultTrace.lean`'s `bridgeKDFormEquiv`; standard-3, supersedes the 🅒 construction plan | trace of 1-forms |
 | `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL with a recorded nuance** — the genuine topological form (transported along the canonical basepoint-independent Hurewicz iso) satisfies all companions; opacity is spec-complete for current uses (downstream consumes only the symplectic-basis values + the RBR primitives, and Sp(2g,ℤ) transitivity makes any compliant model equivalent), BUT the *topological anchoring* debt re-surfaces when `AX_RBR1`/`AX_RBR2` are eventually discharged by genuine Stokes — at that point the form must be tied to the actual dissection (record: discharge RBR + intersectionForm jointly). Cosmetic: a `→ₗ[ℤ]` retype would unlock Mathlib bilinear-form API (no soundness content) |
 | `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
 | Layer 3 Phase-B cohomology scaffold: `h1coh_zero_finrank`, `serreDuality_equiv` (**`H1coh`+3 instances and `cohomologyLES` DISCHARGED 2026-06-10** — real Čech cohomology of the chart-disk cover via the Kirov Dolbeault port, `Layer3/CechH1Bridge.lean`, `#print axioms` standard-3) | `Layer3/Cohomology.lean` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08, and **per-axiom for satisfiability/faithfulness 2026-06-09 (`DT`, verdict SATISFIABLE/FAITHFUL, rating Likely correct)**; the port-side interfaces backing the discharge were separately vetted Standard 2026-06-10 (A2, `docs/planning/PHASE_D_TYPE_ALIGNMENT.md`); references Forster §§16–17. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
@@ -363,7 +366,7 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 | `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication. **DT-vetted 2026-06-10 (retry after timeout): Likely correct** — ambient composite = dual of `Tr_f ∘ f^*` conjugated by `eY`; classical projection formula gives `deg(f)·id`, and its descent through `QuotientAddGroup.map` is exactly `nsmul` (no descent subtlety). Constant-`f` edge verified safe: the real `pullbackOneForm` vanishes for constants, so LHS `= 0 = 0 • P` regardless of the opaque trace; genus-0 / Riemann–Hurwitz cases reduce to `0 = 0`. |
 | `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:491` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pushforwardAmbientLinear` is the dual of the REAL `pullbackOneForm` (direction verified in code), so this is classical Albanese naturality `∫_{f_*γ}ω = ∫_γ f^*ω` + integrality of `f_*γ`; basepoint-free as a subset. (A DT direction-flag was a prose artifact; resolved against the defs.) |
 | `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:505` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pullbackAmbientLinear` is the dual of the OPAQUE trace; satisfiable by the genuine trace (Picard pullback / `∫_{f^*δ}η = ∫_δ Tr η`); jointly with `_id`/`_comp` it pins the trace against the zero-mask (not alone — recorded honestly) |
-| `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:241,248` | functoriality of trace. **DT-vetted 2026-06-10: Likely correct (both)** — `_id`: genuine trace satisfies `Tr_id = id` (degree-1 unbranched cover, chart derivative 1); proof-term sensitivity to `contMDiff_id` is a non-issue (proof irrelevance); genuinely non-vacuous (rules out the all-zero trace for g > 0). `_comp`: Lean `comp` order matches covariance `(g∘f)_* = g_* ∘ f_*`; constant-map cases check out under the zero-for-constants convention (0 absorbing under composition); for non-constant f, g the composite is automatically non-constant, and the classical fiber decomposition + multiplicativity of local orders applies. Jointly with the lattice axioms these pin the opaque trace against degenerate models. |
+| `AX_pushforwardOneForm_id` / `_comp` | ✅ **DISCHARGED 2026-06-10** (#27/#28, same PR as #26) — now `theorem`s conjugating the port's `traceFormTotal_id`/`traceFormTotal_comp` across `bridgeKDFormEquiv` (proof shape = the `AX_pullbackOneForm_id`/`_comp` theorems); the DT-vetted constancy edge cases are realized verbatim by the port's case-splits; standard-3 | functoriality of trace. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-10: Likely correct (both)** — `_id`: genuine trace satisfies `Tr_id = id` (degree-1 unbranched cover, chart derivative 1); proof-term sensitivity to `contMDiff_id` is a non-issue (proof irrelevance); genuinely non-vacuous (rules out the all-zero trace for g > 0). `_comp`: Lean `comp` order matches covariance `(g∘f)_* = g_* ∘ f_*`; constant-map cases check out under the zero-for-constants convention (0 absorbing under composition); for non-constant f, g the composite is automatically non-constant, and the classical fiber decomposition + multiplicativity of local orders applies. Jointly with the lattice axioms these pin the opaque trace against degenerate models. |
 
 *Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
 `Axioms/OfCurveInjective.lean`, derived from the proved period-triangle theorem
@@ -435,6 +438,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| **Trace cluster — all 3**: `pushforwardOneForm`, `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` *(#26/#27/#28, 2026-06-10)* | the Kirov-Dolbeault port's fibre-sum trace `traceFormTotal` (genuine `traceForm` — fibre sum via `(mfderiv f x)⁻¹` off the branch locus, sheet-decomposition holomorphicity, removable-singularity extension at branch points — and `0` for constant maps), transported across the new `bridgeKDFormEquiv = bridgeFormEquiv.trans kdFormAlign` (`kdFormAlign` is the *identity* `LinearEquiv`: vendored and port `HolomorphicOneForms` unfold to the same `ContMDiffSection` type). `_id`/`_comp` conjugate `traceFormTotal_id`/`_comp`; the zero-for-constants convention is the port's `dif` branch (`traceFormTotal_eq_zero_of_const`). `#print axioms` standard-3, no `sorryAx`. Net −3 (36 → 33); the trace-gated `AX_pullbackAmbient_preserves_lattice` is now the dual of a REAL trace. | `Bridge/KirovDolbeaultTrace.lean` + `Axioms/AbelJacobiMap.lean`; port proof in `vendor/kirov-dolbeault-port/KirovDolbeault/TraceForm.lean` |
 | `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I | τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
 | `PlaneCurve.instChartedSpace` *(#117, 2026-06-09)* | concrete `ChartedSpace` for the smooth projective plane curve: Euler's homogeneous-function theorem ⇒ nonvanishing dehomogenized gradient on each `x/y/z=1` patch, 6 local charts via the proved Inverse Function Theorem (#99), open-embedding atlas. `#print axioms` standard-3, no `sorryAx`. (Contributed by @daouid.) | `ProjectiveCurve/PlaneCurve/{Euler,AffineChart,Atlas,CrossCompat}.lean` |
 | `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
@@ -485,7 +489,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 36 — the vendored Kirov subtree is now axiom-free, so 36 is the total (incl. 2+2 Layer-3 axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, and PlaneCurve.instChartedSpace #117).
+#   prints 33 — the vendored Kirov subtree is now axiom-free, so 33 is the total (incl. 2+2 Layer-3 axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117, and the 3 trace-cluster axioms #26/#27/#28).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -502,7 +506,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 36
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 33
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
