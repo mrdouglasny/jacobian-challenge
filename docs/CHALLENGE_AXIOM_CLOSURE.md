@@ -18,9 +18,10 @@ Buzzard's `Challenge.lean` (v0.4) poses 24 `sorry`-obligations in two groups:
 `pushforward_comp_apply`, `pullback_contMDiff`, `pullback_id_apply`,
 `pullback_comp_apply`, `pushforward_pullback`, `ContMDiff.degree`.
 
-**Typeclass instances** (7 required + AddCommGroup): `T2Space`, `CompactSpace`,
-`ConnectedSpace`, `ChartedSpace`, `IsManifold`, `LieAddGroup` on `Jacobian X`,
-plus `AddCommGroup`.
+**Typeclass instances** (7 required): `TopologicalSpace`, `T2Space`, `CompactSpace`,
+`ChartedSpace`, `IsManifold`, `LieAddGroup`, `AddCommGroup` on `Jacobian X`.
+`ConnectedSpace` is also provided but is explicitly **not** one of Buzzard's 7 —
+Challenge.lean line 105 marks it as extra, needed for the Albanese universal property.
 
 All 24 are filled; `ChallengeConformance.lean` machine-checks every v0.4 signature
 (`lake env lean ChallengeConformance.lean`, exit 0). **But filling a `sorry` with an
@@ -39,7 +40,7 @@ obligations). Discharging all 13 gives a challenge closure over only
 ### Sub-cluster A1 — Core Jacobian structure (appear in ALL Buzzard declarations)
 
 These two appear even in the definitional declarations (`Jacobian`, `ofCurve`) and in
-the lightweight instances (`AddCommGroup`, `ConnectedSpace`). They underlie the
+the lightweight instances (`AddCommGroup`, `TopologicalSpace`, `ConnectedSpace`). They underlie the
 construction `Jac X = (HolomorphicOneForm X)* / H₁`.
 
 | Axiom | Precise Lean statement | Mathematical content | Discharge path |
@@ -86,14 +87,15 @@ within the cluster is more nuanced than "all follow from one root":
 | `pushforwardOneForm` | core trace construction | The fiber-sum trace `Tr_f(ω)` of a 1-form ω along f: needed for `pullback` (defined as `(Tr_f)ᵀ`), `pullback_id`, `pullback_comp`, `pushforward_pullback` |
 | `AX_pushforwardOneForm_id` | `pushforwardOneForm` real | `Tr_id = id`; immediate once the trace is real |
 | `AX_pushforwardOneForm_comp` | `pushforwardOneForm` real | `Tr_{g∘f} = Tr_g ∘ Tr_f`; functoriality of the fiber sum |
-| `AX_pushforwardAmbient_preserves_lattice` | `pushforwardOneForm` + period naturality | Pushforward preserves the period lattice: `∫_{f_*(γ)} ω = ∫_γ Tr_f(ω)`. Needs the trace AND the integration-commutes-with-trace identity. |
-| `AX_pullbackAmbient_preserves_lattice` | `pullbackOneForm` (already real via Kirov) + period naturality | Pullback preserves the period lattice: `∫_{γ} f*ω = ∫_{f_*(γ)} ω`. `pullbackOneForm` is already a real construction (Kirov bridge); the remaining content is the period naturality identity. |
+| `AX_pushforwardAmbient_preserves_lattice` | `pullbackOneForm` (already real via Kirov) + period naturality | `pushforwardAmbientLinear` is defined as the dual of `pullbackOneForm f` — so `pullbackOneForm` (Kirov-backed) is the dependency, not the trace. Content: `∫_{f_*(γ)} ω = ∫_γ f*ω`. **Not trace-gated; can proceed now.** |
+| `AX_pullbackAmbient_preserves_lattice` | `pushforwardOneForm` (trace, axiom) | `pullbackAmbientLinear` is defined as the dual of `pushforwardOneForm f` — so the trace IS the dependency. Content: `∫_γ f*ω = ∫_{f_*(γ)} ω` from the other side. **Trace-gated.** |
 | `AX_pushforward_pullback` | trace-norm relation | `pushforward_f ∘ pullback_f = [deg f]` on Jac(Y): follows from `Tr_f(f*ω) = deg(f)·ω`. Forster §12 / Miranda. |
 
 The key discharge order: `pushforwardOneForm` (trace across ramification) gates
-`pullback`, both id/comp laws, and push-pull. `AX_pullbackAmbient_preserves_lattice`
-is independent of the trace: it needs `pullbackOneForm` (real, Kirov-backed) plus a
-period-naturality identity. These are the two parallel workstreams in Cluster C.
+`pullback` type, both id/comp laws, `AX_pullbackAmbient_preserves_lattice`, and
+push-pull. `AX_pushforwardAmbient_preserves_lattice` is independent of the trace:
+it is built from `pullbackOneForm` (real, Kirov-backed) and can proceed independently.
+These are the two parallel workstreams in Cluster C.
 
 ---
 
@@ -170,9 +172,10 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
     │      AX_ofCurve_contMDiff
     │
     └── Cluster C (6) — two parallel workstreams
-           Trace workstream: pushforwardOneForm → id + comp + push-pull
-           Naturality workstream: pullbackAmbient_preserves_lattice
-                (uses pullbackOneForm, already real via Kirov bridge)
+           Trace workstream: pushforwardOneForm → pullback type + id + comp
+                             + AX_pullbackAmbient_preserves_lattice + push-pull
+           Kirov-backed workstream: AX_pushforwardAmbient_preserves_lattice
+                (built from pullbackOneForm, already real; can start now)
 ```
 
 ### Bottleneck assessment
@@ -187,8 +190,10 @@ Mathlib. The discharge plan is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-v
 theorem. `AX_ofCurve_contMDiff` needs manifold-level smooth-parameter integral theory.
 `AX_AbelTheorem`'s hard half is Jacobi inversion.
 
-**Cluster C**: `pullbackAmbient_preserves_lattice` can start now (pullbackOneForm is
-real). `pushforwardOneForm` (the trace across ramification) is the gate for the rest.
+**Cluster C**: `AX_pushforwardAmbient_preserves_lattice` can start now — it uses
+`pullbackOneForm` (real, Kirov-backed), not the trace. `pushforwardOneForm` (trace
+across ramification) gates `AX_pullbackAmbient_preserves_lattice`, `pullback`, both
+id/comp laws, and push-pull.
 Miranda (3.1) / Kirov port's `Discharge/Manifold/` machinery are the closest reference.
 
 ---

@@ -52,22 +52,27 @@ open Jacobians Jacobian
 -- `h⁰(0) = 1` over the corrected (germ-quotient) L(D): axiom-free faithfulness check.
 #print axioms Jacobians.RiemannSurface.h0_zero
 
--- Jacobian typeclass instances (the 7 Buzzard-required typeclass obligations).
--- These are anonymous instances in Challenge.lean so we wrap them in named theorems.
--- Jacobian typeclass instances (Buzzard's 7 typeclass obligations + AddCommGroup).
--- These are anonymous in Challenge.lean; wrap in named theorems to use #print axioms.
--- The variable below mirrors the constraint assumed throughout Challenge.lean.
+-- Jacobian typeclass instances: the 7 Buzzard-required obligations
+-- (TopologicalSpace, T2Space, CompactSpace, ChartedSpace, IsManifold, LieAddGroup,
+-- AddCommGroup) plus ConnectedSpace which Challenge.lean explicitly marks as extra
+-- (not one of Buzzard's 7 — see line 105 comment).
+-- Anonymous instances in Challenge.lean; wrap in named decls to use #print axioms.
+-- @[implicit_reducible] suppresses class-type-def warnings for the two data instances.
 section JacobianInstances
 open scoped Manifold ContDiff
 variable {X' : Type*} [TopologicalSpace X'] [T2Space X'] [CompactSpace X']
     [ConnectedSpace X'] [Nonempty X'] [ChartedSpace ℂ X'] [IsManifold 𝓘(ℂ) ⊤ X']
 
 -- Use _root_.Jacobian to disambiguate from open Jacobian namespace
-private noncomputable def jacInst_AddCommGroup : AddCommGroup (_root_.Jacobian X') := inferInstance
+@[implicit_reducible] private noncomputable def jacInst_AddCommGroup :
+    AddCommGroup (_root_.Jacobian X') := inferInstance
+@[implicit_reducible] private noncomputable def jacInst_TopologicalSpace :
+    TopologicalSpace (_root_.Jacobian X') := inferInstance
 private theorem jacInst_T2Space : T2Space (_root_.Jacobian X') := inferInstance
 private theorem jacInst_CompactSpace : CompactSpace (_root_.Jacobian X') := inferInstance
+-- ConnectedSpace: NOT one of Buzzard's 7 (Challenge.lean line 105); included for completeness
 private theorem jacInst_ConnectedSpace : ConnectedSpace (_root_.Jacobian X') := inferInstance
-private noncomputable def jacInst_ChartedSpace :
+@[implicit_reducible] private noncomputable def jacInst_ChartedSpace :
     ChartedSpace (Fin (genus X') → ℂ) (_root_.Jacobian X') := inferInstance
 private theorem jacInst_IsManifold :
     IsManifold 𝓘(ℂ, Fin (genus X') → ℂ) ⊤ (_root_.Jacobian X') := inferInstance
@@ -75,6 +80,7 @@ private theorem jacInst_LieAddGroup :
     LieAddGroup 𝓘(ℂ, Fin (genus X') → ℂ) ⊤ (_root_.Jacobian X') := inferInstance
 
 #print axioms jacInst_AddCommGroup
+#print axioms jacInst_TopologicalSpace
 #print axioms jacInst_T2Space
 #print axioms jacInst_CompactSpace
 #print axioms jacInst_ConnectedSpace

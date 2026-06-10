@@ -111,9 +111,12 @@
  Classical.choice,
  Quot.sound]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
-scripts/axiom_report.lean:66:0: warning: Definition `_private.scripts.axiom_report.0.jacInst_AddCommGroup` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
-scripts/axiom_report.lean:70:0: warning: Definition `_private.scripts.axiom_report.0.jacInst_ChartedSpace` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
 '_private.scripts.axiom_report.0.jacInst_AddCommGroup' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Axioms.AX_AnalyticCycleBasis,
+ Axioms.intersectionForm]
+'_private.scripts.axiom_report.0.jacInst_TopologicalSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_AnalyticCycleBasis,
