@@ -354,8 +354,8 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 |-------|-----------|------|
 | `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:348` | Abel–Jacobi smoothness |
 | `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication |
-| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:413` | period-map naturality |
-| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:427` | period-map naturality |
+| `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:491` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pushforwardAmbientLinear` is the dual of the REAL `pullbackOneForm` (direction verified in code), so this is classical Albanese naturality `∫_{f_*γ}ω = ∫_γ f^*ω` + integrality of `f_*γ`; basepoint-free as a subset. (A DT direction-flag was a prose artifact; resolved against the defs.) |
+| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:505` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pullbackAmbientLinear` is the dual of the OPAQUE trace; satisfiable by the genuine trace (Picard pullback / `∫_{f^*δ}η = ∫_δ Tr η`); jointly with `_id`/`_comp` it pins the trace against the zero-mask (not alone — recorded honestly) |
 | `AX_pushforwardOneForm_id` / `_comp` | `Axioms/AbelJacobiMap.lean:241,248` | functoriality of trace |
 
 *Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
