@@ -30,3 +30,11 @@ CechModelManifold.lean), OneOneLawAt (germ-eventual |φ'|² law via Complex.norm
 oneOneCoeff : Submodule ℂ (ι → ℂ → ℂ) (free ℂ-linearity for R4), and
 isOneOneCoeff_congr (germ-robustness, scoping risk item 2). Committing R1; next R2
 (PoU split reusing cechPoU/rhoC/dbarRho from DolbeaultComparisonInverse).
+
+[R2 DONE] PoUSplit.lean compiles clean (no warnings after omit [Nonempty X]);
+3 headlines axiom-clean. pouSplit σ_i := ∑_k ρ_k·(w k i) over the REUSED
+cechPoU/rhoC backbone; contMDiffAt_pouSplit (gdTerm support-aware gluing pattern);
+pouSplit_telescope (support-aware refinement of cechCoboundary_telescoping —
+cocycle identity demanded only on triple overlaps, IsOverlapCocycle);
+isOverlapCocycle_sub gives the ML difference-family shape w i j = v j − v i.
+M1 scope (R0+R1+R2) complete; committing R2.
