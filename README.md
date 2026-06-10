@@ -11,7 +11,7 @@ A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https
 | **Build** | `lake build Jacobians` green; Kirov Dolbeault port compiled as a `require` dependency |
 | **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 36 (RR + Serre **and** the Riemann-bilinear/period-lattice cluster now **theorems** over the Layer-3 scaffold; Phase D discharged `H1coh`+3 instances and `cohomologyLES` to the real Čech cohomology + skyscraper LES of the vendored Kirov Dolbeault port — Riemann-Roch now rests on the single axiom `h1coh_zero_finrank`; 2 cohomology axioms + 2 statement-vetted period primitives remain, all cross-model-vetted), all classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 36 active, of which **13 are challenge-critical** (kernel-verified per-headline: [`docs/CHALLENGE_AXIOM_CLOSURE.md`](docs/CHALLENGE_AXIOM_CLOSURE.md)); RR + Serre and the period cluster are **theorems** over the Layer-3 scaffold; Phase D discharged `H1coh`+3 instances and `cohomologyLES` to the real Čech cohomology + skyscraper LES of the vendored Kirov Dolbeault port — Riemann-Roch now rests on the single axiom `h1coh_zero_finrank`. All classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 3 in an optional adelic `H¹` construction (kept around, not on the critical path) |
 | **Provenance** | ~50k LOC our own Lean (135 files) + Kirov Dolbeault port (~86k LOC, compiled via `require`) + vendored Kirov/Wallace modules (Apache 2.0 / MIT) |
 
