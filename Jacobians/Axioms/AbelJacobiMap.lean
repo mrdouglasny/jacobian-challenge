@@ -41,12 +41,16 @@ axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ign
 - `pushforwardOneForm (f : X → Y) : HolomorphicOneForm X →ₗ[ℂ]
   HolomorphicOneForm Y` — the trace / pushforward of 1-forms along a
   finite cover. Analogously feeds `pullbackAmbientLinear` as a `def`.
+  **No longer an axiom (2026-06-10)**: now a real `def` via the
+  Kirov-Dolbeault port's fibre-sum trace `traceFormTotal`, transported
+  across `Jacobians.Bridge.bridgeKDFormEquiv`; its identity and
+  composition laws (`AX_pushforwardOneForm_id`/`_comp`) are theorems
+  conjugating `traceFormTotal_id`/`_comp` (issues #26/#27/#28).
 - `AX_pushforwardAmbient_preserves_lattice`,
   `AX_pullbackAmbient_preserves_lattice` — still axioms; retire to
   theorems once period-map naturality is derived.
 - Property axioms (`AX_ofCurve_contMDiff`,
-  `AX_pushforward_contMDiff`, pushforward functoriality,
-  `AX_pushforward_pullback`)
+  `AX_pushforward_contMDiff`, `AX_pushforward_pullback`)
   — properties of the defs, retire with the usual textbook proofs.
 - **`AX_jacobian_lieAddGroup`** is no longer an axiom (2026-04-23
   round-3): converted to a theorem via the ULift-smoothness lemmas
@@ -63,6 +67,7 @@ import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovCanonicalEq
+import Jacobians.Bridge.KirovDolbeaultTrace
 import Jacobians.Vendor.Kirov.ZLatticeQuotient
 
 namespace Jacobians.Axioms
@@ -266,26 +271,37 @@ noncomputable def pullbackOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     ((Jacobians.Vendor.Kirov.pullbackForm f _hf).comp
       (Jacobians.Bridge.bridgeFormEquiv (X := Y)).toLinearMap)
 
-/-- **Axiom.** The pushforward (trace) of holomorphic 1-forms along a
-non-constant holomorphic map `f : X → Y` between compact Riemann
-surfaces. Classical content: for `ω ∈ Ω¹(X)` and `q ∈ Y`,
+/-- The pushforward (trace) of holomorphic 1-forms along a
+holomorphic map `f : X → Y` between compact Riemann surfaces.
+Classical content: for `ω ∈ Ω¹(X)` and `q ∈ Y`,
 `(pushforwardOneForm f)(ω) (q) = Σ_{p ∈ f⁻¹(q)} (local contribution)`,
 with multiplicities counted by `localOrder`. For constant `f` this is
-the zero map. -/
-axiom pushforwardOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
+the zero map.
+
+This is now a real `def` (2026-06-10, issue #26): the Kirov-Dolbeault
+port's fibre-sum trace `traceFormTotal` — genuine `traceForm` (fibre
+sum via `(mfderiv f x)⁻¹` off the branch locus, extended across branch
+points) for non-constant `f`, and `0` for constant `f`
+(`traceFormTotal_eq_zero_of_const`, definitionally the `dif` branch) —
+transported across `Jacobians.Bridge.bridgeKDFormEquiv`. -/
+noncomputable def pushforwardOneForm {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (_hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
-    HolomorphicOneForm X →ₗ[ℂ] HolomorphicOneForm Y
+    HolomorphicOneForm X →ₗ[ℂ] HolomorphicOneForm Y :=
+  (Jacobians.Bridge.bridgeKDFormEquiv (X := Y)).symm.toLinearMap.comp
+    ((_root_.Jacobians.traceFormTotal f _hf).comp
+      (Jacobians.Bridge.bridgeKDFormEquiv (X := X)).toLinearMap)
 
 /-! ### Functoriality on the form-level primitives
 
 Per Gemini 2026-04-23 review: "functoriality on Jacobians is free via
 contravariance of `Module.Dual`" — so we prove or state functoriality at
-the form-level. Pullback identity/composition are now theorems via Kirov
-transport; pushforward identity/composition remain trace axioms. The
-Jacobian-level functoriality then becomes derivable. -/
+the form-level. Pullback identity/composition are theorems via Kirov
+transport; pushforward identity/composition are theorems (2026-06-10)
+via the Kirov-Dolbeault trace bridge. The Jacobian-level functoriality
+then becomes derivable. -/
 
 /-- Pullback of 1-forms preserves identity. -/
 theorem AX_pullbackOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
@@ -315,15 +331,23 @@ theorem AX_pullbackOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
   ext form
   simp [LinearMap.comp_apply]
 
-/-- **Axiom.** Pushforward (trace) of 1-forms preserves identity. -/
-axiom AX_pushforwardOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pushforward (trace) of 1-forms preserves identity. Conjugate of the
+port's `traceFormTotal_id` across `bridgeKDFormEquiv` (issue #27). -/
+theorem AX_pushforwardOneForm_id {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    pushforwardOneForm (id : X → X) contMDiff_id = LinearMap.id
+    pushforwardOneForm (id : X → X) contMDiff_id = LinearMap.id := by
+  unfold pushforwardOneForm
+  rw [_root_.Jacobians.traceFormTotal_id]
+  ext form
+  simp
 
-/-- **Axiom.** Pushforward (trace) of 1-forms is covariant under
-composition. Classical: `(g ∘ f)_* ω = g_* (f_* ω)`. -/
-axiom AX_pushforwardOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- Pushforward (trace) of 1-forms is covariant under composition.
+Classical: `(g ∘ f)_* ω = g_* (f_* ω)`. Conjugate of the port's
+`traceFormTotal_comp` across `bridgeKDFormEquiv` (issue #28); the
+constancy case-splits (`f` or `g` constant ⇒ both sides `0`) live in
+the port proof. -/
+theorem AX_pushforwardOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
@@ -333,7 +357,11 @@ axiom AX_pushforwardOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (g : Y → Z) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω g) :
     pushforwardOneForm (g ∘ f) (hg.comp hf) =
-      (pushforwardOneForm g hg).comp (pushforwardOneForm f hf)
+      (pushforwardOneForm g hg).comp (pushforwardOneForm f hf) := by
+  unfold pushforwardOneForm
+  rw [_root_.Jacobians.traceFormTotal_comp f hf g hg (hg.comp hf)]
+  ext form
+  simp [LinearMap.comp_apply]
 
 /-! ### `ofCurve` as a real definition -/
 
