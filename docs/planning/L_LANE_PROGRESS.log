@@ -1,0 +1,5 @@
+[2026-06-10 S6 psiAction] START feat/keystone-l-psiaction. Recon complete:
+  - cup (D' D) in SerreCupProduct.lean IS the multiplication map; psiAct = llcomp lam ∘ cup ∘ lSysCongr(sub_sub_cancel).
+  - Injectivity route: mult-by-f surjective on H1 = h1InclMono surjectivity (iterated surj₄ via exists_skyscraperLES, needs hR : LocallyRealizable) ∘ inverse-germ trick (f·f⁻¹ = 1 in MGerm, zeros codiscrete by identity thm orderW_ne_top_of_exists).
+  - New pieces needed: MeromorphicFunction.inv + orderW_inv (Mathlib meromorphicOrderAt_inv), div spec (orderW = coe div, untop₀ API), monotone-inclusion layer (generalize SkyscraperLESBase _le_add_single lemmas to pointwise ≤), h1InclMono + surjectivity induction on deg(D−E).
+  Next: write S6_STATEMENT.md + defs skeleton, compile, then proofs.
