@@ -4,8 +4,20 @@
 challenge property theorems and the concrete-curve headlines). The Jacobian typeclass
 instances are now also covered: `scripts/axiom_report.lean` includes wrapper theorems
 for all 7 Buzzard instance obligations (T2Space, CompactSpace, ConnectedSpace,
-ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-10 against
-the 36-axiom table.*
+ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-10
+(post-D1 + the #161 trace-cluster discharge) against the 31-axiom table.*
+
+> **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
+> count dropped **13 → 7** (D1 merge −3+1 −intersectionForm; #161 trace-cluster
+> discharge −3): `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2` were merged into
+> the single **`AX_PeriodCycleBasis`** (loops + H₁ basis + Hurewicz tie + the two
+> Riemann bilinear relations stated arc-level over the bundle's own loops —
+> `docs/planning/CYCLEBASIS_ALTERNATIVES.md` §1, owner-approved, DT-vetted), and
+> **`intersectionForm` exited every Buzzard closure** (the structure's
+> proof-unconsumed `symplectic` field, its only headline route, was dropped;
+> the form + its 2 laws are kept as non-critical Part-3 debt per owner decision
+> D2). Kernel evidence: `docs/axiom-report.txt` post-D1 regeneration. Cluster
+> text below has been updated; A1/A2 are now a single Cluster A.
 
 ---
 
@@ -25,14 +37,14 @@ Challenge.lean line 105 marks it as extra, needed for the Albanese universal pro
 
 All 24 are filled; `ChallengeConformance.lean` machine-checks every v0.4 signature
 (`lake env lean ChallengeConformance.lean`, exit 0). **But filling a `sorry` with an
-`axiom` is not the same as proving it.** This document identifies: which of the 36
+`axiom` is not the same as proving it.** This document identifies: which of the 31
 remaining axioms must be discharged to produce a fully axiom-free challenge closure?
 
 ---
 
-## What filling the 13 does — and does not — claim
+## What filling the 7 does — and does not — claim
 
-Discharging all 13 makes every Buzzard declaration print exactly
+Discharging all 7 makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -51,54 +63,46 @@ declarations. Four boundaries to keep the claim honest:
    are among the 24 obligations, and `ChallengeConformance.lean`
    machine-checks every signature verbatim against the pinned v0.4 spec —
    a hollow construction provably cannot satisfy both.
-3. **13 is the end-state count, not the work count.** Discharge routes pull
+3. **7 is the end-state count, not the work count.** Discharge routes pull
    in their own mathematics (e.g. `AX_AbelTheorem` classically routes
    through the RR/Serre tower, so the Serre keystone — not itself in the
-   13 — is on the path). The set may grow transiently if a discharge
+   7 — is on the path). The set may grow transiently if a discharge
    introduces a new textbook axiom; the CI guard makes any such step
    visible, and the claim lands only when the challenge cone hits zero.
 4. **`AX_ofCurve_contMDiff` is the conditional one.** Its 2026-06-10
    deep-think vetting pinned its *truth* to the completeness of the
    `periodMap`/H1 model (homotopy invariance of the arc integral — the
-   parked X1 workstream). Filling the 13 therefore includes settling X1;
+   parked X1 workstream). Filling the 7 therefore includes settling X1;
    it cannot stay parked if axiom-free closure is the goal.
 
-## The 13 challenge-critical axioms
+## The 7 challenge-critical axioms
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging all 13 gives a challenge closure over only
+obligations). Discharging all 7 gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
-### Sub-cluster A1 — Core Jacobian structure (appear in ALL Buzzard declarations)
+### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
 
-These two appear even in the definitional declarations (`Jacobian`, `ofCurve`) and in
-the lightweight instances (`AddCommGroup`, `TopologicalSpace`, `ConnectedSpace`). They underlie the
-construction `Jac X = (HolomorphicOneForm X)* / H₁`.
-
-| Axiom | Precise Lean statement | Mathematical content | Discharge path |
-|---|---|---|---|
-| `AX_AnalyticCycleBasis` | `Nonempty (AnalyticCycleBasis X x₀)` — a symplectic H₁ basis of analytic loops, with the intersection-form values on the basis already pinned: `⟨αᵢ,βⱼ⟩ = δᵢⱼ`, `⟨αᵢ,αⱼ⟩ = 0`, `⟨βᵢ,βⱼ⟩ = 0` | Existence of a piecewise-analytic symplectic basis of H₁(X,ℤ). Standard; follows from the CW structure of a compact oriented surface (4g-gon dissection + the Hurewicz iso). | Forster §§19–21; the 4g-gon construction gives the H₁ basis; symplecticity from the intersection form. DT-vetting (2026-06-09) confirmed satisfiability. Coupled to `intersectionForm` — discharge is one joint obligation. |
-| `intersectionForm` | `H1 X x₀ →+ (H1 X x₀ →+ ℤ)` — the opaque H₁ × H₁ → ℤ pairing | The algebraic intersection number (oriented transverse intersection count). From Poincaré duality: `H₁ ≅ H¹` via UCT, cup product gives the form. Non-degeneracy from PD. | Same as `AX_AnalyticCycleBasis`: needs CW homology + Poincaré duality for compact oriented surfaces, neither in Mathlib at our pin. DT-vetting confirmed satisfiability. |
-
-**Note on coupling.** `AX_AnalyticCycleBasis` already pins the values of
-`intersectionForm` on the symplectic basis. Their discharge is one proof obligation that
-constructs both from the CW topology of the surface. The separate law axioms
-`AX_IntersectionForm_alternating` and `AX_IntersectionForm_perfect` are **not**
-challenge-critical (see §Not critical) because the proofs use `intersectionForm` only
-via the basis values already pinned by `AX_AnalyticCycleBasis`, never via the general laws.
-
-### Sub-cluster A2 — Period/Hodge primitives (add to smoothness + 5 Jacobian instances)
-
-These appear in `ofCurve_contMDiff`, `pushforward_contMDiff`, `pullback_contMDiff`,
-and in the Jacobian instances for `T2Space`, `CompactSpace`, `ChartedSpace`,
-`IsManifold`, `LieAddGroup` — all via `instPeriodLatticeDiscrete` (the proof that the
-period lattice is a ℤ-lattice depends on RBR1+RBR2).
+Since the D1 merge this is a single axiom. It appears even in the definitional
+declarations (`Jacobian`, `ofCurve`) and in the lightweight instances
+(`AddCommGroup`, `TopologicalSpace`, `ConnectedSpace`) — they underlie the
+construction `Jac X = (HolomorphicOneForm X)* / H₁` — and, through its R1/R2
+fields feeding `instPeriodLatticeDiscrete`, also in the smoothness theorems and
+the 5 heavier Jacobian instances (`T2Space`, `CompactSpace`, `ChartedSpace`,
+`IsManifold`, `LieAddGroup`).
 
 | Axiom | Precise Lean statement | Mathematical content | Discharge path |
 |---|---|---|---|
-| `AX_RBR1` | `∀ η ζ : HolomorphicOneForm X, Q (periodVec b η) (periodVec b ζ) = 0` | The period vectors of any two holomorphic 1-forms are Q-isotropic. Equivalently `∫_X η ∧ ζ = 0` (the wedge of two (1,0)-forms is a (2,0)-form, zero on a complex curve). Forces τ = τᵀ. | Stokes' theorem on the cut surface. The Kirov port's `residueTheorem_unconditional` (∑ Res = 0, sorry-free at our Mathlib) is the closest existing Lean reference for this class of integral identity. Forster §20; Griffiths–Harris Ch. 2 §2. |
-| `AX_RBR2` | `∀ η ≠ 0, 0 < (ℂ.I * Q (periodVec b η) (conjPeriodVec b η)).re` | Hodge positivity: `i · Q(period η, conj-period η) > 0` for every nonzero holomorphic 1-form. Equivalently `i ∫_X η ∧ η̄ > 0` (the Hodge norm). Forces Im τ ≻ 0. | Hodge decomposition on compact Riemann surfaces. No Lean proof exists anywhere; the hardest axiom in Cluster A. Griffiths–Harris Ch. 0 §7; Mumford *Tata Lectures* Ch. II §2. |
+| `AX_PeriodCycleBasis` | `Nonempty (PeriodCycleBasis X x₀)` — 2g analytic loops whose classes are a ℤ-basis of H₁ (with the Hurewicz tie `loops_to_basis`), satisfying the Riemann bilinear relations **arc-level** over their own canonical arc integrals: R1 `Q(P(η),P(ζ)) = 0`, R2 `0 < Re(i·Q(P(η), conj P(η)))` for `η ≠ 0`, where `arcPeriodVec` splits A/B-periods through `αEmbed`/`βEmbed` in exactly `Q`'s layout (simp-pinned) | The canonical homology basis of a compact Riemann surface together with Riemann's bilinear relations. Standard: Griffiths–Harris Ch. 2 §2; Forster §§19–21. D1 merge of the former `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2`; strictly weaker-or-equal than that trio (satisfiability inherited from their 2026-06-09 DT vets). | Loops + basis from a dissection (4g-gon, or post-keystone the branched-cover slit-sheet route, `docs/planning/CYCLEBASIS_ALTERNATIVES.md` §2b); R1 by Stokes on the cut surface (the Kirov port's proven `riemann_R1_of_boundaryWord` is the engine); R2 from the Hodge norm (`riemann_R2_posDef_of_boundaryWord`, hardest ingredient — no Lean Hodge theory exists). The genus-comparison gate (`Fin (2·genus X)` rank pin) binds every route. |
+
+**Note on `intersectionForm` (post-D1).** The form and its two law axioms are
+**no longer challenge-critical**: the old structure's `symplectic` field — their
+only route into the headline closures — had zero proof consumers and was dropped
+in the merge. They remain in the build as Part-3 topological-anchoring debt
+(owner decision D2; see §Not critical). When `AX_PeriodCycleBasis` is eventually
+discharged by a genuine dissection, re-tying the form to that dissection is the
+recorded joint obligation.
 
 ### Cluster B — Three independent classical theorems
 
@@ -112,7 +116,8 @@ Each appears in exactly one Buzzard declaration and has its own proof path.
 
 ### Cluster C — Functoriality block
 
-All six appear in the `pushforward`/`pullback` declarations. The dependency structure
+Six entries, of which the trace trio is now **discharged** (status note below) and
+**three remain as axioms**. All appear in the `pushforward`/`pullback` declarations. The dependency structure
 within the cluster is more nuanced than "all follow from one root":
 
 | Axiom | Primary dependency | Role |
@@ -128,29 +133,31 @@ within the cluster is more nuanced than "all follow from one root":
 > `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` — are **DISCHARGED**
 > (#26/#27/#28): real def/theorems via the Kirov-Dolbeault port's fibre-sum trace
 > `traceFormTotal`, transported across `Bridge/KirovDolbeaultTrace.lean`
-> (standard-3). The challenge-critical count is now **10**;
+> (standard-3). Together with the D1 merge the challenge-critical count is now **7**;
 > `AX_pullbackAmbient_preserves_lattice` is no longer trace-gated by an axiom —
 > it is the dual of a REAL trace.
 
-The key discharge order: `pushforwardOneForm` (trace across ramification) gates
-`pullback` type, both id/comp laws, `AX_pullbackAmbient_preserves_lattice`, and
-push-pull. `AX_pushforwardAmbient_preserves_lattice` is independent of the trace:
-it is built from `pullbackOneForm` (real, Kirov-backed) and can proceed independently.
-These are the two parallel workstreams in Cluster C.
+With the trace real, the remaining Cluster-C axioms are the two
+lattice-preservation statements — `AX_pushforwardAmbient_preserves_lattice`
+(dual of the real `pullbackOneForm`) and `AX_pullbackAmbient_preserves_lattice`
+(dual of the now-real trace) — plus `AX_pushforward_pullback`. All three are
+period-naturality / projection-formula content over real maps; none is gated by
+an opaque construction any more.
 
 ---
 
-## The 23 non-challenge-critical axioms
+## The 24 non-challenge-critical axioms
 
-### i. Intersection form laws (2) — not yet consumed
+### i. Intersection form + laws (3) — out of the challenge cone since D1
 
-| Axiom | Why not yet critical |
+| Axiom | Why not critical |
 |---|---|
-| `AX_IntersectionForm_alternating` | Current proofs consume `intersectionForm` only via the basis values pinned by `AX_AnalyticCycleBasis`; this general law is not invoked |
-| `AX_IntersectionForm_perfect` | Period-lattice discreteness is proved from `AX_RBR1`/`AX_RBR2` directly, bypassing this law |
+| `intersectionForm` | **Exited every headline closure in D1 (2026-06-10)**: its only route was the old structure's proof-unconsumed `symplectic` field, now dropped. Kept per owner decision D2 as Part-3 topological-anchoring debt. |
+| `AX_IntersectionForm_alternating` | Never consumed by any proof; fully orphaned post-D1 |
+| `AX_IntersectionForm_perfect` | Period-lattice discreteness is proved from the bundle's R1/R2 fields directly, bypassing this law |
 
-*Both become redundant theorems once `intersectionForm` is discharged to a real
-construction that already satisfies them.*
+*All three become redundant theorems once `intersectionForm` is discharged to a
+real construction that already satisfies them (the #16+#22 joint plan).*
 
 ### ii. Albanese universal property (4) — our addition beyond Buzzard
 
@@ -196,45 +203,44 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 ## Summary: the closure picture
 
 ```
-13 challenge-critical axioms
+7 challenge-critical axioms
     │
-    ├── Sub-cluster A1 (2) — in EVERY Buzzard declaration
-    │      AX_AnalyticCycleBasis + intersectionForm  [coupled: one proof obligation]
-    │      Needs: CW homology + Poincaré duality for surfaces
-    │
-    ├── Sub-cluster A2 (2) — add to smoothness + 5 of the 7 Jacobian instances
-    │      AX_RBR1  (Q-isotropy of period vectors / Stokes)
-    │      AX_RBR2  (Hodge positivity / Im τ ≻ 0)    ← hardest; no Lean proof exists
-    │      Kirov port has reference proof for RBR1 class of integrals
+    ├── Cluster A (1) — in EVERY Buzzard declaration
+    │      AX_PeriodCycleBasis  (D1 merge: loops + H₁ basis + Hurewicz tie
+    │                            + arc-level R1 (Stokes) + R2 (Hodge ≻ 0))
+    │      Needs: dissection/branched-cover topology for the basis;
+    │      Stokes for R1; Hodge positivity for R2 ← hardest, no Lean proof
+    │      Kirov port has the proven boundary-word engine for R1/R2
     │
     ├── Cluster B (3) — three independent classical theorems
     │      AX_genus_eq_zero_iff_homeo  ← Wallace has best Lean progress
     │      AX_AbelTheorem
     │      AX_ofCurve_contMDiff
     │
-    └── Cluster C (6) — two parallel workstreams
-           Trace workstream: pushforwardOneForm → pullback type + id + comp
-                             + AX_pullbackAmbient_preserves_lattice + push-pull
-           Kirov-backed workstream: AX_pushforwardAmbient_preserves_lattice
-                (built from pullbackOneForm, already real; can start now)
+    └── Cluster C (3) — functoriality over now-real maps
+           (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge)
+           AX_pushforwardAmbient_preserves_lattice  (dual of real pullbackOneForm)
+           AX_pullbackAmbient_preserves_lattice     (dual of the real trace)
+           AX_pushforward_pullback                  (projection formula, deg f)
 ```
 
 ### Bottleneck assessment
 
-**Sub-cluster A2 (RBR2)** is the single hardest barrier. Hodge positivity requires
+**Cluster A's R2 field** is the single hardest barrier. Hodge positivity requires
 L² theory / harmonic forms on a compact Riemann surface — no Lean proof exists anywhere.
 
-**Sub-cluster A1** needs CW homology + Poincaré duality for surfaces, absent from
-Mathlib. The discharge plan is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vetted.
+**Cluster A's basis half** needs dissection topology (4g-gon, or the branched-cover
+slit-sheet route post-keystone — `docs/planning/CYCLEBASIS_ALTERNATIVES.md`). The
+older discharge analysis is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vetted.
 
 **Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) is the deepest single
 theorem. `AX_ofCurve_contMDiff` needs manifold-level smooth-parameter integral theory.
 `AX_AbelTheorem`'s hard half is Jacobi inversion.
 
-**Cluster C**: `AX_pushforwardAmbient_preserves_lattice` can start now — it uses
-`pullbackOneForm` (real, Kirov-backed), not the trace. `pushforwardOneForm` (trace
-across ramification) gates `AX_pullbackAmbient_preserves_lattice`, `pullback`, both
-id/comp laws, and push-pull.
+**Cluster C**: the trace trio is discharged (#26/#27/#28), so nothing in the
+cluster is gated by an opaque construction: both lattice-preservation axioms are
+period-naturality statements about duals of REAL maps, and push-pull is the
+projection formula `Tr_f(f*ω) = deg(f)·ω`.
 Miranda (3.1) / Kirov port's `Discharge/Manifold/` machinery are the closest reference.
 
 ---
@@ -244,16 +250,18 @@ Miranda (3.1) / Kirov port's `Discharge/Manifold/` machinery are the closest ref
 The Layer-3 tower (Phases B–D) contains two distinct parts with different relationships
 to challenge closure:
 
-**Phase C period primitives (`AX_RBR1`, `AX_RBR2`)** — these ARE challenge-critical
-(Sub-cluster A2 above). They were introduced by the tower as primitives for proving the
-period-cluster theorems, but they ended up in the challenge's dependency chain via
-`instPeriodLatticeDiscrete` (which is now a theorem over them).
+**Phase C period primitives (formerly `AX_RBR1`, `AX_RBR2`; since D1 the R1/R2
+fields of `AX_PeriodCycleBasis`)** — these ARE challenge-critical (Cluster A
+above). They were introduced by the tower as primitives for proving the
+period-cluster theorems, and sit in the challenge's dependency chain via
+`instPeriodLatticeDiscrete` (a theorem over the chosen bundle witness).
 
 **The RR/Serre cohomology branch** (`h1coh_zero_finrank`, `serreDuality_equiv`,
 line-bundle stubs) — this IS orthogonal to challenge closure. These axioms do not appear
 in any Buzzard `#print axioms`. The tower's RR/Serre discharge deepens mathematical
-trust without touching any of the 13.
+trust without touching any of the 7.
 
 The tower's indirect contribution to eventual challenge closure: the Kirov port
-integrated in Phase D contains `residueTheorem_unconditional` (relevant to `AX_RBR1`)
+integrated in Phase D contains `residueTheorem_unconditional` and the proven
+boundary-word R1/R2 engine (relevant to the R1/R2 fields of `AX_PeriodCycleBasis`)
 and the branched-cover degree machinery (relevant to `pushforwardOneForm`).
