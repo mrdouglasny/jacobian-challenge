@@ -1,5 +1,5 @@
 /-
-Concrete witnesses for `AX_AnalyticCycleBasis` on `Elliptic ω₁ ω₂ h`.
+Concrete witnesses for `AX_PeriodCycleBasis` on `Elliptic ω₁ ω₂ h`.
 
 ## What this module provides
 
@@ -36,14 +36,14 @@ is 1), and (b) the deck-transformation / covering-space description of
 ## The witness
 
 `ellipticCycleBasis` assembles the three axioms into a concrete
-`AnalyticCycleBasis (Elliptic ω₁ ω₂ h) 0` term. Non-vacuous and
+`PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0` term. Non-vacuous and
 traceable — axiom dependencies auditable via `lean_verify`.
 
 See `docs/completion-plan.md` workstream C2.
 -/
 import Jacobians.ProjectiveCurve.Elliptic.Genus
 import Jacobians.RiemannSurface.AnalyticArc
-import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodCycleBasis
 
 namespace Jacobians.ProjectiveCurve
 
@@ -488,18 +488,37 @@ noncomputable def bLoop : AnalyticLoop (Elliptic ω₁ ω₂ h) 0 where
     unfold ellipticLattice
     exact Submodule.subset_span ⟨1, by simp [ellipticRealBasis]⟩
 
-/-- **Axiom.** Symplectic basis of `H_1` from A- and B-cycles. Provides
-the `Module.Basis (Fin 2) ℤ (H_1 _ _)` structure together with a
+/-- **Axiom.** `H_1` cycle basis of the elliptic curve from A- and B-cycles.
+Provides the `Module.Basis (Fin 2) ℤ (H_1 _ _)` structure together with a
 specialization to `Fin (2 * genus (Elliptic _)) = Fin 2` (after the
-`genus_Elliptic_eq_one` rewrite) and the symplectic matrix condition. -/
-axiom AX_Elliptic_H1_symplectic :
-    AnalyticCycleBasis (Elliptic ω₁ ω₂ h) 0
+`genus_Elliptic_eq_one` rewrite) and the arc-level Riemann bilinear
+relations R1/R2.
 
-/-- **Concrete witness** for `AX_AnalyticCycleBasis` on `Elliptic`.
+**Re-typed 2026-06-10 (D1)** from the retired `AnalyticCycleBasis` (whose
+opaque-intersection-form `symplectic` field made every concrete witness
+unprovable by design) to `PeriodCycleBasis`. Satisfiability of the new
+fields at g = 1: R1 because the form space is 1-dimensional (`η = c·dz`,
+so `Q(P(η), P(ζ)) = c·c'·(AB − BA) = 0`), R2 because
+`i·Q(P(η), conj P(η)) = |c|²·2·Im(ω̄₁ω₂)·(±1) > 0` after choosing the loop
+order/orientation matching the sign of `Im(ω₂/ω₁)` — the axiom does not pin
+which loop is `α`, so a correctly oriented witness always exists.
+
+**Remaining discharge debt** (`docs/planning/AX_Elliptic_H1_symplectic.md`):
+the `isBasis` + `loops_to_basis` fields still need
+`H_1(torus) ≅ ℤ²` with the A/B classes as generators — covering-space
+theory (`π₁(ℂ/Λ) ≅ Λ`) not yet in the repo. R1/R2 are now *provable* for
+the concrete `aLoop`/`bLoop` (their `dz`-periods are `ω₁`/`ω₂` by the
+lift FTC in `Elliptic/OfCurveInj.lean`), so the D1 re-type strictly
+shrinks this axiom's real content to the H₁-basis half. -/
+axiom AX_Elliptic_H1_symplectic :
+    PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0
+
+/-- **Concrete witness** for `AX_PeriodCycleBasis` on `Elliptic`.
 Axiom-wrapped at this level — genuine non-vacuity would come from
 discharging `AX_Elliptic_H1_symplectic` via covering-space theory +
-concrete A/B cycle constructions. -/
-noncomputable def ellipticCycleBasis : AnalyticCycleBasis (Elliptic ω₁ ω₂ h) 0 :=
+concrete A/B cycle constructions (see the axiom's docstring for what
+remains after the D1 re-type). -/
+noncomputable def ellipticCycleBasis : PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0 :=
   AX_Elliptic_H1_symplectic ω₁ ω₂ h
 
 end Jacobians.ProjectiveCurve

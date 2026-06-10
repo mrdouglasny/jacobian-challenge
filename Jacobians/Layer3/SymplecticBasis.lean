@@ -11,7 +11,7 @@ import Mathlib.Tactic
 
 This file proves the field version of the Darboux/symplectic-basis theorem for
 finite-dimensional vector spaces. It is the axiom-free linear-algebra core of
-the Layer 3 `AX_AnalyticCycleBasis` reduction, except for the integral lattice
+the Layer 3 `AX_PeriodCycleBasis` reduction, except for the integral lattice
 step needed to upgrade fields to `Z`.
 -/
 

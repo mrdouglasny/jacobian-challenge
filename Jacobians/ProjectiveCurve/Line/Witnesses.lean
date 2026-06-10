@@ -9,22 +9,23 @@ Concrete witnesses for axiom consistency on `ProjectiveLine`.
   so we axiomatize the consequence directly for ProjectiveLine.
 
 * `projectiveLineCycleBasis` (theorem): a concrete
-  `AnalyticCycleBasis ProjectiveLine x₀` witness for every `x₀`. Since
-  `genus (ProjectiveLine) = 0`, the basis is the **empty basis** —
-  an honest, non-vacuous witness that `AX_AnalyticCycleBasis` is
-  consistent on ProjectiveLine.
+  `PeriodCycleBasis ProjectiveLine x₀` witness for every `x₀`. Since
+  `genus (ProjectiveLine) = 0`, the basis is the **empty basis** and the
+  bilinear-relation fields R1/R2 are vacuous (`Q` is an empty sum; every
+  holomorphic 1-form on ℙ¹ is zero) — an honest, non-vacuous witness that
+  `AX_PeriodCycleBasis` is consistent on ProjectiveLine.
 
 ## Why this matters
 
 Gemini review #1 flagged the possibility of axiom vacuity. Providing
 an explicit concrete witness for the simplest curve validates the
-framework: `AX_AnalyticCycleBasis ProjectiveLine x₀` is not only
+framework: `AX_PeriodCycleBasis ProjectiveLine x₀` is not only
 consistent but *realized* by a concrete term.
 
 See `docs/completion-plan.md` workstream C1.
 -/
 import Jacobians.ProjectiveCurve.Line.Genus
-import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodCycleBasis
 
 namespace Jacobians.ProjectiveCurve
 
@@ -43,7 +44,7 @@ lands in Mathlib (or when we choose to prove it). -/
 theorem AX_H1_ProjectiveLine_trivial (x₀ : ProjectiveLine) :
     Subsingleton (H1 ProjectiveLine x₀) := by
   haveI hg : genus ProjectiveLine = 0 := genus_projectiveLine_eq_zero
-  obtain ⟨b⟩ := AX_AnalyticCycleBasis x₀
+  obtain ⟨b⟩ := AX_PeriodCycleBasis x₀
   haveI hEmp : IsEmpty (Fin (2 * genus ProjectiveLine)) := by
     rw [hg, Nat.mul_zero]
     infer_instance
@@ -87,7 +88,7 @@ noncomputable def constLoop (x₀ : ProjectiveLine) : AnalyticLoop ProjectiveLin
   start_eq := rfl
   end_eq := rfl
 
-/-- **Concrete non-vacuous witness** for `AX_AnalyticCycleBasis` on
+/-- **Concrete non-vacuous witness** for `AX_PeriodCycleBasis` on
 `ProjectiveLine`. Genus is 0, so the basis is the empty basis.
 
 * `loops : Fin (2 * 0) → AnalyticLoop _` is a constant function into
@@ -95,10 +96,11 @@ noncomputable def constLoop (x₀ : ProjectiveLine) : AnalyticLoop ProjectiveLin
   once `genus = 0` reduces.
 * `isBasis` is `Module.Basis.empty` given `Subsingleton (H_1)` (from
   `AX_H1_ProjectiveLine_trivial`) + `IsEmpty (Fin 0)`.
-* `symplectic` is vacuously true because `Fin (genus ℙ¹) = Fin 0`
-  is empty. -/
+* `R1` holds because `Q` is a sum over the empty `Fin (genus ℙ¹)`.
+* `R2` is vacuous: every holomorphic 1-form on ℙ¹ is zero
+  (`HolomorphicOneForm_projectiveLine_eq_zero`), so there is no `η ≠ 0`. -/
 noncomputable def projectiveLineCycleBasis (x₀ : ProjectiveLine) :
-    AnalyticCycleBasis ProjectiveLine x₀ := by
+    PeriodCycleBasis ProjectiveLine x₀ := by
   haveI hg : genus ProjectiveLine = 0 := genus_projectiveLine_eq_zero
   haveI _hSub : Subsingleton (H1 ProjectiveLine x₀) :=
     AX_H1_ProjectiveLine_trivial x₀
@@ -110,10 +112,13 @@ noncomputable def projectiveLineCycleBasis (x₀ : ProjectiveLine) :
     { loops := fun _ => constLoop x₀
       isBasis := Module.Basis.empty _
       loops_to_basis := ?_
-      symplectic := ?_ }
+      R1 := ?_
+      R2 := ?_ }
   · intro i
     exact (‹IsEmpty (Fin (2 * genus ProjectiveLine))›.false i).elim
-  intro i _
-  exact (‹IsEmpty (Fin (genus ProjectiveLine))›.false i).elim
+  · intro η ζ
+    simp [Jacobians.Layer3.Q, Finset.univ_eq_empty]
+  · intro η hη
+    exact absurd (Subsingleton.elim η 0) hη
 
 end Jacobians.ProjectiveCurve

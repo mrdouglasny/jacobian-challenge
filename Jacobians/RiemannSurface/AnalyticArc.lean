@@ -11,7 +11,7 @@ By restricting to **piecewise-real-analytic** paths we can reuse
 Mathlib's `curveIntegral` (on normed spaces) chart-locally and appeal to
 analytic continuation for homotopy arguments.
 
-**Classical fact (axiomatized as `AX_AnalyticCycleBasis`):** every
+**Classical fact (axiomatized as `AX_PeriodCycleBasis`):** every
 homology class `[γ] ∈ H_1(X, ℤ)` has a piecewise-real-analytic
 representative, and there exists a ℤ-basis of `H_1` consisting of such
 representatives.
