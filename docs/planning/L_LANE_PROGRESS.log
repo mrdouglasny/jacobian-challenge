@@ -3,3 +3,13 @@
   - Injectivity route: mult-by-f surjective on H1 = h1InclMono surjectivity (iterated surj₄ via exists_skyscraperLES, needs hR : LocallyRealizable) ∘ inverse-germ trick (f·f⁻¹ = 1 in MGerm, zeros codiscrete by identity thm orderW_ne_top_of_exists).
   - New pieces needed: MeromorphicFunction.inv + orderW_inv (Mathlib meromorphicOrderAt_inv), div spec (orderW = coe div, untop₀ API), monotone-inclusion layer (generalize SkyscraperLESBase _le_add_single lemmas to pointwise ≤), h1InclMono + surjectivity induction on deg(D−E).
   Next: write S6_STATEMENT.md + defs skeleton, compile, then proofs.
+[2026-06-10 S6 psiAction] DONE — SerrePsiAction.lean landed sorry-free in one pass.
+  - psiMul/psiAct constructed on the proven cup product (lSysCongr transport along sub_sub_cancel).
+  - Forster 17.8 injectivity CLOSED: h1InclMono_surjective (deg-induction over surj₄ of
+    exists_skyscraperLES) + cupH1_surjective (E := D − div f representation + globalGerm_mul_inv).
+  - #print axioms: standard-3 on all landed theorems; no sorryAx, no custom axioms.
+  - Statement gate: docs/planning/S6_STATEMENT.md written; partial SurjectivityInputs assembly
+    example compiles (psiAct + psiAct_injective slots; injectivity takes hR : LocallyRealizable,
+    consistent with the skeleton's own hR threading). DT vet PENDING (orchestrator, parallel).
+  - Note: repo already had Inv (MeromorphicFunction X) + orderW_inv in
+    SerreResidueRamifiedRealCover.lean — reused, nothing re-proven.
