@@ -81,6 +81,23 @@ tracker issues.
   `lineIntegral` meromorphic extension. Ready so Abel ⊆ assembles the moment
   the keystone falls.
 
+## Live status (2026-06-10, end of day 1)
+
+- Lane R: R0-R3 MERGED (#154, #156). Sign convention pinned (`resNormalization
+  = −π⁻¹` on area). R3 design delta (τ = ∂̄σ·g, IsOneZeroCoeff) DT-vetted
+  sound; g=0 needs a separate endgame case (no holomorphic ω₀). R4 in flight.
+- Lane L: COMPLETE — S6 (#155, Forster 17.8) + S5 (#159, the unwind).
+  SurjectivityInputs fully assembles; §17.9 surjectivity =
+  `pairing_surjective_of_globalResidue`, conditional on exactly
+  {GlobalResidue (R-lane), UnwindRegularity (R6 — discharge on the DOLBEAULT
+  side per the S5 vet: bump-form class + Cauchy-Pompeiu, cover-independent)}.
+- Lane X: trace cluster MERGED (#161; 36→33; critical 13→10);
+  PlaneCurve.instIsManifold discharged by Codex (PR pending; →32).
+- D1 (PeriodCycleBasis, owner+DT approved, index-split guard implemented):
+  refactor complete, rebase in flight (→31 active / 7 critical).
+- #15 wall-shrink finding (Gemini): backward direction may need only
+  monodromy + max-modulus, not de Rham — candidate campaign #2 input.
+
 ## Milestones
 
 - **M1:** R0 sign test + R1–R2 + S6 underway + #52 PR-4.
