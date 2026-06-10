@@ -9,7 +9,7 @@
 
 ## Issue body
 
-Hi — we're [mrdouglasny/jacobian-challenge](https://github.com/mrdouglasny/jacobian-challenge), a sibling effort on the Buzzard Jacobian challenge. We've vendored your repo at `4437c2b` (forward-ported to Mathlib `c5ea003`, builds green) with Apache 2.0 attribution, and we're already consuming your sorry-free `exists_cechModel` and `exists_skyscraperLES` to discharge our own Čech-finiteness and LES axioms. Thanks for the work — the Dolbeault tower is excellent.
+Hi — we're [mrdouglasny/jacobian-challenge](https://github.com/mrdouglasny/jacobian-challenge), a sibling effort on the Buzzard Jacobian challenge. We've vendored your repo at `4437c2b` (forward-ported to Mathlib `c5ea003`, builds green) with Apache 2.0 attribution, and we're consuming your sorry-free `exists_cechModel` (H¹ finiteness landed; PR #143) and are bridging `exists_skyscraperLES` to discharge our own Čech-finiteness and LES axioms. Thanks for the work — the Dolbeault tower is excellent.
 
 We did a detailed gap analysis of the remaining Serre sorry, `exists_serreDualityData` (`SerreDualityPairing.lean:125`), tracing your assembly chain `MeromorphicCousinSolutions → CousinResidueData → GlobalResidue → SerreResidueRealization → SerreDualityData`. Full writeup: [`docs/planning/KEYSTONE_GAP_ANALYSIS.md`](https://github.com/mrdouglasny/jacobian-challenge/blob/main/docs/planning/KEYSTONE_GAP_ANALYSIS.md). Summary of what we found (please correct anything we misread):
 
