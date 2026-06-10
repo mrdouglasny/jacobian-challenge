@@ -546,9 +546,9 @@ theorem exists_mem_open_notMem_finite {Y : Type*} [TopologicalSpace Y] [ChartedS
   have hWsub : W ⊆ C := fun y hy => h y hy
   exact (infinite_of_isOpen_nonempty hW hne) (hC.subset hWsub)
 
-/-- **Degree-one ⟹ homeomorphism** (Step 3, the crux).  A non-constant degree-one
-holomorphic map `F : X → Y` between compact connected Riemann surfaces is
-bijective and a local biholomorphism, hence a homeomorphism.
+/-- **Degree-one ⟹ bijective** (Step 3's set-theoretic core, extracted from
+`degreeOne_homeo` so the genus transport `KirovDolbeault.DegreeOneGenusTransport`
+can consume the bijection together with the underlying holomorphic `F`).
 
 Proof:
 * **Surjective** — `surjective_of_nonconstant` (open + closed image, connected target).
@@ -557,15 +557,14 @@ Proof:
   independence of the degree. If `F a = F b = c` with `a ≠ b`, take disjoint opens
   `U ∋ a`, `V ∋ b` (Hausdorff); their open images `F '' U`, `F '' V` (open mapping)
   both contain `c`, so the open intersection contains a regular value `y`; then `y`
-  has preimages in `U` and in `V`, contradicting the singleton fibre.
-* **Continuous open bijection ⟹ homeomorphism** (`Equiv.toHomeomorphOfContinuousOpen`). -/
-theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
+  has preimages in `U` and in `V`, contradicting the singleton fibre. -/
+theorem degreeOne_bijective {Y : Type*} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y]
     (F : X → Y) (hF : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω F)
     (hnc : ¬ IsConstantMap F)
     (hdeg : degreeFiber F hF = 1) :
-    Nonempty (X ≃ₜ Y) := by
+    Function.Bijective F := by
   classical
   -- `¬ IsConstantMap F` unfolds to the form used by the open-mapping lemmas.
   have hnc' : ¬ ∃ y₀ : Y, ∀ x, F x = y₀ := hnc
@@ -612,8 +611,23 @@ theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
       rw [hp] at this; exact this
     have huv : u = v := hup.trans hvp.symm
     exact (hUV.ne_of_mem huU (huv ▸ hvV)) rfl
-  -- Assemble: continuous open bijection ⟹ homeomorphism.
-  refine ⟨Equiv.toHomeomorphOfContinuousOpen (Equiv.ofBijective F ⟨hinj, hsurj⟩)
+  exact ⟨hinj, hsurj⟩
+
+/-- **Degree-one ⟹ homeomorphism** (Step 3, the crux).  A non-constant degree-one
+holomorphic map `F : X → Y` between compact connected Riemann surfaces is
+bijective (`degreeOne_bijective`) and open (open-mapping theorem), hence a
+homeomorphism (`Equiv.toHomeomorphOfContinuousOpen`). -/
+theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y]
+    (F : X → Y) (hF : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω F)
+    (hnc : ¬ IsConstantMap F)
+    (hdeg : degreeFiber F hF = 1) :
+    Nonempty (X ≃ₜ Y) := by
+  have hbij : Function.Bijective F := degreeOne_bijective F hF hnc hdeg
+  have hnc' : ¬ ∃ y₀ : Y, ∀ x, F x = y₀ := hnc
+  have hopen : IsOpenMap F := isOpenMap_of_nonconstant F hF hnc'
+  exact ⟨Equiv.toHomeomorphOfContinuousOpen (Equiv.ofBijective F hbij)
     hF.continuous hopen⟩
 
 /-! ### The endgame theorem -/
