@@ -1,3 +1,12 @@
+> **RESOLVED INTERNALLY — DO NOT POST (2026-06-10).** Kirov has handed the
+> repo over and asked us to continue the work; there is no upstream party to
+> coordinate with. The division of labor below is therefore obsolete as a
+> *split* — every item is now ours, including the `GlobalResidue` analytic
+> core and the S3 architecture call (decision: Forster fine-sheaf residue
+> route, per `KEYSTONE_GAP_ANALYSIS.md`, avoiding the g>0 `IsDiskAcyclic`
+> circularity). Kept as the de-facto keystone work plan; tracking continues
+> in `PLAN_AUTONOMOUS_RUN`-successors and the B3 branch.
+
 # DRAFT — upstream coordination issue (DO NOT POST)
 
 - **Target repo:** `rkirov/jacobian-claude`

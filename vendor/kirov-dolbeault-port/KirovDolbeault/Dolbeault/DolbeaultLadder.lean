@@ -53,17 +53,18 @@ So `cohomological_riemannRoch` is in scope here via the import — no longer an 
 Now PROVEN via the **direct Forster §17 route** (`SerreDualityPairing`, the residue-pairing perfectness),
 modulo the single §17 instantiation input `exists_serreDualityData` — **no `hodge_symmetry`, no Dolbeault
 comparison** (Forster §16–17 are PDE-free; the comparison/conjugation detour is not needed). -/
-theorem arithmeticGenus_eq_genus (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
+theorem arithmeticGenus_eq_genus (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
+    (hR : 𝔘.LocallyRealizable) :
     𝔘.h1Dim 0 = kirovGenus X :=
-  arithmeticGenus_eq_genus_serre 𝔘 hL
+  arithmeticGenus_eq_genus_serre 𝔘 hL hR
 
 /-- **General Serre duality.** `h¹(D) = l(K − D)` for a canonical divisor `K` (the perfect residue
 pairing). Together with `cohomological_riemannRoch` this turns the cohomological form into the classical
 `l(D) − l(K−D) = deg D + 1 − g`. Now PROVEN via the **direct Forster §17 route** (`SerreDualityPairing`),
 modulo the single §17 instantiation input `exists_serreDualityData` (Forster 17.11). -/
-theorem serre_h1_eq (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
+theorem serre_h1_eq (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) (hR : 𝔘.LocallyRealizable) :
     ∃ K : Divisor X, ∀ D : Divisor X, 𝔘.h1Dim D = lDim (K - D) :=
-  serre_h1_eq_serre 𝔘 hL
+  serre_h1_eq_serre 𝔘 hL hR
 
 /- **Bridge: Čech global sections = the linear system** (`h⁰(𝔘, 𝒪_D) = l(D)`). PROVEN in
 `CechH0` (`FiniteCover.h0Dim_eq_lDim`) modulo the single gluing/surjectivity gap
@@ -79,10 +80,10 @@ theorem riemannRoch_equality_of_ladder (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray
     (hR : 𝔘.LocallyRealizable) :
     ∃ K : Divisor X, ∀ D : Divisor X,
       (lDim D : ℤ) - lDim (K - D) = Divisor.deg X D + 1 - kirovGenus X := by
-  obtain ⟨K, hK⟩ := serre_h1_eq 𝔘 hL
+  obtain ⟨K, hK⟩ := serre_h1_eq 𝔘 hL hR
   refine ⟨K, fun D => ?_⟩
   have h := cohomological_riemannRoch 𝔘 hR D
-  rw [𝔘.h0Dim_eq_lDim D, hK D, arithmeticGenus_eq_genus 𝔘 hL] at h
+  rw [𝔘.h0Dim_eq_lDim D, hK D, arithmeticGenus_eq_genus 𝔘 hL hR] at h
   exact h
 
 end Jacobians.Dolbeault

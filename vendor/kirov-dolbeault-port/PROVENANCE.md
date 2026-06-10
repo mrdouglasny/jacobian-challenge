@@ -71,7 +71,7 @@ Proof follows Miranda §VIII.3 (trace to ℙ¹).
 
 | Sorry | File | Content |
 |---|---|---|
-| `exists_serreDualityData` | `Dolbeault/SerreDualityPairing.lean:127` | §17.5 connecting map + §17.9 surjectivity — the chokepoint for RR |
+| `exists_serreDualityData` | `Dolbeault/SerreDualityPairing.lean:134` | §17.5 connecting map + §17.9 surjectivity — the chokepoint for RR. *Signature changed in this port (B3/S8, 2026-06-10): hypothesis `hR : 𝔘.LocallyRealizable` added (and threaded through `arithmeticGenus_eq_genus_serre`, `serre_h1_eq_serre`, `DolbeaultLadder.arithmeticGenus_eq_genus`, `DolbeaultLadder.serre_h1_eq`) — every §17.9 RR input needs it, and the sole consumer (`exists_riemannRoch_divisor`) already holds it.* |
 | `abelJacobi_twoPoint_ne_zero` | `Abel.lean:671` | Abel's theorem core |
 | `exists_cutSurface` | `CutSurfaceRelations.lean:161` | Cut surface / surface topology |
 | `HasHolomorphicPrimitives` | `DegreeOneSphere.lean:678` | Manifold de Rham (period slice) |
@@ -111,6 +111,21 @@ Deviations from the verbatim snapshot, beyond the 7-file forward-port:
      the 4-declaration `IsLocalHomeomorph.chartAtPreimage` family, which we
      had already adopted verbatim in
      `Jacobians/Vendor/Kirov/ChartedSpaceOfLocalHomeomorph.lean`).
+
+3. **Keystone signature change (B3/S8, 2026-06-10,
+   `docs/planning/KEYSTONE_GAP_ANALYSIS.md` step S8).** The sorry'd keystone
+   `exists_serreDualityData` gained the hypothesis `hR : 𝔘.LocallyRealizable`
+   (it was missing relative to the §17.9 surjectivity count's RR inputs,
+   which all require local realizability of the cover), threaded through
+   `arithmeticGenus_eq_genus_serre`, `serre_h1_eq_serre`,
+   `DolbeaultLadder.arithmeticGenus_eq_genus`, `DolbeaultLadder.serre_h1_eq`.
+   `riemannRoch_equality_of_ladder` and everything downstream are unchanged
+   (they already carried `hR`).
+4. **New file `KirovDolbeault/Dolbeault/SerreSurjectivitySkeleton.lean`
+   (B3/S7, 2026-06-10).** Ours, not upstream's: the Forster §17.9
+   surjectivity-count engine (`SurjectivityInputs` packaging 17.7/17.8 +
+   `pairing_surjective_of_inputs`), axiom-free and sorry-free, built on the
+   port's proven RR API. Carries our copyright header, not Kirov's.
 
 Bridge rule (PHASE_D_BRIDGE_PLAN.md): bridges may consume only the port's
 sorry-free results, and every bridge headline must be `#print axioms`
