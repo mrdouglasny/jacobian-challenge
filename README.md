@@ -73,11 +73,11 @@ Every axiom is a staging point with a citation and a discharge plan, classified 
 |-------|:-----:|:----------:|
 | Period / Hodge / homology core (intersection form + laws, H₁ cycle basis; **Riemann bilinear + period lattice now theorems**, Phase C) | 4 | 🔴🟡 |
 | Abel–Jacobi (`AX_AbelTheorem` + `ofCurve` smoothness; `ofCurve_inj` is now a theorem) | 2 | 🔴 |
-| Sheaf cohomology stubs / Plücker / uniformization (`H0`,`H1` de-opaqued; **RR + Serre now theorems**, not axioms) | 5 | 🔴 |
+| Sheaf cohomology stubs / Plücker / uniformization (`LineBundle`/`canonicalDivisor`/`ofDivisor` type stubs; `AX_PluckerFormula`; `AX_genus_eq_zero_iff_homeo`; **RR + Serre now theorems**; `H0` = `riemannRochSpace`, `H1` = `Layer3.H1coh`) | 5 | 🔴 |
 | Layer-3 scaffold: cohomology (`h1coh_zero_finrank` + `serreDuality_equiv`, 2 — **Phase D discharged** `H1coh`+3 instances+`cohomologyLES` to the Kirov Čech model; [#126](https://github.com/mrdouglasny/jacobian-challenge/issues/126)/[#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)/#143/#144) + period primitives (`RBR1`/`RBR2`, 2 — bilinear relations + period lattice proved over them, Phase C) | 4 | 🔴 |
 | Functoriality (pushforward / pullback naturality + lattice preservation) | 7 | 🟡 |
 | Torus / Albanese universal property | 3 | 🟡 |
-| Concrete curves (hyperelliptic / plane-curve / ℙ¹ atlases & witnesses) | 11 | 🟢🟡 |
+| Concrete curves (elliptic `H₁`-symplectic witness; hyperelliptic genus formula + 7-axiom odd-atlas ∞-chart cluster; plane-curve affine-connected + `instIsManifold`; **ℙ¹ is axiom-free**) | 11 | 🟢🟡 |
 | Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 0 | ✅ **discharged** (PR #96) |
 | **Total** | **36** | |
 
