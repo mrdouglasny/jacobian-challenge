@@ -5,7 +5,8 @@ challenge property theorems and the concrete-curve headlines). The Jacobian type
 instances are now also covered: `scripts/axiom_report.lean` includes wrapper theorems
 for all 7 Buzzard instance obligations (T2Space, CompactSpace, ConnectedSpace,
 ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-10
-(post-D1 + the #161 trace-cluster discharge) against the 31-axiom table.*
+(post-D1 + the #161 trace-cluster discharge + the #52 `PlaneCurve.instIsManifold`
+discharge) against the 30-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
 > count dropped **13 → 7** (D1 merge −3+1 −intersectionForm; #161 trace-cluster
@@ -37,7 +38,7 @@ Challenge.lean line 105 marks it as extra, needed for the Albanese universal pro
 
 All 24 are filled; `ChallengeConformance.lean` machine-checks every v0.4 signature
 (`lake env lean ChallengeConformance.lean`, exit 0). **But filling a `sorry` with an
-`axiom` is not the same as proving it.** This document identifies: which of the 31
+`axiom` is not the same as proving it.** This document identifies: which of the 30
 remaining axioms must be discharged to produce a fully axiom-free challenge closure?
 
 ---
@@ -146,7 +147,7 @@ an opaque construction any more.
 
 ---
 
-## The 24 non-challenge-critical axioms
+## The 23 non-challenge-critical axioms
 
 ### i. Intersection form + laws (3) — out of the challenge cone since D1
 
@@ -189,14 +190,14 @@ construction, ofCurve, functoriality) do not depend on RR/Serre.
 `AX_PluckerFormula`: `genus(C) = (d−1)(d−2)/2` for a smooth degree-d plane curve.
 Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib currently.
 
-### v. Concrete curve witnesses (11) — Part 3 vetting only
+### v. Concrete curve witnesses (10) — Part 3 vetting only
 
 | Group | Axioms |
 |---|---|
 | Elliptic | `AX_Elliptic_H1_symplectic` |
 | Hyperelliptic | `AX_Hyperelliptic_genus` |
 | Odd-atlas ∞-chart (7) | `infinityInverseMap`, `infinityChart`, `infinityChart_mem_source`, 4 compat axioms |
-| Plane curve | `AX_PlaneCurveAffine_connected`, `PlaneCurve.instIsManifold` |
+| Plane curve | `AX_PlaneCurveAffine_connected` (`PlaneCurve.instIsManifold` **discharged #52**, 2026-06-10) |
 
 ---
 

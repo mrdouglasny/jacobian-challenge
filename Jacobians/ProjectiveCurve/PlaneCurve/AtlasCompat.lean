@@ -2909,4 +2909,201 @@ theorem xLiftChart_compat_yLiftChart (H : PlaneCurveData)
   · exact affineChartProjY_X_lift_compat_affineChartProjZ_Y H p p' _ _
   · exact affineChartProjY_X_lift_compat_affineChartProjX_Y H p p' _ _
 
+/-! ### Diagonal compatibility for preferred lifted patch charts -/
+
+/-- Same-patch compatibility for preferred lifted charts in the `z = 1` patch. -/
+theorem centralLiftChart_compat_centralLiftChart (H : PlaneCurveData)
+    (p p' : PlaneCurveAffine H) :
+    ContDiffOn ℂ ω
+      (((centralLiftChart H p).symm.trans (centralLiftChart H p')) : ℂ → ℂ)
+      ((centralLiftChart H p).symm.trans (centralLiftChart H p')).source := by
+  classical
+  unfold centralLiftChart PlaneCurveAffine.prefChart
+  split_ifs with hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjY_compat_affineChartProjY H p p' hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjY_compat_affineChartProjX H p p' hp _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjX_compat_affineChartProjY H p p' _ _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjX_compat_affineChartProjX H p p' _ _
+
+/-- Same-patch compatibility for preferred lifted charts in the `y = 1` patch. -/
+theorem yLiftChart_compat_yLiftChart (H : PlaneCurveData)
+    [Nonempty (PlaneCurveAffineY H)]
+    (p p' : PlaneCurveAffineY H) :
+    ContDiffOn ℂ ω
+      (((yLiftChart H p).symm.trans (yLiftChart H p')) : ℂ → ℂ)
+      ((yLiftChart H p).symm.trans (yLiftChart H p')).source := by
+  classical
+  unfold yLiftChart PlaneCurveAffineY.prefChart
+  split_ifs with hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjZ_Y_compat_affineChartProjZ_Y H p p' hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjZ_Y_compat_affineChartProjX_Y H p p' hp _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjX_Y_compat_affineChartProjZ_Y H p p' _ _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjX_Y_compat_affineChartProjX_Y H p p' _ _
+
+/-- Same-patch compatibility for preferred lifted charts in the `x = 1` patch. -/
+theorem xLiftChart_compat_xLiftChart (H : PlaneCurveData)
+    [Nonempty (PlaneCurveAffineX H)]
+    (p p' : PlaneCurveAffineX H) :
+    ContDiffOn ℂ ω
+      (((xLiftChart H p).symm.trans (xLiftChart H p')) : ℂ → ℂ)
+      ((xLiftChart H p).symm.trans (xLiftChart H p')).source := by
+  classical
+  unfold xLiftChart PlaneCurveAffineX.prefChart
+  split_ifs with hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjZ_X_compat_affineChartProjZ_X H p p' hp hp'
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjZ_X_compat_affineChartProjY_X H p p' hp _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjY_X_compat_affineChartProjZ_X H p p' _ _
+  · simpa only [OpenPartialHomeomorph.lift_openEmbedding_trans] using
+      affineChartProjY_X_compat_affineChartProjY_X H p p' _ _
+
+/-! ### Charted-space compatibility and manifold instance -/
+
+/-- The preferred chart at any two points of a plane curve has an analytic transition. -/
+theorem PlaneCurve.chartAt_compat (H : PlaneCurveData) (q q' : PlaneCurve H) :
+    ContDiffOn ℂ ω
+      (((chartAt H q).symm.trans (chartAt H q')) : ℂ → ℂ)
+      ((chartAt H q).symm.trans (chartAt H q')).source := by
+  classical
+  by_cases hq2 : q.val.rep 2 ≠ 0
+  · let p : PlaneCurveAffine H := PlaneCurveAffine.projZ_inv H ⟨q, by
+      rw [range_toPlaneCurve_eq_U2 H]
+      exact mem_U_of_rep_ne_zero q.val 2 hq2⟩
+    have hq : chartAt H q = centralLiftChart H p := by
+      simp [chartAt, hq2, p]
+    by_cases hq'2 : q'.val.rep 2 ≠ 0
+    · let p' : PlaneCurveAffine H := PlaneCurveAffine.projZ_inv H ⟨q', by
+        rw [range_toPlaneCurve_eq_U2 H]
+        exact mem_U_of_rep_ne_zero q'.val 2 hq'2⟩
+      have hq' : chartAt H q' = centralLiftChart H p' := by
+        simp [chartAt, hq'2, p']
+      simpa [hq, hq'] using centralLiftChart_compat_centralLiftChart H p p'
+    · by_cases hq'1 : q'.val.rep 1 ≠ 0
+      · let p' : PlaneCurveAffineY H := PlaneCurveAffineY.projY_inv H ⟨q', by
+          rw [range_toPlaneCurveY_eq_U1 H]
+          exact mem_U_of_rep_ne_zero q'.val 1 hq'1⟩
+        haveI : Nonempty (PlaneCurveAffineY H) := ⟨p'⟩
+        have hq' : chartAt H q' = yLiftChart H p' := by
+          simp [chartAt, hq'2, hq'1, p']
+        simpa [hq, hq'] using centralLiftChart_compat_yLiftChart H p p'
+      · have hq'0 : q'.val.rep 0 ≠ 0 := by
+          have h_nz := Projectivization.rep_nonzero q'.val
+          intro h_zero
+          apply h_nz
+          ext i
+          fin_cases i
+          · exact h_zero
+          · exact not_not.mp hq'1
+          · exact not_not.mp hq'2
+        let p' : PlaneCurveAffineX H := PlaneCurveAffineX.projX_inv H ⟨q', by
+          rw [range_toPlaneCurveX_eq_U0 H]
+          exact mem_U_of_rep_ne_zero q'.val 0 hq'0⟩
+        haveI : Nonempty (PlaneCurveAffineX H) := ⟨p'⟩
+        have hq' : chartAt H q' = xLiftChart H p' := by
+          simp [chartAt, hq'2, hq'1, p']
+        simpa [hq, hq'] using centralLiftChart_compat_xLiftChart H p p'
+  · by_cases hq1 : q.val.rep 1 ≠ 0
+    · let p : PlaneCurveAffineY H := PlaneCurveAffineY.projY_inv H ⟨q, by
+        rw [range_toPlaneCurveY_eq_U1 H]
+        exact mem_U_of_rep_ne_zero q.val 1 hq1⟩
+      haveI : Nonempty (PlaneCurveAffineY H) := ⟨p⟩
+      have hq : chartAt H q = yLiftChart H p := by
+        simp [chartAt, hq2, hq1, p]
+      by_cases hq'2 : q'.val.rep 2 ≠ 0
+      · let p' : PlaneCurveAffine H := PlaneCurveAffine.projZ_inv H ⟨q', by
+          rw [range_toPlaneCurve_eq_U2 H]
+          exact mem_U_of_rep_ne_zero q'.val 2 hq'2⟩
+        have hq' : chartAt H q' = centralLiftChart H p' := by
+          simp [chartAt, hq'2, p']
+        simpa [hq, hq'] using yLiftChart_compat_centralLiftChart H p p'
+      · by_cases hq'1 : q'.val.rep 1 ≠ 0
+        · let p' : PlaneCurveAffineY H := PlaneCurveAffineY.projY_inv H ⟨q', by
+            rw [range_toPlaneCurveY_eq_U1 H]
+            exact mem_U_of_rep_ne_zero q'.val 1 hq'1⟩
+          have hq' : chartAt H q' = yLiftChart H p' := by
+            simp [chartAt, hq'2, hq'1, p']
+          simpa [hq, hq'] using yLiftChart_compat_yLiftChart H p p'
+        · have hq'0 : q'.val.rep 0 ≠ 0 := by
+            have h_nz := Projectivization.rep_nonzero q'.val
+            intro h_zero
+            apply h_nz
+            ext i
+            fin_cases i
+            · exact h_zero
+            · exact not_not.mp hq'1
+            · exact not_not.mp hq'2
+          let p' : PlaneCurveAffineX H := PlaneCurveAffineX.projX_inv H ⟨q', by
+            rw [range_toPlaneCurveX_eq_U0 H]
+            exact mem_U_of_rep_ne_zero q'.val 0 hq'0⟩
+          haveI : Nonempty (PlaneCurveAffineX H) := ⟨p'⟩
+          have hq' : chartAt H q' = xLiftChart H p' := by
+            simp [chartAt, hq'2, hq'1, p']
+          simpa [hq, hq'] using yLiftChart_compat_xLiftChart H p p'
+    · have hq0 : q.val.rep 0 ≠ 0 := by
+        have h_nz := Projectivization.rep_nonzero q.val
+        intro h_zero
+        apply h_nz
+        ext i
+        fin_cases i
+        · exact h_zero
+        · exact not_not.mp hq1
+        · exact not_not.mp hq2
+      let p : PlaneCurveAffineX H := PlaneCurveAffineX.projX_inv H ⟨q, by
+        rw [range_toPlaneCurveX_eq_U0 H]
+        exact mem_U_of_rep_ne_zero q.val 0 hq0⟩
+      haveI : Nonempty (PlaneCurveAffineX H) := ⟨p⟩
+      have hq : chartAt H q = xLiftChart H p := by
+        simp [chartAt, hq2, hq1, p]
+      by_cases hq'2 : q'.val.rep 2 ≠ 0
+      · let p' : PlaneCurveAffine H := PlaneCurveAffine.projZ_inv H ⟨q', by
+          rw [range_toPlaneCurve_eq_U2 H]
+          exact mem_U_of_rep_ne_zero q'.val 2 hq'2⟩
+        have hq' : chartAt H q' = centralLiftChart H p' := by
+          simp [chartAt, hq'2, p']
+        simpa [hq, hq'] using xLiftChart_compat_centralLiftChart H p p'
+      · by_cases hq'1 : q'.val.rep 1 ≠ 0
+        · let p' : PlaneCurveAffineY H := PlaneCurveAffineY.projY_inv H ⟨q', by
+            rw [range_toPlaneCurveY_eq_U1 H]
+            exact mem_U_of_rep_ne_zero q'.val 1 hq'1⟩
+          haveI : Nonempty (PlaneCurveAffineY H) := ⟨p'⟩
+          have hq' : chartAt H q' = yLiftChart H p' := by
+            simp [chartAt, hq'2, hq'1, p']
+          simpa [hq, hq'] using xLiftChart_compat_yLiftChart H p p'
+        · have hq'0 : q'.val.rep 0 ≠ 0 := by
+            have h_nz := Projectivization.rep_nonzero q'.val
+            intro h_zero
+            apply h_nz
+            ext i
+            fin_cases i
+            · exact h_zero
+            · exact not_not.mp hq'1
+            · exact not_not.mp hq'2
+          let p' : PlaneCurveAffineX H := PlaneCurveAffineX.projX_inv H ⟨q', by
+            rw [range_toPlaneCurveX_eq_U0 H]
+            exact mem_U_of_rep_ne_zero q'.val 0 hq'0⟩
+          have hq' : chartAt H q' = xLiftChart H p' := by
+            simp [chartAt, hq'2, hq'1, p']
+          simpa [hq, hq'] using xLiftChart_compat_xLiftChart H p p'
+
+/-- The analytic manifold structure on a smooth projective plane curve. -/
+noncomputable instance PlaneCurve.instIsManifold (H : PlaneCurveData) :
+    IsManifold 𝓘(ℂ, ℂ) ω (PlaneCurve H) := by
+  apply isManifold_of_contDiffOn
+  intro e e' he he'
+  rcases he with ⟨q, rfl⟩
+  rcases he' with ⟨q', rfl⟩
+  simpa only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+    Set.range_id, Set.preimage_id, id_eq, Set.inter_univ, Set.univ_inter] using
+    PlaneCurve.chartAt_compat H q q'
+
 end Jacobians.ProjectiveCurve
