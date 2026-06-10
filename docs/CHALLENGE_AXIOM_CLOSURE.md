@@ -30,6 +30,39 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ---
 
+## What filling the 13 does — and does not — claim
+
+Discharging all 13 makes every Buzzard declaration print exactly
+`[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
+itself. That is the strongest claim the kernel can express, it is enforced
+continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
+and it should be certified at the end by a comparator run (kernel replay +
+axiom whitelist, `~/.claude/COMPARATOR.md` protocol) on the headline
+declarations. Four boundaries to keep the claim honest:
+
+1. **Kernel trust ≠ review trust.** Post-discharge the solution rests on
+   Mathlib *plus this repo's ~50k LOC and the vendored port* — all
+   kernel-checked to standard-3, none human-reviewed. The kernel guarantee
+   is identical to Mathlib's; the social provenance is not. The README's
+   LLM-authorship disclaimer remains load-bearing.
+2. **Definitional faithfulness is not an axiom question.** A degenerate
+   definition can be standard-3. This is covered by the challenge's own
+   design, not by the axiom count: the anti-degeneracy property theorems
+   are among the 24 obligations, and `ChallengeConformance.lean`
+   machine-checks every signature verbatim against the pinned v0.4 spec —
+   a hollow construction provably cannot satisfy both.
+3. **13 is the end-state count, not the work count.** Discharge routes pull
+   in their own mathematics (e.g. `AX_AbelTheorem` classically routes
+   through the RR/Serre tower, so the Serre keystone — not itself in the
+   13 — is on the path). The set may grow transiently if a discharge
+   introduces a new textbook axiom; the CI guard makes any such step
+   visible, and the claim lands only when the challenge cone hits zero.
+4. **`AX_ofCurve_contMDiff` is the conditional one.** Its 2026-06-10
+   deep-think vetting pinned its *truth* to the completeness of the
+   `periodMap`/H1 model (homotopy invariance of the arc integral — the
+   parked X1 workstream). Filling the 13 therefore includes settling X1;
+   it cannot stay parked if axiom-free closure is the goal.
+
 ## The 13 challenge-critical axioms
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
