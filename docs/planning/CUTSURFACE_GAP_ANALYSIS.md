@@ -227,3 +227,28 @@ dry run of D/F — but it does not discharge the universally-quantified theorem.
    formalization) and B (analytic = topological genus — blocked on the Dolbeault/Serre keystone
    `exists_serreDualityData` + a Hodge/de Rham comparison). Neither should be scheduled inside
    this repo's critical path now.
+
+
+---
+
+## §4 flag RESOLVED (2026-06-10, deep-think): satisfiable as stated; geometric witness impossible for g ≥ 2
+
+The satisfiability suspicion is settled with a split verdict:
+
+- **The structure as stated is SATISFIABLE for all g ≥ 0** — it carries no cut
+  chart, only abstract `h, F : ℂ → ℂ` plus the two boundary-word ∮ identities.
+  Abstract witness: genuine symplectic loops (R1/R2 classically true) + g
+  polynomials Gram-matched (Cholesky) to `G = ½·i(AᵀB̄ − BᵀĀ) ≻ 0`; the Green
+  constant and boundary words check out. g = 1: constant `h` with `|c|² = Im τ`
+  (NB the earlier "affine entire chart" claim above is wrong for generic τ —
+  the chart is only ℝ-linear — but irrelevant to the witness). So mapping our
+  axioms onto `exists_cutSurface` is kernel-safe.
+- **But the corner suspicion is CONFIRMED for the intended geometric route**:
+  the angle count `4·(π/2) + (4g−4)·π = (4g−2)π > 2π` rigorously rules out a
+  holomorphic-on-closed-box cut chart for g ≥ 2.
+- **Strategic consequence:** the only non-circular witnesses at g ≥ 2 are
+  abstract (they presuppose R1/R2 proven by other means), so the structure's
+  value as a *proof factoring* is weaker than its docstring suggests. An honest
+  discharge of the sorry must either weaken `hh` to interior-holomorphy +
+  boundary continuity (re-enabling the Riemann-map witness; Mathlib's rectangle
+  theorems tolerate this) or prove R1/R2 independently first.
