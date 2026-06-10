@@ -464,11 +464,9 @@ instance : NoncompactSpace (HyperellipticAffine H) := by
 
 end HyperellipticAffine
 
-/-- Hyperelliptic curve with **odd** `deg f = 2g + 1`: a single branch
-point at infinity, modeled by the one-point compactification of the
-affine locus. -/
 def HyperellipticOdd (H : HyperellipticData) (_h : Odd H.f.natDegree) : Type :=
   OnePoint (HyperellipticAffine H)
+
 
 namespace HyperellipticOdd
 
@@ -488,6 +486,15 @@ instance : Nonempty (HyperellipticOdd H h) :=
 
 instance : ConnectedSpace (HyperellipticOdd H h) :=
   inferInstanceAs (ConnectedSpace (OnePoint (HyperellipticAffine H)))
+
+/-- Coercion from affine points to the odd projective curve. -/
+def coe (a : HyperellipticAffine H) : HyperellipticOdd H h := OnePoint.some a
+
+/-- The point at infinity on the odd projective curve. -/
+def infty : HyperellipticOdd H h := OnePoint.infty
+
+instance : Coe (HyperellipticAffine H) (HyperellipticOdd H h) where
+  coe := coe
 
 end HyperellipticOdd
 
