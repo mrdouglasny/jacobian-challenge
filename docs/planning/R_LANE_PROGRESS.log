@@ -38,3 +38,12 @@ pouSplit_telescope (support-aware refinement of cechCoboundary_telescoping —
 cocycle identity demanded only on triple overlaps, IsOverlapCocycle);
 isOverlapCocycle_sub gives the ML difference-family shape w i j = v j − v i.
 M1 scope (R0+R1+R2) complete; committing R2.
+
+[SESSION END] Commits on feat/keystone-r0-signtest: a1d7ac9 (R0), 72c06c6 (R1),
+6066025 (R2). All FineResidue files sorry-free, lake-env-lean-validated,
+headlines axiom-clean. Not pushed (orchestrator gates).
+R3 next: Wirtinger chain rule dbar (f∘φ) = ((dbar f)∘φ)·conj φ′ for holomorphic φ
+(planar, fderiv composition + DbarDisk.dbar), then: pouSplit read in chart-j
+coordinates, dbar of it = member of oneOneCoeff (uses pouSplit_telescope +
+dbar_eq_zero_of_differentiableAt on w, transitionMap_analyticAt/deriv_ne_zero
+from OneOneCoeff.lean). Cite R0's resNormalization, do not re-derive signs.
