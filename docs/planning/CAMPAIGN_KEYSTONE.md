@@ -34,7 +34,11 @@ Source of truth: `docs/planning/S3_FINESHEAF_RES_SCOPING.md` (R1–R8, file
 targets, Mathlib decl inventory verified at pin c5ea003). Branch prefix
 `feat/keystone-r*`. Rules: **R0 FIRST — the end-to-end `(z−a)⁻¹` sign test**
 (top scoping risk: sign/normalization conventions; pin them before anything
-builds on R3/R4). Then R1 (germ→chart-coefficient (1,1) representation) → R2
+builds on R3/R4). **R0 DONE (PR #154): the pinned convention is
+`resNormalization := −π⁻¹` against the Lebesgue AREA integral** — i.e.
+Forster's `(2πi)⁻¹∬ τ` with `dz∧dz̄ = −2i·dA` absorbed
+(`resNormalization = (2πi)⁻¹·(−2i)`); matches the port's `resAt`
+(`(z−a)⁻¹ ↦ +1`). R3+ cite `FineResidue.resNormalization`; never re-derive. Then R1 (germ→chart-coefficient (1,1) representation) → R2
 (PoU split via `SmoothPartitionOfUnity.exists_isSubordinate` + the port's
 `cechPoU`/`rhoC`/`dbarRho`) → R3 (Wirtinger chain rule) → R4 (integral
 functional + chart relocation via `integral_image_eq_integral_abs_det_fderiv_smul`)
