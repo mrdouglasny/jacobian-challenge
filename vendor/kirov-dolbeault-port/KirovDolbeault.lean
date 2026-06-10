@@ -83,7 +83,7 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X] [Connecte
 
 -- data
 /-- The period lattice of a compact Riemann surface, living inside
-`(Fin (genus X) → ℂ)`.
+`(Fin (kirovGenus X) → ℂ)`.
 
 Defined as `Jacobians.truePeriodLattice X` (see
 `Jacobians/PeriodLattice.lean`): the ℤ-span of period vectors of
@@ -97,7 +97,7 @@ Mathlib); they are supplied as unconditional unproved-obligation instances (S2/S
 them. -/
 noncomputable def periodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Submodule ℤ (Fin (genus X) → ℂ) :=
+    [IsManifold 𝓘(ℂ) ω X] : Submodule ℤ (Fin (kirovGenus X) → ℂ) :=
   Jacobians.truePeriodLattice X
 
 instance {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
@@ -112,7 +112,7 @@ instance {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 
 -- data
 /-- The Jacobian of a compact Riemann surface, as the quotient of
-`(Fin (genus X) → ℂ)` by the period lattice.
+`(Fin (kirovGenus X) → ℂ)` by the period lattice.
 
 TODO (universe polymorphism): the challenge file originally signed
 `Jacobian : Type u`. Our concrete construction lives in `Type 0`.
@@ -123,7 +123,7 @@ explicit TODO; current signature is `Type`. -/
 @[reducible]
 noncomputable def JacobianTorus (X : Type*) [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Type :=
-  (Fin (genus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup
+  (Fin (kirovGenus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup
 
 namespace JacobianTorus
 
@@ -143,17 +143,17 @@ noncomputable instance : CompactSpace (JacobianTorus X) := inferInstance
 
 -- data
 /-- The Jacobian of a compact Riemann surface is a complex manifold, of dimension
-equal to the genus of the surface. -/
-noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (JacobianTorus X) := inferInstance
+equal to the kirovGenus of the surface. -/
+noncomputable instance : ChartedSpace (Fin (kirovGenus X) → ℂ) (JacobianTorus X) := inferInstance
 
 -- Prop
 noncomputable instance :
-    IsManifold (𝓘(ℂ, Fin (genus X) → ℂ)) ω (JacobianTorus X) :=
+    IsManifold (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω (JacobianTorus X) :=
   inferInstance
 
 -- Prop
 noncomputable instance :
-    LieAddGroup (𝓘(ℂ, Fin (genus X) → ℂ)) ω (JacobianTorus X) :=
+    LieAddGroup (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω (JacobianTorus X) :=
   inferInstance
 
 /-- The Abel-Jacobi map from a compact Riemann surface to its Jacobian.
@@ -174,7 +174,7 @@ is holomorphic.
 At each `Q₀ : X`:
 
 * The vector-valued local lift `localLift Q₀ (periodVec (smoothPath P
-  Q₀))` is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω` at `Q₀`
+  Q₀))` is `ContMDiffAt 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω` at `Q₀`
   (`Jacobians.OfCurveSkeleton.localLift_contMDiffAt`, PROVEN via the
   Morera-primitive + FTC + `AnalyticAt.contDiffAt` +
   `ContDiffAt.comp_contMDiffAt` chain).
@@ -189,29 +189,29 @@ At each `Q₀ : X`:
   at `Q₀`.
 * `ContMDiff = ∀ Q, ContMDiffAt` (Mathlib definitional). -/
 lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ)
-    (𝓘(ℂ, Fin (genus X) → ℂ)) ω (ofCurve P) := by
+    (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω (ofCurve P) := by
   intro Q₀
   -- Local lift at `Q₀` with `constants = periodVec(smoothPath P Q₀)`.
   have h_local : ContMDiffAt 𝓘(ℂ)
-      (𝓘(ℂ, Fin (genus X) → ℂ)) ω
+      (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω
       (Jacobians.OfCurveSkeleton.localLift (X := X) Q₀
         (Jacobians.periodVec (Jacobians.smoothPath P Q₀))) Q₀ :=
     Jacobians.OfCurveSkeleton.localLift_contMDiffAt Q₀ _
   -- Smooth quotient projection.
-  have h_mk : ContMDiff (𝓘(ℂ, Fin (genus X) → ℂ))
-      (𝓘(ℂ, Fin (genus X) → ℂ)) ω
+  have h_mk : ContMDiff (𝓘(ℂ, Fin (kirovGenus X) → ℂ))
+      (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω
       (QuotientAddGroup.mk :
-        (Fin (genus X) → ℂ) →
-        (Fin (genus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup) :=
-    Jacobians.ZLatticeQuotient.contMDiff_mk (𝕜 := ℂ) (E := Fin (genus X) → ℂ)
+        (Fin (kirovGenus X) → ℂ) →
+        (Fin (kirovGenus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup) :=
+    Jacobians.ZLatticeQuotient.contMDiff_mk (𝕜 := ℂ) (E := Fin (kirovGenus X) → ℂ)
       (Λ := periodLattice X) (n := ω)
   -- Composition: quotient of the local lift, ContMDiffAt at Q₀.
   have h_local_quotient : ContMDiffAt 𝓘(ℂ)
-      (𝓘(ℂ, Fin (genus X) → ℂ)) ω
+      (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω
       (fun Q => (QuotientAddGroup.mk
         (Jacobians.OfCurveSkeleton.localLift (X := X) Q₀
           (Jacobians.periodVec (Jacobians.smoothPath P Q₀)) Q) :
-        (Fin (genus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup)) Q₀ :=
+        (Fin (kirovGenus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup)) Q₀ :=
     (h_mk _).comp Q₀ h_local
   -- Local agreement with `ofCurve P` (via path algebra in the quotient).
   -- `periodLattice X = Jacobians.truePeriodLattice X` is definitionally
@@ -220,7 +220,7 @@ lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ)
       (fun Q => (QuotientAddGroup.mk
         (Jacobians.OfCurveSkeleton.localLift (X := X) Q₀
           (Jacobians.periodVec (Jacobians.smoothPath P Q₀)) Q) :
-        (Fin (genus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup))
+        (Fin (kirovGenus X) → ℂ) ⧸ (periodLattice X).toAddSubgroup))
       =ᶠ[nhds Q₀] (ofCurve P) := by
     have h_id := Jacobians.OfCurveSkeleton.localLift_quotient_eq_ofCurve_eventually
       (X := X) P Q₀
@@ -268,7 +268,7 @@ ofCurve P₀ Q' - ofCurve P₀ Q`. The chain:
   ofCurve P Q = ofCurve P Q'
    → (basepoint change, `ofCurve_basepoint_change`) ofCurve P₀ Q' = ofCurve P₀ Q
    → abelJacobi (twoPointDivisor Q' Q) = 0
-   → contradicts `abelJacobi_twoPoint_ne_zero` when Q ≠ Q' and 0 < genus X.
+   → contradicts `abelJacobi_twoPoint_ne_zero` when Q ≠ Q' and 0 < kirovGenus X.
 
 The only remaining math gap is the leaf `abelJacobi_twoPoint_ne_zero`
 (gap S7 = Abel's theorem + Riemann–Hurwitz, `Abel.lean`); everything
@@ -276,7 +276,7 @@ above it here is proven. The basepoint-change step also rests on
 `smoothPath_basepoint_change`, extracted from gap S1
 (`exists_smoothPath_family`). -/
 lemma ofCurve_inj
-    (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) := by
+    (P : X) (h : 0 < kirovGenus X) : Function.Injective (ofCurve P) := by
   intro Q Q' h_eq
   by_contra h_ne
   -- Abel's theorem chain: abelJacobi (twoPointDivisor Q' Q) ≠ 0 when Q' ≠ Q.
@@ -307,7 +307,7 @@ chain rule). -/
 lemma ambientPhi_preserves_lattice (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (periodLattice X).toAddSubgroup ≤
       (periodLattice Y).toAddSubgroup.comap
-        (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf).toAddMonoidHom :=
+        (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toAddMonoidHom :=
   Jacobians.ambientPhi_preserves_truePeriodLattice f hf
 
 /-- The pushforward map between Jacobians associated to a map of the underlying curves.
@@ -316,23 +316,23 @@ noncomputable def pushforward (f : X → Y)
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     JacobianTorus X →ₜ+ JacobianTorus Y :=
   Jacobians.ZLatticeQuotient.pushforward (periodLattice X) (periodLattice Y)
-    (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf)
+    (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
     (ambientPhi_preserves_lattice f hf)
 
 -- pushforward is holomorphic
 theorem pushforward_contMDiff :
-  ContMDiff (𝓘(ℂ, Fin (genus X) → ℂ))
-  (𝓘(ℂ, Fin (genus Y) → ℂ)) ω (pushforward f hf) :=
+  ContMDiff (𝓘(ℂ, Fin (kirovGenus X) → ℂ))
+  (𝓘(ℂ, Fin (kirovGenus Y) → ℂ)) ω (pushforward f hf) :=
   Jacobians.ZLatticeQuotient.pushforward_contMDiff_of_ambient
     (periodLattice X) (periodLattice Y)
-    (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf)
+    (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
     (ambientPhi_preserves_lattice f hf)
 
 -- functoriality
 lemma pushforward_id_apply (P : JacobianTorus X) : pushforward id contMDiff_id P = P :=
   Jacobians.ZLatticeQuotient.pushforward_id_of_ambient
     (periodLattice X)
-    (Jacobians.ambientPhi (gX := genus X) (gY := genus X) id contMDiff_id)
+    (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id)
     (ambientPhi_preserves_lattice id contMDiff_id)
     (fun x => Jacobians.ambientPhi_id (X := X) x)
     P
@@ -348,11 +348,11 @@ lemma pushforward_comp_apply (P : JacobianTorus X) :
   induction P using QuotientAddGroup.induction_on with
   | H x =>
     show QuotientAddGroup.mk
-        (Jacobians.ambientPhi (gX := genus X) (gY := genus Z) (g ∘ f)
+        (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f)
           (hg.comp hf) x) =
       QuotientAddGroup.mk
-        (Jacobians.ambientPhi (gX := genus Y) (gY := genus Z) g hg
-          (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf x))
+        (Jacobians.ambientPhi (gX := kirovGenus Y) (gY := kirovGenus Z) g hg
+          (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf x))
     congr 1
     exact Jacobians.ambientPhi_comp f hf g hg (hg.comp hf) x
 
@@ -370,7 +370,7 @@ lemma ambientPullbackJac_preserves_lattice
     (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     (periodLattice Y).toAddSubgroup ≤
       (periodLattice X).toAddSubgroup.comap
-        (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf).toAddMonoidHom :=
+        (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf).toAddMonoidHom :=
   Jacobians.ambientPullbackJac_preserves_truePeriodLattice f hf
 
 /-- Pullback map between Jacobians associated to a map of the underlying curves.
@@ -381,16 +381,16 @@ noncomputable def pullback (f : X → Y)
     (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
     JacobianTorus Y →ₜ+ JacobianTorus X :=
   Jacobians.ZLatticeQuotient.pullback (periodLattice X) (periodLattice Y)
-    (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf)
+    (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
     (ambientPullbackJac_preserves_lattice f hf)
 
 -- pullback is holomorphic
 theorem pullback_contMDiff :
-    ContMDiff (𝓘(ℂ, Fin (genus Y) → ℂ))
-      (𝓘(ℂ, Fin (genus X) → ℂ)) ω (pullback f hf) :=
+    ContMDiff (𝓘(ℂ, Fin (kirovGenus Y) → ℂ))
+      (𝓘(ℂ, Fin (kirovGenus X) → ℂ)) ω (pullback f hf) :=
   Jacobians.ZLatticeQuotient.pullback_contMDiff_of_ambient
     (periodLattice X) (periodLattice Y)
-    (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf)
+    (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
     (ambientPullbackJac_preserves_lattice f hf)
 
 -- functoriality
@@ -398,7 +398,7 @@ lemma pullback_id_apply
     (P : JacobianTorus X) : pullback id contMDiff_id P = P :=
   Jacobians.ZLatticeQuotient.pushforward_id_of_ambient
     (periodLattice X)
-    (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus X) id contMDiff_id)
+    (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus X) id contMDiff_id)
     (ambientPullbackJac_preserves_lattice id contMDiff_id)
     (fun x => Jacobians.ambientPullbackJac_id (X := X) x)
     P
@@ -410,11 +410,11 @@ lemma pullback_comp_apply
   induction P using QuotientAddGroup.induction_on with
   | H z =>
     show QuotientAddGroup.mk
-        (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Z) (g ∘ f)
+        (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Z) (g ∘ f)
           (hg.comp hf) z) =
       QuotientAddGroup.mk
-        (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf
-          (Jacobians.ambientPullbackJac (gX := genus Y) (gY := genus Z) g hg z))
+        (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+          (Jacobians.ambientPullbackJac (gX := kirovGenus Y) (gY := kirovGenus Z) g hg z))
     congr 1
     exact Jacobians.ambientPullbackJac_comp f hf g hg (hg.comp hf) z
 
@@ -479,12 +479,12 @@ lemma ambientPhi_ambientPullback_periodVec_of_cycle
     {n : ℕ} (loops : Fin n → ℝ → X)
     (loops_smooth : ∀ i, Jacobians.IsClosedSmoothLoop (loops i))
     (coeffs : Fin n → ℤ) (δ : ℝ → Y)
-    (h_pullback : Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf
+    (h_pullback : Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf
         (Jacobians.periodVec δ) = ∑ i, coeffs i • Jacobians.periodVec (loops i))
     (h_pushforward : ∑ i, coeffs i • Jacobians.periodVec (f ∘ loops i) =
         (ContMDiff.degree f hf) • Jacobians.periodVec δ) :
-    Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf
-        (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf
+    Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf
           (Jacobians.periodVec δ)) =
       (ContMDiff.degree f hf) • Jacobians.periodVec δ := by
   rw [h_pullback, map_sum, ← h_pushforward]
@@ -541,8 +541,8 @@ theorem exists_preimageCycle_sheets_eq_degree (δ : ℝ → Y)
 the §3 keystone with the cycle-sheets-equal-degree input. -/
 private lemma ambientPhi_ambientPullback_periodVec_eq (δ : ℝ → Y)
     (hδ : Jacobians.IsClosedSmoothLoop δ) :
-    Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf
-      (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf
+    Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+      (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf
         (Jacobians.periodVec δ)) =
       (ContMDiff.degree f hf) • Jacobians.periodVec δ := by
   obtain ⟨c, hc⟩ := exists_preimageCycle_sheets_eq_degree f hf δ hδ
@@ -554,10 +554,10 @@ private lemma ambientPhi_ambientPullback_periodVec_eq (δ : ℝ → Y)
 
 /-- The ambient degree identity on the whole period lattice of `Y`, by ℤ-linear
 extension from the `periodVec δ` generators (`Submodule.span_induction`). -/
-private lemma ambientPhi_ambientPullback_eq_on_lattice (v : Fin (genus Y) → ℂ)
+private lemma ambientPhi_ambientPullback_eq_on_lattice (v : Fin (kirovGenus Y) → ℂ)
     (hv : v ∈ Jacobians.truePeriodLattice Y) :
-    Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf
-      (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf v) =
+    Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+      (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf v) =
       (ContMDiff.degree f hf) • v := by
   rw [Jacobians.truePeriodLattice] at hv
   induction hv using Submodule.span_induction with
@@ -582,29 +582,29 @@ lattice (`ambientPhi_ambientPullback_eq_on_lattice`), and the real period basis
 through the sum (converting each real scalar to its complex coercion) gives the
 identity everywhere. The only remaining input is the cycle sheet-count = degree
 (`exists_preimageCycle_sheets_eq_degree`). -/
-theorem ambientPhi_ambientPullback_eq (y : Fin (genus Y) → ℂ) :
-    Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf
-      (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf y) =
+theorem ambientPhi_ambientPullback_eq (y : Fin (kirovGenus Y) → ℂ) :
+    Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+      (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf y) =
       (ContMDiff.degree f hf) • y := by
   classical
   obtain ⟨b, hb⟩ := Jacobians.exists_periodLattice_realBasis (X := Y)
   -- The ℂ-linear composite `ambientPhi ∘ ambientPullbackJac`.
-  set Φ : (Fin (genus Y) → ℂ) →L[ℂ] (Fin (genus Y) → ℂ) :=
-    (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf).comp
-      (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf) with hΦ
+  set Φ : (Fin (kirovGenus Y) → ℂ) →L[ℂ] (Fin (kirovGenus Y) → ℂ) :=
+    (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf).comp
+      (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf) with hΦ
   -- Real scalars on `Fin gY → ℂ` act as their complex coercion (componentwise).
-  have hsmul : ∀ (s : ℝ) (a : Fin (genus Y) → ℂ), s • a = (↑s : ℂ) • a :=
+  have hsmul : ∀ (s : ℝ) (a : Fin (kirovGenus Y) → ℂ), s • a = (↑s : ℂ) • a :=
     fun s a => by funext j; simp [Complex.real_smul]
   -- `Φ` agrees with `deg • id` on each basis vector (each lies in the lattice).
   have hlat : ∀ i, Φ (b i) = (ContMDiff.degree f hf) • b i := by
     intro i
     have hmem : b i ∈ Jacobians.truePeriodLattice Y := by
       rw [hb]; exact Submodule.subset_span ⟨i, rfl⟩
-    show Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf
-        (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf (b i)) = _
+    show Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+        (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (b i)) = _
     exact ambientPhi_ambientPullback_eq_on_lattice f hf (b i) hmem
   -- Hence on every real multiple of a basis vector, by ℂ-linearity of `Φ`.
-  have per_term : ∀ (r : ℝ) (i : Fin (2 * genus Y)),
+  have per_term : ∀ (r : ℝ) (i : Fin (2 * kirovGenus Y)),
       Φ (r • b i) = (ContMDiff.degree f hf) • (r • b i) := by
     intro r i
     rw [hsmul r (b i), map_smul, hlat i, smul_comm, ← hsmul r (b i)]
@@ -619,8 +619,8 @@ lemma pushforward_pullback
     pushforward f hf (pullback f hf P) = (ContMDiff.degree f hf) • P :=
   Jacobians.ZLatticeQuotient.pushforward_pullback_of_ambient
     (periodLattice X) (periodLattice Y)
-    (Jacobians.ambientPhi (gX := genus X) (gY := genus Y) f hf)
-    (Jacobians.ambientPullbackJac (gX := genus X) (gY := genus Y) f hf)
+    (Jacobians.ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
+    (Jacobians.ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf)
     (ambientPhi_preserves_lattice f hf)
     (ambientPullbackJac_preserves_lattice f hf)
     (ContMDiff.degree f hf)
@@ -671,23 +671,23 @@ noncomputable instance : AddCommGroup (Jacobian X) := inferInstance
 noncomputable instance : TopologicalSpace (Jacobian X) := inferInstance
 noncomputable instance : T2Space (Jacobian X) := inferInstance
 noncomputable instance : CompactSpace (Jacobian X) := inferInstance
-noncomputable instance : ChartedSpace (Fin (genus X) → ℂ) (Jacobian X) := inferInstance
-noncomputable instance : IsManifold 𝓘(ℂ, Fin (genus X) → ℂ) ω (Jacobian X) := inferInstance
-noncomputable instance : LieAddGroup 𝓘(ℂ, Fin (genus X) → ℂ) ω (Jacobian X) := inferInstance
+noncomputable instance : ChartedSpace (Fin (kirovGenus X) → ℂ) (Jacobian X) := inferInstance
+noncomputable instance : IsManifold 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω (Jacobian X) := inferInstance
+noncomputable instance : LieAddGroup 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω (Jacobian X) := inferInstance
 
 /-- The Abel-Jacobi map from a compact Riemann surface to its Jacobian. -/
 noncomputable def ofCurve (P : X) : X → Jacobian X := fun Q => ULift.up (JacobianTorus.ofCurve P Q)
 
 /-- **Holomorphic Abel-Jacobi map**: `ofCurve P` is holomorphic — the
 `ULift.up`-conjugate of `JacobianTorus.ofCurve_contMDiff`. -/
-lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω (ofCurve P) :=
+lemma ofCurve_contMDiff (P : X) : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω (ofCurve P) :=
   contMDiff_uliftUp.comp (JacobianTorus.ofCurve_contMDiff P)
 
 lemma ofCurve_self (P : X) : ofCurve P P = 0 := by
   show ULift.up (JacobianTorus.ofCurve P P) = 0
   rw [JacobianTorus.ofCurve_self]; rfl
 
-lemma ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) :=
+lemma ofCurve_inj (P : X) (h : 0 < kirovGenus X) : Function.Injective (ofCurve P) :=
   fun _ _ hQQ' => JacobianTorus.ofCurve_inj P h (congrArg ULift.down hQQ')
 
 variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
@@ -703,7 +703,7 @@ noncomputable def pushforward (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) 
     ((JacobianTorus.pushforward f hf).comp (uliftDownHom (JacobianTorus X)))
 
 theorem pushforward_contMDiff :
-    ContMDiff 𝓘(ℂ, Fin (genus X) → ℂ) 𝓘(ℂ, Fin (genus Y) → ℂ) ω (pushforward f hf) :=
+    ContMDiff 𝓘(ℂ, Fin (kirovGenus X) → ℂ) 𝓘(ℂ, Fin (kirovGenus Y) → ℂ) ω (pushforward f hf) :=
   contMDiff_uliftUp.comp ((JacobianTorus.pushforward_contMDiff f hf).comp contMDiff_uliftDown)
 
 lemma pushforward_id_apply (P : Jacobian X) : pushforward id contMDiff_id P = P := by
@@ -729,7 +729,7 @@ noncomputable def pullback (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω 
     ((JacobianTorus.pullback f hf).comp (uliftDownHom (JacobianTorus Y)))
 
 theorem pullback_contMDiff :
-    ContMDiff 𝓘(ℂ, Fin (genus Y) → ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ω (pullback f hf) :=
+    ContMDiff 𝓘(ℂ, Fin (kirovGenus Y) → ℂ) 𝓘(ℂ, Fin (kirovGenus X) → ℂ) ω (pullback f hf) :=
   contMDiff_uliftUp.comp ((JacobianTorus.pullback_contMDiff f hf).comp contMDiff_uliftDown)
 
 lemma pullback_id_apply (P : Jacobian X) : pullback id contMDiff_id P = P := by
