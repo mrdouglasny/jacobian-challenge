@@ -121,21 +121,30 @@ end SerreDualityData
 Serre-duality data: a canonical divisor and the perfect residue pairing. This single named input
 replaces both ladder leaves `arithmeticGenus_eq_genus` and `serre_h1_eq`. Its construction (the residue
 functional via the 1-form residue theorem, the pairing, 17.6 injectivity, 17.9 surjectivity) is the
-genuine remaining §17 analytic work — the one remaining gap. -/
-theorem exists_serreDualityData (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
+genuine remaining §17 analytic work — the one remaining gap.
+
+The hypothesis `hR : 𝔘.LocallyRealizable` is required by every Riemann–Roch input of the §17.9
+surjectivity count (`cohomological_riemannRoch`, `riemannRoch_inequality` — local Mittag–Leffler
+realizability of the cover, proven for the chart-disk cover by `locallyRealizable_chartDiskCover`);
+the sole downstream consumer (`exists_riemannRoch_divisor`) instantiates at a cover carrying both
+`hL` and `hR` (`exists_realizableLerayCover`). -/
+theorem exists_serreDualityData (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
+    (hR : 𝔘.LocallyRealizable) :
     Nonempty (SerreDualityData 𝔘) :=
   sorry
 
 /-- **`arithmeticGenus_eq_genus` via the direct §17 route** (the plan of record). -/
-theorem arithmeticGenus_eq_genus_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
+theorem arithmeticGenus_eq_genus_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
+    (hR : 𝔘.LocallyRealizable) :
     𝔘.h1Dim 0 = kirovGenus X := by
-  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL
+  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL hR
   exact data.arithmeticGenus
 
 /-- **`serre_h1_eq` via the direct §17 route** (the plan of record). -/
-theorem serre_h1_eq_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) :
+theorem serre_h1_eq_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
+    (hR : 𝔘.LocallyRealizable) :
     ∃ K : Divisor X, ∀ D : Divisor X, 𝔘.h1Dim D = lDim (X := X) (K - D) := by
-  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL
+  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL hR
   exact data.serreH1
 
 end Jacobians.Dolbeault
