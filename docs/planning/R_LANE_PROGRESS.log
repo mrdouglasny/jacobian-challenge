@@ -21,3 +21,12 @@ resNormalization · ∫ = 1 for χ(a)=1 (resNormalization_integral_eq_one).
 No fudge: raw Forster (2πi)⁻¹ on the Lebesgue integral would give i/2; the −2i Jacobian
 (dz∧dz̄ = −2i·dA) is recorded as resNormalization_eq_two_pi_I_inv_mul.
 Non-vacuity witness via ContDiffBump (exists_signTest_witness). Committing R0; next R1.
+
+[R1 DONE] OneOneCoeff.lean compiles clean; 5 headline decls axiom-clean.
+The (1,1) chart-coefficient layer: chartMap/transitionMap (+ analyticAt,
+deriv_ne_zero, relocation transitionMap_chartMap from the proven
+transition_analyticAt_of_mem / transition_deriv_ne_zero atoms in
+CechModelManifold.lean), OneOneLawAt (germ-eventual |φ'|² law via Complex.normSq),
+oneOneCoeff : Submodule ℂ (ι → ℂ → ℂ) (free ℂ-linearity for R4), and
+isOneOneCoeff_congr (germ-robustness, scoping risk item 2). Committing R1; next R2
+(PoU split reusing cechPoU/rhoC/dbarRho from DolbeaultComparisonInverse).
