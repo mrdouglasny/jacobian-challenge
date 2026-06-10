@@ -11,8 +11,7 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.pushforwardOneForm]
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
 'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
@@ -45,30 +44,24 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.pushforwardOneForm]
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pullback_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pushforwardOneForm_id,
- Axioms.pushforwardOneForm]
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pullback_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.AX_pushforwardOneForm_comp,
- Axioms.pushforwardOneForm]
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pushforward_pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.AX_pushforward_pullback,
- Axioms.pushforwardOneForm]
+ Axioms.AX_pushforward_pullback]
 'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero' depends on axioms: [propext,
  Classical.choice,
