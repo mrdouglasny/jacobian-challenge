@@ -1,0 +1,17 @@
+# D1 PeriodCycleBasis refactor — progress log
+# Branch feat/period-cycle-basis, base 373f896 (origin/main 2026-06-10)
+
+[T0] Setup done: worktree reset to origin/main, caches copied, spec read
+     (docs/planning/CYCLEBASIS_ALTERNATIVES.md from main checkout — file is
+     not in origin/main tree). Audited all consumers:
+     - Axioms/AnalyticCycleBasis.lean (structure + axiom, to be replaced)
+     - Layer3/Periods.lean (AX_RBR1/AX_RBR2 + engine + lattice discharge)
+     - RiemannSurface/LoopIntegral.lean, LoopIntegralHom.lean
+     - Axioms/{H1FreeRank2g,RiemannBilinear,PeriodLattice(Base)}.lean
+     - ProjectiveCurve/{Line,Elliptic}/Witnesses.lean, Elliptic/OfCurveInj.lean
+     - Extensions/AbelJacobi.lean (2 theorem statements quantify over the type)
+     Count baseline: ledger says 36 active (NOT 33 as task brief assumed —
+     brief predates Phase-D H1coh/cohomologyLES discharges already on main).
+     Expected after D1: 36 - 3 + 1 = 34 (or 33 if elliptic axiom falls).
+Plan: c1 new axiom file; c2 consumer refactor + delete old axioms;
+      c3 elliptic witness attempt; c4 ledger reconcile + report regen.
