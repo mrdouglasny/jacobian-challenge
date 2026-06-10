@@ -311,9 +311,9 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 
 | Axiom | File:Line | Reference |
 |-------|-----------|-----------|
-| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form) |
-| `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker) |
-| `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27) |
+| `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form). **DT-re-vetted post-fix 2026-06-09: SATISFIABLE/FAITHFUL** — basepoint-independence on deg-0 makes `Classical.arbitrary` harmless; g=0 and lattice-quotient cases clean; ⊓-typing sound |
+| `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — degree-genus via adjunction (smooth ⇒ genera coincide); ℕ-truncated subtraction exactly absorbs d=1, `(d−1)(d−2)` always even so `/2` exact; hypotheses sufficient (irreducibility redundant-but-safe by Bézout) |
+| `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — → via uniformization/RR, ← via b₁ homeo-invariance + Hodge `b₁=2h^{1,0}`; no empty-space vacuity (`ConnectedSpace` ⇒ `Nonempty`); `EuclideanSpace` sphere is the genuine L² S² |
 | `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard). **DT-vetted per-axiom 2026-06-09: SATISFIABLE/FAITHFUL** — 4g-gon dissection gives 2g analytic loops at one basepoint; refinement-based analyticity is the correct (post-#82) form; `loops_to_basis` Hurewicz tie is the load-bearing anti-vacuity pin; g=0 empty-basis case sound |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
