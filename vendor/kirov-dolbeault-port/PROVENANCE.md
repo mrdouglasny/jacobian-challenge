@@ -72,9 +72,9 @@ Proof follows Miranda §VIII.3 (trace to ℙ¹).
 | Sorry | File | Content |
 |---|---|---|
 | `exists_serreDualityData` | `Dolbeault/SerreDualityPairing.lean:134` | §17.5 connecting map + §17.9 surjectivity — the chokepoint for RR. *Signature changed in this port (B3/S8, 2026-06-10): hypothesis `hR : 𝔘.LocallyRealizable` added (and threaded through `arithmeticGenus_eq_genus_serre`, `serre_h1_eq_serre`, `DolbeaultLadder.arithmeticGenus_eq_genus`, `DolbeaultLadder.serre_h1_eq`) — every §17.9 RR input needs it, and the sole consumer (`exists_riemannRoch_divisor`) already holds it.* |
-| `abelJacobi_twoPoint_ne_zero` | `Abel.lean:671` | Abel's theorem core |
+| `abelJacobi_twoPoint_ne_zero` | `Abel.lean:671` | Abel's theorem core. *The genus-obstruction half (A2+A3 of `docs/planning/ABEL_WALL_GAP_ANALYSIS.md`) is now closed keystone- and de-Rham-free by `genus_zero_of_singleSimplePole` (`DegreeOneGenusTransport.lean`, E6 port 2026-06-10, axiom-clean); the remaining content is the two-point ⊆ direction (B-half).* |
 | `exists_cutSurface` | `CutSurfaceRelations.lean:161` | Cut surface / surface topology |
-| `HasHolomorphicPrimitives` | `DegreeOneSphere.lean:678` | Manifold de Rham (period slice) |
+| `HasHolomorphicPrimitives` | `DegreeOneSphere.lean:703` | Manifold de Rham (period slice). *Reclassified (E6, 2026-06-10): gates only the bare-homeomorphism backward half of the conformance headline `genus_eq_zero_iff_homeo`. Off the Abel/`ofCurve_inj` critical path — the single-simple-pole chain concludes genus 0 via the biholomorphic transport `genus_zero_of_singleSimplePole` (`DegreeOneGenusTransport.lean`) without it. Not closable by that transport as stated: a bare `X ≃ₜ S²` carries no complex structure (see parent `docs/planning/E6_BLOCKER.md`).* |
 
 ## Relationship to the earlier Kirov vendor (`vendor/kirov-jacobian-claude/`)
 
@@ -126,6 +126,14 @@ Deviations from the verbatim snapshot, beyond the 7-file forward-port:
    surjectivity-count engine (`SurjectivityInputs` packaging 17.7/17.8 +
    `pairing_surjective_of_inputs`), axiom-free and sorry-free, built on the
    port's proven RR API. Carries our copyright header, not Kirov's.
+5. **New file `KirovDolbeault/DegreeOneGenusTransport.lean` (E6,
+   2026-06-10).** Ours, not upstream's: port-side reconstruction of the
+   parent repository's biholomorphic genus transport
+   (`Jacobians/RiemannSurface/DegreeOneGenusZero.lean:388–451`), giving
+   `genus_zero_of_singleSimplePole` (single simple pole ⇒ `kirovGenus X = 0`)
+   axiom- and sorry-free, keystone- and de-Rham-free. Carries our copyright
+   header. Supporting refactor in `DegreeOneSphere.lean`: `degreeOne_homeo`'s
+   bijection extracted as `degreeOne_bijective` (no proof-content change).
 
 Bridge rule (PHASE_D_BRIDGE_PLAN.md): bridges may consume only the port's
 sorry-free results, and every bridge headline must be `#print axioms`

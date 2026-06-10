@@ -546,9 +546,9 @@ theorem exists_mem_open_notMem_finite {Y : Type*} [TopologicalSpace Y] [ChartedS
   have hWsub : W ⊆ C := fun y hy => h y hy
   exact (infinite_of_isOpen_nonempty hW hne) (hC.subset hWsub)
 
-/-- **Degree-one ⟹ homeomorphism** (Step 3, the crux).  A non-constant degree-one
-holomorphic map `F : X → Y` between compact connected Riemann surfaces is
-bijective and a local biholomorphism, hence a homeomorphism.
+/-- **Degree-one ⟹ bijective** (Step 3's set-theoretic core, extracted from
+`degreeOne_homeo` so the genus transport `KirovDolbeault.DegreeOneGenusTransport`
+can consume the bijection together with the underlying holomorphic `F`).
 
 Proof:
 * **Surjective** — `surjective_of_nonconstant` (open + closed image, connected target).
@@ -557,15 +557,14 @@ Proof:
   independence of the degree. If `F a = F b = c` with `a ≠ b`, take disjoint opens
   `U ∋ a`, `V ∋ b` (Hausdorff); their open images `F '' U`, `F '' V` (open mapping)
   both contain `c`, so the open intersection contains a regular value `y`; then `y`
-  has preimages in `U` and in `V`, contradicting the singleton fibre.
-* **Continuous open bijection ⟹ homeomorphism** (`Equiv.toHomeomorphOfContinuousOpen`). -/
-theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
+  has preimages in `U` and in `V`, contradicting the singleton fibre. -/
+theorem degreeOne_bijective {Y : Type*} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y]
     (F : X → Y) (hF : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω F)
     (hnc : ¬ IsConstantMap F)
     (hdeg : degreeFiber F hF = 1) :
-    Nonempty (X ≃ₜ Y) := by
+    Function.Bijective F := by
   classical
   -- `¬ IsConstantMap F` unfolds to the form used by the open-mapping lemmas.
   have hnc' : ¬ ∃ y₀ : Y, ∀ x, F x = y₀ := hnc
@@ -612,8 +611,23 @@ theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
       rw [hp] at this; exact this
     have huv : u = v := hup.trans hvp.symm
     exact (hUV.ne_of_mem huU (huv ▸ hvV)) rfl
-  -- Assemble: continuous open bijection ⟹ homeomorphism.
-  refine ⟨Equiv.toHomeomorphOfContinuousOpen (Equiv.ofBijective F ⟨hinj, hsurj⟩)
+  exact ⟨hinj, hsurj⟩
+
+/-- **Degree-one ⟹ homeomorphism** (Step 3, the crux).  A non-constant degree-one
+holomorphic map `F : X → Y` between compact connected Riemann surfaces is
+bijective (`degreeOne_bijective`) and open (open-mapping theorem), hence a
+homeomorphism (`Equiv.toHomeomorphOfContinuousOpen`). -/
+theorem degreeOne_homeo {Y : Type*} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y]
+    (F : X → Y) (hF : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω F)
+    (hnc : ¬ IsConstantMap F)
+    (hdeg : degreeFiber F hF = 1) :
+    Nonempty (X ≃ₜ Y) := by
+  have hbij : Function.Bijective F := degreeOne_bijective F hF hnc hdeg
+  have hnc' : ¬ ∃ y₀ : Y, ∀ x, F x = y₀ := hnc
+  have hopen : IsOpenMap F := isOpenMap_of_nonconstant F hF hnc'
+  exact ⟨Equiv.toHomeomorphOfContinuousOpen (Equiv.ofBijective F hbij)
     hF.continuous hopen⟩
 
 /-! ### The endgame theorem -/
@@ -669,7 +683,18 @@ The *only* remaining input is the **holomorphic Poincaré lemma / monodromy theo
 a global primitive); Mathlib has only the plane/ball version, the manifold de Rham globalisation is
 the open gap. The whole route, *modulo that single input*, is assembled axiom-clean in
 `Jacobians.genus_zero_of_nonempty_homeo_sphere_of_hasPrimitives`; the one remaining gap below is exactly
-`HasHolomorphicPrimitives X`. -/
+`HasHolomorphicPrimitives X`.
+
+**Scope of the remaining sorry (E6 reroute, 2026-06-10).** This bare-homeomorphism statement
+is now needed *only* for the backward half of the conformance headline `genus_eq_zero_iff_homeo`
+(`KirovDolbeault.GenusSphereHeadline`). Wherever the homeomorphism arises from the degree-one
+chain itself — i.e. from a single simple pole, as in the Abel-wall genus obstruction — the
+genus-0 conclusion is available **without** this sorry via the biholomorphic genus transport
+`Jacobians.genus_zero_of_singleSimplePole` (`KirovDolbeault.DegreeOneGenusTransport`,
+axiom-clean, keystone- and de-Rham-free). The transport cannot replace THIS statement: a bare
+`X ≃ₜ S²` carries no complex structure, so no holomorphic degree-1 map is available to pull
+forms back along; closing this sorry as stated genuinely requires the de Rham input (or
+uniformization). See `docs/planning/E6_BLOCKER.md` in the parent repository. -/
 theorem genus_zero_of_nonempty_homeo_sphere {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     (h : Nonempty (X ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :

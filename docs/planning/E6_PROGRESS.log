@@ -1,0 +1,55 @@
+# E6 progress log — port biholo-genus-transport onto Kirov degree-one chain
+
+[T+0h] Read ABEL_WALL_GAP_ANALYSIS.md (esp. §5), our DegreeOneGenusZero.lean:388-451,
+port DegreeOneSphere.lean / GenusZeroOfSphere.lean / GenusSphereHeadline.lean /
+HolomorphicForms.lean / Genus.lean / ManifoldIFT.lean / Discharge critical-value files.
+
+KEY FINDING (architecture-level, drives a documented deviation):
+The :678 sorry's STATEMENT is `Nonempty (X ≃ₜ S²) → kirovGenus X = 0` (bare
+topological homeo). The biholo transport needs a HOLOMORPHIC degree-1 map; a bare
+homeo provides none. Producing one from genus data is RR (keystone-gated, and
+circular here); from nothing it is uniformization. So the transport can close the
+genus-0 conclusion of the SINGLE-SIMPLE-POLE chain (the Abel-wall A3 use, the
+challenge-critical path) but NOT the bare-homeo backward headline itself.
+rkirov's own docstrings (GenusZeroOfSphere.lean) agree the bare-homeo statement's
+only route is the de Rham wall. Gap analysis claim "(b) free by-product discharges
+the 4th sorry" is overstated; its own "coordinate with rkirov (changes the
+advertised route of his backward headline)" footnote flags the issue.
+
+PLAN (deviation justified in E6_BLOCKER.md, to be written):
+1. Refactor port DegreeOneSphere.lean: extract `degreeOne_bijective` from
+   `degreeOne_homeo` (proof body already constructs hinj/hsurj).
+2. New port file KirovDolbeault/DegreeOneGenusTransport.lean (Apache header,
+   provenance = our Jacobians/RiemannSurface/DegreeOneGenusZero.lean:388-451):
+   - degreeOne_inverse_contMDiff : bijective + nonconstant C^ω map between compact
+     curves has C^ω inverse. Port-side proof CHEAPER than ours: global injectivity
+     ⇒ locally injective ⇒ deriv chart-pullback ≠ 0
+     (Discharge.deriv_chart_pullback_ne_zero_of_inj_on_neighbourhood) ⇒
+     exists_holo_localInverse (ManifoldIFT) ⇒ congr to Equiv.symm. No porting of
+     our IsHolomorphicAt/mapAnalyticOrderAt tower needed (it has no port analog;
+     the port's degree machinery substitutes).
+   - kirovGenus_eq_of_biholo : pullbackForm_id/_comp ⇒ LinearEquiv ⇒ finrank eq.
+   - kirovGenus_eq_zero_of_singleSimplePole : HasSingleSimplePole P ⇒ kirovGenus X = 0
+     (keystone-free, de-Rham-free; = Abel-wall A2+A3 fused).
+3. Docstring note at the remaining :678 sorry + PROVENANCE.md reclassification
+   (de Rham sorry now confined to the bare-homeo conformance headline; off the
+   ofCurve_inj/Abel critical path) + E6_BLOCKER.md.
+
+[T+1h] Commit b7a216a: degreeOne_bijective extracted from degreeOne_homeo;
+`lake env lean DegreeOneSphere.lean` clean (only pre-existing sorry warning).
+
+[T+1.5h] Commit 679a766: DegreeOneGenusTransport.lean — compiled CLEAN on first
+attempt. #print axioms verified for all four decls (genus_zero_of_singleSimplePole,
+bijective_inverse_contMDiff, kirovGenus_eq_of_biholo, degreeOne_bijective):
+exactly [propext, Classical.choice, Quot.sound]. Port-side downstream consumers
+(ToSphereGeneral, GenusSphereHeadline) build; ROOT package full `lake build`
+green (8747 jobs). NOTE: port-internal full `lake build` (globs) fails on the
+PRE-EXISTING spec-aggregator breakage (KirovDolbeault.lean references `genus`,
+renamed kirovGenus at S2; KirovDolbeault.olean absent in main repo's cache too
+— not caused by E6).
+
+[T+2h] Docs pass: :678→:687→:703 line drift tracked; PROVENANCE.md sorry table
+reclassified (de Rham row + Abel row note + deviations item 5); E6_BLOCKER.md
+written (statement-level blocker: bare homeo carries no complex structure;
+transport cannot close the literal :703 sorry — needs de Rham or uniformization;
+sorry count stays 4 BY DESIGN, documented deviation from the E6 gate).
