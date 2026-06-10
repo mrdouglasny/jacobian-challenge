@@ -13,3 +13,36 @@
     consistent with the skeleton's own hR threading). DT vet PENDING (orchestrator, parallel).
   - Note: repo already had Inv (MeromorphicFunction X) + orderW_inv in
     SerreResidueRamifiedRealCover.lean — reused, nothing re-proven.
+[2026-06-10 S5 unwind] START feat/keystone-l-unwind. Recon + interface audit complete:
+  - SerreResidueRealization (pairing+witness) has NO cross-divisor law -> unwind unprovable
+    abstractly; but the skeleton is parametric in R, and at R := GlobalResidue.toSerreResidueRealization
+    (pairing = res ∘ cup) BOTH formal halves of 17.7 are derivable (cup = germ multiplication).
+  - Honest order arithmetic: psi in L(nP) allows extra zeros -> w/psi in L(K-E) only,
+    E := (D-nP) - div psi <= D. The upgrade L(K-E)-with-factoring-functional -> L(K-D) is
+    Forster 17.7's pole-bound regularity, needs res-LOCALITY (one-point cocycle evaluation,
+    = R-lane R6 simple-pole tie); NOT derivable from GlobalResidue fields, dimension-count
+    derivation would BE Serre duality (circular). -> isolated as Prop law UnwindRegularity
+    (hypothesis-parametric, no axiom, no interface change); S5_BLOCKER.md queues the
+    field-ify-vs-discharge decision.
+  - Plan: SerreUnwind.lean = Mul/orderW_mul/mul_mem_linearSystem + lSysInclMono +
+    cup multiplicativity (cupH1_cupH1, cupH1_congr_germ, globalGerm_mul) + psiMul/incl
+    compatibilities + pairing_comp_h1InclMono + GlobalResidue.unwind (17.7 reduced to the law,
+    cancellation via h1InclMono_surjective) + full SurjectivityInputs assembly gate.
+[2026-06-10 S5 unwind] DONE — SerreUnwind.lean landed sorry-free; lake build OK (8726 jobs).
+  - Forster 17.7 reduced to ONE isolated Prop law: GlobalResidue.UnwindRegularity (pole-bound
+    regularity; needs res-locality = R6 simple-pole tie; hypothesis-parametric, NO axiom added,
+    NO interface change). Everything else PROVEN: Mul+orderW_mul+mul_mem_linearSystem,
+    lSysInclMono, cup multiplicativity (globalGerm_mul/cupH1_cupH1/cupH1_congr_germ),
+    psiMul_mk + h1InclMono/cup compatibilities, pairing_comp_h1InclMono (restriction
+    compatibility = formal half of 17.7), GlobalResidue.unwind (division at honest level
+    E = D−nP−div ψ; shift-iso transport; cancellation via h1InclMono_surjective).
+  - SurjectivityInputs FULLY ASSEMBLES (example gate + pairing_surjective_of_globalResidue):
+    Surjective (pairing D) now conditional on exactly {GlobalResidue 𝔘 K, UnwindRegularity G D}.
+  - #print axioms: standard-3 on unwind / pairing_comp_h1InclMono /
+    pairing_surjective_of_globalResidue / orderW_mul / mul_mem_linearSystem; no sorryAx.
+  - Statement gate: docs/planning/S5_STATEMENT.md (DT vet PENDING, orchestrator);
+    interface-extension decision queued in docs/planning/S5_BLOCKER.md (the anticipated
+    pairing×cup compatibility law turned out DERIVABLE at GlobalResidue level; the genuinely
+    missing law is 17.7 regularity — discharge for the concrete R-lane res, or field-ify).
+  - Gotcha logged: `set D' := D − nP` SHADOWED `w` (its type contained the pattern) and broke
+    obtain-rfl substitution silently; fix = destructure before set / spell divisors out.
