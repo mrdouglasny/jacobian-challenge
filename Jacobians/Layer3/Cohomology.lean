@@ -1,3 +1,4 @@
+import Jacobians.Layer3.CechH1Bridge
 import Jacobians.Layer3.EulerChar
 import Jacobians.RiemannSurface.Cohomology.RiemannRochBase
 import Jacobians.RiemannSurface.Cohomology.LineBundleBasic
@@ -7,9 +8,12 @@ import Mathlib.LinearAlgebra.Dimension.Constructions
 # Layer 3 cohomology scaffold
 
 This file records the Phase-B cohomological scaffold for Challenge Layer 3.
-The analytic inputs are isolated as axioms about the actual Riemann-Roch
-spaces `L(D) = riemannRochSpace D`; Riemann-Roch and the numerical Serre
-duality identity are then proved from the six-term Euler-characteristic engine.
+The cohomology space `H1coh` and its vector-space/finiteness instances are
+real definitions backed by the Kirov Dolbeault port
+(`Jacobians.Layer3.CechH1Bridge`); the remaining analytic inputs are isolated
+as axioms about the actual Riemann-Roch spaces `L(D) = riemannRochSpace D`;
+Riemann-Roch and the numerical Serre duality identity are then proved from
+the six-term Euler-characteristic engine.
 -/
 
 noncomputable section
@@ -25,35 +29,12 @@ universe u
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The opaque first cohomology vector space
-`H¹(X, O(D))` attached to the concrete divisor sheaf `O(D)`.
-
-Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. This is the real
-sheaf cohomology group `H¹(X, O(D))`; only its vector-space structure and
-finite-dimensionality are exposed at Layer 3. -/
-axiom H1coh (D : Divisor X) : Type u
-
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Additive group structure on
-`H¹(X, O(D))`.
-
-Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
-axiom H1coh.instAddCommGroup (D : Divisor X) : AddCommGroup (H1coh D)
-attribute [instance] H1coh.instAddCommGroup
-
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Complex vector-space structure on
-`H¹(X, O(D))`.
-
-Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
-axiom H1coh.instModule (D : Divisor X) : Module ℂ (H1coh D)
-attribute [instance] H1coh.instModule
-
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Serre finiteness for the first cohomology
-of `O(D)`.
-
-Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
-axiom H1coh.instFiniteDimensional (D : Divisor X) :
-    FiniteDimensional ℂ (H1coh D)
-attribute [instance] H1coh.instFiniteDimensional
+/-!
+`H1coh` and its `AddCommGroup`/`Module ℂ`/`FiniteDimensional` instances —
+formerly the first four Layer-3 axioms — are now real definitions in
+`Jacobians.Layer3.CechH1Bridge`, backed by the Kirov Dolbeault port's Čech
+cohomology of the canonical chart-disk cover.
+-/
 
 private theorem coeff_le_add_point (D : Divisor X) (P : X) :
     ∀ Q : X, FreeAbelianGroup.coeff Q (D : FreeAbelianGroup X) ≤

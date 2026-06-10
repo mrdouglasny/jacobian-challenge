@@ -37,6 +37,12 @@ namespace Jacobians.RiemannSurface
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
+/- Name-resolution shim (pattern: `Jacobians/Layer3/CechH1Bridge.lean`): the
+Kirov Dolbeault port declares `Jacobians.Divisor` (a `Finsupp` divisor), which
+shadows the opened `Jacobians.Axioms.Divisor` inside enclosing `Jacobians.*`
+namespaces. Re-export pins the bare names to our divisor layer. -/
+export Jacobians.Axioms (Divisor Divisor.deg)
+
 universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
