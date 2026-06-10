@@ -14,8 +14,9 @@ silently when `genus X` is 0):
 1. `AX_FiniteDimOneForms` (compactness + normal families; foundation)
 2. `AX_IntersectionForm` (non-degenerate alternating ℤ-bilinear pairing
    on `H_1`; prerequisite for "symplectic basis")
-3. `AX_AnalyticCycleBasis` (piecewise-real-analytic ℤ-basis of `H_1`;
-   enables a tractable `PathIntegral` restricted to analytic arcs;
+3. `AX_PeriodCycleBasis` (piecewise-real-analytic ℤ-basis of `H_1`
+   carrying the arc-level Riemann bilinear relations R1/R2 — the D1
+   merge of the former `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2`;
    **subsumes** the former `AX_H1FreeRank2g`, now a theorem)
 4. `AX_PeriodLattice` (period image is a ℤ-lattice in `Fin g → ℂ`;
    needed for Jacobian as a complex torus)
@@ -32,7 +33,7 @@ import Jacobians.Axioms.PeriodLattice
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.H1FreeRank2g
 import Jacobians.Axioms.IntersectionForm
-import Jacobians.Axioms.AnalyticCycleBasis
+import Jacobians.Axioms.PeriodCycleBasis
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.Uniformization0
 import Jacobians.Axioms.RiemannRoch

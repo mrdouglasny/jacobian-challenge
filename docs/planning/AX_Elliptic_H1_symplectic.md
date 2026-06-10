@@ -60,3 +60,32 @@ This discharge uses a hybrid strategy. First, we define `H1` purely algebraicall
 **Vetting trail.** Critique: `_vetting/AX_Elliptic_H1_symplectic.md`. Verdict: reject. Revised: 2026-06-03.
 
 **Cross-plan patch (2026-06-03):** H1 type canonicalised to `Additive (Abelianization (FundamentalGroup X x₀))` so `Module ℤ` typeclasses elaborate.
+---
+
+## D1 re-type + discharge attempt (2026-06-10, feat/period-cycle-basis)
+
+The D1 merge (`PeriodCycleBasis` replacing `AnalyticCycleBasis`, see
+`docs/planning/CYCLEBASIS_ALTERNATIVES.md` §1) re-typed this axiom to
+`PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0`. **Attempted full discharge;
+outcome: NOT closable yet — the axiom was not only needed for the
+symplectic field.** Field-by-field:
+
+| Field | Status after D1 |
+|---|---|
+| `loops` | constructible (`aLoop`/`bLoop`, analyticity discharged d4f6e82) |
+| `R1` | now **provable**: form space is 1-dim (`eq_smul_ellipticDz`), so `Q(P(η),P(ζ)) = c·c'·(AB−BA) = 0` |
+| `R2` | now **provable** modulo computing `∫_a dz = ω₁`, `∫_b dz = ω₂` (the lift-FTC machinery of `Elliptic/OfCurveInj.lean` does this for bridge paths; loop version is mechanical) + orienting the pair by `sign Im(ω₂/ω₁)` |
+| `isBasis`, `loops_to_basis` | **still blocked**: needs `H₁(ℂ/Λ) ≅ ℤ²` with the A/B classes as generators, i.e. `π₁(ℂ/Λ) ≅ Λ` via covering-space theory (`ComplexTorus.isCoveringMap_quotient` exists, but the deck-group/π₁ identification does not) — exactly steps 1–4 of the recipe above |
+
+So the D1 re-type strictly *shrank* the axiom's real content: the
+previously-unprovable-by-design symplectic field (opaque
+`intersectionForm`) is gone, the planned helper axiom
+`AX_Elliptic_intersection_A_B` is no longer needed, and what remains is
+precisely the covering-space H₁ computation (steps 1–4). The recipe's
+steps 5–6 (symplectic verification through the intersection-form axioms)
+are obsolete — replace with the R1/R2 computations sketched in the
+axiom's docstring (`Witnesses.lean`).
+
+Axiom retained (count unchanged by this attempt); satisfiability of the
+re-typed statement argued in the docstring (orientation freedom absorbs
+the `Im(ω₂/ω₁)` sign).

@@ -181,7 +181,7 @@ theorem periodMapInBasis_ellipticCoordZero_mem_scaled_lattice
         (ellipticCoordZero ω₁ ω₂ h) ∈
       (ellipticLattice ω₁ ω₂ h).map (complexScaleIntLinear c) := by
   let i0 := ellipticCoordZero ω₁ ω₂ h
-  let cb := Classical.choice (AX_AnalyticCycleBasis x0)
+  let cb := Classical.choice (AX_PeriodCycleBasis x0)
   let eval0 : (Fin (genus (Elliptic ω₁ ω₂ h)) → ℂ) →ₗ[ℤ] ℂ :=
     { toFun := fun v => v i0
       map_add' := by intro v w; rfl
