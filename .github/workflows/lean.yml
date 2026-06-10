@@ -3,6 +3,22 @@ name: CI
 on:
   push:
     branches: [main]
+    # Skip the full build on doc-only pushes to main.
+    # Pull requests always run CI (no paths filter there).
+    # Triggers when any of these change:
+    #   - Lean source or build config (need lake build)
+    #   - scripts/ (axiom-report script, sorry/axiom checkers)
+    #   - docs/axiom-report.txt (golden file — sync check must run)
+    #   - this workflow file itself
+    paths:
+      - 'Jacobians/**'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - 'scripts/**'
+      - 'docs/axiom-report.txt'
+      - 'vendor/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
   workflow_dispatch:
