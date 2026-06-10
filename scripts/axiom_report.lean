@@ -102,6 +102,5 @@ end JacobianInstances
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instNonempty
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instChartedSpace
-#print axioms Jacobians.ProjectiveCurve.PlaneCurve.instIsManifold
 #print axioms Jacobians.ProjectiveCurve.PlaneCurve.instConnectedSpace
 
