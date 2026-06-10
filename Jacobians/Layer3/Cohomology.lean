@@ -1,4 +1,4 @@
-import Jacobians.Layer3.CechH1Bridge
+import Jacobians.Layer3.CohomologyLESBridge
 import Jacobians.Layer3.EulerChar
 import Jacobians.RiemannSurface.Cohomology.RiemannRochBase
 import Jacobians.RiemannSurface.Cohomology.LineBundleBasic
@@ -8,10 +8,12 @@ import Mathlib.LinearAlgebra.Dimension.Constructions
 # Layer 3 cohomology scaffold
 
 This file records the Phase-B cohomological scaffold for Challenge Layer 3.
-The cohomology space `H1coh` and its vector-space/finiteness instances are
-real definitions backed by the Kirov Dolbeault port
-(`Jacobians.Layer3.CechH1Bridge`); the remaining analytic inputs are isolated
-as axioms about the actual Riemann-Roch spaces `L(D) = riemannRochSpace D`;
+The cohomology space `H1coh` with its vector-space/finiteness instances
+(`Jacobians.Layer3.CechH1Bridge`) and the six-term cohomology LES
+`cohomologyLES` (`Jacobians.Layer3.CohomologyLESBridge`) are real
+definitions backed by the Kirov Dolbeault port; the remaining analytic
+inputs (`h1coh_zero_finrank`, `serreDuality_equiv`) are isolated as axioms
+about the actual Riemann-Roch spaces `L(D) = riemannRochSpace D`;
 Riemann-Roch and the numerical Serre duality identity are then proved from
 the six-term Euler-characteristic engine.
 -/
@@ -34,75 +36,14 @@ variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 formerly the first four Layer-3 axioms — are now real definitions in
 `Jacobians.Layer3.CechH1Bridge`, backed by the Kirov Dolbeault port's Čech
 cohomology of the canonical chart-disk cover.
+
+`riemannRochSpaceAddPointInclusion`, `ZeroCoh`, `SkyscraperFiber`,
+`CohomologyLESData`, and the six-term LES `cohomologyLES` — formerly the
+fifth Layer-3 axiom — are now real definitions in
+`Jacobians.Layer3.LinearSystemBridge` / `Jacobians.Layer3.CohomologyLESBridge`,
+backed by the port's skyscraper LES at the chart-disk cover through the
+`L(D)` bridge (A4 steps (ii)-(iii), docs/planning/PHASE_D_BRIDGE_PLAN.md).
 -/
-
-private theorem coeff_le_add_point (D : Divisor X) (P : X) :
-    ∀ Q : X, FreeAbelianGroup.coeff Q (D : FreeAbelianGroup X) ≤
-      FreeAbelianGroup.coeff Q (D + FreeAbelianGroup.of P : Divisor X) := by
-  intro Q
-  rw [map_add]
-  by_cases hQ : Q = P
-  · subst Q
-    simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of,
-      Finsupp.single_eq_same]
-  · simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of,
-      hQ]
-
-/-- The natural inclusion `L(D) -> L(D + P)`. -/
-noncomputable def riemannRochSpaceAddPointInclusion (D : Divisor X) (P : X) :
-    riemannRochSpace D →ₗ[ℂ] riemannRochSpace (D + FreeAbelianGroup.of P) :=
-  Submodule.inclusion (riemannRochSpace_mono (coeff_le_add_point D P))
-
-/-- The zero vector space used as the terminal term in the six-term exact
-sequence `... -> H¹(D + P) -> 0`. -/
-abbrev ZeroCoh : Type u := ULift.{u} (Fin 0 → ℂ)
-
-/-- A universe-lifted copy of the skyscraper fiber `ℂ_P = ℂ`, used so every
-term in the six-term exact-sequence engine lives in the same universe. -/
-abbrev SkyscraperFiber : Type u := ULift.{u} ℂ
-
-/-- The six-term long exact sequence data for
-`0 -> L(D) -> L(D+P) -> ℂ -> H¹(D) -> H¹(D+P) -> 0`, in exactly the shape
-consumed by `eulerChar_additive_of_exact_six`.
-
-The first map is the concrete inclusion `riemannRochSpaceAddPointInclusion`.
-The middle `SkyscraperFiber` is a universe-lifted copy of the skyscraper fiber
-`ℂ_P = ℂ`; the terminal term is the zero vector space `ZeroCoh`. -/
-structure CohomologyLESData (D : Divisor X) (P : X) where
-  principalPart :
-    riemannRochSpace (D + FreeAbelianGroup.of P) →ₗ[ℂ] SkyscraperFiber.{u}
-  connecting :
-    SkyscraperFiber.{u} →ₗ[ℂ] H1coh D
-  cohomologyMap :
-    H1coh D →ₗ[ℂ] H1coh (D + FreeAbelianGroup.of P)
-  exact_start :
-    Function.Exact (0 : riemannRochSpace D →ₗ[ℂ] riemannRochSpace D)
-      (riemannRochSpaceAddPointInclusion D P)
-  exact_LD_add :
-    Function.Exact (riemannRochSpaceAddPointInclusion D P) principalPart
-  exact_skyscraper :
-    Function.Exact principalPart connecting
-  exact_H1 :
-    Function.Exact connecting cohomologyMap
-  exact_H1_add :
-    Function.Exact cohomologyMap
-      (0 : H1coh (D + FreeAbelianGroup.of P) →ₗ[ℂ] ZeroCoh.{u})
-  exact_terminal :
-    Function.Exact
-      (0 : H1coh (D + FreeAbelianGroup.of P) →ₗ[ℂ] ZeroCoh.{u})
-      (0 : ZeroCoh.{u} →ₗ[ℂ] ZeroCoh.{u})
-
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The divisor-addition long exact
-cohomology sequence
-
-`0 -> L(D) -> L(D+P) -> ℂ_P -> H¹(X,O(D)) -> H¹(X,O(D+P)) -> 0`,
-
-with `L(D) = riemannRochSpace D` and `ℂ_P` represented by `ℂ`.
-
-Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. This is the
-standard long exact sequence obtained from
-`0 -> O(D) -> O(D+P) -> ℂ_P -> 0`. -/
-axiom cohomologyLES (D : Divisor X) (P : X) : CohomologyLESData D P
 
 /-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The base first-cohomology dimension:
 `h¹(O_X) = genus(X)`.
