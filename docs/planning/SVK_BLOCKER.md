@@ -58,9 +58,9 @@ keystone lands and direction 2b starts, first check whether the H₁ statement
 
 ## Recommended next steps (in order)
 
-1. (cheap, anytime) M4 sphere transport: π₁ invariance under homeomorphism +
-   `OnePoint ℂ` puncture transport — gives the punctured-sphere versions of
-   M1–M3-partial. (Attempted this session; see progress log for status.)
+1. ~~M4 sphere transport~~ — DONE this session (`PuncturedSpherePi1.lean`:
+   `pi1MulEquivOfHomeomorph`, `puncturedSphereHomeo`, `pi1PuncturedSphere`,
+   `pi1SphereTwoPoints`).
 2. (medium) H₁ packaging: `H₁(ℂ∖T)`-level independence statement in the
    `Homology.lean` shape (`Additive (Abelianization (FundamentalGroup ...))`),
    so the slit-sheet consumer can use the lassos without π₁ plumbing.
