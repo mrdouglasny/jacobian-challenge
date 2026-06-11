@@ -39,3 +39,13 @@ Files: new FrameTraceWall*.lean engine (no import of FrameTrace), final in-place
 FrameTrace.lean. Fallback at cutoff: re-isolate unfinished fields as ONE named sorry lemma.
 16:14 cluster+assembly done; next: hoff wiring + hinf
 16:21 wall now = valueTrace_resAtInfty_df only
+=== T2-lane session 2026-06-11 (feat/frame-trace-wall) — WALL CLOSED ===
+exists_frameTraceFunctionData_df PROVEN (no sorry in the chain).
+New sorry-free files: FrameTraceWallEngine (valueTrace + patching slice engine + hoff),
+FrameTraceWallDescent (unweighted symmetric descent, m|n collapse, residue m*a_{-m}),
+FrameTraceWallCluster (cluster_descent at finite centres + per-centre hmero/hres),
+FrameTraceWallInfty (infCluster_descent at poles + valueTrace_resAtInfty_df contour).
+FrameTrace.lean: in-place construction (S = fibre-saturated support + infinity fibre,
+C = finite f-values of base support) + NEW exists_canonicalData_residueAtom (unconditional).
+NOTE: machine under heavy concurrent-agent load (system-wide fd exhaustion, ENFILE);
+full-build + kernel checks retried until clean — results recorded below.

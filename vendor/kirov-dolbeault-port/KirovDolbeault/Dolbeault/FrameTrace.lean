@@ -45,19 +45,15 @@ per-sheet coefficients the atom's own chart integrands, the per-sheet residue br
 per-sheet pushforward collapses to the **plain value trace** `F ∘ sheet`
 (`frameFibreTrace_traceCoeff_df_eventuallyEq`) — `(f̂ ∘ sheet)' = 1` kills the Jacobian.
 
-## The residual wall (single named `sorry`)
+## The wall, CLOSED
 
-`exists_traceLaurentForm_df` — the §VIII.3 trace assembly for the plain value trace: the
-existence of the `LaurentForm` realizing (fin) + (inf) for the `ω₀ = df` datum.  Mathematically
-TRUE (Miranda §VIII.3: the value trace of `F` through the branched cover `f` is a rational
-function of the base coordinate; its `1`-form `Tr(F)·dw` has finite residues the fibre sums
-and `∞`-residue the `∞`-fibre sum).  The proven §5 slit tower constructs exactly this datum
-for a holomorphic frame; the `df` instance needs strictly less per-sheet data (the plain value
-trace).  Discharge plan: `A_ATOM_ROUTE.md`.
-
-Everything downstream of the wall is proven: `frameTraceHypothesis_of_df` and the existential
-`exists_canonicalData_frameTraceHypothesis` feed the keystone corollaries of `ResidueAtom.lean`
-(`h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frameTrace`, …).
+`exists_frameTraceFunctionData_df` — the §VIII.3 trace assembly for the plain value trace —
+is **proven**: the trace-function datum is constructed from the conservation-of-number engine
+(`FrameTraceWallEngine`), the unweighted symmetric descent (`FrameTraceWallDescent`), the
+per-centre cluster descents (`FrameTraceWallCluster`), and Lemma 3.2 at `∞`
+(`FrameTraceWallInfty`).  Hence `frameTraceHypothesis_of_df`, the existential
+`exists_canonicalData_frameTraceHypothesis`, and the unconditional keystone atom
+`exists_canonicalData_residueAtom` are all sorry-free.
 
 Reference: Miranda, *Algebraic Curves and Riemann Surfaces* (GSM 5), §VIII.3; Forster,
 *Lectures on Riemann Surfaces* (GTM 81), §17.3.
@@ -706,19 +702,16 @@ theorem exists_traceLaurentForm_of_functionData (data : CanonicalForm17Data X)
     rw [hLρ] at hLinf ⊢
     exact hLinf.trans D.hinf
 
-/-! ## The residual wall (single named `sorry`)
+/-! ## The wall, closed: the trace-function datum for `ω₀ = df`
 
-The §VIII.3 trace assembly for the canonical `ω₀ = df` frame, now reduced to the
-**trace-function level**: the existence of the value trace `T` with its local residue
-transports.  Mathematically TRUE: the plain value trace `Tr(F)(w) = ∑_{sheets over w}
-F(sheet)` of `F` through the branched cover `F = f.toRiemannSphere` is analytic off the
-finitely many exceptional values (IFT sections off the branch locus; symmetric-descent
-clusters across it), meromorphic at each of them, its local residues are the fibre residue
-sums of `F·df` (per-sheet: `frameRes_df_read` + section-inverse `(f̂ ∘ sheet)' = 1`; ramified
-clusters: `planarCoeff_neg_one_branch`'s `e·a_{−e}` normalization), and its `∞`-residue is the
-`∞`-fibre sum (the reciprocal-chart cluster).  The proven §5 slit tower constructs exactly
-this datum for a holomorphic frame (strictly more per-sheet data than the plain value trace
-needs).  Discharge plan: `A_ATOM_ROUTE.md`. -/
+The §VIII.3 trace assembly for the canonical `ω₀ = df` frame at the **trace-function level**,
+CONSTRUCTED over the `FrameTraceWall` engine: the plain value trace
+`Tr(F)(w) = ∑_{fibre over w} F.holoRepr` of `F` through the branched cover
+`𝔉 = f.toRiemannSphere` is analytic off the finitely many exceptional values
+(conservation-of-number section sums), meromorphic at each of them with the fibre residue sums
+of `F·df` as residues (the per-centre cluster descents, ramified clusters included), and its
+`∞`-residue is the `∞`-fibre sum (the reciprocal-chart clusters + the large-contour
+computation). -/
 
 /-- **The trace-function datum of the plain value trace** of `F` through `f`, for the canonical
 `ω₀ = df` datum — Miranda §VIII.3 step 1 + Lemma 3.2 at the exceptional values, CONSTRUCTED:
@@ -941,6 +934,13 @@ theorem exists_canonicalData_frameTraceHypothesis :
   obtain ⟨K, hK⟩ := exists_differentialForm_divisor f (differentialForm_ne_zero hf)
   exact ⟨canonicalForm17DataOfDivisor f hf K hK,
     frameTraceHypothesis_of_df f hf (canonicalForm17DataOfDivisor f hf K hK) rfl⟩
+
+/-- **The keystone atom, unconditional**: a canonical `ω₀ = df` datum satisfying its own
+residue atom `∑_{p ∈ supp(div F) ∪ supp K} Res_p(F·ω₀) = 0` (for EVERY global meromorphic
+`F`) exists on every compact connected Riemann surface. -/
+theorem exists_canonicalData_residueAtom :
+    ∃ data : CanonicalForm17Data X, data.ResidueAtom :=
+  exists_residueAtom_of_exists_frameTrace exists_canonicalData_frameTraceHypothesis
 
 end Dolbeault
 
