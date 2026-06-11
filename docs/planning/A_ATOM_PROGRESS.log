@@ -1,2 +1,3 @@
 2026-06-11 12:35 A-lane session start: ResidueAtom (∑Res(F·df)=0) — Phase 0 inventory begins
 2026-06-11 (A-lane 3rd launch) merge origin/main clean (import union); route decision committed: Route 2 frame-trace datum + proven consumer; skeleton next
+2026-06-11 ResidueAtom.lean skeleton LANDED (compiles clean, first pass): frameRes + off-support vanishing + fibrewise regrouping + FrameResidueTrace datum + PROVEN consumer residueAtom_of_frameTraceHypothesis + keystone corollaries + branch normalization down-payment
