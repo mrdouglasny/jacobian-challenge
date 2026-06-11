@@ -167,3 +167,5 @@ commutes). Note: pouCoeff's ∂̄ is not yet packaged — R5 should add dbar_pou
 (chart read of dbarRho) on top of contDiff_pouCoeff, or work with dbar (pouCoeff j) directly
 via DbarDisk; support lemmas (support_pouCoeff ⊆ chartMap j '' tsupport ρ_j) are implicit in
 pouCoeff_eq_zero_of_notMem_image_tsupport.
+R6 inline: skeleton committed; filling overlap lemmas next
+R6 inline: overlap lemmas DONE; remaining = resFunctional_mlGlue (sigma-collapse + relocation + smeared-pole eval per module docstring)
