@@ -349,6 +349,24 @@ theorem frameFibreTrace_traceCoeff_df (data : CanonicalForm17Data X)
   filter_upwards [hall] with w hw
   exact Finset.sum_congr rfl fun i _ => hw i
 
+/-- **The `hres` field at an unramified centre (proven)**: if the global trace `T` germ-agrees
+at `p` with the fibre trace coefficient of a `FibreRegularData` whose `xs` injectively
+enumerates the `S`-points of the fibre, then `T`'s residue at `p` is the fibre-restricted
+`frameRes` sum — the exact `FrameTraceFunctionData.hres` obligation at that centre. -/
+theorem resAt_eq_filter_sum_of_traceCoeff_germ (data : CanonicalForm17Data X)
+    (F : MeromorphicFunction X) (f : MeromorphicFunction X) {p : ℂ}
+    (D : FibreRegularData F.toFun f p) (S : Finset X) (T : ℂ → ℂ)
+    (hT : T =ᶠ[𝓝[≠] p] (frameFibreTrace data F f D).traceCoeff)
+    (hxs_inj : Function.Injective D.xs)
+    (hxs_mem : ∀ i, D.xs i ∈ S ∧ f.toRiemannSphere (D.xs i) = ((p : ℂ) : RiemannSphere))
+    (hxs_surj : ∀ a ∈ S, f.toRiemannSphere a = ((p : ℂ) : RiemannSphere) → ∃ i, D.xs i = a) :
+    resAt T p
+      = ∑ a ∈ S with f.toRiemannSphere a = ((p : ℂ) : RiemannSphere), frameRes data F a := by
+  rw [resAt_congr hT]
+  calc resAt (frameFibreTrace data F f D).traceCoeff p
+      = ∑ i, frameRes data F (D.xs i) := resAt_traceCoeff_frameFibreTrace data F f D
+    _ = _ := frameFibreResidueSum_eq_filter data F f D S hxs_inj hxs_mem hxs_surj
+
 /-! ## The one-variable rationality reduction
 
 `Miranda §VIII.3 steps 2–3, proven`: from a coefficient `T : ℂ → ℂ` analytic off a finite
