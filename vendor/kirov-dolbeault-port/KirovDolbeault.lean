@@ -62,6 +62,7 @@ import KirovDolbeault.Dolbeault.TailRR1
 import KirovDolbeault.Dolbeault.TailSerre
 import KirovDolbeault.Dolbeault.TailSurjectivity
 import KirovDolbeault.Dolbeault.TailFrameWitness
+import KirovDolbeault.Dolbeault.TailFrameGenus0
 import KirovDolbeault.Dolbeault.TailRegularity
 import KirovDolbeault.Dolbeault.TailUnwind
 import KirovDolbeault.Dolbeault.TailDictionary
