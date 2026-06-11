@@ -113,11 +113,83 @@ theorem pi1PuncturedPlaneInt_ofAdd_one (a : ℂ) :
   rw [AddSubgroup.vadd_def, vadd_eq_add, add_zero]
   simp
 
+/-- π₁ of the punctured plane is ℤ at a basepoint `z` presented as `expAround a e₀`.
+The explicit lift basepoint `e₀` makes the generator computation
+(`pi1PuncturedPlaneIntOn_eq_fromPath`) cast-free. -/
+noncomputable def pi1PuncturedPlaneIntOn (a e₀ : ℂ) (z : {w : ℂ // w ≠ a})
+    (hz : expAround a e₀ = z) :
+    Multiplicative ℤ ≃* FundamentalGroup {w : ℂ // w ≠ a} z :=
+  hz ▸ pi1PuncturedPlaneInt a e₀
+
+/-- **Generator-power identification at any presented basepoint.** If the loop `γ` at
+`z = expAround a e₀` lifts pointwise through `expAround a` to a path from `e₀` to
+`n • 2πi + e₀`, then `γ` represents the image of `n : ℤ`. -/
+theorem pi1PuncturedPlaneIntOn_eq_fromPath (a e₀ : ℂ) (z : {w : ℂ // w ≠ a})
+    (hz : expAround a e₀ = z) (n : ℤ) (γ : Path z z)
+    (Γ : Path e₀ (n • twoPiI + e₀)) (hΓ : ∀ t, expAround a (Γ t) = γ t) :
+    pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd n)
+      = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ) := by
+  subst hz
+  show pi1PuncturedPlane a e₀
+      (Multiplicative.ofAdd (intAddEquivZMultiples twoPiI_ne_zero n))
+    = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ)
+  refine deckMulEquivPi1_eq_fromPath (isAddQuotientCoveringMap_expAround a) e₀
+    (intAddEquivZMultiples twoPiI_ne_zero n) Γ γ hΓ ?_
+  rw [AddSubgroup.vadd_def, vadd_eq_add]
+  rfl
+
+/-- The standard generator loop at `expAround a e₀`: `t ↦ a + exp e₀ · exp (2πit)`,
+the circle of radius `|exp e₀|` around the puncture. -/
+noncomputable def circleLoopOn (a e₀ : ℂ) : Path (expAround a e₀) (expAround a e₀) where
+  toFun t := expAround a (twoPiI * (t : ℝ) + e₀)
+  continuous_toFun := by
+    exact (continuous_expAround a).comp
+      ((continuous_const.mul (Complex.continuous_ofReal.comp
+        continuous_subtype_val)).add continuous_const)
+  source' := by simp
+  target' := by
+    apply Subtype.ext
+    simp [Complex.exp_add, Complex.exp_two_pi_mul_I, twoPiI]
+
+theorem pi1PuncturedPlaneIntOn_ofAdd_one (a e₀ : ℂ) (z : {w : ℂ // w ≠ a})
+    (hz : expAround a e₀ = z) :
+    pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd 1)
+      = FundamentalGroup.fromPath
+          (Path.Homotopic.Quotient.mk ((circleLoopOn a e₀).cast hz.symm hz.symm)) := by
+  refine pi1PuncturedPlaneIntOn_eq_fromPath a e₀ z hz 1 _
+    ⟨⟨fun t ↦ twoPiI * (t : ℝ) + e₀, by fun_prop⟩, by simp, by simp⟩ fun t ↦ rfl
+
+/-- The iso `pi1PuncturedPlaneIntOn` does not depend on the choice of lift basepoint
+`e₀` presenting the same basepoint `z`: both send `1 : ℤ` to the same circle-loop
+class. -/
+theorem pi1PuncturedPlaneIntOn_indep (a e₀ e₀' : ℂ) (z : {w : ℂ // w ≠ a})
+    (hz : expAround a e₀ = z) (hz' : expAround a e₀' = z) :
+    pi1PuncturedPlaneIntOn a e₀ z hz = pi1PuncturedPlaneIntOn a e₀' z hz' := by
+  have hexp : Complex.exp e₀ = Complex.exp e₀' := by
+    have := hz.trans hz'.symm
+    simpa [expAround, Subtype.ext_iff] using this
+  have hloop : (circleLoopOn a e₀).cast hz.symm hz.symm
+      = (circleLoopOn a e₀').cast hz'.symm hz'.symm := by
+    ext t
+    show (expAround a (twoPiI * (t : ℝ) + e₀) : ℂ) = expAround a (twoPiI * (t : ℝ) + e₀')
+    simp [Complex.exp_add, hexp]
+  apply MulEquiv.toMonoidHom_injective
+  apply MonoidHom.ext_mint
+  show pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd 1)
+    = pi1PuncturedPlaneIntOn a e₀' z hz' (Multiplicative.ofAdd 1)
+  rw [pi1PuncturedPlaneIntOn_ofAdd_one, pi1PuncturedPlaneIntOn_ofAdd_one, hloop]
+
 /-- π₁ of the punctured plane is ℤ at ANY basepoint `z ≠ a`. -/
 noncomputable def pi1PuncturedPlaneIntAt (a : ℂ) (z : {w : ℂ // w ≠ a}) :
-    Multiplicative ℤ ≃* FundamentalGroup {w : ℂ // w ≠ a} z := by
-  have hz : expAround a (Complex.log (z.1 - a)) = z :=
-    Subtype.ext (by simp [Complex.exp_log (sub_ne_zero.mpr z.2)])
-  exact hz ▸ pi1PuncturedPlaneInt a (Complex.log (z.1 - a))
+    Multiplicative ℤ ≃* FundamentalGroup {w : ℂ // w ≠ a} z :=
+  pi1PuncturedPlaneIntOn a (Complex.log (z.1 - a)) z
+    (Subtype.ext (by simp [Complex.exp_log (sub_ne_zero.mpr z.2)]))
+
+/-- `pi1PuncturedPlaneIntAt` agrees with `pi1PuncturedPlaneIntOn` for any presentation
+of the basepoint. -/
+theorem pi1PuncturedPlaneIntAt_eq_intOn (a e₀ : ℂ) (z : {w : ℂ // w ≠ a})
+    (hz : expAround a e₀ = z) :
+    pi1PuncturedPlaneIntAt a z = pi1PuncturedPlaneIntOn a e₀ z hz :=
+  pi1PuncturedPlaneIntOn_indep a _ e₀ z _ hz
 
 end Jacobians.Topology
