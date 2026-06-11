@@ -308,3 +308,49 @@ resCocycle_cup_testCocycle_ne_zero through resFunctional_eq_neg_residue_of_mero_
 NOTE: stale-olean gotcha — lake env lean used pre-branch MeroVanish.olean until
 `lake build ...FineResidue.DescentVanish`; "unknown identifier SlotProductSimplePoleAt" was
 NOT a namespace problem.
+=== 2026-06-10 final-bits lane (feat/keystone-final-bits) ===
+[start] Items: (1) SlotMatchesK witness slotMatchesK_omegaCoeff; (2) cover construction
+  (exists_separatingChartDiskCover + reserved disk, generic isLeray, generalized
+  locallyRealizable); (3) CupMLWitnessR over the reserved disk; (4) hga if time.
+  Caches APFS-cloned, 264G free. Beginning item 1 (SlotMatch.lean).
+[item1 DONE] SlotMatch.lean: slotMatchesK_omegaCoeff PROVEN (standard-3) via
+  formOrderW_chart_invariant + formCoeff_holToSection + coeffAt_analyticAt +
+  AnalyticAt.meromorphicOrderAt_eq + analyticOrderAt_eq_natCast factorization.
+  Wrappers resH1_omegaCoeff / cousinResidueData_omegaCoeff: analytic side of the
+  R-lane descent fully discharged for g = omegaCoeff; remaining hyps = SeparatesPoles
+  (cover geometry, item 2) + CupMLWitnessR (item 3). Aggregator wired. Starting item 2.
+[item2a DONE] ChartDiskCoverGeneric.lean: generic ChartDiskCover.isLeray (every chart-disk
+  cover set is a chart-ball preimage, simply connected) + generic
+  ChartDiskCover.locallyRealizable (factorized-rational product witness, only cover-specific
+  input was subset_chart_source). Bill items 2+3 of COVER_WIRING done. Next: the
+  separating-cover construction with the reserved disk (bill item 1).
+[item2b DONE] SeparatingCover.lean: exists_separatingChartDiskCover PROVEN (standard-3).
+  Construction: reserved point p ∉ S, reserved disk in U(idx p) ∩ Sᶜ, compact half-radius
+  core, good disks in U(idx x) ∩ coreᶜ ∩ (S.erase x)ᶜ, finite subcover of (resDisk)ᶜ,
+  Option-indexed assembly. Outputs: refinement of any 𝔘 + S-separation (→ SeparatesPoles
+  for supp K ⊆ S) + nonempty open reserved zone W (→ MLIsolated ∀ w ∈ W) + W ∩ S = ∅.
+  Item 2 complete (with 2a generics). Next: item 3, CupMLWitnessR over the reserved disk.
+[item3 DONE — THE LANE HEADLINE] CupWitness.lean: CupMLWitnessR INHABITED
+  (cupMLWitnessR_of_isolated, standard-3). The cup_surjective_of_ne_zero dissolution
+  worked exactly as scoped: NO transport computation — build the explicit germ-level
+  one-point ML cocycle mlCochain (toGerm of mlCocycle; Z¹(𝒪_K) membership = pointwise
+  ring identity through toGerm + MLIsolated keeps the pole off overlaps + K ≥ 0),
+  extraction agreement by eq_at_of_toGerm_eq (germ classes pin continuous reps),
+  r := g j₀(α)⁻¹ normalization by inv_mul_cancel₀, and cup surjectivity supplies ξ
+  hitting [mlCochain] for every (D, v). ω₀-side inputs: formDivisor_nonneg (div ω₀ ≥ 0)
+  + omegaCoeff_ne_zero_at (slot ≠ 0 where K = 0 — every reserved-zone point).
+  CAPSTONE exists_separating_cousinResidueData: for any 𝔘 and α with divisor K,
+  a refining separating cover (Leray + locallyRealizable) with hsep, inhabited
+  CupMLWitnessR, and Nonempty (CousinResidueData 𝔇.toFiniteCover K) — ZERO remaining
+  hypotheses. All 6 decls standard-3; root aggregator wired; module lake build green.
+  Next: item 4 (hga via D=0 Čech↔Dolbeault comparison) if time.
+[item4 PARTIAL — honest scope] ArithmeticGenusTransfer.lean: the hga ATOM ITSELF is NOT
+  provable from the comparison alone (confirmed R6D2_BLOCKER §3 / G0_BLOCKER route 2: needs
+  H^{0,1}=0 from no-holomorphic-forms, Hodge-flavoured — research-grade, NOT faked). What IS
+  proven (standard-3): the cover dependence of hga is GONE — the IsLeray-free comparison
+  (GoodCover.cechH1_dolbeault_comparison', finrank ℝ DolbeaultH01 = 2·h1Dim 0, cover-free
+  LHS) gives h1Dim_zero_chartDiskCover_invariant (h¹(𝒪) equal on ALL chart-disk covers),
+  hga_transfer (atom at any one cover feeds every other, incl. the separating cover), and
+  h1Dim_zero_eq_canonical (normal form at the canonical chartDiskCover). The genus-0 wall
+  need only be climbed once, at any convenient cover. Root lake build green (8771 jobs).
+  LANE COMPLETE: items 1-3 DONE, item 4 done to its honest boundary.

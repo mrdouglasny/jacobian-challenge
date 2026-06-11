@@ -20,11 +20,7 @@
  Quot.sound,
  Axioms.AX_AbelTheorem,
  Axioms.AX_PeriodCycleBasis]
-'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_PeriodCycleBasis,
- Axioms.AX_ofCurve_contMDiff]
+'Jacobian.ofCurve_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
@@ -127,6 +123,7 @@
 'Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instNonempty' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instChartedSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.PlaneCurve.instIsManifold' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instConnectedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,

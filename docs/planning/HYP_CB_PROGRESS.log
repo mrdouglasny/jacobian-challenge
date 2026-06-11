@@ -1,0 +1,32 @@
+# HYP_CB progress log — hyperelliptic PeriodCycleBasis witness foundations
+# branch feat/hyperelliptic-cyclebasis (worktree agent-a2d498750ea6f1fbd)
+
+[T+0] Setup: reset to origin/main 12123eb, caches copied. Read PeriodCycleBasis.lean
+      (αEmbed-first A/B layout contract), Elliptic/Witnesses.lean (g=1 pattern:
+      explicit extend + IsAnalyticArcStrong via chart-cover refinement + retyped
+      AX_Elliptic_H1_symplectic), Hyperelliptic/Basic.lean (sqMap covering,
+      branch machinery, path-connectivity hub argument), OddAtlas.lean (#167 area:
+      ChartedSpace + IsManifold on HyperellipticOdd), AnalyticArc.lean
+      (IsAnalyticArcStrong refinement predicate; concat/reverse still TODO),
+      CanonicalArcIntegral.lean, CYCLEBASIS_ALTERNATIVES.md direction 2a.
+      Plan: M1 = sqrt-lift machinery (x-plane analytic loop + analytic branch
+      y(t) with y²=f(x) ⇒ AnalyticArc on HyperellipticAffine ⇒ lift to
+      HyperellipticOdd), then explicit aᵢ/bᵢ branch-pair loops; M2 = homology
+      named hypotheses; M3 = R1/R2 arc-level reduction statement.
+[T+1] File A landed: AnalyticArcMovingChart.lean compiles clean (lake env lean), committed. Generic isAnalyticArcStrong_of_movingChart + ofMovingChart packagers.
+[T+2] LoopConjugation.lean compiles clean, committed (conjugate + period cancellation).
+[T+3] CycleLoops.lean clean+committed: SqrtArcData, extChartAt_toOdd readout (rfl on affineChartProjX!), toOddArc/toOddLoop, canonicalIntegrand/ArcIntegral reduction, circleX/segmentX. Next: BranchCutSystem assembly + conditional PeriodCycleBasis witness.
+[T+4] CycleBasisWitness.lean clean+committed. M1 done (constructor+circles+segments), M3 arc-level reduction done, M2 = named hypotheses in nonempty_periodCycleBasis_of_branchCutSystem. Next: continuous-sqrt-branch analyticity lemma (optional), concrete branch-pair circle layout, BLOCKER doc.
+[T+5] exists_sqrt_branch + exists_sqrtArcData landed; M1 branch-existence half now PROVEN (closure = winding integral, documented gap). All modules wired into aggregators.
+[T+6] HYP_CB_BLOCKER.md written: gap ledger G-A (closure winding integral), G-B (circle layout geometry), G-C (H1 basis+tie, SVK package), G-D (R1/R2 over explicit integrals), G-E (even model). Aggregator build running in background.
+[T+7] Verbatim-gates pass: aggregator build OK (8726 jobs), full lake build running; sorry-grep clean on all 5 new files; port LoopOffBranch skimmed (complementary chart-local FTC; our extChartAt_toOdd makes its chartFrame_cancel trivial for hyperelliptic sqrt lifts). Pending: #print axioms probe post-build.
+[T+8] FINAL. Full `lake build` green (8756 jobs, CI-equivalent). #print axioms:
+      - isAnalyticArcStrong_of_movingChart, canonicalArcIntegral_conjugate,
+        analyticAt_of_sq_eq_analytic, exists_sqrt_branch, exists_sqrtArcData:
+        STANDARD-3.
+      - extChartAt_toOdd / loop_period_eq / nonempty_periodCycleBasis_of_
+        branchCutSystem: standard-3 + the PRE-EXISTING tracked odd-atlas
+        infinity-chart axioms (AXIOM_AUDIT row "Odd-atlas infinity chart",
+        inherited through instChartedSpace — where that dependency belongs
+        per the audit). ZERO new axioms, zero sorries, this workstream.
+      8 commits on feat/hyperelliptic-cyclebasis (not pushed, per gates).

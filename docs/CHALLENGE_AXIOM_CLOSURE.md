@@ -4,9 +4,10 @@
 challenge property theorems and the concrete-curve headlines). The Jacobian typeclass
 instances are now also covered: `scripts/axiom_report.lean` includes wrapper theorems
 for all 7 Buzzard instance obligations (T2Space, CompactSpace, ConnectedSpace,
-ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-10
+ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-11
 (post-D1 + the #161 trace-cluster discharge + the #52 `PlaneCurve.instIsManifold`
-discharge) against the 30-axiom table.*
+discharge + the PR #179 `AX_ofCurve_contMDiff` discharge, which dropped the
+challenge-critical count 7 → **6**) against the 29-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
 > count dropped **13 → 7** (D1 merge −3+1 −intersectionForm; #161 trace-cluster
@@ -38,14 +39,14 @@ Challenge.lean line 105 marks it as extra, needed for the Albanese universal pro
 
 All 24 are filled; `ChallengeConformance.lean` machine-checks every v0.4 signature
 (`lake env lean ChallengeConformance.lean`, exit 0). **But filling a `sorry` with an
-`axiom` is not the same as proving it.** This document identifies: which of the 30
+`axiom` is not the same as proving it.** This document identifies: which of the 29
 remaining axioms must be discharged to produce a fully axiom-free challenge closure?
 
 ---
 
-## What filling the 7 does — and does not — claim
+## What filling the 6 does — and does not — claim
 
-Discharging all 7 makes every Buzzard declaration print exactly
+Discharging all 6 makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -70,17 +71,22 @@ declarations. Four boundaries to keep the claim honest:
    7 — is on the path). The set may grow transiently if a discharge
    introduces a new textbook axiom; the CI guard makes any such step
    visible, and the claim lands only when the challenge cone hits zero.
-4. **`AX_ofCurve_contMDiff` is the conditional one.** Its 2026-06-10
-   deep-think vetting pinned its *truth* to the completeness of the
-   `periodMap`/H1 model (homotopy invariance of the arc integral — the
-   parked X1 workstream). Filling the 7 therefore includes settling X1;
-   it cannot stay parked if axiom-free closure is the goal.
+4. **`AX_ofCurve_contMDiff` — DISCHARGED 2026-06-11 (PR #179, @Deicyde),
+   with the conditionality transferred, not settled.** The chart-line
+   descent proof makes Abel–Jacobi smoothness a theorem (standard-3 +
+   `AX_PeriodCycleBasis` only). But the 2026-06-10 DT flag's
+   HI/lattice-completeness condition is NOT settled by this proof — the
+   `Classical.choice` path discrepancy is landed in the lattice via the
+   cycle-basis `loops_to_basis` pin, so the condition transfers into
+   `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis`
+   pin), where it belongs. Filling the 6 therefore still includes
+   settling X1, now inside the Cluster-A discharge.
 
-## The 7 challenge-critical axioms
+## The 6 challenge-critical axioms
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging all 7 gives a challenge closure over only
+obligations). Discharging all 6 gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
 ### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
@@ -105,7 +111,7 @@ in the merge. They remain in the build as Part-3 topological-anchoring debt
 discharged by a genuine dissection, re-tying the form to that dissection is the
 recorded joint obligation.
 
-### Cluster B — Three independent classical theorems
+### Cluster B — Two independent classical theorems (a third discharged, PR #179)
 
 Each appears in exactly one Buzzard declaration and has its own proof path.
 
@@ -113,7 +119,7 @@ Each appears in exactly one Buzzard declaration and has its own proof path.
 |---|---|---|
 | `AX_genus_eq_zero_iff_homeo` | `genus X = 0 ↔ X ≅ₜ S²` — uniformization for genus 0 | Forster §27. Wallace's GenusZero route (degree-1 cover → biholomorphism to ℙ¹) has the most Lean progress. The concrete `genus ℙ¹ = 0` is already proved axiom-free via Liouville. |
 | `AX_AbelTheorem` | Degree-0 kernel of `abelJacobiDiv` = `PrincipalDivisors` — Abel's theorem | Forster §21. The ⊇ direction (principal ⊆ ker) is underway via the Liouville route. The ⊆ direction (ker ⊆ principal, the Jacobi inversion step) is the hard half. |
-| `AX_ofCurve_contMDiff` | `ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin (genus X) → ℂ) ⊤ (ofCurve x₀)` — Abel–Jacobi map is smooth | Smooth dependence of the line integral `∫_{x₀}^x ω` on the upper limit. Requires a manifold-level smooth-dependence-on-parameters theorem, absent from Mathlib. |
+| `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — Abel–Jacobi smoothness is now a theorem (chart-line descent; standard-3 + `AX_PeriodCycleBasis` only) | **Transfer note:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. |
 
 ### Cluster C — Functoriality block
 
@@ -204,7 +210,7 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 ## Summary: the closure picture
 
 ```
-7 challenge-critical axioms
+6 challenge-critical axioms
     │
     ├── Cluster A (1) — in EVERY Buzzard declaration
     │      AX_PeriodCycleBasis  (D1 merge: loops + H₁ basis + Hurewicz tie
@@ -213,10 +219,11 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
     │      Stokes for R1; Hodge positivity for R2 ← hardest, no Lean proof
     │      Kirov port has the proven boundary-word engine for R1/R2
     │
-    ├── Cluster B (3) — three independent classical theorems
+    ├── Cluster B (2) — two independent classical theorems
     │      AX_genus_eq_zero_iff_homeo  ← Wallace has best Lean progress
     │      AX_AbelTheorem
-    │      AX_ofCurve_contMDiff
+    │      (AX_ofCurve_contMDiff — discharged PR #179, conditionality
+    │       transferred to AX_PeriodCycleBasis's loops_to_basis pin)
     │
     └── Cluster C (3) — functoriality over now-real maps
            (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge)
@@ -235,8 +242,9 @@ slit-sheet route post-keystone — `docs/planning/CYCLEBASIS_ALTERNATIVES.md`). 
 older discharge analysis is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vetted.
 
 **Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) is the deepest single
-theorem. `AX_ofCurve_contMDiff` needs manifold-level smooth-parameter integral theory.
-`AX_AbelTheorem`'s hard half is Jacobi inversion.
+theorem. `AX_AbelTheorem`'s hard half is Jacobi inversion. (`AX_ofCurve_contMDiff`
+was discharged in PR #179; its HI/lattice-completeness conditionality now lives in
+Cluster A's discharge obligation.)
 
 **Cluster C**: the trace trio is discharged (#26/#27/#28), so nothing in the
 cluster is gated by an opaque construction: both lattice-preservation axioms are
@@ -260,7 +268,7 @@ period-cluster theorems, and sit in the challenge's dependency chain via
 **The RR/Serre cohomology branch** (`h1coh_zero_finrank`, `serreDuality_equiv`,
 line-bundle stubs) — this IS orthogonal to challenge closure. These axioms do not appear
 in any Buzzard `#print axioms`. The tower's RR/Serre discharge deepens mathematical
-trust without touching any of the 7.
+trust without touching any of the 6.
 
 The tower's indirect contribution to eventual challenge closure: the Kirov port
 integrated in Phase D contains `residueTheorem_unconditional` and the proven

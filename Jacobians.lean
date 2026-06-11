@@ -10,3 +10,4 @@ import Jacobians.RiemannSurface
 import Jacobians.Vendor
 import Jacobians.Bridge
 import Jacobians.Extensions
+import Jacobians.Topology

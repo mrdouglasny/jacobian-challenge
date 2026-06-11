@@ -1,0 +1,82 @@
+# Lane A progress log — keystone assembly prep (S1/S2/S4/S9)
+
+Campaign: docs/planning/CAMPAIGN_KEYSTONE.md, lane A. Gap analysis:
+docs/planning/KEYSTONE_GAP_ANALYSIS.md. Branch feat/keystone-a-lane.
+
+## 2026-06-10 — session 1
+
+NEW FILE: vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/SerreAssemblyPrep.lean
+(wired into the KirovDolbeault.lean aggregator; full lib rebuild green, 8728 jobs;
+all 10 new declarations #print-axioms = [propext, Classical.choice, Quot.sound]).
+
+### Per-step status
+
+* **S1 (datum alignment) — PROVEN, complete.**
+  - `lDim_eq_genus_of_order_eq` — ANY divisor reading off the orders of a germ-nonzero
+    MEROMORPHIC 1-form satisfies `lDim K = kirovGenus X` (all genera; via
+    `CanonicalForm17Data.hKgenus_unconditional`, anonymous-constructor instantiation).
+  - `holToMero_formOrderW_ne_top`, `lDim_eq_genus_of_holomorphic_order_eq`,
+    `exists_canonicalDivisor_of_holomorphic` — the holomorphic-ω₀ (lane-R) forms:
+    the order-divisor of a NONZERO holomorphic form exists and is genus-canonical.
+  - `exists_holomorphicOneForms_ne_zero` — supply at `0 < kirovGenus X`.
+  Effect: the `hKgenus` field of the keystone is ELIMINATED whenever `K` is the
+  order-divisor of the chain's own ω₀ (holomorphic or meromorphic). No alignment gap left.
+
+* **Assembly spine — PROVEN, complete (the "near-mechanical final diff" deliverable).**
+  - `GlobalResidue.exists_serreDualityData_of` : {G : GlobalResidue 𝔘 K (abstract, lane R),
+    hR : LocallyRealizable, hKgenus, ∀ D UnwindRegularity (R6-gated)} →
+    Nonempty (SerreDualityData 𝔘). finH1 := finiteDimensional_cechH1_wired (proven);
+    ι_surj := pairing_surjective_of_globalResidue (landed S5+S6+S7); ι_inj derived.
+  - `CousinResidueData.exists_serreDualityData_of` — same spine at the R7 landing rung.
+  - NOTE: `hL : IsLeray` is needed by NO input of the spine; only hR is. The final keystone
+    wrapper just drops hL.
+
+* **S9 (genus-0 routing) — split theorem PROVEN; g=0 leg = named hypothesis; ROUTING
+  FINDING (see A_LANE_BLOCKER.md).**
+  - `exists_serreDualityData_of_globalResidue_holomorphic` — the g≥1 leg reduced to EXACTLY
+    the lane-R outputs {ω₀ ≠ 0 holomorphic, K = div ω₀, G, hreg}; hKgenus gone.
+  - `exists_serreDualityData_of_globalResidue_meromorphic` — genus-uniform meromorphic
+    variant (the natural shape of a g=0 discharge through GlobalResidue).
+  - `exists_serreDualityData_genus_split` — the R4_G0_NOTE Decision-5 case split;
+    `hzero : kirovGenus X = 0 → Nonempty (SerreDualityData 𝔘)` kept maximally general.
+  - FINDING: the snapshot's SerreResidueDirectGenus0* capstones are all parametrized by
+    `ω₀ : HolomorphicOneForms X` (they discharge Gate A residual #5 — the TRACE-side ∞-
+    vanishing on the target ℙ¹, "genus 0" refers to that, not to source genus). At source
+    genus 0 they are vacuous (ω₀ = 0). The g=0 keystone leg is therefore NOT closed by
+    existing machinery; it needs its own (small) construction. Documented in
+    docs/planning/A_LANE_BLOCKER.md.
+
+* **S2 (vanish descent) — RETIRED, no Lean artifact (by design).**
+  The gap-analysis S2 (`MeromorphicCousinSolutions.vanish` on CoverMLLift) belongs to the
+  meromorphic-Cousin feeder retired by the fine-sheaf decision
+  (S3_FINESHEAF_RES_SCOPING.md §1.2). Under the adopted architecture the coboundary-
+  vanishing is the LANDED R5 Stokes theorem
+  (FineResidue/CoboundaryVanish.lean: resFunctional_eq_zero_of_coboundary) and enters the
+  keystone as the `vanish_coboundary` FIELD of CousinResidueData (R7, lane R). The spine
+  consumes it abstractly. Implementing the CoverMLLift gluing would be ~1-2 wk of dead code.
+
+* **S4 (dz/z witness transport) — CONDITIONAL (R6/R8-gated), consumed abstractly.**
+  `nondegenerate` is a FIELD of GlobalResidue/CousinResidueData; its construction is R8 of
+  the S3 scoping (final evaluation step gated on the R6 simple-pole ML-tie). Introducing a
+  finer A-lane interface for it now would be a unilateral interface extension (the rule that
+  produced UnwindRegularity's isolation in SerreUnwind.lean) and would need a DT vet; the
+  spine is invariant under however R8 lands. No A-lane artifact.
+
+### What the final keystone diff now looks like (target shape)
+
+```
+theorem exists_serreDualityData (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
+    (hR : 𝔘.LocallyRealizable) : Nonempty (SerreDualityData 𝔘) :=
+  exists_serreDualityData_genus_split 𝔘 hR
+    (fun hg => ⟨...R4 ω₀-witness..., ...R7 K..., ...R7 GlobalResidue...,
+                fun D => ...R6 UnwindRegularity...⟩)
+    (fun h0 => ...g=0 leg, see A_LANE_BLOCKER.md...)
+```
+
+### Gates run
+
+- `lake env lean KirovDolbeault/Dolbeault/SerreAssemblyPrep.lean` — clean.
+- `lake build KirovDolbeault.Dolbeault.SerreAssemblyPrep` — green (8728 jobs).
+- `#print axioms` on all 10 new declarations — [propext, Classical.choice, Quot.sound].
+- Aggregator: SerreAssemblyPrep imported from KirovDolbeault.lean.
+- No sorries, no new axioms, no interface changes anywhere.
