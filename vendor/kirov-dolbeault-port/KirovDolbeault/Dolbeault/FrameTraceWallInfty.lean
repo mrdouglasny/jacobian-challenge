@@ -499,7 +499,351 @@ theorem valueTrace_resAtInfty_df (data : CanonicalForm17Data X) (F f : Meromorph
     (hoff : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ (valueTrace F f) z) :
     resAtInfty (valueTrace F f) ρ
       = ∑ y ∈ fibreFinset f hdiv OnePoint.infty, frameRes data F y := by
-  sorry
+  classical
+  set P : MultiplicityPatchingData f OnePoint.infty := patchAt f hdiv OnePoint.infty with hP_def
+  -- the per-pole reciprocal descents and their sum
+  have hex : ∀ p ∈ P.xs, ∃ Hp : ℂ → ℂ, MeromorphicAt Hp 0 ∧
+      (∀ᶠ v in 𝓝[≠] (0 : ℂ),
+        (∑ y ∈ slice hdiv P p (v⁻¹), F.holoRepr y) = -v ^ 2 * Hp v) ∧
+      resAt Hp 0 = frameRes data F p :=
+    fun p hp => infCluster_descent data F f hω hdiv P hp
+  choose! Hf hH_mero hH_germ hH_res using hex
+  set Ht : ℂ → ℂ := fun v => ∑ p ∈ P.xs, Hf p v with hHt_def
+  have hHt_mero : MeromorphicAt Ht 0 := MeromorphicAt.fun_sum (fun p hp => hH_mero p hp)
+  have hfibP : fibreFinset f hdiv OnePoint.infty = P.xs := by
+    apply Finset.coe_injective
+    rw [coe_fibreFinset, P.xs_coe]
+  have hHt_res : resAt Ht 0 = ∑ y ∈ fibreFinset f hdiv OnePoint.infty, frameRes data F y := by
+    rw [show resAt Ht 0 = resAt (fun v => ∑ p ∈ P.xs, Hf p v) 0 from rfl,
+      Jacobians.TraceResidue.LaurentForm.resAt_finsum P.xs Hf (fun p hp => hH_mero p hp), hfibP]
+    exact Finset.sum_congr rfl (fun p hp => hH_res p hp)
+  -- the global reciprocal germ: `T(1/v) = −v²·Ht(v)`
+  have hgerm : ∀ᶠ v in 𝓝[≠] (0 : ℂ), valueTrace F f (v⁻¹) = -v ^ 2 * Ht v := by
+    have hW : ∀ᶠ v in 𝓝[≠] (0 : ℂ), (((v⁻¹ : ℂ)) : RiemannSphere) ∈ P.W :=
+      tendsto_coe_inv_infty.eventually (P.W_open.mem_nhds P.w₀_mem_W)
+    have hclusters : ∀ᶠ v in 𝓝[≠] (0 : ℂ), ∀ p ∈ P.xs,
+        (∑ y ∈ slice hdiv P p (v⁻¹), F.holoRepr y) = -v ^ 2 * Hf p v :=
+      (eventually_all_finset _).mpr (fun p hp => hH_germ p hp)
+    filter_upwards [hW, hclusters] with v hWv hcl
+    rw [valueTrace_eq_sum_slices F f hdiv P hWv, Finset.sum_congr rfl hcl, ← Finset.mul_sum]
+  -- the principal part of `Ht` and its residue coefficient
+  obtain ⟨N, b, Rf, hRf_an, hHt_eq⟩ :=
+    Jacobians.Dolbeault.FormTracePrincipalPart.exists_principalPart_meromorphicAt hHt_mero
+  set β : ℂ := if 1 ≤ N then b 1 else 0 with hβ_def
+  have hmero_tail : MeromorphicAt
+      (Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N) 0 := by
+    apply MeromorphicAt.fun_sum
+    intro k _
+    exact (MeromorphicAt.const (b k) 0).mul (meromorphicAt_zpow_self 0 (-(k : ℤ)))
+  have hβ_eq : β = resAt Ht 0 := by
+    rw [resAt_eq_planarCoeff_neg_one hHt_mero, planarCoeff_congr hHt_eq (-1),
+      show (fun z => Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N z + Rf z)
+        = Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N + Rf from rfl,
+      planarCoeff_add hmero_tail hRf_an.meromorphicAt]
+    have hRf0 : planarCoeff (-1) Rf 0 = 0 := by
+      refine planarCoeff_eq_zero_of_lt_order ?_ hRf_an.meromorphicAt
+      refine lt_of_lt_of_le ?_ hRf_an.meromorphicOrderAt_nonneg
+      exact_mod_cast (by norm_num : (-1 : ℤ) < 0)
+    have htail : planarCoeff (-1)
+        (Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N) 0
+          = if 1 ≤ N then b 1 else 0 := by
+      rw [show Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N
+          = fun z => ∑ k ∈ Finset.Icc 1 N, b k * (z - 0) ^ (-(k : ℤ)) from rfl,
+        planarCoeff_finset_sum (Finset.Icc 1 N)
+          (fun k z => b k * (z - 0) ^ (-(k : ℤ))) (-1) 0
+          (fun k _ => (MeromorphicAt.const (b k) 0).mul
+            (meromorphicAt_zpow_self 0 (-(k : ℤ))))]
+      have hterm : ∀ k ∈ Finset.Icc 1 N,
+          planarCoeff (-1) (fun z => b k * (z - 0) ^ (-(k : ℤ))) 0
+            = if k = 1 then b 1 else 0 := by
+        intro k _
+        rw [planarCoeff_monomial]
+        by_cases hk1 : k = 1
+        · subst hk1
+          norm_num
+        · rw [if_neg (fun hc => hk1 (by omega : k = 1)), if_neg hk1]
+      rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' _ 1 (fun _ => b 1)]
+      by_cases h1N : 1 ≤ N
+      · rw [if_pos (Finset.mem_Icc.mpr ⟨le_refl 1, h1N⟩), if_pos h1N]
+      · rw [if_neg (fun hc => h1N (Finset.mem_Icc.mp hc).2), if_neg h1N]
+    rw [hRf0, htail, add_zero]
+  -- metric radii: the reciprocal expansion is valid for `0 < |v| < r₀`
+  rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hgerm
+  obtain ⟨δ₁, hδ₁0, hδ₁⟩ := hgerm
+  have hHt_eq' : ∀ᶠ v in 𝓝 (0 : ℂ), v ∈ ({(0 : ℂ)}ᶜ : Set ℂ) →
+      Ht v = Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N v + Rf v :=
+    eventually_nhdsWithin_iff.mp hHt_eq
+  rw [Metric.eventually_nhds_iff] at hHt_eq'
+  obtain ⟨δ₂, hδ₂0, hδ₂⟩ := hHt_eq'
+  have hRf_ev : ∀ᶠ v in 𝓝 (0 : ℂ), AnalyticAt ℂ Rf v := hRf_an.eventually_analyticAt
+  rw [Metric.eventually_nhds_iff] at hRf_ev
+  obtain ⟨δ₃, hδ₃0, hδ₃⟩ := hRf_ev
+  set r₀ : ℝ := min δ₁ (min δ₂ δ₃) / 2 with hr₀_def
+  have hr₀0 : 0 < r₀ := by
+    have h1 : 0 < min δ₁ (min δ₂ δ₃) := lt_min hδ₁0 (lt_min hδ₂0 hδ₃0)
+    rw [hr₀_def]
+    linarith
+  have hr₀δ₁ : r₀ < δ₁ := by
+    have h1 : min δ₁ (min δ₂ δ₃) ≤ δ₁ := min_le_left _ _
+    rw [hr₀_def]; linarith
+  have hr₀δ₂ : r₀ < δ₂ := by
+    have h1 : min δ₁ (min δ₂ δ₃) ≤ δ₂ := le_trans (min_le_right _ _) (min_le_left _ _)
+    rw [hr₀_def]; linarith
+  have hr₀δ₃ : r₀ < δ₃ := by
+    have h1 : min δ₁ (min δ₂ δ₃) ≤ δ₃ := le_trans (min_le_right _ _) (min_le_right _ _)
+    rw [hr₀_def]; linarith
+  -- the bound on `Rf` near `0`
+  obtain ⟨M, hM⟩ := (isCompact_closedBall (0 : ℂ) r₀).exists_bound_of_continuousOn
+    (fun v hv => ((hδ₃ (lt_of_le_of_lt (by simpa [dist_zero_right] using
+      (Metric.mem_closedBall.mp hv)) hr₀δ₃)).continuousAt).continuousWithinAt)
+  -- the outer reciprocal expansion `E = E₁ + E₂` and the threshold radius
+  set E₁ : ℂ → ℂ := fun w =>
+    -(w⁻¹) ^ 2 * Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N w⁻¹ with hE₁_def
+  set E₂ : ℂ → ℂ := fun w => -(w⁻¹) ^ 2 * Rf w⁻¹ with hE₂_def
+  set R₀ : ℝ := max ρ (2 / r₀) with hR₀_def
+  have hρR₀ : ρ ≤ R₀ := le_max_left _ _
+  have hR₀0 : 0 < R₀ := lt_of_lt_of_le hρ hρR₀
+  -- on `|w| ≥ R₀`, the reciprocal value is well inside the expansion discs
+  have hwv : ∀ w : ℂ, R₀ ≤ ‖w‖ → w ≠ 0 ∧ ‖w⁻¹‖ ≤ r₀ / 2 := by
+    intro w hw
+    have h2r : (0 : ℝ) < 2 / r₀ := by positivity
+    have hw2 : 2 / r₀ ≤ ‖w‖ := le_trans (le_max_right _ _) hw
+    have hw0 : w ≠ 0 := by
+      intro h0
+      rw [h0, norm_zero] at hw2
+      linarith
+    refine ⟨hw0, ?_⟩
+    rw [norm_inv]
+    have h1 : 1 / ‖w‖ ≤ 1 / (2 / r₀) := one_div_le_one_div_of_le h2r hw2
+    have h2 : 1 / (2 / r₀) = r₀ / 2 := by
+      field_simp
+    rw [h2] at h1
+    rw [show (‖w‖)⁻¹ = 1 / ‖w‖ by rw [one_div]]
+    linarith
+  have hr₀2 : r₀ / 2 < r₀ := by linarith
+  -- the trace splits beyond `R₀`
+  have hsplit : ∀ w : ℂ, R₀ ≤ ‖w‖ → valueTrace F f w = E₁ w + E₂ w := by
+    intro w hw
+    obtain ⟨hw0, hvr⟩ := hwv w hw
+    have hv0 : w⁻¹ ≠ 0 := inv_ne_zero hw0
+    have hvd : dist w⁻¹ 0 < δ₁ := by
+      rw [dist_zero_right]
+      linarith [lt_of_le_of_lt hvr hr₀2, hr₀δ₁]
+    have h1 := hδ₁ hvd (Set.mem_compl_singleton_iff.mpr hv0)
+    rw [inv_inv] at h1
+    have hvd₂ : dist w⁻¹ 0 < δ₂ := by
+      rw [dist_zero_right]
+      linarith [lt_of_le_of_lt hvr hr₀2, hr₀δ₂]
+    have h2 := hδ₂ hvd₂ (Set.mem_compl_singleton_iff.mpr hv0)
+    rw [h1, h2, hE₁_def, hE₂_def]
+    ring
+  -- step 1: the contour moves from `ρ` out to any `R ≥ R₀` (the trace is analytic there)
+  have hzCρ : ∀ z : ℂ, ρ ≤ ‖z‖ → z ∉ C := by
+    intro z hz hzC
+    have h1 := hball z hzC
+    rw [Metric.mem_ball, dist_zero_right] at h1
+    linarith
+  have hannulusT : ∀ R : ℝ, R₀ ≤ R → (∮ z in C((0 : ℂ), R), valueTrace F f z)
+      = ∮ z in C((0 : ℂ), ρ), valueTrace F f z := by
+    intro R hR
+    refine circleIntegral_eq_of_differentiable_on_annulus_off_countable hρ (le_trans hρR₀ hR)
+      Set.countable_empty ?_ ?_
+    · intro z hz
+      obtain ⟨_, hz2⟩ := hz
+      have hzn : ρ ≤ ‖z‖ := by
+        by_contra hlt
+        exact hz2 (by rw [Metric.mem_ball, dist_zero_right]; linarith)
+      exact ((hoff z (hzCρ z hzn)).continuousAt).continuousWithinAt
+    · intro z hz
+      obtain ⟨⟨_, hz2⟩, _⟩ := hz
+      have hzn : ρ ≤ ‖z‖ := by
+        by_contra hlt
+        exact hz2 (by rw [Metric.mem_closedBall, dist_zero_right]; linarith)
+      exact (hoff z (hzCρ z hzn)).differentiableAt
+  -- step 2: at radius `R ≥ R₀` the integrand splits on the circle
+  have hsphere_norm : ∀ {R : ℝ} (_ : 0 < R) {z : ℂ}, z ∈ Metric.sphere (0 : ℂ) R → ‖z‖ = R := by
+    intro R hR0 z hz
+    rw [Metric.mem_sphere, dist_zero_right] at hz
+    exact hz
+  have hE₁cont : ∀ {z : ℂ}, z ≠ 0 → ContinuousAt E₁ z := by
+    intro z hz0
+    have h1 : ContinuousAt (fun w : ℂ => -(w⁻¹) ^ 2) z :=
+      (((continuousAt_id.inv₀ hz0).pow 2).neg)
+    have h2 : ContinuousAt (fun w : ℂ =>
+        Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N w⁻¹) z := by
+      have h3 : AnalyticAt ℂ (Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N) z⁻¹ :=
+        Jacobians.Dolbeault.FormTracePrincipalPart.analyticAt_negTail_of_ne b N
+          (fun hc => hz0 (inv_eq_zero.mp hc))
+      exact h3.continuousAt.comp (continuousAt_id.inv₀ hz0)
+    exact h1.mul h2
+  have hE₂cont : ∀ {z : ℂ}, R₀ ≤ ‖z‖ → ContinuousAt E₂ z := by
+    intro z hz
+    obtain ⟨hz0, hvr⟩ := hwv z hz
+    have h1 : ContinuousAt (fun w : ℂ => -(w⁻¹) ^ 2) z :=
+      (((continuousAt_id.inv₀ hz0).pow 2).neg)
+    have h2 : ContinuousAt (fun w : ℂ => Rf w⁻¹) z := by
+      have h3 : AnalyticAt ℂ Rf z⁻¹ := by
+        refine hδ₃ ?_
+        rw [dist_zero_right]
+        linarith [lt_of_le_of_lt hvr hr₀2, hr₀δ₃]
+      exact h3.continuousAt.comp (continuousAt_id.inv₀ hz0)
+    exact h1.mul h2
+  have hcongrR : ∀ R : ℝ, R₀ ≤ R → (∮ z in C((0 : ℂ), R), valueTrace F f z)
+      = (∮ z in C((0 : ℂ), R), E₁ z) + ∮ z in C((0 : ℂ), R), E₂ z := by
+    intro R hR
+    have hR0 : 0 < R := lt_of_lt_of_le hR₀0 hR
+    have h1 : (∮ z in C((0 : ℂ), R), valueTrace F f z)
+        = ∮ z in C((0 : ℂ), R), (E₁ z + E₂ z) := by
+      refine circleIntegral.integral_congr hR0.le (fun z hz => ?_)
+      exact hsplit z (by rw [hsphere_norm hR0 hz]; exact hR)
+    rw [h1]
+    refine circleIntegral.integral_add ?_ ?_
+    · refine ContinuousOn.circleIntegrable hR0.le (fun z hz => ?_)
+      have hzR : ‖z‖ = R := hsphere_norm hR0 hz
+      have hz0 : z ≠ 0 := by
+        intro h0
+        rw [h0, norm_zero] at hzR
+        exact absurd hzR.symm (ne_of_gt hR0)
+      exact (hE₁cont hz0).continuousWithinAt
+    · refine ContinuousOn.circleIntegrable hR0.le (fun z hz => ?_)
+      exact (hE₂cont (by rw [hsphere_norm hR0 hz]; exact hR)).continuousWithinAt
+  -- step 3: the principal-part contour integral is `−2πi·β`
+  have hE₁int : ∀ R : ℝ, R₀ ≤ R → (∮ z in C((0 : ℂ), R), E₁ z) = -(2 * π * I) * β := by
+    intro R hR
+    have hR0 : 0 < R := lt_of_lt_of_le hR₀0 hR
+    have hcong : (∮ z in C((0 : ℂ), R), E₁ z)
+        = ∮ z in C((0 : ℂ), R), (∑ k ∈ Finset.Icc 1 N, -b k * (z - 0) ^ ((k : ℤ) - 2)) := by
+      refine circleIntegral.integral_congr hR0.le (fun z hz => ?_)
+      have hzR : ‖z‖ = R := hsphere_norm hR0 hz
+      have hz0 : z ≠ 0 := by
+        intro h0
+        rw [h0, norm_zero] at hzR
+        exact absurd hzR.symm (ne_of_gt hR0)
+      show -(z⁻¹) ^ 2 * Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N z⁻¹ = _
+      rw [show Jacobians.Dolbeault.FormTracePrincipalPart.negTail 0 b N z⁻¹
+          = ∑ k ∈ Finset.Icc 1 N, b k * (z⁻¹ - 0) ^ (-(k : ℤ)) from rfl, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [sub_zero, sub_zero]
+      have hzp1 : (z⁻¹ : ℂ) ^ (-(k : ℤ)) = z ^ ((k : ℤ)) := by
+        rw [inv_zpow, ← zpow_neg, neg_neg]
+      have hzp2 : (-(z⁻¹ : ℂ) ^ 2) = -(z ^ (-2 : ℤ)) := by
+        rw [inv_pow, ← zpow_natCast z 2, ← zpow_neg]
+        norm_num
+      rw [hzp1, hzp2, show ((k : ℤ) - 2) = (-2 : ℤ) + (k : ℤ) by ring, zpow_add₀ hz0]
+      ring
+    have hint : ∀ k ∈ Finset.Icc 1 N,
+        CircleIntegrable (fun z : ℂ => -b k * (z - 0) ^ ((k : ℤ) - 2)) 0 R := by
+      intro k _
+      refine ContinuousOn.circleIntegrable hR0.le (fun z hz => ?_)
+      have hzR : ‖z‖ = R := hsphere_norm hR0 hz
+      have hz0 : z ≠ 0 := by
+        intro h0
+        rw [h0, norm_zero] at hzR
+        exact absurd hzR.symm (ne_of_gt hR0)
+      have h1 : ContinuousAt (fun z : ℂ => -b k * (z - 0) ^ ((k : ℤ) - 2)) z := by
+        refine continuousAt_const.mul ?_
+        refine ContinuousAt.zpow₀ ((continuousAt_id.sub continuousAt_const)) _ (Or.inl ?_)
+        simpa using hz0
+      exact h1.continuousWithinAt
+    rw [hcong, circleIntegral.integral_fun_sum hint]
+    have hterm : ∀ k ∈ Finset.Icc 1 N,
+        (∮ z in C((0 : ℂ), R), -b k * (z - 0) ^ ((k : ℤ) - 2))
+          = if k = 1 then -(2 * π * I) * b 1 else 0 := by
+      intro k hk
+      rw [circleIntegral.integral_const_mul]
+      by_cases hk1 : k = 1
+      · subst hk1
+        rw [if_pos rfl]
+        have h1 : ((1 : ℕ) : ℤ) - 2 = -1 := by norm_num
+        rw [h1]
+        rw [show (∮ z in C((0 : ℂ), R), (z - 0) ^ (-1 : ℤ))
+            = ∮ z in C((0 : ℂ), R), (z - 0)⁻¹ from by
+          refine circleIntegral.integral_congr hR0.le (fun z _ => ?_)
+          rw [zpow_neg_one]]
+        rw [circleIntegral.integral_sub_inv_of_mem_ball (Metric.mem_ball_self hR0)]
+        ring
+      · rw [if_neg hk1,
+          circleIntegral.integral_sub_zpow_of_ne (by omega : (k : ℤ) - 2 ≠ -1), mul_zero]
+    rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' _ 1 (fun _ => -(2 * π * I) * b 1)]
+    by_cases h1N : 1 ≤ N
+    · rw [if_pos (Finset.mem_Icc.mpr ⟨le_refl 1, h1N⟩), hβ_def, if_pos h1N]
+    · rw [if_neg (fun hc => h1N (Finset.mem_Icc.mp hc).2), hβ_def, if_neg h1N, mul_zero]
+  -- step 4: the analytic remainder contributes nothing to the large contour
+  have hE₂diff : ∀ z : ℂ, R₀ ≤ ‖z‖ → DifferentiableAt ℂ E₂ z := by
+    intro z hz
+    obtain ⟨hz0, hvr⟩ := hwv z hz
+    have h1 : DifferentiableAt ℂ (fun w : ℂ => -(w⁻¹) ^ 2) z :=
+      (((differentiableAt_inv hz0).pow 2).neg)
+    have h2 : DifferentiableAt ℂ (fun w : ℂ => Rf w⁻¹) z := by
+      have h3 : AnalyticAt ℂ Rf z⁻¹ := by
+        refine hδ₃ ?_
+        rw [dist_zero_right]
+        linarith [lt_of_le_of_lt hvr hr₀2, hr₀δ₃]
+      exact (h3.differentiableAt).comp z (differentiableAt_inv hz0)
+    exact h1.mul h2
+  have hE₂const : ∀ R R' : ℝ, R₀ ≤ R → R ≤ R' →
+      (∮ z in C((0 : ℂ), R'), E₂ z) = ∮ z in C((0 : ℂ), R), E₂ z := by
+    intro R R' hR hRR'
+    have hR0 : 0 < R := lt_of_lt_of_le hR₀0 hR
+    refine circleIntegral_eq_of_differentiable_on_annulus_off_countable hR0 hRR'
+      Set.countable_empty ?_ ?_
+    · intro z hz
+      obtain ⟨_, hz2⟩ := hz
+      have hzn : R ≤ ‖z‖ := by
+        by_contra hlt
+        exact hz2 (by rw [Metric.mem_ball, dist_zero_right]; linarith)
+      exact (hE₂diff z (le_trans hR hzn)).continuousAt.continuousWithinAt
+    · intro z hz
+      obtain ⟨⟨_, hz2⟩, _⟩ := hz
+      have hzn : R ≤ ‖z‖ := by
+        by_contra hlt
+        exact hz2 (by rw [Metric.mem_closedBall, dist_zero_right]; linarith)
+      exact hE₂diff z (le_trans hR hzn)
+  have hM0 : 0 ≤ M := le_trans (norm_nonneg _) (hM 0 (Metric.mem_closedBall_self hr₀0.le))
+  have hE₂bound : ∀ R : ℝ, R₀ ≤ R →
+      ‖∮ z in C((0 : ℂ), R), E₂ z‖ ≤ 2 * π * M / R := by
+    intro R hR
+    have hR0 : 0 < R := lt_of_lt_of_le hR₀0 hR
+    have hb : ∀ z ∈ Metric.sphere (0 : ℂ) R, ‖E₂ z‖ ≤ R⁻¹ * R⁻¹ * M := by
+      intro z hz
+      have hzR : ‖z‖ = R := hsphere_norm hR0 hz
+      have hz0 : z ≠ 0 := by
+        intro h0
+        rw [h0, norm_zero] at hzR
+        exact absurd hzR.symm (ne_of_gt hR0)
+      obtain ⟨_, hvr⟩ := hwv z (by rw [hzR]; exact hR)
+      have h1 : ‖(-(z⁻¹) ^ 2 : ℂ)‖ = R⁻¹ * R⁻¹ := by
+        rw [norm_neg, norm_pow, norm_inv, hzR]
+        ring
+      have h2 : ‖Rf z⁻¹‖ ≤ M := by
+        refine hM z⁻¹ ?_
+        rw [Metric.mem_closedBall, dist_zero_right]
+        linarith
+      calc ‖E₂ z‖ = ‖(-(z⁻¹) ^ 2 : ℂ)‖ * ‖Rf z⁻¹‖ := norm_mul _ _
+        _ ≤ R⁻¹ * R⁻¹ * M := by
+            rw [h1]
+            exact mul_le_mul_of_nonneg_left h2 (by positivity)
+    have h3 := circleIntegral.norm_integral_le_of_norm_le_const hR0.le hb
+    calc ‖∮ z in C((0 : ℂ), R), E₂ z‖ ≤ 2 * π * R * (R⁻¹ * R⁻¹ * M) := h3
+      _ = 2 * π * M / R := by
+          field_simp
+  have hE₂zero : (∮ z in C((0 : ℂ), R₀), E₂ z) = 0 := by
+    have hub : ∀ᶠ R' in Filter.atTop, ‖∮ z in C((0 : ℂ), R₀), E₂ z‖ ≤ 2 * π * M / R' := by
+      filter_upwards [Filter.eventually_ge_atTop R₀] with R' hR'
+      rw [← hE₂const R₀ R' le_rfl hR']
+      exact hE₂bound R' (le_trans le_rfl hR')
+    have hlim : Tendsto (fun R' : ℝ => 2 * π * M / R') Filter.atTop (𝓝 0) := by
+      simpa using tendsto_const_nhds.div_atTop (tendsto_id (α := ℝ))
+    have hn : ‖∮ z in C((0 : ℂ), R₀), E₂ z‖ ≤ 0 := ge_of_tendsto hlim hub
+    rw [norm_le_zero_iff] at hn
+    exact hn
+  -- final assembly
+  have hfinal : (∮ z in C((0 : ℂ), ρ), valueTrace F f z) = -(2 * π * I) * β := by
+    rw [← hannulusT R₀ le_rfl, hcongrR R₀ le_rfl, hE₁int R₀ le_rfl, hE₂zero, add_zero]
+  rw [resAtInfty, hfinal, ← hHt_res, ← hβ_eq, smul_eq_mul]
+  have hne : (2 * π * I : ℂ) ≠ 0 := by
+    simp [Real.pi_ne_zero, Complex.I_ne_zero]
+  field_simp
 
 end Jacobians.Dolbeault.FrameTraceWall
 
