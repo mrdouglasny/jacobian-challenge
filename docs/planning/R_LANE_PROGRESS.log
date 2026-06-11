@@ -228,3 +228,38 @@ DISCHARGE (SerreUnwind.lean:275, the §17.7 pole-bound regularity Prop, hypothes
 discharge becomes an R6-style residue-evaluation estimate, so schedule it WITH the ML-tie, not
 after R7. R7 then: germ→coefficient extraction + CousinResidueData instantiation (liftQ descent
 is already proven in the port).
+
+=== 2026-06-10 R6D2 lane (branch feat/keystone-r6d2, worktree agent) ===
+START. Four deliverables: D2a order-m vanish tie (generalized mero-coboundary engine,
+removable-product Stokes kill — NO higher Cauchy-Pompeiu needed: slot vanishing makes the
+smeared-pole product extend analytically, so the surviving Stokes term dies by the planar
+Stokes atom after a finite point-repair); D2b general-K vanish_coboundary (principal parts
+avoided: restrict 0-cochain germs to U_i \ S, holoFn-extract, product-germ trick at K-points:
+(f·slot-pullback) ∈ OmegaDGerm 0 → holoFn gives the analytic extension q); D2c
+UnwindRegularity; D2d CupMLWitness. Plan: new FineResidue/MeroVanish.lean (engine, mirrors
+MLTie/CoboundaryVanish), then Descent-side wiring.
+
+2026-06-10 D2a LANDED: MeroVanish.lean compiles clean (4 iterations). Engine
+resFunctional_eq_zero_of_mero_coboundary + order-m tie
+resFunctional_poleCocycle_eq_zero_of_slot_vanishes. Key design win: NO higher-order
+Cauchy-Pompeiu — pointRepair (finite limit-repair) + planar Stokes atom kills the
+surviving term since the slot zero makes the smeared product extend analytically.
+Next: D2b DescentVanish.lean — general-K vanish_coboundary via holoFn extraction off
+the K-points + product-germ trick ((f·slot-pullback) ∈ OmegaD 0, holoFn = the analytic
+extension q); also the R6Outputs bridge (MLTie is on this branch).
+
+2026-06-10 D2b LANDED: DescentVanish.lean compiles clean (3 iterations). Headlines:
+- resCocycle_vanish_coboundary: vanish_coboundary at GENERAL K (R7 gap 1 closed) via
+  product-germ trick — no Laurent decomposition: restrict germs off K-points, holoFn
+  extract; at each K-point (f·slot-pullback) ∈ OmegaD 0 (orders −K a + K a ≥ 0; slot
+  order via dslope factorization + meromorphicOrderAt_mul/pow_id_sub_const), holoFn of
+  the product germ IS the engine's analytic extension q.
+- r6Outputs_holds: Descent.R6Outputs now a THEOREM (MLTie bridge, Subtype.ext).
+- resH1_of_slotMatches: unconditional liftQ descent on cechH1 K.
+- CupMLWitnessR + nondegenerate_of_witnessR + cousinResidueData_of_witnessR: CORRECTED
+  §17.6 witness interface — original CupMLWitness demands g(α)=1 exactly (level set can
+  be empty: likely unsatisfiable for fixed g); fixed to r·g(α)=1 with free residue r;
+  membership conjunct now proven. CousinResidueData reduced to CupMLWitnessR alone.
+D2c (UnwindRegularity) + D2d construction half: genuine walls, documented in
+R6D2_BLOCKER.md (forced non-isolated point + HIGHER-ORDER Cauchy-Pompeiu with NONZERO
+conclusion needed for 17.7; isolated-point selection/cover refinement for the witness).
