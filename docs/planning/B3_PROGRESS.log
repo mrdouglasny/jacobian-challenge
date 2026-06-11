@@ -1,0 +1,3 @@
+B3 progress log — feat/period-nondegeneracy
+
+2026-06-11 cycle 1: inventory complete (PeriodCycleBasis/Layer3.Periods/LoopIntegral/LoopIntegralHom/DevelopingMap/BridgePath(+Arc)/ArcAlgebra/OneForm/PartitionIndependence read); B3_NONDEG_ROUTE.md written (design before implementation). Key finds: pathChartBallPrimitive + canonicalArcIntegral_eq_chartPrimitive_endpoint_sub give the local FTC; chartFlatAnalyticArc is the template for chartSegmentArc; AX_Period_Triangle proof is the template for the increment identity; u is a DEFINED function via arcPeriodFunctional(bridgePathArc) — no well-definedness needed.
