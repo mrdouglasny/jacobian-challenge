@@ -56,7 +56,6 @@ import KirovDolbeault.Dolbeault.SeparatingCover
 import KirovDolbeault.Dolbeault.FineResidue.CupWitness
 import KirovDolbeault.Dolbeault.ArithmeticGenusTransfer
 import KirovDolbeault.Dolbeault.SerreUnwindDetect
-import KirovDolbeault.Dolbeault.FineResidue.GlobalCorrection
 import KirovDolbeault.Dolbeault.TailFrame
 import KirovDolbeault.Dolbeault.TailRegularity
 import KirovDolbeault.Dolbeault.TailUnwind
