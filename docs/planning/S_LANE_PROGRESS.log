@@ -1,0 +1,8 @@
+=== S-lane relaunch 2026-06-11 (PairingSurjective, Miranda VI.3.10) ===
+[start] worktree reset to origin/main (5ef66c4, post-#186/#187). Design settled:
+  new file TailSurjectivity.lean. Route: mulTail (multiplication-truncation operator
+  on GlobalTails) + invMonomialTail (local inverse tails, z^k/psi at p) +
+  serre_surjectivity_dim_core over tail_riemannRoch_I; unwind via direct
+  planar-window-law evaluation (no transpose chicken-egg). All inputs proven:
+  Inv/orderW_inv (SerreResidueRamifiedRealCover), identity thm orderW_ne_top_of_exists,
+  resCoeff_mul_window, pairingL_injective, finiteDimensional_H1Tail.
