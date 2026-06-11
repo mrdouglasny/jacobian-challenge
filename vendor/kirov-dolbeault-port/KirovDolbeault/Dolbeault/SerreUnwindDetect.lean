@@ -838,6 +838,60 @@ theorem resCocycle_cup_testCocycle_ne_zero (hsep : SeparatesPoles 𝔇 K)
   rw [heval]
   exact neg_ne_zero.mpr hr0
 
+/-! ## Part 5 — the conditional headline: `UnwindRegularity` for the concrete fine-sheaf residue
+
+The remaining hypothesis is the **cover-isolation discipline** `BadPointsIsolated`: every class
+outside the image must admit SOME cover-isolated bad point.  This is the genuine residual wall
+(`docs/planning/UNWIND_BLOCKER.md`): forced bad points live in `supp(D−E)`, which is arbitrary
+as `E` ranges below `D`, so no fixed cover satisfies the discipline unconditionally — removing
+it needs the multi-chart (non-isolated) evaluation engine. -/
+
+/-- **The cover-isolation discipline** for the level-`D` unwinding: every level-`E` class
+outside the `L(K−D)` bounds has a cover-isolated bad point of finite order in the jump window
+`[E b − K b, D b − K b)`.  (`exists_bad_point` always supplies the window; the ISOLATION is the
+extra demand.) -/
+def BadPointsIsolated (𝔇 : ChartDiskCover X) (K D : Divisor X) : Prop :=
+  ∀ (E : Divisor X), (∀ x, E x ≤ D x) →
+    ∀ f : ↥(linearSystem (X := X) (K - E)),
+      (f : MeromorphicFunction X) ∉ linearSystem (X := X) (K - D) →
+      ∃ (b : X) (j₀ : 𝔇.toFiniteCover.ι) (n : ℤ),
+        MLIsolated 𝔇 j₀ b ∧ (f : MeromorphicFunction X).orderW b = (n : WithTop ℤ) ∧
+        E b - K b ≤ n ∧ n < D b - K b
+
+/-- **THE CONDITIONAL §17.7 HEADLINE — `UnwindRegularity` is a THEOREM for the concrete
+fine-sheaf residue at every level `D` whose bad points are cover-isolated.**  The hypotheses
+are exactly the R-lane interface for the concrete `G`: pole separation, the analytic `dz`-slot
+with exact divisor `K ≥ 0`, the corrected §17.6 witness, the exact-order local Mittag–Leffler
+witness (PROVEN for the canonical chart-disk cover), plus the isolation discipline.  Forster
+(GTM 81), Lemma 17.7. -/
+theorem unwindRegularity_concrete_of_isolated
+    (hsep : SeparatesPoles 𝔇 K) {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+    (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (hwit : CupMLWitnessR 𝔇 hsep g) (hwitness : ExactOrderWitness 𝔇)
+    (hKeff : ∀ x, 0 ≤ K x) (D : Divisor X) (hiso : BadPointsIsolated 𝔇 K D) :
+    ((cousinResidueData_of_witnessR hsep g hg (SlotMatchesK_of_exact hexact)
+      hwit).toGlobalResidue).UnwindRegularity D := by
+  classical
+  refine GlobalResidue.unwindRegularity_of_detects _ D ?_
+  intro E hED v hno
+  obtain ⟨fE, rfl⟩ := Submodule.Quotient.mk_surjective _ v
+  -- the forced cover-isolated bad point with its order window
+  rw [exists_lSysInclMono_eq_iff hED fE] at hno
+  obtain ⟨b, j₀, n, hbiso, hn, hge, hlt⟩ := hiso E hED fE hno
+  have hb : b ∈ (𝔇.U j₀ : Set X) := hbiso.1
+  -- the admissible level `m = n + K b`: `E b ≤ m` and `m + 1 ≤ D b`
+  set m : ℤ := n + K b with hmdef
+  have hmE : E b ≤ m := by
+    have := hKeff b
+    omega
+  have hmD : m + 1 ≤ D b := by omega
+  obtain ⟨td⟩ := TestCocycleData.exists_of_witness hwitness hb hmE
+  refine ⟨Submodule.Quotient.mk (td.cocycle hbiso),
+    td.h1InclMono_cocycle_eq_zero hbiso hED hmD, ?_⟩
+  -- the pairing factors through the cup and evaluates to the nonzero marked residue
+  rw [GlobalResidue.pairing_apply, cup_mk, cupH1_mk]
+  exact resCocycle_cup_testCocycle_ne_zero hsep hg hexact td hbiso (hKeff b) fE hn hmdef
+
 end Evaluation
 
 end Dolbeault
