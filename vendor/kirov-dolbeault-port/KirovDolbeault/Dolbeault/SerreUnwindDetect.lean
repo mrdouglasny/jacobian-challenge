@@ -367,6 +367,91 @@ end TestCocycleData
 
 end TestCocycle
 
+/-! ## Part 4 — the residue evaluation of the cup against the test class
+
+`cup (mk f) [δ⁰n̂] = [δ⁰(f·n̂)]` (the cup commutes with `δ⁰`), a one-marked-point meromorphic
+coboundary: the part `f·γ` has order exactly `n − (m+1) = −K b − 1` at `b` and `≥ −K` elsewhere
+on `U j₀`, so against the `dz`-slot (exact zero order `K b` at `b`, `SlotExactK`) the
+slot-product has a SIMPLE pole at `b` with residue `r ≠ 0` (minimal orders pair uniquely:
+`ord = −1` exactly, then `meromorphicOrderAt_eq_int_iff` + `dslope`), while at the other bad
+points (the K-points) it extends (the DescentVanish product-germ trick at level `K + b`).
+The evaluation engine (`resFunctional_eq_neg_residue_of_mero_coboundary`) then gives
+`resCocycle (cup-rep) = −r ≠ 0`. -/
+
+section Evaluation
+
+open FineResidue
+
+variable {𝔇 : ChartDiskCover X} [Nonempty X] [DecidableEq 𝔇.toFiniteCover.ι] {K : Divisor X}
+
+/-- **The exact-order slot hypothesis**: in every chart containing it, every point sees the
+`dz`-slot factor as `(ζ−α)^{(K a).toNat}·(unit)` with a NONVANISHING unit — for the chart
+coefficients of `ω₀` with `K = div ω₀ ≥ 0` this is the definition of the divisor of the form.
+Strengthens `SlotMatchesK` (which allows the unit to vanish). -/
+def SlotExactK (𝔇 : ChartDiskCover X) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (K : Divisor X) : Prop :=
+  ∀ (a : X) (j : 𝔇.toFiniteCover.ι), a ∈ (𝔇.U j : Set X) →
+    ∃ u : ℂ → ℂ, AnalyticAt ℂ u (chartMap 𝔇 j a) ∧ u (chartMap 𝔇 j a) ≠ 0 ∧
+      ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j a), g j ζ = (ζ - chartMap 𝔇 j a) ^ (K a).toNat * u ζ
+
+theorem SlotMatchesK_of_exact {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+    (hexact : SlotExactK 𝔇 g K) : SlotMatchesK 𝔇 g K := fun a _ j₀ hj₀ =>
+  (hexact a j₀ hj₀).imp fun _ h => ⟨h.1, h.2.2⟩
+
+/-- The marked divisor `K + b` agrees with `K` away from `b`. -/
+private theorem Kb_apply_ne {b x : X} (hx : x ≠ b) :
+    (K + Finsupp.single b 1 : Divisor X) x = K x := by
+  rw [Finsupp.add_apply, Finsupp.single_eq_of_ne (a := b) (a' := x) hx, add_zero]
+
+private theorem Kb_apply_self {b : X} :
+    (K + Finsupp.single b 1 : Divisor X) b = K b + 1 := by
+  rw [Finsupp.add_apply, Finsupp.single_eq_same]
+
+/-- **Chart transfer of meromorphy and order** from the ambient chart at `b` to the cover's
+center chart: the two reads differ by the analytic transition with nonvanishing derivative. -/
+private theorem centerRead_data {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+    (hb : b ∈ (𝔇.U j₀ : Set X)) (H : X → ℂ)
+    (hH : MeromorphicAt (H ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b)) :
+    MeromorphicAt (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ b) ∧
+      meromorphicOrderAt (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ b)
+        = meromorphicOrderAt (H ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b) := by
+  have hbsrc : b ∈ (chartAt ℂ (𝔇.center j₀)).source := mem_chartSource_of_mem_U 𝔇 hb
+  have hbb : b ∈ (chartAt (H := ℂ) b).source := mem_chart_source ℂ b
+  set σ : ℂ → ℂ := (chartAt (H := ℂ) b) ∘ (chartAt ℂ (𝔇.center j₀)).symm with hσdef
+  have hσan : AnalyticAt ℂ σ (chartMap 𝔇 j₀ b) :=
+    transition_analyticAt_of_mem (y := 𝔇.center j₀) (z := b) hbsrc hbb
+  have hσd : deriv σ (chartMap 𝔇 j₀ b) ≠ 0 :=
+    transition_deriv_ne_zero (y := 𝔇.center j₀) (z := b) hbsrc hbb
+  have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ b) = b :=
+    (chartAt ℂ (𝔇.center j₀)).left_inv hbsrc
+  have hσpt : σ (chartMap 𝔇 j₀ b) = (chartAt (H := ℂ) b) b := by
+    simp only [hσdef, Function.comp_apply, hli]
+  have hzt : chartMap 𝔇 j₀ b ∈ (chartAt ℂ (𝔇.center j₀)).target :=
+    (chartAt ℂ (𝔇.center j₀)).map_source hbsrc
+  have hcont : ContinuousAt (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ b) :=
+    (chartAt ℂ (𝔇.center j₀)).continuousAt_symm hzt
+  have hmem : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j₀ b),
+      (chartAt ℂ (𝔇.center j₀)).symm ζ ∈ (chartAt (H := ℂ) b).source := by
+    refine hcont.preimage_mem_nhds ?_
+    rw [hli]
+    exact (chartAt (H := ℂ) b).open_source.mem_nhds hbb
+  have hev : (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ))
+      =ᶠ[𝓝 (chartMap 𝔇 j₀ b)] ((H ∘ (chartAt (H := ℂ) b).symm) ∘ σ) := by
+    filter_upwards [hmem] with ζ hζ
+    show H ((chartAt ℂ (𝔇.center j₀)).symm ζ)
+        = H ((chartAt (H := ℂ) b).symm (σ ζ))
+    simp only [hσdef, Function.comp_apply]
+    rw [(chartAt (H := ℂ) b).left_inv hζ]
+  have hHσ : MeromorphicAt ((H ∘ (chartAt (H := ℂ) b).symm) ∘ σ) (chartMap 𝔇 j₀ b) := by
+    refine MeromorphicAt.comp_analyticAt ?_ hσan
+    rw [hσpt]
+    exact hH
+  constructor
+  · exact hHσ.congr (hev.filter_mono nhdsWithin_le_nhds).symm
+  · rw [meromorphicOrderAt_congr (hev.filter_mono nhdsWithin_le_nhds),
+      meromorphicOrderAt_comp_of_deriv_ne_zero hσan hσd, hσpt]
+
+end Evaluation
+
 end Dolbeault
 
 end Jacobians
