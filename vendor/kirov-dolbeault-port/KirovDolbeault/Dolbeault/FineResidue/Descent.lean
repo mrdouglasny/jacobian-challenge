@@ -350,3 +350,189 @@ theorem glueCoeff_cocycleFn_mem (hsep : SeparatesPoles 𝔇 K)
     glueCoeff 𝔇 (cocycleFn 𝔇 hsep c) g ∈ oneOneCoeff 𝔇 :=
   glueCoeff_mem_oneOneCoeff 𝔇 (smoothOnOverlaps_cocycleFn 𝔇 hsep c)
     (isOverlapCocycle_cocycleFn 𝔇 hsep c) (holomorphicOnOverlaps_cocycleFn 𝔇 hsep c) hg
+
+/-! ### E. The residue functional reads only overlap values
+
+The PoU split consumes an overlap family only where some `ρ_k` survives — inside the overlaps —
+and the integral functional only reads the chart images of the cover sets.  These congruence
+atoms make the (choice-dependent) extraction well-defined and ℂ-linear after composition with
+`resFunctional`. -/
+
+/-- Overlap-equal families have equal PoU splits on each cover set. -/
+theorem pouSplit_congr_of_overlap_eq {w w' : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    (hov : ∀ i j, ∀ x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X), w i j x = w' i j x)
+    (j : 𝔇.toFiniteCover.ι) {x : X} (hx : x ∈ (𝔇.U j : Set X)) :
+    pouSplit 𝔇 w j x = pouSplit 𝔇 w' j x := by
+  simp only [pouSplit_apply]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  by_cases hb : x ∈ tsupport (cechPoU 𝔇 k)
+  · rw [hov k j x ⟨cechPoU_subordinate 𝔇 k hb, hx⟩]
+  · have hr : rhoC 𝔇 k x = 0 := by
+      simp only [rhoC, ContMDiffMap.comp_apply, ofRealCM, image_eq_zero_of_notMem_tsupport hb]
+      rfl
+    rw [hr, zero_mul, zero_mul]
+
+/-- Chart-read splits of overlap-equal families agree near the chart image of the cover set. -/
+theorem splitCoeff_eventuallyEq_of_overlap_eq
+    {w w' : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    (hov : ∀ i j, ∀ x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X), w i j x = w' i j x)
+    (j : 𝔇.toFiniteCover.ι) {x : X} (hx : x ∈ (𝔇.U j : Set X)) :
+    splitCoeff 𝔇 w j =ᶠ[𝓝 (chartMap 𝔇 j x)] splitCoeff 𝔇 w' j := by
+  have hxsrc : x ∈ (chartAt ℂ (𝔇.center j)).source := mem_chartSource_of_mem_U 𝔇 hx
+  have hzt : chartMap 𝔇 j x ∈ (chartAt ℂ (𝔇.center j)).target :=
+    (chartAt ℂ (𝔇.center j)).map_source hxsrc
+  have hcont : ContinuousAt (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) :=
+    (chartAt ℂ (𝔇.center j)).symm.continuousAt
+      (by rwa [(chartAt ℂ (𝔇.center j)).symm_source])
+  have hli : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+    (chartAt ℂ (𝔇.center j)).left_inv hxsrc
+  have hovU : ((𝔇.U j : Opens X) : Set X)
+      ∈ 𝓝 ((chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x)) := by
+    rw [hli]
+    exact (𝔇.U j).isOpen.mem_nhds hx
+  filter_upwards [hcont.preimage_mem_nhds hovU] with z hz
+  simp only [splitCoeff_apply]
+  exact pouSplit_congr_of_overlap_eq 𝔇 hov j hz
+
+/-- **The residue functional depends only on the chart-image values** of a `(1,1)` family (off
+them, the `pouCoeff` indicator kills the integrand). -/
+theorem resFunctional_congr_chartImage {t t' : oneOneCoeff 𝔇}
+    (h : ∀ j, ∀ x ∈ (𝔇.U j : Set X),
+      (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) j (chartMap 𝔇 j x)
+        = (t' : 𝔇.toFiniteCover.ι → ℂ → ℂ) j (chartMap 𝔇 j x)) :
+    resFunctional 𝔇 t = resFunctional 𝔇 t' := by
+  have hint : ∀ j, (fun z => pouCoeff 𝔇 j z * (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) j z)
+      = fun z => pouCoeff 𝔇 j z * (t' : 𝔇.toFiniteCover.ι → ℂ → ℂ) j z := by
+    intro j
+    funext z
+    by_cases hz : z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hz
+      rw [h j x hxU]
+    · have h0 : pouCoeff 𝔇 j z = 0 := Set.indicator_of_notMem hz _
+      rw [h0, zero_mul, zero_mul]
+  rw [resFunctional_apply, resFunctional_apply]
+  congr 1
+  rw [resIntegral_apply, resIntegral_apply]
+  exact Finset.sum_congr rfl fun j _ => by rw [hint j]
+
+/-! ### F. ℂ-linearity: the `resCocycle` field -/
+
+omit [Nonempty X] in
+/-- The extraction is additive on overlaps (germ addition + continuity). -/
+theorem cocycleFn_add_overlap (hsep : SeparatesPoles 𝔇 K)
+    (c c' : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K)) {i j : 𝔇.toFiniteCover.ι} {x : X}
+    (hx : x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X)) :
+    cocycleFn 𝔇 hsep (c + c') i j x
+      = cocycleFn 𝔇 hsep c i j x + cocycleFn 𝔇 hsep c' i j x := by
+  by_cases h : i = j
+  · subst h
+    rw [cocycleFn_diag, cocycleFn_diag, cocycleFn_diag]
+    simp
+  · refine eq_at_of_toGerm_eq ?_ hx (continuousAt_cocycleFn 𝔇 hsep (c + c') hx)
+      ((continuousAt_cocycleFn 𝔇 hsep c hx).add (continuousAt_cocycleFn 𝔇 hsep c' hx))
+    show toGerm (𝔇.U i ⊓ 𝔇.U j) (fun v => cocycleFn 𝔇 hsep (c + c') i j v.1)
+        = toGerm (𝔇.U i ⊓ 𝔇.U j)
+            ((fun v : ↥(𝔇.U i ⊓ 𝔇.U j) => cocycleFn 𝔇 hsep c i j v.1)
+              + fun v => cocycleFn 𝔇 hsep c' i j v.1)
+    rw [map_add, toGerm_cocycleFn 𝔇 hsep (c + c') h, toGerm_cocycleFn 𝔇 hsep c h,
+      toGerm_cocycleFn 𝔇 hsep c' h]
+    rfl
+
+omit [Nonempty X] in
+/-- The extraction is homogeneous on overlaps. -/
+theorem cocycleFn_smul_overlap (hsep : SeparatesPoles 𝔇 K) (a : ℂ)
+    (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K)) {i j : 𝔇.toFiniteCover.ι} {x : X}
+    (hx : x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X)) :
+    cocycleFn 𝔇 hsep (a • c) i j x = a * cocycleFn 𝔇 hsep c i j x := by
+  by_cases h : i = j
+  · subst h
+    rw [cocycleFn_diag, cocycleFn_diag]
+    simp
+  · refine eq_at_of_toGerm_eq ?_ hx (continuousAt_cocycleFn 𝔇 hsep (a • c) hx)
+      (continuousAt_const.mul (continuousAt_cocycleFn 𝔇 hsep c hx))
+    show toGerm (𝔇.U i ⊓ 𝔇.U j) (fun v => cocycleFn 𝔇 hsep (a • c) i j v.1)
+        = toGerm (𝔇.U i ⊓ 𝔇.U j)
+            (a • fun v : ↥(𝔇.U i ⊓ 𝔇.U j) => cocycleFn 𝔇 hsep c i j v.1)
+    rw [map_smul, toGerm_cocycleFn 𝔇 hsep (a • c) h, toGerm_cocycleFn 𝔇 hsep c h]
+    rfl
+
+/-- The PoU split is additive in the overlap family. -/
+theorem pouSplit_add_apply (w w' : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ)
+    (j : 𝔇.toFiniteCover.ι) (x : X) :
+    pouSplit 𝔇 (fun i j y => w i j y + w' i j y) j x
+      = pouSplit 𝔇 w j x + pouSplit 𝔇 w' j x := by
+  simp only [pouSplit_apply, mul_add, Finset.sum_add_distrib]
+
+/-- The PoU split is homogeneous in the overlap family. -/
+theorem pouSplit_smul_apply (a : ℂ) (w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ)
+    (j : 𝔇.toFiniteCover.ι) (x : X) :
+    pouSplit 𝔇 (fun i j y => a * w i j y) j x = a * pouSplit 𝔇 w j x := by
+  simp only [pouSplit_apply, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun k _ => by ring
+
+/-- **The `resCocycle` field of the Cousin interface — the fine-sheaf residue as a ℂ-linear
+functional on `Z¹(𝒪_K)`** (Forster §17.3, steps 1–4 composed): extract chart coefficients
+(`cocycleFn`, through `holoFn`), glue against the `dz`-slot family `g` (R3), and integrate
+(R4's `resFunctional`, normalized by the pinned R0 constant `resNormalization = −π⁻¹`).
+Linearity holds because the functional only reads overlap values, where the extraction is
+germ-determined, hence additive and homogeneous. -/
+noncomputable def resCocycle (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g) :
+    ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →ₗ[ℂ] ℂ where
+  toFun c := resFunctional 𝔇
+    ⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep c) g, glueCoeff_cocycleFn_mem 𝔇 hsep c hg⟩
+  map_add' c c' := by
+    rw [← map_add (resFunctional 𝔇)]
+    refine resFunctional_congr_chartImage 𝔇 fun j x hx => ?_
+    have hov : ∀ i j', ∀ y ∈ (𝔇.U i ⊓ 𝔇.U j' : Opens X),
+        cocycleFn 𝔇 hsep (c + c') i j' y
+          = cocycleFn 𝔇 hsep c i j' y + cocycleFn 𝔇 hsep c' i j' y :=
+      fun i j' y hy => cocycleFn_add_overlap 𝔇 hsep c c' hy
+    have hev := splitCoeff_eventuallyEq_of_overlap_eq 𝔇 hov j hx
+    have hsum : splitCoeff 𝔇
+        (fun i j' y => cocycleFn 𝔇 hsep c i j' y + cocycleFn 𝔇 hsep c' i j' y) j
+        = fun z => splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j z
+            + splitCoeff 𝔇 (cocycleFn 𝔇 hsep c') j z := by
+      funext z
+      simp only [splitCoeff_apply, pouSplit_add_apply]
+    have hda : DifferentiableAt ℝ (splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j)
+        (chartMap 𝔇 j x) :=
+      (contDiffAt_splitCoeff 𝔇 (smoothOnOverlaps_cocycleFn 𝔇 hsep c) j
+        hx).differentiableAt (by simp)
+    have hdb : DifferentiableAt ℝ (splitCoeff 𝔇 (cocycleFn 𝔇 hsep c') j)
+        (chartMap 𝔇 j x) :=
+      (contDiffAt_splitCoeff 𝔇 (smoothOnOverlaps_cocycleFn 𝔇 hsep c') j
+        hx).differentiableAt (by simp)
+    simp only [Submodule.coe_add, Pi.add_apply, glueCoeff_apply]
+    rw [dbar_congr_of_eventuallyEq hev, hsum, DbarOpenDisk.dbar_add hda hdb]
+    ring
+  map_smul' a c := by
+    rw [RingHom.id_apply, ← map_smul (resFunctional 𝔇)]
+    refine resFunctional_congr_chartImage 𝔇 fun j x hx => ?_
+    have hov : ∀ i j', ∀ y ∈ (𝔇.U i ⊓ 𝔇.U j' : Opens X),
+        cocycleFn 𝔇 hsep (a • c) i j' y = a * cocycleFn 𝔇 hsep c i j' y :=
+      fun i j' y hy => cocycleFn_smul_overlap 𝔇 hsep a c hy
+    have hev := splitCoeff_eventuallyEq_of_overlap_eq 𝔇 hov j hx
+    have hsm : splitCoeff 𝔇 (fun i j' y => a * cocycleFn 𝔇 hsep c i j' y) j
+        = fun z => a * splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j z := by
+      funext z
+      simp only [splitCoeff_apply, pouSplit_smul_apply]
+    have hda : DifferentiableAt ℝ (splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j)
+        (chartMap 𝔇 j x) :=
+      (contDiffAt_splitCoeff 𝔇 (smoothOnOverlaps_cocycleFn 𝔇 hsep c) j
+        hx).differentiableAt (by simp)
+    have hdmul : DbarDisk.dbar (fun z => a * splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j z)
+        (chartMap 𝔇 j x)
+        = a * DbarDisk.dbar (splitCoeff 𝔇 (cocycleFn 𝔇 hsep c) j) (chartMap 𝔇 j x) := by
+      rw [dbar_mul (differentiableAt_const a) hda,
+        DbarDisk.dbar_eq_zero_of_differentiableAt (differentiableAt_const a), zero_mul,
+        zero_add]
+    simp only [Submodule.coe_smul, Pi.smul_apply, smul_eq_mul, glueCoeff_apply]
+    rw [dbar_congr_of_eventuallyEq hev, hsm, hdmul]
+    ring
+
+theorem resCocycle_apply (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g) (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K)) :
+    resCocycle 𝔇 hsep g hg c = resFunctional 𝔇
+      ⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep c) g, glueCoeff_cocycleFn_mem 𝔇 hsep c hg⟩ :=
+  rfl
