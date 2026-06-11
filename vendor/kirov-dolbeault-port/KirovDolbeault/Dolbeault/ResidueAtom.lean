@@ -472,6 +472,67 @@ theorem planarCoeff_neg_one_branch {ψ : ℂ → ℂ} {c : ℂ} (hψ : Meromorph
   congr 2
   ring
 
+/-! ## Down-payment: the `ω₀ = df` collapse and local exactness at the atom's integrand
+
+For the canonical datum with frame `ω₀ = df`, the atom's integrand reads
+`(F ∘ chart⁻¹)·(f ∘ chart⁻¹)'` — the change-of-variables Jacobian is already the frame
+(`formCoeff (df) ≍ (f ∘ chart⁻¹)'`).  Consequently every locally-EXACT combination has zero
+frame residue (`planarCoeff_neg_one_deriv`); `F = f` is a worked instance (`f·df = d(f²/2)`).
+These are the bricks of the genus-0 closure plan: the `ℂ(f)` case of the residual is exactness
+(powers of `f`) + the logarithmic count (`resAt_logDeriv_eq_order` / `deg_div`), and the
+general case is the plain value trace along `f`'s sheets. -/
+
+/-- **The `df`-collapse of the atom integrand**: for a datum with `ω₀ = df`, the frame residue
+reads the chart-pullback derivative of `f` — `Res_p(F·df)` is the planar residue of
+`(F ∘ chart⁻¹)·(f ∘ chart⁻¹)'`. -/
+theorem frameRes_df_read (data : CanonicalForm17Data X) (f F : MeromorphicFunction X)
+    (hω : data.ω₀ = differentialForm f) (p : X) :
+    frameRes data F p = planarCoeff (-1)
+      (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ)
+        * deriv (f.toFun ∘ (chartAt (H := ℂ) p).symm) ζ) ((chartAt (H := ℂ) p) p) := by
+  have hev : (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ) * formCoeff data.ω₀.toFun p ζ)
+      =ᶠ[𝓝[≠] ((chartAt (H := ℂ) p) p)]
+      (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ)
+        * deriv (f.toFun ∘ (chartAt (H := ℂ) p).symm) ζ) := by
+    filter_upwards [formCoeff_differentialSection_eventuallyEq f p] with z hz
+    rw [hω]
+    rw [show formCoeff (differentialForm f).toFun p z
+        = formCoeff (differentialSection f) p z from rfl, ← hz]
+  exact planarCoeff_congr hev (-1)
+
+/-- **Local exactness kills the frame residue** (the `Res(dh) = 0` brick at the atom's own
+integrand): if the collapsed integrand `(F ∘ chart⁻¹)·(f ∘ chart⁻¹)'` germ-equals `deriv H`
+for some meromorphic `H`, the frame residue vanishes. -/
+theorem frameRes_eq_zero_of_exact_read (data : CanonicalForm17Data X)
+    (f F : MeromorphicFunction X) (hω : data.ω₀ = differentialForm f) (p : X)
+    {H : ℂ → ℂ} (hH : MeromorphicAt H ((chartAt (H := ℂ) p) p))
+    (hfac : (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ)
+        * deriv (f.toFun ∘ (chartAt (H := ℂ) p).symm) ζ)
+      =ᶠ[𝓝[≠] ((chartAt (H := ℂ) p) p)] deriv H) :
+    frameRes data F p = 0 := by
+  rw [frameRes_df_read data f F hω p, planarCoeff_congr hfac (-1)]
+  exact planarCoeff_neg_one_deriv hH
+
+/-- **Worked instance `f·df = d(f²/2)`**: the canonical frame paired with its own function has
+zero frame residue at EVERY point (the first `ℂ(f)`-case brick of the genus-0 closure). -/
+theorem frameRes_self_eq_zero (data : CanonicalForm17Data X) (f : MeromorphicFunction X)
+    (hω : data.ω₀ = differentialForm f) (p : X) :
+    frameRes data f p = 0 := by
+  refine frameRes_eq_zero_of_exact_read data f f hω p
+    (H := fun z => (f.toFun ((chartAt (H := ℂ) p).symm z)) ^ 2 / 2) ?_ ?_
+  · exact ((f.meromorphic p).pow 2).div (MeromorphicAt.const 2 ((chartAt (H := ℂ) p) p))
+  · filter_upwards [(f.meromorphic p).eventually_analyticAt] with z hz
+    have hdg : HasDerivAt (f.toFun ∘ (chartAt (H := ℂ) p).symm)
+        (deriv (f.toFun ∘ (chartAt (H := ℂ) p).symm) z) z :=
+      hz.differentiableAt.hasDerivAt
+    have hd : HasDerivAt (fun w => (f.toFun ((chartAt (H := ℂ) p).symm w)) ^ 2 / 2)
+        ((2 : ℕ) * (f.toFun ((chartAt (H := ℂ) p).symm z)) ^ (2 - 1)
+          * deriv (f.toFun ∘ (chartAt (H := ℂ) p).symm) z / 2) z :=
+      (hdg.pow 2).div_const 2
+    rw [hd.deriv]
+    push_cast
+    ring
+
 end Dolbeault
 
 end Jacobians

@@ -2,3 +2,4 @@
 2026-06-11 (A-lane 3rd launch) merge origin/main clean (import union); route decision committed: Route 2 frame-trace datum + proven consumer; skeleton next
 2026-06-11 ResidueAtom.lean skeleton LANDED (compiles clean, first pass): frameRes + off-support vanishing + fibrewise regrouping + FrameResidueTrace datum + PROVEN consumer residueAtom_of_frameTraceHypothesis + keystone corollaries + branch normalization down-payment
 2026-06-11 POSITIVE-GENUS UPGRADE LANDED: frameRes_eq_formFnResidue (covector-ratio factorization), residueAtom_of_holForm (atom for EVERY datum given a nonzero hol form), residueAtom_of_kirovGenus_pos, residueAtom_of_genus_split (residual needed at g=0 ONLY). lake env lean clean.
+2026-06-11 df-collapse down-payments LANDED: frameRes_df_read (atom integrand reads (f∘chart⁻¹)' for ω₀=df), frameRes_eq_zero_of_exact_read (local exactness brick), frameRes_self_eq_zero (f·df=d(f²/2) worked instance). lake env lean clean.
