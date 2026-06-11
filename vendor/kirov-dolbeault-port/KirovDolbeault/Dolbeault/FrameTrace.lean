@@ -490,23 +490,123 @@ theorem exists_laurentForm_of_traceData (T : ℂ → ℂ) (C : Finset ℂ) (ρ :
     rw [resAtInfty, resAtInfty, hTsplit, hE_zero, add_zero]
   exact ⟨L, rfl, tailLaurentForm_image_a C ρ hball N b hM1, hres, hinfty⟩
 
+/-! ## The trace-function datum, and the wall conclusion from it (proven)
+
+The honest remaining content of Miranda §VIII.3 step 1, packaged at the level of the **trace
+function** alone: a coefficient `T : ℂ → ℂ` (the value trace `Tr(F)(w) = ∑_{sheets over w}
+F(sheet)` read in the base chart), analytic off a finite exceptional value set `C`,
+meromorphic at each exceptional value, whose local residues are the fibre `frameRes` sums
+(Lemma 3.2, including the ramified clusters), and whose large-contour residue is the
+`∞`-fibre sum (Lemma 3.2 at `∞`).  Given this, the wall conclusion — the `LaurentForm` with
+its two residue transports — is **proven** via the one-variable rationality reduction. -/
+
+/-- **The trace-function datum** for `α = F·ω₀` through `F = f.toRiemannSphere` over the pole
+superset `S`: the value-chart trace coefficient `T` with its exceptional finite-value set `C`,
+local meromorphy, the per-value residue transport (`hres`, Lemma 3.2 at the finite values,
+ramified clusters included), the value coverage (`hcover`), and the `∞`-transport (`hinf`,
+Lemma 3.2 at `∞` on the contour `C(0, ρ)` enclosing `C`).  Every field is a TRUE statement of
+the §VIII.3 assembly for the plain value trace. -/
+structure FrameTraceFunctionData (data : CanonicalForm17Data X) (F : MeromorphicFunction X)
+    (f : MeromorphicFunction X) (S : Finset X) where
+  /-- The value-chart trace coefficient on the finite part of `ℂℙ¹`. -/
+  T : ℂ → ℂ
+  /-- The finite exceptional value set (chart coordinates). -/
+  C : Finset ℂ
+  /-- The enclosing contour radius. -/
+  ρ : ℝ
+  /-- The contour radius is positive. -/
+  hρ : 0 < ρ
+  /-- Every exceptional value lies inside the contour. -/
+  hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ
+  /-- The trace is analytic off the exceptional values. -/
+  hoff : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ T z
+  /-- The trace is meromorphic at each exceptional value. -/
+  hmero : ∀ c ∈ C, MeromorphicAt T c
+  /-- Lemma 3.2 at each exceptional value: the trace residue is the fibre `frameRes` sum. -/
+  hres : ∀ c ∈ C, resAt T c
+    = ∑ a ∈ S with f.toRiemannSphere a = ((c : ℂ) : RiemannSphere), frameRes data F a
+  /-- Every finite value of `f` on `S` is an exceptional value (so no fibre is missed). -/
+  hcover : (S.image f.toRiemannSphere).erase OnePoint.infty
+    ⊆ C.image (fun c : ℂ => ((c : ℂ) : RiemannSphere))
+  /-- Lemma 3.2 at `∞`: the trace residue at infinity is the `∞`-fibre `frameRes` sum. -/
+  hinf : resAtInfty T ρ
+    = ∑ a ∈ S with f.toRiemannSphere a = OnePoint.infty, frameRes data F a
+
+/-- **The wall conclusion from the trace-function datum (proven).**  Given a
+`FrameTraceFunctionData`, the principal-part `LaurentForm` of `T` realizes both residue
+transports: the one-variable rationality reduction transfers the finite residues and the
+`∞`-residue from `T` to `L`, and the value coverage re-indexes the centre sum into the
+fibrewise sum. -/
+theorem exists_traceLaurentForm_of_functionData (data : CanonicalForm17Data X)
+    (F : MeromorphicFunction X) (f : MeromorphicFunction X) (S : Finset X)
+    (D : FrameTraceFunctionData data F f S) :
+    ∃ L : LaurentForm,
+      (∑ p ∈ Finset.univ.image L.a, resAt L.R p
+        = ∑ y ∈ (S.image f.toRiemannSphere).erase OnePoint.infty,
+            ∑ a ∈ S with f.toRiemannSphere a = y, frameRes data F a) ∧
+      resAtInfty L.R L.ρ
+        = ∑ a ∈ S with f.toRiemannSphere a = OnePoint.infty, frameRes data F a := by
+  classical
+  obtain ⟨L, hLρ, hLa, hLres, hLinf⟩ :=
+    exists_laurentForm_of_traceData D.T D.C D.ρ D.hρ D.hball D.hoff D.hmero
+  refine ⟨L, ?_, ?_⟩
+  · -- The finite transport: centres = `C`, residues = `T`'s = the fibre sums, re-indexed.
+    rw [hLa]
+    have h1 : ∀ c ∈ D.C, resAt L.R c
+        = ∑ a ∈ S with f.toRiemannSphere a = ((c : ℂ) : RiemannSphere), frameRes data F a :=
+      fun c hc => (hLres c hc).trans (D.hres c hc)
+    rw [Finset.sum_congr rfl h1]
+    -- Re-index `∑_{c ∈ C}` to `∑_{y ∈ C.image coe}` (`coe` injective), then shrink to the
+    -- finite value set (`hcover`; off it the fibre filter is empty).
+    have himg : ∑ y ∈ D.C.image (fun c : ℂ => ((c : ℂ) : RiemannSphere)),
+          ∑ a ∈ S with f.toRiemannSphere a = y, frameRes data F a
+        = ∑ c ∈ D.C, ∑ a ∈ S with f.toRiemannSphere a = ((c : ℂ) : RiemannSphere),
+            frameRes data F a :=
+      Finset.sum_image (fun p _ q _ h => OnePoint.coe_injective h)
+    rw [← himg]
+    refine (Finset.sum_subset D.hcover fun y hy hynot => ?_).symm
+    -- An exceptional value that is not a value of `f` on `S` has an empty fibre filter.
+    have hempty : (S.filter (fun a => f.toRiemannSphere a = y)) = ∅ := by
+      rw [Finset.filter_eq_empty_iff]
+      intro a haS hay
+      -- `y = F a` is a value of `f` on `S`; it is finite (`y ∈ C.image coe`), so it lies in
+      -- the erased image — contradicting `hynot`.
+      obtain ⟨c, _, hcy⟩ := Finset.mem_image.mp hy
+      refine hynot (Finset.mem_erase.mpr ⟨?_, hay ▸ Finset.mem_image_of_mem _ haS⟩)
+      rw [← hcy]
+      exact fun h => OnePoint.coe_ne_infty c h
+    rw [hempty, Finset.sum_empty]
+  · -- The `∞`-transport: `L`'s `∞`-residue is `T`'s, which is the `∞`-fibre sum.
+    rw [hLρ] at hLinf ⊢
+    exact hLinf.trans D.hinf
+
 /-! ## The residual wall (single named `sorry`)
 
-The §VIII.3 trace assembly for the canonical `ω₀ = df` frame, reduced (by
-`frameResidueTrace_of_laurentForm`) to the existence of the partial-fraction `LaurentForm` of
-the trace with its two residue identifications.  Mathematically TRUE: the plain value trace
-`Tr(F)(w) = ∑_{sheets over w} F(sheet)` of `F` through the branched cover
-`F = f.toRiemannSphere` is a rational function of `w` (Miranda §VIII.3), its `1`-form
-`Tr(F)·dw` has at each finite value the fibre residue sum (Lemma 3.2; at a ramification point
-of index `e`, the cluster contribution is `planarCoeff_neg_one_branch`'s `e·a_{−e}`), and its
-`∞`-residue is the `∞`-fibre sum.  The proven §5 slit tower constructs exactly this datum for
-a holomorphic frame (more data than needed here: the `df` per-sheet integrand collapses to the
-plain value trace, `frameRes_df_read`). -/
+The §VIII.3 trace assembly for the canonical `ω₀ = df` frame, now reduced to the
+**trace-function level**: the existence of the value trace `T` with its local residue
+transports.  Mathematically TRUE: the plain value trace `Tr(F)(w) = ∑_{sheets over w}
+F(sheet)` of `F` through the branched cover `F = f.toRiemannSphere` is analytic off the
+finitely many exceptional values (IFT sections off the branch locus; symmetric-descent
+clusters across it), meromorphic at each of them, its local residues are the fibre residue
+sums of `F·df` (per-sheet: `frameRes_df_read` + section-inverse `(f̂ ∘ sheet)' = 1`; ramified
+clusters: `planarCoeff_neg_one_branch`'s `e·a_{−e}` normalization), and its `∞`-residue is the
+`∞`-fibre sum (the reciprocal-chart cluster).  The proven §5 slit tower constructs exactly
+this datum for a holomorphic frame (strictly more per-sheet data than the plain value trace
+needs).  Discharge plan: `A_ATOM_ROUTE.md`. -/
 
-/-- **[THE RESIDUAL WALL — single named `sorry`].**  The partial-fraction `LaurentForm` of the
-value trace of `F` through `f`, with the finite-fibre and `∞`-fibre residue transports, for
-the canonical `ω₀ = df` datum.  (NOT VERIFIED — Miranda §VIII.3, the trace assembly; see the
-module docstring and `A_ATOM_ROUTE.md` for the discharge plan.) -/
+/-- **[THE RESIDUAL WALL — single named `sorry`].**  The trace-function datum of the plain
+value trace of `F` through `f`, for the canonical `ω₀ = df` datum.  (NOT VERIFIED — Miranda
+§VIII.3 step 1 + Lemma 3.2 at the exceptional values; see the module docstring and
+`A_ATOM_ROUTE.md` for the discharge plan.) -/
+theorem exists_frameTraceFunctionData_df (f : MeromorphicFunction X)
+    (hf : ¬ IsGermConstant f) (data : CanonicalForm17Data X)
+    (hω : data.ω₀ = differentialForm f) (F : MeromorphicFunction X) :
+    ∃ S : Finset X, F.div.support ∪ data.K.support ⊆ S ∧
+      Nonempty (FrameTraceFunctionData data F f S) := by
+  sorry
+
+/-- **The `LaurentForm` wall conclusion** (proven over `exists_frameTraceFunctionData_df`):
+the partial-fraction form of the value trace with its two residue transports. -/
 theorem exists_traceLaurentForm_df (f : MeromorphicFunction X) (hf : ¬ IsGermConstant f)
     (data : CanonicalForm17Data X) (hω : data.ω₀ = differentialForm f)
     (F : MeromorphicFunction X) :
@@ -517,7 +617,9 @@ theorem exists_traceLaurentForm_df (f : MeromorphicFunction X) (hf : ¬ IsGermCo
             ∑ a ∈ S with f.toRiemannSphere a = y, frameRes data F a) ∧
       resAtInfty L.R L.ρ
         = ∑ a ∈ S with f.toRiemannSphere a = OnePoint.infty, frameRes data F a := by
-  sorry
+  obtain ⟨S, hS, ⟨D⟩⟩ := exists_frameTraceFunctionData_df f hf data hω F
+  obtain ⟨L, hfin, hinf⟩ := exists_traceLaurentForm_of_functionData data F f S D
+  exact ⟨S, L, hS, hfin, hinf⟩
 
 /-! ## The trace hypothesis from the wall (proven) -/
 
