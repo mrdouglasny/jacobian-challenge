@@ -66,3 +66,13 @@ The keystone `exists_serreDualityData` analytic inputs are NOT yet all theorems.
 - `hga` / `h¹(𝒪) = g`: conditional on `TailRiemannRoch X` (residual input 1).
 - The R-lane interface (`hsep`/`SlotExactK`/`CupMLWitnessR`/`ExactOrderWitness`): proven
   (R-lane capstone `exists_separating_cousinResidueData`).
+
+## Update 2026-06-11 (branch `feat/tail-riemann-roch`)
+
+Residual input 1 (`TailRiemannRoch X`) has been **decomposed and mostly discharged** by the
+item-3 tower build (T1–T6, `TailCoeffFull` / `TailSpaceGlobal` / `TailRR1` / `TailSerre`):
+global tail spaces, tail `H¹` finiteness, and **tail RR-I are now unconditional theorems**;
+tail Serre duality's injectivity half is proven; `TailRiemannRoch X` itself is a theorem
+conditional on exactly (i) `Nonempty (TailPairFrame X)` — slots + the pair-frame residue
+theorem `∑Res(F·ω₀) = 0`, the one analytic atom — and (ii) `PairingSurjective` (Miranda
+VI.3.10 recovery + pigeonhole).  See `docs/planning/TAILRR_BLOCKER.md`.

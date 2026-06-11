@@ -451,3 +451,38 @@ implementation over cup/h1InclMono/RR), then the conditional two-RR subtraction 
   REMAINING (DICT_BLOCKER.md): W2 deep-matching star cocycle (triangular window realization,
     ~300-400 LoC), W3 X-side cutoff (~100), W4 presentation bookkeeping (~250), W5 assembly
     (~150).  No new analytic atoms needed.
+08:10 TAILRR lane: route doc committed (cheap bridges rejected; Miranda tail tower T1-T6; PairResidueTheorem isolated)
+08:31 TAILRR: T1 (TailCoeffFull) + T2/T3 (TailSpaceGlobal) COMPILED+COMMITTED; next T4 tail H1 + RR-I
+09:16 TAILRR: T4 LANDED — tail_riemannRoch_I proven (finiteness + chi-pair + posPart); next T5 duality (pairing/injectivity/surjectivity)
+09:37 TAILRR: T5 A-D LANDED (pairing + injectivity half over TailPairFrame); next: Part E conditional assembly -> TailRiemannRoch
+09:42 TAILRR: T5E+gates DONE — all headliners standard-3; TailRiemannRoch = thm mod (TailPairFrame, PairingSurjective); Layer-3 flip chain verified wired (equivFinsupp map_zero + bridgeKDFormEquiv); blocker doc written
+
+=== 2026-06-11 PUSHFORWARD-LATTICE lane (branch feat/pushforward-lattice, #30) ===
+DISCHARGED: AX_pushforwardAmbient_preserves_lattice is a THEOREM (span-induction
+naturality route, KIROV_ROUTE_IDEAS item 7 — idea credited, implementation ours).
+- Engine (committed 03e3075, axiom-free): DevelopingNaturality.lean
+  (IsPullbackCoeffRel + developingValue_comp_of_isPullbackCoeffRel — devVal f^*ω γ
+  = devVal ω (f∘γ) via a joint Lebesgue subdivision fine for X-charts of γ and
+  Y-charts of f∘γ) + LoopLattice.lean (devVal_loop_mem_periodLatticeInBasis_any —
+  ANY continuous loop's period vector ∈ periodLatticeInBasis at any basepoint;
+  H1 functional at the loop's own basepoint + path-conjugation transport).
+- Conversion (7ec63e0): pullbackOneForm_isPullbackCoeffRel — the bridge unwind,
+  sectionCoeff/localRep → Kirov's pointwise mfderiv pullback → chart-read fderiv
+  factor by mfderiv chain rule (standard-3). Theorem proof = representative-loop
+  induction: lattice vector = period vector of an H1 class = loop class γp;
+  dual-basis algebra → γ-integrals of pulled-back basis; engine → periods of the
+  honest image loop f∘γp; LoopLattice lands them in the target lattice.
+  Post-merge fix: MDifferentiableAt.comp_of_eq dot-notation elaboration failure
+  → MDifferentiableAt.comp + a `show ... from hq_def ▸` cast; dropped a dead
+  tactic after congr 1.
+- Gates: lake env lean AbelJacobiMap.lean clean; full lake build green (8768
+  jobs); #print axioms — theorem + all 4 pushforward headlines = standard-3 +
+  AX_PeriodCycleBasis (AX_pushforwardAmbient gone from pushforward_pullback's
+  closure too); NO sorryAx; 0 sorries.
+- Ledger (0b3496d): kernel 22 → 21, challenge-critical 6 → 5; AXIOM_AUDIT +
+  README + CHALLENGE_AXIOM_CLOSURE + axiom-report regen; consistency guard ✓21.
+- Template note for AX_pullbackAmbient_preserves_lattice (#31-class work): the
+  engine is reusable as-is; the missing piece is the trace-side analogue of
+  pullbackOneForm_isPullbackCoeffRel (fibre-sum coefficient law for
+  pushforwardOneForm — multi-valued sheet decomposition, harder than the
+  pullback unwind).
