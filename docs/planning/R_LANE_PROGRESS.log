@@ -269,3 +269,9 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   (exists_separatingChartDiskCover + reserved disk, generic isLeray, generalized
   locallyRealizable); (3) CupMLWitnessR over the reserved disk; (4) hga if time.
   Caches APFS-cloned, 264G free. Beginning item 1 (SlotMatch.lean).
+[item1 DONE] SlotMatch.lean: slotMatchesK_omegaCoeff PROVEN (standard-3) via
+  formOrderW_chart_invariant + formCoeff_holToSection + coeffAt_analyticAt +
+  AnalyticAt.meromorphicOrderAt_eq + analyticOrderAt_eq_natCast factorization.
+  Wrappers resH1_omegaCoeff / cousinResidueData_omegaCoeff: analytic side of the
+  R-lane descent fully discharged for g = omegaCoeff; remaining hyps = SeparatesPoles
+  (cover geometry, item 2) + CupMLWitnessR (item 3). Aggregator wired. Starting item 2.
