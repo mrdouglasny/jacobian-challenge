@@ -1,0 +1,30 @@
+[2026-06-11] P-lane session (keystone packaging, branch feat/keystone-packaging).
+[milestone] KeystonePackaging.lean landed (vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/,
+  wired into aggregator), compiled clean first pass; lake build KirovDolbeault: 8788 jobs OK.
+  Branch includes origin/feat/g0-atom (PR #192) via fast-forward merge (ResidueAtom + G0 chain).
+  Item 1 (SlotExactK): slotExactK_omegaCoeff — SlotExactK 𝔇 (omegaCoeff 𝔇 α) K for K = div α,
+    every point/every chart, nonvanishing unit from AnalyticAt.analyticOrderAt_eq_natCast.
+  Item 2 (hpos packaging): exists_separating_unwindRegularity — at 0 < kirovGenus X, a
+    separating chart-disk cover (refines any 𝔘₀; Leray; locally realizable) + (ω₀, K=div ω₀),
+    ω₀ ≠ 0, + GlobalResidue with ∀ D UnwindRegularity (unwindRegularity_concrete engine).
+    Helper: ChartDiskCover.exactOrderWitness (ExactOrderWitness for EVERY chart-disk cover).
+  Item 3 (capstone): exists_serreDualityData_cover_of_residueAtom (single-datum) and
+    _of_genus_split_residueAtom (atom needed at g=0 only) →
+    ∃ 𝔘 : FiniteCover X, 𝔘.IsLeray ∧ 𝔘.LocallyRealizable ∧ Nonempty (SerreDualityData 𝔘).
+    Plus tailRiemannRoch_of_kirovGenus_pos: #189 frame witness + #188 pairingSurjective ⊢
+    TailRiemannRoch X at g>0 (closes the codex-#189 UNVERIFIED item).
+  COVER FINDING: keystone sorry (SerreDualityPairing.lean:131) is ∀-cover, but the unique
+    top-level consumer (RiemannRoch.lean:66) CHOOSES its cover via exists_realizableLerayCover
+    (COVER_WIRING.md census confirmed in-tree). Flip plan: weaken keystone to the ∃-cover form
+    produced here + re-pin RiemannRoch.lean:66 in the same commit. No refinement-invariance
+    lemma needed.
+  Kernel closures (#print axioms, all [propext, Classical.choice, Quot.sound]):
+    slotExactK_omegaCoeff, ChartDiskCover.exactOrderWitness,
+    exists_separating_unwindRegularity, tailRiemannRoch_of_kirovGenus_pos,
+    exists_serreDualityData_cover_of_tailRR_of_kirovGenus_pos,
+    exists_serreDualityData_cover_of_genus_split_residueAtom,
+    exists_serreDualityData_cover_of_residueAtom.
+  F2 folded: unused tautological hbase_p have deleted (LoopLattice.lean), file compiles.
+  FLIP RECIPE for the A-lane: prove (some data).ResidueAtom; then
+    exists_serreDualityData_cover_of_residueAtom data hres gives the ∃-cover keystone;
+    replace the keystone sorry by the ∃-form + RiemannRoch.lean:66 one-line re-pin.
