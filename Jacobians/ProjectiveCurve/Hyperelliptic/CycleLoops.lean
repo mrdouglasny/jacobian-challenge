@@ -166,7 +166,7 @@ noncomputable def toOddLoop (hx : D.x 1 = D.x 0) (hy : D.y 1 = D.y 0) :
   AnalyticLoop.ofMovingChart (D.toOdd h) (D.continuous_toOdd h)
     (D.movingChart_analyticAt h)
     (by
-      show HyperellipticOdd.coe (D.toAffine 1) = HyperellipticOdd.coe (D.toAffine 0)
+      change HyperellipticOdd.coe (D.toAffine 1) = HyperellipticOdd.coe (D.toAffine 0)
       have : D.toAffine 1 = D.toAffine 0 := Subtype.ext (Prod.ext hx hy)
       rw [this])
 
