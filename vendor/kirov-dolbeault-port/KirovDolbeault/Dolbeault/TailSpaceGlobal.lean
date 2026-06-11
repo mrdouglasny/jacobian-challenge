@@ -160,6 +160,76 @@ theorem truncTails_eq_self_of_mem {D' : Divisor X} {t : GlobalTails X}
   · rfl
   · exact ((mem_tailSpace_iff.mp ht) q (by omega)).symm
 
+/-! ## Part 2b — the upper space (the complement of the tail region)
+
+`H¹` lives as a quotient of the FULL ambient `GlobalTails X` by `im α_D ⊔ 𝒰[D]` (the
+upper space of terms at orders `≥ −D`), avoiding subtype quotients. -/
+
+/-- **The upper space `𝒰[D]`**: formal tails supported at orders `≥ −D(p)` — the complement
+of `𝒯[D]`. -/
+def upperSpace (D : Divisor X) : Submodule ℂ (GlobalTails X) :=
+  Finsupp.supported ℂ ℂ (belowSet D)ᶜ
+
+theorem mem_upperSpace_iff {D : Divisor X} {t : GlobalTails X} :
+    t ∈ upperSpace D ↔ ∀ q : X × ℤ, q.2 < -(D q.1) → t q = 0 := by
+  constructor
+  · intro ht q hq
+    by_contra hne
+    have hsupp : q ∈ t.support := Finsupp.mem_support_iff.mpr hne
+    have := ht hsupp
+    simp only [Set.mem_compl_iff, belowSet, Set.mem_setOf_eq] at this
+    omega
+  · intro h q hq
+    simp only [Set.mem_compl_iff, belowSet, Set.mem_setOf_eq, not_lt]
+    by_contra hout
+    exact (Finsupp.mem_support_iff.mp hq) (h q (by omega))
+
+/-- The upper spaces are monotone (`D ≤ D'` allows more upper terms). -/
+theorem upperSpace_mono {D D' : Divisor X} (h : ∀ x, D x ≤ D' x) :
+    upperSpace (X := X) D ≤ upperSpace D' := by
+  refine Finsupp.supported_mono ?_
+  intro q hq
+  simp only [Set.mem_compl_iff, belowSet, Set.mem_setOf_eq, not_lt] at hq ⊢
+  have := h q.1
+  omega
+
+/-- Tail and upper space are complementary: together they span everything. -/
+theorem tailSpace_sup_upperSpace (D : Divisor X) :
+    tailSpace (X := X) D ⊔ upperSpace D = ⊤ := by
+  rw [tailSpace, upperSpace, ← Finsupp.supported_union, Set.union_compl_self,
+    Finsupp.supported_univ]
+
+/-- … and they intersect trivially. -/
+theorem tailSpace_inf_upperSpace (D : Divisor X) :
+    Disjoint (tailSpace (X := X) D) (upperSpace D) :=
+  Finsupp.disjoint_supported_supported disjoint_compl_right
+
+/-- The un-truncated part lies in the upper space (ambient form). -/
+theorem sub_truncTails_mem_upperSpace (D' : Divisor X) (t : GlobalTails X) :
+    t - truncTails D' t ∈ upperSpace D' := by
+  rw [mem_upperSpace_iff]
+  intro q hq
+  rw [Finsupp.sub_apply, truncTails_apply, if_pos hq, sub_self]
+
+/-- Truncation kills the upper space. -/
+theorem truncTails_eq_zero_of_mem_upperSpace {D' : Divisor X} {u : GlobalTails X}
+    (hu : u ∈ upperSpace D') : truncTails D' u = 0 := by
+  ext q
+  rw [truncTails_apply, Finsupp.coe_zero, Pi.zero_apply]
+  split
+  · exact mem_upperSpace_iff.mp hu q (by assumption)
+  · rfl
+
+/-- Truncations compose: the deeper cut wins (`D ≤ D'`). -/
+theorem truncTails_comp {D D' : Divisor X} (hDD' : ∀ x, D x ≤ D' x) (t : GlobalTails X) :
+    truncTails D' (truncTails D t) = truncTails D' t := by
+  ext q
+  rw [truncTails_apply, truncTails_apply, truncTails_apply]
+  have := hDD' q.1
+  by_cases h' : q.2 < -(D' q.1)
+  · rw [if_pos h', if_pos h', if_pos (by omega)]
+  · rw [if_neg h', if_neg h']
+
 /-! ## Part 3 — the window and its dimension -/
 
 /-- The truncation window region `[−D'(p), −D(p))`. -/
@@ -248,6 +318,26 @@ theorem finrank_windowSpace {D D' : Divisor X} (hDD' : ∀ x, D x ≤ D' x) :
     (Finsupp.supportedEquivFinsupp (R := ℂ) (M := ℂ)
       (↑(windowFinset D D') : Set (X × ℤ))).finrank_eq,
     (Finsupp.linearEquivFunOnFinite ℂ ℂ _).finrank_eq, Module.finrank_pi]
+  simp [card_windowFinset hDD']
+
+/-- **The Pi-model of the window** — instance-clean for the quotient/lift machinery
+(`Finsupp`-subtype targets choke `liftQ`-style unification; Pi targets do not). -/
+abbrev WindowModel (D D' : Divisor X) : Type _ :=
+  (↑(windowFinset D D') : Set (X × ℤ)) → ℂ
+
+/-- The window space in its Pi-model coordinates. -/
+noncomputable def windowModelEquiv (D D' : Divisor X) :
+    ↥(windowSpace (X := X) D D') ≃ₗ[ℂ] WindowModel D D' :=
+  (LinearEquiv.ofEq _ _ (by rw [windowSpace, ← coe_windowFinset])).trans
+    ((Finsupp.supportedEquivFinsupp (R := ℂ) (M := ℂ)
+      (↑(windowFinset D D') : Set (X × ℤ))).trans
+      (Finsupp.linearEquivFunOnFinite ℂ ℂ _))
+
+/-- **The window dimension, Pi-model form**: `dim 𝒲(D, D') = deg D' − deg D` (`D ≤ D'`). -/
+theorem finrank_windowModel {D D' : Divisor X} (hDD' : ∀ x, D x ≤ D' x) :
+    Module.finrank ℂ (WindowModel (X := X) D D')
+      = (Divisor.deg X D' - Divisor.deg X D).toNat := by
+  rw [Module.finrank_pi]
   simp [card_windowFinset hDD']
 
 /-! ## Part 4 — the Laurent tail map `α_D` -/
