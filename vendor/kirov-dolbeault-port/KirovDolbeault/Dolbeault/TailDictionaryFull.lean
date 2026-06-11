@@ -1340,6 +1340,78 @@ theorem resCocycle_cup_deepTestCocycle_ne_zero {E : Divisor X} {m : ℤ}
   rw [resCocycle_apply, heval]
   exact neg_ne_zero.mpr hr0
 
+/-! ## Part 5 — W5: the unconditional assembly -/
+
+/-- **THE UNCONDITIONAL §17.7 HEADLINE — `UnwindRegularity` is a THEOREM for the concrete
+fine-sheaf residue at EVERY level `D`**, with no `BadPointsIsolated` discipline: at a forced
+bad point, either the point is cover-isolated (the proven `SerreUnwindDetect` engine), or
+pole separation forces `K b = 0` (D2) and the deep-matching test cocycle feeds the
+global-correction engine (W1–W4).  Forster (GTM 81) Lemma 17.7, unconditional form. -/
+theorem unwindRegularity_concrete (hsep : SeparatesPoles 𝔇 K)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (hwit : CupMLWitnessR 𝔇 hsep g) (hwitness : ExactOrderWitness 𝔇)
+    (hKeff : ∀ x, 0 ≤ K x) (D : Divisor X) :
+    ((cousinResidueData_of_witnessR hsep g hg (SlotMatchesK_of_exact hexact)
+      hwit).toGlobalResidue).UnwindRegularity D := by
+  classical
+  refine GlobalResidue.unwindRegularity_of_detects _ D ?_
+  intro E hED v hno
+  obtain ⟨fE, rfl⟩ := Submodule.Quotient.mk_surjective _ v
+  obtain ⟨b, n, hn, hge, hlt⟩ := exists_bad_point hED fE hno
+  by_cases hiso : ∃ j₀, MLIsolated 𝔇 j₀ b
+  · -- the cover-isolated branch: the proven marked engine
+    obtain ⟨j₀, hbiso⟩ := hiso
+    have hb : b ∈ (𝔇.U j₀ : Set X) := hbiso.1
+    set m : ℤ := n + K b with hmdef
+    have hmE : E b ≤ m := by
+      have := hKeff b
+      omega
+    have hmD : m + 1 ≤ D b := by omega
+    obtain ⟨td⟩ := TestCocycleData.exists_of_witness hwitness hb hmE
+    refine ⟨Submodule.Quotient.mk (td.cocycle hbiso),
+      td.h1InclMono_cocycle_eq_zero hbiso hED hmD, ?_⟩
+    rw [GlobalResidue.pairing_apply, cup_mk, cupH1_mk]
+    exact resCocycle_cup_testCocycle_ne_zero hsep hg hexact td hbiso (hKeff b) fE hn hmdef
+  · -- the non-isolated branch: `K b = 0`, the deep cocycle into the W1 engine
+    have hKb : K b = 0 := K_apply_eq_zero_of_not_isolated hsep hKeff hiso
+    obtain ⟨j₀, hb⟩ := FiniteCover.exists_cover_index 𝔇.toFiniteCover b
+    set m : ℤ := n + K b with hmdef
+    have hmE : E b ≤ m := by
+      have := hKeff b
+      omega
+    have hmD : m + 1 ≤ D b := by omega
+    obtain ⟨dd⟩ := DeepTestData.exists_of_witness (E := E) (m := m) hwitness hb hmE
+    refine ⟨Submodule.Quotient.mk dd.cocycle,
+      dd.h1InclMono_cocycle_eq_zero hED hmD, ?_⟩
+    rw [GlobalResidue.pairing_apply, cup_mk, cupH1_mk]
+    exact resCocycle_cup_deepTestCocycle_ne_zero hsep hg hexact dd hb hKb fE hn hmdef
+
+/-- **`CechTailComparison` is a THEOREM for the concrete fine-sheaf residue at EVERY `D`** —
+the unconditional Čech↔tail dictionary (`docs/planning/DICT_ROUTE.md`, W5): the keystone
+comparison law with NO isolation hypothesis. -/
+theorem cechTailComparison_concrete (hsep : SeparatesPoles 𝔇 K)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (hwit : CupMLWitnessR 𝔇 hsep g) (hwitness : ExactOrderWitness 𝔇)
+    (hKeff : ∀ x, 0 ≤ K x) (D : Divisor X) :
+    CechTailComparison 𝔇 g ((cousinResidueData_of_witnessR hsep g hg
+      (SlotMatchesK_of_exact hexact) hwit).toGlobalResidue) D :=
+  cechTailComparison_of_unwindRegularity hexact hKeff _
+    (unwindRegularity_concrete hsep hg hexact hwit hwitness hKeff D)
+
+/-- **§17.9 surjectivity for the concrete fine-sheaf residue, unconditional in `D`**: the
+assembled Serre residue pairing is surjective at every level, with the dictionary input
+supplied by `cechTailComparison_concrete`. -/
+theorem pairing_surjective_concrete (hsep : SeparatesPoles 𝔇 K)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (hwit : CupMLWitnessR 𝔇 hsep g) (hwitness : ExactOrderWitness 𝔇)
+    (hKeff : ∀ x, 0 ≤ K x) (D : Divisor X) (P : X)
+    (hR : 𝔇.toFiniteCover.LocallyRealizable) :
+    Function.Surjective (((cousinResidueData_of_witnessR hsep g hg
+      (SlotMatchesK_of_exact hexact) hwit).toGlobalResidue).toSerreResidueRealization.pairing
+        D) :=
+  pairing_surjective_of_cechTailComparison hexact hKeff _ D P hR
+    (cechTailComparison_concrete hsep hg hexact hwit hwitness hKeff D)
+
 end Engine
 
 end Dolbeault
