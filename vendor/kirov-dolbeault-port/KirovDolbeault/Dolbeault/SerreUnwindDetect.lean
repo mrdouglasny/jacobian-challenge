@@ -754,6 +754,90 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
 
 end TestCocycleData
 
+/-- **THE §17.7 EVALUATION** — the fine-sheaf residue functional does NOT vanish on the cup of
+`f ∈ L(K−E)` with the skyscraper test cocycle at a cover-isolated forced bad point of exact
+order `n = m − K b`: the cup cocycle is a `B¹(𝒪_{K+b})`-coboundary with ONE marked simple-pole
+point, every other `(K+b)`-point extends (the DescentVanish product-germ trick), and the marked
+evaluation engine gives `resCocycle (f ⌣ δ⁰n̂) = −r ≠ 0`. -/
+theorem resCocycle_cup_testCocycle_ne_zero (hsep : SeparatesPoles 𝔇 K)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    {E : Divisor X} {j₀ : 𝔇.toFiniteCover.ι} {b : X} {hb : b ∈ (𝔇.U j₀ : Set X)} {m : ℤ}
+    (td : TestCocycleData 𝔇 E j₀ b hb m) (hbiso : MLIsolated 𝔇 j₀ b) (hKb : 0 ≤ K b)
+    (f : ↥(linearSystem (X := X) (K - E)))
+    {n : ℤ} (hn : (f : MeromorphicFunction X).orderW b = (n : WithTop ℤ)) (hm : m = n + K b) :
+    resCocycle 𝔇 hsep g hg
+      (cupCocyclesMap (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f.2 (td.cocycle hbiso)) ≠ 0 := by
+  classical
+  have hF0 : cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) (f : MeromorphicFunction X)
+      td.cochain ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1) :=
+    td.cup_mem_sections0 f.2 hn hm
+  have hsep' : SeparatesPoles 𝔇 (K + Finsupp.single b 1) := separatesPoles_add_single hsep hbiso
+  set z : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) :=
+    cupCocyclesMap (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f.2 (td.cocycle hbiso) with hzdef
+  -- the cup cocycle is the coboundary of the cup 0-cochain
+  have hcb : (z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0
+        (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) (f : MeromorphicFunction X)
+          td.cochain) := by
+    have h1 := LinearMap.congr_fun
+      (cupCochain1_comp_cechDelta0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily)
+        (f : MeromorphicFunction X)) td.cochain
+    simp only [LinearMap.comp_apply] at h1
+    rw [hzdef, cupCocyclesMap_coe, td.cocycle_coe]
+    exact h1
+  -- the `Z¹(𝒪_K)` cup cocycle, viewed at the marked level `K + b`
+  have hzK' : (z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.cocycles1 (K + Finsupp.single b 1) := by
+    obtain ⟨hker, hsec⟩ := Submodule.mem_inf.mp z.2
+    refine Submodule.mem_inf.mpr ⟨hker, fun p => ?_⟩
+    refine OmegaDGerm_mono (fun x _ => ?_) (hsec p)
+    by_cases hxb : x = b
+    · subst hxb
+      rw [Kb_apply_self]
+      omega
+    · rw [Kb_apply_ne hxb]
+  set z' : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 (K + Finsupp.single b 1)) :=
+    ⟨(z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1), hzK'⟩ with hz'def
+  obtain ⟨r, hr0, hpole⟩ := td.exists_slotProductSimplePoleAt hn hm hKb hg hexact hF0
+  rw [resCocycle_apply]
+  have heval : resFunctional 𝔇 (⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep z) g,
+      glueCoeff_cocycleFn_mem 𝔇 hsep z hg⟩ : oneOneCoeff 𝔇) = -r := by
+    refine resFunctional_eq_neg_residue_of_mero_coboundary
+      (S := posSupp (K + Finsupp.single b 1)) (w := cocycleFn 𝔇 hsep z)
+      (h := vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily)
+        (f : MeromorphicFunction X) td.cochain) hF0)
+      _ rfl hg ?_ (smoothOnSetsOff_vanishFn hF0) (holomorphicOnSetsOff_vanishFn hF0) ?_ ?_
+      hbiso hpole ?_
+    · -- every bad point is cover-isolated
+      intro a haS
+      by_cases hab : a = b
+      · exact ⟨j₀, hab ▸ hbiso⟩
+      · refine exists_isolated_of_separatesPoles 𝔇 hsep ?_
+        have h1 := mem_posSupp_iff.mp haS
+        rwa [Kb_apply_ne hab] at h1
+    · -- the extraction is honestly the coboundary of the off-(K+b)-points extraction
+      have h1 : IsCoboundaryOn 𝔇 (cocycleFn 𝔇 hsep' z')
+          (vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily)
+            (f : MeromorphicFunction X) td.cochain) hF0) :=
+        isCoboundaryOn_cocycleFn_vanishFn hsep' z' hF0 hcb
+      have h2 : cocycleFn 𝔇 hsep z = cocycleFn 𝔇 hsep' z' := rfl
+      rwa [h2]
+    · -- the marked point is a `(K+b)`-point
+      exact mem_posSupp_iff.mpr (by rw [Kb_apply_self]; omega)
+    · -- every other `(K+b)`-point extends (product-germ trick at level `K+b`)
+      intro a haS hab i₀ hiso'
+      have haK' : 0 < (K + Finsupp.single b 1 : Divisor X) a := mem_posSupp_iff.mp haS
+      have haK : 0 < K a := by rwa [Kb_apply_ne hab] at haK'
+      obtain ⟨u, huan, hu0, hgv⟩ := hexact a i₀ hiso'.1
+      have hgv' : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 i₀ a), g i₀ ζ
+          = (ζ - chartMap 𝔇 i₀ a) ^ ((K + Finsupp.single b 1 : Divisor X) a).toNat * u ζ := by
+        rw [show ((K + Finsupp.single b 1 : Divisor X) a).toNat = (K a).toNat from by
+          rw [Kb_apply_ne hab]]
+        exact hgv
+      exact slotProductExtendsAt_vanishFn hsep' hF0 hg haK' hiso' huan hgv'
+  rw [heval]
+  exact neg_ne_zero.mpr hr0
+
 end Evaluation
 
 end Dolbeault
