@@ -447,6 +447,224 @@ theorem mulTail_tailMap {E : Divisor X} {f : MeromorphicFunction X}
         _ ≤ f.orderW p + g.orderW p := add_le_add le_rfl hgord
     · rw [if_neg hm]
 
+/-! ### The local inverse tails (the division step) -/
+
+/-- A single below the cut lies in `𝒯[D]`. -/
+theorem single_mem_tailSpace {D : Divisor X} {p : X} {k : ℤ} (hk : k < -(D p)) (a : ℂ) :
+    Finsupp.single (p, k) a ∈ tailSpace (X := X) D := by
+  rw [mem_tailSpace_iff]
+  intro q hq
+  rw [Finsupp.single_apply, if_neg]
+  rintro rfl
+  exact absurd hq (by simpa using hk)
+
+/-- A single at or above the cut lies in `𝒰[D]`. -/
+theorem single_mem_upperSpace {D : Divisor X} {p : X} {k : ℤ} (hk : -(D p) ≤ k) (a : ℂ) :
+    Finsupp.single (p, k) a ∈ upperSpace (X := X) D := by
+  rw [mem_upperSpace_iff]
+  intro q hq
+  rw [Finsupp.single_apply, if_neg]
+  rintro rfl
+  exact absurd hq (by simpa using hk)
+
+/-- **The local inverse tail**: the `[lo, hi)` coefficient window of `z^k / f` read in the
+chart at `p` — the division witness of Miranda's recovery step (a purely local formal tail;
+no global meromorphic inverse data needed beyond the chart read of `f⁻¹`). -/
+def invMonomialTail (f : MeromorphicFunction X) (p : X) (k lo hi : ℤ) : GlobalTails X :=
+  ∑ j ∈ Finset.Ico lo hi,
+    Finsupp.single (p, j)
+      (planarCoeff j
+        (fun ζ => (ζ - (chartAt (H := ℂ) p) p) ^ k
+          * (((f.toFun ∘ (chartAt (H := ℂ) p).symm)) ζ)⁻¹)
+        ((chartAt (H := ℂ) p) p))
+
+/-- **The division identity**: multiplying the local inverse tail back by `f` and truncating
+at `D` recovers exactly the truncated monomial single — `mulTail f D (tail of z^k/f at p)
+= trunc_D (z^k at p)`.  Requires only a finite order `d` of `f` at `p` and a window deep
+enough on both sides (`lo ≤ k − d`, `hi ≥ −D p − d`). -/
+theorem mulTail_invMonomialTail (f : MeromorphicFunction X) (D : Divisor X) (p : X)
+    {k lo hi d : ℤ} (hd : f.orderW p = (d : WithTop ℤ)) (hlo : lo ≤ k - d)
+    (hhi : -(D p) - d ≤ hi) (hlohi : lo ≤ hi) :
+    mulTail f D (invMonomialTail f p k lo hi)
+      = truncTails D (Finsupp.single (p, k) (1 : ℂ)) := by
+  classical
+  set c : ℂ := (chartAt (H := ℂ) p) p with hc
+  set A : ℂ → ℂ := f.toFun ∘ (chartAt (H := ℂ) p).symm with hA
+  set W : ℂ → ℂ := fun ζ => (ζ - c) ^ k * (A ζ)⁻¹ with hW
+  have hAm : MeromorphicAt A c := f.meromorphic p
+  have hAord : meromorphicOrderAt A c = (d : WithTop ℤ) := hd
+  have hWm : MeromorphicAt W c := (meromorphicAt_zpow_self c k).mul hAm.inv
+  have hWord : meromorphicOrderAt W c = ((k - d : ℤ) : WithTop ℤ) := by
+    rw [hW, show (fun ζ => (ζ - c) ^ k * (A ζ)⁻¹)
+        = (fun ζ => (ζ - c) ^ k) * (A⁻¹) from rfl,
+      meromorphicOrderAt_mul (meromorphicAt_zpow_self c k) hAm.inv,
+      meromorphicOrderAt_zpow_self, meromorphicOrderAt_inv, hAord]
+    rw [show -((d : ℤ) : WithTop ℤ) = ((-d : ℤ) : WithTop ℤ) from by simp,
+      ← WithTop.coe_add, show (k + -d : ℤ) = k - d from by ring]
+  -- `W·A` is the monomial germ (the inverse cancels off the isolated zeros/poles of `A`)
+  have hAne : ∀ᶠ ζ in 𝓝[≠] c, A ζ ≠ 0 :=
+    (meromorphicOrderAt_ne_top_iff_eventually_ne_zero hAm).mp (by rw [hAord]; simp)
+  have hgerm : (fun ζ => W ζ * A ζ) =ᶠ[𝓝[≠] c] fun ζ => (ζ - c) ^ k := by
+    filter_upwards [hAne] with ζ hζ
+    rw [hW]
+    show (ζ - c) ^ k * (A ζ)⁻¹ * A ζ = (ζ - c) ^ k
+    rw [mul_assoc, inv_mul_cancel₀ hζ, mul_one]
+  ext q
+  obtain ⟨p', m⟩ := q
+  rw [invMonomialTail, mulTail_pointTail_apply, truncTails_apply, ← hc, ← hA, ← hW]
+  rcases eq_or_ne p' p with heq | hne
+  · subst heq
+    by_cases hm : m < -(D p')
+    · rw [if_pos ⟨rfl, hm⟩, if_pos hm]
+      -- the window sum is the product coefficient `c_m(W·A) = c_m(z^k) = δ_{mk}`
+      have hsum : ∑ j ∈ Finset.Ico lo hi,
+          planarCoeff j W c * f.coeffAt p' (m - j)
+          = planarCoeff m (fun ζ => W ζ * A ζ) c := by
+        refine (planarCoeff_mul_window hWm hAm ?_ hlohi ?_).symm
+        · rw [hWord]
+          exact_mod_cast hlo
+        · rw [hAord]
+          exact_mod_cast (by omega : m + 1 - hi ≤ d)
+      rw [hsum, planarCoeff_congr hgerm, planarCoeff_zpow_self, Finsupp.single_apply]
+      by_cases hmk : m = k
+      · rw [if_pos hmk, if_pos (by rw [hmk])]
+      · rw [if_neg hmk, if_neg (fun h => hmk (congrArg Prod.snd h).symm)]
+    · rw [if_neg (by tauto), if_neg hm]
+  · rw [if_neg (by tauto)]
+    split
+    · rw [Finsupp.single_apply, if_neg (fun h => hne (congrArg Prod.fst h).symm)]
+    · rfl
+
+/-! ## Part D — the descended multiplication and the `ψ`-action on functionals -/
+
+/-- **The descended multiplication map** `H¹_t(D−E) → H¹_t(D)` along `f ∈ L(E)`
+(well-defined by the transport identity and the upper kill). -/
+def mulH1 (D E : Divisor X) (f : MeromorphicFunction X)
+    (hf : f ∈ linearSystem (X := X) E) :
+    H1Tail (X := X) (D - E) →ₗ[ℂ] H1Tail (X := X) D := by
+  refine Submodule.mapQ _ _ (mulTail f D) (sup_le ?_ ?_)
+  · rintro - ⟨g, rfl⟩
+    rw [Submodule.mem_comap, mulTail_tailMap hf D g]
+    exact Submodule.mem_sup_left ⟨f * g, rfl⟩
+  · intro u hu
+    rw [Submodule.mem_comap, mulTail_eq_zero_of_mem_upperSpace hf D hu]
+    exact Submodule.zero_mem _
+
+@[simp] theorem mulH1_mk (D E : Divisor X) (f : MeromorphicFunction X)
+    (hf : f ∈ linearSystem (X := X) E) (t : GlobalTails X) :
+    mulH1 D E f hf (Submodule.Quotient.mk t)
+      = Submodule.Quotient.mk (mulTail f D t) := rfl
+
+/-- **Division surjectivity**: for `f` of finite order everywhere, every tail class at level
+`D` is a `mulTail f D`-image (each below-cut single is hit exactly, by the local inverse
+tails; upper singles die). -/
+theorem mkQ_mulTail_surjective (f : MeromorphicFunction X) (D : Divisor X)
+    (hf0 : ∀ p : X, f.orderW p ≠ ⊤) (ξ : H1Tail (X := X) D) :
+    ∃ t : GlobalTails X,
+      (Submodule.Quotient.mk (mulTail f D t) : H1Tail (X := X) D) = ξ := by
+  classical
+  set L : GlobalTails X →ₗ[ℂ] H1Tail (X := X) D :=
+    (tailCoker (X := X) D).mkQ.comp (mulTail f D) with hL
+  suffices h : ∀ q : X × ℤ, ∀ a : ℂ,
+      (Submodule.Quotient.mk (Finsupp.single q a) : H1Tail (X := X) D)
+        ∈ LinearMap.range L by
+    obtain ⟨t₀, rfl⟩ := Submodule.Quotient.mk_surjective _ ξ
+    have hmem : (Submodule.Quotient.mk t₀ : H1Tail (X := X) D) ∈ LinearMap.range L := by
+      have ht₀ : t₀ = ∑ q ∈ t₀.support, Finsupp.single q (t₀ q) := by
+        conv_lhs => rw [← Finsupp.sum_single t₀]
+        rfl
+      have hexp : (Submodule.Quotient.mk t₀ : H1Tail (X := X) D)
+          = ∑ q ∈ t₀.support,
+              (Submodule.Quotient.mk (Finsupp.single q (t₀ q)) : H1Tail (X := X) D) := by
+        conv_lhs => rw [ht₀]
+        exact map_sum ((tailCoker (X := X) D).mkQ) _ _
+      rw [hexp]
+      exact Submodule.sum_mem _ fun q _ => h q (t₀ q)
+    obtain ⟨t, ht⟩ := hmem
+    exact ⟨t, ht⟩
+  intro q a
+  obtain ⟨p, k⟩ := q
+  by_cases hk : k < -(D p)
+  · -- hit by the (scaled) local inverse tail
+    obtain ⟨d, hd⟩ := WithTop.ne_top_iff_exists.mp (hf0 p)
+    refine ⟨a • invMonomialTail f p k (k - d) (max (-(D p) - d) (k - d)), ?_⟩
+    rw [hL, LinearMap.comp_apply, map_smul, mulTail_invMonomialTail f D p hd.symm le_rfl
+      (le_max_left _ _) (le_max_right _ _),
+      truncTails_eq_self_of_mem (single_mem_tailSpace hk 1), map_smul,
+      Submodule.mkQ_apply, ← Submodule.Quotient.mk_smul, Finsupp.smul_single,
+      smul_eq_mul, mul_one]
+  · -- upper singles die in `H¹`
+    refine ⟨0, ?_⟩
+    rw [map_zero, eq_comm, Submodule.Quotient.mk_eq_zero]
+    exact Submodule.mem_sup_right (single_mem_upperSpace (by omega) a)
+
+/-- **The `ψ`-action on tail functionals** (Miranda VI.3.8 analogue, dual form):
+`f̄ ↦ φ ∘ (mulH1 f) : L(E)/junk →ₗ Dual(H¹_t(D−E))`. -/
+def tailPsiAct (D E : Divisor X) (φ : Module.Dual ℂ (H1Tail (X := X) D)) :
+    lSysModule (X := X) E →ₗ[ℂ] Module.Dual ℂ (H1Tail (X := X) (D - E)) := by
+  refine Submodule.liftQ _
+    { toFun := fun f => φ.comp (mulH1 D E (f : MeromorphicFunction X) f.2)
+      map_add' := fun f₁ f₂ => ?_
+      map_smul' := fun a f => ?_ } ?_
+  · refine LinearMap.ext fun ξ => ?_
+    obtain ⟨t, rfl⟩ := Submodule.Quotient.mk_surjective _ ξ
+    show φ (Submodule.Quotient.mk (mulTail ((f₁ : MeromorphicFunction X)
+        + (f₂ : MeromorphicFunction X)) D t))
+      = φ (Submodule.Quotient.mk (mulTail (f₁ : MeromorphicFunction X) D t))
+        + φ (Submodule.Quotient.mk (mulTail (f₂ : MeromorphicFunction X) D t))
+    rw [mulTail_add_fun, LinearMap.add_apply, Submodule.Quotient.mk_add, map_add]
+  · refine LinearMap.ext fun ξ => ?_
+    obtain ⟨t, rfl⟩ := Submodule.Quotient.mk_surjective _ ξ
+    show φ (Submodule.Quotient.mk (mulTail (a • (f : MeromorphicFunction X)) D t))
+      = a • φ (Submodule.Quotient.mk (mulTail (f : MeromorphicFunction X) D t))
+    rw [mulTail_smul_fun, LinearMap.smul_apply, Submodule.Quotient.mk_smul, map_smul]
+  · intro f hf
+    have hf' : (f : MeromorphicFunction X) ∈ germZeroSubmodule (X := X) := hf
+    rw [LinearMap.mem_ker]
+    refine LinearMap.ext fun ξ => ?_
+    obtain ⟨t, rfl⟩ := Submodule.Quotient.mk_surjective _ ξ
+    show φ (Submodule.Quotient.mk (mulTail (f : MeromorphicFunction X) D t)) = 0
+    rw [mulTail_eq_zero_of_germZero hf' D, LinearMap.zero_apply,
+      Submodule.Quotient.mk_zero, map_zero]
+
+@[simp] theorem tailPsiAct_mk_mk (D E : Divisor X)
+    (φ : Module.Dual ℂ (H1Tail (X := X) D)) (f : ↥(linearSystem (X := X) E))
+    (t : GlobalTails X) :
+    tailPsiAct (X := X) D E φ (Submodule.Quotient.mk f) (Submodule.Quotient.mk t)
+      = φ (Submodule.Quotient.mk (mulTail (f : MeromorphicFunction X) D t)) := rfl
+
+/-- A nonzero junk-free class has finite order EVERYWHERE (identity theorem). -/
+theorem orderW_ne_top_of_lSys_ne_zero {E : Divisor X} {f : ↥(linearSystem (X := X) E)}
+    (hf : (Submodule.Quotient.mk f : lSysModule (X := X) E) ≠ 0) (p : X) :
+    (f : MeromorphicFunction X).orderW p ≠ ⊤ := by
+  refine MeromorphicFunction.orderW_ne_top_of_exists _ ?_ p
+  by_contra hall
+  push Not at hall
+  refine hf ?_
+  rw [Submodule.Quotient.mk_eq_zero, Submodule.submoduleOf, Submodule.mem_comap]
+  intro x
+  exact hall x
+
+/-- **Injectivity of the `ψ`-action** for `φ ≠ 0` (Miranda VI.3.8 analogue): the division
+surjectivity makes `f·φ = 0` with `f ≠ 0` force `φ = 0`. -/
+theorem tailPsiAct_injective (D E : Divisor X) (φ : Module.Dual ℂ (H1Tail (X := X) D))
+    (hφ : φ ≠ 0) : Function.Injective (tailPsiAct (X := X) D E φ) := by
+  rw [← LinearMap.ker_eq_bot]
+  refine (Submodule.eq_bot_iff _).mpr fun u hu => ?_
+  obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ u
+  rw [LinearMap.mem_ker] at hu
+  by_contra hne
+  have hf0 : ∀ p : X, (f : MeromorphicFunction X).orderW p ≠ ⊤ :=
+    orderW_ne_top_of_lSys_ne_zero hne
+  refine hφ (LinearMap.ext fun ξ => ?_)
+  obtain ⟨t, ht⟩ := mkQ_mulTail_surjective (f : MeromorphicFunction X) D hf0 ξ
+  have happ := congrArg (fun χ : Module.Dual ℂ (H1Tail (X := X) (D - E)) =>
+    χ (Submodule.Quotient.mk t)) hu
+  simp only [LinearMap.zero_apply] at happ
+  rw [tailPsiAct_mk_mk, ht] at happ
+  rw [happ]
+  rfl
+
 end Dolbeault
 
 end Jacobians
