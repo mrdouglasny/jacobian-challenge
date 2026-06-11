@@ -104,4 +104,132 @@ noncomputable def pi1EquivFiber [SimplyConnectedSpace E] (e₀ : E) :
 
 end Monodromy
 
+section Deck
+
+variable {G : Type*} [AddGroup G] [AddAction G E] (h : IsAddQuotientCoveringMap p G)
+include h
+
+/-- A quotient covering map is invariant under the deck action. -/
+theorem proj_vadd (g : G) (e : E) : p (g +ᵥ e) = p e :=
+  h.apply_eq_iff_mem_orbit.mpr (AddAction.mem_orbit e g)
+
+variable [SimplyConnectedSpace E]
+
+/-- The deck loop of `g : G`: the class in `π₁(X, p e₀)` of the projection of a path
+from `e₀` to `g +ᵥ e₀` in the (simply connected) total space. -/
+noncomputable def deckLoop (e₀ : E) (g : G) : FundamentalGroup X (p e₀) :=
+  FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
+    (((PathConnectedSpace.somePath e₀ (g +ᵥ e₀)).map h.isCoveringMap.continuous).cast
+      rfl (proj_vadd h g e₀).symm))
+
+/-- Monodromy along the deck loop of `g` sends the fiber point `g' +ᵥ e₀` to
+`(g' + g) +ᵥ e₀`: the lift of the deck loop starting at `g' +ᵥ e₀` is the
+`g'`-translate of the chosen path, by uniqueness of lifts. -/
+theorem monodromy_deckLoop (e₀ : E) (g g' : G) :
+    h.isCoveringMap.monodromy (FundamentalGroup.toPath (deckLoop h e₀ g))
+        ⟨g' +ᵥ e₀, proj_vadd h g' e₀⟩
+      = ⟨(g' + g) +ᵥ e₀, proj_vadd h (g' + g) e₀⟩ := by
+  haveI : ContinuousConstVAdd G E := h.toContinuousConstVAdd
+  refine monodromy_mk h.isCoveringMap _ _
+    (((PathConnectedSpace.somePath e₀ (g +ᵥ e₀)).map
+      (continuous_const_vadd g')).cast rfl (vadd_vadd g' g e₀).symm)
+    (fun t ↦ ?_) (proj_vadd h (g' + g) e₀)
+  show p (g' +ᵥ (PathConnectedSpace.somePath e₀ (g +ᵥ e₀)) t)
+    = p ((PathConnectedSpace.somePath e₀ (g +ᵥ e₀)) t)
+  exact proj_vadd h g' _
+
+/-- The base case of `monodromy_deckLoop`: the deck loop of `g` moves the canonical
+basepoint lift to `g +ᵥ e₀`. -/
+theorem monodromy_deckLoop_base (e₀ : E) (g : G) :
+    h.isCoveringMap.monodromy (FundamentalGroup.toPath (deckLoop h e₀ g)) ⟨e₀, rfl⟩
+      = ⟨g +ᵥ e₀, proj_vadd h g e₀⟩ :=
+  monodromy_mk h.isCoveringMap _ _ (PathConnectedSpace.somePath e₀ (g +ᵥ e₀))
+    (fun _ ↦ rfl) (proj_vadd h g e₀)
+
+/-- Deck loops compose contravariantly with `End`-multiplication (`End` multiplication
+is reverse path composition, while lift translation adds on the left). -/
+theorem deckLoop_add (e₀ : E) (g g' : G) :
+    deckLoop h e₀ (g' + g) = deckLoop h e₀ g * deckLoop h e₀ g' := by
+  apply monodromy_injective h.isCoveringMap e₀ (y := p e₀)
+  show h.isCoveringMap.monodromy (FundamentalGroup.toPath (deckLoop h e₀ (g' + g))) ⟨e₀, rfl⟩
+    = h.isCoveringMap.monodromy
+        (FundamentalGroup.toPath (deckLoop h e₀ g * deckLoop h e₀ g')) ⟨e₀, rfl⟩
+  have hmul : FundamentalGroup.toPath (deckLoop h e₀ g * deckLoop h e₀ g')
+      = (FundamentalGroup.toPath (deckLoop h e₀ g')).trans
+          (FundamentalGroup.toPath (deckLoop h e₀ g)) := rfl
+  rw [monodromy_deckLoop_base h e₀ (g' + g), hmul, h.isCoveringMap.monodromy_trans_apply,
+    monodromy_deckLoop_base h e₀ g', monodromy_deckLoop h e₀ g g']
+
+end Deck
+
+section DeckComm
+
+variable {G : Type*} [AddCommGroup G] [AddAction G E] (h : IsAddQuotientCoveringMap p G)
+variable [SimplyConnectedSpace E]
+include h
+
+/-- The deck homomorphism `Multiplicative G →* π₁(X, p e₀)` of a quotient covering by
+a commutative group, sending `g` to the projection of a path `e₀ → g +ᵥ e₀`. -/
+noncomputable def deckHom (e₀ : E) : Multiplicative G →* FundamentalGroup X (p e₀) :=
+  MonoidHom.mk' (fun a ↦ deckLoop h e₀ a.toAdd) fun a b ↦ by
+    show deckLoop h e₀ (a.toAdd + b.toAdd) = deckLoop h e₀ a.toAdd * deckLoop h e₀ b.toAdd
+    rw [add_comm]
+    exact deckLoop_add h e₀ a.toAdd b.toAdd
+
+theorem deckHom_apply (e₀ : E) (g : G) :
+    deckHom h e₀ (Multiplicative.ofAdd g) = deckLoop h e₀ g := rfl
+
+theorem deckHom_bijective (e₀ : E) : Function.Bijective (deckHom h e₀) := by
+  haveI : IsCancelVAdd G E := h.isCancelVAdd
+  constructor
+  · intro a b hab
+    have hmono : h.isCoveringMap.monodromy
+          (FundamentalGroup.toPath (deckLoop h e₀ a.toAdd)) ⟨e₀, rfl⟩
+        = h.isCoveringMap.monodromy
+          (FundamentalGroup.toPath (deckLoop h e₀ b.toAdd)) ⟨e₀, rfl⟩ := by
+      exact congrArg (fun γ ↦ h.isCoveringMap.monodromy (FundamentalGroup.toPath γ)
+        ⟨e₀, rfl⟩) hab
+    rw [monodromy_deckLoop_base h e₀, monodromy_deckLoop_base h e₀] at hmono
+    exact Multiplicative.toAdd.injective
+      (IsCancelVAdd.right_cancel _ _ e₀ (congrArg Subtype.val hmono))
+  · intro γ
+    obtain ⟨g, hg⟩ := AddAction.mem_orbit_iff.mp (h.apply_eq_iff_mem_orbit.mp
+      (h.isCoveringMap.monodromy (FundamentalGroup.toPath γ) ⟨e₀, rfl⟩).2)
+    refine ⟨Multiplicative.ofAdd g, monodromy_injective h.isCoveringMap e₀ (y := p e₀) ?_⟩
+    show h.isCoveringMap.monodromy
+        (FundamentalGroup.toPath (deckHom h e₀ (Multiplicative.ofAdd g))) ⟨e₀, rfl⟩
+      = h.isCoveringMap.monodromy (FundamentalGroup.toPath γ) ⟨e₀, rfl⟩
+    rw [deckHom_apply, monodromy_deckLoop_base h e₀ g]
+    exact Subtype.ext hg
+
+/-- **The deck group is the fundamental group.** For a quotient covering by a free,
+properly discontinuous action of a commutative group `G` on a simply connected space,
+`π₁` of the base at `p e₀` is `Multiplicative G`; the iso sends `g` to the projected
+deck loop `e₀ → g +ᵥ e₀`. -/
+noncomputable def deckMulEquivPi1 (e₀ : E) :
+    Multiplicative G ≃* FundamentalGroup X (p e₀) :=
+  MulEquiv.ofBijective (deckHom h e₀) (deckHom_bijective h e₀)
+
+theorem deckMulEquivPi1_apply (e₀ : E) (g : G) :
+    deckMulEquivPi1 h e₀ (Multiplicative.ofAdd g) = deckLoop h e₀ g := rfl
+
+/-- **Generator identification.** Any loop `γ` at `p e₀` in the base that lifts
+pointwise to a path `e₀ → g +ᵥ e₀` upstairs represents the image of `g` under the
+deck isomorphism. This is the form consumers use: it identifies explicit loops
+(e.g. circle loops around a puncture) as the generators. -/
+theorem deckMulEquivPi1_eq_fromPath (e₀ : E) (g : G) {e' : E}
+    (Γ : Path e₀ e') (γ : Path (p e₀) (p e₀)) (hΓ : ∀ t, p (Γ t) = γ t)
+    (he' : e' = g +ᵥ e₀) :
+    deckMulEquivPi1 h e₀ (Multiplicative.ofAdd g)
+      = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ) := by
+  apply monodromy_injective h.isCoveringMap e₀ (y := p e₀)
+  show h.isCoveringMap.monodromy
+      (FundamentalGroup.toPath (deckMulEquivPi1 h e₀ (Multiplicative.ofAdd g))) ⟨e₀, rfl⟩
+    = h.isCoveringMap.monodromy (Path.Homotopic.Quotient.mk γ) ⟨e₀, rfl⟩
+  rw [deckMulEquivPi1_apply, monodromy_deckLoop_base h e₀ g,
+    monodromy_mk h.isCoveringMap γ ⟨e₀, rfl⟩ Γ hΓ (by rw [he']; exact proj_vadd h g e₀)]
+  exact Subtype.ext he'.symm
+
+end DeckComm
+
 end Jacobians.Topology
