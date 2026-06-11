@@ -52,6 +52,7 @@ import KirovDolbeault.Dolbeault.FineResidue.SlotMatch
 import KirovDolbeault.Dolbeault.ChartDiskCoverGeneric
 import KirovDolbeault.Dolbeault.SeparatingCover
 import KirovDolbeault.Dolbeault.FineResidue.CupWitness
+import KirovDolbeault.Dolbeault.ArithmeticGenusTransfer
 
 /-
 

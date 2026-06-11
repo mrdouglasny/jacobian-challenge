@@ -300,3 +300,13 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   CupMLWitnessR, and Nonempty (CousinResidueData 𝔇.toFiniteCover K) — ZERO remaining
   hypotheses. All 6 decls standard-3; root aggregator wired; module lake build green.
   Next: item 4 (hga via D=0 Čech↔Dolbeault comparison) if time.
+[item4 PARTIAL — honest scope] ArithmeticGenusTransfer.lean: the hga ATOM ITSELF is NOT
+  provable from the comparison alone (confirmed R6D2_BLOCKER §3 / G0_BLOCKER route 2: needs
+  H^{0,1}=0 from no-holomorphic-forms, Hodge-flavoured — research-grade, NOT faked). What IS
+  proven (standard-3): the cover dependence of hga is GONE — the IsLeray-free comparison
+  (GoodCover.cechH1_dolbeault_comparison', finrank ℝ DolbeaultH01 = 2·h1Dim 0, cover-free
+  LHS) gives h1Dim_zero_chartDiskCover_invariant (h¹(𝒪) equal on ALL chart-disk covers),
+  hga_transfer (atom at any one cover feeds every other, incl. the separating cover), and
+  h1Dim_zero_eq_canonical (normal form at the canonical chartDiskCover). The genus-0 wall
+  need only be climbed once, at any convenient cover. Root lake build green (8771 jobs).
+  LANE COMPLETE: items 1-3 DONE, item 4 done to its honest boundary.
