@@ -311,4 +311,94 @@ theorem windingHom_lasso_ne {s s' : ℂ} (hs' : s' ∈ S)
   rw [hcast, fromPath_conj_eq_one _ _ hmidtriv]
   exact map_one _
 
+/-! ## Existence of a winding-dual loop family for finitely many punctures -/
+
+/-- **M3-partial headline: loops around the punctures with δ winding matrix.**
+For a finite puncture set `T` and any basepoint, every puncture `s ∈ T` has an
+explicit lasso loop with winding number `1` around `s` and `0` around every other
+puncture. Hence the puncture loops are ℤ-independent in `π₁(ℂ ∖ T, x₀)` — the
+identified-generators lower-bound half of "π₁ of the punctured plane is free on
+loops around the punctures". -/
+theorem exists_winding_dual_loops (T : Finset ℂ) (x₀ : {w : ℂ // w ∉ (T : Set ℂ)})
+    {s : ℂ} (hs : s ∈ T) :
+    ∃ L : Path x₀ x₀,
+      windingHom (Finset.mem_coe.mpr hs) x₀
+          (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk L))
+        = Multiplicative.ofAdd 1
+      ∧ ∀ {s' : ℂ}, s' ∈ T → s' ≠ s →
+          ∀ (hs' : s' ∈ (T : Set ℂ)),
+          windingHom hs' x₀
+            (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk L)) = 1 := by
+  classical
+  -- a radius smaller than the distance to every other puncture
+  obtain ⟨r, hr0, hrlt⟩ : ∃ r : ℝ, 0 < r ∧ ∀ s' ∈ T, s' ≠ s → r < dist s s' := by
+    rcases (T.erase s).eq_empty_or_nonempty with h | h
+    · exact ⟨1, one_pos, fun s' h₁ h₂ ↦
+        absurd (Finset.mem_erase.mpr ⟨h₂, h₁⟩) (h ▸ Finset.notMem_empty s')⟩
+    · have hpos : 0 < (T.erase s).inf' h (dist s) := by
+        rw [Finset.lt_inf'_iff]
+        exact fun b hb ↦ dist_pos.mpr (Ne.symm (Finset.mem_erase.mp hb).1)
+      refine ⟨(T.erase s).inf' h (dist s) / 2, half_pos hpos, fun s' h₁ h₂ ↦ ?_⟩
+      calc (T.erase s).inf' h (dist s) / 2 < (T.erase s).inf' h (dist s) := half_lt_self hpos
+        _ ≤ dist s s' := Finset.inf'_le _ (Finset.mem_erase.mpr ⟨h₂, h₁⟩)
+  -- the anchor point on the circle of radius `r` around `s`
+  have hrC : ((s + r : ℂ) - s) = (r : ℝ) := by ring
+  have hzS : (s + (r : ℝ) : ℂ) ∉ (T : Set ℂ) := by
+    intro hmem
+    rcases eq_or_ne (s + (r : ℝ) : ℂ) s with he | hne
+    · have : (r : ℂ) = 0 := by linear_combination he
+      simp only [Complex.ofReal_eq_zero] at this
+      exact hr0.ne' this
+    · have hlt := hrlt _ hmem hne
+      rw [Complex.dist_eq, show s - (s + (r : ℝ)) = -(r : ℝ) by ring, norm_neg,
+        Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr0] at hlt
+      linarith
+  set z : {w : ℂ // w ∉ (T : Set ℂ)} := ⟨s + (r : ℝ), hzS⟩ with hz
+  -- circle points have distance exactly `r` from `s`
+  have hcircnorm : ∀ t : unitInterval,
+      ‖((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ))‖ = r := by
+    intro t
+    have h2 : twoPiI * (t : ℝ) = ((2 * Real.pi * t : ℝ) : ℂ) * Complex.I := by
+      push_cast [twoPiI]
+      ring
+    rw [norm_mul, show ((z : ℂ) - s) = (r : ℝ) from hrC, h2,
+      Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hr0]
+  -- the circle avoids all punctures
+  have hcirc : ∀ t : unitInterval,
+      s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ) := by
+    intro t hmem
+    rcases eq_or_ne (s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ))) s with he | hne
+    · have h0 : ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) = 0 := by
+        linear_combination he
+      have := hcircnorm t
+      rw [h0, norm_zero] at this
+      linarith
+    · have hlt := hrlt _ hmem hne
+      rw [Complex.dist_eq, show s - (s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)))
+          = -(((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ))) by ring,
+        norm_neg, hcircnorm t] at hlt
+      linarith
+  -- a connecting path inside the punctured plane
+  have hpc : IsPathConnected ((T : Set ℂ)ᶜ) := by
+    apply Set.Countable.isPathConnected_compl_of_one_lt_rank
+    · rw [Complex.rank_real_complex]
+      exact Cardinal.one_lt_two
+    · exact T.countable_toSet
+  have hjoin : JoinedIn ((T : Set ℂ)ᶜ) (x₀ : ℂ) (z : ℂ) := hpc.joinedIn _ x₀.2 _ hzS
+  obtain ⟨P⟩ : Joined x₀ z := hjoin.joined_subtype
+  refine ⟨P.trans ((circleInPunctured s z hcirc).trans P.symm),
+    windingHom_lasso_self (Finset.mem_coe.mpr hs) P hcirc, ?_⟩
+  intro s' hmem hne hs'
+  refine windingHom_lasso_ne hs' P hcirc (convex_closedBall s r) ?_ ?_
+  · intro hmemK
+    have hlt := hrlt s' hmem hne
+    rw [Metric.mem_closedBall, dist_comm] at hmemK
+    linarith
+  · intro t
+    rw [Metric.mem_closedBall, Complex.dist_eq,
+      show s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) - s
+        = ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) by ring,
+      hcircnorm t]
+
 end Jacobians.Topology
