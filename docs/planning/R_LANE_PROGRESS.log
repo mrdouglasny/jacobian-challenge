@@ -275,3 +275,8 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   Wrappers resH1_omegaCoeff / cousinResidueData_omegaCoeff: analytic side of the
   R-lane descent fully discharged for g = omegaCoeff; remaining hyps = SeparatesPoles
   (cover geometry, item 2) + CupMLWitnessR (item 3). Aggregator wired. Starting item 2.
+[item2a DONE] ChartDiskCoverGeneric.lean: generic ChartDiskCover.isLeray (every chart-disk
+  cover set is a chart-ball preimage, simply connected) + generic
+  ChartDiskCover.locallyRealizable (factorized-rational product witness, only cover-specific
+  input was subset_chart_source). Bill items 2+3 of COVER_WIRING done. Next: the
+  separating-cover construction with the reserved disk (bill item 1).
