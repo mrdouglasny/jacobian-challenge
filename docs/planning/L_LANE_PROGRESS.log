@@ -46,3 +46,10 @@
     missing law is 17.7 regularity — discharge for the concrete R-lane res, or field-ify).
   - Gotcha logged: `set D' := D − nP` SHADOWED `w` (its type contained the pattern) and broke
     obtain-rfl substitution silently; fix = destructure before set / spell divisors out.
+[2026-06-11] L-lane session start (branch feat/layer3-flip-prep off origin/main 9289f91).
+  Goal: pre-write Layer-3 axiom flips conditionally on FrameTraceHypothesis
+  (Jacobians/Layer3/FlipPrep.lean + docs/planning/FLIP_CHECKLIST.md). No axiom/sorry edits.
+  EARLY FINDING (divisor-pin): serreDuality_equiv's exact statement uses the OPAQUE axiom
+  constant Jacobians.Axioms.canonicalDivisor (LineBundleBasic.lean:43), constrained by NO
+  other axiom -> exact statement underivable; flip must de-opaque canonicalDivisor
+  (axiom -> def via Classical.choose of the ∃-K form), kernel 21->18 not 21->19.
