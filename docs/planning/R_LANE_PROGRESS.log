@@ -228,3 +228,13 @@ DISCHARGE (SerreUnwind.lean:275, the §17.7 pole-bound regularity Prop, hypothes
 discharge becomes an R6-style residue-evaluation estimate, so schedule it WITH the ML-tie, not
 after R7. R7 then: germ→coefficient extraction + CousinResidueData instantiation (liftQ descent
 is already proven in the port).
+
+=== 2026-06-10 R6D2 lane (branch feat/keystone-r6d2, worktree agent) ===
+START. Four deliverables: D2a order-m vanish tie (generalized mero-coboundary engine,
+removable-product Stokes kill — NO higher Cauchy-Pompeiu needed: slot vanishing makes the
+smeared-pole product extend analytically, so the surviving Stokes term dies by the planar
+Stokes atom after a finite point-repair); D2b general-K vanish_coboundary (principal parts
+avoided: restrict 0-cochain germs to U_i \ S, holoFn-extract, product-germ trick at K-points:
+(f·slot-pullback) ∈ OmegaDGerm 0 → holoFn gives the analytic extension q); D2c
+UnwindRegularity; D2d CupMLWitness. Plan: new FineResidue/MeroVanish.lean (engine, mirrors
+MLTie/CoboundaryVanish), then Descent-side wiring.
