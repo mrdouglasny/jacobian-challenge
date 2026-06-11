@@ -60,12 +60,13 @@ import KirovDolbeault.Dolbeault.TailCoeffFull
 import KirovDolbeault.Dolbeault.TailSpaceGlobal
 import KirovDolbeault.Dolbeault.TailRR1
 import KirovDolbeault.Dolbeault.TailSerre
-import KirovDolbeault.Dolbeault.TailSurjectivity
 import KirovDolbeault.Dolbeault.TailFrameWitness
+import KirovDolbeault.Dolbeault.TailSurjectivity
 import KirovDolbeault.Dolbeault.TailFrameGenus0
 import KirovDolbeault.Dolbeault.TailRegularity
 import KirovDolbeault.Dolbeault.TailUnwind
 import KirovDolbeault.Dolbeault.TailDictionary
+import KirovDolbeault.Dolbeault.TailDictionaryFull
 import KirovDolbeault.Dolbeault.CechH1CupKill
 import KirovDolbeault.Dolbeault.TailGenusTarget
 
