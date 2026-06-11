@@ -580,4 +580,157 @@ theorem integral_pouCoeff_glueCoeff_corr_split
 
 end CorrSplit
 
+/-! ### The relocation collapse to the distinguished chart -/
+
+section Collapse
+
+variable {H : X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+
+/-- The **chart-`j₀` planar cut** of the correction family: the `corrFam` component of the
+distinguished chart, cut off by the indicator of the chart image of `U j₀` (the `pouCoeff`
+pattern — junk values of the chart inverse outside the target are removed where the honest
+family vanishes anyway). -/
+noncomputable def corrC (𝔇 : ChartDiskCover X) (H : X → ℂ)
+    (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (b : X) (j₀ : 𝔇.toFiniteCover.ι) : ℂ → ℂ :=
+  (chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X)).indicator (corrFam 𝔇 H g b j₀)
+
+/-- The chart image of `tsupport H` is compact (for `tsupport H ⊆ U j₀`). -/
+theorem isCompact_chartMap_image_tsupport (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X)) :
+    IsCompact (chartMap 𝔇 j₀ '' tsupport H) := by
+  have hts : IsCompact (tsupport H) := (isClosed_tsupport H).isCompact
+  refine hts.image_of_continuousOn ?_
+  refine (chartAt ℂ (𝔇.center j₀)).continuousOn.mono fun x hx => ?_
+  exact mem_chartSource_of_mem_U 𝔇 (hHsupp hx)
+
+/-- The planar cut vanishes off the chart image of `tsupport H`. -/
+theorem corrC_eq_zero_of_notMem_image_tsupport {z : ℂ} (hz : z ∉ chartMap 𝔇 j₀ '' tsupport H) : corrC 𝔇 H g b j₀ z = 0 := by
+  by_cases hzU : z ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X)
+  · obtain ⟨x, hxU, rfl⟩ := hzU
+    have hxs : x ∉ tsupport H := fun hs => hz (Set.mem_image_of_mem _ hs)
+    have hmem : chartMap 𝔇 j₀ x ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X) := ⟨x, hxU, rfl⟩
+    rw [corrC, Set.indicator_of_mem hmem]
+    exact (corrFam_eventually_zero_of_notMem_tsupport hxU hxs).self_of_nhds
+  · exact Set.indicator_of_notMem hzU _
+
+/-- The planar cut is continuous (locally the smooth `corrFam` component on the open chart
+image; locally `0` off the compact image of `tsupport H`). -/
+theorem continuous_corrC (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X))
+    (hcorr : IsOneOneCoeff 𝔇 (corrFam 𝔇 H g b)) : Continuous (corrC 𝔇 H g b j₀) := by
+  rw [continuous_iff_continuousAt]
+  intro z
+  by_cases hz : z ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X)
+  · obtain ⟨x, hxU, rfl⟩ := hz
+    have h1 : ContinuousAt (corrFam 𝔇 H g b j₀) (chartMap 𝔇 j₀ x) :=
+      (hcorr.1 j₀ x hxU).continuousAt
+    refine h1.congr ?_
+    filter_upwards [(isOpen_chartMap_image 𝔇 j₀ (𝔇.U j₀).isOpen
+      (subset_refl _)).mem_nhds ⟨x, hxU, rfl⟩] with w hw
+    exact (Set.indicator_of_mem hw _).symm
+  · have hzs : z ∉ chartMap 𝔇 j₀ '' tsupport H := fun hc =>
+      hz (Set.image_mono hHsupp hc)
+    have hev : corrC 𝔇 H g b j₀ =ᶠ[𝓝 z] fun _ => (0 : ℂ) := by
+      filter_upwards [(isCompact_chartMap_image_tsupport
+        hHsupp).isClosed.isOpen_compl.mem_nhds hzs] with w hw
+      exact corrC_eq_zero_of_notMem_image_tsupport hw
+    exact continuousAt_const.congr hev.symm
+
+/-- The planar cut has compact support (inside the chart image of `tsupport H`). -/
+theorem hasCompactSupport_corrC (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X)) :
+    HasCompactSupport (corrC 𝔇 H g b j₀) :=
+  HasCompactSupport.intro (isCompact_chartMap_image_tsupport hHsupp) fun _ hz =>
+    corrC_eq_zero_of_notMem_image_tsupport hz
+
+/-- **The per-chart relocation of the correction term** (R4): the chart-`j` correction
+integral reads entirely inside `U j ⊓ U j₀` (the support of `H`), where the R4 relocation
+lemma re-routes it to the distinguished chart against the global weight `ρ_j`. -/
+theorem integral_pouCoeff_corrFam_eq (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X))
+    (hcorr : IsOneOneCoeff 𝔇 (corrFam 𝔇 H g b)) (j : 𝔇.toFiniteCover.ι) :
+    ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z
+      = ∫ z, rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z := by
+  -- step 1: the chart-`j` integrand vanishes off the overlap image
+  have hvan1 : ∀ z, z ∉ overlapImage 𝔇 j j₀ →
+      pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z = 0 := by
+    intro z hz
+    by_cases hzU : z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hzU
+      have hxj₀ : x ∉ (𝔇.U j₀ : Set X) := fun hk => hz ⟨x, ⟨hxU, hk⟩, rfl⟩
+      have hxs : x ∉ tsupport H := fun hs => hxj₀ (hHsupp hs)
+      rw [(corrFam_eventually_zero_of_notMem_tsupport hxU hxs).self_of_nhds, mul_zero]
+    · rw [show pouCoeff 𝔇 j z = 0 from Set.indicator_of_notMem hzU _, zero_mul]
+  rw [← setIntegral_eq_integral_of_forall_compl_eq_zero hvan1]
+  -- step 2: on the overlap image, the `pouCoeff` weight is the `ρ_j` read
+  have hcongr1 : ∀ z ∈ overlapImage 𝔇 j j₀,
+      pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z
+        = rhoC 𝔇 j ((chartAt ℂ (𝔇.center j)).symm z) * corrFam 𝔇 H g b j z := by
+    rintro z ⟨x, hx, rfl⟩
+    have hli : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+      (chartAt ℂ (𝔇.center j)).left_inv (mem_chartSource_of_mem_U 𝔇 hx.1)
+    rw [pouCoeff_chartMap 𝔇 hx.1, hli]
+  rw [MeasureTheory.setIntegral_congr_fun (isOpen_overlapImage 𝔇 j j₀).measurableSet hcongr1]
+  -- step 3: relocate to the distinguished chart (R4, weight `ρ_j`)
+  have hrel := setIntegral_overlap_relocate 𝔇 hcorr j j₀ fun y => rhoC 𝔇 j y
+  simp only [] at hrel
+  rw [hrel]
+  -- step 4: on the chart-`j₀` overlap image, the component is the planar cut
+  have hcongr2 : ∀ z ∈ overlapImage 𝔇 j₀ j,
+      rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrFam 𝔇 H g b j₀ z
+        = rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z := by
+    rintro z ⟨x, hx, rfl⟩
+    have hmem : chartMap 𝔇 j₀ x ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X) := ⟨x, hx.1, rfl⟩
+    rw [corrC, Set.indicator_of_mem hmem]
+  rw [MeasureTheory.setIntegral_congr_fun (isOpen_overlapImage 𝔇 j₀ j).measurableSet hcongr2]
+  -- step 5: the chart-`j₀` integrand vanishes off the overlap image, re-extend to `ℂ`
+  have hvan2 : ∀ z, z ∉ overlapImage 𝔇 j₀ j →
+      rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z = 0 := by
+    intro z hz
+    by_cases hzU : z ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hzU
+      have hxj : x ∉ (𝔇.U j : Set X) := fun hj => hz ⟨x, ⟨hxU, hj⟩, rfl⟩
+      have hxsupp : x ∉ tsupport (cechPoU 𝔇 j) := fun hs => hxj (cechPoU_subordinate 𝔇 j hs)
+      have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ x) = x :=
+        (chartAt ℂ (𝔇.center j₀)).left_inv (mem_chartSource_of_mem_U 𝔇 hxU)
+      rw [hli, rhoC_eq_zero_of_notMem_tsupport hxsupp, zero_mul]
+    · rw [show corrC 𝔇 H g b j₀ z = 0 from Set.indicator_of_notMem hzU _, mul_zero]
+  rw [setIntegral_eq_integral_of_forall_compl_eq_zero hvan2]
+
+/-- **The relocation collapse**: the PoU-weighted correction terms sum to the single
+distinguished-chart integral of the planar cut (`∑ρ ≡ 1`). -/
+theorem sum_integral_pouCoeff_corrFam (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X))
+    (hcorr : IsOneOneCoeff 𝔇 (corrFam 𝔇 H g b)) :
+    ∑ j, ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z = ∫ z, corrC 𝔇 H g b j₀ z := by
+  -- the relocated integrands are continuous with compact support, hence integrable
+  have hcont : ∀ j : 𝔇.toFiniteCover.ι, Continuous fun z =>
+      rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z := by
+    intro j
+    rw [continuous_iff_continuousAt]
+    intro z
+    by_cases hz : z ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X)
+    · have hzt : z ∈ (chartAt ℂ (𝔇.center j₀)).target :=
+        chartMap_image_U_subset_target 𝔇 j₀ hz
+      have h1 : ContinuousAt (chartAt ℂ (𝔇.center j₀)).symm z :=
+        (chartAt ℂ (𝔇.center j₀)).continuousAt_symm hzt
+      exact ((((rhoC 𝔇 j).contMDiff).continuous.continuousAt).comp h1).mul
+        ((continuous_corrC hHsupp hcorr).continuousAt)
+    · have hzs : z ∉ chartMap 𝔇 j₀ '' tsupport H := fun hc =>
+        hz (Set.image_mono hHsupp hc)
+      have hev : (fun w => rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm w)
+          * corrC 𝔇 H g b j₀ w) =ᶠ[𝓝 z] fun _ => (0 : ℂ) := by
+        filter_upwards [(isCompact_chartMap_image_tsupport
+          hHsupp).isClosed.isOpen_compl.mem_nhds hzs] with w hw
+        rw [corrC_eq_zero_of_notMem_image_tsupport hw, mul_zero]
+      exact continuousAt_const.congr hev.symm
+  have hint : ∀ j ∈ (Finset.univ : Finset 𝔇.toFiniteCover.ι), Integrable fun z =>
+      rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z := fun j _ =>
+    (hcont j).integrable_of_hasCompactSupport (hasCompactSupport_corrC hHsupp).mul_left
+  calc ∑ j, ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z
+      = ∑ j, ∫ z, rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z :=
+        Finset.sum_congr rfl fun j _ => integral_pouCoeff_corrFam_eq hHsupp hcorr j
+    _ = ∫ z, ∑ j, rhoC 𝔇 j ((chartAt ℂ (𝔇.center j₀)).symm z) * corrC 𝔇 H g b j₀ z :=
+        (integral_finsetSum Finset.univ hint).symm
+    _ = ∫ z, corrC 𝔇 H g b j₀ z := by
+        refine integral_congr_ae (Eventually.of_forall fun z => ?_)
+        simp only [← Finset.sum_mul, sum_rhoC_apply, one_mul]
+
+end Collapse
+
 end Jacobians.Dolbeault.FineResidue
