@@ -764,7 +764,7 @@ private lemma bridgeForm_chartLine_integrand [Nonempty X]
           rw [hspeed]
           rfl
 
-lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
+private lemma lineIntegral_chartLine_eq_eventually [Nonempty X]
     (P : X) (form : HolomorphicOneForm X) :
     (fun z : ℂ =>
         Jacobians.Vendor.Kirov.lineIntegral (Jacobians.Bridge.bridgeForm form)

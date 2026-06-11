@@ -1,6 +1,6 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-10.*
+*Last updated 2026-06-11.*
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
@@ -10,7 +10,15 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 30** — all **30** in our own modules (the #52
+**Active project axioms: 29** — all **29** in our own modules (PR #179
+(@Deicyde) discharged `AX_ofCurve_contMDiff` to a theorem — the chart-line
+descent proof of Abel–Jacobi holomorphy, with the `Classical.choice` path
+discrepancy landed in the lattice via the period-triangle theorem +
+`loopDevValH1Hom` + the cycle-basis `loops_to_basis` pin, 2026-06-11,
+headline `ofCurve_contMDiff` now standard-3 + `AX_PeriodCycleBasis` only,
+net −1, 30 → 29; the 2026-06-10 DT flag's HI/lattice-completeness condition
+is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s
+discharge obligation, where it belongs; the #52
 endgame discharged `PlaneCurve.instIsManifold` to a real `instance` — diagonal
 preferred-lifted compat + `chartAt_compat` assembly over the #117 atlas, proof
 moved to `AtlasCompat.lean` downstream of the proved compat layer, 2026-06-10,
@@ -304,7 +312,7 @@ primitives that are statement-vetted but not yet discharged.
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (18 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (17 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -320,7 +328,7 @@ primitives that are statement-vetted but not yet discharged.
 |------|------:|--------|-------|
 | 1 — textbook-standard | 10 | classical theorems, citable | high |
 | 2a — data-existence | 4 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 4 | "my construction has good property P" | **may mask a bad def** |
+| 2b — definition-asserting | 3 | "my construction has good property P" | **may mask a bad def** |
 | 2c — atlas / structure | 10 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 2 | `h1coh_zero_finrank`+`serreDuality_equiv` (keystone-gated: port's `exists_serreDualityData`) — **re-stamped vs the now-CONCRETE `H1coh` 2026-06-10 (`DT`): both Standard** — chart disks are Stein/∂̄-acyclic, so the one-cover Čech H¹ IS genuine H¹(X,𝒪_D) (Cartan; twisting by the finite-support D preserves chart-disk acyclicity), making `h1coh_zero_finrank` exactly the Hodge/Serre h¹(𝒪)=g base case and `serreDuality_equiv` Forster §17 at the right strength (opaque K satisfiable as div(ω)). `H1coh`(+3 instances) and `cohomologyLES` **DISCHARGED 2026-06-10** via the Kirov Dolbeault port (`Layer3/CechH1Bridge.lean`, `LinearSystemBridge.lean`, `CohomologyLESBridge.lean`; all standard-3) | research |
@@ -376,7 +384,7 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 
 | Axiom | File:Line | Note |
 |-------|-----------|------|
-| `AX_ofCurve_contMDiff` | `Axioms/AbelJacobiMap.lean:348` | Abel–Jacobi smoothness. **DT-vetted 2026-06-10: FLAGGED (conditional)** — correctly typed, non-vacuous, mathematically true *for the genuine objects*, but as a definition-asserting axiom about `ofCurveImpl` its truth is exactly equivalent to (i) homotopy invariance of the arc integral and (ii) completeness of the `periodMap`/H1 lattice model: if `periodLatticeInBasis` missed any piecewise-analytic loop period, the `Classical.choice` path discrepancies would survive the quotient and the concrete map would be discontinuous (axiom FALSE). Not a new defect — pins this axiom's discharge to the active homotopy-invariance workstream (see `defer-homotopy-invariance` / Fork 1). |
+| `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — now a theorem: the chart-line descent proof of Abel–Jacobi holomorphy (analytic core at 𝕜 = ℂ; the `Classical.choice` path discrepancy is compared only mod Λ and landed in the lattice via the `AX_Period_Triangle` theorem → `loopDevValH1Hom` → the cycle-basis `loops_to_basis` pin); headline `ofCurve_contMDiff` is standard-3 + `AX_PeriodCycleBasis` only. **Conditionality transfer:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-10: FLAGGED (conditional)** — correctly typed, non-vacuous, mathematically true *for the genuine objects*, but as a definition-asserting axiom about `ofCurveImpl` its truth was exactly equivalent to (i) homotopy invariance of the arc integral and (ii) completeness of the `periodMap`/H1 lattice model: if `periodLatticeInBasis` missed any piecewise-analytic loop period, the `Classical.choice` path discrepancies would survive the quotient and the concrete map would be discontinuous (axiom FALSE). |
 | `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication. **DT-vetted 2026-06-10 (retry after timeout): Likely correct** — ambient composite = dual of `Tr_f ∘ f^*` conjugated by `eY`; classical projection formula gives `deg(f)·id`, and its descent through `QuotientAddGroup.map` is exactly `nsmul` (no descent subtlety). Constant-`f` edge verified safe: the real `pullbackOneForm` vanishes for constants, so LHS `= 0 = 0 • P` regardless of the opaque trace; genus-0 / Riemann–Hurwitz cases reduce to `0 = 0`. |
 | `AX_pushforwardAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:491` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pushforwardAmbientLinear` is the dual of the REAL `pullbackOneForm` (direction verified in code), so this is classical Albanese naturality `∫_{f_*γ}ω = ∫_γ f^*ω` + integrality of `f_*γ`; basepoint-free as a subset. (A DT direction-flag was a prose artifact; resolved against the defs.) |
 | `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:505` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pullbackAmbientLinear` is the dual of the OPAQUE trace; satisfiable by the genuine trace (Picard pullback / `∫_{f^*δ}η = ∫_δ Tr η`); jointly with `_id`/`_comp` it pins the trace against the zero-mask (not alone — recorded honestly) |
@@ -505,7 +513,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 30 — the vendored Kirov subtree is now axiom-free, so 30 is the total (incl. the 2 Layer-3 cohomology axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges and the D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, and the 3 trace-cluster axioms #26/#27/#28).
+#   prints 29 — the vendored Kirov subtree is now axiom-free, so 29 is the total (incl. the 2 Layer-3 cohomology axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges and the D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, and AX_ofCurve_contMDiff PR #179).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -522,7 +530,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 30
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 29
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
