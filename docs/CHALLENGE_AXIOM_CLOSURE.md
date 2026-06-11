@@ -8,7 +8,9 @@ ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-11
 (post-D1 + the #161 trace-cluster discharge + the #52 `PlaneCurve.instIsManifold`
 discharge + the PR #179 `AX_ofCurve_contMDiff` discharge, which dropped the
 challenge-critical count 7 → **6** + the PR #183 odd-atlas ∞-chart cluster
-discharge, −7 non-critical) against the 22-axiom table.*
+discharge, −7 non-critical + the #30 `AX_pushforwardAmbient_preserves_lattice`
+discharge, which dropped the challenge-critical count 6 → **5**) against the
+21-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
 > count dropped **13 → 7** (D1 merge −3+1 −intersectionForm; #161 trace-cluster
@@ -45,9 +47,9 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ---
 
-## What filling the 6 does — and does not — claim
+## What filling the 5 does — and does not — claim
 
-Discharging all 6 makes every Buzzard declaration print exactly
+Discharging all 5 makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -80,14 +82,14 @@ declarations. Four boundaries to keep the claim honest:
    `Classical.choice` path discrepancy is landed in the lattice via the
    cycle-basis `loops_to_basis` pin, so the condition transfers into
    `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis`
-   pin), where it belongs. Filling the 6 therefore still includes
+   pin), where it belongs. Filling the 5 therefore still includes
    settling X1, now inside the Cluster-A discharge.
 
-## The 6 challenge-critical axioms
+## The 5 challenge-critical axioms
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging all 6 gives a challenge closure over only
+obligations). Discharging all 5 gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
 ### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
@@ -124,8 +126,9 @@ Each appears in exactly one Buzzard declaration and has its own proof path.
 
 ### Cluster C — Functoriality block
 
-Six entries, of which the trace trio is now **discharged** (status note below) and
-**three remain as axioms**. All appear in the `pushforward`/`pullback` declarations. The dependency structure
+Six entries, of which the trace trio (status note below) and the pushforward
+lattice-preservation statement (#30, 2026-06-11) are now **discharged** and
+**two remain as axioms**. All appear in the `pushforward`/`pullback` declarations. The dependency structure
 within the cluster is more nuanced than "all follow from one root":
 
 | Axiom | Primary dependency | Role |
@@ -133,7 +136,7 @@ within the cluster is more nuanced than "all follow from one root":
 | `pushforwardOneForm` | core trace construction | The fiber-sum trace `Tr_f(ω)` of a 1-form ω along f: needed for `pullback` (defined as `(Tr_f)ᵀ`), `pullback_id`, `pullback_comp`, `pushforward_pullback` |
 | `AX_pushforwardOneForm_id` | `pushforwardOneForm` real | `Tr_id = id`; immediate once the trace is real |
 | `AX_pushforwardOneForm_comp` | `pushforwardOneForm` real | `Tr_{g∘f} = Tr_g ∘ Tr_f`; functoriality of the fiber sum |
-| `AX_pushforwardAmbient_preserves_lattice` | `pullbackOneForm` (already real via Kirov) + period naturality | `pushforwardAmbientLinear` is defined as the dual of `pullbackOneForm f` — so `pullbackOneForm` (Kirov-backed) is the dependency, not the trace. Content: `∫_{f_*(γ)} ω = ∫_γ f*ω`. **Not trace-gated; can proceed now.** |
+| `AX_pushforwardAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#30) | Now a theorem: `∫_{f_*(γ)} ω = ∫_γ f*ω` realized by the developing-value naturality engine (`DevelopingNaturality.lean` + `LoopLattice.lean`, axiom-free) over the Kirov-backed `pullbackOneForm`; representative-loop induction, the image cycle is the honest loop `f∘γ`. Headlines `pushforward`/`_contMDiff`/`_id_apply`/`_comp_apply` now standard-3 + `AX_PeriodCycleBasis`. |
 | `AX_pullbackAmbient_preserves_lattice` | `pushforwardOneForm` (trace, axiom) | `pullbackAmbientLinear` is defined as the dual of `pushforwardOneForm f` — so the trace IS the dependency. Content: `∫_γ f*ω = ∫_{f_*(γ)} ω` from the other side. **Trace-gated.** |
 | `AX_pushforward_pullback` | trace-norm relation | `pushforward_f ∘ pullback_f = [deg f]` on Jac(Y): follows from `Tr_f(f*ω) = deg(f)·ω`. Forster §12 / Miranda. |
 
@@ -145,12 +148,13 @@ within the cluster is more nuanced than "all follow from one root":
 > `AX_pullbackAmbient_preserves_lattice` is no longer trace-gated by an axiom —
 > it is the dual of a REAL trace.
 
-With the trace real, the remaining Cluster-C axioms are the two
-lattice-preservation statements — `AX_pushforwardAmbient_preserves_lattice`
-(dual of the real `pullbackOneForm`) and `AX_pullbackAmbient_preserves_lattice`
-(dual of the now-real trace) — plus `AX_pushforward_pullback`. All three are
-period-naturality / projection-formula content over real maps; none is gated by
-an opaque construction any more.
+With the trace real and the pushforward lattice statement a theorem (#30),
+the remaining Cluster-C axioms are `AX_pullbackAmbient_preserves_lattice`
+(dual of the now-real trace; the #30 engine is the template — what is missing
+is the trace-side analogue of `pullbackOneForm_isPullbackCoeffRel`, i.e. the
+fibre-sum coefficient law for `pushforwardOneForm`) and
+`AX_pushforward_pullback`. Both are period-naturality / projection-formula
+content over real maps; neither is gated by an opaque construction any more.
 
 ---
 
@@ -210,7 +214,7 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 ## Summary: the closure picture
 
 ```
-6 challenge-critical axioms
+5 challenge-critical axioms
     │
     ├── Cluster A (1) — in EVERY Buzzard declaration
     │      AX_PeriodCycleBasis  (D1 merge: loops + H₁ basis + Hurewicz tie
@@ -225,9 +229,10 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
     │      (AX_ofCurve_contMDiff — discharged PR #179, conditionality
     │       transferred to AX_PeriodCycleBasis's loops_to_basis pin)
     │
-    └── Cluster C (3) — functoriality over now-real maps
-           (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge)
-           AX_pushforwardAmbient_preserves_lattice  (dual of real pullbackOneForm)
+    └── Cluster C (2) — functoriality over now-real maps
+           (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge;
+            AX_pushforwardAmbient_preserves_lattice discharged #30 via the
+            developing-value naturality engine)
            AX_pullbackAmbient_preserves_lattice     (dual of the real trace)
            AX_pushforward_pullback                  (projection formula, deg f)
 ```
@@ -246,9 +251,12 @@ theorem. `AX_AbelTheorem`'s hard half is Jacobi inversion. (`AX_ofCurve_contMDif
 was discharged in PR #179; its HI/lattice-completeness conditionality now lives in
 Cluster A's discharge obligation.)
 
-**Cluster C**: the trace trio is discharged (#26/#27/#28), so nothing in the
-cluster is gated by an opaque construction: both lattice-preservation axioms are
-period-naturality statements about duals of REAL maps, and push-pull is the
+**Cluster C**: the trace trio is discharged (#26/#27/#28) and the pushforward
+lattice statement is a theorem (#30, developing-value naturality engine), so
+nothing in the cluster is gated by an opaque construction: the remaining
+lattice-preservation axiom is a period-naturality statement about the dual of
+the REAL trace (the #30 engine is the template; the missing piece is the
+fibre-sum coefficient law for `pushforwardOneForm`), and push-pull is the
 projection formula `Tr_f(f*ω) = deg(f)·ω`.
 Miranda (3.1) / Kirov port's `Discharge/Manifold/` machinery are the closest reference.
 
@@ -268,7 +276,7 @@ period-cluster theorems, and sit in the challenge's dependency chain via
 **The RR/Serre cohomology branch** (`h1coh_zero_finrank`, `serreDuality_equiv`,
 line-bundle stubs) — this IS orthogonal to challenge closure. These axioms do not appear
 in any Buzzard `#print axioms`. The tower's RR/Serre discharge deepens mathematical
-trust without touching any of the 6.
+trust without touching any of the 5.
 
 The tower's indirect contribution to eventual challenge closure: the Kirov port
 integrated in Phase D contains `residueTheorem_unconditional` and the proven
