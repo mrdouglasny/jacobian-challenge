@@ -1,0 +1,28 @@
+
+== 2026-06-11 F-lane (frame witness) ==
+MILESTONE 1 (COMPLETE, single pass): Nonempty (TailPairFrame X) at kirovGenus > 0.
+File: vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/TailFrameWitness.lean (457 LoC,
+wired into KirovDolbeault.lean aggregator). ZERO sorries, ZERO new axioms.
+
+Components:
+(a) slot family: coeffAt α p (chart reads of ω₀ = holToMero α) — definitional vs formCoeff.
+(b) side conditions: slot_mero from coeffAt_analyticAt; slot_order = K p verbatim from
+    canonicalDataOfForm.order_eq (K := exists_form_divisor choice) via formOrderW_holToMero.
+(c) resSum (THE analytic atom): discharged from the PROVEN Gate-A
+    SerreResidueTheorem.residueTheorem_unconditional via two new bridges:
+    * resAt_eq_planarCoeff_neg_one — contour residue = planar c_{-1} (one-variable,
+      leading-monomial stripping; monomial atom ∮(z−c)^n=0, n≠−1; NF removable-sing base).
+    * MeromorphicFunction.repair — holoRepr junk repair (germ-equal, honestly analytic
+      off div-support), satisfying the Gate-A analyticity hypothesis for arbitrary F.
+    No new analytic lemma was needed beyond what the tower supplies — the FineResidue
+    machinery was NOT needed; Kirov's Gate-A closure already carries the atom.
+
+Headline: nonempty_tailPairFrame_of_kirovGenus_pos : 0 < kirovGenus X → Nonempty (TailPairFrame X).
+Kernel: #print axioms standard-3 (propext, Classical.choice, Quot.sound) on all six
+declarations (headline, tailPairFrameOfForm, resAt_eq_planarCoeff_neg_one, resSum_planar,
+repair, canonicalDataOfForm); no sorryAx. Downstream check: witness + PairingSurjective
+feeds TailPairFrame.tailRiemannRoch_of_pairingSurjective verbatim (example compiled).
+Builds: vendor lake build green (8784 jobs); root lake build green (8768 jobs).
+Commit: db214d0.
+Note: genus-0 is intentionally outside the witness (no nonzero holomorphic ω₀ exists;
+Gate-A residue theorem is for holomorphic frame forms; genus-0 keystone has its own route).
