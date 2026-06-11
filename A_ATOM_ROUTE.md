@@ -138,3 +138,39 @@ fibre `Finset` of `f.toRiemannSphere` (`ProperMapDegreeSheets` has fibre finiten
 `holoRepr` machinery), prove `hoff` at regular non-pole values from conservation of number,
 and attack `hmero`/`hres` per exceptional class (F-pole over regular value; ramified;
 `∞`-fibre).
+
+## T2-lane session (2026-06-11, branch `feat/frame-trace-wall`): THE WALL IS CLOSED
+
+`exists_frameTraceFunctionData_df` is **PROVEN** — no sorry anywhere in the chain.  Route: the
+direct Miranda §VIII.3 step-1 construction over the proven multiplicity-patching engine, with a
+fibre-saturated pole superset.  New files (all sorry-free):
+
+1. `FrameTraceWallEngine.lean` — `valueTrace` (the junk-free plain value trace, a finsum of
+   `F.holoRepr` over the fibres), the `MultiplicityPatchingData` slice decomposition (no-escape +
+   disjointness as a `Finset` partition), slice enumeration by counting (each preimage has
+   `localDeg ≥ 1`; `m` exhibited distinct preimages exhaust a weight-`m` slice), the regularity
+   bridges (`localDeg = 1 ⟺ holoRepr-pullback derivative ≠ 0`; `K x = 0 ⟹ unramified` for
+   `ω₀ = df` data), and the unramified section-sum identification (`hoff`).
+2. `FrameTraceWallDescent.lean` — the UNWEIGHTED symmetric descent (mirror of the weighted
+   `analyticAt_weightedSymSum_descent`, `m ∣ n` collapse), `descTail` (the descended principal
+   part at an arbitrary centre `c₀`), and the meromorphic capstone
+   `meromorphicAt_plainSymSum_descent`: `∑_j ψ(ζʲu) = H(c₀ + uᵐ)` with
+   `planarCoeff (−1) H c₀ = m·a₋ₘ(ψ)`.
+3. `FrameTraceWallCluster.lean` — `cluster_descent`: per fibre point over any finite centre (any
+   multiplicity), the slice sum descends to `H` meromorphic with `Res_c H = frameRes data F r`
+   (CoV along the §5 normal form `η` + `planarCoeff_neg_one_branch`); per-centre assembly
+   `valueTrace_meromorphicAt_and_resAt` (`hmero` + `hres`, ramified clusters included).
+4. `FrameTraceWallInfty.lean` — `infCluster_descent` (the reciprocal normal form
+   `1/f̂ = ηᵐ` at each pole, weighted integrand `Q̃ = −u^{−2m}Q` rotation-invariant, residue
+   `−m·aₘ(Q)` on both sides) and `valueTrace_resAtInfty_df` (Lemma 3.2 at `∞`: contour moved
+   outward by annulus Cauchy, reciprocal principal part picks out `−2πi·b₁`, analytic remainder
+   killed by decay + annulus invariance).
+
+`FrameTrace.lean` assembles the datum in place (S := fibre saturation of
+`supp(div F) ∪ supp K` plus the `∞`-fibre; C := the finite `f`-values of the base support —
+contains every branch value since `supp K` holds all ramification points and poles), and adds
+the unconditional keystone corollary `exists_canonicalData_residueAtom`.
+
+**Atom status: UNCONDITIONAL.**  `exists_canonicalData_frameTraceHypothesis` and
+`exists_canonicalData_residueAtom` are sorry-free; kernel verification recorded in
+`docs/planning/T_LANE_PROGRESS.log`.
