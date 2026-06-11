@@ -368,3 +368,24 @@ RUNG 4 LANDED FIRST (shapes lined up directly — short, as hoped): TailUnwind.l
 - Gates: lake build green (8744 jobs); both headliners standard-3; aggregator wired.
 Next: RUNG 3 — cup-kill (exists effective A with h¹(𝒪_A)=0, Kirov CechH1CupKill idea, our
 implementation over cup/h1InclMono/RR), then the conditional two-RR subtraction targets.
+
+2026-06-11 RUNG 3 LANDED (CechH1CupKill.lean + TailGenusTarget.lean):
+- CUP-KILL PROVEN (no hypotheses): exists_effective_h1InclMono_eq_zero (one-class kill —
+  RR pigeonhole on the cup-at-ξ map L(nP)→H¹(𝒪_nP) at n=h¹(𝒪): l(nP)=h¹(nP)+1 forces a
+  kernel class ψ≠0; then incl_{0→A} ξ = ψ⁻¹⌣(ψ⌣ξ) = 0 at A = nP + div ψ via
+  globalGerm_mul_inv — the cupH1_surjective factorization run in the killing direction)
+  and exists_effective_h1Dim_eq_zero_forall_ge (effective A₀ with h¹(𝒪_A)=0 ∀ A ≥ A₀:
+  basis kill + summed divisors + h1InclMono_surjective onto-kills-basis).
+- TWO-RR SUBTRACTION EXECUTED, conditional on ONE named input TailRiemannRoch X
+  (large-degree tail RR, the item-3 tower output — see TAIL_BLOCKER.md):
+  h1Dim_zero_eq_kirovGenus_of_tailRR (uniform h¹(𝒪)=g at ANY locally realizable cover),
+  h1Dim_zero_eq_zero_of_kirovGenus_zero (the hga shape, target (a)),
+  h1Dim_zero_chartDiskCover_eq_kirovGenus (canonical-cover normal form — the EXACT
+  port-side fact the Layer-3 flip of h1coh_zero_finrank consumes at the CechH1Bridge
+  cover pin), h1Dim_zero_anyChartDiskCover_eq_kirovGenus (via ArithmeticGenusTransfer).
+- KEYSTONE COLLAPSE: exists_serreDualityData_of_genus_zero_of_tailRR (g=0 leg, hga gone)
+  and exists_serreDualityData_genus_split_of_tailRR (keystone = hpos + TailRiemannRoch;
+  hga atom discharged; hpos's UnwindRegularity ∀D is what rung 4 re-points).
+- Gates: all 8 headliners standard-3 (#print axioms); TailGenusTarget lake build green
+  (8733 jobs); both files wired into KirovDolbeault.lean aggregator; TAIL_BLOCKER.md
+  records the two residual inputs (TailRiemannRoch; CechTailComparison) honestly.
