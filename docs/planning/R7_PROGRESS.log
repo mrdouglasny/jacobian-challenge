@@ -1,0 +1,41 @@
+# R7 progress log — FineResidue/Descent.lean (liftQ descent engine)
+# branch feat/keystone-r7-engine, conditional on R6 (MLTie taken as hypothesis shapes, NOT imported)
+
+[T0] Read complete: R6_HANDOFF, GlobalResidueConstruct.CousinResidueData (:141-182),
+     CoboundaryVanish (resFunctional_eq_zero_of_coboundary), Glue/OmegaWitness/Integral/OneOneCoeff,
+     CechComplex (cechH1 = Z1/B1 submoduleOf quotient), CechSection (MGerm = codiscrete germ,
+     OmegaDGerm), HoloRep (holoFn analytic-representative toolkit = the germ->function engine),
+     CechModelManifold (analyticAt_chart_change_to = own-chart -> cover-chart converter),
+     MLTie.lean read AS TEXT from feat/keystone-r6-mltie (shapes: resFunctional_mlGlue,
+     resFunctional_mlCocycle_residue_one; orientation w i j = p_i - p_j).
+     KEY math findings:
+     - extraction must go through holoFn (codiscrete germs: raw reps carry removable junk);
+     - K-point isolation hypothesis (SeparatesPoles): overlaps i/=j must have K<=0 so
+       OmegaDGerm K <= OmegaDGerm 0 there; diagonal pairs get the 0 function (cocycle forces it);
+     - vanish_coboundary FULLY provable only for coboundaries of OmegaDGerm-0 cochains (R5 shape);
+       general K coboundaries carry scalar poles at K-points (form-holomorphic, scalar-polar)
+       -> genuine gap, R6b/higher-order-tie territory -> hypothesis field + R7_BLOCKER.md;
+       at K = 0 (genus 1) the full field is PROVEN.
+[T1] Plan: Descent.lean = (A) germ->pointwise eq_at lemma, (B) SeparatesPoles + OmegaD mono,
+     (C) cocycleFn extraction + Smooth/Holo/Cocycle predicates + oneOneCoeff membership,
+     (E) resFunctional congruence machinery, (F) resCocycle linear map, (G) holomorphic-coboundary
+     vanishing + K<=0 full vanish + liftQ descent, (H) R6Shape + R6Outputs + assembly into
+     CousinResidueData. Compile incrementally with lake env lean.
+[T2] chunks A-F compile: extraction + IsOverlapCocycle + resCocycle linear map done.
+[T3] Chunk G compiled first try: cochainFn extraction, IsCoboundaryOn from germ delta0,
+     resCocycle_eq_zero_of_holomorphic_coboundary (R5 wired), full vanish at K<=0,
+     resH1 / resH1_of_nonpos liftQ descent.
+[T4] Chunk H compiled: R6Shape (verbatim shape copies of in-flight MLTie defs, distinct
+     namespace -> no merge clash), R6Outputs (Prop structure, fields = resFunctional_mlGlue /
+     resFunctional_mlCocycle_residue_one quantified over any t with coe = glueCoeff(mlCocycle),
+     so the R6 bridge is Subtype.ext), resFunctional_glueCoeff_congr, CupMLWitness,
+     nondegenerate_of_r6 (R6 tie GENUINELY consumed), cousinResidueData_of_descent,
+     cousinResidueData_of_r6 : CousinResidueData 𝔇.toFiniteCover K.
+[T5] Gates: #print axioms on all 13 landed declarations = [propext, Classical.choice,
+     Quot.sound] (standard-3, no sorryAx). 0 sorries in Descent.lean. Aggregator wired
+     (KirovDolbeault.lean imports Descent after CoboundaryVanish; pulls GlobalResidueConstruct
+     into the build). lake build KirovDolbeault green.
+[T6] R7_BLOCKER.md written: (1) general-K coboundary pole leg (needs principal-part split +
+     order-m tie; same machinery as UnwindRegularity), (2) CupMLWitness = §17.6 dz/z transport
+     through the cup, (3) refinement invariance deliberately out of scope, (4) genus-0 routed
+     per R4_G0_NOTE (do not instantiate at g=0).
