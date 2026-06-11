@@ -8,12 +8,10 @@ import KirovDolbeault.Dolbeault.FrameTraceWallCluster
 /-!
 # Lemma 3.2 at infinity for the plain value trace (T lane)
 
-The last analytic field of the residual wall `exists_frameTraceFunctionData_df`: the residue at
-infinity of the value trace is the `∞`-fibre `frameRes` sum (the reciprocal-chart cluster
-computation at the poles of the cover).
-
-`valueTrace_resAtInfty_df` is currently the **single residual `sorry`** of the T lane; see the
-discharge sketch in its docstring.
+The last analytic field of the wall `exists_frameTraceFunctionData_df`, PROVEN: the residue at
+infinity of the value trace is the `∞`-fibre `frameRes` sum — the reciprocal-chart cluster
+computation at the poles of the cover (`infCluster_descent`) plus the large-contour
+evaluation (`valueTrace_resAtInfty_df`).
 -/
 
 noncomputable section
@@ -484,14 +482,14 @@ theorem infCluster_descent (data : CanonicalForm17Data X) (F f : MeromorphicFunc
       ← resAt_eq_planarCoeff_neg_one hAη_mero, hCoV, hη0,
       resAt_eq_planarCoeff_neg_one hAt_mero, hbranch]
 
-/-- **[RESIDUAL — single named `sorry`] Lemma 3.2 at `∞` for the plain value trace.**  On a
-contour enclosing all exceptional values of the `ω₀ = df` value trace, the residue at infinity
-is the `∞`-fibre `frameRes` sum (over the poles of the cover).  (NOT VERIFIED — Miranda
-§VIII.3, the reciprocal-chart cluster computation: over `w` large the fibre clusters at the
-poles of `f`; per pole of order `e`, the reciprocal normal form `1/f̂ = ηᵉ`
-(`exists_reciprocal_NF`) and the unweighted symmetric descent give `T(w) = H(1/w)` with `H`
-meromorphic at `0`; the contour integral picks out `−a₁(H)`, which the branch normalization
-identifies with the `frameRes` sum.) -/
+/-- **Lemma 3.2 at `∞` for the plain value trace** (Miranda §VIII.3, the reciprocal-chart
+cluster computation).  On a contour enclosing all exceptional values of the `ω₀ = df` value
+trace, the residue at infinity is the `∞`-fibre `frameRes` sum (over the poles of the cover):
+over `w` large the fibre clusters at the poles of `f` (`infCluster_descent`), so
+`T(w) = −w⁻²·Ht(w⁻¹)` with `Ht` meromorphic at `0` and `Res₀ Ht` the `frameRes` sum; the
+contour moves outward (annulus Cauchy off the exceptional ball), the reciprocal principal
+part contributes `−2πi·a₋₁(Ht)`, and the analytic remainder is killed by decay + annulus
+invariance. -/
 theorem valueTrace_resAtInfty_df (data : CanonicalForm17Data X) (F f : MeromorphicFunction X)
     (hω : data.ω₀ = differentialForm f) (hdiv : (f.div : Divisor X) ≠ 0)
     (C : Finset ℂ) {ρ : ℝ} (hρ : 0 < ρ)
