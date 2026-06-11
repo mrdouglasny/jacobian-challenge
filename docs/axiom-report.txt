@@ -178,6 +178,10 @@
 'Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instNonempty' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instChartedSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.PlaneCurve.instIsManifold' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ ProjectiveCurve.PlaneCurve.instIsManifold]
 'Jacobians.ProjectiveCurve.PlaneCurve.instConnectedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
