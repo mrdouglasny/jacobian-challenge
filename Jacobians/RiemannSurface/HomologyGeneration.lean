@@ -237,6 +237,25 @@ theorem exists_loop_of_mem_span {x₀ : X} {v : H1 X x₀}
     ∃ γ : AnalyticLoop X x₀, loopToHomology γ = v := by
   rwa [← SetLike.mem_coe, coe_span_range_loopToHomology] at hv
 
+/-! ## T-FG in its canonical π₁ form -/
+
+omit [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] in
+/-- The abelianization quotient map is surjective. -/
+private theorem abelianizationOf_surjective {G : Type*} [Group G] :
+    Function.Surjective (Abelianization.of (G := G)) := fun y =>
+  Quotient.inductionOn y fun g => ⟨g, rfl⟩
+
+omit [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] in
+/-- **T-FG bridge.** A finitely generated fundamental group makes `H1 X x₀`
+a finitely generated ℤ-module — so the named residual T-FG can be supplied
+in its canonical topological form `Group.FG (FundamentalGroup X x₀)`
+(π₁ of a compact manifold is finitely generated). -/
+instance moduleFinite_H1_of_fundamentalGroup_fg (x₀ : X)
+    [Group.FG (FundamentalGroup X x₀)] : Module.Finite ℤ (H1 X x₀) := by
+  have h1 : Group.FG (Abelianization (FundamentalGroup X x₀)) :=
+    Group.fg_of_surjective abelianizationOf_surjective
+  exact Module.Finite.iff_addGroup_fg.mpr (GroupFG.iff_add_fg.mp h1)
+
 /-! ## Noetherian extraction: finitely many generating loops -/
 
 /-- **Topological residual T-FG payoff.** If `H1 X x₀` is a finitely

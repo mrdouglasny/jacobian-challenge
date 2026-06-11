@@ -55,3 +55,14 @@ AX_H1FreeRank2g: Module.Finite ℤ (H1 X x₀) + Module.Free ℤ (H1 X x₀) +
 finrank ℤ (H1 X x₀) ≤ 2*genus X. No analytic representatives, no Hurewicz
 tie, no R1/R2 — the loop-subgroup trick (loopHomologyClasses) supplies the
 analytic representatives for free. rank ≥ 2g never needed (B-3 gives it).
+
+T+2h: stages 2-4 COMPILE CLEAN (617af1d): loopHomologyClasses subgroup,
+exists_finite_generating_loops (Fin n from Module.Finite ℤ H1),
+exists_generating_loops (Fin 2g from + Free + finrank ≤ 2g via basisOfPid),
+exists_periodGeneratingLoops / discreteTopology_loopPeriodLattice_of_H1 /
+exists_loopPeriodLattice_basis_of_H1. Umbrella wired.
+Adding T-FG bridge: instance moduleFinite_H1_of_fundamentalGroup_fg
+([Group.FG (FundamentalGroup X x₀)] ⇒ Module.Finite ℤ (H1 X x₀)) so T-FG
+can be supplied in canonical π₁ form. Mathlib chain: Group.fg_of_surjective
+(Abelianization.of surjective) + GroupFG.iff_add_fg + Module.Finite.iff_addGroup_fg.
+Next: kernel closure check (NO AX_PeriodCycleBasis) + full lake build.
