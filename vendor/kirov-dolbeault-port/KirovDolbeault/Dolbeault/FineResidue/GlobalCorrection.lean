@@ -331,4 +331,253 @@ theorem isOneOneCoeff_corrFam (hb : b ∈ (𝔇.U j₀ : Set X))
 
 end Clearances
 
+/-! ### The Leibniz split with the explicit correction term -/
+
+section CorrSplit
+
+variable {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    {h : 𝔇.toFiniteCover.ι → X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+    {H : X → ℂ} {b : X}
+
+/-- **The Leibniz step with the common `∂̄`-discrepancy kept explicit** (per chart): for a
+presentation `h` whose chart reads satisfy `∂̄h̃_i = −∂̄H̃_i` off `S ∪ {b}` (the
+`h + H`-holomorphy hypothesis `hhol'`), the `j`-th summand of the residue integral equals
+the PoU-reinserted curvature terms MINUS the Stokes term MINUS the correction term
+`∫ ρ̃_j·(∂̄H̃_j·g̃_j)`.  This is `integral_pouCoeff_glueCoeff_mero_split` with the
+holomorphy of `h` replaced by the global-correction shape. -/
+theorem integral_pouCoeff_glueCoeff_corr_split
+    (hiso : ∀ a ∈ S, ∃ j₁, MLIsolated 𝔇 j₁ a)
+    (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
+    (hg : IsOneZeroCoeff 𝔇 g)
+    (htmem : IsOneOneCoeff 𝔇 (glueCoeff 𝔇 w g))
+    (hcorr : IsOneOneCoeff 𝔇 (corrFam 𝔇 H g b))
+    (hsmH : ∀ x : X, x ≠ b → ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) H x)
+    (hhol' : ∀ i, ∀ x ∈ (𝔇.U i : Set X), x ∉ (S : Set X) → x ≠ b →
+      DifferentiableAt ℂ (fun z => h i ((chartAt ℂ (𝔇.center i)).symm z)
+        + H ((chartAt ℂ (𝔇.center i)).symm z)) (chartMap 𝔇 i x))
+    (j : 𝔇.toFiniteCover.ι) :
+    ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
+      = (∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+        - (∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z)
+        - ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := by
+  -- the a.e. pointwise Leibniz identity (off the bad coordinates of `insert b S`)
+  have hpt : ∀ z : ℂ, z ∉ badCoords 𝔇 (insert b S) j →
+      pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
+        = DbarDisk.dbar (pouCoeff 𝔇 j) z
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+          - DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+          - pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := by
+    intro z hzT
+    by_cases hzU : z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hzU
+      have hxbS : x ∉ insert b S := fun hx =>
+        hzT ((chartMap_mem_badCoords_iff 𝔇 hxU).mpr hx)
+      have hxb : x ≠ b := fun hc => hxbS (hc ▸ Finset.mem_insert_self b S)
+      have hxS : x ∉ (S : Set X) := fun hx =>
+        hxbS (Finset.mem_insert_of_mem hx)
+      have hxsrc : x ∈ (chartAt ℂ (𝔇.center j)).source := mem_chartSource_of_mem_U 𝔇 hxU
+      have hzt : chartMap 𝔇 j x ∈ (chartAt ℂ (𝔇.center j)).target :=
+        (chartAt ℂ (𝔇.center j)).map_source hxsrc
+      have hcont : ContinuousAt (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) :=
+        (chartAt ℂ (𝔇.center j)).symm.continuousAt
+          (by rwa [(chartAt ℂ (𝔇.center j)).symm_source])
+      have hli : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+        (chartAt ℂ (𝔇.center j)).left_inv hxsrc
+      have hovU : ((𝔇.U j : Opens X) : Set X)
+          ∈ 𝓝 ((chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x)) := by
+        rw [hli]
+        exact (𝔇.U j).isOpen.mem_nhds hxU
+      -- the Forster collapse, read in chart-`j` coordinates
+      have hsplit_ev : splitCoeff 𝔇 w j =ᶠ[𝓝 (chartMap 𝔇 j x)]
+          fun ζ => h j ((chartAt ℂ (𝔇.center j)).symm ζ)
+            - pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) := by
+        filter_upwards [hcont.preimage_mem_nhds hovU] with ζ hζ
+        rw [splitCoeff_apply, pouSplit_eq_of_coboundary 𝔇 hδ hζ]
+      have hBd : DifferentiableAt ℝ
+          (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) :=
+        (contDiffAt_pouAverageRead_off hsm hxU hxS).differentiableAt (by simp)
+      have hgd : DifferentiableAt ℝ (g j) (chartMap 𝔇 j x) :=
+        ((hg.1 j x hxU).restrictScalars (𝕜 := ℝ)).differentiableAt
+      -- the chart reads of `h j` and `H`
+      have hHrd : ContDiffAt ℝ (⊤ : ℕ∞)
+          (fun ζ => H ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) := by
+        refine contDiffAt_chartSymmRead_of_contMDiffAt hzt ?_
+        rw [hli]
+        exact hsmH x hxb
+      have hhd : DifferentiableAt ℝ
+          (fun ζ => h j ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) := by
+        have h1 : ContDiffAt ℝ (⊤ : ℕ∞)
+            (fun ζ => h j ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) := by
+          refine contDiffAt_chartSymmRead_of_contMDiffAt hzt ?_
+          rw [hli]
+          exact hsm j x hxU hxS
+        exact h1.differentiableAt (by simp)
+      -- the common-discrepancy law `∂̄h̃_j = −∂̄H̃_j` at the good point
+      have hdbar_h : DbarDisk.dbar
+            (fun ζ => h j ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x)
+          = - DbarDisk.dbar
+              (fun ζ => H ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) := by
+        have hsplit : (fun ζ => h j ((chartAt ℂ (𝔇.center j)).symm ζ))
+            = fun ζ => (h j ((chartAt ℂ (𝔇.center j)).symm ζ)
+                + H ((chartAt ℂ (𝔇.center j)).symm ζ))
+              - H ((chartAt ℂ (𝔇.center j)).symm ζ) := by
+          funext ζ
+          ring
+        rw [hsplit, DbarOpenDisk.dbar_sub
+            ((hhol' j x hxU hxS hxb).restrictScalars ℝ)
+            (hHrd.differentiableAt (by simp)),
+          DbarDisk.dbar_eq_zero_of_differentiableAt (hhol' j x hxU hxS hxb), zero_sub]
+      have hdbar_split : DbarDisk.dbar (splitCoeff 𝔇 w j) (chartMap 𝔇 j x)
+          = - DbarDisk.dbar
+              (fun ζ => H ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x)
+            - DbarDisk.dbar
+              (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ))
+              (chartMap 𝔇 j x) := by
+        rw [dbar_congr_of_eventuallyEq hsplit_ev, DbarOpenDisk.dbar_sub hhd hBd, hdbar_h]
+      have hdbarB : DbarDisk.dbar
+            (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)
+            (chartMap 𝔇 j x)
+          = DbarDisk.dbar (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ))
+              (chartMap 𝔇 j x) * g j (chartMap 𝔇 j x) := by
+        rw [dbar_mul hBd hgd,
+          DbarDisk.dbar_eq_zero_of_differentiableAt (hg.1 j x hxU).differentiableAt,
+          mul_zero, add_zero]
+      have hdbarPB : DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) (chartMap 𝔇 j x)
+          = DbarDisk.dbar (pouCoeff 𝔇 j) (chartMap 𝔇 j x)
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x))
+                  * g j (chartMap 𝔇 j x))
+            + pouCoeff 𝔇 j (chartMap 𝔇 j x)
+              * DbarDisk.dbar
+                  (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)
+                  (chartMap 𝔇 j x) :=
+        dbar_mul ((contDiff_pouCoeff 𝔇 j).differentiable (by simp) _)
+          ((contDiffAt_pouAverageRead_mul_off hsm hg hxU hxS).differentiableAt (by simp))
+      -- the repaired correction value at the good point
+      have hcorrv : corrFam 𝔇 H g b j (chartMap 𝔇 j x)
+          = DbarDisk.dbar (fun ζ => H ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x)
+              * g j (chartMap 𝔇 j x) := by
+        rw [corrFam_apply]
+        refine if_neg ?_
+        rintro ⟨hbU, hzb⟩
+        exact hzT (hzb ▸ (chartMap_mem_badCoords_iff 𝔇 hbU).mpr (Finset.mem_insert_self b S))
+      rw [glueCoeff_apply, hdbar_split, hdbarPB, hdbarB, hcorrv]
+      ring
+    · have hzs : z ∉ chartMap 𝔇 j '' tsupport (cechPoU 𝔇 j) := fun hc =>
+        hzU (Set.image_mono (fun y hy => cechPoU_subordinate 𝔇 j hy) hc)
+      have hP0 : pouCoeff 𝔇 j z = 0 := Set.indicator_of_notMem hzU _
+      have hD0 : DbarDisk.dbar (pouCoeff 𝔇 j) z = 0 :=
+        dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hzs
+      have hPB0 : DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z = 0 := by
+        refine dbar_eq_zero_of_eventuallyEq_zero ?_
+        filter_upwards [(isCompact_image_tsupport_cechPoU 𝔇
+          j).isClosed.isOpen_compl.mem_nhds hzs] with ζ hζ
+        rw [pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hζ, zero_mul]
+      rw [hP0, hD0, hPB0, zero_mul, zero_mul, zero_mul]
+      ring
+  -- integrability bookkeeping
+  have hIt : Integrable fun z => pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z :=
+    integrable_pouCoeff_mul 𝔇 htmem j
+  have hIcorr : Integrable fun z => pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z :=
+    integrable_pouCoeff_mul 𝔇 hcorr j
+  have hYcd : ContDiff ℝ (⊤ : ℕ∞) fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z) := by
+    refine contDiff_of_chartImage_clearance 𝔇 (j := j) ?_ ?_
+    · rintro z ⟨x, hxU, rfl⟩
+      by_cases hxS : x ∈ (S : Set X)
+      · obtain ⟨j₁, hj₁⟩ := hiso x hxS
+        have hj : j = j₁ := eq_isolated_index hj₁ hxU
+        subst hj
+        refine (contDiffAt_const (c := (0 : ℂ))).congr_of_eventuallyEq ?_
+        filter_upwards [eventually_dbar_pouCoeff_zero_near_iso hj₁] with w' hw'
+        rw [hw', zero_mul]
+      · exact (ChartDiskCover.contDiffAt_dbar_chartDisk
+          (contDiff_pouCoeff 𝔇 j).contDiffAt).mul
+          (contDiffAt_pouAverageRead_mul_off hsm hg hxU hxS)
+    · intro z hz
+      rw [dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hz, zero_mul]
+  have hYcs : HasCompactSupport fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+    (DbarDisk.hasCompactSupport_dbar (hasCompactSupport_pouCoeff 𝔇 j)).mul_right
+  have hIY : Integrable fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+    hYcd.continuous.integrable_of_hasCompactSupport hYcs
+  -- the bad coordinates are volume-negligible
+  have hane : ∀ᵐ z : ℂ ∂volume, z ∉ badCoords 𝔇 (insert b S) j := by
+    refine ae_iff.mpr ?_
+    have hset : {z : ℂ | ¬ z ∉ badCoords 𝔇 (insert b S) j}
+        = ((badCoords 𝔇 (insert b S) j : Finset ℂ) : Set ℂ) := by
+      ext z
+      simp
+    rw [hset]
+    exact (badCoords 𝔇 (insert b S) j).finite_toSet.measure_zero _
+  have hF : Integrable fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+      - pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z := hIY.sub hIt
+  have e2 : (∫ z, (DbarDisk.dbar (pouCoeff 𝔇 j) z
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+        - pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z))
+      = (∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+        - ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z := integral_sub hIY hIt
+  have hkey : ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+      = ((∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+        - ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z)
+        - ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := by
+    calc ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+        = ∫ z, ((DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+              - pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z)
+            - pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z) := by
+          refine integral_congr_ae ?_
+          filter_upwards [hane] with z hz
+          linear_combination hpt z hz
+      _ = (∫ z, (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+              - pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z))
+            - ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := integral_sub hF hIcorr
+      _ = ((∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+            - ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z)
+            - ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := by rw [e2]
+  -- PoU reinsertion of the curvature term
+  have hreins : (∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+      = ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+    calc ∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)
+        = ∫ z, ∑ k, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+            * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+          refine integral_congr_ae (Eventually.of_forall fun z => ?_)
+          simp only [← Finset.sum_mul, sum_rhoC_apply, one_mul]
+      _ = ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+            * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+          refine integral_finsetSum Finset.univ fun k _ => ?_
+          have hcd : ContDiff ℝ (⊤ : ℕ∞) fun z =>
+              rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+                * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                    * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) :=
+            contDiff_of_chartImage_clearance 𝔇
+              (fun z hz => (contDiffAt_chartSymmRead (rhoC 𝔇 k).contMDiff
+                (chartMap_image_U_subset_target 𝔇 j hz)).mul hYcd.contDiffAt)
+              (fun z hz => by
+                rw [dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hz, zero_mul, mul_zero])
+          exact hcd.continuous.integrable_of_hasCompactSupport hYcs.mul_left
+  rw [← hreins]
+  linear_combination hkey
+
+end CorrSplit
+
 end Jacobians.Dolbeault.FineResidue
