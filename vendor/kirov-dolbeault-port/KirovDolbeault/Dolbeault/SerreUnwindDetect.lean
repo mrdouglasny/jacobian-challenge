@@ -34,6 +34,7 @@ noncomputable section
 
 open scoped Manifold ContDiff Topology
 open TopologicalSpace (Opens)
+open Filter
 open Module
 
 set_option linter.unusedSectionVars false
@@ -449,6 +450,76 @@ private theorem centerRead_data {j₀ : 𝔇.toFiniteCover.ι} {b : X}
   · exact hHσ.congr (hev.filter_mono nhdsWithin_le_nhds).symm
   · rw [meromorphicOrderAt_congr (hev.filter_mono nhdsWithin_le_nhds),
       meromorphicOrderAt_comp_of_deriv_ne_zero hσan hσd, hσpt]
+
+/-- **`holoFn` reads back an honest representative on a punctured neighbourhood of a marked
+boundary point `b ∉ W`**: if `𝓝[≠] b`-eventually points lie in `W`, and the zero-extension of
+the representative `F` is meromorphic of FINITE order at `b` (ambient chart), then the analytic
+representative agrees with `Gext F` eventually on `𝓝[≠] b`.  The finite-order normal form makes
+`Gext F` junk-free (a continuous formula) on a punctured neighbourhood, so the limit-repair
+recovers its values (`holoFn_eq_of_tendsto`).  This is the boundary-point complement of
+`holoFn_eq_holoRep_of_chart_analyticAt`. -/
+theorem holoFn_eventuallyEq_near_marked {W : Opens X} {gcls : MGerm W}
+    (hgc : gcls ∈ OmegaDGerm (0 : Divisor X) W) {F : ↥W → ℂ}
+    (hgF : toGerm W F = gcls) {b : X}
+    (hWnear : ∀ᶠ x in 𝓝[≠] b, x ∈ W) {nF : ℤ}
+    (hFmer : MeromorphicAt (Gext F ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b))
+    (hFord : meromorphicOrderAt (Gext F ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b)
+      = (nF : WithTop ℤ)) :
+    ∀ᶠ x in 𝓝[≠] b, holoFn hgc x = Gext F x := by
+  classical
+  set ψ := chartAt (H := ℂ) b with hψdef
+  set β := ψ b with hβdef
+  have hbsrc : b ∈ ψ.source := mem_chart_source ℂ b
+  -- the junk-free normal form on a punctured chart neighbourhood
+  obtain ⟨w, hwan, hw0, hwe⟩ := (meromorphicOrderAt_eq_int_iff hFmer).mp hFord
+  set φX : X → ℂ := fun y => (ψ y - β) ^ nF • w (ψ y) with hφXdef
+  -- transfer the normal form to the X side
+  have htendψ : Tendsto ψ (𝓝[≠] b) (𝓝[≠] β) := ψ.tendsto_nhdsNE hbsrc
+  have hXside : ∀ᶠ x in 𝓝[≠] b, Gext F x = φX x := by
+    have h1 : ∀ᶠ x in 𝓝[≠] b, (Gext F ∘ ψ.symm) (ψ x) = (ψ x - β) ^ nF • w (ψ x) :=
+      htendψ.eventually hwe
+    have h2 : ∀ᶠ x in 𝓝[≠] b, x ∈ ψ.source :=
+      eventually_nhdsWithin_of_eventually_nhds (ψ.open_source.mem_nhds hbsrc)
+    filter_upwards [h1, h2] with x hx1 hx2
+    rw [Function.comp_apply, ψ.left_inv hx2] at hx1
+    exact hx1
+  -- the analyticity region of the unit factor, pulled back
+  have hwana : ∀ᶠ x in 𝓝[≠] b, AnalyticAt ℂ w (ψ x) :=
+    (htendψ.mono_right nhdsWithin_le_nhds).eventually hwan.eventually_analyticAt
+  -- the open punctured neighbourhood carrying all four properties
+  have hall : ∀ᶠ x in 𝓝[≠] b, x ∈ W ∧ x ∈ ψ.source ∧
+      Gext F x = φX x ∧ AnalyticAt ℂ w (ψ x) := by
+    filter_upwards [hWnear, eventually_nhdsWithin_of_eventually_nhds
+      (ψ.open_source.mem_nhds hbsrc), hXside, hwana] with x h1 h2 h3 h4
+    exact ⟨h1, h2, h3, h4⟩
+  rw [eventually_nhdsWithin_iff] at hall
+  obtain ⟨O, hOp, hOopen, hbO⟩ := eventually_nhds_iff.mp hall
+  -- pointwise: at each `x ∈ O ∖ {b}`, the limit-repair recovers `Gext F x`
+  rw [eventually_nhdsWithin_iff]
+  refine eventually_nhds_iff.mpr ⟨O, fun x hxO hxbne => ?_, hOopen, hbO⟩
+  obtain ⟨hxW, hxsrc, hxval, hxw⟩ := hOp x hxO hxbne
+  have hxb : x ≠ b := by simpa using hxbne
+  -- the formula is continuous at `x`
+  have hψne : ψ x ≠ β := fun hc => hxb (ψ.injOn hxsrc hbsrc hc)
+  have hcψ : ContinuousAt ψ x := ψ.continuousAt hxsrc
+  have hczpow : ContinuousAt (fun y => (ψ y - β) ^ nF) x := by
+    have h1 : ContinuousAt (fun ζ : ℂ => (ζ - β) ^ nF) (ψ x) :=
+      (continuousAt_id.sub continuousAt_const).zpow₀ nF (Or.inl (sub_ne_zero.mpr hψne))
+    exact h1.comp hcψ
+  have hcw : ContinuousAt (fun y => w (ψ y)) x := hxw.continuousAt.comp hcψ
+  have hcont : ContinuousAt φX x := hczpow.smul hcw
+  -- `Gext F` tends to its own value at `x` (it agrees with the formula near `x`)
+  have hev : ∀ᶠ y in 𝓝 x, y ∈ O ∧ y ∈ ({b}ᶜ : Set X) := by
+    filter_upwards [hOopen.mem_nhds hxO,
+      isOpen_compl_singleton.mem_nhds (by simpa using hxb : x ∈ ({b}ᶜ : Set X))] with y h1 h2
+    exact ⟨h1, h2⟩
+  have htends : Tendsto (Gext F) (𝓝[≠] x) (𝓝 (Gext F x)) := by
+    have h1 : Tendsto φX (𝓝[≠] x) (𝓝 (φX x)) := hcont.tendsto.mono_left nhdsWithin_le_nhds
+    rw [show Gext F x = φX x from hxval]
+    refine h1.congr' ?_
+    filter_upwards [eventually_nhdsWithin_of_eventually_nhds hev] with y hy
+    exact ((hOp y hy.1 hy.2).2.2.1).symm
+  exact holoFn_eq_of_tendsto hgc F hgF hxW htends
 
 /-- **`SeparatesPoles` is stable under marking one cover-isolated point**: overlaps of distinct
 cover sets avoid the isolated point, so the marked divisor `K + b` is still non-positive there. -/
