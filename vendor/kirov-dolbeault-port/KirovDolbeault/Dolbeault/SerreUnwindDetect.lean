@@ -166,6 +166,207 @@ theorem unwindRegularity_of_detects (G : GlobalResidue 𝔘 K) (D : Divisor X)
 
 end GlobalResidue
 
+/-! ## Part 3 — the skyscraper test cocycle at an isolated jump point
+
+The detecting class for the concrete fine-sheaf residue: at an isolated jump point `b` with
+level `E b ≤ m < D b`, the **exact-order local Mittag–Leffler witness** (proven for the
+canonical chart-disk cover, `exists_orderExact_witness_chartDisk`) supplies a section
+`γ ∈ 𝒪_{Ě+b}(U j₀)` (`Ě := E + (m − E b)·b`) of order exactly `−(m+1)` at `b`.  Its
+`Pi.single` coboundary is a `Z¹(𝒪_E)` cocycle (overlaps avoid `b` by isolation, and the
+`𝒪_{Ě+b}` bound IS the `𝒪_E` bound off `b` — the witness absorbs all `E`-negative zero
+requirements), trivialized at level `D` by the cochain itself (`m + 1 ≤ D b`). -/
+
+/-- Pointwise-monotone divisor comparison on an open: `𝒪_{D₁}(V) ≤ 𝒪_{D₂}(V)`. -/
+theorem OmegaD_mono {D₁ D₂ : Divisor X} {V : Opens X} (h : ∀ x ∈ V, D₁ x ≤ D₂ x) :
+    OmegaD (X := X) D₁ V ≤ OmegaD D₂ V := by
+  rintro f ⟨hmer, hord⟩
+  refine ⟨hmer, fun v => le_trans ?_ (hord v)⟩
+  have e1 : (-(D₁ v.1) : WithTop ℤ) = ((-(D₁ v.1) : ℤ) : WithTop ℤ) := rfl
+  have e2 : (-(D₂ v.1) : WithTop ℤ) = ((-(D₂ v.1) : ℤ) : WithTop ℤ) := rfl
+  rw [e1, e2]
+  exact_mod_cast neg_le_neg (h v.1 v.2)
+
+/-- Germ-class version of `OmegaD_mono`. -/
+theorem OmegaDGerm_mono {D₁ D₂ : Divisor X} {V : Opens X} (h : ∀ x ∈ V, D₁ x ≤ D₂ x) :
+    OmegaDGerm (X := X) D₁ V ≤ OmegaDGerm D₂ V :=
+  Submodule.map_mono (OmegaD_mono h)
+
+/-- **The exact-order local Mittag–Leffler witness** on a chart-disk cover: at every cover set
+`U j ∋ P` and divisor `D`, a section of `𝒪_{D+P}(U j)` of order EXACTLY `−D(P)−1` at `P`.
+Strictly stronger than `LocallyRealizable` (which only asks for the top coefficient); proven
+for the canonical cover by the factorized-rational product witness. -/
+def ExactOrderWitness (𝔇 : ChartDiskCover X) : Prop :=
+  ∀ (D : Divisor X) (j : 𝔇.toFiniteCover.ι) (P : X) (hP : P ∈ 𝔇.U j),
+    ∃ γ : ↥(𝔇.U j) → ℂ, γ ∈ OmegaD (D + Finsupp.single P 1) (𝔇.U j) ∧
+      ordU γ ⟨P, hP⟩ = ((-(D P) - 1 : ℤ) : WithTop ℤ)
+
+/-- The canonical chart-disk cover has the exact-order witness
+(`exists_orderExact_witness_chartDisk`, the factorized-rational product witness). -/
+theorem exactOrderWitness_chartDiskCover [Nonempty X] :
+    ExactOrderWitness (chartDiskCover (X := X)) := by
+  intro D j P hP
+  obtain ⟨γ, hmem, hord⟩ := exists_orderExact_witness_chartDisk D j P hP
+  exact ⟨γ, hmem, hord⟩
+
+section TestCocycle
+
+variable {𝔇 : ChartDiskCover X} [DecidableEq 𝔇.toFiniteCover.ι]
+
+/-- **The skyscraper test datum** at level `(E, b, m)`: a distinguished-chart section with pole
+of order exactly `m+1` at `b` and the `𝒪_E` bounds everywhere else on `U j₀`
+(`Ě := E + (m − E b)·b`, so `𝒪_{Ě + b}` is exactly that bound package). -/
+structure TestCocycleData (𝔇 : ChartDiskCover X) (E : Divisor X) (j₀ : 𝔇.toFiniteCover.ι)
+    (b : X) (hb : b ∈ (𝔇.U j₀ : Set X)) (m : ℤ) where
+  /-- The distinguished-chart section. -/
+  γ : ↥(𝔇.U j₀) → ℂ
+  /-- `γ ∈ 𝒪_{Ě + b}(U j₀)` with `Ě := E + (m − E b)·b`. -/
+  mem : γ ∈ OmegaD (E + Finsupp.single b (m - E b) + Finsupp.single b 1) (𝔇.U j₀)
+  /-- The order at `b` is exactly `−(m+1)`. -/
+  ord : ordU γ ⟨b, hb⟩ = ((-m - 1 : ℤ) : WithTop ℤ)
+
+/-- The exact-order witness inhabits the test datum at every admissible level (`E b ≤ m`). -/
+theorem TestCocycleData.exists_of_witness (hwit : ExactOrderWitness 𝔇) {E : Divisor X}
+    {j₀ : 𝔇.toFiniteCover.ι} {b : X} (hb : b ∈ (𝔇.U j₀ : Set X)) {m : ℤ} (hmE : E b ≤ m) :
+    Nonempty (TestCocycleData 𝔇 E j₀ b hb m) := by
+  obtain ⟨γ, hmem, hord⟩ := hwit (E + Finsupp.single b (m - E b)) j₀ b hb
+  refine ⟨⟨γ, hmem, ?_⟩⟩
+  rw [hord]
+  congr 1
+  have hEb : (E + Finsupp.single b (m - E b)) b = m := by
+    rw [Finsupp.add_apply, Finsupp.single_eq_same]
+    ring
+  rw [hEb]
+
+namespace TestCocycleData
+
+variable {E D : Divisor X} {j₀ : 𝔇.toFiniteCover.ι} {b : X} {hb : b ∈ (𝔇.U j₀ : Set X)} {m : ℤ}
+
+/-- The divisor bound carried by the test section, at the marked point. -/
+private theorem divisor_apply_self :
+    (E + Finsupp.single b (m - E b) + Finsupp.single b 1 : Divisor X) b = m + 1 := by
+  rw [Finsupp.add_apply, Finsupp.add_apply, Finsupp.single_eq_same, Finsupp.single_eq_same]
+  ring
+
+/-- The divisor bound carried by the test section, away from the marked point. -/
+private theorem divisor_apply_ne {x : X} (hx : x ≠ b) :
+    (E + Finsupp.single b (m - E b) + Finsupp.single b 1 : Divisor X) x = E x := by
+  rw [Finsupp.add_apply, Finsupp.add_apply,
+    Finsupp.single_eq_of_ne (a := b) (a' := x) hx,
+    Finsupp.single_eq_of_ne (a := b) (a' := x) hx]
+  ring
+
+/-- The skyscraper test 0-cochain: the test germ on the distinguished set, `0` elsewhere. -/
+noncomputable def cochain (td : TestCocycleData 𝔇 E j₀ b hb m) :
+    𝔇.toFiniteCover.toFiniteFamily.Cochain0 :=
+  Pi.single j₀ (toGerm (𝔇.U j₀) td.γ)
+
+theorem cochain_self (td : TestCocycleData 𝔇 E j₀ b hb m) :
+    td.cochain j₀ = toGerm (𝔇.U j₀) td.γ := by
+  rw [cochain, Pi.single_eq_same]
+
+theorem cochain_of_ne (td : TestCocycleData 𝔇 E j₀ b hb m) {j : 𝔇.toFiniteCover.ι}
+    (hj : j ≠ j₀) : td.cochain j = 0 := by
+  rw [cochain, Pi.single_eq_of_ne hj]
+
+/-- **Level-`D` membership of the test cochain** (`m + 1 ≤ D b`, `E ≤ D`): the cochain whose
+coboundary trivializes the test class in `H¹(𝒪_D)`. -/
+theorem cochain_mem_sections0 (td : TestCocycleData 𝔇 E j₀ b hb m)
+    (hED : ∀ x, E x ≤ D x) (hmD : m + 1 ≤ D b) :
+    td.cochain ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 D := by
+  intro i
+  by_cases hi : i = j₀
+  · rw [hi, td.cochain_self]
+    refine OmegaDGerm_mono (D₁ := E + Finsupp.single b (m - E b) + Finsupp.single b 1)
+      (fun x _ => ?_) ⟨td.γ, td.mem, rfl⟩
+    by_cases hx : x = b
+    · rw [hx, divisor_apply_self]
+      exact hmD
+    · rw [divisor_apply_ne hx]
+      exact hED x
+  · rw [td.cochain_of_ne hi]
+    exact Submodule.zero_mem _
+
+/-- **Level-`E` membership of the test coboundary**: the overlap components avoid `b`
+(isolation), where the `𝒪_{Ě+b}` bound is the `𝒪_E` bound. -/
+theorem delta_mem_sections1 (td : TestCocycleData 𝔇 E j₀ b hb m)
+    (hbiso : FineResidue.MLIsolated 𝔇 j₀ b) :
+    𝔇.toFiniteCover.toFiniteFamily.cechDelta0 td.cochain
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.sections1 E := by
+  intro p
+  obtain ⟨i, j⟩ := p
+  have hδ : 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 td.cochain (i, j)
+      = rawRestrictG inf_le_right (td.cochain j) - rawRestrictG inf_le_left (td.cochain i) := by
+    simp only [FiniteFamily.cechDelta0, LinearMap.pi_apply, LinearMap.sub_apply,
+      LinearMap.comp_apply, LinearMap.proj_apply]
+  rw [hδ]
+  by_cases hi : i = j₀ <;> by_cases hj : j = j₀
+  · -- diagonal pair: the two restrictions agree (proof-irrelevant `≤`)
+    rw [hi, hj]
+    have heq : rawRestrictG (inf_le_right : (𝔇.U j₀ ⊓ 𝔇.U j₀ : Opens X) ≤ 𝔇.U j₀)
+          (td.cochain j₀)
+        = rawRestrictG (inf_le_left : (𝔇.U j₀ ⊓ 𝔇.U j₀ : Opens X) ≤ 𝔇.U j₀)
+          (td.cochain j₀) := rfl
+    rw [heq, sub_self]
+    exact Submodule.zero_mem _
+  · -- `i = j₀`, `j ≠ j₀`: the `−γ` side on an overlap avoiding `b`
+    rw [hi, td.cochain_of_ne hj, map_zero, zero_sub]
+    refine neg_mem ?_
+    have h1 : rawRestrictG (inf_le_left : (𝔇.U j₀ ⊓ 𝔇.U j : Opens X) ≤ 𝔇.U j₀)
+        (td.cochain j₀) ∈ OmegaDGerm
+          (E + Finsupp.single b (m - E b) + Finsupp.single b 1) (𝔇.U j₀ ⊓ 𝔇.U j) := by
+      rw [td.cochain_self]
+      exact rawRestrictG_omegaDGerm _ ⟨td.γ, td.mem, rfl⟩
+    refine OmegaDGerm_mono (fun x hx => ?_) h1
+    have hxb : x ≠ b := fun hc => hbiso.2 j hj (hc ▸ hx.2)
+    rw [divisor_apply_ne hxb]
+  · -- `i ≠ j₀`, `j = j₀`: the `+γ` side
+    rw [hj, td.cochain_of_ne hi, map_zero, sub_zero]
+    have h1 : rawRestrictG (inf_le_right : (𝔇.U i ⊓ 𝔇.U j₀ : Opens X) ≤ 𝔇.U j₀)
+        (td.cochain j₀) ∈ OmegaDGerm
+          (E + Finsupp.single b (m - E b) + Finsupp.single b 1) (𝔇.U i ⊓ 𝔇.U j₀) := by
+      rw [td.cochain_self]
+      exact rawRestrictG_omegaDGerm _ ⟨td.γ, td.mem, rfl⟩
+    refine OmegaDGerm_mono (fun x hx => ?_) h1
+    have hxb : x ≠ b := fun hc => hbiso.2 i hi (hc ▸ hx.1)
+    rw [divisor_apply_ne hxb]
+  · -- neither distinguished: `0 − 0`
+    rw [td.cochain_of_ne hi, td.cochain_of_ne hj, map_zero, map_zero, sub_zero]
+    exact Submodule.zero_mem _
+
+/-- The test coboundary is a cocycle (`δ² = 0`). -/
+theorem delta_mem_ker (td : TestCocycleData 𝔇 E j₀ b hb m) :
+    𝔇.toFiniteCover.toFiniteFamily.cechDelta1
+      (𝔇.toFiniteCover.toFiniteFamily.cechDelta0 td.cochain) = 0 := by
+  have h := DFunLike.congr_fun
+    (𝔇.toFiniteCover.toFiniteFamily.cechDelta1_comp_cechDelta0) td.cochain
+  rwa [LinearMap.comp_apply, LinearMap.zero_apply] at h
+
+/-- **The test cocycle**, as an element of `Z¹(𝒪_E)`. -/
+noncomputable def cocycle (td : TestCocycleData 𝔇 E j₀ b hb m)
+    (hbiso : FineResidue.MLIsolated 𝔇 j₀ b) :
+    ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 E) :=
+  ⟨𝔇.toFiniteCover.toFiniteFamily.cechDelta0 td.cochain,
+    Submodule.mem_inf.mpr ⟨LinearMap.mem_ker.mpr td.delta_mem_ker, td.delta_mem_sections1 hbiso⟩⟩
+
+@[simp] theorem cocycle_coe (td : TestCocycleData 𝔇 E j₀ b hb m)
+    (hbiso : FineResidue.MLIsolated 𝔇 j₀ b) :
+    (td.cocycle hbiso : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 td.cochain := rfl
+
+/-- **The test class dies in `H¹(𝒪_D)`**: the monotone inclusion sends it to the class of a
+`B¹(𝒪_D)`-coboundary. -/
+theorem h1InclMono_cocycle_eq_zero (td : TestCocycleData 𝔇 E j₀ b hb m)
+    (hbiso : FineResidue.MLIsolated 𝔇 j₀ b) (hED : ∀ x, E x ≤ D x) (hmD : m + 1 ≤ D b) :
+    𝔇.toFiniteCover.h1InclMono hED
+      (Submodule.Quotient.mk (td.cocycle hbiso)) = 0 := by
+  rw [𝔇.toFiniteCover.h1InclMono_mk, Submodule.Quotient.mk_eq_zero]
+  rw [Submodule.submoduleOf, Submodule.mem_comap]
+  exact ⟨td.cochain, td.cochain_mem_sections0 hED hmD, rfl⟩
+
+end TestCocycleData
+
+end TestCocycle
+
 end Dolbeault
 
 end Jacobians
