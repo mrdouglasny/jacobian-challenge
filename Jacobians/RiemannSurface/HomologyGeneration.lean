@@ -292,7 +292,7 @@ theorem exists_finite_generating_loops (x₀ : X)
       exact (S.equivFin.symm i).2
     · intro hv
       refine ⟨S.equivFin ⟨v, hv⟩, ?_⟩
-      show loopToHomology (f (S.equivFin.symm (S.equivFin ⟨v, hv⟩))) = v
+      change loopToHomology (f (S.equivFin.symm (S.equivFin ⟨v, hv⟩))) = v
       rw [Equiv.symm_apply_apply, hf]
   rw [hrange, hS]
   exact Submodule.subset_span ⟨δ, rfl⟩

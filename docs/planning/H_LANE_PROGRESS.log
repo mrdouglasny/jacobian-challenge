@@ -66,3 +66,33 @@ Adding T-FG bridge: instance moduleFinite_H1_of_fundamentalGroup_fg
 can be supplied in canonical π₁ form. Mathlib chain: Group.fg_of_surjective
 (Abelianization.of surjective) + GroupFG.iff_add_fg + Module.Finite.iff_addGroup_fg.
 Next: kernel closure check (NO AX_PeriodCycleBasis) + full lake build.
+
+T+2.5h: T-FG bridge compiles (committed). lake build of module olean in retry
+loop (FD pressure persists: 20 lean procs from other lanes). Next: #print
+axioms closure check via /tmp/hlane_check.lean, then full lake build.
+
+T+3h: KERNEL CLOSURE VERIFIED — all 9 headliners standard-3
+[propext, Classical.choice, Quot.sound], NO AX_PeriodCycleBasis:
+  loopToHomology_refl/_trans/_reverse, coe_span_range_loopToHomology,
+  exists_finite_generating_loops, exists_generating_loops,
+  exists_periodGeneratingLoops, discreteTopology_loopPeriodLattice_of_H1,
+  exists_loopPeriodLattice_basis_of_H1.
+Check file: scripts/hlane_axiom_check.lean.txt. One style lint fixed
+(show→change). Full lake build running.
+
+SESSION SUMMARY (deliverable):
+1. Statement chain: PeriodGeneratingLoops (B-4 residual) ⟸ of_homology_span
+   ⟸ [Module.Finite ℤ H1] + [Module.Free ℤ H1] + finrank ℤ H1 ≤ 2g
+   — i.e. exactly the ≤-weakened former AX_H1FreeRank2g, with NO analytic
+   representatives needed (loop-class subgroup supplies them) and NO rank ≥
+   (B-3 covers it). Module.Finite suppliable as Group.FG (π₁) via new instance.
+2. n-vs-2g: n > 2g generators do NOT give discreteness (ℤ+ℤ√2 dense); the
+   2g count is exactly where T-RANK enters; no alternative ZSpan route for
+   n > 2g exists (rank of f.g. subgroup of ℝ^N can exceed N).
+3. Mathlib FG inventory: NO π₁ finite-generation results at pin (no Group.FG
+   near FundamentalGroup); π₁-f.g.-of-compact-manifold must be built (grid
+   cover/SVK; multi-week — same family as SVK_BLOCKER B1) OR H1-rank facts
+   supplied by future Hodge work (which would give T-RANK too).
+4. Residuals for future lanes (both pure topology/Hodge, loop-free):
+   T-FG : Group.FG (FundamentalGroup X x₀)   (compact manifold π₁ f.g.)
+   T-RANK: Module.Free ℤ (H1 X x₀) ∧ finrank ℤ (H1 X x₀) ≤ 2 * genus X
