@@ -20,3 +20,20 @@ RESIDUAL (single named sorry): exists_frameTraceFunctionData_df — the Miranda 
 trace-FUNCTION datum (T, C, hoff, hmero, hres, hcover, hinf) for the plain value trace.
 All LaurentForm/residue/fibre bookkeeping is proven on both sides of it.
 Commits: a4d0e5e fc578f7 d9a2144 8ebacb6 9f93a43 + hres helper + docs.
+2026-06-11 15:12 T2-lane session start (feat/frame-trace-wall)
+=== T2-lane session start 2026-06-11 — branch feat/frame-trace-wall (from feat/frame-trace c9f656a) ===
+Goal: prove exists_frameTraceFunctionData_df (THE LAST SORRY).
+Route (after full inventory): direct Miranda step-1 construction with fibre-saturated S.
+  T := plain value trace, T w := finsum over fibre(coe w) of F.holoRepr (junk-free repair).
+  S := fibre-saturation of S0 := supp(div F) ∪ supp K  (K-support contains all ramification
+  points AND f-poles, so C := f-values of S0 contains all finite branch values; hcover free).
+  Engine: MultiplicityPatchingData (sheets + no-escape + per-sheet conservation, PROVEN) gives
+  the fibre = sheet-slices decomposition; localDeg≥1 + count ⟹ slice enumeration.
+  hoff: sections via exists_planar_section + slice singletons.
+  hres/hmero unramified centre: germ agreement + landed resAt_eq_filter_sum_of_traceCoeff_germ.
+  ramified: exists_clusterSplit_at_fibrePoint (§5 normal form, PROVEN) + NEW unweighted
+  symmetric descent (mirror of analyticAt_weightedSymSum_descent, d:=0 collapse) +
+  planarCoeff_neg_one_branch + residueChangeOfVariables.
+  hinf: reciprocal clusters at f-poles + annulus contour algebra (largest new piece).
+Files: new FrameTraceWall*.lean engine (no import of FrameTrace), final in-place assembly in
+FrameTrace.lean. Fallback at cutoff: re-isolate unfinished fields as ONE named sorry lemma.
