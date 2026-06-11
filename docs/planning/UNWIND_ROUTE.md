@@ -1,5 +1,11 @@
 # UNWIND route — discharging `UnwindRegularity G D` for the concrete fine-sheaf `G` (2026-06-10)
 
+> **STATUS 2026-06-11: LANDED (conditional).**  `unwindRegularity_concrete_of_isolated`
+> (`SerreUnwindDetect.lean`, Part 5) proves `UnwindRegularity G D` for the concrete fine-sheaf
+> `G`, sorry-free and standard-3, conditional on the cover-isolation discipline
+> `BadPointsIsolated 𝔇 K D`.  The unconditional `∀ D` discharge is blocked exactly on the
+> non-isolated-point evaluation — see `UNWIND_BLOCKER.md`.
+
 Branch `feat/keystone-unwind` (on top of `feat/keystone-r6d2`: MLTie, MeroVanish, Descent,
 DescentVanish all landed sorry-free).  Target: `SerreUnwind.lean:275`
 `GlobalResidue.UnwindRegularity G D` for
