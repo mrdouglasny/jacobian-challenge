@@ -29,3 +29,5 @@ import Jacobians.Bridge.KirovCanonicalEq
 import Jacobians.Bridge.KirovHolomorphic
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral
+import Jacobians.Bridge.KirovDolbeaultLattice
+

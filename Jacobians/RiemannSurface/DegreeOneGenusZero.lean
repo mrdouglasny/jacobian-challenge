@@ -8,6 +8,15 @@ import Jacobians.RiemannSurface.GenusInvariance
 import Jacobians.ProjectiveCurve.Line.Genus
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Topology.LocallyConstant.Basic
+import KirovDolbeault.ProjectiveLine
+
+attribute [-instance] Jacobians.RiemannSphere.instTopologicalSpace
+attribute [-instance] Jacobians.RiemannSphere.instCompactSpace
+attribute [-instance] Jacobians.RiemannSphere.instT2Space
+attribute [-instance] Jacobians.RiemannSphere.instConnectedSpace
+attribute [-instance] Jacobians.RiemannSphere.instNonempty
+attribute [-instance] Jacobians.RiemannSphere.instChartedSpaceComplex
+attribute [-instance] Jacobians.RiemannSphere.instIsManifoldComplexModelWithCornersSelfTopWithTopENat
 
 /-!
 # Degree-one meromorphic functions force genus zero
@@ -74,13 +83,13 @@ private theorem pointSub_coeff_of_ne {Q₁ Q₂ p : X} (hp₁ : p ≠ Q₁) (hp�
   simp [FreeAbelianGroup.coeff, hp₁, hp₂]
 
 private theorem orderAtMF_eq_of_divisor_eq {f : MeromorphicFunctionField X}
-    {D : Divisor X} (hdiv : divisor f = D) {p : X} {n : ℤ}
+    {D : Axioms.Divisor X} (hdiv : divisor f = D) {p : X} {n : ℤ}
     (hcoeff : FreeAbelianGroup.coeff p (D : FreeAbelianGroup X) = n) :
     orderAtMF p f = (n : WithTop ℤ) := by
   apply withTop_eq_coe_of_untop₀_eq (orderAtMF_ne_top f p)
   rw [← coeff_divisor f p, hdiv, hcoeff]
 
-private theorem divisor_eq_of_divHom_eq {f : MeromorphicFunctionField X} {D : Divisor X}
+private theorem divisor_eq_of_divHom_eq {f : MeromorphicFunctionField X} {D : Axioms.Divisor X}
     (hdiv : divHom f = Multiplicative.ofAdd D) : divisor f = D :=
   Multiplicative.ofAdd.injective hdiv
 
@@ -482,7 +491,7 @@ theorem principal_imp_eq_of_genus_pos
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
     (hgenus : 0 < genus X) (Q₁ Q₂ : X)
     (hprincipal :
-      ((FreeAbelianGroup.of Q₁ - FreeAbelianGroup.of Q₂ : FreeAbelianGroup X) : Divisor X)
+      ((FreeAbelianGroup.of Q₁ - FreeAbelianGroup.of Q₂ : FreeAbelianGroup X) : Axioms.Divisor X)
         ∈ PrincipalDivisors X) :
     Q₁ = Q₂ := by
   by_contra hne
