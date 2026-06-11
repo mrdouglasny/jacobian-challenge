@@ -40,6 +40,8 @@ import Jacobians.RiemannSurface.SegmentAdjacency
 import Jacobians.RiemannSurface.PartitionIndependence
 import Jacobians.RiemannSurface.CanonicalArcIntegral
 import Jacobians.RiemannSurface.ArcAlgebra
+import Jacobians.RiemannSurface.AnalyticArcMovingChart
+import Jacobians.RiemannSurface.LoopConjugation
 import Jacobians.RiemannSurface.HomotopyInvariance
 import Jacobians.RiemannSurface.DevelopingMap
 import Jacobians.RiemannSurface.DevelopingValueAlgebra
