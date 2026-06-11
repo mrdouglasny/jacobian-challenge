@@ -173,22 +173,22 @@ theorem analyticAt_plainSymSum_descent {Q : ℂ → ℂ} (hQ : AnalyticAt ℂ Q 
 The per-monomial roots-of-unity collapse for the negative tail: only the depths `m ∣ k`
 survive, contributing `m·b_k·(uᵐ)^{−k/m}`. -/
 
-/-- **The descended tail**: `v ↦ ∑_{k ∈ Icc 1 N, m ∣ k} m·b_k·v^{−k/m}`. -/
-def descTail (m : ℕ) (b : ℕ → ℂ) (N : ℕ) : ℂ → ℂ :=
+/-- **The descended tail at the centre `c₀`**: `v ↦ ∑_{k ∈ Icc 1 N, m ∣ k} m·b_k·(v−c₀)^{−k/m}`. -/
+def descTail (c₀ : ℂ) (m : ℕ) (b : ℕ → ℂ) (N : ℕ) : ℂ → ℂ :=
   fun v => ∑ k ∈ (Finset.Icc 1 N).filter (fun k => m ∣ k),
-    ((m : ℂ) * b k) * (v - 0) ^ (-((k / m : ℕ) : ℤ))
+    ((m : ℂ) * b k) * (v - c₀) ^ (-((k / m : ℕ) : ℤ))
 
-theorem meromorphicAt_descTail (m : ℕ) (b : ℕ → ℂ) (N : ℕ) :
-    MeromorphicAt (descTail m b N) 0 := by
+theorem meromorphicAt_descTail (c₀ : ℂ) (m : ℕ) (b : ℕ → ℂ) (N : ℕ) :
+    MeromorphicAt (descTail c₀ m b N) c₀ := by
   apply MeromorphicAt.fun_sum
   intro k _
-  exact (MeromorphicAt.const _ 0).mul (meromorphicAt_zpow_self 0 (-((k / m : ℕ) : ℤ)))
+  exact (MeromorphicAt.const _ c₀).mul (meromorphicAt_zpow_self c₀ (-((k / m : ℕ) : ℤ)))
 
 /-- **The tail collapse**: for `u ≠ 0`, the unweighted `m`-sheet sum of the negative tail is
 the descended tail at `uᵐ`. -/
-theorem negTail_plainSymSum (b : ℕ → ℂ) (N : ℕ) {m : ℕ} (hm : 0 < m) {ζ : ℂ}
+theorem negTail_plainSymSum (c₀ : ℂ) (b : ℕ → ℂ) (N : ℕ) {m : ℕ} (hm : 0 < m) {ζ : ℂ}
     (hζ : IsPrimitiveRoot ζ m) (u : ℂ) :
-    ∑ j ∈ Finset.range m, negTail 0 b N (ζ ^ j * u) = descTail m b N (u ^ m) := by
+    ∑ j ∈ Finset.range m, negTail 0 b N (ζ ^ j * u) = descTail c₀ m b N (c₀ + u ^ m) := by
   classical
   -- expand and swap the two finite sums
   have hexp : ∑ j ∈ Finset.range m, negTail 0 b N (ζ ^ j * u)
@@ -227,8 +227,8 @@ theorem negTail_plainSymSum (b : ℕ → ℂ) (N : ℕ) {m : ℕ} (hm : 0 < m) {
   simp only [descTail]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hdvd : m ∣ k := (Finset.mem_filter.mp hk).2
-  have hku : u ^ (-(k : ℤ)) = (u ^ m - 0) ^ (-((k / m : ℕ) : ℤ)) := by
-    rw [sub_zero, ← zpow_natCast u m, ← zpow_mul]
+  have hku : u ^ (-(k : ℤ)) = (c₀ + u ^ m - c₀) ^ (-((k / m : ℕ) : ℤ)) := by
+    rw [add_sub_cancel_left, ← zpow_natCast u m, ← zpow_mul]
     congr 1
     obtain ⟨k', rfl⟩ := hdvd
     rw [Nat.mul_div_cancel_left k' hm]
@@ -238,16 +238,16 @@ theorem negTail_plainSymSum (b : ℕ → ℂ) (N : ℕ) {m : ℕ} (hm : 0 < m) {
   ring
 
 /-- The residue read of the descended tail: only the depth-`m` term hits `−1`. -/
-theorem planarCoeff_neg_one_descTail (m : ℕ) (hm : 0 < m) (b : ℕ → ℂ) (N : ℕ) :
-    planarCoeff (-1) (descTail m b N) 0 = if m ≤ N then (m : ℂ) * b m else 0 := by
+theorem planarCoeff_neg_one_descTail (c₀ : ℂ) (m : ℕ) (hm : 0 < m) (b : ℕ → ℂ) (N : ℕ) :
+    planarCoeff (-1) (descTail c₀ m b N) c₀ = if m ≤ N then (m : ℂ) * b m else 0 := by
   classical
   unfold descTail
   rw [planarCoeff_finset_sum ((Finset.Icc 1 N).filter (fun k => m ∣ k))
-    (fun k v => ((m : ℂ) * b k) * (v - 0) ^ (-((k / m : ℕ) : ℤ))) (-1) 0
-    (fun k _ => (MeromorphicAt.const ((m : ℂ) * b k) 0).mul
-      (meromorphicAt_zpow_self 0 (-((k / m : ℕ) : ℤ))))]
+    (fun k v => ((m : ℂ) * b k) * (v - c₀) ^ (-((k / m : ℕ) : ℤ))) (-1) c₀
+    (fun k _ => (MeromorphicAt.const ((m : ℂ) * b k) c₀).mul
+      (meromorphicAt_zpow_self c₀ (-((k / m : ℕ) : ℤ))))]
   have hterm : ∀ k ∈ (Finset.Icc 1 N).filter (fun k => m ∣ k),
-      planarCoeff (-1) (fun v => ((m : ℂ) * b k) * (v - 0) ^ (-((k / m : ℕ) : ℤ))) 0
+      planarCoeff (-1) (fun v => ((m : ℂ) * b k) * (v - c₀) ^ (-((k / m : ℕ) : ℤ))) c₀
         = if k = m then (m : ℂ) * b m else 0 := by
     intro k hk
     obtain ⟨hkIcc, hdvd⟩ := Finset.mem_filter.mp hk
@@ -282,16 +282,21 @@ there is `H` meromorphic at `0` with
 
 (the sphere-side ramified-cluster residue normalization, matching the X-side
 `planarCoeff_neg_one_branch`). -/
-theorem meromorphicAt_plainSymSum_descent {ψ : ℂ → ℂ} (hψ : MeromorphicAt ψ 0) {m : ℕ}
+theorem meromorphicAt_plainSymSum_descent (c₀ : ℂ) {ψ : ℂ → ℂ} (hψ : MeromorphicAt ψ 0) {m : ℕ}
     (hm : 0 < m) {ζ : ℂ} (hζ : IsPrimitiveRoot ζ m) :
-    ∃ H : ℂ → ℂ, MeromorphicAt H 0 ∧
-      (∀ᶠ u in 𝓝[≠] (0 : ℂ), (∑ j ∈ Finset.range m, ψ (ζ ^ j * u)) = H (u ^ m)) ∧
-      planarCoeff (-1) H 0 = (m : ℂ) * planarCoeff (-(m : ℤ)) ψ 0 := by
+    ∃ H : ℂ → ℂ, MeromorphicAt H c₀ ∧
+      (∀ᶠ u in 𝓝[≠] (0 : ℂ), (∑ j ∈ Finset.range m, ψ (ζ ^ j * u)) = H (c₀ + u ^ m)) ∧
+      planarCoeff (-1) H c₀ = (m : ℂ) * planarCoeff (-(m : ℤ)) ψ 0 := by
   classical
   obtain ⟨N, b, R, hR_an, hψ_eq⟩ := exists_principalPart_meromorphicAt hψ
   obtain ⟨G, hG_an, hG_eq⟩ := analyticAt_plainSymSum_descent hR_an hm hζ
-  refine ⟨descTail m b N + G,
-    (meromorphicAt_descTail m b N).add hG_an.meromorphicAt, ?_, ?_⟩
+  have hshift_an : AnalyticAt ℂ (fun z : ℂ => G (z - c₀)) c₀ := by
+    have hsub : AnalyticAt ℂ (fun z : ℂ => z - c₀) c₀ := analyticAt_id.sub analyticAt_const
+    have hcomp := AnalyticAt.comp (g := G) (f := fun z : ℂ => z - c₀) (x := c₀)
+      (by simpa using hG_an) hsub
+    simpa [Function.comp] using hcomp
+  refine ⟨descTail c₀ m b N + fun z => G (z - c₀),
+    (meromorphicAt_descTail c₀ m b N).add hshift_an.meromorphicAt, ?_, ?_⟩
   · -- the descent identity on the punctured neighbourhood
     have hper : ∀ j ∈ Finset.range m, ∀ᶠ u in 𝓝[≠] (0 : ℂ),
         ψ (ζ ^ j * u) = negTail 0 b N (ζ ^ j * u) + R (ζ ^ j * u) := by
@@ -315,15 +320,16 @@ theorem meromorphicAt_plainSymSum_descent {ψ : ℂ → ℂ} (hψ : MeromorphicA
       hG_eq.filter_mono nhdsWithin_le_nhds
     filter_upwards [hall, hG'] with u hu hGu
     rw [Finset.sum_congr rfl hu, Finset.sum_add_distrib,
-      negTail_plainSymSum b N hm hζ u, hGu]
-    rfl
+      negTail_plainSymSum c₀ b N hm hζ u, hGu]
+    show _ = descTail c₀ m b N (c₀ + u ^ m) + G (c₀ + u ^ m - c₀)
+    rw [add_sub_cancel_left]
   · -- the residue bookkeeping
-    rw [planarCoeff_add (meromorphicAt_descTail m b N) hG_an.meromorphicAt,
-      planarCoeff_neg_one_descTail m hm b N]
-    have hG0 : planarCoeff (-1) G 0 = 0 :=
+    rw [planarCoeff_add (meromorphicAt_descTail c₀ m b N) hshift_an.meromorphicAt,
+      planarCoeff_neg_one_descTail c₀ m hm b N]
+    have hG0 : planarCoeff (-1) (fun z => G (z - c₀)) c₀ = 0 :=
       planarCoeff_eq_zero_of_lt_order
         (lt_of_lt_of_le (by exact_mod_cast (by norm_num : (-1 : ℤ) < 0))
-          hG_an.meromorphicOrderAt_nonneg) hG_an.meromorphicAt
+          hshift_an.meromorphicOrderAt_nonneg) hshift_an.meromorphicAt
     have hmero_tail : MeromorphicAt (negTail 0 b N) 0 := by
       apply MeromorphicAt.fun_sum
       intro k _
