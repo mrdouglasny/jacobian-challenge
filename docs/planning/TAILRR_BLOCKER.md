@@ -54,19 +54,29 @@ Two sub-pieces:
    route ideas only, `KIROV_ROUTE_IDEAS.md` item 4). Shared infrastructure with Abel-⊆
    (item 1's E3b). **This is the single analytic blocker of the whole lane.**
 
-## Residual input 2 — `P.PairingSurjective` (the Miranda VI.3.10 surjectivity half)
+## Residual input 2 — `P.PairingSurjective` — **DISCHARGED (2026-06-11, S-lane)**
 
 ```
 ∀ D, Function.Surjective (P.pairingL D)   -- L(K−D)/junk ↠ Dual(H¹_t(D))
 ```
 
-Recovery + growth pigeonhole: the `ℳ(X)`-module action on tail functionals (the W1/W2
-multiplication–truncation identities — the `resCoeff_mul_window` engine already covers the
-product-coefficient algebra), `serre_surjectivity_dim_core` (proven, `SerreDuality.lean`)
-for the dimension count over `tail_riemannRoch_I` (proven), and the rung-2 regularity
-(`TailRegularity.lean`, proven) for the division step. All shapes exist; this is sustained
-bookkeeping, NOT new analysis. Estimated 1–2 weeks of lane time (Kirov actuals:
-`PairDualitySurjective.lean` ≈ 700 LoC).
+**PROVEN**: `TailPairFrame.pairingSurjective : P.PairingSurjective`
+(`TailSurjectivity.lean`, tail tower T7; standard-3 `#print axioms`, zero custom axioms,
+zero sorries).  Route (Miranda VI.3.10, recovery + growth pigeonhole, pure coefficient
+algebra):
+
+| Rung | Content |
+|------|---------|
+| A | `planarCoeff_zpow_self` (monomial spectrum) + `planarCoeff_mul_window` (the GENERAL-order window product law, from `resCoeff_mul_window` by monomial shift) |
+| B | `coeffAt_mul_window` (X-level product law, window on the second factor) |
+| C | `mulTail f D` (the multiplication–truncation operator on `GlobalTails`): linearity in `f`, upper kill (`L(E)` kills `𝒰[D−E]`), transport `mulTail f D (α_{D−E} g) = α_D(f·g)`, and the **local inverse tails** `invMonomialTail` (`z^k/f` windows at `p`) with the division identity `mulTail f D (invMonomialTail …) = trunc_D(z^k at p)` (`MeromorphicAt.inv` + identity theorem) |
+| D | `mulH1 : H¹_t(D−E) → H¹_t(D)`; `mkQ_mulTail_surjective` (division surjectivity); `tailPsiAct` (`ψ`-action on functionals) + `tailPsiAct_injective` for `φ ≠ 0` |
+| E | the unwind: `unwind_eval` (evaluate the witness identity on inverse tails — both sides collapse by the window law to `pairSlot (w·ψ⁻¹)`), `unwind_mem` (VI.3.9 pole-bound: `w·ψ⁻¹ ∈ L(K−D)`), `unwind_pairing_eq` (`φ∘mkQ = pairFun (w·ψ⁻¹)` via `Finsupp.lhom_ext`), `unwind` |
+| F | `pairingSurjective` (the `serre_surjectivity_dim_core` count over `tail_riemannRoch_I`), `TailPairFrame.tailRiemannRoch : TailRiemannRoch X` (frame-only), `h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame'` |
+
+So `TailRiemannRoch X` — and the keystone-facing `h¹(𝒪) = kirovGenus` — now rest on
+**residual input 1 alone**: `Nonempty (TailPairFrame X)` (slots + the pair-frame residue
+theorem, the single analytic atom).
 
 ## Downstream readiness (checked this session)
 

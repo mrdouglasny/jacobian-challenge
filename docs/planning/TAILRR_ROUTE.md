@@ -58,10 +58,15 @@ Final assembly (all inside the tail model, pair frame `(ω₀, K)` from
 | T5 | `TailSerre.lean` | `planarCoeff` + window product law; `TailPairFrame` (slots + residue atom); pairing well-defined + linear + junk-free; **injectivity half landed**; surjectivity = named input `PairingSurjective` | **LANDED, conditional pieces as planned** |
 | T6 | `TailSerre.lean` Part E | assembly: `tailRiemannRoch_of_pairingSurjective : TailPairFrame → PairingSurjective → TailRiemannRoch X` | **LANDED** |
 
-**Status 2026-06-11: T1–T6 all landed (standard-3, no custom axioms, no sorries).
-`TailRiemannRoch X` is a theorem conditional on exactly two named hypotheses —
-frame existence (slots + the residue atom) and the surjectivity half.  Residual-input
-ledger: `docs/planning/TAILRR_BLOCKER.md`.**
+**Status 2026-06-11 (am): T1–T6 all landed (standard-3, no custom axioms, no sorries).**
+
+**Status 2026-06-11 (pm, S-lane): T7 LANDED — `TailSurjectivity.lean` proves
+`TailPairFrame.pairingSurjective : P.PairingSurjective` (Miranda VI.3.10, standard-3,
+no custom axioms, no sorries).  `TailRiemannRoch X` is now a theorem conditional on
+ONE named hypothesis — frame existence (`TailPairFrame.tailRiemannRoch`).
+Residual-input ledger: `docs/planning/TAILRR_BLOCKER.md`.**
+
+| T7 | `TailSurjectivity.lean` | general window product law; `mulTail` multiplication–truncation operator (+ transport identity, upper kill); local inverse tails (division); `mulH1`/`tailPsiAct` (+ injectivity); the unwind (VI.3.7/3.9); the VI.3.10 pigeonhole over `serre_surjectivity_dim_core` + `tail_riemannRoch_I` | **LANDED, unconditional** |
 
 ### The ONE isolated analytic atom: the pair-frame residue theorem
 
