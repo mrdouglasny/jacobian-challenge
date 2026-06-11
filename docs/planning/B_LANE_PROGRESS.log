@@ -89,3 +89,16 @@ branched-cover homology generators, or the Kirov B-4 residue-engine count).
 That is the ONLY gap between the engine and an unconditional
 DiscreteTopology/IsZLattice for the Forster-model lattice; the spanning
 half is already unconditional (B-3).
+
+## 2026-06-11 — bonus: axiom-free reduction of the named hypothesis to topology
+
+`PeriodGeneratingLoops.of_homology_span` (in `Layer3/PeriodLatticeDiscrete.lean`,
+kernel-verified standard-3 — NO AX_PeriodCycleBasis despite the host file):
+if the 2g loops' homology classes ℤ-generate every analytic loop's homology
+class, they period-generate. Route: `devValPeriodVec` — the axiom-free
+H1-level period map in coordinates (`loopDevValH1Hom` componentwise, which is
+itself standard-3) — pushes the homology span to the period span.
+
+Net effect on the B-route ladder: the residual for unconditional
+discreteness is now PURE TOPOLOGY — "2g analytic loops whose classes
+ℤ-generate the loop classes in H1" — with zero analytic content left.

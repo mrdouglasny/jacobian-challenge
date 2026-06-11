@@ -17,3 +17,8 @@ import Jacobians.Layer3.PeriodLatticeDiscrete
 #print axioms Jacobians.Layer3.periodLatticeInBasis_discreteTopology_of_loopSpan
 #print axioms Jacobians.Layer3.periodLatticeInBasis_isZLattice_of_loopSpan
 #print axioms Jacobians.Layer3.exists_periodLatticeInBasis_basis_of_loopSpan
+
+-- Axiom-free reduction (added after first pass; all verified standard-3)
+#print axioms Jacobians.Layer3.devValPeriodVec
+#print axioms Jacobians.Layer3.devValPeriodVec_loopToHomology
+#print axioms Jacobians.Layer3.PeriodGeneratingLoops.of_homology_span

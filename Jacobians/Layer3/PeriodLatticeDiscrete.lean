@@ -38,6 +38,47 @@ noncomputable section
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
+/-- The developing-value period vector on homology: the axiom-free
+`H1`-level period map in coordinates (`loopDevValH1Hom` componentwise). On
+loop classes it returns the loop's `loopPeriodVec`
+(`devValPeriodVec_loopToHomology`). -/
+def devValPeriodVec (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    H1 X x₀ →ₗ[ℤ] (Fin (genus X) → ℂ) :=
+  LinearMap.pi fun i => (loopDevValH1Hom x₀ (b i)).toIntLinearMap
+
+@[simp]
+theorem devValPeriodVec_loopToHomology (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (δ : AnalyticLoop X x₀) :
+    devValPeriodVec x₀ b (Jacobians.Axioms.loopToHomology δ)
+      = loopPeriodVec x₀ b δ := by
+  funext i
+  simp [devValPeriodVec, loopPeriodVec]
+
+/-- **Axiom-free reduction of the named hypothesis to topology.** If the
+`2g` loops' homology classes ℤ-generate every closed analytic loop's
+homology class, they period-generate: `PeriodGeneratingLoops` follows by
+pushing the span through the (axiom-free) developing-value period map.
+This is the interface a future dissection/Hurewicz construction of homology
+generators must satisfy — no integration, no R1/R2, no chosen witness. -/
+theorem PeriodGeneratingLoops.of_homology_span {x₀ : X}
+    {b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)}
+    {γs : Fin (2 * genus X) → AnalyticLoop X x₀}
+    (hgen : ∀ δ : AnalyticLoop X x₀, Jacobians.Axioms.loopToHomology δ ∈
+      Submodule.span ℤ (Set.range fun i =>
+        Jacobians.Axioms.loopToHomology (γs i))) :
+    PeriodGeneratingLoops x₀ b γs := by
+  intro δ
+  have hmem := Submodule.mem_map_of_mem (f := devValPeriodVec x₀ b) (hgen δ)
+  rw [Submodule.map_span, ← Set.range_comp] at hmem
+  have himg : ⇑(devValPeriodVec x₀ b) ∘ (fun i =>
+        Jacobians.Axioms.loopToHomology (γs i))
+      = fun i => loopPeriodVec x₀ b (γs i) :=
+    funext fun i => devValPeriodVec_loopToHomology x₀ b (γs i)
+  rw [himg] at hmem
+  rwa [devValPeriodVec_loopToHomology] at hmem
+
 /-- The coordinate period vector of a closed analytic loop is the
 `periodMapInBasis`-image of its homology class (developing-value bridge). -/
 theorem loopPeriodVec_eq_periodMapInBasis (x₀ : X)
