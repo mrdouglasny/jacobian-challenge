@@ -51,11 +51,13 @@ theorem span_loopPeriodFunctional_eq_top (x₀ : X) :
     Submodule.span ℝ (Set.range (loopPeriodFunctional x₀)) = ⊤
 ```
 
-These statements do **not** mention `AX_PeriodCycleBasis`. Expected axiom
-closure of H1/H2: the two Kirov-bridge structural axioms behind
-`instFiniteDimOneForms` (`FiniteDimensional ℂ (HolomorphicOneForm X)` is
-load-bearing for the dual-separation step) — nothing else beyond the three
-standard Lean axioms. Verified by `#print axioms` at the end.
+These statements do **not** mention `AX_PeriodCycleBasis`.
+
+**Outcome (2026-06-11, verified):** the axiom closure of H1/H2 is exactly
+`[propext, Classical.choice, Quot.sound]` — no project axioms at all (the
+`FiniteDimensional ℂ (HolomorphicOneForm X)` instance is the Kirov-Montel
+bridge-derived theorem, itself axiom-free at the current pin). C1–C3 add
+exactly `Jacobians.Axioms.AX_PeriodCycleBasis` and nothing else.
 
 ## Downstream corollaries (what Layer3/Periods + lattice instances consume)
 
@@ -200,6 +202,13 @@ No `sorry` anywhere. If a piece resists at implementation time, it lands as a
 progress log), never as a sorry/axiom. Current assessment after full
 inventory: every needed primitive exists (listed above with file names); no
 named hypotheses are expected.
+
+**Outcome (2026-06-11):** everything closed; **zero named hypotheses, zero
+sorries, zero new axioms**. Landed files:
+`Jacobians/RiemannSurface/ChartSegmentArc.lean`,
+`Jacobians/RiemannSurface/PeriodNondegeneracy.lean`,
+`Jacobians/Layer3/PeriodSpan.lean` (all registered in the umbrella imports;
+full `lake build` green).
 
 ## Gates
 
