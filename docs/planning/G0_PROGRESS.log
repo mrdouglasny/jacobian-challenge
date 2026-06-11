@@ -1,0 +1,37 @@
+# G0 leg progress log — feat/keystone-g0-leg
+
+2026-06-10 (session 1)
+
+- Base: origin/main (12123eb) + merge of feat/keystone-a-lane (#170 spine,
+  SerreAssemblyPrep.exists_serreDualityData_genus_split / hzero interface).
+- INVENTORY (~30 min): confirmed A_LANE_BLOCKER findings; additionally established:
+  * cohomological_riemannRoch RHS genus is h1Dim 0 (arithmetic), proven from hR alone;
+  * arithmeticGenus_eq_genus is keystone-gated (forbidden/circular here);
+  * exists_skyscraperLES proven from hR -> surj4 gives h1 monotonicity;
+  * h0Dim_eq_lDim proven via explicit linear equiv globalSectionsEquivQuot
+    (transports finiteDimensional_globalSections_instance to lSysModule);
+  * lDim_eq_zero_of_deg_neg / lDim_zero_eq_one proven via axiom-clean deg_div;
+  * NO unconditional h1-vanishing / arithmetic-genus-0 artifact exists in the port;
+  * SerreResidueDirectGenus0* / sphere results: target-side or keystone-gated, unusable.
+- ROUTE DECISION (docs/planning/G0_ROUTE.md): bespoke SerreDualityData with K := -2*P
+  (no canonical form needed; lDim K = 0 by negative-degree vanishing) and abstract
+  LinearEquiv.ofFinrankEq pairings from the PROVEN dimension equality
+  h1Dim D = lDim (K - D) at arithmetic genus 0. Reduces the entire g=0 leg to the
+  single scalar atom hga : h1Dim 0 = 0 (minimal: forced by SerreDualityData.arithmeticGenus).
+- IMPLEMENTED: KirovDolbeault/Dolbeault/SerreDualityGenus0.lean (7 declarations):
+  h1Dim_add_single_le, h1Dim_add_single_nat_le, h1Dim_eq_zero_of_arithmeticGenus_zero,
+  h1Dim_cast_eq_of_deg_neg, h1Dim_eq_lDim_single_neg_two_sub,
+  exists_serreDualityData_of_arithmeticGenus_zero (the g=0 leg),
+  exists_serreDualityData_genus_split_arithmetic (spine split, hzero -> scalar atom).
+- GATES:
+  * lake env lean KirovDolbeault/Dolbeault/SerreDualityGenus0.lean — clean.
+  * lake build KirovDolbeault.Dolbeault.SerreDualityGenus0 — OK (8729 jobs).
+  * Aggregator wired (KirovDolbeault.lean) — lake build KirovDolbeault OK (8762 jobs).
+  * #print axioms, all 7 new declarations: [propext, Classical.choice, Quot.sound]
+    (standard-3; no sorryAx; exists_serreDualityData NOT in any dependency cone).
+  * No sorries in the new file.
+- RESIDUAL (research-grade, documented in docs/planning/G0_BLOCKER.md): the atom
+  hga : h1Dim 0 = 0 at kirovGenus X = 0 (Cech H1(O) vanishing absent holomorphic forms).
+  Named hypothesis, never a sorry. Discharge shapes: meromorphic-omega0 GlobalResidue
+  (lane-R extension, subsumes hga), Dolbeault-comparison H^{0,1}=0, or RR-free
+  uniformization. Keystone equation now: hpos (lane R, g>=1) + hga (g=0).
