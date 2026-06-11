@@ -38,3 +38,4 @@ Route (after full inventory): direct Miranda step-1 construction with fibre-satu
 Files: new FrameTraceWall*.lean engine (no import of FrameTrace), final in-place assembly in
 FrameTrace.lean. Fallback at cutoff: re-isolate unfinished fields as ONE named sorry lemma.
 16:14 cluster+assembly done; next: hoff wiring + hinf
+16:21 wall now = valueTrace_resAtInfty_df only
