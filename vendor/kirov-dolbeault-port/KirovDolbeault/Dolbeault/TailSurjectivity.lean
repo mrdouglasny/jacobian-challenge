@@ -194,6 +194,259 @@ theorem MeromorphicFunction.coeffAt_mul_window (f g : MeromorphicFunction X) (p 
   rw [hread, hlaw]
   rfl
 
+/-! ## Part C — the multiplication–truncation operator `mulTail` -/
+
+/-- **The single-slot multiplication tail**: the `D`-truncated tail of `f·(z^k at p)` — the
+window `[min(ord f + k, −D p), −D p)` of shifted full coefficients of `f`. -/
+def mulTailSingle (f : MeromorphicFunction X) (D : Divisor X) (q : X × ℤ) : GlobalTails X :=
+  ∑ m ∈ Finset.Ico (min ((f.orderW q.1).untop₀ + q.2) (-(D q.1))) (-(D q.1)),
+    Finsupp.single (q.1, m) (f.coeffAt q.1 (m - q.2))
+
+/-- **The coefficient law of the single-slot tail**: the read at `(p', m)` is the shifted
+coefficient `c_{m−k}(f)` strictly below the cut at `p`, `0` elsewhere. -/
+theorem mulTailSingle_apply (f : MeromorphicFunction X) (D : Divisor X) (p : X) (k : ℤ)
+    (p' : X) (m : ℤ) :
+    mulTailSingle f D (p, k) (p', m)
+      = if p' = p ∧ m < -(D p) then f.coeffAt p (m - k) else 0 := by
+  classical
+  rw [mulTailSingle, Finsupp.finsetSum_apply]
+  rcases eq_or_ne p' p with rfl | hne
+  · have hterm : ∀ m' ∈ Finset.Ico (min ((f.orderW (p', k).1).untop₀ + (p', k).2)
+        (-(D (p', k).1))) (-(D (p', k).1)),
+        (Finsupp.single ((p', k).1, m') (f.coeffAt (p', k).1 (m' - (p', k).2))) (p', m)
+          = if m' = m then f.coeffAt p' (m - k) else 0 := by
+      intro m' _
+      rw [Finsupp.single_apply]
+      simp only [Prod.mk.injEq, true_and]
+      rcases eq_or_ne m' m with rfl | hm'
+      · simp
+      · rw [if_neg hm', if_neg hm']
+    rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' _ m fun _ => f.coeffAt p' (m - k)]
+    simp only [Finset.mem_Ico, true_and]
+    by_cases hcut : m < -(D p')
+    · rw [if_pos hcut]
+      by_cases hbot : min ((f.orderW p').untop₀ + k) (-(D p')) ≤ m
+      · rw [if_pos ⟨hbot, hcut⟩]
+      · rw [if_neg (by omega)]
+        have hk : m - k < (f.orderW p').untop₀ := by omega
+        exact (MeromorphicFunction.coeffAt_eq_zero_of_lt_untop₀ hk).symm
+    · rw [if_neg hcut, if_neg (by omega)]
+  · rw [if_neg (by simp [hne])]
+    refine Finset.sum_eq_zero fun m' _ => ?_
+    rw [Finsupp.single_apply, if_neg]
+    simp only [Prod.mk.injEq, not_and]
+    exact fun h => absurd h.symm hne
+
+/-- The single-slot tail lands strictly below the cut. -/
+theorem mulTailSingle_mem_tailSpace (f : MeromorphicFunction X) (D : Divisor X) (q : X × ℤ) :
+    mulTailSingle f D q ∈ tailSpace D := by
+  obtain ⟨p, k⟩ := q
+  rw [mem_tailSpace_iff]
+  intro q' hq'
+  obtain ⟨p', m⟩ := q'
+  rw [mulTailSingle_apply]
+  rcases eq_or_ne p' p with rfl | hne
+  · rw [if_neg (by simp only [true_and, not_lt]; exact hq')]
+  · rw [if_neg (by simp [hne])]
+
+/-- **The multiplication–truncation operator** `t ↦ trunc_D(f·t)`, in coefficients. -/
+def mulTail (f : MeromorphicFunction X) (D : Divisor X) :
+    GlobalTails X →ₗ[ℂ] GlobalTails X :=
+  Finsupp.lsum ℂ fun q => LinearMap.toSpanSingleton ℂ (GlobalTails X) (mulTailSingle f D q)
+
+@[simp] theorem mulTail_single (f : MeromorphicFunction X) (D : Divisor X) (q : X × ℤ)
+    (a : ℂ) : mulTail f D (Finsupp.single q a) = a • mulTailSingle f D q := by
+  rw [mulTail, Finsupp.lsum_single, LinearMap.toSpanSingleton_apply]
+
+theorem mulTail_apply (f : MeromorphicFunction X) (D : Divisor X) (t : GlobalTails X) :
+    mulTail f D t = t.sum fun q a => a • mulTailSingle f D q := by
+  rw [mulTail, Finsupp.lsum_apply]
+  exact Finsupp.sum_congr fun q _ => LinearMap.toSpanSingleton_apply ℂ _ _ _
+
+/-- `mulTail` lands in `𝒯[D]`. -/
+theorem mulTail_mem_tailSpace (f : MeromorphicFunction X) (D : Divisor X)
+    (t : GlobalTails X) : mulTail f D t ∈ tailSpace D := by
+  rw [mulTail_apply]
+  refine Submodule.finsuppSum_mem _ _ _ _ fun q _ => ?_
+  exact Submodule.smul_mem _ _ (mulTailSingle_mem_tailSpace f D q)
+
+/-- **The point-tail evaluation** (the shared bookkeeping engine): `mulTail` of a
+single-point coefficient window reads the window sum of shifted coefficients below the
+cut. -/
+theorem mulTail_pointTail_apply (f : MeromorphicFunction X) (D : Divisor X) (p : X)
+    (s : Finset ℤ) (φ : ℤ → ℂ) (p' : X) (m : ℤ) :
+    mulTail f D (∑ j ∈ s, Finsupp.single (p, j) (φ j)) (p', m)
+      = if p' = p ∧ m < -(D p) then ∑ j ∈ s, φ j * f.coeffAt p (m - j) else 0 := by
+  classical
+  rw [map_sum, Finsupp.finsetSum_apply]
+  have hterm : ∀ j ∈ s, (mulTail f D (Finsupp.single (p, j) (φ j))) (p', m)
+      = if p' = p ∧ m < -(D p) then φ j * f.coeffAt p (m - j) else 0 := by
+    intro j _
+    rw [mulTail_single, Finsupp.smul_apply, mulTailSingle_apply, smul_eq_mul]
+    split
+    · rfl
+    · rw [mul_zero]
+  rw [Finset.sum_congr rfl hterm]
+  by_cases hcond : p' = p ∧ m < -(D p)
+  · rw [if_pos hcond]
+    exact Finset.sum_congr rfl fun j _ => by rw [if_pos hcond]
+  · rw [if_neg hcond]
+    exact Finset.sum_eq_zero fun j _ => by rw [if_neg hcond]
+
+/-! ### Linearity of `mulTail` in the function -/
+
+theorem mulTailSingle_add (f g : MeromorphicFunction X) (D : Divisor X) (q : X × ℤ) :
+    mulTailSingle (f + g) D q = mulTailSingle f D q + mulTailSingle g D q := by
+  obtain ⟨p, k⟩ := q
+  ext q'
+  obtain ⟨p', m⟩ := q'
+  rw [Finsupp.add_apply, mulTailSingle_apply, mulTailSingle_apply, mulTailSingle_apply,
+    MeromorphicFunction.coeffAt_add]
+  split <;> simp
+
+theorem mulTailSingle_smul (a : ℂ) (f : MeromorphicFunction X) (D : Divisor X) (q : X × ℤ) :
+    mulTailSingle (a • f) D q = a • mulTailSingle f D q := by
+  obtain ⟨p, k⟩ := q
+  ext q'
+  obtain ⟨p', m⟩ := q'
+  rw [Finsupp.smul_apply, mulTailSingle_apply, mulTailSingle_apply,
+    MeromorphicFunction.coeffAt_smul, smul_eq_mul]
+  split <;> simp
+
+theorem mulTailSingle_eq_zero_of_germZero {f : MeromorphicFunction X}
+    (hf : f ∈ germZeroSubmodule (X := X)) (D : Divisor X) (q : X × ℤ) :
+    mulTailSingle f D q = 0 := by
+  obtain ⟨p, k⟩ := q
+  ext q'
+  obtain ⟨p', m⟩ := q'
+  rw [mulTailSingle_apply, Finsupp.coe_zero, Pi.zero_apply,
+    MeromorphicFunction.coeffAt_of_orderW_eq_top (hf p)]
+  split <;> rfl
+
+theorem mulTail_add_fun (f g : MeromorphicFunction X) (D : Divisor X) :
+    mulTail (f + g) D = mulTail f D + mulTail g D := by
+  refine Finsupp.lhom_ext fun q a => ?_
+  rw [LinearMap.add_apply, mulTail_single, mulTail_single, mulTail_single,
+    mulTailSingle_add, smul_add]
+
+theorem mulTail_smul_fun (a : ℂ) (f : MeromorphicFunction X) (D : Divisor X) :
+    mulTail (a • f) D = a • mulTail f D := by
+  refine Finsupp.lhom_ext fun q b => ?_
+  rw [LinearMap.smul_apply, mulTail_single, mulTail_single, mulTailSingle_smul,
+    smul_comm]
+
+theorem mulTail_eq_zero_of_germZero {f : MeromorphicFunction X}
+    (hf : f ∈ germZeroSubmodule (X := X)) (D : Divisor X) :
+    mulTail f D = 0 := by
+  refine Finsupp.lhom_ext fun q a => ?_
+  rw [mulTail_single, mulTailSingle_eq_zero_of_germZero hf D q, smul_zero,
+    LinearMap.zero_apply]
+
+/-! ### The upper kill and the transport identity -/
+
+/-- **The upper kill**: for `f ∈ L(E)`, `mulTail f D` annihilates the upper space
+`𝒰[D−E]` (the truncation depth clears the multiplier's pole bound). -/
+theorem mulTail_eq_zero_of_mem_upperSpace {E : Divisor X} {f : MeromorphicFunction X}
+    (hf : f ∈ linearSystem (X := X) E) (D : Divisor X) {u : GlobalTails X}
+    (hu : u ∈ upperSpace (D - E)) : mulTail f D u = 0 := by
+  classical
+  rw [mulTail_apply, Finsupp.sum]
+  refine Finset.sum_eq_zero fun q hq => ?_
+  obtain ⟨p, k⟩ := q
+  have hcut : -(D p) + E p ≤ k := by
+    have hmem := hu hq
+    simp only [Set.mem_compl_iff, belowSet, Set.mem_setOf_eq, not_lt, Finsupp.sub_apply]
+      at hmem
+    omega
+  have hzero : mulTailSingle f D (p, k) = 0 := by
+    ext q'
+    obtain ⟨p', m⟩ := q'
+    rw [mulTailSingle_apply, Finsupp.coe_zero, Pi.zero_apply]
+    split
+    · rename_i hcond
+      refine MeromorphicFunction.coeffAt_eq_zero_of_coe_lt_orderW ?_
+      refine lt_of_lt_of_le ?_ (hf p)
+      exact_mod_cast (by omega : m - k < -(E p))
+    · rfl
+  rw [hzero, smul_zero]
+
+/-- **The transport identity** (the engine of the descended multiplication): for
+`f ∈ L(E)`, multiplying the level-`(D−E)` tail of `g` and truncating at `D` is the
+level-`D` tail of `f·g`: `mulTail f D (α_{D−E} g) = α_D (f·g)`. -/
+theorem mulTail_tailMap {E : Divisor X} {f : MeromorphicFunction X}
+    (hf : f ∈ linearSystem (X := X) E) (D : Divisor X) (g : MeromorphicFunction X) :
+    mulTail f D (tailMap (D - E) g) = tailMap D (f * g) := by
+  classical
+  ext q
+  obtain ⟨p, m⟩ := q
+  rw [show tailMap (D - E) g = tailMapFun (D - E) g from rfl, tailMapFun, map_sum,
+    Finsupp.finsetSum_apply, tailMap_apply_coeff]
+  set S : Finset X := (D - E).support ∪ g.div.support with hS
+  have hterm : ∀ p' ∈ S,
+      (mulTail f D (∑ k ∈ Finset.Ico (min ((g.orderW p').untop₀) (-((D - E : Divisor X) p')))
+        (-((D - E : Divisor X) p')), Finsupp.single (p', k) (g.coeffAt p' k))) (p, m)
+      = if p = p' ∧ m < -(D p') then
+          ∑ k ∈ Finset.Ico (min ((g.orderW p').untop₀) (-((D - E : Divisor X) p')))
+            (-((D - E : Divisor X) p')), g.coeffAt p' k * f.coeffAt p' (m - k)
+        else 0 := by
+    intro p' _
+    exact mulTail_pointTail_apply f D p' _ _ p m
+  rw [Finset.sum_congr rfl hterm]
+  have hsplit : ∀ p' : X, (if p = p' ∧ m < -(D p') then
+      ∑ k ∈ Finset.Ico (min ((g.orderW p').untop₀) (-((D - E : Divisor X) p')))
+        (-((D - E : Divisor X) p')), g.coeffAt p' k * f.coeffAt p' (m - k) else 0)
+      = if p = p' then (if m < -(D p') then
+          ∑ k ∈ Finset.Ico (min ((g.orderW p').untop₀) (-((D - E : Divisor X) p')))
+            (-((D - E : Divisor X) p')), g.coeffAt p' k * f.coeffAt p' (m - k) else 0)
+        else 0 := by
+    intro p'
+    by_cases h1 : p = p'
+    · by_cases h2 : m < -(D p')
+      · rw [if_pos ⟨h1, h2⟩, if_pos h1, if_pos h2]
+      · rw [if_neg (by tauto), if_pos h1, if_neg h2]
+    · rw [if_neg (by tauto), if_neg h1]
+  rw [Finset.sum_congr rfl fun p' _ => hsplit p']
+  rw [Finset.sum_ite_eq S p fun p' => if m < -(D p') then
+      ∑ k ∈ Finset.Ico (min ((g.orderW p').untop₀) (-((D - E : Divisor X) p')))
+        (-((D - E : Divisor X) p')), g.coeffAt p' k * f.coeffAt p' (m - k) else 0]
+  -- the window product law identifies the windowed sum with the product coefficient
+  have hwindow : m < -(D p) →
+      (f * g).coeffAt p m
+        = ∑ k ∈ Finset.Ico (min ((g.orderW p).untop₀) (-((D - E : Divisor X) p)))
+            (-((D - E : Divisor X) p)), g.coeffAt p k * f.coeffAt p (m - k) := by
+    intro hm
+    refine MeromorphicFunction.coeffAt_mul_window f g p
+      (coe_min_untop₀_le_self _ _) (min_le_right _ _) ?_
+    refine le_trans ?_ (hf p)
+    have harith : m + 1 - (-((D - E : Divisor X) p)) ≤ -(E p) := by
+      rw [Finsupp.sub_apply]
+      omega
+    exact_mod_cast harith
+  by_cases hmem : p ∈ S
+  · rw [if_pos hmem]
+    by_cases hm : m < -(D p)
+    · rw [if_pos hm, if_pos hm, hwindow hm]
+    · rw [if_neg hm, if_neg hm]
+  · rw [if_neg hmem]
+    rw [Finset.mem_union, not_or] at hmem
+    by_cases hm : m < -(D p)
+    · rw [if_pos hm]
+      have hDE0 : (D - E : Divisor X) p = 0 := Finsupp.notMem_support_iff.mp hmem.1
+      have hEp : E p = D p := by
+        have := Finsupp.sub_apply (g₁ := D) (g₂ := E) (a := p)
+        rw [hDE0] at this
+        omega
+      have hgord : (0 : WithTop ℤ) ≤ g.orderW p :=
+        MeromorphicFunction.orderW_nonneg_of_not_mem_div_support hmem.2
+      refine (MeromorphicFunction.coeffAt_eq_zero_of_coe_lt_orderW ?_).symm
+      rw [MeromorphicFunction.orderW_mul]
+      calc ((m : ℤ) : WithTop ℤ) < ((-(E p) : ℤ) : WithTop ℤ) := by
+            exact_mod_cast (by omega : m < -(E p))
+        _ ≤ f.orderW p := hf p
+        _ = f.orderW p + 0 := (add_zero _).symm
+        _ ≤ f.orderW p + g.orderW p := add_le_add le_rfl hgord
+    · rw [if_neg hm]
+
 end Dolbeault
 
 end Jacobians
