@@ -1,0 +1,6 @@
+=== T-lane session start 2026-06-11 — branch feat/frame-trace (from feat/residue-atom a3e9dfc) ===
+Goal: FrameResidueTrace for the canonical df datum -> frameTraceHypothesis_df.
+Plan: (1) principal-part FibreTrace reduction (FrameResidueTrace from a LaurentForm + two residue
+identities, proven); (2) unramified frame-fibre mirror of FormTraceFibre (Lemma 3.2 for frameRes,
+proven); (3) df value-trace collapse per sheet (proven); (4) THE WALL isolated as one named
+lemma (exists_traceLaurentForm_df) if the global rationality cannot be closed in-session.
