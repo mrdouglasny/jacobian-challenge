@@ -7,7 +7,8 @@ for all 7 Buzzard instance obligations (T2Space, CompactSpace, ConnectedSpace,
 ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-11
 (post-D1 + the #161 trace-cluster discharge + the #52 `PlaneCurve.instIsManifold`
 discharge + the PR #179 `AX_ofCurve_contMDiff` discharge, which dropped the
-challenge-critical count 7 → **6**) against the 29-axiom table.*
+challenge-critical count 7 → **6** + the PR #183 odd-atlas ∞-chart cluster
+discharge, −7 non-critical) against the 22-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
 > count dropped **13 → 7** (D1 merge −3+1 −intersectionForm; #161 trace-cluster
@@ -39,7 +40,7 @@ Challenge.lean line 105 marks it as extra, needed for the Albanese universal pro
 
 All 24 are filled; `ChallengeConformance.lean` machine-checks every v0.4 signature
 (`lake env lean ChallengeConformance.lean`, exit 0). **But filling a `sorry` with an
-`axiom` is not the same as proving it.** This document identifies: which of the 29
+`axiom` is not the same as proving it.** This document identifies: which of the 22
 remaining axioms must be discharged to produce a fully axiom-free challenge closure?
 
 ---
@@ -153,7 +154,7 @@ an opaque construction any more.
 
 ---
 
-## The 23 non-challenge-critical axioms
+## The 16 non-challenge-critical axioms
 
 ### i. Intersection form + laws (3) — out of the challenge cone since D1
 
@@ -196,13 +197,12 @@ construction, ofCurve, functoriality) do not depend on RR/Serre.
 `AX_PluckerFormula`: `genus(C) = (d−1)(d−2)/2` for a smooth degree-d plane curve.
 Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib currently.
 
-### v. Concrete curve witnesses (10) — Part 3 vetting only
+### v. Concrete curve witnesses (3) — Part 3 vetting only
 
 | Group | Axioms |
 |---|---|
 | Elliptic | `AX_Elliptic_H1_symplectic` |
-| Hyperelliptic | `AX_Hyperelliptic_genus` |
-| Odd-atlas ∞-chart (7) | `infinityInverseMap`, `infinityChart`, `infinityChart_mem_source`, 4 compat axioms |
+| Hyperelliptic | `AX_Hyperelliptic_genus` (the 7-axiom odd-atlas ∞-chart cluster — `infinityChart`, `infinityInverseMap`, `mem_source`, 4 compats — **discharged PR #183**, 2026-06-11, correct analytic branch; `Hyperelliptic.instChartedSpace`/`instIsManifold` now standard-3) |
 | Plane curve | `AX_PlaneCurveAffine_connected` (`PlaneCurve.instIsManifold` **discharged #52**, 2026-06-10) |
 
 ---

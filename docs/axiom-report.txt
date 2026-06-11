@@ -103,20 +103,8 @@
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-'Jacobians.ProjectiveCurve.Hyperelliptic.instChartedSpace' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- ProjectiveCurve.HyperellipticOdd.infinityChart,
- ProjectiveCurve.HyperellipticOdd.infinityChart_mem_source]
-'Jacobians.ProjectiveCurve.Hyperelliptic.instIsManifold' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- ProjectiveCurve.HyperellipticOdd.affineLiftProjX_compat_infinityChart,
- ProjectiveCurve.HyperellipticOdd.affineLiftProjY_compat_infinityChart,
- ProjectiveCurve.HyperellipticOdd.infinityChart,
- ProjectiveCurve.HyperellipticOdd.infinityChart_compat_affineLiftProjX,
- ProjectiveCurve.HyperellipticOdd.infinityChart_compat_affineLiftProjY,
- ProjectiveCurve.HyperellipticOdd.infinityChart_mem_source]
+'Jacobians.ProjectiveCurve.Hyperelliptic.instChartedSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.Hyperelliptic.instIsManifold' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.AX_Hyperelliptic_oddEquiv' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.AX_Hyperelliptic_evenEquiv' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve' depends on axioms: [propext, Classical.choice, Quot.sound]
