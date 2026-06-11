@@ -1,0 +1,15 @@
+# HYP_CB progress log — hyperelliptic PeriodCycleBasis witness foundations
+# branch feat/hyperelliptic-cyclebasis (worktree agent-a2d498750ea6f1fbd)
+
+[T+0] Setup: reset to origin/main 12123eb, caches copied. Read PeriodCycleBasis.lean
+      (αEmbed-first A/B layout contract), Elliptic/Witnesses.lean (g=1 pattern:
+      explicit extend + IsAnalyticArcStrong via chart-cover refinement + retyped
+      AX_Elliptic_H1_symplectic), Hyperelliptic/Basic.lean (sqMap covering,
+      branch machinery, path-connectivity hub argument), OddAtlas.lean (#167 area:
+      ChartedSpace + IsManifold on HyperellipticOdd), AnalyticArc.lean
+      (IsAnalyticArcStrong refinement predicate; concat/reverse still TODO),
+      CanonicalArcIntegral.lean, CYCLEBASIS_ALTERNATIVES.md direction 2a.
+      Plan: M1 = sqrt-lift machinery (x-plane analytic loop + analytic branch
+      y(t) with y²=f(x) ⇒ AnalyticArc on HyperellipticAffine ⇒ lift to
+      HyperellipticOdd), then explicit aᵢ/bᵢ branch-pair loops; M2 = homology
+      named hypotheses; M3 = R1/R2 arc-level reduction statement.
