@@ -22,6 +22,9 @@ import Jacobians.ProjectiveCurve.Elliptic.OfCurveInj
 import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
+import Jacobians.ProjectiveCurve.Hyperelliptic.CycleLoops
+import Jacobians.ProjectiveCurve.Hyperelliptic.CycleBasisWitness
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas.InfinityAffineChart
 import Jacobians.ProjectiveCurve.Hyperelliptic.EvenAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm

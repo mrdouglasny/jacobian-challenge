@@ -12,7 +12,7 @@ over a loop representative of a homology class. Well-definedness on
 ## Design
 
 Following the design decision recorded in
-`Jacobians/Axioms/AnalyticCycleBasis.lean` (and the user-driven
+`Jacobians/Axioms/PeriodCycleBasis.lean` (and the user-driven
 discussion in `docs/history.md` 2026-04-22 "PathIntegral design
 conversation"), we restrict to **piecewise-real-analytic** arcs and
 reuse Mathlib's `curveIntegral` / `intervalIntegral` chart-locally.

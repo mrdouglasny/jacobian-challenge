@@ -10,8 +10,20 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 33** — all **33** in our own modules (Phase D
-discharged the Layer-3 `H1coh` + its 3 instances to real definitions backed by
+**Active project axioms: 30** — all **30** in our own modules (the #52
+endgame discharged `PlaneCurve.instIsManifold` to a real `instance` — diagonal
+preferred-lifted compat + `chartAt_compat` assembly over the #117 atlas, proof
+moved to `AtlasCompat.lean` downstream of the proved compat layer, 2026-06-10,
+`#print axioms` standard-3, net −1, 31 → 30; the **D1
+merge**, 2026-06-10, replaced `AX_AnalyticCycleBasis` + `Layer3.AX_RBR1` +
+`Layer3.AX_RBR2` with the single `AX_PeriodCycleBasis` — same loops/H₁-basis/
+Hurewicz-tie fields plus the two Riemann bilinear relations stated arc-level
+over the bundle's own loops, net −2, 33 → 31; the proof-unconsumed `symplectic` field
+was dropped, so `intersectionForm` and its 2 laws, kept per owner decision D2,
+exit every headline closure; owner-approved per
+`docs/planning/CYCLEBASIS_ALTERNATIVES.md` §1, DT-vetted 2026-06-10 with the
+index-split alignment guard pinned by the `arcPeriodVec_fst/snd` simp lemmas;
+Phase D discharged the Layer-3 `H1coh` + its 3 instances to real definitions backed by
 the Kirov Dolbeault port's Čech cohomology (`Layer3/CechH1Bridge.lean`,
 2026-06-10, `#print axioms` standard-3, net −4), then `cohomologyLES` to a real
 construction, then the **trace cluster** — `pushforwardOneForm` +
@@ -292,25 +304,27 @@ primitives that are statement-vetted but not yet discharged.
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (19 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (18 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
   obvious discharge. **This is the class to focus on.** Subdivided 2a–2d
   below, with 2d (Flagged) the most urgent.
-- **Class 3 — Layer-3 primitives** (9 axioms). Standard cohomology and
-  Riemann-bilinear primitives introduced to prove earlier table entries as
-  theorems while keeping the remaining trust boundary explicit.
+- **Class 3 — Layer-3 primitives** (2 axioms). Standard cohomology
+  primitives introduced to prove earlier table entries as theorems while
+  keeping the remaining trust boundary explicit. (The 2 Riemann-bilinear
+  primitives `AX_RBR1`/`AX_RBR2` were merged into `AX_PeriodCycleBasis`
+  in D1, 2026-06-10.)
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
 | 1 — textbook-standard | 10 | classical theorems, citable | high |
 | 2a — data-existence | 4 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 4 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 11 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 10 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 2 | `h1coh_zero_finrank`+`serreDuality_equiv` (keystone-gated: port's `exists_serreDualityData`) — **re-stamped vs the now-CONCRETE `H1coh` 2026-06-10 (`DT`): both Standard** — chart disks are Stein/∂̄-acyclic, so the one-cover Čech H¹ IS genuine H¹(X,𝒪_D) (Cartan; twisting by the finite-support D preserves chart-disk acyclicity), making `h1coh_zero_finrank` exactly the Hodge/Serre h¹(𝒪)=g base case and `serreDuality_equiv` Forster §17 at the right strength (opaque K satisfiable as div(ω)). `H1coh`(+3 instances) and `cohomologyLES` **DISCHARGED 2026-06-10** via the Kirov Dolbeault port (`Layer3/CechH1Bridge.lean`, `LinearSystemBridge.lean`, `CohomologyLESBridge.lean`; all standard-3) | research |
-| 3 — Layer-3 period primitives (Phase C) | 2 | `Layer3.AX_RBR1` (isotropy/Stokes) + `Layer3.AX_RBR2` (Hodge positivity) — statement-vetted (`DT`, per-axiom, sign verified on the torus) **before** introduction; discharge `AX_RiemannBilinear`/`AX_PeriodLattice`/`instPeriodLatticeDiscrete` | research |
+| 3 — Layer-3 period primitives (Phase C) | 0 | `Layer3.AX_RBR1` + `Layer3.AX_RBR2` **MERGED 2026-06-10 (D1)** into `AX_PeriodCycleBasis` (Class 1) as its arc-level `R1`/`R2` fields — the bundle is self-guarding, dissolving the global-choice trap their basis-quantified form needed the `symplectic` field for | — |
 
 ---
 
@@ -324,7 +338,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form). **DT-re-vetted post-fix 2026-06-09: SATISFIABLE/FAITHFUL** — basepoint-independence on deg-0 makes `Classical.arbitrary` harmless; g=0 and lattice-quotient cases clean; ⊓-typing sound |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — degree-genus via adjunction (smooth ⇒ genera coincide); ℕ-truncated subtraction exactly absorbs d=1, `(d−1)(d−2)` always even so `/2` exact; hypotheses sufficient (irreducibility redundant-but-safe by Bézout) |
 | `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — → via uniformization/RR, ← via b₁ homeo-invariance + Hodge `b₁=2h^{1,0}`; no empty-space vacuity (`ConnectedSpace` ⇒ `Nonempty`); `EuclideanSpace` sphere is the genuine L² S² |
-| `AX_AnalyticCycleBasis` | `Axioms/AnalyticCycleBasis.lean:257` | symplectic H₁ basis (standard). **DT-vetted per-axiom 2026-06-09: SATISFIABLE/FAITHFUL** — 4g-gon dissection gives 2g analytic loops at one basepoint; refinement-based analyticity is the correct (post-#82) form; `loops_to_basis` Hurewicz tie is the load-bearing anti-vacuity pin; g=0 empty-basis case sound |
+| `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean:237` | H₁ cycle basis + arc-level Riemann bilinear relations (standard: Griffiths–Harris Ch. 2 §2, Forster §§20–21). **D1 merge of `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2` (2026-06-10), DT-vetted: SATISFIABLE/FAITHFUL** — strictly implied by the three 2026-06-09-vetted predecessors (instantiate RBR1/2 at the chosen symplectic basis; weaker-or-equal, never stronger), so satisfiability is inherited; `loops_to_basis` Hurewicz tie remains the anti-vacuity pin; **index-split alignment guard (DT finding 5)**: `arcPeriodVec` is defined through `αEmbed`/`βEmbed` so component 1 = A-periods, component 2 = B-periods, exactly `Q`'s layout, pinned by the `@[simp]` lemmas `arcPeriodVec_fst`/`arcPeriodVec_snd` + a docstring layout contract; g=0 empty-basis witness re-proved (`projectiveLineCycleBasis`, R1 empty sum / R2 vacuous) |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
 | `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
@@ -350,7 +364,7 @@ or contradictory, or doesn't pin down the intended object. The three marked
 | Axiom | File:Line | Note |
 |-------|-----------|------|
 | `pushforwardOneForm` 🅒 | ✅ **DISCHARGED 2026-06-10** (#26) — now a real `def` via the Kirov-Dolbeault port's fibre-sum trace `traceFormTotal` (genuine `traceForm` off constants, `0` for constant maps — the docstring convention realized definitionally), transported across `Bridge/KirovDolbeaultTrace.lean`'s `bridgeKDFormEquiv`; standard-3, supersedes the 🅒 construction plan | trace of 1-forms |
-| `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL with a recorded nuance** — the genuine topological form (transported along the canonical basepoint-independent Hurewicz iso) satisfies all companions; opacity is spec-complete for current uses (downstream consumes only the symplectic-basis values + the RBR primitives, and Sp(2g,ℤ) transitivity makes any compliant model equivalent), BUT the *topological anchoring* debt re-surfaces when `AX_RBR1`/`AX_RBR2` are eventually discharged by genuine Stokes — at that point the form must be tied to the actual dissection (record: discharge RBR + intersectionForm jointly). Cosmetic: a `→ₗ[ℤ]` retype would unlock Mathlib bilinear-form API (no soundness content) |
+| `intersectionForm` | `Axioms/IntersectionForm.lean:59` | the pairing itself (properties are Class 1). **D1 (2026-06-10): no longer referenced by any axiom or headline** — the `symplectic` field that carried it was dropped from the cycle-basis bundle; kept in the build as Part-3 topological-anchoring debt per owner decision D2 (keep-as-non-critical). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL with a recorded nuance** — the genuine topological form (transported along the canonical basepoint-independent Hurewicz iso) satisfies all companions; opacity is spec-complete for current uses (downstream consumes only the symplectic-basis values + the RBR primitives, and Sp(2g,ℤ) transitivity makes any compliant model equivalent), BUT the *topological anchoring* debt re-surfaces when `AX_RBR1`/`AX_RBR2` are eventually discharged by genuine Stokes — at that point the form must be tied to the actual dissection (record: discharge RBR + intersectionForm jointly). Cosmetic: a `→ₗ[ℤ]` retype would unlock Mathlib bilinear-form API (no soundness content) |
 | `LineBundle`, `canonicalDivisor`, `LineBundle.ofDivisor` (3) | `RiemannSurface/Cohomology/LineBundleBasic.lean` | line-bundle / canonical-divisor **type stubs**. `H0` is `riemannRochSpace D` with inherited submodule instances; `H1` is now `Layer3.H1coh D` with inherited Layer-3 instances; the `Divisor` triple and `PrincipalDivisors` were already discharged. |
 | Layer 3 Phase-B cohomology scaffold: `h1coh_zero_finrank`, `serreDuality_equiv` (**`H1coh`+3 instances and `cohomologyLES` DISCHARGED 2026-06-10** — real Čech cohomology of the chart-disk cover via the Kirov Dolbeault port, `Layer3/CechH1Bridge.lean`, `#print axioms` standard-3) | `Layer3/Cohomology.lean` | Axiomatic cohomology hybrid for the real `H¹(X,O(D))`: the long exact sequence for `0 → O(D) → O(D+P) → ℂ_P → 0`, `h¹(O_X)=g`, and the Serre pairing. Gemini deep-think vetted the design 2026-06-08, and **per-axiom for satisfiability/faithfulness 2026-06-09 (`DT`, verdict SATISFIABLE/FAITHFUL, rating Likely correct)**; the port-side interfaces backing the discharge were separately vetted Standard 2026-06-10 (A2, `docs/planning/PHASE_D_TYPE_ALIGNMENT.md`); references Forster §§16–17. Riemann-Roch and the Serre dimension identity are theorems in the same file. |
 
@@ -382,11 +396,11 @@ remains here is their **atlas/manifold** instances + the genus formula.
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
-| `PlaneCurve`: `instIsManifold` + 1 affine prop `AX_PlaneCurveAffine_connected` (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117** — Euler + IFT affine charts, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 2 |
+| `PlaneCurve`: 1 affine prop `AX_PlaneCurveAffine_connected` only (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117**, **`instIsManifold` DISCHARGED #52 PR-4 (2026-06-10)** — diagonal + `chartAt_compat` assembly over the #117 atlas, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 1 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
 | `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
-| Elliptic witness (`AX_Elliptic_H1_symplectic`) | `…/Elliptic/Witnesses.lean:497` | 1; `AX_Elliptic_aLoop_analytic` (PR #86, 2026-06-06) and `AX_Elliptic_bLoop_analytic` (2026-06-07) were **discharged to theorems** via `extChartAt_quotient_mk_line_analyticAt`. |
+| Elliptic witness (`AX_Elliptic_H1_symplectic`) | `…/Elliptic/Witnesses.lean` | 1; **re-typed to `PeriodCycleBasis` in D1 (2026-06-10)** — discharge attempted, NOT closable: `isBasis`/`loops_to_basis` still need `π₁(ℂ/Λ) ≅ Λ` (covering-space H₁), but the unprovable-by-design opaque-form `symplectic` field is gone and R1/R2 are now provable for the concrete A/B loops, so the axiom's real content strictly shrank (see `docs/planning/AX_Elliptic_H1_symplectic.md` D1 note). `AX_Elliptic_aLoop_analytic` (PR #86, 2026-06-06) and `AX_Elliptic_bLoop_analytic` (2026-06-07) were **discharged to theorems** via `extChartAt_quotient_mk_line_analyticAt`. |
 | `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
 
 ### 2d. Flagged — *true-but-unproven; needs end-to-end check*
@@ -438,8 +452,10 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `PlaneCurve.instIsManifold` *(#52 PR-4, 2026-06-10)* | the IsManifold endgame over the #117 atlas: the 3 diagonal preferred-lifted-chart compat assemblies (`centralLiftChart`/`yLiftChart`/`xLiftChart` self-pairs via `OpenPartialHomeomorph.lift_openEmbedding_trans` + the PR-2 within-patch lemmas), the full 9-case `PlaneCurve.chartAt_compat` dispatch (rep-coordinate trichotomy matching `chartAt`'s preference order z→y→x), and the `isManifold_of_contDiffOn` wrapper. Module placement: axiom deleted from `Atlas.lean`, real `instance` lives in `AtlasCompat.lean` (downstream of the proved compat layer); `CrossCompat.lean` re-imports `AtlasCompat`. `#print axioms` standard-3, no `sorryAx`. Net −1 (31 → 30 after the D1 merge). (Implementation by Codex; independently re-verified.) | `ProjectiveCurve/PlaneCurve/AtlasCompat.lean` |
 | **Trace cluster — all 3**: `pushforwardOneForm`, `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` *(#26/#27/#28, 2026-06-10)* | the Kirov-Dolbeault port's fibre-sum trace `traceFormTotal` (genuine `traceForm` — fibre sum via `(mfderiv f x)⁻¹` off the branch locus, sheet-decomposition holomorphicity, removable-singularity extension at branch points — and `0` for constant maps), transported across the new `bridgeKDFormEquiv = bridgeFormEquiv.trans kdFormAlign` (`kdFormAlign` is the *identity* `LinearEquiv`: vendored and port `HolomorphicOneForms` unfold to the same `ContMDiffSection` type). `_id`/`_comp` conjugate `traceFormTotal_id`/`_comp`; the zero-for-constants convention is the port's `dif` branch (`traceFormTotal_eq_zero_of_const`). `#print axioms` standard-3, no `sorryAx`. Net −3 (36 → 33); the trace-gated `AX_pullbackAmbient_preserves_lattice` is now the dual of a REAL trace. | `Bridge/KirovDolbeaultTrace.lean` + `Axioms/AbelJacobiMap.lean`; port proof in `vendor/kirov-dolbeault-port/KirovDolbeault/TraceForm.lean` |
-| `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I | τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
+| `AX_AnalyticCycleBasis`, `Layer3.AX_RBR1`, `Layer3.AX_RBR2` *(D1 merge, 2026-06-10)* | merged into the single `AX_PeriodCycleBasis` (`Axioms/PeriodCycleBasis.lean`): same `loops`/`isBasis`/`loops_to_basis` fields + R1/R2 stated arc-level over the bundle's own `canonicalArcIntegral`s (`arcPeriodVec`, αEmbed/βEmbed layout pinned by `@[simp]`); the Layer-3 engine takes `R1Holds`/`R2Holds` hypotheses and instantiates them on the SAME `Classical.choice` witness that defines `loopIntegralToH1` (`periodVec_choice_eq_arcPeriodVec` via `loopIntegralToH1_loop`); the proof-unconsumed `symplectic` field was dropped, removing `intersectionForm` from every headline closure. Net −2. Statement strictly weaker-or-equal to the merged trio (satisfiability inherited from their 2026-06-09 DT vets; merge design DT-endorsed 2026-06-10). | `Axioms/PeriodCycleBasis.lean`, `Layer3/Periods.lean`, witnesses in `ProjectiveCurve/{Line,Elliptic}/Witnesses.lean` |
+| `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` *(Layer-3 Phase C, 2026-06-09; since D1 these rest on `AX_PeriodCycleBasis` alone)* | the 2 basis-free primitives `Layer3.AX_RBR1` (isotropy/Stokes) + `AX_RBR2` (Hodge positivity), statement-vetted (`DT`, per-axiom, RBR2 sign verified on the genus-1 torus) **before** introduction, through the axiom-free matrix engine: RBR2 ⇒ A-period matrix invertible ⇒ normalized basis; RBR1 ⇒ `τ = τᵀ`; RBR1+RBR2 ⇒ `Im τ ≻ 0` ⇒ Siegel membership (`riemannBilinear_exists`); normalized lattice = engine `[I | τ]` column lattice (τ-symmetry = the row/column bridge) ⇒ `IsZLattice` + discreteness, transported to every form basis via `ZLattice.comap` along the dual-coordinate change. `#print axioms` = standard-3 + `AX_AnalyticCycleBasis` + `intersectionForm` + RBR1/RBR2; no `sorryAx`. Net −1 (+2 primitives, −3 discharged). | `Layer3/Periods.lean`; conversions in `Axioms/RiemannBilinear.lean`, `Axioms/PeriodLattice.lean` (defs split to `Axioms/PeriodLatticeBase.lean`) |
 | `PlaneCurve.instChartedSpace` *(#117, 2026-06-09)* | concrete `ChartedSpace` for the smooth projective plane curve: Euler's homogeneous-function theorem ⇒ nonvanishing dehomogenized gradient on each `x/y/z=1` patch, 6 local charts via the proved Inverse Function Theorem (#99), open-embedding atlas. `#print axioms` standard-3, no `sorryAx`. (Contributed by @daouid.) | `ProjectiveCurve/PlaneCurve/{Euler,AffineChart,Atlas,CrossCompat}.lean` |
 | `AX_RiemannRoch`, `AX_SerreDuality`, `Axioms.H1` + `H1.instAddCommGroup`/`H1.instModule` *(2026-06-09)* | import-cycle split through `RiemannRochBase` and `LineBundleBasic`; `H1 := Layer3.H1coh`; RR from `Layer3.riemannRochL3`; Serre equivalence from `Layer3.serreDuality_equiv`. The Layer-3 cohomology axioms remain axioms (separately DT+CX-vetted) and are not discharged here. | `Axioms/RiemannRoch.lean`, `Axioms/SerreDuality.lean`, `RiemannSurface/Cohomology/LineBundle.lean`, `Layer3/Cohomology.lean` |
 | `riemannRochSpace_finiteDimensional` *(2026-06-08, #116)* | elementary `ℓ(D) ≤ 1 + deg D⁺` (Forster §16 / Miranda VI, the easy half of Riemann's inequality), **Montel-free**: a local pole-clearing coefficient functional `φ(f) = lim (z−z0)ⁿ·f` with `ker φ = L(D−p)`, a `Multiset` one-point induction, base case `L(0) = ℂ`. `#print axioms` standard-3. Gemini + Codex vetted | `RiemannSurface/Cohomology/RiemannRochFinite.lean`; swap in `…/RiemannRochAPI.lean` |
@@ -489,7 +505,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 33 — the vendored Kirov subtree is now axiom-free, so 33 is the total (incl. 2+2 Layer-3 axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117, and the 3 trace-cluster axioms #26/#27/#28).
+#   prints 30 — the vendored Kirov subtree is now axiom-free, so 30 is the total (incl. the 2 Layer-3 cohomology axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges and the D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, and the 3 trace-cluster axioms #26/#27/#28).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -506,7 +522,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 33
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 30
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

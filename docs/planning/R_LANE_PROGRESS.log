@@ -106,3 +106,160 @@ norm_complex_apply, whose Jacobian is literally OneOneLawAt's normSq factor;
 (iii) the ω₀-coefficient witness for IsOneZeroCoeff (+ the K-point-separating cover
 refinement above) before R6 can evaluate on real Z¹(O_K) data; (iv) cite
 resNormalization = -π⁻¹ from SignTest for the final normalization - do not re-derive.
+
+# ---- Session 3: R4 (feat/keystone-r4-integral) ----
+
+[R4a DONE] Integral.lean compiles clean (lake env lean, no warnings); 8 headlines axiom-clean
+([propext, Classical.choice, Quot.sound]): contDiff_pouCoeff, integrable_pouCoeff_mul,
+resIntegral, resFunctional, det_complexToReal_smul_one, setIntegral_image_holomorphic,
+setIntegral_overlap_relocate, setIntegral_overlap_relocate'.
+THE FUNCTIONAL: pouCoeff 𝔇 j := indicator (chartMap j '' U_j) (rhoC 𝔇 j ∘ (chart j).symm) —
+the indicator cutoff is what makes the chart-pushed weight an HONEST global planar function
+(junk values of (chart j).symm outside the target are killed because tsupport ρ_j ⊆ U_j, so
+the cutoff only removes zeros); globally ContDiff + HasCompactSupport, hence each summand
+∫ ρ̃_j·t_j integrable from IsOneOneCoeff smoothness alone.
+resIntegralFun t := ∑_j ∫_ℂ pouCoeff 𝔇 j z * t j z; resIntegral : oneOneCoeff 𝔇 →ₗ[ℂ] ℂ
+(map_add via integral_add over the member integrability; map_smul via integral_const_mul);
+resFunctional := resNormalization • resIntegral 𝔇 — R0 constant CITED, not re-derived.
+RELOCATION: setIntegral_image_holomorphic (∫_{φ''s} u = ∫_s normSq φ′ · u∘φ) from
+integral_image_eq_integral_abs_det_fderiv_smul + det_complexToReal_smul_one
+(det_ℝ(c·) = normSq c via LinearMap.det_restrictScalars + Algebra.norm_complex_apply — the
+exact scoping-inventory route); headline setIntegral_overlap_relocate: over overlapImage
+(chart reads of U_j ⊓ U_k, open/injective/holomorphic via the R1 transition atoms), the
+f-weighted integral of t_j equals the chart-k read — the CoV Jacobian is consumed by
+OneOneLawAt evaluated pointwise (Eventually.self_of_nhds). R1's normSq design paid off on
+the nose. Gotcha for posterity: chartMap j x vs (chartAt ...) x are defeq but not syntactic;
+every left_inv/right_inv rewrite needs a TYPED have (hli : ... = x := left_inv ...), and
+setIntegral_congr_fun goals need dsimp only to beta-reduce before rw.
+
+[R4b DONE] OmegaWitness.lean compiles clean; 3 headlines axiom-clean:
+localRep_transitionMap, isOneZeroCoeff_omegaCoeff, exists_omegaCoeff_ne_zero.
+THE ω₀ WITNESS: omegaCoeff 𝔇 α j := coeffAt α (𝔇.center j) (the PROVEN
+Montel.localRep/FormCoeff layer). The (1,0) law comes from localRep_transitionMap:
+localRep α c_j = φ′_{jk}·localRep α c_k on U_j ⊓ U_k, proven from the frame identity
+trivAt_symmL_one_eq_fderiv_C (SmoothPathCore: the chart-c unit tangent IS fderiv of the
+chart transition) + fderiv chain rule through φ_{jk} (transition factors as
+(chart_y∘chart_k⁻¹)∘φ near chart_j y) + ℂ-linearity of α.toFun y. Non-triviality at g ≥ 1:
+exists_omegaCoeff_ne_zero via Module.nontrivial_of_finrank_pos (finrank = kirovGenus) +
+exists_localRep_self_ne_zero + Montel.localRep_chart_transition/chartTransitionFactor_ne_zero.
+K-POINT CONSTRAINT RECORDED WHERE IT BITES: the witness is UNCONDITIONAL (any cover, any α);
+the refinement constraint is on the SCALAR w-data (HolomorphicOnOverlaps for Z¹(O_K) reps),
+surfacing at R6 evaluation — recorded in the OmegaWitness module docstring next to the g=0
+note, per the Gemini verdict's request.
+G=0 (Gemini flag on #156): docs/planning/R4_G0_NOTE.md — lane R conditioned on
+0 < kirovGenus X; NO fake witness, NO meromorphic-ω₀ generalization; genus 0 routes through
+the snapshot SerreResidueDirectGenus0* leg (S9); the case split lives at the keystone
+exists_serreDualityData instantiation (R7/R8), not inside lane R.
+
+[R4 GATES] Both files wired into the KirovDolbeault root aggregator in the same commits
+(F7 lesson); root lake build green (8758 jobs); all 11 R4 headlines #print-axioms standard-3.
+R5 NEXT NEEDS: (i) the planar Stokes atom ∫_ℂ ∂̄g = 0 for g ∈ C^∞_c (Fubini via
+volume_preserving_equiv_real_prod + intervalIntegral FTC on lines, or
+integral2_divergence_prod_of_hasFDerivAt; GreenBox is the worked precedent); (ii) the
+assembly: for a coboundary w = δh read through splitCoeff, t_j = ∂̄(β_j) with
+β = ∑_k ρ̃_k·(h_k·ω₀)-coefficients; I(δh) = ∑_j ∫ ∂̄(ρ̃_j β_j) − ∑_j ∫ (∂̄ρ̃_j)·β_j; first
+sum dies termwise by (i) (pouCoeff is ContDiff + compact support — use dbar_mul from R0 for
+the Leibniz split); second sum dies by re-inserting the PoU (sum_rhoC_apply/sum_dbarRho via
+the rhoC backbone) + setIntegral_overlap_relocate to re-route each (j,k) term + the cocycle.
+Integrands are pouCoeff-weighted ⇒ all integrability free from R4's lemmas. Cite R0's
+resNormalization; the functional to kill coboundaries on is resIntegral (normalization
+commutes). Note: pouCoeff's ∂̄ is not yet packaged — R5 should add dbar_pouCoeff lemmas
+(chart read of dbarRho) on top of contDiff_pouCoeff, or work with dbar (pouCoeff j) directly
+via DbarDisk; support lemmas (support_pouCoeff ⊆ chartMap j '' tsupport ρ_j) are implicit in
+pouCoeff_eq_zero_of_notMem_image_tsupport.
+
+# ---- Session 4: R5 (feat/keystone-r5-stokes) ----
+
+[R5a DONE] Stokes.lean compiles clean (lake env lean, no warnings); 9 headlines axiom-clean
+([propext, Classical.choice, Quot.sound]). THE PLANAR ATOM: integral_dbar_eq_zero
+(∫_ℂ ∂̄g dA = 0 for g ∈ C^∞_c) — NOT via GreenBox/Fubini-by-hand: Mathlib's
+integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable (Analysis.Calculus.LineDeriv.
+IntegrationByParts, the prepackaged Fubini + line-FTC) applied against the constant 1 gives
+∫ ∂_v g = 0 per direction (integral_fderiv_apply_eq_zero); ∂̄ = ½(∂_x + i∂_y) finishes.
+No R5_BLOCKER needed — the IBP lemma's instance side conditions (IsAddHaarMeasure volume on ℂ)
+resolved first try. THE PACKAGING GAP (flagged in the R4 handoff) closed:
+dbar_pouCoeff_chartRead (on chartMap j '' U_j, ∂̄ρ̃_j = ∂̄ of the honest read ρ_j∘(chart j).symm)
++ dbar_pouCoeff_eq_zero_of_notMem_image_tsupport (frontier case, compact-tsupport clearance) —
+same two-case pattern as contDiff_pouCoeff. PoU reinsertion: sum_dbar_rhoC_read
+(∑_j ∂̄(ρ_j∘(chart k).symm) = 0 on the chart target — chart-read sum_dbarRho_eq_zero, derived
+from the GLOBAL sum_rhoC_apply: the sum of reads is constantly 1 even through junk values).
+Germ calculus dbar_congr_of_eventuallyEq / dbar_eq_zero_of_eventuallyEq_zero / dbar_finset_sum
++ globalization helpers contDiff_of_chartImage_clearance / contDiff_pouCoeff_mul /
+contDiffAt_chartSymmRead / chartMap_image_U_subset_target for all downstream integrability.
+
+[R5b DONE — THE R5 HEADLINE] CoboundaryVanish.lean compiles clean; 12 decls axiom-clean.
+KILLS-COBOUNDARIES (verbatim):
+  theorem resFunctional_eq_zero_of_coboundary (t : oneOneCoeff 𝔇)
+      (ht : (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w g)
+      (hg : IsOneZeroCoeff 𝔇 g) (hsm : SmoothOnSets 𝔇 h) (hhol : HolomorphicOnSets 𝔇 h)
+      (hδ : IsCoboundaryOn 𝔇 w h) : resFunctional 𝔇 t = 0
+with IsCoboundaryOn 𝔇 w h := ∀ i j, ∀ x ∈ U_i ⊓ U_j, w i j x = h j x - h i x
+(membership-guarded — the exact shape R7's germ extraction of a B¹(𝒪_K) coboundary delivers).
+Proof: Forster collapse pouSplit_eq_of_coboundary (σ_i = h_i − β, β = pouAverage = ∑ρ_k h_k,
+globally ContMDiff by the gdTerm pattern) ⇒ t_j = −∂̄(β̃_j g_j) on chart images; per-j Leibniz
+split via R0's dbar_mul (integral_pouCoeff_glueCoeff_of_coboundary): ∂̄(ρ̃_j B_j)-term dies by
+the R5a atom, survivor PoU-reinserted to (j,k) terms; per-(j,k) relocation
+(integral_overlapTerm_relocate): vanish-off-overlap (ρ_k clearance / ∂̄ρ̃_j clearance) →
+setIntegral_overlap_relocate (R4) on the (1,1) family ∂̄ρ_j ∧ (β·ω₀)
+(isOneOneCoeff_dbarRead_mul: conj φ′ from dbar_comp on the relocated read, scalar β̃ invariant,
+φ′ from the dz-slot; mul_conj reassembles normSq — same reconciliation as Glue) → re-extend by
+the pouCoeff indicator; per-k kill (sum_integral_relocated_eq_zero) by sum_dbar_rhoC_read;
+Finset.sum_comm glues. Coboundary data feeds glueCoeff_mem_oneOneCoeff for free
+(smoothOnOverlaps/isOverlapCocycle/holomorphicOnOverlaps_of_coboundary), so R7 needs no side
+conditions beyond (w, h, g) shape. DESCENT PACKAGING CHECKED: the port's quotient is
+cechH1 = Z¹ ⧸ B¹.submoduleOf Z¹ with CousinResidueData.vanish_coboundary consumed by
+Submodule.liftQ (GlobalResidueConstruct.lean:141-182, res_mk simp at :171);
+resFunctional_eq_zero_of_coboundary is that field's chart-coefficient feeder — deliberately NOT
+instantiated here (R7 scope: germ→coefficient extraction Z¹(𝒪_K) → overlap families, then liftQ).
+
+[R5 GATES] Both files wired into the root aggregator in their own commits (f11f1a1 R5a,
+2fe3103 R5b); root lake build green (8760 jobs); all 21 R5 decls #print-axioms standard-3
+([propext, Classical.choice, Quot.sound]); no sorries; not pushed (orchestrator gates).
+R6 NEXT NEEDS (BOTH pieces): (i) THE SIMPLE-POLE ML-TIE (S3 scoping §4.R6, the hardest rung):
+for the explicit single-simple-pole ML cocycle e_{ij} = m_i − m_j with Res_a(ω₀·m) = r,
+resFunctional evaluates to r — route: η = ∑ρ_k(ω₀ m_k)-coefficients, ContDiffBump cutoff ψ_a
+in one chart, smooth part dies by R5a atom + R4 relocation, singular part is EXACTLY
+DbarDisk.cauchyPompeiu_area at the pole (ψ_a(a)=1, no annulus limits); identify r via
+resAt_const_mul_sub_inv; CITE resNormalization = −π⁻¹ (R0) — the R5b coboundary machinery
+(IsCoboundaryOn is exactly the off-pole shape: away from a, e = δm honestly) plus the K-point
+cover-refinement constraint recorded in Glue/OmegaWitness docstrings. (ii) THE UNWINDREGULARITY
+DISCHARGE (SerreUnwind.lean:275, the §17.7 pole-bound regularity Prop, hypothesis-parametric)
+— S5's SurjectivityInputs assembly is complete modulo it; under the Forster architecture its
+discharge becomes an R6-style residue-evaluation estimate, so schedule it WITH the ML-tie, not
+after R7. R7 then: germ→coefficient extraction + CousinResidueData instantiation (liftQ descent
+is already proven in the port).
+
+=== 2026-06-10 R6D2 lane (branch feat/keystone-r6d2, worktree agent) ===
+START. Four deliverables: D2a order-m vanish tie (generalized mero-coboundary engine,
+removable-product Stokes kill — NO higher Cauchy-Pompeiu needed: slot vanishing makes the
+smeared-pole product extend analytically, so the surviving Stokes term dies by the planar
+Stokes atom after a finite point-repair); D2b general-K vanish_coboundary (principal parts
+avoided: restrict 0-cochain germs to U_i \ S, holoFn-extract, product-germ trick at K-points:
+(f·slot-pullback) ∈ OmegaDGerm 0 → holoFn gives the analytic extension q); D2c
+UnwindRegularity; D2d CupMLWitness. Plan: new FineResidue/MeroVanish.lean (engine, mirrors
+MLTie/CoboundaryVanish), then Descent-side wiring.
+
+2026-06-10 D2a LANDED: MeroVanish.lean compiles clean (4 iterations). Engine
+resFunctional_eq_zero_of_mero_coboundary + order-m tie
+resFunctional_poleCocycle_eq_zero_of_slot_vanishes. Key design win: NO higher-order
+Cauchy-Pompeiu — pointRepair (finite limit-repair) + planar Stokes atom kills the
+surviving term since the slot zero makes the smeared product extend analytically.
+Next: D2b DescentVanish.lean — general-K vanish_coboundary via holoFn extraction off
+the K-points + product-germ trick ((f·slot-pullback) ∈ OmegaD 0, holoFn = the analytic
+extension q); also the R6Outputs bridge (MLTie is on this branch).
+
+2026-06-10 D2b LANDED: DescentVanish.lean compiles clean (3 iterations). Headlines:
+- resCocycle_vanish_coboundary: vanish_coboundary at GENERAL K (R7 gap 1 closed) via
+  product-germ trick — no Laurent decomposition: restrict germs off K-points, holoFn
+  extract; at each K-point (f·slot-pullback) ∈ OmegaD 0 (orders −K a + K a ≥ 0; slot
+  order via dslope factorization + meromorphicOrderAt_mul/pow_id_sub_const), holoFn of
+  the product germ IS the engine's analytic extension q.
+- r6Outputs_holds: Descent.R6Outputs now a THEOREM (MLTie bridge, Subtype.ext).
+- resH1_of_slotMatches: unconditional liftQ descent on cechH1 K.
+- CupMLWitnessR + nondegenerate_of_witnessR + cousinResidueData_of_witnessR: CORRECTED
+  §17.6 witness interface — original CupMLWitness demands g(α)=1 exactly (level set can
+  be empty: likely unsatisfiable for fixed g); fixed to r·g(α)=1 with free residue r;
+  membership conjunct now proven. CousinResidueData reduced to CupMLWitnessR alone.
+D2c (UnwindRegularity) + D2d construction half: genuine walls, documented in
+R6D2_BLOCKER.md (forced non-isolated point + HIGHER-ORDER Cauchy-Pompeiu with NONZERO
+conclusion needed for 17.7; isolated-point selection/cover refinement for the witness).

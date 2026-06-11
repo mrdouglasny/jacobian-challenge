@@ -1,100 +1,67 @@
 'genus' depends on axioms: [propext, Classical.choice, Quot.sound]
-'Jacobians.Jacobian' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
-'Jacobian.ofCurve' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+'Jacobians.Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+'Jacobian.ofCurve' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.pushforward' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pushforwardAmbient_preserves_lattice]
 'Jacobian.pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
-'Jacobian.ofCurve_self' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  Axioms.AX_AbelTheorem,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_ofCurve_contMDiff,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_ofCurve_contMDiff]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pushforwardAmbient_preserves_lattice]
 'Jacobian.pushforward_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pushforwardAmbient_preserves_lattice]
 'Jacobian.pushforward_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pushforwardAmbient_preserves_lattice]
 'Jacobian.pullback_contMDiff' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pullback_id_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pullback_comp_apply' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.AX_pullbackAmbient_preserves_lattice,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis,
+ Axioms.AX_pullbackAmbient_preserves_lattice]
 'Jacobian.pushforward_pullback' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
+ Axioms.AX_PeriodCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice,
  Axioms.AX_pushforwardAmbient_preserves_lattice,
- Axioms.AX_pushforward_pullback,
- Axioms.intersectionForm]
+ Axioms.AX_pushforward_pullback]
 'Jacobians.ProjectiveCurve.genus_projectiveLine_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.HolomorphicOneForm_projectiveLine_eq_zero' depends on axioms: [propext,
  Classical.choice,
@@ -107,53 +74,35 @@
 '_private.scripts.axiom_report.0.jacInst_AddCommGroup' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_TopologicalSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_T2Space' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_CompactSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_ConnectedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_ChartedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_IsManifold' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis]
 '_private.scripts.axiom_report.0.jacInst_LieAddGroup' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AnalyticCycleBasis,
- Axioms.intersectionForm,
- Layer3.AX_RBR1,
- Layer3.AX_RBR2]
+ Axioms.AX_PeriodCycleBasis]
 'Jacobians.ProjectiveCurve.Hyperelliptic' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.Hyperelliptic.instTopologicalSpace' depends on axioms: [propext,
  Classical.choice,
@@ -178,6 +127,7 @@
 'Jacobians.ProjectiveCurve.PlaneCurve.instTopologicalSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instNonempty' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instChartedSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.ProjectiveCurve.PlaneCurve.instIsManifold' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobians.ProjectiveCurve.PlaneCurve.instConnectedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
