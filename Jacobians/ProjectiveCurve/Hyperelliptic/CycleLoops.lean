@@ -95,6 +95,18 @@ theorem y_analytic (r : ℝ) : AnalyticAt ℝ D.y r := by
     D.y_continuous.continuousAt (Filter.Eventually.of_forall D.sq_eq)
     (D.y_ne_zero r)
 
+/-- **Closure criterion.** For a branch given by the exponential formula
+(e.g. from `exists_sqrtArcData`), loop closure is equivalent to the
+exponential of the half-winding integral being `1` — the G-A gap in
+`docs/planning/HYP_CB_BLOCKER.md` in its sharpest form. -/
+theorem y_closed_iff_exp_eq_one {y₀ w : ℂ}
+    (hy0 : D.y 0 = y₀) (h1 : D.y 1 = y₀ * Complex.exp w) :
+    D.y 1 = D.y 0 ↔ Complex.exp w = 1 := by
+  have hy₀ : y₀ ≠ 0 := hy0 ▸ D.y_ne_zero 0
+  rw [h1, hy0]
+  exact ⟨fun h => mul_left_cancel₀ hy₀ (h.trans (mul_one y₀).symm),
+    fun h => by simp [h]⟩
+
 /-- The lifted curve on the affine hyperelliptic curve. -/
 def toAffine : ℝ → HyperellipticAffine H :=
   fun r => ⟨(D.x r, D.y r), D.sq_eq r⟩
@@ -242,6 +254,16 @@ theorem analyticAt_circleX (c : ℂ) (R : ℝ) (r : ℝ) :
 
 @[simp] theorem circleX_zero (c : ℂ) (R : ℝ) : circleX c R 0 = c + R := by
   simp [circleX]
+
+/-- `circleX` is Mathlib's `circleMap` reparametrized to unit speed on
+`[0, 1]` — the bridge to the `circleIntegral` API for the winding-integral
+closure computation (gap G-A). -/
+theorem circleX_eq_circleMap (c : ℂ) (R r : ℝ) :
+    circleX c R r = circleMap c R (2 * Real.pi * r) := by
+  unfold circleX circleMap
+  congr 1
+  push_cast
+  ring_nf
 
 theorem circleX_closed (c : ℂ) (R : ℝ) : circleX c R 1 = circleX c R 0 := by
   unfold circleX
