@@ -655,3 +655,167 @@ noncomputable def resH1_of_nonpos (hK : ∀ x, K x ≤ 0) (g : 𝔇.toFiniteCove
     𝔇.toFiniteCover.toFiniteFamily.cechH1 K →ₗ[ℂ] ℂ :=
   resH1 𝔇 (separatesPoles_of_nonpos 𝔇 hK) g hg
     (resCocycle_vanish_coboundary_of_nonpos 𝔇 (separatesPoles_of_nonpos 𝔇 hK) hK g hg)
+
+/-! ### H. The R6 interface and the conditional Cousin assembly
+
+`MLTie.lean` (rung R6, in flight on a parallel branch) is **not imported**: its outputs are
+taken as the hypothesis structure `R6Outputs`, whose fields copy the statement shapes of the
+in-flight `resFunctional_mlGlue` / `resFunctional_mlCocycle_residue_one` over local copies of
+the ML-datum definitions (`R6Shape`, definition bodies verbatim from `MLTie.lean`, same
+orientation contract `w i j = p_i − p_j`).  When R6 lands, instantiating `R6Outputs` is a
+two-line bridge (`Subtype.ext` on the glued element). -/
+
+namespace R6Shape
+
+/-- The pole `a` lies in the cover set `U j₀` and in NO other cover set — the K-point/pole
+refinement discipline.  (Shape copy of the in-flight `MLTie.MLIsolated`.) -/
+def MLIsolated (j₀ : 𝔇.toFiniteCover.ι) (a : X) : Prop :=
+  a ∈ (𝔇.U j₀ : Set X) ∧ ∀ i, i ≠ j₀ → a ∉ (𝔇.U i : Set X)
+
+/-- The simple-pole principal part in the distinguished chart.  (Shape copy of the in-flight
+`MLTie.mlPrincipal`.) -/
+noncomputable def mlPrincipal (j₀ : 𝔇.toFiniteCover.ι) (a : X) (r : ℂ) : X → ℂ :=
+  fun x => r * (chartMap 𝔇 j₀ x - chartMap 𝔇 j₀ a)⁻¹
+
+/-- The one-point ML part family.  (Shape copy of the in-flight `MLTie.mlPart`.) -/
+noncomputable def mlPart (j₀ : 𝔇.toFiniteCover.ι) (a : X) (r : ℂ) : 𝔇.toFiniteCover.ι → X → ℂ :=
+  fun i => if i = j₀ then mlPrincipal 𝔇 j₀ a r else 0
+
+/-- The simple-pole ML overlap cocycle, in the orientation the R6 sign test pins
+(`w i j = p_i − p_j`).  (Shape copy of the in-flight `MLTie.mlCocycle`.) -/
+noncomputable def mlCocycle (j₀ : 𝔇.toFiniteCover.ι) (a : X) (r : ℂ) :
+    𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ :=
+  fun i j x => mlPart 𝔇 j₀ a r i x - mlPart 𝔇 j₀ a r j x
+
+end R6Shape
+
+/-- **The R6 outputs, as a hypothesis structure** — exactly what the in-flight `MLTie.lean`
+will provide (statement shapes copied verbatim, quantified over any `(1,1)` element whose
+coefficients are the glued ML family, so the bridge from R6 is `Subtype.ext`):
+
+* `resFunctional_mlGlue` — the simple-pole Mittag–Leffler tie: on an isolated simple pole the
+  residue functional of the glued ML family is the residue times the `dz`-slot value at the
+  pole;
+* `resFunctional_mlCocycle_residue_one` — the R0-contract end-to-end sign test: a residue-1
+  datum with slot value 1 evaluates to exactly `1` (under the pinned
+  `resNormalization = −π⁻¹`). -/
+structure R6Outputs : Prop where
+  resFunctional_mlGlue :
+    ∀ {j₀ : 𝔇.toFiniteCover.ι} {a : X} {r : ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ},
+      R6Shape.MLIsolated 𝔇 j₀ a → IsOneZeroCoeff 𝔇 g →
+      ∀ t : oneOneCoeff 𝔇,
+        (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 (R6Shape.mlCocycle 𝔇 j₀ a r) g →
+        resFunctional 𝔇 t = r * g j₀ (chartMap 𝔇 j₀ a)
+  resFunctional_mlCocycle_residue_one :
+    ∀ {j₀ : 𝔇.toFiniteCover.ι} {a : X} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ},
+      R6Shape.MLIsolated 𝔇 j₀ a → IsOneZeroCoeff 𝔇 g → g j₀ (chartMap 𝔇 j₀ a) = 1 →
+      ∀ t : oneOneCoeff 𝔇,
+        (t : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+          = glueCoeff 𝔇 (R6Shape.mlCocycle 𝔇 j₀ a (1 : ℂ)) g →
+        resFunctional 𝔇 t = 1
+
+/-- **Glued-family congruence**: the residue functional of glued `(1,1)` elements agrees for
+overlap-equal cocycle data (the functional never reads junk values off the overlaps). -/
+theorem resFunctional_glueCoeff_congr
+    {w w' : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    (hov : ∀ i j, ∀ x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X), w i j x = w' i j x)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (t t' : oneOneCoeff 𝔇)
+    (ht : (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w g)
+    (ht' : (t' : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w' g) :
+    resFunctional 𝔇 t = resFunctional 𝔇 t' := by
+  refine resFunctional_congr_chartImage 𝔇 fun j x hx => ?_
+  rw [ht, ht']
+  simp only [glueCoeff_apply]
+  rw [dbar_congr_of_eventuallyEq (splitCoeff_eventuallyEq_of_overlap_eq 𝔇 hov j hx)]
+
+/-- **The §17.6 cup–ML witness transport** — the remaining genuinely-open §17.6 leg (see
+`docs/planning/R7_BLOCKER.md` §2): for every nonzero `[f] ∈ L(K−D)` there is a class
+`ξ ∈ H¹(𝒪_D)` whose cup product is represented by a cocycle whose extraction agrees on overlaps
+with an *isolated simple-pole ML cocycle* of residue 1, slot-normalized at the pole (Forster
+§17.6's `dz/z` datum, transported through the cup).  The final membership conjunct is the glued
+ML family's `(1,1)`-membership (proven in the in-flight R6 as `mlGlue_mem_oneOneCoeff`). -/
+def CupMLWitness (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) : Prop :=
+  ∀ (D : Divisor X) (v : lSysModule (K - D)), v ≠ 0 →
+    ∃ (ξ : 𝔇.toFiniteCover.toFiniteFamily.cechH1 D)
+      (z : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+      (j₀ : 𝔇.toFiniteCover.ι) (a : X),
+      R6Shape.MLIsolated 𝔇 j₀ a ∧ g j₀ (chartMap 𝔇 j₀ a) = 1 ∧
+      cup (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) D K v ξ = Submodule.Quotient.mk z ∧
+      (∀ i j, ∀ x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X),
+        cocycleFn 𝔇 hsep z i j x = R6Shape.mlCocycle 𝔇 j₀ a (1 : ℂ) i j x) ∧
+      glueCoeff 𝔇 (R6Shape.mlCocycle 𝔇 j₀ a (1 : ℂ)) g ∈ oneOneCoeff 𝔇
+
+/-- **The `nondegenerate` field from the R6 tie + the witness transport**: the descended
+residue of the cup is computed by the extraction-congruence (`resFunctional_glueCoeff_congr`)
+against the ML representative, where the R6 sign-test gives exactly `1`. -/
+theorem nondegenerate_of_r6 (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g)
+    (hvanish : ∀ c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K),
+      c ∈ (𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K).submoduleOf
+        (𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →
+      resCocycle 𝔇 hsep g hg c = 0)
+    (hR6 : R6Outputs 𝔇) (hwit : CupMLWitness 𝔇 hsep g) :
+    ∀ (D : Divisor X) (v : lSysModule (K - D)), v ≠ 0 →
+      ∃ ξ : 𝔇.toFiniteCover.toFiniteFamily.cechH1 D,
+        (Submodule.liftQ _ (resCocycle 𝔇 hsep g hg) hvanish)
+          (cup (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) D K v ξ) = 1 := by
+  intro D v hv
+  obtain ⟨ξ, z, j₀, a, hiso, hnorm, hcup, hov, hmem⟩ := hwit D v hv
+  refine ⟨ξ, ?_⟩
+  rw [hcup]
+  have h1 : (Submodule.liftQ _ (resCocycle 𝔇 hsep g hg) hvanish)
+      (Submodule.Quotient.mk z) = resCocycle 𝔇 hsep g hg z := rfl
+  rw [h1, resCocycle_apply]
+  rw [resFunctional_glueCoeff_congr 𝔇 hov
+    (⟨_, glueCoeff_cocycleFn_mem 𝔇 hsep z hg⟩ : oneOneCoeff 𝔇)
+    (⟨_, hmem⟩ : oneOneCoeff 𝔇) rfl rfl]
+  exact hR6.resFunctional_mlCocycle_residue_one hiso hg hnorm ⟨_, hmem⟩ rfl
+
+/-! ### The assembled Cousin interface -/
+
+/-- **The descent assembly of the port's isolated Cousin interface**
+(`GlobalResidueConstruct.CousinResidueData`): the `resCocycle` field is the **proven** fine-sheaf
+residue functional of this file; the two open legs are taken as named hypotheses —
+
+* `hvanish` — the full coboundary vanishing (PROVEN at `K ≤ 0` by
+  `resCocycle_vanish_coboundary_of_nonpos`; at general `K` the K-point-pole leg remains, see
+  `docs/planning/R7_BLOCKER.md` §1);
+* `hnondeg` — the §17.6 non-degeneracy (derivable from `R6Outputs` + `CupMLWitness` via
+  `nondegenerate_of_r6`, see `cousinResidueData_of_r6`).
+
+Feeding the result to `CousinResidueData.toGlobalResidue` →
+`GlobalResidue.toSerreResidueRealization` (both PROVEN in the port) yields the full Serre
+pairing, `pairing_injective`, `lDim_le_h1Dim`, and `toSerreDualityData`. -/
+noncomputable def cousinResidueData_of_descent (hsep : SeparatesPoles 𝔇 K)
+    (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (hg : IsOneZeroCoeff 𝔇 g)
+    (hvanish : ∀ c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K),
+      c ∈ (𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K).submoduleOf
+        (𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →
+      resCocycle 𝔇 hsep g hg c = 0)
+    (hnondeg : ∀ (D : Divisor X) (v : lSysModule (K - D)), v ≠ 0 →
+      ∃ ξ : 𝔇.toFiniteCover.toFiniteFamily.cechH1 D,
+        (Submodule.liftQ _ (resCocycle 𝔇 hsep g hg) hvanish)
+          (cup (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) D K v ξ) = 1) :
+    CousinResidueData 𝔇.toFiniteCover K where
+  resCocycle := resCocycle 𝔇 hsep g hg
+  vanish_coboundary := hvanish
+  nondegenerate := hnondeg
+
+/-- **`CousinResidueData`, conditionally on R6** — the headline conditional assembly: from the
+in-flight R6 outputs (`R6Outputs`, the ML tie + sign test), the §17.6 witness transport
+(`CupMLWitness`), and the coboundary-vanishing leg (`hvanish`, proven at `K ≤ 0`), the full
+Cousin interface of the port assembles over the proven `resCocycle`.  The R6 tie genuinely
+enters: it evaluates the descended residue on the cup against the transported `dz/z` witness
+(`nondegenerate_of_r6`). -/
+noncomputable def cousinResidueData_of_r6 (hsep : SeparatesPoles 𝔇 K)
+    (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (hg : IsOneZeroCoeff 𝔇 g)
+    (hR6 : R6Outputs 𝔇) (hwit : CupMLWitness 𝔇 hsep g)
+    (hvanish : ∀ c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K),
+      c ∈ (𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K).submoduleOf
+        (𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →
+      resCocycle 𝔇 hsep g hg c = 0) :
+    CousinResidueData 𝔇.toFiniteCover K :=
+  cousinResidueData_of_descent 𝔇 hsep g hg hvanish
+    (nondegenerate_of_r6 𝔇 hsep g hg hvanish hR6 hwit)
+
+end Jacobians.Dolbeault.FineResidue

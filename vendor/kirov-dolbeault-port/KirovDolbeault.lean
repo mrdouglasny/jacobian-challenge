@@ -42,6 +42,7 @@ import KirovDolbeault.Dolbeault.FineResidue.Integral
 import KirovDolbeault.Dolbeault.FineResidue.OmegaWitness
 import KirovDolbeault.Dolbeault.FineResidue.Stokes
 import KirovDolbeault.Dolbeault.FineResidue.CoboundaryVanish
+import KirovDolbeault.Dolbeault.FineResidue.Descent
 
 /-
 
