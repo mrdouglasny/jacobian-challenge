@@ -53,3 +53,31 @@
   constant Jacobians.Axioms.canonicalDivisor (LineBundleBasic.lean:43), constrained by NO
   other axiom -> exact statement underivable; flip must de-opaque canonicalDivisor
   (axiom -> def via Classical.choose of the ∃-K form), kernel 21->18 not 21->19.
+[2026-06-11] L-lane session COMPLETE (feat/layer3-flip-prep, local only, not pushed).
+  [milestone] Jacobians/Layer3/FlipPrep.lean landed + wired (Layer3 aggregator);
+    full `lake build` clean (8941 jobs; one transient macOS fd-exhaustion rerun).
+  Item 1: h1coh_zero_finrank_of_frameTrace(+') — the axiom's EXACT statement from the
+    genus-split residual; route finrank H1coh 0 =(rfl+map_zero)= h1Dim 0
+    -> kirovGenus (ResidueAtom.lean) -> genus (bridgeKDFormEquiv.finrank_eq).
+  Item 2: serreDuality_equiv_exists_of_frameTrace(+') — ∃-K form (dim L(K)=g ∧ ∀ D,
+    H1coh D ≃ₗ Dual L(K−D)) at the chartDiskCover pin. VERBATIM axiom statement is
+    UNDERIVABLE while canonicalDivisor stays an opaque axiom (constrained by no other
+    axiom) — flip must de-opaque it via Classical.choose (compiled endgame shape:
+    serreDuality_equiv_for_chosen_K). Kernel count at flip: 21->18, not 21->19.
+  COVER FINDING (general D): no new cover-independence machinery needed — subtract
+    cohomological_riemannRoch (Euler form) at the capstone cover vs the canonical
+    cover; lDim/deg are cover-free and both h¹(0) = kirovGenus (data.arithmeticGenus
+    resp. the residual genus identity). ArithmeticGenusTransfer (D=0-only) unused.
+  Item 3: exists_serreDualityData_cover_of_frameTrace + layer3Flip_composition(+') —
+    the compiled full composition the flip PR cites.
+  Item 4: docs/planning/FLIP_CHECKLIST.md — atomic flip edit list. Extra finding:
+    RiemannRoch.lean cannot import KeystonePackaging (cycle via SerreDualityGenus0/
+    TailSerre/SerreSurjectivitySkeleton -> RiemannRoch); base-file split moving
+    deg_div + lDim_eq_zero_of_deg_neg to new KirovDolbeault/RiemannRochDegree.lean.
+  Kernel closures (#print axioms, ALL 12 declarations = [propext, Classical.choice,
+    Quot.sound]): finrank_H1coh_eq_h1Dim, finrank_H1coh_zero_eq_h1Dim_zero,
+    genus_eq_kirovGenus, lDim_equivFinsupp, h1coh_zero_finrank_of_frameTrace(+'),
+    exists_serreDualityData_cover_of_frameTrace,
+    serreDuality_equiv_exists_of_frameTrace(+'), serreDuality_equiv_for_chosen_K,
+    layer3Flip_composition(+'). No Layer-3 axiom, no sorryAx in any closure
+    (residual carried as hypothesis — non-circular by construction).

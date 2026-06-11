@@ -71,8 +71,9 @@ files consume ONLY `MeromorphicFunction.deg_div` (SerreDualityGenus0) and
 
 ### 1.2 The keystone replacement (`Dolbeault/SerreDualityPairing.lean`)
 
-* DELETE `exists_serreDualityData` (**the keystone sorry**, lines 113-134; `sorry` at
-  :134) and its two ∀-cover dependents in the same file:
+* DELETE `exists_serreDualityData` (**the keystone sorry**, docstring+theorem
+  :120-134; theorem head :131, `sorry` at :134) and its two ∀-cover dependents in the
+  same file:
   - `arithmeticGenus_eq_genus_serre` (:136-141)
   - `serre_h1_eq_serre` (:143-149)
   (Sole consumers of these two: `Dolbeault/DolbeaultLadder.lean` wrappers, §1.3.)
