@@ -99,20 +99,20 @@ section Clearance
 
 variable {𝔇} {j₀ : 𝔇.toFiniteCover.ι} {a : X}
 
-private theorem rhoC_eq_zero_of_notMem_tsupport {k : 𝔇.toFiniteCover.ι} {y : X}
+theorem rhoC_eq_zero_of_notMem_tsupport {k : 𝔇.toFiniteCover.ι} {y : X}
     (hy : y ∉ tsupport (cechPoU 𝔇 k)) : rhoC 𝔇 k y = 0 := by
   simp only [rhoC, ContMDiffMap.comp_apply, ofRealCM, image_eq_zero_of_notMem_tsupport hy]
   rfl
 
 /-- Near an isolated bad point, every off-index PoU weight vanishes identically. -/
-private theorem eventually_rhoC_eq_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
+theorem eventually_rhoC_eq_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
     {k : 𝔇.toFiniteCover.ι} (hk : k ≠ j₀) : ∀ᶠ y in 𝓝 a, rhoC 𝔇 k y = 0 := by
   have hns : a ∉ tsupport (cechPoU 𝔇 k) := fun hs => hiso.2 k hk (cechPoU_subordinate 𝔇 k hs)
   filter_upwards [(isClosed_tsupport (cechPoU 𝔇 k)).isOpen_compl.mem_nhds hns] with y hy
   exact rhoC_eq_zero_of_notMem_tsupport hy
 
 /-- Near an isolated bad point, `∑ρ = 1` forces the distinguished weight to be `≡ 1`. -/
-private theorem eventually_rhoC_eq_one_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
+theorem eventually_rhoC_eq_one_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
     ∀ᶠ y in 𝓝 a, rhoC 𝔇 j₀ y = 1 := by
   have hall : ∀ᶠ y in 𝓝 a, ∀ k ∈ Finset.univ.erase j₀, rhoC 𝔇 k y = 0 :=
     (Filter.eventually_all_finset _).2 fun k hk =>
@@ -123,7 +123,7 @@ private theorem eventually_rhoC_eq_one_near_iso (hiso : MLIsolated 𝔇 j₀ a) 
   exact hs
 
 /-- Every PoU weight is locally constant near an isolated bad point. -/
-private theorem exists_rhoC_eventuallyEq_const_near_iso (hiso : MLIsolated 𝔇 j₀ a)
+theorem exists_rhoC_eventuallyEq_const_near_iso (hiso : MLIsolated 𝔇 j₀ a)
     (k : 𝔇.toFiniteCover.ι) : ∃ c : ℂ, (fun y => rhoC 𝔇 k y) =ᶠ[𝓝 a] fun _ => c := by
   by_cases hk : k = j₀
   · subst hk
@@ -132,7 +132,7 @@ private theorem exists_rhoC_eventuallyEq_const_near_iso (hiso : MLIsolated 𝔇 
 
 /-- The chart-`j₀` reads of two functions locally equal at `a` are locally equal at the bad
 coordinate. -/
-private theorem eventuallyEq_chartSymmRead_near_iso (hiso : MLIsolated 𝔇 j₀ a)
+theorem eventuallyEq_chartSymmRead_near_iso (hiso : MLIsolated 𝔇 j₀ a)
     {F G : X → ℂ} (hFG : F =ᶠ[𝓝 a] G) :
     (fun w => F ((chartAt ℂ (𝔇.center j₀)).symm w))
       =ᶠ[𝓝 (chartMap 𝔇 j₀ a)] fun w => G ((chartAt ℂ (𝔇.center j₀)).symm w) := by
@@ -148,7 +148,7 @@ private theorem eventuallyEq_chartSymmRead_near_iso (hiso : MLIsolated 𝔇 j₀
 
 /-- `∂̄` of the chart-`j₀` read of a function locally constant at `a` vanishes identically near
 the bad coordinate. -/
-private theorem eventually_dbar_chartSymmRead_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
+theorem eventually_dbar_chartSymmRead_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
     {F : X → ℂ} {c : ℂ} (hF : F =ᶠ[𝓝 a] fun _ => c) :
     ∀ᶠ w in 𝓝 (chartMap 𝔇 j₀ a),
       DbarDisk.dbar (fun ζ => F ((chartAt ℂ (𝔇.center j₀)).symm ζ)) w = 0 := by
@@ -158,7 +158,7 @@ private theorem eventually_dbar_chartSymmRead_zero_near_iso (hiso : MLIsolated �
 
 /-- Near-bad-point clearance for the relocation weights: every chart-`j₀`-read `∂̄ρ̃_k` vanishes
 identically near the bad coordinate. -/
-private theorem eventually_dbar_rhoC_read_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
+theorem eventually_dbar_rhoC_read_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a)
     (k : 𝔇.toFiniteCover.ι) :
     ∀ᶠ w in 𝓝 (chartMap 𝔇 j₀ a),
       DbarDisk.dbar (fun ζ => rhoC 𝔇 k ((chartAt ℂ (𝔇.center j₀)).symm ζ)) w = 0 := by
@@ -166,7 +166,7 @@ private theorem eventually_dbar_rhoC_read_zero_near_iso (hiso : MLIsolated 𝔇 
   exact eventually_dbar_chartSymmRead_zero_near_iso hiso hc
 
 /-- The chart-pushed PoU weight `ρ̃_{j₀}` is `≡ 1` near the bad coordinate. -/
-private theorem eventuallyEq_pouCoeff_one_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
+theorem eventuallyEq_pouCoeff_one_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
     pouCoeff 𝔇 j₀ =ᶠ[𝓝 (chartMap 𝔇 j₀ a)] fun _ => (1 : ℂ) := by
   have himg : chartMap 𝔇 j₀ a ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X) := ⟨a, hiso.1, rfl⟩
   filter_upwards [(isOpen_chartMap_image 𝔇 j₀ (𝔇.U j₀).isOpen (subset_refl _)).mem_nhds himg,
@@ -175,7 +175,7 @@ private theorem eventuallyEq_pouCoeff_one_near_iso (hiso : MLIsolated 𝔇 j₀ 
   rw [pouCoeff, Set.indicator_of_mem hw1]
   exact hw2
 
-private theorem eventually_dbar_pouCoeff_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
+theorem eventually_dbar_pouCoeff_zero_near_iso (hiso : MLIsolated 𝔇 j₀ a) :
     ∀ᶠ w in 𝓝 (chartMap 𝔇 j₀ a), DbarDisk.dbar (pouCoeff 𝔇 j₀) w = 0 := by
   filter_upwards [(eventuallyEq_pouCoeff_one_near_iso hiso).eventuallyEq_nhds] with w hw
   rw [dbar_congr_of_eventuallyEq hw]
@@ -183,7 +183,7 @@ private theorem eventually_dbar_pouCoeff_zero_near_iso (hiso : MLIsolated 𝔇 j
 
 /-- The isolated index is unique: any cover set containing the bad point is the distinguished
 one. -/
-private theorem eq_isolated_index (hiso : MLIsolated 𝔇 j₀ a) {i : 𝔇.toFiniteCover.ι}
+theorem eq_isolated_index (hiso : MLIsolated 𝔇 j₀ a) {i : 𝔇.toFiniteCover.ι}
     (hai : a ∈ (𝔇.U i : Set X)) : i = j₀ := by
   by_contra hne
   exact hiso.2 i hne hai
@@ -198,7 +198,7 @@ variable {𝔇} {S : Set X} {h : 𝔇.toFiniteCover.ι → X → ℂ}
 
 /-- The PoU average of a family smooth off `S` is smooth at every point off `S` (the support-
 aware gluing of R5's `contMDiff_pouAverage`, localized). -/
-private theorem contMDiffAt_pouAverage_off (hsm : SmoothOnSetsOff 𝔇 S h) {x : X}
+theorem contMDiffAt_pouAverage_off (hsm : SmoothOnSetsOff 𝔇 S h) {x : X}
     (hx : x ∉ S) : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (pouAverage 𝔇 h) x := by
   refine ContMDiffAt.sum fun k _ => ?_
   by_cases hb : x ∈ tsupport (cechPoU 𝔇 k)
@@ -209,7 +209,7 @@ private theorem contMDiffAt_pouAverage_off (hsm : SmoothOnSetsOff 𝔇 S h) {x :
 
 /-- Near an isolated bad point the PoU average is the distinguished cochain component
 (`ρ_{j₀} ≡ 1`, the others `≡ 0`). -/
-private theorem pouAverage_eventuallyEq_near_iso {j₀ : 𝔇.toFiniteCover.ι} {a : X}
+theorem pouAverage_eventuallyEq_near_iso {j₀ : 𝔇.toFiniteCover.ι} {a : X}
     (hiso : MLIsolated 𝔇 j₀ a) (h : 𝔇.toFiniteCover.ι → X → ℂ) :
     pouAverage 𝔇 h =ᶠ[𝓝 a] h j₀ := by
   have hall : ∀ᶠ y in 𝓝 a, ∀ k ∈ Finset.univ.erase j₀, rhoC 𝔇 k y = 0 :=
@@ -221,7 +221,7 @@ private theorem pouAverage_eventuallyEq_near_iso {j₀ : 𝔇.toFiniteCover.ι} 
 
 /-- Local variant of `contDiffAt_chartSymmRead`: the chart read of a function `ContMDiffAt` at
 the read point is planar-smooth there. -/
-private theorem contDiffAt_chartSymmRead_of_contMDiffAt {F : X → ℂ} {c : X} {z : ℂ}
+theorem contDiffAt_chartSymmRead_of_contMDiffAt {F : X → ℂ} {c : X} {z : ℂ}
     (hz : z ∈ (chartAt ℂ c).target)
     (hF : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) F ((chartAt ℂ c).symm z)) :
     ContDiffAt ℝ (⊤ : ℕ∞) (fun w => F ((chartAt ℂ c).symm w)) z := by
@@ -231,7 +231,7 @@ private theorem contDiffAt_chartSymmRead_of_contMDiffAt {F : X → ℂ} {c : X} 
   exact contMDiffAt_iff_contDiffAt.1 (hF.comp z hsymm)
 
 /-- The chart-`i` read of the PoU average is planar-smooth at good chart points. -/
-private theorem contDiffAt_pouAverageRead_off (hsm : SmoothOnSetsOff 𝔇 S h)
+theorem contDiffAt_pouAverageRead_off (hsm : SmoothOnSetsOff 𝔇 S h)
     {i : 𝔇.toFiniteCover.ι} {x : X} (hx : x ∈ (𝔇.U i : Set X)) (hxS : x ∉ S) :
     ContDiffAt ℝ (⊤ : ℕ∞)
       (fun w => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center i)).symm w)) (chartMap 𝔇 i x) := by
@@ -244,7 +244,7 @@ private theorem contDiffAt_pouAverageRead_off (hsm : SmoothOnSetsOff 𝔇 S h)
   exact contMDiffAt_pouAverage_off hsm hxS
 
 /-- The `β̃·g` slot product is planar-smooth at good chart points. -/
-private theorem contDiffAt_pouAverageRead_mul_off {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+theorem contDiffAt_pouAverageRead_mul_off {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
     (hsm : SmoothOnSetsOff 𝔇 S h) (hg : IsOneZeroCoeff 𝔇 g) {i : 𝔇.toFiniteCover.ι} {x : X}
     (hx : x ∈ (𝔇.U i : Set X)) (hxS : x ∉ S) :
     ContDiffAt ℝ (⊤ : ℕ∞)
@@ -255,7 +255,7 @@ private theorem contDiffAt_pouAverageRead_mul_off {g : 𝔇.toFiniteCover.ι →
 
 /-- At an isolated bad point, the chart read of `β·g` inherits the analytic extension of the
 distinguished `h̃_{j₀}·g_{j₀}` (the slot-kills-pole hypothesis transported to the average). -/
-private theorem pouAverageRead_mul_extends {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+theorem pouAverageRead_mul_extends {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
     {j₀ : 𝔇.toFiniteCover.ι} {a : X} (hiso : MLIsolated 𝔇 j₀ a)
     (hext : SlotProductExtendsAt 𝔇 h g j₀ a) :
     ∃ q : ℂ → ℂ, AnalyticAt ℂ q (chartMap 𝔇 j₀ a) ∧
@@ -277,13 +277,13 @@ end Average
 
 /-- **Finite limit-repair**: replace the values of a planar function on a finite set by its
 punctured limits.  At a removable singularity this produces the honest analytic extension. -/
-private noncomputable def pointRepair (F : ℂ → ℂ) (T : Finset ℂ) : ℂ → ℂ :=
+noncomputable def pointRepair (F : ℂ → ℂ) (T : Finset ℂ) : ℂ → ℂ :=
   fun ζ => if ζ ∈ T then limUnder (𝓝[≠] ζ) F else F ζ
 
-private theorem pointRepair_eq_off {F : ℂ → ℂ} {T : Finset ℂ} {ζ : ℂ} (h : ζ ∉ T) :
+theorem pointRepair_eq_off {F : ℂ → ℂ} {T : Finset ℂ} {ζ : ℂ} (h : ζ ∉ T) :
     pointRepair F T ζ = F ζ := if_neg h
 
-private theorem pointRepair_eventuallyEq_off {F : ℂ → ℂ} {T : Finset ℂ} {z : ℂ}
+theorem pointRepair_eventuallyEq_off {F : ℂ → ℂ} {T : Finset ℂ} {z : ℂ}
     (h : z ∉ T) : pointRepair F T =ᶠ[𝓝 z] F := by
   have hcl : IsClosed (T : Set ℂ) := T.finite_toSet.isClosed
   filter_upwards [hcl.isOpen_compl.mem_nhds h] with ζ hζ
@@ -291,7 +291,7 @@ private theorem pointRepair_eventuallyEq_off {F : ℂ → ℂ} {T : Finset ℂ} 
 
 /-- At a repaired point with an analytic punctured extension, the repair agrees with the
 extension on a whole neighbourhood. -/
-private theorem pointRepair_eventuallyEq_of_extends {F q : ℂ → ℂ} {T : Finset ℂ} {α : ℂ}
+theorem pointRepair_eventuallyEq_of_extends {F q : ℂ → ℂ} {T : Finset ℂ} {α : ℂ}
     (hα : α ∈ T) (hq : AnalyticAt ℂ q α) (hFq : F =ᶠ[𝓝[≠] α] q) :
     pointRepair F T =ᶠ[𝓝 α] q := by
   haveI : (𝓝[≠] α).NeBot := Module.punctured_nhds_neBot ℝ ℂ α
@@ -316,7 +316,7 @@ private theorem pointRepair_eventuallyEq_of_extends {F q : ℂ → ℂ} {T : Fin
 /-- **The repaired Stokes atom**: the planar Stokes integral of `∂̄(ρ̃_j·u)` vanishes when `u`
 is smooth on the chart image off a finite repairable set — repair, note the `∂̄`s agree a.e.
 (finite sets are null), and apply the R5a Stokes atom to the repaired C∞c function. -/
-private theorem integral_dbar_pouCoeff_repairable_eq_zero {u : ℂ → ℂ} {T : Finset ℂ}
+theorem integral_dbar_pouCoeff_repairable_eq_zero {u : ℂ → ℂ} {T : Finset ℂ}
     (j : 𝔇.toFiniteCover.ι)
     (hsm : ∀ z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X), z ∉ T → ContDiffAt ℝ (⊤ : ℕ∞) u z)
     (hT : ∀ α ∈ T, ∃ q : ℂ → ℂ, AnalyticAt ℂ q α ∧ u =ᶠ[𝓝[≠] α] q) :
@@ -354,10 +354,10 @@ private theorem integral_dbar_pouCoeff_repairable_eq_zero {u : ℂ → ℂ} {T :
 /-! ### Bad coordinates of a chart -/
 
 /-- The bad coordinates of chart `j`: the chart-`j` images of the bad points lying in `U j`. -/
-private noncomputable def badCoords (S : Finset X) (j : 𝔇.toFiniteCover.ι) : Finset ℂ :=
+noncomputable def badCoords (S : Finset X) (j : 𝔇.toFiniteCover.ι) : Finset ℂ :=
   (S.filter fun a => a ∈ (𝔇.U j : Set X)).image (chartMap 𝔇 j)
 
-private theorem chartMap_mem_badCoords_iff {S : Finset X} {j : 𝔇.toFiniteCover.ι} {x : X}
+theorem chartMap_mem_badCoords_iff {S : Finset X} {j : 𝔇.toFiniteCover.ι} {x : X}
     (hx : x ∈ (𝔇.U j : Set X)) : chartMap 𝔇 j x ∈ badCoords 𝔇 S j ↔ x ∈ S := by
   constructor
   · intro hmem
@@ -369,7 +369,7 @@ private theorem chartMap_mem_badCoords_iff {S : Finset X} {j : 𝔇.toFiniteCove
   · intro hxS
     exact Finset.mem_image.mpr ⟨x, Finset.mem_filter.mpr ⟨hxS, hx⟩, rfl⟩
 
-private theorem exists_of_mem_badCoords {S : Finset X} {j : 𝔇.toFiniteCover.ι} {α : ℂ}
+theorem exists_of_mem_badCoords {S : Finset X} {j : 𝔇.toFiniteCover.ι} {α : ℂ}
     (hα : α ∈ badCoords 𝔇 S j) :
     ∃ a, a ∈ S ∧ a ∈ (𝔇.U j : Set X) ∧ chartMap 𝔇 j a = α := by
   obtain ⟨a, ha, hca⟩ := Finset.mem_image.mp hα
@@ -384,7 +384,7 @@ variable {𝔇} {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover
     {h : 𝔇.toFiniteCover.ι → X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
 
 /-- Off-diagonal overlap points are never bad (a bad point lies in a single cover set). -/
-private theorem notMem_S_of_mem_overlap (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a)
+theorem notMem_S_of_mem_overlap (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a)
     {i j : 𝔇.toFiniteCover.ι} (hij : i ≠ j) {x : X}
     (hx : x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X)) : x ∉ (S : Set X) := by
   intro hxS
@@ -477,7 +477,7 @@ variable {𝔇} {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover
 chart point the `∂̄ρ̃_{jj}` factor vanishes on a whole neighbourhood (local constancy of the
 weights near the isolated bad point); the overlap law never differentiates the scalar slot, so
 the R5 proof applies verbatim. -/
-private theorem isOneOneCoeff_dbarRead_mul_mero (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a)
+theorem isOneOneCoeff_dbarRead_mul_mero (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a)
     (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h) (hg : IsOneZeroCoeff 𝔇 g)
     (jj : 𝔇.toFiniteCover.ι) :
     IsOneOneCoeff 𝔇 fun i z =>
@@ -534,7 +534,7 @@ private theorem isOneOneCoeff_dbarRead_mul_mero (hiso : ∀ a ∈ S, ∃ j₀, M
 /-- **The relocation step** — `integral_overlapTerm_relocate` with the bad-point PoU average in
 place of the globally smooth one (R4's `setIntegral_overlap_relocate` applied to the `(1,1)`
 family `isOneOneCoeff_dbarRead_mul_mero`). -/
-private theorem integral_overlapTerm_relocate_mero
+theorem integral_overlapTerm_relocate_mero
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hg : IsOneZeroCoeff 𝔇 g) (j k : 𝔇.toFiniteCover.ι) :
     ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
@@ -619,7 +619,7 @@ private theorem integral_overlapTerm_relocate_mero
 /-- **The reinsertion kill**: at fixed chart `k`, the relocated curvature terms sum to zero
 (`∑_j ∂̄ρ̃_j = 0` on the chart image); near each bad coordinate every `∂̄ρ̃_j`-read vanishes
 identically, supplying the integrability clearance. -/
-private theorem sum_integral_relocated_eq_zero_mero
+theorem sum_integral_relocated_eq_zero_mero
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hg : IsOneZeroCoeff 𝔇 g) (k : 𝔇.toFiniteCover.ι) :
     ∑ j, ∫ z, pouCoeff 𝔇 k z
@@ -670,7 +670,7 @@ off the (finitely many) bad coordinates the integrand is `∂̄` of a smooth com
 function, and at each bad coordinate the slot zero supplies the analytic extension
 (`pouAverageRead_mul_extends`), so the finite limit-repair + R5a Stokes atom give `0`.  This
 is where the in-flight R6's Cauchy–Pompeiu pole evaluation is replaced by a Stokes kill. -/
-private theorem integral_dbar_pouCoeff_pouAverage_eq_zero
+theorem integral_dbar_pouCoeff_pouAverage_eq_zero
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hg : IsOneZeroCoeff 𝔇 g)
     (hext : ∀ a ∈ S, ∀ j₀, MLIsolated 𝔇 j₀ a → SlotProductExtendsAt 𝔇 h g j₀ a)
@@ -697,7 +697,7 @@ total-derivative (Stokes) term.  A.e. version of R5's
 (finite, null) set of bad coordinates.  No slot-product hypothesis: the Stokes term is not
 evaluated here (the vanish engine kills it via `SlotProductExtendsAt`, the evaluation engine
 computes it via `SlotProductSimplePoleAt`). -/
-private theorem integral_pouCoeff_glueCoeff_mero_split
+theorem integral_pouCoeff_glueCoeff_mero_split
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hhol : HolomorphicOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
     (hg : IsOneZeroCoeff 𝔇 g)
@@ -858,7 +858,7 @@ private theorem integral_pouCoeff_glueCoeff_mero_split
 /-- **The Leibniz/Stokes step** (per chart): the `j`-th summand of the residue integral equals
 the PoU-reinserted curvature terms — the total-derivative term dies by the repaired Stokes
 kill (the split step plus `integral_dbar_pouCoeff_pouAverage_eq_zero`). -/
-private theorem integral_pouCoeff_glueCoeff_mero
+theorem integral_pouCoeff_glueCoeff_mero
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hhol : HolomorphicOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
     (hg : IsOneZeroCoeff 𝔇 g)
@@ -941,14 +941,14 @@ variable {𝔇} {j₀ : 𝔇.toFiniteCover.ι} {a : X} {P₀ : ℂ → ℂ}
     {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
 
 /-- The pole cocycle is the coboundary of the negated part family. -/
-private theorem isCoboundaryOn_poleCocycle :
+theorem isCoboundaryOn_poleCocycle :
     IsCoboundaryOn 𝔇 (poleCocycle 𝔇 j₀ P₀) (fun i x => -(polePart 𝔇 j₀ P₀ i x)) := by
   intro i j x _
   simp only [poleCocycle]
   ring
 
 /-- The negated part family is smooth off the pole. -/
-private theorem smoothOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
+theorem smoothOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
     (hP : ∀ z, z ≠ chartMap 𝔇 j₀ a → AnalyticAt ℂ P₀ z) :
     SmoothOnSetsOff 𝔇 (({a} : Finset X) : Set X) fun i x => -(polePart 𝔇 j₀ P₀ i x) := by
   intro j x hx hxa
@@ -971,7 +971,7 @@ private theorem smoothOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
     exact contMDiffAt_const
 
 /-- The negated part family is holomorphic off the pole. -/
-private theorem holomorphicOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
+theorem holomorphicOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
     (hP : ∀ z, z ≠ chartMap 𝔇 j₀ a → AnalyticAt ℂ P₀ z) :
     HolomorphicOnSetsOff 𝔇 (({a} : Finset X) : Set X)
       fun i x => -(polePart 𝔇 j₀ P₀ i x) := by
@@ -998,7 +998,7 @@ private theorem holomorphicOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a
 
 /-- The slot-product extension for the negated part family, from the planar extension of
 `P₀·g`. -/
-private theorem slotProductExtendsAt_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
+theorem slotProductExtendsAt_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
     {q : ℂ → ℂ} (hq : AnalyticAt ℂ q (chartMap 𝔇 j₀ a))
     (hpg : (fun ζ => P₀ ζ * g j₀ ζ) =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ a)] q) :
     SlotProductExtendsAt 𝔇 (fun i x => -(polePart 𝔇 j₀ P₀ i x)) g j₀ a := by
@@ -1058,7 +1058,7 @@ coordinate `α`. -/
 noncomputable def stdPrincipalPart (α : ℂ) (m : ℕ) (c : ℕ → ℂ) : ℂ → ℂ :=
   fun ζ => ∑ k ∈ Finset.range m, c k * ((ζ - α) ^ (k + 1))⁻¹
 
-private theorem analyticAt_stdPrincipalPart {α z : ℂ} (hz : z ≠ α) (m : ℕ) (c : ℕ → ℂ) :
+theorem analyticAt_stdPrincipalPart {α z : ℂ} (hz : z ≠ α) (m : ℕ) (c : ℕ → ℂ) :
     AnalyticAt ℂ (stdPrincipalPart α m c) z := by
   unfold stdPrincipalPart
   refine Finset.analyticAt_fun_sum (𝕜 := ℂ)
@@ -1136,7 +1136,7 @@ variable {𝔇} {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover
 
 /-- At the marked isolated bad point, the chart read of `β·g` inherits the simple-pole shape of
 the distinguished `h̃_{j₀}·g_{j₀}` (the average is locally the distinguished component). -/
-private theorem pouAverageRead_mul_simplePole {j₀ : 𝔇.toFiniteCover.ι} {b : X} {r : ℂ}
+theorem pouAverageRead_mul_simplePole {j₀ : 𝔇.toFiniteCover.ι} {b : X} {r : ℂ}
     (hb : MLIsolated 𝔇 j₀ b) (hpole : SlotProductSimplePoleAt 𝔇 h g j₀ b r) :
     ∃ q : ℂ → ℂ, AnalyticAt ℂ q (chartMap 𝔇 j₀ b) ∧
       (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
@@ -1154,7 +1154,7 @@ private theorem pouAverageRead_mul_simplePole {j₀ : 𝔇.toFiniteCover.ι} {b 
 /-- **The off-marked-chart Stokes kill**: for every chart `j ≠ j₀` (the marked point's chart),
 the total-derivative term dies — every bad coordinate of chart `j` comes from a bad point
 OTHER than the marked one (isolation), where the slot-product extends. -/
-private theorem integral_dbar_pouCoeff_pouAverage_eq_zero_off
+theorem integral_dbar_pouCoeff_pouAverage_eq_zero_off
     (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hg : IsOneZeroCoeff 𝔇 g) {b : X} {j₀ : 𝔇.toFiniteCover.ι} (hb : MLIsolated 𝔇 j₀ b)
     (hext : ∀ a ∈ S, a ≠ b → ∀ i₀, MLIsolated 𝔇 i₀ a → SlotProductExtendsAt 𝔇 h g i₀ a)
@@ -1179,7 +1179,7 @@ private theorem integral_dbar_pouCoeff_pouAverage_eq_zero_off
 term is the R0 smeared simple pole — split off `χ·(ζ−α)⁻¹` with `χ = r·pouCoeff` (`∂̄χ ≡ 0`
 near the marked coordinate, weights locally constant), repair-and-kill the remainder, and
 evaluate the singular piece by `integral_dbar_smearedSimplePole`. -/
-private theorem integral_dbar_pouCoeff_pouAverage_eq_residue
+theorem integral_dbar_pouCoeff_pouAverage_eq_residue
     (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hg : IsOneZeroCoeff 𝔇 g) {b : X} (hbS : b ∈ S) {j₀ : 𝔇.toFiniteCover.ι}
     (hb : MLIsolated 𝔇 j₀ b) {r : ℂ} (hpole : SlotProductSimplePoleAt 𝔇 h g j₀ b r)

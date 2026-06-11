@@ -49,6 +49,7 @@ import KirovDolbeault.Dolbeault.FineResidue.CoboundaryVanish
 import KirovDolbeault.Dolbeault.FineResidue.Descent
 import KirovDolbeault.Dolbeault.FineResidue.DescentVanish
 import KirovDolbeault.Dolbeault.SerreUnwindDetect
+import KirovDolbeault.Dolbeault.FineResidue.GlobalCorrection
 import KirovDolbeault.Dolbeault.FineResidue.SlotMatch
 import KirovDolbeault.Dolbeault.ChartDiskCoverGeneric
 import KirovDolbeault.Dolbeault.SeparatingCover
@@ -62,6 +63,7 @@ import KirovDolbeault.Dolbeault.TailRR1
 import KirovDolbeault.Dolbeault.TailSerre
 import KirovDolbeault.Dolbeault.TailRegularity
 import KirovDolbeault.Dolbeault.TailUnwind
+import KirovDolbeault.Dolbeault.TailDictionary
 import KirovDolbeault.Dolbeault.CechH1CupKill
 import KirovDolbeault.Dolbeault.TailGenusTarget
 

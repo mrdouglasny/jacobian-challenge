@@ -433,6 +433,24 @@ implementation over cup/h1InclMono/RR), then the conditional two-RR subtraction 
 - Gates: all 8 headliners standard-3 (#print axioms); TailGenusTarget lake build green
   (8733 jobs); both files wired into KirovDolbeault.lean aggregator; TAIL_BLOCKER.md
   records the two residual inputs (TailRiemannRoch; CechTailComparison) honestly.
+
+2026-06-11 [feat/cech-tail-dictionary] — residual 2 (CechTailComparison) lane.
+  W0 DONE (TailDictionary.lean): dictionary PINCHED — cechTailComparison_iff_unwindRegularity
+    (the keystone residual is EXACTLY isolation-free UnwindRegularity for the concrete G);
+    cechTailComparison_concrete_of_isolated (theorem under BadPointsIsolated);
+    K_apply_eq_zero_of_not_isolated (non-isolated points have K b = 0 — simple-pole case).
+  W1 DONE (FineResidue/GlobalCorrection.lean, 920 LoC): the MULTI-CHART evaluation engine —
+    resFunctional_eq_neg_residue_of_global_correction, standard-3.  Both UNWIND_BLOCKER walls
+    closed at engine level: (D1) the R0 atom integral_dbar_smearedSimplePole was ALREADY the
+    general Cauchy–Pompeiu (no local constancy) — wall 1 was vacuous; (D3) the global-cutoff
+    subtraction h̃ := h − (H,…,H) removes the marked pole from the presentation (constant
+    cochains have δ⁰ = 0), the Stokes terms die vanish-engine style, and the entire residue
+    routes through ONE distinguished-chart correction integral (no cross-chart residue
+    transport, no per-chart partial-weight telescoping).  MeroVanish internals de-privatized
+    (visibility-only).  Full port build green (8779 jobs).
+  REMAINING (DICT_BLOCKER.md): W2 deep-matching star cocycle (triangular window realization,
+    ~300-400 LoC), W3 X-side cutoff (~100), W4 presentation bookkeeping (~250), W5 assembly
+    (~150).  No new analytic atoms needed.
 08:10 TAILRR lane: route doc committed (cheap bridges rejected; Miranda tail tower T1-T6; PairResidueTheorem isolated)
 08:31 TAILRR: T1 (TailCoeffFull) + T2/T3 (TailSpaceGlobal) COMPILED+COMMITTED; next T4 tail H1 + RR-I
 09:16 TAILRR: T4 LANDED — tail_riemannRoch_I proven (finiteness + chi-pair + posPart); next T5 duality (pairing/injectivity/surjectivity)
