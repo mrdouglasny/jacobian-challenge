@@ -43,6 +43,7 @@ as a `sorry`. See `docs/planning/HYP_CB_BLOCKER.md`.
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
 import Jacobians.RiemannSurface.AnalyticArcMovingChart
 import Jacobians.RiemannSurface.LoopConjugation
+import Jacobians.GeneralResults.SqrtBranch
 
 namespace Jacobians.ProjectiveCurve
 
@@ -82,6 +83,17 @@ theorem y_ne_zero (r : ℝ) : D.y r ≠ 0 := by
 
 theorem x_continuous : Continuous D.x :=
   continuous_iff_continuousAt.mpr fun r => (D.x_analytic r).continuousAt
+
+/-- The branch is automatically real-analytic: a continuous nonvanishing
+square root of the analytic `f ∘ x` is analytic
+(`Jacobians.GeneralResults.analyticAt_of_sq_eq_analytic`). Requiring only
+`Continuous y` in the structure therefore loses no analytic strength. -/
+theorem y_analytic (r : ℝ) : AnalyticAt ℝ D.y r := by
+  have hg : AnalyticAt ℝ (fun t : ℝ => H.f.eval (D.x t)) r := by
+    simpa using (D.x_analytic r).aeval_polynomial H.f
+  exact Jacobians.GeneralResults.analyticAt_of_sq_eq_analytic hg
+    D.y_continuous.continuousAt (Filter.Eventually.of_forall D.sq_eq)
+    (D.y_ne_zero r)
 
 /-- The lifted curve on the affine hyperelliptic curve. -/
 def toAffine : ℝ → HyperellipticAffine H :=
