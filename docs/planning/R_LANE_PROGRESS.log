@@ -277,3 +277,12 @@ absorption + R0 atom + pointRepair). Residual wall: evaluation at NON-isolated f
 (multi-chart smeared pole; cochain side already covered by skyscraper coneB0). Plan in
 docs/planning/UNWIND_ROUTE.md. Disk note: machine at 100% (18 sibling worktrees); using
 cp -Rc clones + lake env lean only.
+
+2026-06-11 UNWIND resume: Commit A landed (01b3203) — marked-divisor bookkeeping:
+separatesPoles_add_single, mem_linearSystem_marked (exact −n bound at b), cup_mem_sections0
+(cup 0-cochain ∈ sections0(K+b)), cupRep + toGerm_cupRep + ordU_cupRep (exact order −K b−1).
+Next (Commit B): holoFn_eventuallyEq_near_marked (read-back of the analytic rep on a punctured
+nbhd of the marked point via finite-order normal form + holoFn_eq_of_tendsto), then
+exists_slotProductSimplePoleAt (order −1 exact ⟹ residue w'(α) ≠ 0 via dslope split), then
+resCocycle_cup_testCocycle_ne_zero through resFunctional_eq_neg_residue_of_mero_coboundary
+(mixed-level trick: z ∈ Z¹(K) is a B¹(K+b)-coboundary; cocycleFn proof-irrelevant ⟹ rfl).
