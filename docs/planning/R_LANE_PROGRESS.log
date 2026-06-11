@@ -238,3 +238,12 @@ avoided: restrict 0-cochain germs to U_i \ S, holoFn-extract, product-germ trick
 (f·slot-pullback) ∈ OmegaDGerm 0 → holoFn gives the analytic extension q); D2c
 UnwindRegularity; D2d CupMLWitness. Plan: new FineResidue/MeroVanish.lean (engine, mirrors
 MLTie/CoboundaryVanish), then Descent-side wiring.
+
+2026-06-10 D2a LANDED: MeroVanish.lean compiles clean (4 iterations). Engine
+resFunctional_eq_zero_of_mero_coboundary + order-m tie
+resFunctional_poleCocycle_eq_zero_of_slot_vanishes. Key design win: NO higher-order
+Cauchy-Pompeiu — pointRepair (finite limit-repair) + planar Stokes atom kills the
+surviving term since the slot zero makes the smeared product extend analytically.
+Next: D2b DescentVanish.lean — general-K vanish_coboundary via holoFn extraction off
+the K-points + product-germ trick ((f·slot-pullback) ∈ OmegaD 0, holoFn = the analytic
+extension q); also the R6Outputs bridge (MLTie is on this branch).
