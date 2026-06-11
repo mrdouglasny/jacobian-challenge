@@ -286,3 +286,17 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   Option-indexed assembly. Outputs: refinement of any 𝔘 + S-separation (→ SeparatesPoles
   for supp K ⊆ S) + nonempty open reserved zone W (→ MLIsolated ∀ w ∈ W) + W ∩ S = ∅.
   Item 2 complete (with 2a generics). Next: item 3, CupMLWitnessR over the reserved disk.
+[item3 DONE — THE LANE HEADLINE] CupWitness.lean: CupMLWitnessR INHABITED
+  (cupMLWitnessR_of_isolated, standard-3). The cup_surjective_of_ne_zero dissolution
+  worked exactly as scoped: NO transport computation — build the explicit germ-level
+  one-point ML cocycle mlCochain (toGerm of mlCocycle; Z¹(𝒪_K) membership = pointwise
+  ring identity through toGerm + MLIsolated keeps the pole off overlaps + K ≥ 0),
+  extraction agreement by eq_at_of_toGerm_eq (germ classes pin continuous reps),
+  r := g j₀(α)⁻¹ normalization by inv_mul_cancel₀, and cup surjectivity supplies ξ
+  hitting [mlCochain] for every (D, v). ω₀-side inputs: formDivisor_nonneg (div ω₀ ≥ 0)
+  + omegaCoeff_ne_zero_at (slot ≠ 0 where K = 0 — every reserved-zone point).
+  CAPSTONE exists_separating_cousinResidueData: for any 𝔘 and α with divisor K,
+  a refining separating cover (Leray + locallyRealizable) with hsep, inhabited
+  CupMLWitnessR, and Nonempty (CousinResidueData 𝔇.toFiniteCover K) — ZERO remaining
+  hypotheses. All 6 decls standard-3; root aggregator wired; module lake build green.
+  Next: item 4 (hga via D=0 Čech↔Dolbeault comparison) if time.
