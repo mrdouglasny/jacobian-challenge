@@ -293,6 +293,160 @@ theorem exists_serreDualityData_of_genus_zero_of_frameTrace (𝔘 : FiniteCover 
   exact exists_serreDualityData_of_genus_zero_of_residueAtom 𝔘 hR data
     (data.residueAtom_of_frameTraceHypothesis hdata) hg0
 
+/-! ## Satisfiability upgrade: the atom is a THEOREM at positive genus for EVERY datum
+
+`residueAtom_of_form` (`TailFrameGenus0.lean`) proves the atom only for the datum BUILT FROM
+a holomorphic form.  Here we upgrade: ANY canonical datum — in particular the canonical
+`ω₀ = df` frame — satisfies its own residue atom as soon as one nonzero holomorphic form
+exists, i.e. at every `kirovGenus X > 0`.
+
+Route: divide the frame through the holomorphic form (`meroFormDiv`), `F·ω₀ = α·(F·(ω₀/α))`,
+junk-repair the numerator, and run the proven Gate-A engine
+(`residueTheorem_unconditional`) over the enlarged pole set
+`supp(div F) ∪ supp K ∪ supp K_α`; the extra points carry zero `frameRes`
+(`frameRes_eq_zero_of_not_mem`).  Consequence (`residueAtom_of_genus_split`): the trace
+residual `FrameTraceHypothesis` is honestly needed at `kirovGenus X = 0` ONLY — exactly the
+case the Gate-A engine cannot reach (no nonzero holomorphic frame exists there). -/
+
+/-- **The engine integrand reads the atom integrand**: at every point, the frame residue of
+`F·ω₀` equals the Gate-A local residue `formFnResidue α g` of the factorization
+`F·ω₀ = α·g`, `g := (F·(ω₀/α)).repair`.  Germ bookkeeping: junk repair and the covector
+ratio do not move punctured germs, and `coeffAt α` is eventually nonzero (isolated zeros). -/
+theorem frameRes_eq_formFnResidue (data : CanonicalForm17Data X)
+    (α : HolomorphicOneForms X) (hα : α ≠ 0) (F : MeromorphicFunction X) (p : X) :
+    frameRes data F p
+      = formFnResidue α
+          ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun p := by
+  classical
+  set c : ℂ := (chartAt (H := ℂ) p) p with hc
+  -- the holomorphic frame coefficient: analytic, not germ-zero
+  have hmem : c ∈ (chartAt (H := ℂ) p).target :=
+    (chartAt (H := ℂ) p).map_source (mem_chart_source ℂ p)
+  have hcoeff_an : AnalyticAt ℂ (coeffAt α p) c := coeffAt_analyticAt α p hmem
+  have hne_top : meromorphicOrderAt (coeffAt α p) c ≠ ⊤ := by
+    have h1 := (canonicalDataOfForm α hα).formOrderW_ω₀_ne_top p
+    rw [canonicalDataOfForm_ω₀, formOrderW_holToMero] at h1
+    exact h1
+  have hne : ∀ᶠ z in 𝓝[≠] c, coeffAt α p z ≠ 0 := by
+    rcases hcoeff_an.eventually_eq_zero_or_eventually_ne_zero with hcase | hcase
+    · exact absurd (meromorphicOrderAt_eq_top_iff.mpr
+        (hcase.filter_mono nhdsWithin_le_nhds)) hne_top
+    · exact hcase
+  -- the covector ratio's chart read
+  have hdiv : ((canonicalDataOfForm α hα).meroFormDiv data.ω₀).toFun
+        ∘ (chartAt (H := ℂ) p).symm
+      =ᶠ[𝓝[≠] c] formCoeff data.ω₀.toFun p / coeffAt α p := by
+    have h1 := (canonicalDataOfForm α hα).meroFormDiv_comp_chart_eq data.ω₀ p
+    simp only [canonicalDataOfForm_ω₀, holToMero_toFun] at h1
+    -- `formCoeff (holToSection α) p = coeffAt α p` definitionally (`formCoeff_holToSection`)
+    exact h1
+  -- the germ identity: engine integrand ≍ atom integrand
+  have hev : (fun z => coeffAt α p z
+        * ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun
+            ((chartAt (H := ℂ) p).symm z))
+      =ᶠ[𝓝[≠] c]
+      (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ) * formCoeff data.ω₀.toFun p ζ) := by
+    have hrep :=
+      (F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).holoRepr_read_eventuallyEq p
+    filter_upwards [hrep, hdiv, hne] with z hz1 hz2 hz3
+    have hz1' : ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun
+        ((chartAt (H := ℂ) p).symm z)
+        = (F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).toFun
+            ((chartAt (H := ℂ) p).symm z) := hz1
+    have hz2' : ((canonicalDataOfForm α hα).meroFormDiv data.ω₀).toFun
+        ((chartAt (H := ℂ) p).symm z)
+        = formCoeff data.ω₀.toFun p z / coeffAt α p z := hz2
+    have hcancel : coeffAt α p z * (formCoeff data.ω₀.toFun p z / coeffAt α p z)
+        = formCoeff data.ω₀.toFun p z := by
+      rw [mul_comm, div_mul_cancel₀ _ hz3]
+    rw [hz1', MeromorphicFunction.mul_toFun, Pi.mul_apply, hz2', mul_left_comm, hcancel]
+  -- the bridge: contour residue of the engine integrand = planar residue of the atom integrand
+  have hmero_engine : MeromorphicAt (fun z => coeffAt α p z
+      * ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun
+          ((chartAt (H := ℂ) p).symm z)) c :=
+    hcoeff_an.meromorphicAt.mul
+      (((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).meromorphic p)
+  show planarCoeff (-1)
+      (fun ζ => F.toFun ((chartAt (H := ℂ) p).symm ζ) * formCoeff data.ω₀.toFun p ζ) c
+      = formFnResidue α
+          ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun p
+  rw [show formFnResidue α
+        ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun p
+      = resAt (fun z => coeffAt α p z
+          * ((F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀).repair).toFun
+              ((chartAt (H := ℂ) p).symm z)) c from rfl,
+    resAt_eq_planarCoeff_neg_one hmero_engine]
+  exact (planarCoeff_congr hev (-1)).symm
+
+/-- **The residue atom for EVERY canonical datum, from one nonzero holomorphic form**: the
+Gate-A engine through the covector-ratio factorization `F·ω₀ = α·((F·(ω₀/α)).repair)`. -/
+theorem CanonicalForm17Data.residueAtom_of_holForm (data : CanonicalForm17Data X)
+    (α : HolomorphicOneForms X) (hα : α ≠ 0) : data.ResidueAtom := by
+  rw [residueAtom_iff_frameRes]
+  intro F
+  classical
+  set FH := F * (canonicalDataOfForm α hα).meroFormDiv data.ω₀ with hFH
+  set P : Finset X := (F.div.support ∪ data.K.support)
+      ∪ (canonicalDataOfForm α hα).K.support with hP
+  have hsub : F.div.support ∪ data.K.support ⊆ P := Finset.subset_union_left
+  have hext : ∑ p ∈ F.div.support ∪ data.K.support, frameRes data F p
+      = ∑ p ∈ P, frameRes data F p :=
+    Finset.sum_subset hsub fun p _ hpnot => frameRes_eq_zero_of_not_mem data F hpnot
+  -- the engine's pole-freeness off `P`
+  have hpoles : ∀ x : X, x ∉ P →
+      AnalyticAt ℂ (fun z => FH.repair.toFun ((chartAt ℂ x).symm z)) ((chartAt ℂ x) x) := by
+    intro x hx
+    rw [hP] at hx
+    simp only [Finset.mem_union, not_or] at hx
+    obtain ⟨⟨hxF, hxK⟩, hxKα⟩ := hx
+    refine FH.repair_read_analyticAt ?_
+    have hhord : ((canonicalDataOfForm α hα).meroFormDiv data.ω₀).orderW x = 0 := by
+      rw [CanonicalForm17Data.meroFormDiv_orderW, data.order_eq x,
+        Finsupp.notMem_support_iff.mp hxK, Finsupp.notMem_support_iff.mp hxKα]
+      norm_num
+    have hford0 : F.orderAtPoint x = 0 := Finsupp.notMem_support_iff.mp hxF
+    have horder : FH.orderAtPoint x = 0 := by
+      have hmul : FH.orderW x = F.orderW x + 0 := by
+        rw [hFH, MeromorphicFunction.orderW_mul, hhord]
+      rw [add_zero] at hmul
+      show (FH.orderW x).untop₀ = 0
+      rw [hmul]
+      exact hford0
+    rw [horder]
+  have h0 := SerreResidueTheorem.residueTheorem_unconditional α FH.repair P hpoles
+  rw [hext]
+  calc ∑ p ∈ P, frameRes data F p
+      = ∑ p ∈ P, formFnResidue α FH.repair.toFun p :=
+        Finset.sum_congr rfl fun p _ => frameRes_eq_formFnResidue data α hα F p
+    _ = 0 := h0
+
+/-- **The residue atom at positive genus, for every datum** (in particular the canonical
+`ω₀ = df` frame): at `kirovGenus X > 0` a nonzero holomorphic form exists and the engine
+closes the atom.  Strengthens `exists_residueAtom_of_kirovGenus_pos` (which produced the
+atom only for the holomorphic-form datum). -/
+theorem CanonicalForm17Data.residueAtom_of_kirovGenus_pos (data : CanonicalForm17Data X)
+    (hg : 0 < kirovGenus X) : data.ResidueAtom := by
+  have hex : ∃ β : HolomorphicOneForms X, β ≠ 0 := by
+    by_contra hcon
+    push Not at hcon
+    haveI hsub : Subsingleton (HolomorphicOneForms X) :=
+      ⟨fun a b => by rw [hcon a, hcon b]⟩
+    have h0 : kirovGenus X = 0 := by
+      unfold kirovGenus
+      exact Module.finrank_zero_of_subsingleton
+    omega
+  obtain ⟨β, hβ⟩ := hex
+  exact data.residueAtom_of_holForm β hβ
+
+/-- **The genus-split residue atom for an arbitrary datum**: the trace residual is needed in
+the `kirovGenus X = 0` case ONLY; at positive genus the atom is a theorem (Gate A through
+the covector ratio). -/
+theorem CanonicalForm17Data.residueAtom_of_genus_split (data : CanonicalForm17Data X)
+    (h0 : kirovGenus X = 0 → data.FrameTraceHypothesis) : data.ResidueAtom := by
+  rcases Nat.eq_zero_or_pos (kirovGenus X) with hg | hg
+  · exact data.residueAtom_of_frameTraceHypothesis (h0 hg)
+  · exact data.residueAtom_of_kirovGenus_pos hg
+
 /-! ## Down-payment toward the residual: the local branch-trace normalization (X side)
 
 At a ramification point of index `e` of the cover (normal form `w = w₀ + z^e` in centred
