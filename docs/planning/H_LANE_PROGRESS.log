@@ -41,3 +41,17 @@ Residual after this session (named, for future lanes):
 - T-FG: Module.Finite ℤ (H1 X x₀) for compact manifolds (π₁ f.g.; real topology)
 - T-RANK: Module.Free ℤ (H1 X x₀) ∧ finrank ℤ (H1 X x₀) ≤ 2 * genus X
   (Betti-number/analytic-genus comparison; classification or Hodge/Dolbeault).
+
+T+1h: Stage 1 (loop algebra + Hurewicz hom lemmas) compiled clean & committed.
+Stages 2-4 written (loopHomologyClasses subgroup, Noetherian extraction,
+basisOfPid 2g-count, wiring to PeriodGeneratingLoops/discreteness).
+Build environment under FD pressure: ~20 concurrent lean processes from other
+lanes cause flapping "missing data file"/"Too many open files" at import time;
+running compile in retry loop.
+
+Statement-chain finding (sharpened): the topological residual of the WHOLE
+Forster 21.4 ladder is exactly the ≤-weakened content of former
+AX_H1FreeRank2g: Module.Finite ℤ (H1 X x₀) + Module.Free ℤ (H1 X x₀) +
+finrank ℤ (H1 X x₀) ≤ 2*genus X. No analytic representatives, no Hurewicz
+tie, no R1/R2 — the loop-subgroup trick (loopHomologyClasses) supplies the
+analytic representatives for free. rank ≥ 2g never needed (B-3 gives it).
