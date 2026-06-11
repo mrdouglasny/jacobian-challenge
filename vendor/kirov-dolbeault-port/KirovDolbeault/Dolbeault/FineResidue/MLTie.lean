@@ -83,16 +83,94 @@ theorem isOverlapCocycle_mlCocycle :
   simp only [mlCocycle]
   ring
 
+/-- The chart denominator of the principal part is nonvanishing away from
+the pole (chart injectivity on the source). -/
+theorem mlDenom_ne_zero (hiso : MLIsolated 𝔇 j₀ a) {x : X}
+    (hxj : x ∈ (𝔇.U j₀ : Set X)) (hxa : x ≠ a) :
+    chartMap 𝔇 j₀ x - chartMap 𝔇 j₀ a ≠ 0 := by
+  rw [sub_ne_zero]
+  exact fun h => hxa ((chartAt ℂ (𝔇.center j₀)).injOn
+    (mem_chartSource_of_mem_U 𝔇 hxj) (mem_chartSource_of_mem_U 𝔇 hiso.1) h)
+
+/-- The principal part is `ℝ`-smooth away from the pole (chart coordinate
+smooth via `contMDiffAt_extChartAt'`, denominator nonvanishing). -/
+theorem contMDiffAt_mlPrincipal (hiso : MLIsolated 𝔇 j₀ a) {x : X}
+    (hxj : x ∈ (𝔇.U j₀ : Set X)) (hxa : x ≠ a) :
+    ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (mlPrincipal 𝔇 j₀ a r) x := by
+  have hchart : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (chartMap 𝔇 j₀) x :=
+    contMDiffAt_extChartAt' (I := 𝓘(ℝ, ℂ)) (mem_chartSource_of_mem_U 𝔇 hxj)
+  have houter : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : ℂ => r * (z - chartMap 𝔇 j₀ a)⁻¹) (chartMap 𝔇 j₀ x) :=
+    contDiffAt_const.mul
+      ((contDiffAt_id.sub contDiffAt_const).inv (mlDenom_ne_zero hiso hxj hxa))
+  exact (contMDiffAt_iff_contDiffAt.2 houter).comp x hchart
+
+/-- One ML part is `ℝ`-smooth at any non-pole point of its set. -/
+theorem contMDiffAt_mlPart (hiso : MLIsolated 𝔇 j₀ a) {k : 𝔇.toFiniteCover.ι}
+    {x : X} (hxa : x ≠ a) (hxj : k = j₀ → x ∈ (𝔇.U j₀ : Set X)) :
+    ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (mlPart 𝔇 j₀ a r k) x := by
+  unfold mlPart
+  by_cases hk : k = j₀
+  · subst hk
+    rw [if_pos rfl]
+    exact contMDiffAt_mlPrincipal hiso (hxj rfl) hxa
+  · rw [if_neg hk]
+    exact contMDiffAt_const
+
 /-- Under isolation, every overlap avoids the pole, so the cocycle is
 smooth on overlaps. -/
 theorem smoothOnOverlaps_mlCocycle (hiso : MLIsolated 𝔇 j₀ a) :
     SmoothOnOverlaps 𝔇 (mlCocycle 𝔇 j₀ a r) := by
-  sorry
+  intro i j x hx
+  by_cases hij : i = j₀ ∧ j = j₀
+  · refine (contMDiffAt_const (c := (0 : ℂ))).congr_of_eventuallyEq
+      (Filter.Eventually.of_forall fun y => ?_)
+    simp [mlCocycle, hij.1, hij.2]
+  · have hxa : x ≠ a := by
+      rcases not_and_or.mp hij with hi | hj
+      · exact fun h => hiso.2 i hi (h ▸ hx.1)
+      · exact fun h => hiso.2 j hj (h ▸ hx.2)
+    exact (contMDiffAt_mlPart hiso hxa fun h => h ▸ hx.1).sub
+      (contMDiffAt_mlPart hiso hxa fun h => h ▸ hx.2)
+
+/-- The chart-`i` read of one ML part is `ℂ`-differentiable at non-pole
+overlap coordinates: it is `r·(φ_{i j₀} z − α)⁻¹` (or `0`), with the
+transition holomorphic and the denominator nonvanishing. -/
+theorem differentiableAt_mlPart_read (hiso : MLIsolated 𝔇 j₀ a)
+    {i k : 𝔇.toFiniteCover.ι} {x : X} (hxi : x ∈ (𝔇.U i : Set X)) (hxa : x ≠ a)
+    (hxj : k = j₀ → x ∈ (𝔇.U j₀ : Set X)) :
+    DifferentiableAt ℂ
+      (fun z => mlPart 𝔇 j₀ a r k ((chartAt ℂ (𝔇.center i)).symm z))
+      (chartMap 𝔇 i x) := by
+  unfold mlPart
+  by_cases hk : k = j₀
+  · rw [if_pos hk]
+    have hxj' := hxj hk
+    -- the read IS `fun z => r * (transitionMap 𝔇 i j₀ z − α)⁻¹` definitionally
+    have htrans : AnalyticAt ℂ (transitionMap 𝔇 i j₀) (chartMap 𝔇 i x) :=
+      transitionMap_analyticAt 𝔇 hxi hxj'
+    have hden : transitionMap 𝔇 i j₀ (chartMap 𝔇 i x) - chartMap 𝔇 j₀ a ≠ 0 := by
+      rw [transitionMap_chartMap 𝔇 hxi]
+      exact mlDenom_ne_zero hiso hxj' hxa
+    exact (analyticAt_const.mul
+      ((htrans.sub analyticAt_const).inv hden)).differentiableAt
+  · rw [if_neg hk]
+    exact differentiableAt_const _
 
 /-- Under isolation, the cocycle is holomorphic on overlaps. -/
 theorem holomorphicOnOverlaps_mlCocycle (hiso : MLIsolated 𝔇 j₀ a) :
     HolomorphicOnOverlaps 𝔇 (mlCocycle 𝔇 j₀ a r) := by
-  sorry
+  intro i j x hx
+  by_cases hij : i = j₀ ∧ j = j₀
+  · refine (differentiableAt_const (0 : ℂ)).congr_of_eventuallyEq
+      (Filter.Eventually.of_forall fun z => ?_)
+    simp [mlCocycle, hij.1, hij.2]
+  · have hxa : x ≠ a := by
+      rcases not_and_or.mp hij with hi | hj
+      · exact fun h => hiso.2 i hi (h ▸ hx.1)
+      · exact fun h => hiso.2 j hj (h ▸ hx.2)
+    exact (differentiableAt_mlPart_read hiso hx.1 hxa fun h => h ▸ hx.1).sub
+      (differentiableAt_mlPart_read hiso hx.1 hxa fun h => h ▸ hx.2)
 
 /-- The glued family of the ML cocycle is a global `(1,1)` family (R3's
 headline applied to the verified hypotheses). -/
