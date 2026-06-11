@@ -577,19 +577,7 @@ lemma affineGluingImage_mem_smoothLocusY
   rw [affineGluingImage_val_snd]
   exact mul_ne_zero hpY (pow_ne_zero _ (inv_ne_zero hxNZ))
 
-/-- The reflection identity at the chart level: for nonzero `x`,
-`(H.f.reverse).eval x⁻¹ = H.f.eval x · x⁻¹^(deg H.f)`. -/
-lemma reverse_eval_inv_eq
-    (x : ℂ) (hx : x ≠ 0) :
-    (H.f.reverse).eval x⁻¹ = H.f.eval x * x⁻¹ ^ H.f.natDegree := by
-  haveI := invertibleOfNonzero hx
-  have key := Polynomial.eval₂_reverse_mul_pow (RingHom.id ℂ) x H.f
-  have hinv : (⅟x : ℂ) = x⁻¹ := invOf_eq_inv x
-  simp only [Polynomial.eval₂_eq_eval_map, Polynomial.map_id, hinv] at key
-  have hx_pow : (x ^ H.f.natDegree) ≠ 0 := pow_ne_zero _ hx
-  have h2 : (H.f.eval x * x⁻¹ ^ H.f.natDegree) * x ^ H.f.natDegree = H.f.eval x := by
-    rw [mul_assoc, ← mul_pow, inv_mul_cancel₀ hx, one_pow, mul_one]
-  rw [← mul_right_cancel₀ hx_pow (key.trans h2.symm)]
+
 
 /-- **Reverse-derivative identity** (cleared form). For nonzero `x`:
 `x^N · (H.f.reverse)'(x⁻¹) + H.f'(x) · x² = N · H.f(x) · x`

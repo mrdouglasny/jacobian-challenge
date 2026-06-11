@@ -10,7 +10,18 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 29** — all **29** in our own modules (PR #179
+**Active project axioms: 22** — all **22** in our own modules (PR #183
+(@daouid) discharged the **entire 7-axiom odd-atlas infinity-chart cluster**
+— `infinityChart`, `infinityInverseMap`, `infinityChart_mem_source`, and the
+4 affine↔infinity compat transitions — to real defs/theorems with the
+**correct analytic branch** (`y := z·x^(g+1)` through the IFT-inverted
+uniformizer `t = w·S(w²)`, the #178-review Step-5 route: the
+variable-dependent square root is `cpow 2⁻¹` on a slit-plane preimage, with
+`Complex.sqrt` applied only to the constant leading coefficient — fixing the
+discontinuous-principal-branch bug `Complex.sqrt (f.eval x)` that forced the
+Phase-3 revert), 2026-06-11, `#print axioms` standard-3 on all 7 and on
+`Hyperelliptic.instChartedSpace`/`instIsManifold` (the odd-atlas axiom
+dependency they carried is gone), net −7, 29 → 22; PR #179
 (@Deicyde) discharged `AX_ofCurve_contMDiff` to a theorem — the chart-line
 descent proof of Abel–Jacobi holomorphy, with the `Classical.choice` path
 discrepancy landed in the lattice via the period-triangle theorem +
@@ -312,7 +323,7 @@ primitives that are statement-vetted but not yet discharged.
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (17 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (10 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -329,7 +340,7 @@ primitives that are statement-vetted but not yet discharged.
 | 1 — textbook-standard | 10 | classical theorems, citable | high |
 | 2a — data-existence | 4 | "this function/object exists with spec S" | spec needs review |
 | 2b — definition-asserting | 3 | "my construction has good property P" | **may mask a bad def** |
-| 2c — atlas / structure | 10 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 3 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 2 | `h1coh_zero_finrank`+`serreDuality_equiv` (keystone-gated: port's `exists_serreDualityData`) — **re-stamped vs the now-CONCRETE `H1coh` 2026-06-10 (`DT`): both Standard** — chart disks are Stein/∂̄-acyclic, so the one-cover Čech H¹ IS genuine H¹(X,𝒪_D) (Cartan; twisting by the finite-support D preserves chart-disk acyclicity), making `h1coh_zero_finrank` exactly the Hodge/Serre h¹(𝒪)=g base case and `serreDuality_equiv` Forster §17 at the right strength (opaque K satisfiable as div(ω)). `H1coh`(+3 instances) and `cohomologyLES` **DISCHARGED 2026-06-10** via the Kirov Dolbeault port (`Layer3/CechH1Bridge.lean`, `LinearSystemBridge.lean`, `CohomologyLESBridge.lean`; all standard-3) | research |
 | 3 — Layer-3 period primitives (Phase C) | 0 | `Layer3.AX_RBR1` + `Layer3.AX_RBR2` **MERGED 2026-06-10 (D1)** into `AX_PeriodCycleBasis` (Class 1) as its arc-level `R1`/`R2` fields — the bundle is self-guarding, dissolving the global-choice trap their basis-quantified form needed the `symplectic` field for | — |
@@ -405,11 +416,11 @@ remains here is their **atlas/manifold** instances + the genus formula.
 |---------|-----------|------:|
 | `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
 | `PlaneCurve`: 1 affine prop `AX_PlaneCurveAffine_connected` only (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117**, **`instIsManifold` DISCHARGED #52 PR-4 (2026-06-10)** — diagonal + `chartAt_compat` assembly over the #117 atlas, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 1 |
-| Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`; the Phase-3 `infinityInverseMap` discharge was reverted in review) | `…/OddAtlas/InfinityChart.lean` | 7 |
-| Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) | `…/Hyperelliptic/EvenAtlas.lean:243,252` | 2 |
-| `AX_HyperellipticAffine_connected` | `…/Hyperelliptic/Basic.lean:101` | 1 |
+| Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`) — ✅ **all 7 DISCHARGED 2026-06-11 (PR #183, @daouid)** with the correct analytic branch `y := z·x^(g+1)` (Step-5 route; the Phase-3 arbitrary-root revert is superseded); standard-3, and `Hyperelliptic.instChartedSpace`/`instIsManifold` are now standard-3 too | `…/OddAtlas/InfinityChart.lean`, `…/OddAtlas/InfinityInverse.lean` | 0 |
+| Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) — ✅ **DISCHARGED** (#109, 2026-06-07; now `theorem`s in-file) | `…/Hyperelliptic/EvenAtlas.lean` | 0 |
+| `AX_HyperellipticAffine_connected` — ✅ **DISCHARGED** (#112, 2026-06-07; now a real `instance`) | `…/Hyperelliptic/Basic.lean:448` | 0 |
 | Elliptic witness (`AX_Elliptic_H1_symplectic`) | `…/Elliptic/Witnesses.lean` | 1; **re-typed to `PeriodCycleBasis` in D1 (2026-06-10)** — discharge attempted, NOT closable: `isBasis`/`loops_to_basis` still need `π₁(ℂ/Λ) ≅ Λ` (covering-space H₁), but the unprovable-by-design opaque-form `symplectic` field is gone and R1/R2 are now provable for the concrete A/B loops, so the axiom's real content strictly shrank (see `docs/planning/AX_Elliptic_H1_symplectic.md` D1 note). `AX_Elliptic_aLoop_analytic` (PR #86, 2026-06-06) and `AX_Elliptic_bLoop_analytic` (2026-06-07) were **discharged to theorems** via `extChartAt_quotient_mk_line_analyticAt`. |
-| `AX_H1_ProjectiveLine_trivial` | `…/Line/Witnesses.lean:43` | 1 |
+| `AX_H1_ProjectiveLine_trivial` — ✅ **DISCHARGED** (PR #104, 2026-06-07; now a `theorem` — empty genus-0 basis) | `…/Line/Witnesses.lean:44` | 0 |
 
 ### 2d. Flagged — *true-but-unproven; needs end-to-end check*
 
@@ -460,6 +471,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| **Odd-atlas infinity-chart cluster — all 7**: `infinityChart`, `infinityInverseMap`, `infinityChart_mem_source`, `infinityChart_compat_affineLiftProjX`, `affineLiftProjX_compat_infinityChart`, `infinityChart_compat_affineLiftProjY`, `affineLiftProjY_compat_infinityChart` *(PR #183, @daouid, 2026-06-11)* | real defs/theorems with the **correct analytic branch**, resolving the #178 review: the uniformizer at ∞ is `t H w = w · S H (w²)` with `S = √lc · (lc⁻¹ · f.reverse.eval ·)^(2⁻¹)` — a `cpow` analytic on the slit-plane preimage `U_S`, `Complex.sqrt` applied only to the *constant* `leadingCoeff`, never the variable (the discontinuous-principal-branch bug `Complex.sqrt (f.eval x)` of the reverted Phase-3 attempt is gone) — inverted by the IFT (`tLocalHomeomorph`, `t_deriv_ne_zero`); `infinityInverseMap` sets `x := W⁻¹^2`, `y := z·x^(g+1)` for `W = (tLocalHomeomorph H).symm z`, with `y² = f.eval x` **proved** (`y_sq_eq_eval_x`) and the right/left-inverse companions the review demanded (`infinityForward_infinityInverseMap_eq_self`, `t_w_q`, `w_q_sq_eq_inv`); chart V open / Vᶜ compact via the bounded-roots argument; the 4 compat transitions proved by the transition algebra; `contDiffOn_symm_toOpenPartialHomeomorph_local` added to the IFT toolkit. `#print axioms` **standard-3 on all 7**, and downstream `Hyperelliptic.instChartedSpace`/`instIsManifold` + the #175 `nonempty_periodCycleBasis_of_branchCutSystem` witness are now standard-3 (the last atlas-axiom dependency of the unified `Hyperelliptic` manifold structure is gone). Net −7 (29 → 22). | `…/OddAtlas/InfinityInverse.lean` (new), `…/OddAtlas/InfinityChart.lean`, `GeneralResults/InverseFunctionTheorem.lean` |
 | `PlaneCurve.instIsManifold` *(#52 PR-4, 2026-06-10)* | the IsManifold endgame over the #117 atlas: the 3 diagonal preferred-lifted-chart compat assemblies (`centralLiftChart`/`yLiftChart`/`xLiftChart` self-pairs via `OpenPartialHomeomorph.lift_openEmbedding_trans` + the PR-2 within-patch lemmas), the full 9-case `PlaneCurve.chartAt_compat` dispatch (rep-coordinate trichotomy matching `chartAt`'s preference order z→y→x), and the `isManifold_of_contDiffOn` wrapper. Module placement: axiom deleted from `Atlas.lean`, real `instance` lives in `AtlasCompat.lean` (downstream of the proved compat layer); `CrossCompat.lean` re-imports `AtlasCompat`. `#print axioms` standard-3, no `sorryAx`. Net −1 (31 → 30 after the D1 merge). (Implementation by Codex; independently re-verified.) | `ProjectiveCurve/PlaneCurve/AtlasCompat.lean` |
 | **Trace cluster — all 3**: `pushforwardOneForm`, `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` *(#26/#27/#28, 2026-06-10)* | the Kirov-Dolbeault port's fibre-sum trace `traceFormTotal` (genuine `traceForm` — fibre sum via `(mfderiv f x)⁻¹` off the branch locus, sheet-decomposition holomorphicity, removable-singularity extension at branch points — and `0` for constant maps), transported across the new `bridgeKDFormEquiv = bridgeFormEquiv.trans kdFormAlign` (`kdFormAlign` is the *identity* `LinearEquiv`: vendored and port `HolomorphicOneForms` unfold to the same `ContMDiffSection` type). `_id`/`_comp` conjugate `traceFormTotal_id`/`_comp`; the zero-for-constants convention is the port's `dif` branch (`traceFormTotal_eq_zero_of_const`). `#print axioms` standard-3, no `sorryAx`. Net −3 (36 → 33); the trace-gated `AX_pullbackAmbient_preserves_lattice` is now the dual of a REAL trace. | `Bridge/KirovDolbeaultTrace.lean` + `Axioms/AbelJacobiMap.lean`; port proof in `vendor/kirov-dolbeault-port/KirovDolbeault/TraceForm.lean` |
 | `AX_AnalyticCycleBasis`, `Layer3.AX_RBR1`, `Layer3.AX_RBR2` *(D1 merge, 2026-06-10)* | merged into the single `AX_PeriodCycleBasis` (`Axioms/PeriodCycleBasis.lean`): same `loops`/`isBasis`/`loops_to_basis` fields + R1/R2 stated arc-level over the bundle's own `canonicalArcIntegral`s (`arcPeriodVec`, αEmbed/βEmbed layout pinned by `@[simp]`); the Layer-3 engine takes `R1Holds`/`R2Holds` hypotheses and instantiates them on the SAME `Classical.choice` witness that defines `loopIntegralToH1` (`periodVec_choice_eq_arcPeriodVec` via `loopIntegralToH1_loop`); the proof-unconsumed `symplectic` field was dropped, removing `intersectionForm` from every headline closure. Net −2. Statement strictly weaker-or-equal to the merged trio (satisfiability inherited from their 2026-06-09 DT vets; merge design DT-endorsed 2026-06-10). | `Axioms/PeriodCycleBasis.lean`, `Layer3/Periods.lean`, witnesses in `ProjectiveCurve/{Line,Elliptic}/Witnesses.lean` |
@@ -513,7 +525,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 29 — the vendored Kirov subtree is now axiom-free, so 29 is the total (incl. the 2 Layer-3 cohomology axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges and the D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, and AX_ofCurve_contMDiff PR #179).
+#   prints 22 — the vendored Kirov subtree is now axiom-free, so 22 is the total (incl. the 2 Layer-3 cohomology axioms after the Phase-D H1coh(+3 instances)+cohomologyLES discharges and the D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis; less the 5 discharged RR/Serre+H1, the 3 discharged period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, and the 7-axiom odd-atlas infinity-chart cluster PR #183).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -530,7 +542,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 29
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 22
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
