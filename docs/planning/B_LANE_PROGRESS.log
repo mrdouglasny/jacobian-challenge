@@ -48,3 +48,44 @@ Design (statement-level, before implementation):
 Circularity guard: engine file imports only PeriodNondegeneracy + Mathlib;
 kernel-closure check (`#print axioms`) on every headline at the end — engine
 must be standard-3 only.
+
+## 2026-06-11 — B-4/B-5 LANDED (engine + transport), kernel-verified
+
+Files (both compile via `lake env lean`; full `lake build` green, 8770 jobs):
+
+* `Jacobians/RiemannSurface/PeriodDiscreteness.lean` (engine, commit dfcfd1e)
+* `Jacobians/Layer3/PeriodLatticeDiscrete.lean` (transport, commit a0e8e5b)
+* wired into `Jacobians/RiemannSurface.lean` + `Jacobians/Layer3.lean`.
+
+Zero sorries, zero new axioms, ONE named hypothesis (`PeriodGeneratingLoops`,
+the topological 2g rank count — by design, the honest residual).
+
+Kernel closures (`#print axioms`, script saved at
+`docs/planning/b45_axiom_check.lean.txt`, run with `lake env lean`):
+
+* ENGINE — all standard-3 ([propext, Classical.choice, Quot.sound]), no
+  project axioms:
+  - discreteTopology_span_int_of_card_eq_finrank
+  - isZLattice_span_int_of_span_real_eq_top
+  - exists_basis_span_int_of_card_eq_finrank
+  - span_real_loopPeriodLattice_eq_top
+  - PeriodGeneratingLoops.discreteTopology   (B-4 headline)
+  - PeriodGeneratingLoops.exists_basis       (B-5: Fin (2g) ℤ-basis)
+  - PeriodGeneratingLoops.finrank_eq         (B-5: rank 2g)
+  - isZLattice_loopPeriodLattice             (B-5 headline)
+* TRANSPORT — standard-3 + AX_PeriodCycleBasis ONLY (the axiom enters
+  exclusively through the DEFINITION of loopIntegralToH1/periodLatticeInBasis;
+  fields used: loops/isBasis/loops_to_basis; R1/R2 untouched):
+  - choiceLoops_periodGenerating
+  - loopPeriodLattice_eq_periodLatticeInBasis
+  - periodLatticeInBasis_discreteTopology_of_loopSpan
+  - periodLatticeInBasis_isZLattice_of_loopSpan
+  - exists_periodLatticeInBasis_basis_of_loopSpan
+
+What remains for a fully axiom-free lattice (B-route forward plan):
+construct 2g analytic loops generating H1's loop-period image — i.e.
+discharge `PeriodGeneratingLoops` without the chosen witness (dissection /
+branched-cover homology generators, or the Kirov B-4 residue-engine count).
+That is the ONLY gap between the engine and an unconditional
+DiscreteTopology/IsZLattice for the Forster-model lattice; the spanning
+half is already unconditional (B-3).
