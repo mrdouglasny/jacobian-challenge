@@ -20,3 +20,13 @@
 [T+5] exists_sqrt_branch + exists_sqrtArcData landed; M1 branch-existence half now PROVEN (closure = winding integral, documented gap). All modules wired into aggregators.
 [T+6] HYP_CB_BLOCKER.md written: gap ledger G-A (closure winding integral), G-B (circle layout geometry), G-C (H1 basis+tie, SVK package), G-D (R1/R2 over explicit integrals), G-E (even model). Aggregator build running in background.
 [T+7] Verbatim-gates pass: aggregator build OK (8726 jobs), full lake build running; sorry-grep clean on all 5 new files; port LoopOffBranch skimmed (complementary chart-local FTC; our extChartAt_toOdd makes its chartFrame_cancel trivial for hyperelliptic sqrt lifts). Pending: #print axioms probe post-build.
+[T+8] FINAL. Full `lake build` green (8756 jobs, CI-equivalent). #print axioms:
+      - isAnalyticArcStrong_of_movingChart, canonicalArcIntegral_conjugate,
+        analyticAt_of_sq_eq_analytic, exists_sqrt_branch, exists_sqrtArcData:
+        STANDARD-3.
+      - extChartAt_toOdd / loop_period_eq / nonempty_periodCycleBasis_of_
+        branchCutSystem: standard-3 + the PRE-EXISTING tracked odd-atlas
+        infinity-chart axioms (AXIOM_AUDIT row "Odd-atlas infinity chart",
+        inherited through instChartedSpace — where that dependency belongs
+        per the audit). ZERO new axioms, zero sorries, this workstream.
+      8 commits on feat/hyperelliptic-cyclebasis (not pushed, per gates).
