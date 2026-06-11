@@ -286,3 +286,25 @@ nbhd of the marked point via finite-order normal form + holoFn_eq_of_tendsto), t
 exists_slotProductSimplePoleAt (order −1 exact ⟹ residue w'(α) ≠ 0 via dslope split), then
 resCocycle_cup_testCocycle_ne_zero through resFunctional_eq_neg_residue_of_mero_coboundary
 (mixed-level trick: z ∈ Z¹(K) is a B¹(K+b)-coboundary; cocycleFn proof-irrelevant ⟹ rfl).
+
+2026-06-11 UNWIND Commits B+C LANDED (3e7ca31, 62948e0, + headline):
+- holoFn_eventuallyEq_near_marked: the read-back principle — holoFn of a class on W agrees
+  with Gext of ANY honest rep on a punctured nbhd of a marked boundary point b ∉ W, given
+  finite meromorphic order (normal form ⟹ junk-free continuous formula ⟹ limUnder recovers).
+- exists_slotProductSimplePoleAt: exact orders (−K b−1) + K b = −1; order −1 ⟹ residue
+  w'(α) ≠ 0; q = dslope w' α; pure-ring final identity (div_eq_mul_inv, no field_simp).
+- resCocycle_cup_testCocycle_ne_zero: the §17.7 evaluation. Mixed-level trick WORKED AS
+  PLANNED: cup cocycle ∈ Z¹(K) viewed in Z¹(K+b) (OmegaDGerm_mono), and
+  cocycleFn 𝔇 hsep z = cocycleFn 𝔇 hsep' z' is rfl (proof irrelevance through holoFn/choose).
+  Engine = resFunctional_eq_neg_residue_of_mero_coboundary at S = posSupp(K+b).
+- unwindRegularity_concrete_of_isolated: THE CONDITIONAL HEADLINE — UnwindRegularity G D is a
+  THEOREM for the concrete fine-sheaf G, conditional on BadPointsIsolated 𝔇 K D (+ the R-lane
+  interface hsep/hg/SlotExactK/CupMLWitnessR/ExactOrderWitness(proven)/K ≥ 0).
+- Gates: #print axioms standard-3 on all six headliners; 0 sorries; full lake build green
+  (8765 jobs); SerreUnwindDetect wired into KirovDolbeault.lean root imports.
+- Residual wall documented in docs/planning/UNWIND_BLOCKER.md: unconditional ∀ D needs the
+  multi-chart (non-isolated) evaluation — per-chart smeared-pole atom with non-constant weight
+  + cross-chart residue transport + ∑ρ≡1 telescoping; cochain side already covered (coneB0).
+NOTE: stale-olean gotcha — lake env lean used pre-branch MeroVanish.olean until
+`lake build ...FineResidue.DescentVanish`; "unknown identifier SlotProductSimplePoleAt" was
+NOT a namespace problem.
