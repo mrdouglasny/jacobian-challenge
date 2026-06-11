@@ -39,9 +39,9 @@ Layer-3 axioms (`Jacobians/Layer3/Cohomology.lean`: `h1coh_zero_finrank`,
 
 ## The divisor-pin finding (why the ∃-K form, not the axiom verbatim)
 
-`serreDuality_equiv` is stated with `Jacobians.Axioms.canonicalDivisor X` — an OPAQUE
-axiom constant (`RiemannSurface/Cohomology/LineBundleBasic.lean:43`) constrained by no
-other axiom. No theorem can pin the dimensions of `L(canonicalDivisor X − D)`, so the
+`serreDuality_equiv` is stated with `Jacobians.Axioms.canonicalDivisor X` — an opaque
+axiom-level constant (`RiemannSurface/Cohomology/LineBundleBasic.lean:43`) constrained
+by no other axiom. No theorem can pin the dimensions of `L(canonicalDivisor X − D)`, so the
 axiom's verbatim statement is underivable from ANY analytic input while `canonicalDivisor`
 stays opaque. The flip commit therefore ALSO de-opaques `canonicalDivisor`
 (axiom → `noncomputable def … := Classical.choose (serreDuality_equiv_exists …)`), after
