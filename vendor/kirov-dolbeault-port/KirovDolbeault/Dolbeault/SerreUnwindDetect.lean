@@ -409,7 +409,7 @@ private theorem Kb_apply_self {b : X} :
 
 /-- **Chart transfer of meromorphy and order** from the ambient chart at `b` to the cover's
 center chart: the two reads differ by the analytic transition with nonvanishing derivative. -/
-private theorem centerRead_data {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+theorem centerRead_data {j₀ : 𝔇.toFiniteCover.ι} {b : X}
     (hb : b ∈ (𝔇.U j₀ : Set X)) (H : X → ℂ)
     (hH : MeromorphicAt (H ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b)) :
     MeromorphicAt (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ b) ∧
@@ -626,19 +626,17 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
     {f : MeromorphicFunction X}
     {n : ℤ} (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b) (hKb : 0 ≤ K b)
     {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
-    (hF0 : cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain
-      ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1)) :
-    ∃ r : ℂ, r ≠ 0 ∧ SlotProductSimplePoleAt 𝔇
-      (vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0)
-      g j₀ b r := by
+    {F0 : 𝔇.toFiniteCover.toFiniteFamily.Cochain0}
+    (hF0 : F0 ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1))
+    (hcomp : F0 j₀ = cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain j₀) :
+    ∃ r : ℂ, r ≠ 0 ∧ SlotProductSimplePoleAt 𝔇 (vanishFn F0 hF0) g j₀ b r := by
   classical
   set α := chartMap 𝔇 j₀ b with hαdef
   set W : Opens X := 𝔇.U j₀ ⊓ offPos (K + Finsupp.single b 1) with hWdef
   set F : ↥W → ℂ := td.cupRep f ∘ openIncl (inf_le_left : W ≤ 𝔇.U j₀) with hFdef
   -- `F` represents the restricted cup-cochain class on `W`
-  have hgF : toGerm W F = rawRestrictG (inf_le_left : W ≤ 𝔇.U j₀)
-      (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain j₀) := by
-    rw [← td.toGerm_cupRep f]
+  have hgF : toGerm W F = rawRestrictG (inf_le_left : W ≤ 𝔇.U j₀) (F0 j₀) := by
+    rw [hcomp, ← td.toGerm_cupRep f]
     rfl
   -- punctured neighbourhoods of `b` lie in `W`
   have hWnear : ∀ᶠ x in 𝓝[≠] b, x ∈ W := by
@@ -682,7 +680,7 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
     exact hcord
   -- the read-back: the extraction agrees with the honest representative near `b`
   have hread : ∀ᶠ x in 𝓝[≠] b,
-      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀ x
+      vanishFn F0 hF0 j₀ x
         = Gext F x :=
     holoFn_eventuallyEq_near_marked (restrict_mem_omegaDGerm_zero hF0 j₀) hgF hWnear hFmer hFord
   -- transfer the agreement to the center chart
@@ -694,7 +692,7 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
       (by simpa using (chartAt ℂ (𝔇.center j₀)).map_source hbsrc)
     rwa [hli] at h
   have hcenterEq : ∀ᶠ ζ in 𝓝[≠] α,
-      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+      vanishFn F0 hF0 j₀
           ((chartAt ℂ (𝔇.center j₀)).symm ζ)
         = Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) := by
     filter_upwards [hctend.eventually hread, hctend.eventually hGFeq] with ζ h1 h2
@@ -727,18 +725,18 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
     exact_mod_cast congrArg (fun z : ℤ => (z : WithTop ℤ)) harith
   -- transfer to the extraction's slot-product
   have htargetEq : (fun ζ =>
-      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+      vanishFn F0 hF0 j₀
           ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
       =ᶠ[𝓝[≠] α] (fun ζ =>
         Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) := by
     filter_upwards [hcenterEq] with ζ hζ
     rw [hζ]
   have htmer : MeromorphicAt (fun ζ =>
-      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+      vanishFn F0 hF0 j₀
         ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α :=
     hRgmer.congr htargetEq.symm
   have htord : meromorphicOrderAt (fun ζ =>
-      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+      vanishFn F0 hF0 j₀
         ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α = ((-1 : ℤ) : WithTop ℤ) := by
     rw [meromorphicOrderAt_congr htargetEq]
     exact hRgord
@@ -798,7 +796,7 @@ theorem resCocycle_cup_testCocycle_ne_zero (hsep : SeparatesPoles 𝔇 K)
     · rw [Kb_apply_ne hxb]
   set z' : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 (K + Finsupp.single b 1)) :=
     ⟨(z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1), hzK'⟩ with hz'def
-  obtain ⟨r, hr0, hpole⟩ := td.exists_slotProductSimplePoleAt hn hm hKb hg hexact hF0
+  obtain ⟨r, hr0, hpole⟩ := td.exists_slotProductSimplePoleAt hn hm hKb hg hexact hF0 rfl
   rw [resCocycle_apply]
   have heval : resFunctional 𝔇 (⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep z) g,
       glueCoeff_cocycleFn_mem 𝔇 hsep z hg⟩ : oneOneCoeff 𝔇) = -r := by
