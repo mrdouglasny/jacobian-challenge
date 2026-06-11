@@ -88,7 +88,7 @@ theorem span_choiceCycleBasis_arcPeriodFunctional_eq_top (x₀ : X) :
         = Set.range gens := by
       rw [← Set.range_comp]
       refine congrArg Set.range (funext fun i => ?_)
-      show loopIntegralToH1 x₀ (cb.isBasis i) = gens i
+      change loopIntegralToH1 x₀ (cb.isBasis i) = gens i
       rw [cb.loops_to_basis i]
       simpa [hcb, hgens] using loopIntegralToH1_loop (X := X) x₀ i
     rw [himg] at h2

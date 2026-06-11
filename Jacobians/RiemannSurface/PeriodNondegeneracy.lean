@@ -389,7 +389,7 @@ theorem potential_constant (x₀ : X)
         chartTargetBall_subset_chart_target P hz
       have hQ1_mem : (chartAt ℂ P).symm z ∈ chartBallSource P := by
         refine ⟨(chartAt ℂ P).map_target hz_target, ?_⟩
-        show (chartAt ℂ P) ((chartAt ℂ P).symm z) ∈ Metric.ball z₀ _
+        change (chartAt ℂ P) ((chartAt ℂ P).symm z) ∈ Metric.ball z₀ _
         rw [(chartAt ℂ P).right_inv hz_target]
         exact hz
       have hformula := potential_eq_localPotential x₀ Λ hΛ bω P hQ1_mem
@@ -414,7 +414,7 @@ theorem potential_constant (x₀ : X)
       (isOpen_chartBallSource P).mem_nhds (mem_chartBallSource_self P)]
       with R hR_const hR_mem
     have hformula := potential_eq_localPotential x₀ Λ hΛ bω P hR_mem
-    show u R = u Pm
+    change u R = u Pm
     have hR_const' : localPotential Λ bω P ((chartAt ℂ P) R)
         = localPotential Λ bω P ((chartAt ℂ P) P) := hR_const
     have huP : Λ (basepointPeriodFunctional x₀ P) = u P := rfl
@@ -449,7 +449,7 @@ theorem lamForm_coeff_center_eq_zero (x₀ : X)
       chartTargetBall_subset_chart_target P hz
     have hQ1_mem : (chartAt ℂ P).symm z ∈ chartBallSource P := by
       refine ⟨(chartAt ℂ P).map_target hz_target, ?_⟩
-      show (chartAt ℂ P) ((chartAt ℂ P).symm z) ∈ Metric.ball z₀ _
+      change (chartAt ℂ P) ((chartAt ℂ P).symm z) ∈ Metric.ball z₀ _
       rw [(chartAt ℂ P).right_inv hz_target]
       exact hz
     have hformula := potential_eq_localPotential x₀ Λ hΛ bω P hQ1_mem
@@ -485,7 +485,7 @@ theorem HolomorphicOneForm.eq_zero_of_coeff_center_eq_zero
   apply HolomorphicOneForm.ext_of_coeff
   funext x z
   rw [HolomorphicOneForm.coeff_zero]
-  show (form : X → ℂ → ℂ) x z = 0
+  change (form : X → ℂ → ℂ) x z = 0
   by_cases hz : z ∈ (extChartAt 𝓘(ℂ) x).target
   · have hmem : (extChartAt 𝓘(ℂ) x).symm z ∈
         (extChartAt 𝓘(ℂ) ((extChartAt 𝓘(ℂ) x).symm z)).source :=
