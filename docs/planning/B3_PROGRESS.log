@@ -1,0 +1,15 @@
+B3 progress log — feat/period-nondegeneracy
+
+2026-06-11 cycle 1: inventory complete (PeriodCycleBasis/Layer3.Periods/LoopIntegral/LoopIntegralHom/DevelopingMap/BridgePath(+Arc)/ArcAlgebra/OneForm/PartitionIndependence read); B3_NONDEG_ROUTE.md written (design before implementation). Key finds: pathChartBallPrimitive + canonicalArcIntegral_eq_chartPrimitive_endpoint_sub give the local FTC; chartFlatAnalyticArc is the template for chartSegmentArc; AX_Period_Triangle proof is the template for the increment identity; u is a DEFINED function via arcPeriodFunctional(bridgePathArc) — no well-definedness needed.
+
+2026-06-11 cycle 2: ChartSegmentArc.lean (segment arc + FTC) and PeriodNondegeneracy.lean (parts A-C) land compiling: increment identity, Re-pairing coordinates, local potential, max-principle clopen engine, headlines H1 (functional) + H2 (span) PROVED, no named hypotheses needed. Next: Layer3 corollaries C1-C3 + #print axioms.
+
+2026-06-11 cycle 3: Layer3/PeriodSpan.lean (C1-C3) lands; umbrella imports wired; FULL lake build green (8765 jobs).
+#print axioms results:
+  eq_zero_of_forall_loopPeriodFunctional_eq_zero : [propext, Classical.choice, Quot.sound]
+  span_loopPeriodFunctional_eq_top               : [propext, Classical.choice, Quot.sound]
+  span_choiceCycleBasis_arcPeriodFunctional_eq_top : [std 3, AX_PeriodCycleBasis]
+  span_range_loopIntegralToH1_eq_top               : [std 3, AX_PeriodCycleBasis]
+  span_periodLatticeInBasis_eq_top                 : [std 3, AX_PeriodCycleBasis]
+  canonicalArcIntegral_chartSegmentArc             : [propext, Classical.choice, Quot.sound]
+B-3 COMPLETE: zero named hypotheses, zero sorries, zero new axioms. Not pushed.
