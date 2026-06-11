@@ -64,6 +64,8 @@ See `docs/formalization-plan.md` §7.
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.BranchLocus
 import Jacobians.RiemannSurface.LoopIntegralHom
+import Jacobians.RiemannSurface.LoopLattice
+import Jacobians.RiemannSurface.DevelopingNaturality
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovCanonicalEq
@@ -330,6 +332,165 @@ theorem AX_pullbackOneForm_comp {X : Type u} [TopologicalSpace X] [T2Space X]
   rw [Jacobians.Vendor.Kirov.pullbackForm_comp f hf g hg (hg.comp hf)]
   ext form
   simp [LinearMap.comp_apply]
+
+/-- The chart-local coefficient family of `pullbackOneForm f hf form`
+satisfies the cross-manifold pullback transformation law against `form`:
+in compatible charts, `(f^*ω)(x, z) = ω(y, F z) · F'(z)` where
+`F = φ_y ∘ f ∘ φ_x⁻¹` is the chart read of `f`.
+
+Unwinds the Kirov bridge (`sectionCoeff` / `localRep` /
+`toFun_eq_localRep_smul`) down to Kirov's pointwise
+`(f^*α)(x) = α(f x) ∘ mfderiv f x`; the tangent-trivialization factor is
+converted to the complex derivative of the chart read exactly as in
+`Bridge.BridgeFormEquiv.chartTransitionFactor_eq_fderiv` (the `f = id`
+case). This is the relation hypothesis consumed by the developing-value
+naturality engine (`developingValue_comp_of_isPullbackCoeffRel`). -/
+theorem pullbackOneForm_isPullbackCoeffRel {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (form : HolomorphicOneForm Y) :
+    IsPullbackCoeffRel f (pullbackOneForm f hf form) form := by
+  classical
+  intro x y z hz hfq
+  set q : X := (extChartAt 𝓘(ℂ) x).symm z with hq_def
+  have hqx : q ∈ (extChartAt 𝓘(ℂ) x).source := (extChartAt 𝓘(ℂ) x).map_target hz
+  have hxq : (extChartAt 𝓘(ℂ) x) q = z := (extChartAt 𝓘(ℂ) x).right_inv hz
+  have hqx_chart : q ∈ (chartAt ℂ x).source := by
+    simpa [extChartAt] using hqx
+  have hfq_chart : f q ∈ (chartAt ℂ y).source := by
+    simpa [extChartAt] using hfq
+  have hfq_base : f q ∈
+      (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y)) y).baseSet := by
+    rwa [TangentBundle.trivializationAt_baseSet]
+  -- Step 1: unfold the bridge — the pullback's coefficient is the `localRep`
+  -- of Kirov's section pullback.
+  set αY := Jacobians.Bridge.bridgeForm form with hαY_def
+  set β := Jacobians.Vendor.Kirov.pullbackForm f hf αY with hβ_def
+  have hunfold : pullbackOneForm f hf form =
+      Jacobians.Bridge.BridgeFormEquiv.inverseForm β := by
+    simp only [pullbackOneForm, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+      Jacobians.Bridge.bridgeFormEquiv, LinearEquiv.ofLinear_apply,
+      LinearEquiv.ofLinear_symm_apply, hβ_def, hαY_def]
+  have hLHS : (pullbackOneForm f hf form).coeff x z =
+      Jacobians.Vendor.Kirov.Montel.localRep β x q := by
+    rw [hunfold]
+    have h1 : (Jacobians.Bridge.BridgeFormEquiv.inverseForm β).coeff x z =
+        Jacobians.Bridge.BridgeFormEquiv.sectionCoeff β x z := rfl
+    rw [h1, Jacobians.Bridge.BridgeFormEquiv.sectionCoeff_apply_of_mem β hz]
+  -- Step 2: Kirov's pullback section evaluated on the chart unit tangent.
+  set w : TangentSpace 𝓘(ℂ, ℂ) (f q) := mfderiv 𝓘(ℂ) 𝓘(ℂ) f q
+      ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) x).symmL ℂ q 1)
+    with hw_def
+  have hβ_localRep : Jacobians.Vendor.Kirov.Montel.localRep β x q =
+      αY.toFun (f q) w := rfl
+  -- Step 3: split off the scalar coefficient at `f q` in the `y`-chart.
+  have htoFun := Jacobians.Vendor.Kirov.Montel.toFun_eq_localRep_smul αY y (f q)
+    hfq_base
+  have hsplit : αY.toFun (f q) w =
+      Jacobians.Vendor.Kirov.Montel.localRep αY y (f q) *
+        ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+            y).continuousLinearEquivAt ℂ (f q) hfq_base :
+          TangentSpace 𝓘(ℂ, ℂ) (f q) →L[ℂ] ℂ) w := by
+    rw [htoFun]
+    simp
+  -- Step 4: the trivialization factor is the derivative of the chart read.
+  have hA : ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+          y).continuousLinearEquivAt ℂ (f q) hfq_base :
+        TangentSpace 𝓘(ℂ, ℂ) (f q) →L[ℂ] ℂ) w =
+      fderiv ℂ
+        ((extChartAt 𝓘(ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ) x).symm) z 1 := by
+    have hmdiff_y : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) y) (f q) := mdifferentiableAt_extChartAt hfq_chart
+    have hmdiff_f : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) f q :=
+      hf.mdifferentiableAt (by decide)
+    have hmdiff_symm_within : MDifferentiableWithinAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) x).symm (Set.range (𝓘(ℂ, ℂ))) z :=
+      mdifferentiableWithinAt_extChartAt_symm hz
+    have hmdiff_symm : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) x).symm z := by
+      have hrange : (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+        ModelWithCorners.range_eq_univ _
+      rw [← mdifferentiableWithinAt_univ, ← hrange]
+      exact hmdiff_symm_within
+    have hchain1 : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z =
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) f q).comp
+          (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x).symm z) :=
+      mfderiv_comp_of_eq hmdiff_f hmdiff_symm hq_def.symm
+    have hmdiff_fsymm : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z :=
+      MDifferentiableAt.comp z
+        (show MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) f
+            ((extChartAt 𝓘(ℂ, ℂ) x).symm z) from hq_def ▸ hmdiff_f)
+        hmdiff_symm
+    have hchain2 : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        ((extChartAt 𝓘(ℂ, ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z =
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y) (f q)).comp
+          (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z) :=
+      mfderiv_comp_of_eq hmdiff_y hmdiff_fsymm
+        (by rw [Function.comp_apply, ← hq_def])
+    have hmfd_y :
+        (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+            y).continuousLinearMapAt ℂ (f q) =
+          mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y) (f q) :=
+      TangentBundle.continuousLinearMapAt_trivializationAt hfq_chart
+    have hsymm_x :
+        (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) x).symmL ℂ q =
+          mfderivWithin 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+            (extChartAt 𝓘(ℂ, ℂ) x).symm (Set.range (𝓘(ℂ, ℂ)))
+            ((extChartAt 𝓘(ℂ, ℂ) x) q) :=
+      TangentBundle.symmL_trivializationAt hqx_chart
+    have hsymm_mfderiv :
+        mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x).symm z =
+          mfderivWithin 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+            (extChartAt 𝓘(ℂ, ℂ) x).symm (Set.range (𝓘(ℂ, ℂ))) z := by
+      have hrange : (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+        ModelWithCorners.range_eq_univ _
+      rw [hrange, mfderivWithin_univ]
+    have hcoe : ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+            y).continuousLinearEquivAt ℂ (f q) hfq_base :
+          TangentSpace 𝓘(ℂ, ℂ) (f q) →L[ℂ] ℂ) =
+        (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+            y).continuousLinearMapAt ℂ (f q) :=
+      Bundle.Trivialization.coe_continuousLinearEquivAt_eq'
+        (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y)) y) hfq_base
+    rw [hcoe, hmfd_y, hw_def, hsymm_x, hxq, ← hsymm_mfderiv]
+    have hcomp : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        ((extChartAt 𝓘(ℂ, ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z =
+        (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y) (f q)).comp
+          ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) f q).comp
+            (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x).symm z)) := by
+      rw [hchain2, hchain1]
+    have hfd : fderiv ℂ
+        ((extChartAt 𝓘(ℂ, ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z =
+        mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+          ((extChartAt 𝓘(ℂ, ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z :=
+      mfderiv_eq_fderiv.symm
+    rw [hfd, hcomp]
+    rfl
+  -- Step 5: identify the scalar coefficient with `form.coeff` at `y`.
+  have hRHS : form.coeff y ((extChartAt 𝓘(ℂ) y) (f q)) =
+      Jacobians.Vendor.Kirov.Montel.localRep αY y (f q) := by
+    conv_lhs => rw [show form = Jacobians.Bridge.BridgeFormEquiv.inverseForm αY
+      from (Jacobians.Bridge.BridgeFormEquiv.inverseForm_bridgeForm form).symm]
+    have h1 : (Jacobians.Bridge.BridgeFormEquiv.inverseForm αY).coeff y
+        ((extChartAt 𝓘(ℂ) y) (f q)) =
+        Jacobians.Bridge.BridgeFormEquiv.sectionCoeff αY y
+          ((extChartAt 𝓘(ℂ) y) (f q)) := rfl
+    rw [h1, Jacobians.Bridge.BridgeFormEquiv.sectionCoeff_apply_of_mem αY
+      ((extChartAt 𝓘(ℂ) y).map_source hfq), (extChartAt 𝓘(ℂ) y).left_inv hfq]
+  calc (pullbackOneForm f hf form).coeff x z
+      = Jacobians.Vendor.Kirov.Montel.localRep β x q := hLHS
+    _ = αY.toFun (f q) w := hβ_localRep
+    _ = Jacobians.Vendor.Kirov.Montel.localRep αY y (f q) *
+          ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := Y))
+              y).continuousLinearEquivAt ℂ (f q) hfq_base :
+            TangentSpace 𝓘(ℂ, ℂ) (f q) →L[ℂ] ℂ) w := hsplit
+    _ = form.coeff y ((extChartAt 𝓘(ℂ) y) (f q)) *
+          fderiv ℂ ((extChartAt 𝓘(ℂ) y) ∘ f ∘ (extChartAt 𝓘(ℂ) x).symm) z 1 := by
+        rw [hA, hRHS]
 
 /-- Pushforward (trace) of 1-forms preserves identity. Conjugate of the
 port's `traceFormTotal_id` across `bridgeKDFormEquiv` (issue #27). -/
@@ -1311,14 +1472,24 @@ noncomputable def pullbackAmbientLinear {X : Type u} [TopologicalSpace X]
   eX.toLinearMap.comp
     ((pushforwardOneForm f hf).dualMap.comp eY.symm.toLinearMap)
 
-/-- **Axiom.** Lattice preservation: the pushforward ambient map sends
-the period lattice of `X` into the period lattice of `Y`.
+/-- **Theorem (derived 2026-06-11, issue #30).** Lattice preservation: the
+pushforward ambient map sends the period lattice of `X` into the period
+lattice of `Y`.
 
-Classical content: the period-map naturality `∫_{f_*γ} ω_Y = ∫_γ
-(pullbackOneForm f) ω_Y`, combined with the fact that `f_*` sends
-integer cycles to integer cycles. Retires to a theorem once
-`pushforwardH1` + path-integral naturality land. -/
-axiom AX_pushforwardAmbient_preserves_lattice {X : Type u}
+Formerly an axiom; the classical content `∫_{f_*γ} ω_Y = ∫_γ f^*ω_Y` is now
+the developing-value naturality engine. Proof route (representative-loop
+induction, KIROV_ROUTE_IDEAS item 7): a lattice vector is the period vector
+of an `H1` class; every `H1` class is the class of a representative loop
+`γ`; the pushforward ambient map turns its period vector into the vector of
+`γ`-integrals of the pulled-back basis forms (dual-basis algebra);
+developing-value naturality (`developingValue_comp_of_isPullbackCoeffRel`
+fed by `pullbackOneForm_isPullbackCoeffRel`) identifies these with the
+period vector of the image loop `f ∘ γ`; and the period vector of any
+continuous loop lies in the target lattice at any basepoint
+(`devVal_loop_mem_periodLatticeInBasis_any`: `H1` developing functional +
+path conjugation). `f_*` sending integer cycles to integer cycles is
+implicit: the image class is the class of the honest loop `f ∘ γ`. -/
+theorem AX_pushforwardAmbient_preserves_lattice {X : Type u}
     [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
     [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
@@ -1328,7 +1499,86 @@ axiom AX_pushforwardAmbient_preserves_lattice {X : Type u}
               (jacobianBasis X)).toAddSubgroup,
       (pushforwardAmbientLinear f hf) v ∈
         (periodLatticeInBasis Y (Classical.arbitrary Y)
-          (jacobianBasis Y)).toAddSubgroup
+          (jacobianBasis Y)).toAddSubgroup := by
+  classical
+  intro v hv
+  rw [Submodule.mem_toAddSubgroup] at hv ⊢
+  obtain ⟨γh, hγh⟩ := hv
+  -- Every `H1` class is the class of a representative loop `γp`.
+  obtain ⟨g, hg⟩ : ∃ g : FundamentalGroup X (Classical.arbitrary X),
+      Additive.ofMul (Abelianization.of g) = γh := by
+    obtain ⟨g, hg⟩ := Quot.exists_rep (Additive.toMul γh)
+    exact ⟨g, by simpa using congrArg Additive.ofMul hg⟩
+  obtain ⟨γp, hγp⟩ := Quotient.exists_rep (FundamentalGroup.toPath g)
+  -- The image vector is the developing-value period vector of `f ∘ γp`.
+  have hcoord : ∀ j, pushforwardAmbientLinear f hf v j =
+      developingValue (f (Classical.arbitrary X)) (jacobianBasis Y j)
+        ((γp.map hf.continuous :
+            Path (f (Classical.arbitrary X)) (f (Classical.arbitrary X))) :
+          C(unitInterval, Y)) := by
+    intro j
+    have h1 : pushforwardAmbientLinear f hf v j =
+        ((jacobianBasis X).dualBasis.equivFun.symm v)
+          (pullbackOneForm f hf (jacobianBasis Y j)) := by
+      simp [pushforwardAmbientLinear, Module.Basis.dualBasis_equivFun,
+        LinearMap.dualMap_apply]
+    have h2 : ((jacobianBasis X).dualBasis.equivFun.symm)
+        (periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) γh) =
+        RiemannSurface.periodMap X (Classical.arbitrary X) γh := by
+      have hPM : periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) γh =
+          (jacobianBasis X).dualBasis.equivFun
+            (RiemannSurface.periodMap X (Classical.arbitrary X) γh) := rfl
+      rw [hPM, LinearEquiv.symm_apply_apply]
+    have h3 : RiemannSurface.periodMap X (Classical.arbitrary X) γh
+        (pullbackOneForm f hf (jacobianBasis Y j)) =
+        developingValue (Classical.arbitrary X)
+          (pullbackOneForm f hf (jacobianBasis Y j))
+          ((γp : Path (Classical.arbitrary X) (Classical.arbitrary X)) :
+            C(unitInterval, X)) := by
+      have hPM : RiemannSurface.periodMap X (Classical.arbitrary X) γh =
+          loopIntegralToH1 (Classical.arbitrary X) γh := rfl
+      rw [hPM, ← loopDevValH1Hom_eq_loopIntegralToH1_apply, ← hg,
+        loopDevValH1Hom_of]
+      show loopDevValQuotient (Classical.arbitrary X)
+          (pullbackOneForm f hf (jacobianBasis Y j))
+          (FundamentalGroup.toPath g) = _
+      rw [← hγp]
+      rfl
+    have h4 : developingValue (Classical.arbitrary X)
+        (pullbackOneForm f hf (jacobianBasis Y j))
+        ((γp : Path (Classical.arbitrary X) (Classical.arbitrary X)) :
+          C(unitInterval, X)) =
+        developingValue (f (Classical.arbitrary X)) (jacobianBasis Y j)
+          ((γp.map hf.continuous :
+              Path (f (Classical.arbitrary X)) (f (Classical.arbitrary X))) :
+            C(unitInterval, Y)) := by
+      rw [developingValue_comp_of_isPullbackCoeffRel hf
+        (pullbackOneForm_isPullbackCoeffRel f hf (jacobianBasis Y j))
+        (Classical.arbitrary X) (f (Classical.arbitrary X))
+        ((γp : Path (Classical.arbitrary X) (Classical.arbitrary X)) :
+          C(unitInterval, X))]
+      congr 1
+    calc pushforwardAmbientLinear f hf v j
+        = ((jacobianBasis X).dualBasis.equivFun.symm v)
+            (pullbackOneForm f hf (jacobianBasis Y j)) := h1
+      _ = RiemannSurface.periodMap X (Classical.arbitrary X) γh
+            (pullbackOneForm f hf (jacobianBasis Y j)) := by rw [← hγh, h2]
+      _ = developingValue (Classical.arbitrary X)
+            (pullbackOneForm f hf (jacobianBasis Y j))
+            ((γp : Path (Classical.arbitrary X) (Classical.arbitrary X)) :
+              C(unitInterval, X)) := h3
+      _ = developingValue (f (Classical.arbitrary X)) (jacobianBasis Y j)
+            ((γp.map hf.continuous :
+                Path (f (Classical.arbitrary X)) (f (Classical.arbitrary X))) :
+              C(unitInterval, Y)) := h4
+  have hfun : pushforwardAmbientLinear f hf v = fun j =>
+      developingValue (f (Classical.arbitrary X)) (jacobianBasis Y j)
+        ((γp.map hf.continuous :
+            Path (f (Classical.arbitrary X)) (f (Classical.arbitrary X))) :
+          C(unitInterval, Y)) := funext hcoord
+  rw [hfun]
+  exact devVal_loop_mem_periodLatticeInBasis_any (Classical.arbitrary Y)
+    (jacobianBasis Y) (γp.map hf.continuous)
 
 /-- **Axiom.** Lattice preservation for pullback. Symmetric to
 `AX_pushforwardAmbient_preserves_lattice`. -/
