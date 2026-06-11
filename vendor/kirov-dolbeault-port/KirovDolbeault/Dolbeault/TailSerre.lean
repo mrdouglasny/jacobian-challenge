@@ -828,7 +828,89 @@ theorem lDim_le_h1TailDim (D : Divisor X) :
   haveI := finiteDimensional_H1Tail (X := X) D
   exact SerreDuality.finrank_le_of_injective_to_dual (P.pairingL D) (P.pairingL_injective D)
 
+/-! ## Part E — tail Serre duality under the surjectivity input, and `TailRiemannRoch` -/
+
+/-- **The surjectivity half of tail Serre duality** (Miranda VI.3.10: recovery + growth
+pigeonhole) — the remaining mathematical input of the tail tower beyond the frame itself
+(`docs/planning/TAILRR_BLOCKER.md`). -/
+def PairingSurjective : Prop :=
+  ∀ D : Divisor X, Function.Surjective (P.pairingL D)
+
+/-- **Tail Serre duality** under the surjectivity input: `h¹_t(D) = l(K − D)`. -/
+theorem h1TailDim_eq_lDim_of_surjective (hs : P.PairingSurjective) (D : Divisor X) :
+    h1TailDim (X := X) D = lDim (X := X) (P.data.K - D) := by
+  classical
+  haveI := finiteDimensional_H1Tail (X := X) D
+  haveI hFD : FiniteDimensional ℂ (lSysModule (X := X) (P.data.K - D)) :=
+    ((chartDiskCover (X := X)).toFiniteCover.globalSectionsEquivQuot
+      (D := P.data.K - D)).symm.finiteDimensional
+  refine le_antisymm ?_ (P.lDim_le_h1TailDim D)
+  have hrn := LinearMap.finrank_range_add_finrank_ker (P.pairingL D)
+  have hrange : finrank ℂ ↥(LinearMap.range (P.pairingL D))
+      = finrank ℂ (Module.Dual ℂ (H1Tail (X := X) D)) := by
+    rw [LinearMap.range_eq_top.mpr (hs D), finrank_top]
+  have hdual : finrank ℂ (Module.Dual ℂ (H1Tail (X := X) D))
+      = h1TailDim (X := X) D := Subspace.dual_finrank_eq
+  have hsrc : finrank ℂ (lSysModule (X := X) (P.data.K - D))
+      = lDim (X := X) (P.data.K - D) := rfl
+  omega
+
+/-- `g_t = l(K)` under the surjectivity input (duality at `D = 0`). -/
+theorem tailGenus_eq_lDim_K (hs : P.PairingSurjective) :
+    tailGenus X = lDim (X := X) P.data.K := by
+  rw [show tailGenus X = h1TailDim (X := X) (0 : Divisor X) from rfl,
+    P.h1TailDim_eq_lDim_of_surjective hs 0, sub_zero]
+
+/-- `h¹_t(K) = 1` under the surjectivity input (duality at `D = K`). -/
+theorem h1TailDim_K_eq_one (hs : P.PairingSurjective) :
+    h1TailDim (X := X) P.data.K = 1 := by
+  rw [P.h1TailDim_eq_lDim_of_surjective hs P.data.K, sub_self]
+  exact lDim_zero_eq_one
+
+/-- `deg K = 2g_t − 2` under the surjectivity input (tail RR-I at `K`). -/
+theorem deg_K_eq (hs : P.PairingSurjective) :
+    Divisor.deg X P.data.K = 2 * (tailGenus X : ℤ) - 2 := by
+  have hRR := tail_riemannRoch_I (X := X) P.data.K
+  rw [P.h1TailDim_K_eq_one hs] at hRR
+  have hlK : lDim (X := X) P.data.K = tailGenus X := (P.tailGenus_eq_lDim_K hs).symm
+  rw [hlK] at hRR
+  omega
+
+/-- **`g_t = kirovGenus`** under the surjectivity input: the tail genus is the analytic
+genus (duality at `0` + the §17.4 canonical iso `l(K) = kirovGenus`). -/
+theorem tailGenus_eq_kirovGenus (hs : P.PairingSurjective) :
+    tailGenus X = kirovGenus X := by
+  rw [P.tailGenus_eq_lDim_K hs]
+  exact P.data.hKgenus (le_of_eq omegaDim_zero_eq_genus)
+
+/-- **`TailRiemannRoch` from the tail tower** — the headline conditional assembly: a tail
+pair frame (slots + the pair-frame residue theorem) together with the surjectivity half of
+the tail duality pairing yields the named large-degree Riemann–Roch input of
+`TailGenusTarget.lean` verbatim. -/
+theorem tailRiemannRoch_of_pairingSurjective (hs : P.PairingSurjective) :
+    TailRiemannRoch X := by
+  intro A hAeff hAdeg
+  have hRR := tail_riemannRoch_I (X := X) A
+  have hgg := P.tailGenus_eq_kirovGenus hs
+  have hdK := P.deg_K_eq hs
+  have h1A : h1TailDim (X := X) A = lDim (X := X) (P.data.K - A) :=
+    P.h1TailDim_eq_lDim_of_surjective hs A
+  have hneg : Divisor.deg X (P.data.K - A) < 0 := by
+    rw [Divisor.deg_sub, hdK]
+    omega
+  have h0 : lDim (X := X) (P.data.K - A) = 0 := lDim_eq_zero_of_deg_neg _ hneg
+  rw [h1A, h0] at hRR
+  omega
+
 end TailPairFrame
+
+/-- **The keystone-facing corollary**: with a tail pair frame and the surjectivity half, the
+canonical-cover arithmetic genus identity `h¹(𝒪) = kirovGenus` of `TailGenusTarget.lean` — the
+exact port-side fact the Layer-3 flip consumes — becomes a theorem. -/
+theorem h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame (P : TailPairFrame X)
+    (hs : P.PairingSurjective) :
+    (chartDiskCover (X := X)).toFiniteCover.h1Dim (0 : Divisor X) = kirovGenus X :=
+  h1Dim_zero_chartDiskCover_eq_kirovGenus (P.tailRiemannRoch_of_pairingSurjective hs)
 
 end Dolbeault
 
