@@ -242,6 +242,113 @@ theorem frameFibreResidueSum_eq_filter (data : CanonicalForm17Data X)
     · rintro ⟨ha_mem, ha_fib⟩; exact hxs_surj a ha_mem ha_fib
   rw [← hImg, Finset.sum_image (fun i _ j _ h => hxs_inj h)]
 
+/-! ### The `ω₀ = df` value-trace collapse over an unramified fibre
+
+For the canonical frame `ω₀ = df` and the cover `f` ITSELF, the per-sheet pushforward of the
+atom's integrand collapses to the **plain value** of `F` along the sheet: the sheet is a
+section of `f̂`, so the change-of-variables Jacobian `(f̂ ∘ sheet)' = 1` exactly cancels the
+frame coefficient.  The trace coefficient of `frameFibreTrace` is therefore germ-equal at the
+base to the PLAIN VALUE TRACE `w ↦ ∑ᵢ F(sheet i w)` — the datum the residual wall asks for. -/
+
+/-- **The per-sheet `df` collapse**: along the `i`-th sheet, the pushforward of the atom's
+integrand is the plain value read `w ↦ F(sheet i w)` (germ at the base). -/
+theorem frameFibreTrace_summand_df (data : CanonicalForm17Data X)
+    (F f : MeromorphicFunction X) (hω : data.ω₀ = differentialForm f) {b : ℂ}
+    (D : FibreRegularData F.toFun f b) (i : D.ι) :
+    (fun w => (frameFibreTrace data F f D).coeff i ((frameFibreTrace data F f D).sheet i w)
+        * deriv ((frameFibreTrace data F f D).sheet i) w)
+      =ᶠ[𝓝[≠] b]
+      fun w => F.toFun ((chartAt ℂ (D.xs i)).symm ((frameFibreTrace data F f D).sheet i w)) := by
+  classical
+  set x : X := D.xs i with hx
+  set ch := chartAt (H := ℂ) x with hch
+  set pre : ℂ := ch x with hpre
+  set s : ℂ → ℂ := (frameFibreTrace data F f D).sheet i with hs
+  set φ : ℂ → ℂ := fun z => f.holoRepr (ch.symm z) with hφ
+  -- The sheet's defining properties (the planar section germ).
+  have hspec := Classical.choose_spec (exists_planar_section (D.hg_an i) (D.hg_deriv i)
+    (D.gval' f i))
+  have hs_an : AnalyticAt ℂ s b := hspec.1
+  have hs_b : s b = pre := hspec.2.1
+  have hs' : deriv s b ≠ 0 := hspec.2.2.1
+  have hrinv : ∀ᶠ w in 𝓝 b, φ (s w) = w := hspec.2.2.2
+  have hpre_tgt : pre ∈ ch.target := ch.map_source (mem_chart_source ℂ x)
+  -- The sheet enters the punctured neighbourhood of `pre` (local injectivity from `s' ≠ 0`).
+  have hne : ∀ᶠ w in 𝓝[≠] b, s w ≠ pre := by
+    have hg_an : AnalyticAt ℂ (fun w => s w - pre) b := hs_an.sub analyticAt_const
+    rcases hg_an.eventually_eq_zero_or_eventually_ne_zero with hcase | hcase
+    · exfalso
+      have hsconst : s =ᶠ[𝓝 b] fun _ => pre := by
+        filter_upwards [hcase] with w hw
+        exact sub_eq_zero.mp hw
+      have hzero : deriv s b = 0 := by
+        rw [Filter.EventuallyEq.deriv_eq hsconst]
+        exact deriv_const b pre
+      exact hs' hzero
+    · filter_upwards [hcase] with w hw
+      exact sub_ne_zero.mp hw
+  have hcont : Tendsto s (𝓝[≠] b) (𝓝 pre) := by
+    have h1 := hs_an.continuousAt.tendsto
+    rw [hs_b] at h1
+    exact h1.mono_left nhdsWithin_le_nhds
+  have htend : Tendsto s (𝓝[≠] b) (𝓝[≠] pre) := by
+    rw [tendsto_nhdsWithin_iff]
+    exact ⟨hcont, hne.mono fun w hw => Set.mem_compl_singleton_iff.mpr hw⟩
+  -- The frame coefficient reads the chart derivative of `f` along the sheet.
+  have hform : ∀ᶠ w in 𝓝[≠] b,
+      deriv (f.toFun ∘ ch.symm) (s w) = formCoeff (differentialSection f) x (s w) :=
+    htend.eventually (formCoeff_differentialSection_eventuallyEq f x)
+  -- The chart derivative of `f.toFun` agrees with that of the junk-free `φ` near `pre`.
+  have hderiv_eq : ∀ᶠ w in 𝓝[≠] b,
+      deriv (f.holoRepr ∘ ch.symm) (s w) = deriv (f.toFun ∘ ch.symm) (s w) :=
+    htend.eventually (deriv_eventuallyEq_punctured
+      (Jacobians.ProperMapDegreeSheets.holoRepr_pullback_eventuallyEq_toFun f x hpre_tgt))
+  -- The section Jacobian: `(φ ∘ s)' = 1` near the base.
+  have hone : ∀ᶠ w in 𝓝 b, deriv (fun w => φ (s w)) w = 1 := by
+    have hid : (fun w => φ (s w)) =ᶠ[𝓝 b] id := by
+      filter_upwards [hrinv] with w hw
+      exact hw
+    filter_upwards [hid.deriv] with w hw
+    rw [hw, deriv_id]
+  -- The chain rule splits the section Jacobian.
+  have hφs_ev : ∀ᶠ w in 𝓝[≠] b, AnalyticAt ℂ φ (s w) :=
+    htend.eventually ((D.hg_an i).eventually_analyticAt.filter_mono nhdsWithin_le_nhds)
+  have hs_ev : ∀ᶠ w in 𝓝 b, AnalyticAt ℂ s w := hs_an.eventually_analyticAt
+  have hchain : ∀ᶠ w in 𝓝[≠] b, deriv φ (s w) * deriv s w = 1 := by
+    filter_upwards [hφs_ev, hs_ev.filter_mono nhdsWithin_le_nhds,
+      hone.filter_mono nhdsWithin_le_nhds] with w h1 h2 h3
+    have hcomp : deriv (φ ∘ s) w = deriv φ (s w) * deriv s w :=
+      deriv_comp w h1.differentiableAt h2.differentiableAt
+    rw [show φ ∘ s = fun w => φ (s w) from rfl] at hcomp
+    rw [← hcomp]
+    exact h3
+  -- Assemble the per-sheet collapse.
+  filter_upwards [hform, hderiv_eq, hchain] with w h1 h2 h3
+  show F.toFun (ch.symm (s w)) * formCoeff data.ω₀.toFun x (s w) * deriv s w
+    = F.toFun (ch.symm (s w))
+  have hcoeff : formCoeff data.ω₀.toFun x (s w)
+      = deriv (f.holoRepr ∘ ch.symm) (s w) := by
+    rw [hω]
+    rw [show formCoeff (differentialForm f).toFun x (s w)
+        = formCoeff (differentialSection f) x (s w) from rfl, ← h1, ← h2]
+  rw [hcoeff, mul_assoc, show deriv (f.holoRepr ∘ ch.symm) = deriv φ from rfl, h3, mul_one]
+
+/-- **The `df` value-trace collapse over the fibre**: the trace coefficient of the frame fibre
+trace is germ-equal at the base to the plain value trace `w ↦ ∑ᵢ F(sheet i w)`. -/
+theorem frameFibreTrace_traceCoeff_df (data : CanonicalForm17Data X)
+    (F f : MeromorphicFunction X) (hω : data.ω₀ = differentialForm f) {b : ℂ}
+    (D : FibreRegularData F.toFun f b) :
+    (frameFibreTrace data F f D).traceCoeff =ᶠ[𝓝[≠] b]
+      fun w => ∑ i, F.toFun ((chartAt ℂ (D.xs i)).symm
+        ((frameFibreTrace data F f D).sheet i w)) := by
+  have hall : ∀ᶠ w in 𝓝[≠] b, ∀ i : D.ι,
+      (frameFibreTrace data F f D).coeff i ((frameFibreTrace data F f D).sheet i w)
+          * deriv ((frameFibreTrace data F f D).sheet i) w
+        = F.toFun ((chartAt ℂ (D.xs i)).symm ((frameFibreTrace data F f D).sheet i w)) :=
+    Filter.eventually_all.mpr fun i => frameFibreTrace_summand_df data F f hω D i
+  filter_upwards [hall] with w hw
+  exact Finset.sum_congr rfl fun i _ => hw i
+
 /-! ## The one-variable rationality reduction
 
 `Miranda §VIII.3 steps 2–3, proven`: from a coefficient `T : ℂ → ℂ` analytic off a finite
