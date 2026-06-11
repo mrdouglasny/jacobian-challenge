@@ -737,6 +737,284 @@ theorem cup_component_eq [DecidableEq 𝔇.toFiniteCover.ι] {f : MeromorphicFun
 
 end DeepTestData
 
+/-! ## Part 4 — W3/W4: the cutoff, the repaired presentation, and the engine application
+
+The marked point `b` may lie in several cover sets (`K b = 0`).  The level-`K+b` extraction
+`h⁰ := vanishFn (f·ĉ)` has a simple pole at `b` in every star chart; the global cutoff
+scalar `H := θ·h⁰_{j₀}` (W3) carries the common principal part, and the repaired
+presentation `h̃_i := repairAtX b (h⁰_i − H)` (W4) is smooth at `b`, presents the same
+cocycle, and feeds the W1 engine
+(`resFunctional_eq_neg_residue_of_global_correction`). -/
+
+/-- The marked-point support bookkeeping: with `K b = 0`, the `(K+b)`-points are the
+K-points plus `b` itself. -/
+theorem mem_posSupp_add_single_iff {K : Divisor X} (hKb : K b = 0) {x : X} :
+    x ∈ posSupp (K + Finsupp.single b 1) ↔ x = b ∨ x ∈ posSupp K := by
+  rw [mem_posSupp_iff, mem_posSupp_iff]
+  by_cases hx : x = b
+  · subst hx
+    rw [Finsupp.add_apply, Finsupp.single_eq_same, hKb]
+    simp
+  · rw [Finsupp.add_apply, show (Finsupp.single b 1 : Divisor X) x = 0 from
+      Finsupp.single_eq_of_ne hx, add_zero]
+    simp [hx]
+
+/-- **X-side single-point limit repair**: replace the value at `b` by the punctured limit. -/
+noncomputable def repairAtX (b : X) (F : X → ℂ) : X → ℂ :=
+  fun x => if x = b then limUnder (𝓝[≠] b) F else F x
+
+theorem repairAtX_apply_ne {F : X → ℂ} {y : X} (hy : y ≠ b) : repairAtX b F y = F y :=
+  if_neg hy
+
+@[simp] theorem repairAtX_apply_self {F : X → ℂ} :
+    repairAtX b F b = limUnder (𝓝[≠] b) F := if_pos rfl
+
+theorem repairAtX_eventuallyEq_off {F : X → ℂ} {x : X} (hx : x ≠ b) :
+    repairAtX b F =ᶠ[𝓝 x] F := by
+  filter_upwards [isOpen_compl_singleton.mem_nhds
+    (by simpa using hx : x ∈ ({b}ᶜ : Set X))] with y hy
+  exact repairAtX_apply_ne (by simpa using hy)
+
+/-- X-side punctured eventual equality transfers to the ambient chart reads. -/
+theorem read_eventuallyEq_of_eventuallyEq_nhdsNE {F G : X → ℂ} (h : F =ᶠ[𝓝[≠] b] G) :
+    (F ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝[≠] (βpt b)] (G ∘ (chartAt (H := ℂ) b).symm) := by
+  have hbsrc : b ∈ (chartAt (H := ℂ) b).source := mem_chart_source ℂ b
+  have hzt := (chartAt (H := ℂ) b).map_source hbsrc
+  have hsymtend : Tendsto (chartAt (H := ℂ) b).symm (𝓝[≠] (βpt b)) (𝓝[≠] b) := by
+    have h2 := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := βpt b) (by simpa using hzt)
+    rwa [(chartAt (H := ℂ) b).left_inv hbsrc] at h2
+  filter_upwards [hsymtend.eventually h] with ζ hζ
+  exact hζ
+
+/-- **X-side limit from a chart-side punctured analytic extension.** -/
+theorem tendsto_of_read_extension {F : X → ℂ} {q : ℂ → ℂ}
+    (hq : AnalyticAt ℂ q (βpt b))
+    (hev : (F ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝[≠] (βpt b)] q) :
+    Tendsto F (𝓝[≠] b) (𝓝 (q (βpt b))) := by
+  have hbsrc : b ∈ (chartAt (H := ℂ) b).source := mem_chart_source ℂ b
+  have hfwd : Tendsto (chartAt (H := ℂ) b) (𝓝[≠] b) (𝓝[≠] (βpt b)) :=
+    (chartAt (H := ℂ) b).tendsto_nhdsNE hbsrc
+  have h1 : Tendsto (fun x => q ((chartAt (H := ℂ) b) x)) (𝓝[≠] b) (𝓝 (q (βpt b))) :=
+    hq.continuousAt.tendsto.comp (hfwd.mono_right nhdsWithin_le_nhds)
+  refine h1.congr' ?_
+  have hFev : (fun x => q ((chartAt (H := ℂ) b) x)) =ᶠ[𝓝[≠] b] F := by
+    filter_upwards [hfwd.eventually hev, eventually_nhdsWithin_of_eventually_nhds
+        ((chartAt (H := ℂ) b).open_source.mem_nhds hbsrc)] with y h1' h2'
+    have h3 : (F ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) y) = F y := by
+      rw [Function.comp_apply, (chartAt (H := ℂ) b).left_inv h2']
+    rw [← h3]
+    exact h1'.symm
+  exact hFev
+
+/-- **The repaired read agrees with the analytic extension on a FULL neighbourhood** of the
+ambient chart point (punctured agreement + the limit value at `b`). -/
+theorem repairAtX_read_eventuallyEq {F : X → ℂ} {q : ℂ → ℂ}
+    (hq : AnalyticAt ℂ q (βpt b))
+    (hev : (F ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝[≠] (βpt b)] q) :
+    (repairAtX b F ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝 (βpt b)] q := by
+  haveI := nhdsNE_neBot b
+  have hlim : limUnder (𝓝[≠] b) F = q (βpt b) :=
+    (tendsto_of_read_extension hq hev).limUnder_eq
+  have hbsrc : b ∈ (chartAt (H := ℂ) b).source := mem_chart_source ℂ b
+  have hzt : βpt b ∈ (chartAt (H := ℂ) b).target := (chartAt (H := ℂ) b).map_source hbsrc
+  rw [EventuallyEq, eventually_nhdsWithin_iff] at hev
+  filter_upwards [hev, (chartAt (H := ℂ) b).open_target.mem_nhds hzt] with ζ h1 h2
+  by_cases hζ : ζ = βpt b
+  · subst hζ
+    show repairAtX b F ((chartAt (H := ℂ) b).symm (βpt b)) = q (βpt b)
+    rw [(chartAt (H := ℂ) b).left_inv hbsrc, repairAtX_apply_self, hlim]
+  · have hsne : (chartAt (H := ℂ) b).symm ζ ≠ b := by
+      intro hc
+      apply hζ
+      have h3 := congrArg (chartAt (H := ℂ) b) hc
+      rwa [(chartAt (H := ℂ) b).right_inv h2] at h3
+    show repairAtX b F ((chartAt (H := ℂ) b).symm ζ) = q ζ
+    rw [repairAtX_apply_ne hsne]
+    exact h1 (by simpa using hζ)
+
+section Engine
+
+variable [Nonempty X] [DecidableEq 𝔇.toFiniteCover.ι] {K : Divisor X}
+
+/-- **The presentation identity off the positive locus**: the level-`K` cocycle extraction
+agrees pointwise with the coboundary of a level-`K'` cochain extraction at every overlap
+point where `K'` is non-positive (the localized form of
+`isCoboundaryOn_cocycleFn_vanishFn`, no pole separation at level `K'` required). -/
+theorem cocycleFn_eq_vanishFn_sub_at {K' : Divisor X} (hsep : SeparatesPoles 𝔇 K)
+    (z : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    {F0 : 𝔇.toFiniteCover.toFiniteFamily.Cochain0}
+    (hF0 : F0 ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 K')
+    (hcb : (z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 F0)
+    {i j : 𝔇.toFiniteCover.ι} {x : X} (hx : x ∈ (𝔇.U i ⊓ 𝔇.U j : Opens X))
+    (hxK' : K' x ≤ 0) :
+    cocycleFn 𝔇 hsep z i j x = vanishFn F0 hF0 j x - vanishFn F0 hF0 i x := by
+  by_cases h : i = j
+  · subst h
+    rw [cocycleFn_diag]
+    simp
+  · set V : Opens X := (𝔇.U i ⊓ 𝔇.U j) ⊓ offPos K' with hVdef
+    have hxV : x ∈ V := ⟨hx, mem_offPos_iff.mpr hxK'⟩
+    have hVij : V ≤ 𝔇.U i ⊓ 𝔇.U j := inf_le_left
+    have hle_i : V ≤ 𝔇.U i ⊓ offPos K' :=
+      le_inf (inf_le_left.trans inf_le_left) inf_le_right
+    have hle_j : V ≤ 𝔇.U j ⊓ offPos K' :=
+      le_inf (inf_le_left.trans inf_le_right) inf_le_right
+    have hxi : x ∈ (𝔇.U i ⊓ offPos K' : Opens X) := hle_i hxV
+    have hxj : x ∈ (𝔇.U j ⊓ offPos K' : Opens X) := hle_j hxV
+    refine eq_at_of_toGerm_eq (V := V) ?_ hxV (continuousAt_cocycleFn 𝔇 hsep z hx)
+      (((holoFn_contMDiffAt (restrict_mem_omegaDGerm_zero hF0 j) hxj).continuousAt).sub
+        ((holoFn_contMDiffAt (restrict_mem_omegaDGerm_zero hF0 i) hxi).continuousAt))
+    show toGerm V (fun v => cocycleFn 𝔇 hsep z i j v.1)
+        = toGerm V ((fun v : ↥V => vanishFn F0 hF0 j v.1) - fun v => vanishFn F0 hF0 i v.1)
+    have hj' : toGerm V (fun v => vanishFn F0 hF0 j v.1)
+        = rawRestrictG (hVij.trans inf_le_right) (F0 j) := by
+      have h1 : rawRestrictG hle_j
+            (toGerm (𝔇.U j ⊓ offPos K') (fun v => vanishFn F0 hF0 j v.1))
+          = toGerm V (fun v => vanishFn F0 hF0 j v.1) := rfl
+      rw [← h1, vanishFn, toGerm_holoFn (restrict_mem_omegaDGerm_zero hF0 j),
+        FiniteFamily.rawRestrictG_comp_apply]
+    have hi' : toGerm V (fun v => vanishFn F0 hF0 i v.1)
+        = rawRestrictG (hVij.trans inf_le_left) (F0 i) := by
+      have h1 : rawRestrictG hle_i
+            (toGerm (𝔇.U i ⊓ offPos K') (fun v => vanishFn F0 hF0 i v.1))
+          = toGerm V (fun v => vanishFn F0 hF0 i v.1) := rfl
+      rw [← h1, vanishFn, toGerm_holoFn (restrict_mem_omegaDGerm_zero hF0 i),
+        FiniteFamily.rawRestrictG_comp_apply]
+    rw [map_sub, hj', hi', toGerm_cocycleFn_restrict 𝔇 hsep z h hVij, hcb]
+    have hδ : 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 F0 (i, j)
+        = rawRestrictG inf_le_right (F0 j) - rawRestrictG inf_le_left (F0 i) := by
+      simp only [FiniteFamily.cechDelta0, LinearMap.pi_apply, LinearMap.sub_apply,
+        LinearMap.comp_apply, LinearMap.proj_apply]
+    rw [hδ, map_sub, FiniteFamily.rawRestrictG_comp_apply,
+      FiniteFamily.rawRestrictG_comp_apply]
+
+namespace DeepTestData
+
+variable {E : Divisor X} {m : ℤ} (dd : DeepTestData 𝔇 E b m)
+
+/-- **The boundary read-back of the deep cup extraction** at a star chart: near the marked
+point, the level-`K+b` extraction agrees with the honest product representative `f·c_i`. -/
+theorem vanishFn_eventuallyEq_Gext_cupRep {f : MeromorphicFunction X}
+    {n : ℤ} (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b)
+    {i : 𝔇.toFiniteCover.ι} (hi : b ∈ (𝔇.U i : Set X))
+    (hF0 : cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f dd.cochain
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1)) :
+    ∀ᶠ x in 𝓝[≠] b,
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f dd.cochain) hF0 i x
+        = Gext ((dd.toTestCocycleData hi).cupRep f) x := by
+  classical
+  set td := dd.toTestCocycleData hi with htddef
+  set W : Opens X := 𝔇.U i ⊓ offPos (K + Finsupp.single b 1) with hWdef
+  set F : ↥W → ℂ := td.cupRep f ∘ openIncl (inf_le_left : W ≤ 𝔇.U i) with hFdef
+  have hgF : toGerm W F = rawRestrictG (inf_le_left : W ≤ 𝔇.U i)
+      (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f dd.cochain i) := by
+    rw [dd.cup_component_eq hi, ← td.toGerm_cupRep f]
+    rfl
+  -- punctured neighbourhoods of `b` lie in `W`
+  have hWnear : ∀ᶠ x in 𝓝[≠] b, x ∈ W := by
+    set T : Finset X := (posSupp (K + Finsupp.single b 1)).erase b with hTdef
+    have hTcl : IsClosed ((T : Finset X) : Set X) := T.finite_toSet.isClosed
+    have hbT : b ∉ ((T : Finset X) : Set X) := by simp [hTdef]
+    rw [eventually_nhdsWithin_iff]
+    filter_upwards [(𝔇.U i).isOpen.mem_nhds hi, hTcl.isOpen_compl.mem_nhds hbT]
+      with x hx1 hx2 hxb
+    have hxb' : x ≠ b := by simpa using hxb
+    refine ⟨hx1, mem_offPos_iff.mpr ?_⟩
+    by_contra hpos
+    push_neg at hpos
+    exact hx2 (Finset.mem_erase.mpr ⟨hxb', mem_posSupp_iff.mpr hpos⟩)
+  -- ambient-chart meromorphy and exact order of the honest representative
+  have hcmer : MeromorphicAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) :=
+    Gext_meromorphicAt (td.isMeromorphic_cupRep f) hi
+  have hcord : meromorphicOrderAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) = ((-(K b) - 1 : ℤ) : WithTop ℤ) := by
+    rw [← ordU_eq_orderAt_Gext (td.cupRep f) hi]
+    exact td.ordU_cupRep hn hm
+  have hGFeq : ∀ᶠ x in 𝓝[≠] b, Gext F x = Gext (td.cupRep f) x := by
+    filter_upwards [hWnear] with x hxW
+    rw [Gext_apply_mem F hxW, Gext_apply_mem (td.cupRep f)
+      ((inf_le_left : W ≤ 𝔇.U i) hxW : x ∈ 𝔇.U i)]
+    rfl
+  have hψtend : Tendsto (chartAt (H := ℂ) b).symm
+      (𝓝[≠] ((chartAt (H := ℂ) b) b)) (𝓝[≠] b) := by
+    have h := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) b) b)
+      (by simpa using (chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b))
+    simpa [(chartAt (H := ℂ) b).left_inv (mem_chart_source ℂ b)] using h
+  have hreadeq : (Gext F ∘ (chartAt (H := ℂ) b).symm)
+      =ᶠ[𝓝[≠] ((chartAt (H := ℂ) b) b)] (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm) :=
+    hψtend.eventually hGFeq
+  have hFmer : MeromorphicAt (Gext F ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) := hcmer.congr hreadeq.symm
+  have hFord : meromorphicOrderAt (Gext F ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) = ((-(K b) - 1 : ℤ) : WithTop ℤ) := by
+    rw [meromorphicOrderAt_congr hreadeq]
+    exact hcord
+  have hread := holoFn_eventuallyEq_near_marked (restrict_mem_omegaDGerm_zero hF0 i)
+    hgF hWnear hFmer hFord
+  filter_upwards [hread, hGFeq] with x h1 h2
+  exact h1.trans h2
+
+/-- **The analytic cancellation of two star cup representatives** at the marked point: with
+`E b ≤ n`, the difference `f·c_i − f·c_k` has nonnegative order at `b`, hence an analytic
+punctured extension of its ambient read. -/
+theorem exists_analyticAt_cupRep_sub {f : MeromorphicFunction X} {n : ℤ}
+    (hn : f.orderW b = (n : WithTop ℤ)) (hnE : E b ≤ n)
+    {i k : 𝔇.toFiniteCover.ι} (hi : b ∈ (𝔇.U i : Set X)) (hk : b ∈ (𝔇.U k : Set X)) :
+    ∃ q : ℂ → ℂ, AnalyticAt ℂ q (βpt b) ∧
+      ((fun x => Gext ((dd.toTestCocycleData hi).cupRep f) x
+          - Gext ((dd.toTestCocycleData hk).cupRep f) x)
+        ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝[≠] (βpt b)] q := by
+  set V : Opens X := 𝔇.U i ⊓ 𝔇.U k with hVdef
+  have hbV : b ∈ V := ⟨hi, hk⟩
+  set diff : ↥V → ℂ :=
+    (dd.c i ∘ openIncl inf_le_left) - (dd.c k ∘ openIncl inf_le_right) with hdiffdef
+  have hdiffmem : diff ∈ OmegaD (E + Finsupp.single b (m - E b) + Finsupp.single b 1) V :=
+    sub_mem (OmegaD_comp_openIncl _ (dd.mem i hi)) (OmegaD_comp_openIncl _ (dd.mem k hk))
+  have hdiffmer : IsMeromorphic (V : Type _) diff := hdiffmem.1
+  set dV : ↥V → ℂ := (f.toFun ∘ Subtype.val) * diff with hdVdef
+  have hdVmer : IsMeromorphic (V : Type _) dV :=
+    fun v => ((isMeromorphic_val f) v).mul (hdiffmer v)
+  have hordb : (0 : WithTop ℤ) ≤ ordU dV ⟨b, hbV⟩ := by
+    rw [hdVdef, ordU_globalMul f hdiffmer ⟨b, hbV⟩, hn]
+    have h2 : ((-(E b) : ℤ) : WithTop ℤ) ≤ ordU diff ⟨b, hbV⟩ :=
+      dd.ordU_sub_ge inf_le_left inf_le_right hi hk hbV
+    have h3 : ((n + -(E b) : ℤ) : WithTop ℤ)
+        ≤ ((n : ℤ) : WithTop ℤ) + ordU diff ⟨b, hbV⟩ := by
+      have hcast : ((n + -(E b) : ℤ) : WithTop ℤ)
+          = ((n : ℤ) : WithTop ℤ) + ((-(E b) : ℤ) : WithTop ℤ) := by
+        exact_mod_cast (WithTop.coe_add n (-(E b)))
+      rw [hcast]
+      exact add_le_add le_rfl h2
+    refine le_trans ?_ h3
+    exact_mod_cast (by omega : (0 : ℤ) ≤ n + -(E b))
+  have hread_mer : MeromorphicAt (ambRead dV b) (βpt b) := Gext_meromorphicAt hdVmer hbV
+  have hread_ord : (0 : WithTop ℤ) ≤ meromorphicOrderAt (ambRead dV b) (βpt b) := by
+    rw [show meromorphicOrderAt (ambRead dV b) (βpt b) = ordU dV ⟨b, hbV⟩ from
+      (ordU_eq_orderAt_Gext dV hbV).symm]
+    exact hordb
+  obtain ⟨q, hq, hqe⟩ := exists_analyticAt_extension hread_mer hread_ord
+  refine ⟨q, hq, ?_⟩
+  have heqOn : ∀ x ∈ (V : Set X),
+      (fun x => Gext ((dd.toTestCocycleData hi).cupRep f) x
+        - Gext ((dd.toTestCocycleData hk).cupRep f) x) x = Gext dV x := by
+    intro x hx
+    show Gext ((dd.toTestCocycleData hi).cupRep f) x
+        - Gext ((dd.toTestCocycleData hk).cupRep f) x = Gext dV x
+    rw [Gext_apply_mem ((dd.toTestCocycleData hi).cupRep f) (hx.1 : x ∈ 𝔇.U i),
+      Gext_apply_mem ((dd.toTestCocycleData hk).cupRep f) (hx.2 : x ∈ 𝔇.U k),
+      Gext_apply_mem dV hx]
+    show f.toFun x * dd.c i ⟨x, hx.1⟩ - f.toFun x * dd.c k ⟨x, hx.2⟩
+        = f.toFun x * (dd.c i ⟨x, hx.1⟩ - dd.c k ⟨x, hx.2⟩)
+    ring
+  have hev2 := read_eventuallyEq_of_eqOn V.isOpen hbV heqOn
+  exact (hev2.filter_mono nhdsWithin_le_nhds).trans hqe
+
+end DeepTestData
+
+end Engine
+
 end Dolbeault
 
 end Jacobians
