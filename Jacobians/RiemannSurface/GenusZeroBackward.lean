@@ -81,7 +81,7 @@ theorem developingValue_eq_primitive_sub_of_single_ball
         refine Fin.monotone_iff_le_succ.mpr ?_
         intro i
         fin_cases i
-        simpa using unitInterval.nonneg'
+        simp
       cell_subset := fun _ u _ => hmem u }
   rw [developingValue_eq_developingValueOfSubdivision x₀ form _ S]
   have hsum : developingValueOfSubdivision form
@@ -117,7 +117,8 @@ theorem chartSegmentPath_mem_pathChartBallSet (p : X) {y : X}
   have hu : (u : ℝ) ∈ Set.Icc (0 : ℝ) 1 := u.2
   have hext : (chartSegmentPath p hy).extend (u : ℝ) =
       ((chartSegmentPath p hy : Path p y) : C(unitInterval, X)) u := by
-    rw [Path.extend_extends _ hu]
+    rw [Path.extend_apply _ hu]
+    simp
   constructor
   · show ((chartSegmentPath p hy : Path p y) : C(unitInterval, X)) u ∈
       (chartAt ℂ (canonicalChartBall p).p).source
@@ -189,10 +190,11 @@ theorem mdifferentiable_simplyConnectedPrimitive (x₀ : X)
   set g : ℂ → ℂ := pathChartBallPrimitive form (canonicalChartBall p) with hg_def
   -- the eventual local representation
   have hrep : simplyConnectedPrimitive x₀ form =ᶠ[𝓝 p]
-      fun y => (simplyConnectedPrimitive x₀ form p - g ((extChartAt 𝓘(ℂ) p) p)) +
-        g ((extChartAt 𝓘(ℂ) p) y) := by
+      (fun _ => simplyConnectedPrimitive x₀ form p - g ((extChartAt 𝓘(ℂ) p) p)) +
+        fun y => g ((extChartAt 𝓘(ℂ) p) y) := by
     filter_upwards [(isOpen_chartBallSource p).mem_nhds (mem_chartBallSource_self p)]
       with y hy
+    simp only [Pi.add_apply]
     rw [simplyConnectedPrimitive_localRep x₀ form p hy]
     ring
   -- the model function is `MDifferentiableAt`
@@ -203,11 +205,14 @@ theorem mdifferentiable_simplyConnectedPrimitive (x₀ : X)
     (pathChartBallPrimitive_hasDerivAt form (canonicalChartBall p)
       _ hcenter_ball).differentiableAt
   have hchart : MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) (extChartAt 𝓘(ℂ) p) p :=
-    (contMDiffAt_extChartAt (n := ω)).mdifferentiableAt le_top
+    (contMDiffAt_extChartAt (n := ω)).mdifferentiableAt WithTop.top_ne_zero
   have hcomp : MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ)
       (fun y => g ((extChartAt 𝓘(ℂ) p) y)) p :=
     MDifferentiableAt.comp p hg_diff.mdifferentiableAt hchart
-  exact (hcomp.const_add _).congr_of_eventuallyEq hrep
+  have hconst : MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ)
+      (fun _ : X => simplyConnectedPrimitive x₀ form p - g ((extChartAt 𝓘(ℂ) p) p)) p :=
+    mdifferentiableAt_const
+  exact (hconst.add hcomp).congr_of_eventuallyEq hrep
 
 end SimplyConnected
 
@@ -264,7 +269,7 @@ theorem holomorphicOneForm_eq_zero_of_simplyConnectedSpace
           exact hw
       have hrep := simplyConnectedPrimitive_localRep x₀ form p hyU
       rw [hvx y, hvx p, hyw] at hrep
-      exact sub_eq_zero.mp (self_eq_add_right.mp hrep)
+      exact sub_eq_zero.mp (left_eq_add.mp hrep)
     -- `g` has derivative `form.coeff p z` and is locally constant at `z`
     have hev : g =ᶠ[𝓝 z] fun _ => g ((extChartAt 𝓘(ℂ) p) p) :=
       Filter.eventually_of_mem (Metric.isOpen_ball.mem_nhds hz) hgconst
@@ -306,8 +311,9 @@ end Compact
 theorem genus_eq_zero_of_simplyConnectedSpace [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [SimplyConnectedSpace X] : genus X = 0 := by
   haveI := subsingleton_holomorphicOneForm_of_simplyConnectedSpace (X := X)
-  exact Module.finrank_eq_zero_of_subsingleton
+  exact Module.finrank_eq_zero_of_subsingleton ℂ (HolomorphicOneForm X)
 
+omit [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] in
 /-- Simple connectivity transports along a homeomorphism. -/
 theorem simplyConnectedSpace_of_homeomorph {Y : Type*} [TopologicalSpace Y]
     [SimplyConnectedSpace Y] (h : X ≃ₜ Y) : SimplyConnectedSpace X :=

@@ -1,1 +1,2 @@
 2026-06-11 G-lane session start (campaign-2): AX_genus_eq_zero_iff_homeo backward via developing machinery. Branch feat/genus0-backward from origin/main 90c1da7.
+2026-06-11 G2: GenusZeroBackward.lean drafted; first compile pass clean except 5 name-level fixes (extend_apply, WithTop.top_ne_zero, left_eq_add, finrank explicit args, MDifferentiableAt.add). Single-ball subdivision + localRep + cocycle endgame all elaborate. Machine-wide fd exhaustion intermittently blocking compiles (concurrent lanes).
