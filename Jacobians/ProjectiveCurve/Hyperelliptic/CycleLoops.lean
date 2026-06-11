@@ -266,6 +266,29 @@ theorem analyticAt_segmentX (a b : ℂ) (r : ℝ) :
 @[simp] theorem segmentX_one (a b : ℂ) : segmentX a b 1 = b := by
   simp [segmentX]
 
+/-- **Branch existence (constructive).** Every real-analytic x-plane arc
+avoiding the branch locus carries a global continuous square-root branch,
+hence a `SqrtArcData`: the branch is the explicit log-derivative primitive
+`y₀ · exp(½ ∫₀ᵗ (f∘x)′/(f∘x))` (`exists_sqrt_branch`). The returned formula
+reduces *loop closure* of the branch (`y 1 = y 0`, the input to
+`toOddLoop`) to the explicit winding-integral condition
+`exp(½ ∫₀¹ (f∘x)′/(f∘x)) = 1` — the argument-principle gap recorded in
+`docs/planning/HYP_CB_BLOCKER.md`. -/
+theorem exists_sqrtArcData {H : HyperellipticData} (x : ℝ → ℂ)
+    (hx : ∀ r : ℝ, AnalyticAt ℝ x r)
+    (havoid : ∀ r : ℝ, H.f.eval (x r) ≠ 0)
+    {y₀ : ℂ} (hy₀ : y₀ ^ 2 = H.f.eval (x 0)) :
+    ∃ D : SqrtArcData H, D.x = x ∧ D.y 0 = y₀ ∧
+      ∀ t : ℝ, D.y t = y₀ * Complex.exp
+        ((∫ s in (0 : ℝ)..t,
+          deriv (fun u : ℝ => H.f.eval (x u)) s / H.f.eval (x s)) / 2) := by
+  have hg : ∀ t : ℝ, AnalyticAt ℝ (fun u : ℝ => H.f.eval (x u)) t := by
+    intro t
+    simpa using (hx t).aeval_polynomial H.f
+  obtain ⟨y, hy_cont, hy0, hsq, hformula⟩ :=
+    Jacobians.GeneralResults.exists_sqrt_branch hg havoid hy₀
+  exact ⟨⟨x, y, hx, hy_cont, hsq, havoid⟩, rfl, hy0, hformula⟩
+
 /-- `SqrtArcData` over a circle base arc, given a continuous branch of
 `√(f ∘ circle)`. The branch exists by covering theory
 (`HyperellipticAffine.sqMap_covering`); its closure after a full turn is the

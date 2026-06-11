@@ -92,4 +92,77 @@ theorem analyticAt_of_sq_eq_analytic {g y : ℝ → ℂ} {t₀ : ℝ}
     · exact absurd h h3
   exact hφ.congr (heq.mono fun t ht => ht.symm)
 
+/-- **Constructive global square-root branch.** If `g : ℝ → ℂ` is analytic
+and nonvanishing everywhere, then for any square root `y₀` of `g 0` there is
+a continuous global branch `y` with `y² = g`, given explicitly by the
+log-derivative primitive: `y t = y₀ · exp(½ ∫₀ᵗ g′/g)`.
+
+(Proof: `L t = ∫₀ᵗ g′/g` satisfies `(g · exp(−L))′ = 0`, so
+`g t = g 0 · exp(L t)` and `y = y₀ · exp(L/2)` squares to `g`.)
+
+The closed formula is part of the conclusion so that *loop closure* of the
+branch (`y 1 = y 0`) reduces to evaluating the explicit winding integral
+`∫₀¹ g′/g ∈ 4πi ℤ` — the argument-principle input for the hyperelliptic
+branch-cut cycles. -/
+theorem exists_sqrt_branch {g : ℝ → ℂ} (hg : ∀ t, AnalyticAt ℝ g t)
+    (hne : ∀ t, g t ≠ 0) {y₀ : ℂ} (hy₀ : y₀ ^ 2 = g 0) :
+    ∃ y : ℝ → ℂ, Continuous y ∧ y 0 = y₀ ∧ (∀ t, y t ^ 2 = g t) ∧
+      ∀ t, y t =
+        y₀ * Complex.exp ((∫ s in (0 : ℝ)..t, deriv g s / g s) / 2) := by
+  classical
+  set q : ℝ → ℂ := fun s => deriv g s / g s with hq_def
+  have hg_cont : Continuous g :=
+    continuous_iff_continuousAt.mpr fun t => (hg t).continuousAt
+  have hderiv_cont : Continuous (deriv g) :=
+    continuous_iff_continuousAt.mpr fun t => ((hg t).deriv).continuousAt
+  have hq_cont : Continuous q := hderiv_cont.div hg_cont hne
+  set L : ℝ → ℂ := fun t => ∫ s in (0 : ℝ)..t, q s with hL_def
+  have hL : ∀ t : ℝ, HasDerivAt L (q t) t := by
+    intro t
+    exact intervalIntegral.integral_hasDerivAt_right
+      (hq_cont.intervalIntegrable 0 t)
+      (hq_cont.stronglyMeasurableAtFilter _ _)
+      hq_cont.continuousAt
+  have hL0 : L 0 = 0 := intervalIntegral.integral_same
+  have hLcont : Continuous L :=
+    continuous_iff_continuousAt.mpr fun t => (hL t).continuousAt
+  -- the conserved quantity h = g · exp(−L)
+  set h : ℝ → ℂ := fun t => g t * Complex.exp (-L t) with hh_def
+  have hh' : ∀ t : ℝ, HasDerivAt h 0 t := by
+    intro t
+    have hgd : HasDerivAt g (deriv g t) t := (hg t).differentiableAt.hasDerivAt
+    have hLd : HasDerivAt (fun u => -L u) (-q t) t := (hL t).neg
+    have hexp : HasDerivAt (fun u => Complex.exp (-L u))
+        (Complex.exp (-L t) * -q t) t := hLd.cexp
+    have hmul := hgd.mul hexp
+    convert hmul using 1
+    rw [hq_def]
+    field_simp [hne t]
+    ring
+  have hh_const : ∀ t : ℝ, h t = h 0 := by
+    intro t
+    exact is_const_of_deriv_eq_zero
+      (fun u => ((hh' u).differentiableAt : DifferentiableAt ℝ h u))
+      (fun u => (hh' u).deriv) t 0
+  have hg_eq : ∀ t : ℝ, g t = g 0 * Complex.exp (L t) := by
+    intro t
+    have h1 : g t * Complex.exp (-L t) = g 0 := by
+      have h2 := hh_const t
+      simp only [hh_def, hL0, neg_zero, Complex.exp_zero, mul_one] at h2
+      exact h2
+    calc g t = g t * (Complex.exp (-L t) * Complex.exp (L t)) := by
+          rw [← Complex.exp_add, neg_add_cancel, Complex.exp_zero, mul_one]
+      _ = g 0 * Complex.exp (L t) := by rw [← mul_assoc, h1]
+  refine ⟨fun t => y₀ * Complex.exp (L t / 2), ?_, ?_, ?_, fun t => rfl⟩
+  · exact continuous_const.mul (Complex.continuous_exp.comp (hLcont.div_const 2))
+  · simp [hL0]
+  · intro t
+    change (y₀ * Complex.exp (L t / 2)) ^ 2 = g t
+    have hsq : (y₀ * Complex.exp (L t / 2)) ^ 2 = y₀ ^ 2 * Complex.exp (L t) := by
+      have : Complex.exp (L t / 2) ^ 2 = Complex.exp (L t) := by
+        rw [sq, ← Complex.exp_add]
+        norm_num
+      rw [mul_pow, this]
+    rw [hsq, hy₀, ← hg_eq t]
+
 end Jacobians.GeneralResults
