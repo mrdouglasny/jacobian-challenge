@@ -373,6 +373,50 @@ theorem cluster_descent (data : CanonicalForm17Data X) (F f : MeromorphicFunctio
     rw [← resAt_eq_planarCoeff_neg_one hAη_mero, hCoV, hη0,
       resAt_eq_planarCoeff_neg_one hA_mero, hbranch]
 
+/-! ## The per-centre assembly -/
+
+/-- **The per-centre meromorphy + residue data of the value trace** (Miranda §VIII.3 step 1 +
+Lemma 3.2 at one finite centre, full fibre).  Near any finite centre `c`, the value trace
+germ-agrees with the finite sum of the per-cluster descents; hence it is meromorphic at `c`
+with residue the full-fibre `frameRes` sum. -/
+theorem valueTrace_meromorphicAt_and_resAt (data : CanonicalForm17Data X)
+    (F f : MeromorphicFunction X) (hω : data.ω₀ = differentialForm f)
+    (hdiv : (f.div : Divisor X) ≠ 0) (c : ℂ) :
+    MeromorphicAt (valueTrace F f) c ∧
+      resAt (valueTrace F f) c
+        = ∑ y ∈ fibreFinset f hdiv (((c : ℂ) : RiemannSphere)), frameRes data F y := by
+  classical
+  set P : MultiplicityPatchingData f (((c : ℂ) : RiemannSphere)) :=
+    patchAt f hdiv (((c : ℂ) : RiemannSphere)) with hP_def
+  -- choose the per-cluster descents
+  have hex : ∀ r ∈ P.xs, ∃ H : ℂ → ℂ, MeromorphicAt H c ∧
+      (∀ᶠ z in 𝓝[≠] c, (∑ y ∈ slice hdiv P r z, F.holoRepr y) = H z) ∧
+      resAt H c = frameRes data F r :=
+    fun r hr => cluster_descent data F f hω hdiv P hr
+  choose! Hf hH_mero hH_germ hH_res using hex
+  -- the fibre `Finset` at the centre is the patching enumeration
+  have hfibP : fibreFinset f hdiv (((c : ℂ) : RiemannSphere)) = P.xs := by
+    apply Finset.coe_injective
+    rw [coe_fibreFinset, P.xs_coe]
+  -- the trace germ-agrees with the cluster sum
+  have hgerm : valueTrace F f =ᶠ[𝓝[≠] c] fun z => ∑ r ∈ P.xs, Hf r z := by
+    have hW : ∀ᶠ z in 𝓝[≠] c, (((z : ℂ) : RiemannSphere)) ∈ P.W := by
+      refine Filter.Eventually.filter_mono nhdsWithin_le_nhds ?_
+      exact (OnePoint.continuous_coe.continuousAt) (P.W_open.mem_nhds P.w₀_mem_W)
+    have hclusters : ∀ᶠ z in 𝓝[≠] c, ∀ r ∈ P.xs,
+        (∑ y ∈ slice hdiv P r z, F.holoRepr y) = Hf r z :=
+      (eventually_all_finset _).mpr (fun r hr => hH_germ r hr)
+    filter_upwards [hW, hclusters] with z hzW hzc
+    rw [valueTrace_eq_sum_slices F f hdiv P hzW]
+    exact Finset.sum_congr rfl hzc
+  have hsum_mero : MeromorphicAt (fun z => ∑ r ∈ P.xs, Hf r z) c :=
+    MeromorphicAt.fun_sum (fun r hr => hH_mero r hr)
+  constructor
+  · exact hsum_mero.congr hgerm.symm
+  · rw [resAt_congr hgerm,
+      Jacobians.TraceResidue.LaurentForm.resAt_finsum P.xs Hf (fun r hr => hH_mero r hr), hfibP]
+    exact Finset.sum_congr rfl fun r hr => hH_res r hr
+
 end Jacobians.Dolbeault.FrameTraceWall
 
 end
