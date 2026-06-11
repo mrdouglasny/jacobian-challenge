@@ -29,6 +29,7 @@ See `docs/hyperelliptic-odd-atlas-plan.md` §OA2.
 -/
 
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas.AffineChart
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas.InfinityInverse
 import Mathlib.Topology.Compactification.OnePoint.Basic
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Topology.OpenPartialHomeomorph.Constructions
@@ -45,8 +46,9 @@ variable {H : HyperellipticData} {h : Odd H.f.natDegree}
 `g := (deg f - 1) / 2`, we have `x = 1/t²·(1 + O(t))` and
 `y = 1/t^{2g+1}·(1 + O(t))` after normalizing by `lc(f)`. Domain:
 `{ t : ℂ | 0 < ‖t‖ ∧ ‖t‖ < someRadius }`. -/
-axiom infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    ℂ → HyperellipticAffine H
+noncomputable def infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    ℂ → HyperellipticAffine H :=
+  InfinityInverse.infinityInverseMap H h
 
 /-- The chart at infinity: `PartialHomeomorph (HyperellipticOdd H h) ℂ`
 sending a neighborhood of `OnePoint.infty` to a neighborhood of
