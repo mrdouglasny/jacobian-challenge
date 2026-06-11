@@ -280,3 +280,9 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   ChartDiskCover.locallyRealizable (factorized-rational product witness, only cover-specific
   input was subset_chart_source). Bill items 2+3 of COVER_WIRING done. Next: the
   separating-cover construction with the reserved disk (bill item 1).
+[item2b DONE] SeparatingCover.lean: exists_separatingChartDiskCover PROVEN (standard-3).
+  Construction: reserved point p ∉ S, reserved disk in U(idx p) ∩ Sᶜ, compact half-radius
+  core, good disks in U(idx x) ∩ coreᶜ ∩ (S.erase x)ᶜ, finite subcover of (resDisk)ᶜ,
+  Option-indexed assembly. Outputs: refinement of any 𝔘 + S-separation (→ SeparatesPoles
+  for supp K ⊆ S) + nonempty open reserved zone W (→ MLIsolated ∀ w ∈ W) + W ∩ S = ∅.
+  Item 2 complete (with 2a generics). Next: item 3, CupMLWitnessR over the reserved disk.
