@@ -310,3 +310,48 @@ conclusion needed for 17.7; isolated-point selection/cover refinement for the wi
   h1Dim_zero_eq_canonical (normal form at the canonical chartDiskCover). The genus-0 wall
   need only be climbed once, at any convenient cover. Root lake build green (8771 jobs).
   LANE COMPLETE: items 1-3 DONE, item 4 done to its honest boundary.
+
+=== 2026-06-10 UNWIND lane (branch feat/keystone-unwind, worktree agent) ===
+START. Target: UnwindRegularity G D (SerreUnwind.lean:275) for the concrete fine-sheaf G.
+Route fixed after full read of MLTie/MeroVanish/Descent/DescentVanish/SkyscraperConeRealization/
+LocalRealization: (1) detector reduction (kernel class with nonzero pairing ⟹ UnwindRegularity,
+pure logic); (2) bad point b forced with E b ≤ n+K b ≤ D b−1, n = ord_b f; (3) test cocycle
+δ⁰(Pi.single j₀ γ) with γ the LocallyRealizable witness germ in 𝒪_{Ě+b}(U j₀), Ě = E+(m−E b)·b —
+KEY FIND: LocallyRealizable (proven, SkyscraperProductWitness) solves the E-negative-zeros
+membership wall for free; (4) evaluation = MeroVanish engine generalized to ONE marked
+simple-pole point (SlotProductSimplePoleAt, conclusion −r) — no CP ladder needed (Leibniz
+absorption + R0 atom + pointRepair). Residual wall: evaluation at NON-isolated forced points
+(multi-chart smeared pole; cochain side already covered by skyscraper coneB0). Plan in
+docs/planning/UNWIND_ROUTE.md. Disk note: machine at 100% (18 sibling worktrees); using
+cp -Rc clones + lake env lean only.
+
+2026-06-11 UNWIND resume: Commit A landed (01b3203) — marked-divisor bookkeeping:
+separatesPoles_add_single, mem_linearSystem_marked (exact −n bound at b), cup_mem_sections0
+(cup 0-cochain ∈ sections0(K+b)), cupRep + toGerm_cupRep + ordU_cupRep (exact order −K b−1).
+Next (Commit B): holoFn_eventuallyEq_near_marked (read-back of the analytic rep on a punctured
+nbhd of the marked point via finite-order normal form + holoFn_eq_of_tendsto), then
+exists_slotProductSimplePoleAt (order −1 exact ⟹ residue w'(α) ≠ 0 via dslope split), then
+resCocycle_cup_testCocycle_ne_zero through resFunctional_eq_neg_residue_of_mero_coboundary
+(mixed-level trick: z ∈ Z¹(K) is a B¹(K+b)-coboundary; cocycleFn proof-irrelevant ⟹ rfl).
+
+2026-06-11 UNWIND Commits B+C LANDED (3e7ca31, 62948e0, + headline):
+- holoFn_eventuallyEq_near_marked: the read-back principle — holoFn of a class on W agrees
+  with Gext of ANY honest rep on a punctured nbhd of a marked boundary point b ∉ W, given
+  finite meromorphic order (normal form ⟹ junk-free continuous formula ⟹ limUnder recovers).
+- exists_slotProductSimplePoleAt: exact orders (−K b−1) + K b = −1; order −1 ⟹ residue
+  w'(α) ≠ 0; q = dslope w' α; pure-ring final identity (div_eq_mul_inv, no field_simp).
+- resCocycle_cup_testCocycle_ne_zero: the §17.7 evaluation. Mixed-level trick WORKED AS
+  PLANNED: cup cocycle ∈ Z¹(K) viewed in Z¹(K+b) (OmegaDGerm_mono), and
+  cocycleFn 𝔇 hsep z = cocycleFn 𝔇 hsep' z' is rfl (proof irrelevance through holoFn/choose).
+  Engine = resFunctional_eq_neg_residue_of_mero_coboundary at S = posSupp(K+b).
+- unwindRegularity_concrete_of_isolated: THE CONDITIONAL HEADLINE — UnwindRegularity G D is a
+  THEOREM for the concrete fine-sheaf G, conditional on BadPointsIsolated 𝔇 K D (+ the R-lane
+  interface hsep/hg/SlotExactK/CupMLWitnessR/ExactOrderWitness(proven)/K ≥ 0).
+- Gates: #print axioms standard-3 on all six headliners; 0 sorries; full lake build green
+  (8765 jobs); SerreUnwindDetect wired into KirovDolbeault.lean root imports.
+- Residual wall documented in docs/planning/UNWIND_BLOCKER.md: unconditional ∀ D needs the
+  multi-chart (non-isolated) evaluation — per-chart smeared-pole atom with non-constant weight
+  + cross-chart residue transport + ∑ρ≡1 telescoping; cochain side already covered (coneB0).
+NOTE: stale-olean gotcha — lake env lean used pre-branch MeroVanish.olean until
+`lake build ...FineResidue.DescentVanish`; "unknown identifier SlotProductSimplePoleAt" was
+NOT a namespace problem.

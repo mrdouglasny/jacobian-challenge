@@ -690,20 +690,24 @@ private theorem integral_dbar_pouCoeff_pouAverage_eq_zero
     subst hca
     exact pouAverageRead_mul_extends hj₀ (hext a haS j hj₀)
 
-/-- **The Leibniz/Stokes step** (per chart): the `j`-th summand of the residue integral equals
-the PoU-reinserted curvature terms — the total-derivative term dies by the repaired Stokes
-kill.  A.e. version of R5's `integral_pouCoeff_glueCoeff_of_coboundary`: the pointwise Leibniz
-identity holds off the (finite, null) set of bad coordinates. -/
-private theorem integral_pouCoeff_glueCoeff_mero
+/-- **The Leibniz step, Stokes term kept explicit** (per chart): the `j`-th summand of the
+residue integral equals the PoU-reinserted curvature terms MINUS the surviving
+total-derivative (Stokes) term.  A.e. version of R5's
+`integral_pouCoeff_glueCoeff_of_coboundary`: the pointwise Leibniz identity holds off the
+(finite, null) set of bad coordinates.  No slot-product hypothesis: the Stokes term is not
+evaluated here (the vanish engine kills it via `SlotProductExtendsAt`, the evaluation engine
+computes it via `SlotProductSimplePoleAt`). -/
+private theorem integral_pouCoeff_glueCoeff_mero_split
     (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
     (hhol : HolomorphicOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
     (hg : IsOneZeroCoeff 𝔇 g)
-    (hext : ∀ a ∈ S, ∀ j₀, MLIsolated 𝔇 j₀ a → SlotProductExtendsAt 𝔇 h g j₀ a)
     (j : 𝔇.toFiniteCover.ι) :
     ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
-      = ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+      = (∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
           * (DbarDisk.dbar (pouCoeff 𝔇 j) z
-              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+        - ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z := by
   -- the a.e. pointwise Leibniz identity (off the bad coordinates)
   have hpt : ∀ z : ℂ, z ∉ badCoords 𝔇 S j →
       pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
@@ -821,14 +825,6 @@ private theorem integral_pouCoeff_glueCoeff_mero
     refine integral_congr_ae ?_
     filter_upwards [hane] with z hz
     linear_combination hpt z hz
-  -- the repaired Stokes kill turns the key identity into `∫ pou·glue = ∫ Y`
-  have hstokes := integral_dbar_pouCoeff_pouAverage_eq_zero hiso hsm hg hext j
-  have hYI : ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
-      = ∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
-          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z) := by
-    have h0 := hkey
-    rw [hstokes] at h0
-    linear_combination h0
   -- PoU reinsertion of the curvature term
   have hreins : (∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
         * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
@@ -856,7 +852,24 @@ private theorem integral_pouCoeff_glueCoeff_mero
               (fun z hz => by
                 rw [dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hz, zero_mul, mul_zero])
           exact hcd.continuous.integrable_of_hasCompactSupport hYcs.mul_left
-  rw [hYI, hreins]
+  rw [← hreins]
+  linear_combination hkey
+
+/-- **The Leibniz/Stokes step** (per chart): the `j`-th summand of the residue integral equals
+the PoU-reinserted curvature terms — the total-derivative term dies by the repaired Stokes
+kill (the split step plus `integral_dbar_pouCoeff_pouAverage_eq_zero`). -/
+private theorem integral_pouCoeff_glueCoeff_mero
+    (hiso : ∀ a ∈ S, ∃ j₀, MLIsolated 𝔇 j₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
+    (hhol : HolomorphicOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
+    (hg : IsOneZeroCoeff 𝔇 g)
+    (hext : ∀ a ∈ S, ∀ j₀, MLIsolated 𝔇 j₀ a → SlotProductExtendsAt 𝔇 h g j₀ a)
+    (j : 𝔇.toFiniteCover.ι) :
+    ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z
+      = ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+  rw [integral_pouCoeff_glueCoeff_mero_split hiso hsm hhol hδ hg j,
+    integral_dbar_pouCoeff_pouAverage_eq_zero hiso hsm hg hext j, sub_zero]
 
 /-! ### The engine headline -/
 
@@ -1094,5 +1107,321 @@ theorem resFunctional_poleCocycle_eq_zero_of_slot_vanishes (hiso : MLIsolated �
     (fun z hz => analyticAt_stdPrincipalPart hz m c) hq hpg t ht
 
 end PoleTie
+
+/-! ### The EVALUATION engine — one marked simple-pole point (the nonzero direction)
+
+The vanish engine above kills coboundaries whose slot-products *extend* at every bad point.
+The §17.7 unwinding (`docs/planning/UNWIND_ROUTE.md`) needs the **nonzero direction**: at ONE
+marked bad point the slot-product has a SIMPLE pole with residue `r`, and the functional
+*evaluates* to `−r` (parts orientation `w i j = h j − h i`; against the MLTie orientation
+`h = −mlPart` this reproduces `resFunctional_mlGlue`'s `+r·g(α)`).  No higher-order
+Cauchy–Pompeiu ladder: the slot is analytic, so the Leibniz absorption turns the order-`m`
+pole data into a planar simple pole, and the surviving Stokes term at the marked chart is the
+R0 atom `integral_dbar_smearedSimplePole` plus the repaired-Stokes kill of the remainder. -/
+
+/-- **The slot-product has a simple pole** at the marked bad point: the chart-`j₀` read of
+`h j₀` times the `dz`-slot agrees, on a punctured neighbourhood of the marked coordinate, with
+`r·(ζ−α)⁻¹ + q` for an analytic `q` — the "order-exactly-one-worse-than-the-slot-zero" shape
+that survives the Stokes kill with residue `r`. -/
+def SlotProductSimplePoleAt (h : 𝔇.toFiniteCover.ι → X → ℂ) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (j₀ : 𝔇.toFiniteCover.ι) (a : X) (r : ℂ) : Prop :=
+  ∃ q : ℂ → ℂ, AnalyticAt ℂ q (chartMap 𝔇 j₀ a) ∧
+    (fun ζ => h j₀ ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ a)] fun ζ => r * (ζ - chartMap 𝔇 j₀ a)⁻¹ + q ζ
+
+section MeroEvalEngine
+
+variable {𝔇} {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    {h : 𝔇.toFiniteCover.ι → X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+
+/-- At the marked isolated bad point, the chart read of `β·g` inherits the simple-pole shape of
+the distinguished `h̃_{j₀}·g_{j₀}` (the average is locally the distinguished component). -/
+private theorem pouAverageRead_mul_simplePole {j₀ : 𝔇.toFiniteCover.ι} {b : X} {r : ℂ}
+    (hb : MLIsolated 𝔇 j₀ b) (hpole : SlotProductSimplePoleAt 𝔇 h g j₀ b r) :
+    ∃ q : ℂ → ℂ, AnalyticAt ℂ q (chartMap 𝔇 j₀ b) ∧
+      (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+        =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ b)] fun ζ => r * (ζ - chartMap 𝔇 j₀ b)⁻¹ + q ζ := by
+  obtain ⟨q, hq, hpe⟩ := hpole
+  refine ⟨q, hq, ?_⟩
+  have h1 := eventuallyEq_chartSymmRead_near_iso hb (pouAverage_eventuallyEq_near_iso hb h)
+  have h2 : (fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝 (chartMap 𝔇 j₀ b)]
+        fun ζ => h j₀ ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ := by
+    filter_upwards [h1] with ζ hζ
+    rw [hζ]
+  exact (h2.filter_mono nhdsWithin_le_nhds).trans hpe
+
+/-- **The off-marked-chart Stokes kill**: for every chart `j ≠ j₀` (the marked point's chart),
+the total-derivative term dies — every bad coordinate of chart `j` comes from a bad point
+OTHER than the marked one (isolation), where the slot-product extends. -/
+private theorem integral_dbar_pouCoeff_pouAverage_eq_zero_off
+    (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
+    (hg : IsOneZeroCoeff 𝔇 g) {b : X} {j₀ : 𝔇.toFiniteCover.ι} (hb : MLIsolated 𝔇 j₀ b)
+    (hext : ∀ a ∈ S, a ≠ b → ∀ i₀, MLIsolated 𝔇 i₀ a → SlotProductExtendsAt 𝔇 h g i₀ a)
+    {j : 𝔇.toFiniteCover.ι} (hj : j ≠ j₀) :
+    ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z = 0 := by
+  refine integral_dbar_pouCoeff_repairable_eq_zero 𝔇 (T := badCoords 𝔇 S j) j ?_ ?_
+  · rintro z ⟨x, hxU, rfl⟩ hzT
+    have hxS : x ∉ (S : Set X) := fun hx =>
+      hzT ((chartMap_mem_badCoords_iff 𝔇 hxU).mpr hx)
+    exact contDiffAt_pouAverageRead_mul_off hsm hg hxU hxS
+  · intro α hα
+    obtain ⟨a, haS, haU, hca⟩ := exists_of_mem_badCoords 𝔇 hα
+    obtain ⟨i₀, hi₀⟩ := hiso a haS
+    have hji : j = i₀ := eq_isolated_index hi₀ haU
+    subst hji
+    subst hca
+    have hab : a ≠ b := fun hcontra => hj (eq_isolated_index hb (hcontra ▸ haU))
+    exact pouAverageRead_mul_extends hi₀ (hext a haS hab j hi₀)
+
+/-- **The marked-chart Stokes evaluation**: at the marked point's chart, the total-derivative
+term is the R0 smeared simple pole — split off `χ·(ζ−α)⁻¹` with `χ = r·pouCoeff` (`∂̄χ ≡ 0`
+near the marked coordinate, weights locally constant), repair-and-kill the remainder, and
+evaluate the singular piece by `integral_dbar_smearedSimplePole`. -/
+private theorem integral_dbar_pouCoeff_pouAverage_eq_residue
+    (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a) (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h)
+    (hg : IsOneZeroCoeff 𝔇 g) {b : X} (hbS : b ∈ S) {j₀ : 𝔇.toFiniteCover.ι}
+    (hb : MLIsolated 𝔇 j₀ b) {r : ℂ} (hpole : SlotProductSimplePoleAt 𝔇 h g j₀ b r)
+    (hext : ∀ a ∈ S, a ≠ b → ∀ i₀, MLIsolated 𝔇 i₀ a → SlotProductExtendsAt 𝔇 h g i₀ a) :
+    ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j₀ ζ
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)) z = -π * r := by
+  classical
+  set α := chartMap 𝔇 j₀ b with hαdef
+  set T := badCoords 𝔇 S j₀ with hTdef
+  have hαT : α ∈ T := (chartMap_mem_badCoords_iff 𝔇 hb.1).mpr hbS
+  set u : ℂ → ℂ := fun ζ => pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ
+    with hudef
+  set sing : ℂ → ℂ := fun ζ => r * (ζ - α)⁻¹ with hsingdef
+  obtain ⟨q, hq, hpe⟩ := pouAverageRead_mul_simplePole hb hpole
+  -- the repaired remainder `u − sing`
+  set u' : ℂ → ℂ := pointRepair (fun ζ => u ζ - sing ζ) T with hu'def
+  have hu' : ∀ z ∈ chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X), ContDiffAt ℝ (⊤ : ℕ∞) u' z := by
+    intro z hz
+    by_cases hzT : z ∈ T
+    · obtain ⟨a, haS, haU, hca⟩ := exists_of_mem_badCoords 𝔇 hzT
+      subst hca
+      by_cases hab : a = b
+      · -- the marked coordinate: the remainder extends to `q`
+        have hzα : chartMap 𝔇 j₀ a = α := by rw [hab, hαdef]
+        rw [hzα] at hzT ⊢
+        have hFq : (fun ζ => u ζ - sing ζ) =ᶠ[𝓝[≠] α] q := by
+          filter_upwards [hpe] with ζ hζ
+          have hζ' : u ζ = r * (ζ - α)⁻¹ + q ζ := hζ
+          simp only [hsingdef]
+          rw [hζ']
+          ring
+        exact ((hq.restrictScalars (𝕜 := ℝ)).contDiffAt).congr_of_eventuallyEq
+          (pointRepair_eventuallyEq_of_extends hzT hq hFq)
+      · -- an unmarked bad coordinate: the extension minus the (analytic there) singular part
+        have hzα : chartMap 𝔇 j₀ a ≠ α := fun hc => hab
+          ((chartAt ℂ (𝔇.center j₀)).injOn (mem_chartSource_of_mem_U 𝔇 haU)
+            (mem_chartSource_of_mem_U 𝔇 hb.1) hc)
+        obtain ⟨i₀, hi₀⟩ := hiso a haS
+        have hji : j₀ = i₀ := eq_isolated_index hi₀ haU
+        rw [← hji] at hi₀
+        obtain ⟨q₁, hq₁, hpe₁⟩ := pouAverageRead_mul_extends hi₀ (hext a haS hab j₀ hi₀)
+        have hsingan : AnalyticAt ℂ sing (chartMap 𝔇 j₀ a) := by
+          simp only [hsingdef]
+          exact analyticAt_const.mul
+            ((analyticAt_id.sub analyticAt_const).inv (sub_ne_zero.mpr hzα))
+        have hFq : (fun ζ => u ζ - sing ζ) =ᶠ[𝓝[≠] chartMap 𝔇 j₀ a]
+            fun ζ => q₁ ζ - sing ζ := by
+          filter_upwards [hpe₁] with ζ hζ
+          rw [show u ζ = q₁ ζ from hζ]
+        exact (((hq₁.sub hsingan).restrictScalars (𝕜 := ℝ)).contDiffAt).congr_of_eventuallyEq
+          (pointRepair_eventuallyEq_of_extends hzT (hq₁.sub hsingan) hFq)
+    · -- a good coordinate: `u − sing` is smooth there (`z ≠ α` since `α ∈ T`)
+      obtain ⟨x, hxU, rfl⟩ := hz
+      have hxS : x ∉ (S : Set X) := fun hx =>
+        hzT ((chartMap_mem_badCoords_iff 𝔇 hxU).mpr hx)
+      have hzα : chartMap 𝔇 j₀ x ≠ α := fun hc => hzT (hc ▸ hαT)
+      have hsing : ContDiffAt ℝ (⊤ : ℕ∞) sing (chartMap 𝔇 j₀ x) := by
+        simp only [hsingdef]
+        exact contDiffAt_const.mul
+          ((contDiffAt_id.sub contDiffAt_const).inv (sub_ne_zero.mpr hzα))
+      exact ((contDiffAt_pouAverageRead_mul_off hsm hg hxU hxS).sub hsing).congr_of_eventuallyEq
+        (pointRepair_eventuallyEq_off hzT)
+  -- the repaired remainder is C∞c after the `pouCoeff` clearance
+  have hcd' : ContDiff ℝ (⊤ : ℕ∞) fun ζ => pouCoeff 𝔇 j₀ ζ * u' ζ :=
+    contDiff_pouCoeff_mul 𝔇 hu'
+  have hcs' : HasCompactSupport fun ζ => pouCoeff 𝔇 j₀ ζ * u' ζ :=
+    (hasCompactSupport_pouCoeff 𝔇 j₀).mul_right
+  -- the singular piece `χ·(ζ−α)⁻¹`, `χ := r·pouCoeff`
+  set χ : ℂ → ℂ := fun ζ => r * pouCoeff 𝔇 j₀ ζ with hχdef
+  have hχcd : ContDiff ℝ (⊤ : ℕ∞) χ := contDiff_const.mul (contDiff_pouCoeff 𝔇 j₀)
+  have hχcs : HasCompactSupport χ := (hasCompactSupport_pouCoeff 𝔇 j₀).mul_left
+  have hps : ∀ ζ, pouCoeff 𝔇 j₀ ζ * sing ζ = χ ζ * (ζ - α)⁻¹ := fun ζ => by
+    simp only [hsingdef, hχdef]
+    ring
+  -- `∂̄χ ≡ 0` near the marked coordinate (the weights are locally constant there)
+  have hχconst : χ =ᶠ[𝓝 α] fun _ => r := by
+    filter_upwards [eventuallyEq_pouCoeff_one_near_iso hb] with ζ hζ
+    simp only [hχdef]
+    rw [hζ, mul_one]
+  have hdχ0 : ∀ᶠ ζ in 𝓝 α, DbarDisk.dbar χ ζ = 0 := by
+    filter_upwards [hχconst.eventuallyEq_nhds] with ζ hζ
+    rw [dbar_congr_of_eventuallyEq hζ]
+    exact DbarDisk.dbar_const r ζ
+  -- the continuous a.e. representative of `∂̄(χ·(·−α)⁻¹)`
+  set Gf : ℂ → ℂ := fun ζ => DbarDisk.dbar χ ζ * (ζ - α)⁻¹ with hGdef
+  have hGzero : Gf =ᶠ[𝓝 α] fun _ => (0 : ℂ) := by
+    filter_upwards [hdχ0] with ζ hζ
+    simp only [hGdef]
+    rw [hζ, zero_mul]
+  have hGcont : Continuous Gf := by
+    rw [continuous_iff_continuousAt]
+    intro ζ
+    by_cases hζα : ζ = α
+    · subst hζα
+      exact continuousAt_const.congr hGzero.symm
+    · exact ((DbarDisk.continuous_dbar hχcd).continuousAt).mul
+        ((continuousAt_id.sub continuousAt_const).inv₀ (sub_ne_zero.mpr hζα))
+  have hGcs : HasCompactSupport Gf := (DbarDisk.hasCompactSupport_dbar hχcs).mul_right
+  have hane : ∀ᵐ z : ℂ ∂volume, z ≠ α := by
+    refine ae_iff.mpr ?_
+    simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+    exact measure_singleton _
+  have hGae : (fun ζ => DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ) =ᵐ[volume] Gf := by
+    filter_upwards [hane] with ζ hζ
+    simp only [hGdef]
+    rw [dbar_smul_inv_sub hχcd α hζ, div_eq_mul_inv]
+  have hIsing : Integrable fun ζ => DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ :=
+    (hGcont.integrable_of_hasCompactSupport hGcs).congr hGae.symm
+  have hI1 : Integrable fun ζ => DbarDisk.dbar (fun ξ => pouCoeff 𝔇 j₀ ξ * u' ξ) ζ :=
+    (DbarDisk.continuous_dbar hcd').integrable_of_hasCompactSupport
+      (DbarDisk.hasCompactSupport_dbar hcs')
+  -- the value of the singular integral: the R0 atom, `χ(α) = r`
+  have hval : ∫ ζ, DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ = -π * r := by
+    rw [integral_dbar_smearedSimplePole hχcd hχcs α]
+    have hpou1 : pouCoeff 𝔇 j₀ α = 1 := by
+      rw [hαdef, pouCoeff_chartMap 𝔇 hb.1]
+      exact (eventually_rhoC_eq_one_near_iso hb).self_of_nhds
+    simp only [hχdef]
+    rw [hpou1, mul_one]
+  -- the a.e. split of the target integrand (off the finite bad set)
+  have haneT : ∀ᵐ z : ℂ ∂volume, z ∉ T := by
+    refine ae_iff.mpr ?_
+    have hset : {z : ℂ | ¬ z ∉ T} = ((T : Finset ℂ) : Set ℂ) := by
+      ext z
+      simp
+    rw [hset]
+    exact T.finite_toSet.measure_zero _
+  have hgoalEq : (fun ζ => pouCoeff 𝔇 j₀ ζ
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ))
+      = fun ζ => pouCoeff 𝔇 j₀ ζ * u ζ := rfl
+  have hsplit : (fun z => DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j₀ ζ * u ζ) z)
+      =ᵐ[volume] fun z => DbarDisk.dbar (fun ξ => pouCoeff 𝔇 j₀ ξ * u' ξ) z
+        + DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z := by
+    filter_upwards [haneT] with z hzT
+    have hzα : z ≠ α := fun hc => hzT (hc ▸ hαT)
+    have hev : (fun ζ => pouCoeff 𝔇 j₀ ζ * u ζ)
+        =ᶠ[𝓝 z] fun ζ => pouCoeff 𝔇 j₀ ζ * u' ζ + χ ζ * (ζ - α)⁻¹ := by
+      filter_upwards [pointRepair_eventuallyEq_off (F := fun ζ => u ζ - sing ζ)
+        (T := T) hzT] with ζ hζ
+      rw [← hps ζ]
+      have hζ' : u' ζ = u ζ - sing ζ := hζ
+      rw [hζ']
+      ring
+    rw [dbar_congr_of_eventuallyEq hev]
+    have hd1 : DifferentiableAt ℝ (fun ξ => pouCoeff 𝔇 j₀ ξ * u' ξ) z :=
+      (hcd'.differentiable (by simp)) z
+    have hinvC : DifferentiableAt ℂ (fun ξ : ℂ => (ξ - α)⁻¹) z :=
+      (differentiableAt_id.sub_const α).inv (sub_ne_zero.mpr hzα)
+    have hd2 : DifferentiableAt ℝ (fun ξ => χ ξ * (ξ - α)⁻¹) z :=
+      ((hχcd.differentiable (by simp)) z).mul (hinvC.restrictScalars ℝ)
+    exact DbarOpenDisk.dbar_add hd1 hd2
+  calc ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j₀ ζ
+        * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)) z
+      = ∫ z, (DbarDisk.dbar (fun ξ => pouCoeff 𝔇 j₀ ξ * u' ξ) z
+          + DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z) := by
+        rw [hgoalEq]
+        exact integral_congr_ae hsplit
+    _ = (∫ z, DbarDisk.dbar (fun ξ => pouCoeff 𝔇 j₀ ξ * u' ξ) z)
+        + ∫ z, DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z := integral_add hI1 hIsing
+    _ = -π * r := by
+        rw [integral_dbar_eq_zero hcd' hcs', hval, zero_add]
+
+/-- **THE EVALUATION-ENGINE HEADLINE — the residue functional EVALUATES coboundaries with one
+marked simple-pole bad point.**  Same data shape as `resFunctional_eq_zero_of_mero_coboundary`
+(`w i j = h j − h i` on overlaps, `h` smooth/holomorphic off a finite cover-isolated bad set
+`S`), but at the marked point `b ∈ S` the chart-read slot-product `h̃_{j₀}·g_{j₀}` has a SIMPLE
+POLE with residue `r` (`SlotProductSimplePoleAt`), while at every other bad point it extends.
+Then
+
+  `resFunctional 𝔇 t = −r`.
+
+This is the NONZERO direction of the order-`m` pole ladder (R6D2_BLOCKER §2 wall (a)),
+obtained with no higher-order Cauchy–Pompeiu: the slot is analytic, so Leibniz absorption
+reduces the marked Stokes term to the R0 atom.  Orientation check: for `h = −mlPart` (the
+MLTie cocycle `w i j = p_i − p_j`) the slot-product residue is `−r₀·g(α)`, and
+`−(−r₀·g(α)) = +r₀·g(α)` reproduces `resFunctional_mlGlue`. -/
+theorem resFunctional_eq_neg_residue_of_mero_coboundary (t : oneOneCoeff 𝔇)
+    (ht : (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w g)
+    (hg : IsOneZeroCoeff 𝔇 g) (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a)
+    (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h) (hhol : HolomorphicOnSetsOff 𝔇 (S : Set X) h)
+    (hδ : IsCoboundaryOn 𝔇 w h) {b : X} (hbS : b ∈ S) {j₀ : 𝔇.toFiniteCover.ι}
+    (hb : MLIsolated 𝔇 j₀ b) {r : ℂ} (hpole : SlotProductSimplePoleAt 𝔇 h g j₀ b r)
+    (hext : ∀ a ∈ S, a ≠ b → ∀ i₀, MLIsolated 𝔇 i₀ a → SlotProductExtendsAt 𝔇 h g i₀ a) :
+    resFunctional 𝔇 t = -r := by
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  -- the relocated curvature double sum dies (R5 mechanism, verbatim from the vanish engine)
+  have hcurv : ∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+      * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) = 0 := by
+    calc ∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+        = ∑ j, ∑ k, ∫ z, pouCoeff 𝔇 k z
+            * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) :=
+          Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ =>
+            integral_overlapTerm_relocate_mero hiso hsm hg j k
+      _ = ∑ k, ∑ j, ∫ z, pouCoeff 𝔇 k z
+            * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) :=
+          Finset.sum_comm
+      _ = 0 := Finset.sum_eq_zero fun k _ => sum_integral_relocated_eq_zero_mero hiso hsm hg k
+  -- the Stokes sum survives only at the marked chart, where it is the R0 atom
+  have hstokes : ∑ j, ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z = -π * r := by
+    calc ∑ j, ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+        = ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j₀ ζ
+            * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)) z :=
+          Finset.sum_eq_single j₀
+            (fun j _ hj =>
+              integral_dbar_pouCoeff_pouAverage_eq_zero_off hiso hsm hg hb hext hj)
+            (fun hmem => absurd (Finset.mem_univ j₀) hmem)
+      _ = -π * r :=
+          integral_dbar_pouCoeff_pouAverage_eq_residue hiso hsm hg hbS hb hpole hext
+  have hIfun : resIntegralFun 𝔇 (glueCoeff 𝔇 w g) = (π : ℂ) * r := by
+    calc resIntegralFun 𝔇 (glueCoeff 𝔇 w g)
+        = ∑ j, ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z := rfl
+      _ = ∑ j, ((∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+              * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                  * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+            - ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z) :=
+          Finset.sum_congr rfl fun j _ =>
+            integral_pouCoeff_glueCoeff_mero_split hiso hsm hhol hδ hg j
+      _ = (∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+              * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                  * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+            - ∑ j, ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z := by
+          rw [Finset.sum_sub_distrib]
+      _ = (π : ℂ) * r := by
+          rw [hcurv, hstokes]
+          ring
+  have hI : resIntegral 𝔇 t = (π : ℂ) * r := by
+    have hfun : resIntegral 𝔇 t = resIntegralFun 𝔇 (glueCoeff 𝔇 w g) := by
+      rw [← ht]
+      rfl
+    rw [hfun, hIfun]
+  rw [resFunctional_apply, hI, resNormalization]
+  field_simp
+
+end MeroEvalEngine
 
 end Jacobians.Dolbeault.FineResidue
