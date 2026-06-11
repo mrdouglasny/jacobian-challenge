@@ -144,11 +144,7 @@ theorem cluster_descent (data : CanonicalForm17Data X) (F f : MeromorphicFunctio
           rwa [hs0] at this
         exact hs_t.comp hmul
       exact hcont.eventually hNF
-    -- (d) the moving point is in the sheet, a non-pole, and reads through the chart target
-    have hd : ∀ j ∈ Finset.range m, ∀ᶠ u in 𝓝 (0 : ℂ),
-        yy j u ∈ P.U r ∧ 0 ≤ f.orderAtPoint (yy j u) ∧ 0 ≤ F.orderAtPoint (yy j u) ∨ True := by
-      intro j _
-      exact Filter.Eventually.of_forall fun _ => Or.inr trivial
+    -- (d) the moving point is in the sheet and a non-pole
     have hdU : ∀ j ∈ Finset.range m, ∀ᶠ u in 𝓝 (0 : ℂ),
         yy j u ∈ P.U r ∧ 0 ≤ f.orderAtPoint (yy j u) := by
       intro j _
