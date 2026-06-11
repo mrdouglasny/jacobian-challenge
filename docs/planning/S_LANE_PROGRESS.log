@@ -6,3 +6,14 @@
   planar-window-law evaluation (no transpose chicken-egg). All inputs proven:
   Inv/orderW_inv (SerreResidueRamifiedRealCover), identity thm orderW_ne_top_of_exists,
   resCoeff_mul_window, pairingL_injective, finiteDimensional_H1Tail.
+[milestone] TailSurjectivity.lean COMPLETE — full file compiles (lake env lean clean):
+  Part A: planarCoeff_zpow_self, planarCoeff_mul_window (general window product law).
+  Part B: coeffAt_mul_window.
+  Part C: mulTail (+ linearity in f, upper kill, transport identity mulTail f D (alpha_{D-E} g)
+    = alpha_D (f g)), invMonomialTail + division identity (= trunc_D of monomial single).
+  Part D: mulH1, mkQ_mulTail_surjective, tailPsiAct (+ injectivity, phi != 0).
+  Part E: unwind_eval / unwind_mem (VI.3.9) / unwind_pairing_eq / unwind.
+  Part F: TailPairFrame.pairingSurjective  -- VI.3.10 DONE, no axioms, no sorries
+          TailPairFrame.tailRiemannRoch (frame-only TailRiemannRoch X)
+          h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame'.
+  Wired into KirovDolbeault.lean aggregator. Full lake build + kernel #print axioms next.

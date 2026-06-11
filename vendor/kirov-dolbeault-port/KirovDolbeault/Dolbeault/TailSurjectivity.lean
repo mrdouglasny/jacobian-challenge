@@ -665,6 +665,305 @@ theorem tailPsiAct_injective (D E : Divisor X) (φ : Module.Dual ℂ (H1Tail (X 
   rw [happ]
   rfl
 
+/-! ## Part E — the unwind (Miranda VI.3.7/VI.3.9 analogue) -/
+
+namespace TailPairFrame
+
+variable (P : TailPairFrame X)
+
+/-- **The key evaluation** (the heart of the unwind): under the pigeonhole witness identity
+`φ ∘ (mulTail ψ D) = ⟨w, ·⟩`, the value of `φ` on any truncated monomial single at `p` is
+the slot pairing of the quotient `g = w·ψ⁻¹` — evaluating the identity on the local inverse
+tail `z^k/ψ` and running the window product law on both sides. -/
+theorem unwind_eval {D E : Divisor X} {ψ w : MeromorphicFunction X}
+    (hw : w ∈ linearSystem (X := X) (P.data.K - (D - E)))
+    {φ : Module.Dual ℂ (H1Tail (X := X) D)}
+    (hkey : ∀ t : GlobalTails X,
+      φ (Submodule.Quotient.mk (mulTail ψ D t)) = P.pairFun w t)
+    {p : X} {d : ℤ} (hd : ψ.orderW p = (d : WithTop ℤ)) (k : ℤ) :
+    φ (Submodule.Quotient.mk (truncTails D (Finsupp.single (p, k) (1 : ℂ))))
+      = P.pairSlot (w * ψ⁻¹) p k := by
+  classical
+  set c : ℂ := (chartAt (H := ℂ) p) p with hc
+  set A : ℂ → ℂ := ψ.toFun ∘ (chartAt (H := ℂ) p).symm with hA
+  set W : ℂ → ℂ := fun ζ => (ζ - c) ^ k * (A ζ)⁻¹ with hW
+  set Bw : ℂ → ℂ := fun ζ => w.toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ with hBw
+  set Bg : ℂ → ℂ :=
+    fun ζ => (w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ with hBg
+  set lo : ℤ := k - d with hlodef
+  set hi : ℤ := max (max (-(D p) - d) (k - d)) (-((D - E : Divisor X) p)) with hhidef
+  have hlo : lo ≤ k - d := le_rfl
+  have hhi : -(D p) - d ≤ hi := le_trans (le_max_left _ _) (le_max_left _ _)
+  have hlohi : lo ≤ hi := le_trans (le_max_right _ _) (le_max_left _ _)
+  -- meromorphy and orders
+  have hAm : MeromorphicAt A c := ψ.meromorphic p
+  have hAord : meromorphicOrderAt A c = (d : WithTop ℤ) := hd
+  have hWm : MeromorphicAt W c := (meromorphicAt_zpow_self c k).mul hAm.inv
+  have hWord : meromorphicOrderAt W c = ((k - d : ℤ) : WithTop ℤ) := by
+    rw [hW, show (fun ζ => (ζ - c) ^ k * (A ζ)⁻¹)
+        = (fun ζ => (ζ - c) ^ k) * (A⁻¹) from rfl,
+      meromorphicOrderAt_mul (meromorphicAt_zpow_self c k) hAm.inv,
+      meromorphicOrderAt_zpow_self, meromorphicOrderAt_inv, hAord]
+    rw [show -((d : ℤ) : WithTop ℤ) = ((-d : ℤ) : WithTop ℤ) from by simp,
+      ← WithTop.coe_add, show (k + -d : ℤ) = k - d from by ring]
+  have hBwm : MeromorphicAt Bw c := P.prodRead_mero p w
+  have hBword : ((-hi : ℤ) : WithTop ℤ) ≤ meromorphicOrderAt Bw c := by
+    refine le_trans ?_ (P.prodRead_order_ge hw p)
+    exact_mod_cast (by
+      have := le_max_right (max (-(D p) - d) (k - d)) (-((D - E : Divisor X) p))
+      omega : -hi ≤ ((D - E : Divisor X) p))
+  have hBgm : MeromorphicAt Bg c := P.prodRead_mero p (w * ψ⁻¹)
+  -- step 1: the division identity + the witness identity
+  have hstep1 : φ (Submodule.Quotient.mk (truncTails D (Finsupp.single (p, k) (1 : ℂ))))
+      = P.pairFun w (invMonomialTail ψ p k lo hi) := by
+    rw [← mulTail_invMonomialTail ψ D p hd hlo hhi hlohi]
+    exact hkey _
+  -- step 2: expand the pairing on the inverse tail
+  have hstep2 : P.pairFun w (invMonomialTail ψ p k lo hi)
+      = ∑ j ∈ Finset.Ico lo hi, planarCoeff j W c * P.pairSlot w p j := by
+    rw [invMonomialTail, map_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [P.pairFun_single w (p, j)]
+  -- step 3: the window product law reassembles the residue of `W·(w·ω₀)`
+  have hstep3 : ∑ j ∈ Finset.Ico lo hi, planarCoeff j W c * P.pairSlot w p j
+      = planarCoeff (-1) (fun ζ => W ζ * Bw ζ) c := by
+    have hlaw := resCoeff_mul_window hWm hBwm (lo := lo) (hi := hi)
+      (le_of_le_of_eq
+        (by exact_mod_cast hlo : ((lo : ℤ) : WithTop ℤ) ≤ ((k - d : ℤ) : WithTop ℤ))
+        hWord.symm) hlohi hBword
+    have hpair : ∑ j ∈ Finset.Ico lo hi, planarCoeff j W c * P.pairSlot w p j
+        = ∑ j ∈ Finset.Ico lo hi, planarCoeff j W c * planarCoeff (-1 - j) Bw c := rfl
+    rw [hpair]
+    exact hlaw.symm
+  -- step 4: `W·(w·ω₀) = z^k·(g·ω₀)` pointwise (`g = w·ψ⁻¹` is the pointwise quotient)
+  have hstep4 : (fun ζ => W ζ * Bw ζ) = fun ζ => (ζ - c) ^ k * Bg ζ := by
+    funext ζ
+    rw [hW, hBw, hBg]
+    show ((ζ - c) ^ k * (A ζ)⁻¹) * (w.toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ)
+        = (ζ - c) ^ k * ((w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ)
+    rw [show (w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ)
+        = w.toFun ((chartAt (H := ℂ) p).symm ζ)
+          * (ψ.toFun ((chartAt (H := ℂ) p).symm ζ))⁻¹ from rfl,
+      show A ζ = ψ.toFun ((chartAt (H := ℂ) p).symm ζ) from by rw [hA]; rfl]
+    ring
+  -- step 5: the monomial shift lands on the slot pairing of `g`
+  have hstep5 : planarCoeff (-1) (fun ζ => (ζ - c) ^ k * Bg ζ) c
+      = planarCoeff (-1 - k) Bg c := planarCoeff_monomial_mul k (-1) hBgm
+  have hfinal : P.pairSlot (w * ψ⁻¹) p k = planarCoeff (-1 - k) Bg c := rfl
+  rw [hstep1, hstep2, hstep3, hstep4, hstep5, hfinal]
+
+/-- **Miranda VI.3.9 analogue — the pole-bound regularity of the quotient**: the witness
+identity forces `g = w·ψ⁻¹ ∈ L(K−D)` (each below-`D` gap coefficient of `g·ω₀` is a
+`φ`-value on an upper single, which dies in `H¹_t(D)`). -/
+theorem unwind_mem {D E : Divisor X} {ψ w : MeromorphicFunction X}
+    (hψ0 : ∀ q : X, ψ.orderW q ≠ ⊤)
+    (hw : w ∈ linearSystem (X := X) (P.data.K - (D - E)))
+    {φ : Module.Dual ℂ (H1Tail (X := X) D)}
+    (hkey : ∀ t : GlobalTails X,
+      φ (Submodule.Quotient.mk (mulTail ψ D t)) = P.pairFun w t) :
+    w * ψ⁻¹ ∈ linearSystem (X := X) (P.data.K - D) := by
+  intro p
+  obtain ⟨d, hd'⟩ := WithTop.ne_top_iff_exists.mp (hψ0 p)
+  have hd : ψ.orderW p = (d : WithTop ℤ) := hd'.symm
+  -- gap vanishing for the slot product of `g`
+  have hvan : ∀ j : ℤ, j < D p → planarCoeff j
+      (fun ζ => (w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ)
+      ((chartAt (H := ℂ) p) p) = 0 := by
+    intro j hj
+    have h1 := P.unwind_eval hw hkey hd (-1 - j)
+    have h2 : truncTails D (Finsupp.single (p, -1 - j) (1 : ℂ)) = 0 :=
+      truncTails_eq_zero_of_mem_upperSpace (single_mem_upperSpace (by omega) 1)
+    rw [h2, Submodule.Quotient.mk_zero, map_zero] at h1
+    have h3 : P.pairSlot (w * ψ⁻¹) p (-1 - j)
+        = planarCoeff j
+            (fun ζ => (w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ)
+            ((chartAt (H := ℂ) p) p) := by
+      rw [pairSlot, show (-1 - (-1 - j) : ℤ) = j from by ring]
+    rw [h3] at h1
+    exact h1.symm
+  -- upgrade to the order bound on the slot product, then peel off the exact slot order
+  have hord : ((D p : ℤ) : WithTop ℤ) ≤ meromorphicOrderAt
+      (fun ζ => (w * ψ⁻¹).toFun ((chartAt (H := ℂ) p).symm ζ) * P.slot p ζ)
+      ((chartAt (H := ℂ) p) p) :=
+    (order_ge_iff_planarCoeff_vanish (P.prodRead_mero p (w * ψ⁻¹)) (D p)).mpr
+      fun j hjlt => hvan j (by exact_mod_cast hjlt)
+  rw [P.prodRead_order p (w * ψ⁻¹)] at hord
+  have e1 : (-((P.data.K - D : Divisor X) p) : WithTop ℤ)
+      = ((-((P.data.K - D : Divisor X) p) : ℤ) : WithTop ℤ) := rfl
+  rw [e1, show (-((P.data.K - D : Divisor X) p) : ℤ) = D p - P.data.K p from by
+    rw [Finsupp.sub_apply]; ring]
+  cases hg : (w * ψ⁻¹).orderW p with
+  | top => exact le_top
+  | coe n =>
+    rw [hg] at hord
+    have hn : D p ≤ n + P.data.K p := by
+      have hcoe : ((n : ℤ) : WithTop ℤ) + ((P.data.K p : ℤ) : WithTop ℤ)
+          = ((n + P.data.K p : ℤ) : WithTop ℤ) := (WithTop.coe_add n (P.data.K p)).symm
+      rw [hcoe] at hord
+      exact_mod_cast hord
+    exact_mod_cast (by omega : D p - P.data.K p ≤ n)
+
+/-- **The functional identity of the unwind**: `φ` lifted to ambient tails IS the raw
+pairing functional of `g = w·ψ⁻¹` (they agree on every single: below the cut by
+`unwind_eval`, at/above it both vanish — `φ` through the upper kill, the pairing by the
+same evaluation). -/
+theorem unwind_pairing_eq {D E : Divisor X} {ψ w : MeromorphicFunction X}
+    (hψ0 : ∀ q : X, ψ.orderW q ≠ ⊤)
+    (hw : w ∈ linearSystem (X := X) (P.data.K - (D - E)))
+    {φ : Module.Dual ℂ (H1Tail (X := X) D)}
+    (hkey : ∀ t : GlobalTails X,
+      φ (Submodule.Quotient.mk (mulTail ψ D t)) = P.pairFun w t) :
+    φ.comp (tailCoker (X := X) D).mkQ = P.pairFun (w * ψ⁻¹) := by
+  refine Finsupp.lhom_ext fun q a => ?_
+  obtain ⟨p, k⟩ := q
+  obtain ⟨d, hd'⟩ := WithTop.ne_top_iff_exists.mp (hψ0 p)
+  have h1 := P.unwind_eval hw hkey hd'.symm k
+  have hsm : Finsupp.single ((p, k) : X × ℤ) a = a • Finsupp.single (p, k) (1 : ℂ) := by
+    rw [Finsupp.smul_single, smul_eq_mul, mul_one]
+  have hmk : (Submodule.Quotient.mk (Finsupp.single ((p, k) : X × ℤ) a)
+        : H1Tail (X := X) D)
+      = Submodule.Quotient.mk (truncTails D (Finsupp.single (p, k) a)) := by
+    rw [Submodule.Quotient.eq]
+    exact Submodule.mem_sup_right (sub_truncTails_mem_upperSpace D _)
+  calc (φ.comp (tailCoker (X := X) D).mkQ) (Finsupp.single (p, k) a)
+      = φ (Submodule.Quotient.mk (truncTails D (Finsupp.single (p, k) a))) := by
+        rw [LinearMap.comp_apply, Submodule.mkQ_apply, hmk]
+    _ = a • φ (Submodule.Quotient.mk (truncTails D (Finsupp.single (p, k) (1 : ℂ)))) := by
+        rw [hsm, map_smul, Submodule.Quotient.mk_smul, map_smul]
+    _ = a • P.pairSlot (w * ψ⁻¹) p k := by rw [h1]
+    _ = P.pairFun (w * ψ⁻¹) (Finsupp.single (p, k) a) := by
+        rw [P.pairFun_single, smul_eq_mul]
+
+/-- **The unwind, packaged** (Miranda VI.3.7 analogue): a nonzero pigeonhole witness
+`ψ·φ = ι_{D−E}(w)` puts `φ` in the range of the level-`D` pairing — via `g = w·ψ⁻¹`. -/
+theorem unwind {D E : Divisor X} {φ : Module.Dual ℂ (H1Tail (X := X) D)}
+    (ψq : lSysModule (X := X) E)
+    (wq : lSysModule (X := X) (P.data.K - (D - E)))
+    (hψq : ψq ≠ 0)
+    (heq : tailPsiAct (X := X) D E φ ψq = P.pairingL (D - E) wq) :
+    ∃ u : lSysModule (X := X) (P.data.K - D), P.pairingL D u = φ := by
+  obtain ⟨ψ, rfl⟩ := Submodule.Quotient.mk_surjective _ ψq
+  obtain ⟨w, rfl⟩ := Submodule.Quotient.mk_surjective _ wq
+  have hψ0 : ∀ q : X, (ψ : MeromorphicFunction X).orderW q ≠ ⊤ :=
+    orderW_ne_top_of_lSys_ne_zero hψq
+  have hkey : ∀ t : GlobalTails X,
+      φ (Submodule.Quotient.mk (mulTail (ψ : MeromorphicFunction X) D t))
+        = P.pairFun (w : MeromorphicFunction X) t := by
+    intro t
+    have happ := congrArg (fun χ : Module.Dual ℂ (H1Tail (X := X) (D - E)) =>
+      χ (Submodule.Quotient.mk t)) heq
+    simpa only [tailPsiAct_mk_mk, pairingL_mk, pairingFunctional_mk] using happ
+  have hg : (w : MeromorphicFunction X) * (ψ : MeromorphicFunction X)⁻¹
+      ∈ linearSystem (X := X) (P.data.K - D) := P.unwind_mem hψ0 w.2 hkey
+  refine ⟨Submodule.Quotient.mk ⟨_, hg⟩, ?_⟩
+  have hfn := P.unwind_pairing_eq hψ0 w.2 hkey
+  refine LinearMap.ext fun ξ => ?_
+  obtain ⟨t, rfl⟩ := Submodule.Quotient.mk_surjective _ ξ
+  rw [pairingL_mk, pairingFunctional_mk]
+  have happ := congrArg (fun L : GlobalTails X →ₗ[ℂ] ℂ => L t) hfn
+  exact happ.symm
+
+/-! ## Part F — the headline: `PairingSurjective` is a theorem -/
+
+/-- **Miranda VI.3.10 — the surjectivity half of tail Serre duality.**  For EVERY tail pair
+frame `P` and every divisor `D`, the residue pairing
+`pairingL D : L(K−D)/junk →ₗ Dual(H¹_t(D))` is surjective: the named residual input
+`PairingSurjective` of the tail tower (`docs/planning/TAILRR_BLOCKER.md`, input 2) is
+DISCHARGED.  Proof: the recovery + growth pigeonhole — `serre_surjectivity_dim_core` over
+the proven tail Riemann–Roch I arithmetic, with the `ψ`-action injectivity
+(`tailPsiAct_injective`, via division surjectivity by local inverse tails) and the
+pairing injectivity (`pairingL_injective`) feeding the two dimension lower bounds, and
+the unwind (`unwind`) converting the intersection witness into a preimage. -/
+theorem pairingSurjective (P : TailPairFrame X) : P.PairingSurjective := by
+  intro D φ
+  rcases eq_or_ne φ 0 with rfl | hφ
+  · exact ⟨0, map_zero _⟩
+  obtain ⟨P₀⟩ : Nonempty X := inferInstance
+  haveI hfinH : ∀ n : ℕ, FiniteDimensional ℂ
+      (H1Tail (X := X) (D - Finsupp.single P₀ (n : ℤ))) :=
+    fun _ => finiteDimensional_H1Tail _
+  haveI : ∀ n : ℕ, FiniteDimensional ℂ
+      (Module.Dual ℂ (H1Tail (X := X) (D - Finsupp.single P₀ (n : ℤ)))) :=
+    fun _ => inferInstance
+  -- `dim Λ n = l(nP₀) ≥ n + 1 − g_t` (action injectivity + tail RR-I)
+  have hΛ : ∀ n : ℕ, (1 : ℤ) - (tailGenus X : ℤ) + (n : ℤ) ≤
+      (finrank ℂ
+        ↥(LinearMap.range (tailPsiAct (X := X) D (Finsupp.single P₀ (n : ℤ)) φ)) : ℤ) := by
+    intro n
+    have hrk : finrank ℂ
+        ↥(LinearMap.range (tailPsiAct (X := X) D (Finsupp.single P₀ (n : ℤ)) φ))
+        = lDim (X := X) (Finsupp.single P₀ (n : ℤ)) :=
+      ((LinearEquiv.ofInjective _
+        (tailPsiAct_injective D (Finsupp.single P₀ (n : ℤ)) φ hφ)).finrank_eq).symm
+    have hRR := tail_riemannRoch_I (X := X) (Finsupp.single P₀ (n : ℤ))
+    rw [Divisor.deg_single] at hRR
+    rw [hrk]
+    omega
+  -- `dim I n = l(K − (D − nP₀)) ≥ n + (deg K + 1 − g_t) − deg D` (pairing injectivity + RR-I)
+  have hI : ∀ n : ℕ, (n : ℤ) + (Divisor.deg X P.data.K + 1 - (tailGenus X : ℤ))
+      - Divisor.deg X D ≤
+      (finrank ℂ
+        ↥(LinearMap.range (P.pairingL (D - Finsupp.single P₀ (n : ℤ)))) : ℤ) := by
+    intro n
+    have hrk : finrank ℂ
+        ↥(LinearMap.range (P.pairingL (D - Finsupp.single P₀ (n : ℤ))))
+        = lDim (X := X) (P.data.K - (D - Finsupp.single P₀ (n : ℤ))) :=
+      ((LinearEquiv.ofInjective _
+        (P.pairingL_injective (D - Finsupp.single P₀ (n : ℤ)))).finrank_eq).symm
+    have hRR := tail_riemannRoch_I (X := X)
+      (P.data.K - (D - Finsupp.single P₀ (n : ℤ)))
+    rw [Divisor.deg_sub, Divisor.deg_sub, Divisor.deg_single] at hRR
+    rw [hrk]
+    omega
+  -- `dim V n = h¹_t(D − nP₀) = n + g_t − 1 − deg D` for `n > deg D` (RR-I, negative degree)
+  have hV : ∀ n : ℕ, Divisor.deg X D < (n : ℤ) →
+      ((finrank ℂ
+        (Module.Dual ℂ (H1Tail (X := X) (D - Finsupp.single P₀ (n : ℤ))))) : ℤ)
+        = (n : ℤ) + (tailGenus X : ℤ) - 1 - Divisor.deg X D := by
+    intro n hdn
+    have hdual : finrank ℂ
+        (Module.Dual ℂ (H1Tail (X := X) (D - Finsupp.single P₀ (n : ℤ))))
+        = h1TailDim (X := X) (D - Finsupp.single P₀ (n : ℤ)) :=
+      Subspace.dual_finrank_eq
+    have hRR := tail_riemannRoch_I (X := X) (D - Finsupp.single P₀ (n : ℤ))
+    have h0 : lDim (X := X) (D - Finsupp.single P₀ (n : ℤ)) = 0 := by
+      refine lDim_eq_zero_of_deg_neg _ ?_
+      rw [Divisor.deg_sub, Divisor.deg_single]
+      omega
+    rw [h0, Divisor.deg_sub, Divisor.deg_single] at hRR
+    rw [hdual]
+    omega
+  -- the pigeonhole: the two subspaces of `Dual(H¹_t(D − NP₀))` meet for large `N`
+  obtain ⟨N, hN⟩ := SerreDuality.serre_surjectivity_dim_core
+    (V := fun n => Module.Dual ℂ (H1Tail (X := X) (D - Finsupp.single P₀ (n : ℤ))))
+    (fun n => LinearMap.range (tailPsiAct (X := X) D (Finsupp.single P₀ (n : ℤ)) φ))
+    (fun n => LinearMap.range (P.pairingL (D - Finsupp.single P₀ (n : ℤ))))
+    (tailGenus X : ℤ) (Divisor.deg X D)
+    (Divisor.deg X P.data.K + 1 - (tailGenus X : ℤ)) hΛ hI hV
+  obtain ⟨v, hv, hv0⟩ := (Submodule.ne_bot_iff _).mp (hN N le_rfl)
+  rw [Submodule.mem_inf] at hv
+  obtain ⟨ψq, hψ⟩ := LinearMap.mem_range.mp hv.1
+  obtain ⟨wq, hwq⟩ := LinearMap.mem_range.mp hv.2
+  have hψ0 : ψq ≠ 0 := by
+    rintro rfl
+    rw [map_zero] at hψ
+    exact hv0 hψ.symm
+  exact P.unwind ψq wq hψ0 (hψ.trans hwq.symm)
+
+/-- **Tail Riemann–Roch from a frame alone**: with `PairingSurjective` a theorem, the tail
+tower's headline conditional collapses to frame existence. -/
+theorem tailRiemannRoch (P : TailPairFrame X) : TailRiemannRoch X :=
+  P.tailRiemannRoch_of_pairingSurjective P.pairingSurjective
+
+end TailPairFrame
+
+/-- **The keystone-facing corollary, frame-only form**: a tail pair frame alone yields the
+canonical-cover arithmetic genus identity `h¹(𝒪) = kirovGenus` — the surjectivity input of
+`h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame` is discharged. -/
+theorem h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame' (P : TailPairFrame X) :
+    (chartDiskCover (X := X)).toFiniteCover.h1Dim (0 : Divisor X) = kirovGenus X :=
+  h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame P P.pairingSurjective
+
 end Dolbeault
 
 end Jacobians
