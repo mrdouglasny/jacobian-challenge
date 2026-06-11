@@ -17,3 +17,12 @@
           TailPairFrame.tailRiemannRoch (frame-only TailRiemannRoch X)
           h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame'.
   Wired into KirovDolbeault.lean aggregator. Full lake build + kernel #print axioms next.
+[milestone] KERNEL-VERIFIED + FULL BUILD GREEN:
+  lake build KirovDolbeault: Build completed successfully (8784 jobs).
+  #print axioms (all = [propext, Classical.choice, Quot.sound], no sorryAx, no custom):
+    TailPairFrame.pairingSurjective, TailPairFrame.tailRiemannRoch,
+    h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frame', planarCoeff_mul_window,
+    mkQ_mulTail_surjective, tailPsiAct_injective, TailPairFrame.unwind.
+  File: TailSurjectivity.lean, 971 lines, 0 sorry, 0 axiom.
+  Residual input of the whole tail tower is now ONLY Nonempty (TailPairFrame X)
+  (slots + pair-frame residue theorem). Docs updated: TAILRR_BLOCKER.md, TAILRR_ROUTE.md.
