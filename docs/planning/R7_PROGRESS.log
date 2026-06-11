@@ -21,3 +21,4 @@
      (E) resFunctional congruence machinery, (F) resCocycle linear map, (G) holomorphic-coboundary
      vanishing + K<=0 full vanish + liftQ descent, (H) R6Shape + R6Outputs + assembly into
      CousinResidueData. Compile incrementally with lake env lean.
+[T2] chunks A-F compile: extraction + IsOverlapCocycle + resCocycle linear map done.

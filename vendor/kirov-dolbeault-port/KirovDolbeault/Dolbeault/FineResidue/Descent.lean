@@ -536,3 +536,122 @@ theorem resCocycle_apply (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.
     resCocycle 𝔇 hsep g hg c = resFunctional 𝔇
       ⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep c) g, glueCoeff_cocycleFn_mem 𝔇 hsep c hg⟩ :=
   rfl
+
+/-! ### G. Coboundary vanishing and the `liftQ` descent
+
+A Čech coboundary `δ⁰f` whose 0-cochain components are `𝒪`-classes extracts to exactly the
+`(w, h)`-shape of R5's `resFunctional_eq_zero_of_coboundary`, so the functional kills it.  When
+`K ≤ 0` (genus 1: `K = div ω₀ = 0`) every `B¹(𝒪_K)`-coboundary is of this shape and the full
+`vanish_coboundary` field is **proven**; for `K` with positive part (genus ≥ 2) the remaining
+leg — 0-cochains with scalar poles at the (cover-isolated) K-points — is the residue-theorem
+content that needs the (higher-order) Mittag–Leffler tie, recorded in
+`docs/planning/R7_BLOCKER.md` and taken as the `hvanish` hypothesis of the assembly. -/
+
+/-- 0-cochain extraction: the analytic representative of each `𝒪`-class component. -/
+noncomputable def cochainFn (f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0)
+    (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X)) :
+    𝔇.toFiniteCover.ι → X → ℂ :=
+  fun i => holoFn (hf i)
+
+omit [Nonempty X] in
+theorem smoothOnSets_cochainFn (f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0)
+    (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X)) :
+    SmoothOnSets 𝔇 (cochainFn 𝔇 f hf) :=
+  fun j _ hx => holoFn_contMDiffAt (hf j) hx
+
+omit [Nonempty X] in
+theorem holomorphicOnSets_cochainFn (f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0)
+    (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X)) :
+    HolomorphicOnSets 𝔇 (cochainFn 𝔇 f hf) := by
+  intro j x hx
+  have ha := holoFn_chart_analyticAt (hf j) hx
+  exact (analyticAt_chart_change_to (mem_chartSource_of_mem_U 𝔇 hx) ha).differentiableAt
+
+omit [Nonempty X] in
+/-- For a cocycle that **is** a coboundary `δ⁰f` of `𝒪`-classes, the extracted overlap family is
+the coboundary of the extracted 0-cochain, pointwise on overlaps (the R5 input shape). -/
+theorem isCoboundaryOn_cocycleFn_of_coboundary (hsep : SeparatesPoles 𝔇 K)
+    (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    (f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0)
+    (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X))
+    (hcb : (c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 f) :
+    IsCoboundaryOn 𝔇 (cocycleFn 𝔇 hsep c) (cochainFn 𝔇 f hf) := by
+  intro i j x hx
+  by_cases h : i = j
+  · subst h
+    rw [cocycleFn_diag]
+    simp
+  · refine eq_at_of_toGerm_eq ?_ hx (continuousAt_cocycleFn 𝔇 hsep c hx)
+      (((holoFn_contMDiffAt (hf j) hx.2).continuousAt).sub
+        ((holoFn_contMDiffAt (hf i) hx.1).continuousAt))
+    show toGerm (𝔇.U i ⊓ 𝔇.U j) (fun v => cocycleFn 𝔇 hsep c i j v.1)
+        = toGerm (𝔇.U i ⊓ 𝔇.U j)
+            ((fun v : ↥(𝔇.U i ⊓ 𝔇.U j) => cochainFn 𝔇 f hf j v.1)
+              - fun v => cochainFn 𝔇 f hf i v.1)
+    have hj : toGerm (𝔇.U i ⊓ 𝔇.U j) (fun v => cochainFn 𝔇 f hf j v.1)
+        = rawRestrictG inf_le_right (f j) := by
+      rw [← toGerm_holoFn (hf j), rawRestrictG_coe]
+      rfl
+    have hi : toGerm (𝔇.U i ⊓ 𝔇.U j) (fun v => cochainFn 𝔇 f hf i v.1)
+        = rawRestrictG inf_le_left (f i) := by
+      rw [← toGerm_holoFn (hf i), rawRestrictG_coe]
+      rfl
+    rw [map_sub, toGerm_cocycleFn 𝔇 hsep c h, hcb, hj, hi]
+    simp only [FiniteFamily.cechDelta0, LinearMap.pi_apply, LinearMap.sub_apply,
+      LinearMap.comp_apply, LinearMap.proj_apply]
+
+/-- **The holomorphic-coboundary leg of `vanish_coboundary`** — R5's coboundary Stokes applied
+through the extraction: the residue functional kills every coboundary of `𝒪`-class 0-cochains. -/
+theorem resCocycle_eq_zero_of_holomorphic_coboundary (hsep : SeparatesPoles 𝔇 K)
+    (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (hg : IsOneZeroCoeff 𝔇 g)
+    (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    (f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0)
+    (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X))
+    (hcb : (c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0 f) :
+    resCocycle 𝔇 hsep g hg c = 0 :=
+  resFunctional_eq_zero_of_coboundary 𝔇 _ rfl hg (smoothOnSets_cochainFn 𝔇 f hf)
+    (holomorphicOnSets_cochainFn 𝔇 f hf)
+    (isCoboundaryOn_cocycleFn_of_coboundary 𝔇 hsep c f hf hcb)
+
+/-- **The full `vanish_coboundary` field at `K ≤ 0`** (in particular the genus-1 canonical
+divisor `K = 0`): every `B¹(𝒪_K)`-coboundary has `𝒪`-class components, so the holomorphic leg
+covers all of `B¹` and the residue functional descends to `cechH1 K`. -/
+theorem resCocycle_vanish_coboundary_of_nonpos (hsep : SeparatesPoles 𝔇 K)
+    (hK : ∀ x, K x ≤ 0) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ) (hg : IsOneZeroCoeff 𝔇 g) :
+    ∀ c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K),
+      c ∈ (𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K).submoduleOf
+        (𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →
+      resCocycle 𝔇 hsep g hg c = 0 := by
+  intro c hc
+  have hc' : (c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K := hc
+  obtain ⟨f, hfK, hcb⟩ := hc'
+  have hf0 : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (0 : Divisor X) :=
+    fun i => OmegaDGerm_le_zero_of_nonpos (fun x _ => hK x) (hfK i)
+  exact resCocycle_eq_zero_of_holomorphic_coboundary 𝔇 hsep g hg c f hf0 hcb.symm
+
+/-- **The `liftQ` descent — the fine-sheaf residue on Čech cohomology.**  Given the
+coboundary-vanishing leg, `resCocycle` descends through the `Z¹/B¹` quotient to a ℂ-linear
+functional on `cechH1 K` — exactly the `CousinResidueData.res` packaging of the port. -/
+noncomputable def resH1 (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g)
+    (hvanish : ∀ c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K),
+      c ∈ (𝔇.toFiniteCover.toFiniteFamily.coboundaries1 K).submoduleOf
+        (𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) →
+      resCocycle 𝔇 hsep g hg c = 0) :
+    𝔇.toFiniteCover.toFiniteFamily.cechH1 K →ₗ[ℂ] ℂ :=
+  Submodule.liftQ _ (resCocycle 𝔇 hsep g hg) hvanish
+
+@[simp] theorem resH1_mk (hsep : SeparatesPoles 𝔇 K) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g) (hvanish) (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K)) :
+    resH1 𝔇 hsep g hg hvanish (Submodule.Quotient.mk c) = resCocycle 𝔇 hsep g hg c :=
+  rfl
+
+/-- The descent, unconditional at `K ≤ 0` (the genus-1 leg). -/
+noncomputable def resH1_of_nonpos (hK : ∀ x, K x ≤ 0) (g : 𝔇.toFiniteCover.ι → ℂ → ℂ)
+    (hg : IsOneZeroCoeff 𝔇 g) :
+    𝔇.toFiniteCover.toFiniteFamily.cechH1 K →ₗ[ℂ] ℂ :=
+  resH1 𝔇 (separatesPoles_of_nonpos 𝔇 hK) g hg
+    (resCocycle_vanish_coboundary_of_nonpos 𝔇 (separatesPoles_of_nonpos 𝔇 hK) hK g hg)
