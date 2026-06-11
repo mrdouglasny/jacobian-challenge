@@ -7,3 +7,4 @@ import Jacobians.Topology.CoveringPi1
 import Jacobians.Topology.PuncturedPlanePi1
 import Jacobians.Topology.WindingNumber
 import Jacobians.Topology.PunctureLoops
+import Jacobians.Topology.PuncturedSpherePi1
