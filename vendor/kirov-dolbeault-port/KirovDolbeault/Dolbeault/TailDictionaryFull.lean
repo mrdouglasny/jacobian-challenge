@@ -1013,6 +1013,333 @@ theorem exists_analyticAt_cupRep_sub {f : MeromorphicFunction X} {n : ℤ}
 
 end DeepTestData
 
+/-- **THE NON-ISOLATED §17.7 EVALUATION** — the fine-sheaf residue functional does not
+vanish on the cup of `f ∈ L(K−E)` with the DEEP test cocycle at a forced bad point `b` with
+`K b = 0` (the residual case of the dictionary: `b` may lie in several cover sets).  The cup
+coboundary is presented in the global-cutoff-subtracted form (`H := θ·h⁰_{j₀}`,
+`h̃ := repairAtX b (h⁰ − H)`) and evaluated by the W1 engine
+(`resFunctional_eq_neg_residue_of_global_correction`) to `−r ≠ 0`. -/
+theorem resCocycle_cup_deepTestCocycle_ne_zero {E : Divisor X} {m : ℤ}
+    (hsep : SeparatesPoles 𝔇 K)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (dd : DeepTestData 𝔇 E b m)
+    {j₀ : 𝔇.toFiniteCover.ι} (hb : b ∈ (𝔇.U j₀ : Set X)) (hKb : K b = 0)
+    (f : ↥(linearSystem (X := X) (K - E)))
+    {n : ℤ} (hn : (f : MeromorphicFunction X).orderW b = (n : WithTop ℤ))
+    (hm : m = n + K b) :
+    resCocycle 𝔇 hsep g hg
+      (cupCocyclesMap (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f.2 dd.cocycle) ≠ 0 := by
+  classical
+  haveI := nhdsNE_neBot b
+  have hKb0 : 0 ≤ K b := le_of_eq hKb.symm
+  have hnE : E b ≤ n := by
+    have h1 := dd.hmE
+    omega
+  -- the cup data and its coboundary presentation
+  have hF0 : cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) (f : MeromorphicFunction X)
+      dd.cochain ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1) :=
+    dd.cup_mem_sections0 f.2 hn hm
+  set z : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K) :=
+    cupCocyclesMap (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f.2 dd.cocycle with hzdef
+  have hcb : (z : 𝔇.toFiniteCover.toFiniteFamily.Cochain1)
+      = 𝔇.toFiniteCover.toFiniteFamily.cechDelta0
+        (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) (f : MeromorphicFunction X)
+          dd.cochain) := by
+    have h1 := LinearMap.congr_fun
+      (cupCochain1_comp_cechDelta0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily)
+        (f : MeromorphicFunction X)) dd.cochain
+    simp only [LinearMap.comp_apply] at h1
+    rw [hzdef, cupCocyclesMap_coe, dd.cocycle_coe]
+    exact h1
+  set h0 : 𝔇.toFiniteCover.ι → X → ℂ :=
+    vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) (f : MeromorphicFunction X)
+      dd.cochain) hF0 with hh0def
+  -- the bad set and the marked point
+  have hbS : b ∉ posSupp K := fun hc => by
+    rw [mem_posSupp_iff, hKb] at hc
+    exact lt_irrefl 0 hc
+  have hSiso : ∀ a ∈ posSupp K, ∃ i₀, MLIsolated 𝔇 i₀ a := fun a ha =>
+    exists_isolated_of_separatesPoles 𝔇 hsep (mem_posSupp_iff.mp ha)
+  have hnotpos : ∀ x : X, x ≠ b → x ∉ ((posSupp K : Finset X) : Set X) →
+      x ∉ ((posSupp (K + Finsupp.single b 1) : Finset X) : Set X) := by
+    intro x hxb hxS hc
+    rcases (mem_posSupp_add_single_iff hKb).mp (Finset.mem_coe.mp hc) with h | h
+    · exact hxb h
+    · exact hxS (Finset.mem_coe.mpr h)
+  have h0sm := smoothOnSetsOff_vanishFn hF0
+  have h0hol := holomorphicOnSetsOff_vanishFn hF0
+  -- W3: the bump and the global correction scalar
+  set O : Set X := (𝔇.U j₀ : Set X) ∩ ((posSupp K : Finset X) : Set X)ᶜ with hOdef
+  have hOopen : IsOpen O :=
+    (𝔇.U j₀).isOpen.inter (posSupp K).finite_toSet.isClosed.isOpen_compl
+  have hbO : O ∈ 𝓝 b := hOopen.mem_nhds ⟨hb, by simpa using hbS⟩
+  obtain ⟨χ, -, hχsupp⟩ :=
+    ((SmoothBumpFunction.nhds_basis_tsupport (I := 𝓘(ℝ, ℂ)) b).mem_iff).mp hbO
+  set θ : X → ℂ := fun x => ((χ x : ℝ) : ℂ) with hθdef
+  set H : X → ℂ := fun x => θ x * h0 j₀ x with hHdef
+  have hθsupp : tsupport θ ⊆ O := by
+    refine subset_trans (closure_mono ?_) (subset_trans (closure_minimal
+      (subset_closure) (isClosed_tsupport χ)) hχsupp)
+    intro y hy
+    simp only [Function.mem_support] at hy ⊢
+    intro hc
+    apply hy
+    show ((χ y : ℝ) : ℂ) = 0
+    rw [hc, Complex.ofReal_zero]
+  have hHsuppθ : tsupport H ⊆ tsupport θ := by
+    refine closure_mono ?_
+    intro y hy
+    simp only [Function.mem_support] at hy ⊢
+    intro hc
+    apply hy
+    show θ y * h0 j₀ y = 0
+    rw [hc, zero_mul]
+  have hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X) :=
+    (hHsuppθ.trans hθsupp).trans Set.inter_subset_left
+  have hθ1 : ∀ᶠ y in 𝓝 b, θ y = 1 := by
+    filter_upwards [χ.eventuallyEq_one] with y hy
+    show ((χ y : ℝ) : ℂ) = 1
+    rw [show χ y = 1 from hy, Complex.ofReal_one]
+  have hHev : H =ᶠ[𝓝 b] h0 j₀ := by
+    filter_upwards [hθ1] with y hy
+    show θ y * h0 j₀ y = h0 j₀ y
+    rw [hy, one_mul]
+  have hθsm : ∀ x : X, ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) θ x := by
+    intro x
+    have h1 : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ) (⊤ : ℕ∞) (fun y => (χ y : ℝ)) x := χ.contMDiffAt
+    exact (Complex.ofRealCLM.contMDiff.contMDiffAt).comp x h1
+  have hHsm : ∀ x : X, x ≠ b → ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) H x := by
+    intro x hxb
+    by_cases hxθ : x ∈ tsupport θ
+    · have hxO : x ∈ O := hθsupp hxθ
+      exact (hθsm x).mul (h0sm j₀ x hxO.1 (hnotpos x hxb hxO.2))
+    · refine (contMDiffAt_const (c := (0 : ℂ))).congr_of_eventuallyEq ?_
+      filter_upwards [(isClosed_tsupport θ).isOpen_compl.mem_nhds hxθ] with y hy
+      show H y = 0
+      have hθ0 : θ y = 0 := image_eq_zero_of_notMem_tsupport hy
+      show θ y * h0 j₀ y = 0
+      rw [hθ0, zero_mul]
+  -- the per-star analytic extension of `h0 i − H` across `b`
+  have hQ : ∀ i : 𝔇.toFiniteCover.ι, ∃ q : ℂ → ℂ, b ∈ (𝔇.U i : Set X) →
+      AnalyticAt ℂ q (βpt b) ∧
+      ((fun x => h0 i x - H x) ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝[≠] (βpt b)] q := by
+    intro i
+    by_cases hi : b ∈ (𝔇.U i : Set X)
+    · obtain ⟨q, hq, hqe⟩ := dd.exists_analyticAt_cupRep_sub hn hnE hi hb
+      refine ⟨q, fun _ => ⟨hq, ?_⟩⟩
+      have hXev : (fun x => h0 i x - H x) =ᶠ[𝓝[≠] b]
+          fun x => Gext ((dd.toTestCocycleData hi).cupRep (f : MeromorphicFunction X)) x
+            - Gext ((dd.toTestCocycleData hb).cupRep (f : MeromorphicFunction X)) x := by
+        have h1 := dd.vanishFn_eventuallyEq_Gext_cupRep hn hm hi hF0
+        have h2 := dd.vanishFn_eventuallyEq_Gext_cupRep hn hm hb hF0
+        filter_upwards [h1, h2, eventually_nhdsWithin_of_eventually_nhds hHev]
+          with y hy1 hy2 hy3
+        show h0 i y - H y = _
+        rw [hy3, hh0def, hy1, hy2]
+      exact (read_eventuallyEq_of_eventuallyEq_nhdsNE hXev).trans hqe
+    · exact ⟨0, fun h => absurd h hi⟩
+  choose qf hqf using hQ
+  -- W4: the repaired presentation
+  set ht : 𝔇.toFiniteCover.ι → X → ℂ :=
+    fun i => repairAtX b (fun x => h0 i x - H x) with htdef
+  have htread : ∀ i, ∀ hi : b ∈ (𝔇.U i : Set X),
+      (ht i ∘ (chartAt (H := ℂ) b).symm) =ᶠ[𝓝 (βpt b)] qf i := fun i hi =>
+    repairAtX_read_eventuallyEq (hqf i hi).1 (hqf i hi).2
+  have htsmooth_b : ∀ i, b ∈ (𝔇.U i : Set X) →
+      ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (ht i) b := by
+    intro i hi
+    refine contMDiffAt_real_of_chart_analyticAt ?_
+    exact ((hqf i hi).1).congr (htread i hi).symm
+  have htval : ∀ i, ∀ hi : b ∈ (𝔇.U i : Set X), ht i b = qf i (βpt b) := by
+    intro i hi
+    have h1 := (htread i hi).self_of_nhds
+    rwa [Function.comp_apply, (chartAt (H := ℂ) b).left_inv (mem_chart_source ℂ b)] at h1
+  have httend : ∀ i, ∀ _ : b ∈ (𝔇.U i : Set X),
+      Tendsto (fun x => h0 i x - H x) (𝓝[≠] b) (𝓝 (qf i (βpt b))) := fun i hi =>
+    tendsto_of_read_extension (hqf i hi).1 (hqf i hi).2
+  -- engine hypothesis: smoothness off the K-points
+  have hsm : SmoothOnSetsOff 𝔇 ((posSupp K : Finset X) : Set X) ht := by
+    intro i x hx hxS
+    by_cases hxb : x = b
+    · subst hxb
+      exact htsmooth_b i hx
+    · have h1 : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (fun y => h0 i y - H y) x :=
+        (h0sm i x hx (hnotpos x hxb hxS)).sub (hHsm x hxb)
+      exact h1.congr_of_eventuallyEq (repairAtX_eventuallyEq_off hxb)
+  -- engine hypothesis: the coboundary presentation
+  have hδ : IsCoboundaryOn 𝔇 (cocycleFn 𝔇 hsep z) ht := by
+    intro i j x hx
+    by_cases hij : i = j
+    · subst hij
+      rw [cocycleFn_diag]
+      simp
+    by_cases hxb : x = b
+    · have hbx : b = x := hxb.symm
+      subst hbx
+      have hi : b ∈ (𝔇.U i : Set X) := hx.1
+      have hj : b ∈ (𝔇.U j : Set X) := hx.2
+      have hev : cocycleFn 𝔇 hsep z i j =ᶠ[𝓝[≠] b]
+          fun y => (h0 j y - H y) - (h0 i y - H y) := by
+        rw [EventuallyEq, eventually_nhdsWithin_iff]
+        filter_upwards [(𝔇.U i ⊓ 𝔇.U j : Opens X).isOpen.mem_nhds hx] with y hy hyb
+        have hyb' : y ≠ b := by simpa using hyb
+        have hK'y : (K + Finsupp.single b 1 : Divisor X) y ≤ 0 := by
+          rw [Finsupp.add_apply, show (Finsupp.single b 1 : Divisor X) y = 0 from
+            Finsupp.single_eq_of_ne hyb', add_zero]
+          exact hsep i j hij y hy
+        have h1 := cocycleFn_eq_vanishFn_sub_at hsep z hF0 hcb hy hK'y
+        show cocycleFn 𝔇 hsep z i j y = (h0 j y - H y) - (h0 i y - H y)
+        rw [h1, hh0def]
+        ring
+      have ht1 : Tendsto (cocycleFn 𝔇 hsep z i j) (𝓝[≠] b)
+          (𝓝 (cocycleFn 𝔇 hsep z i j b)) :=
+        (continuousAt_cocycleFn 𝔇 hsep z hx).tendsto.mono_left nhdsWithin_le_nhds
+      have ht2 : Tendsto (cocycleFn 𝔇 hsep z i j) (𝓝[≠] b)
+          (𝓝 (qf j (βpt b) - qf i (βpt b))) := by
+        refine Tendsto.congr' hev.symm ?_
+        exact (httend j hj).sub (httend i hi)
+      rw [tendsto_nhds_unique ht1 ht2, htval i hi, htval j hj]
+    · have hK'x : (K + Finsupp.single b 1 : Divisor X) x ≤ 0 := by
+        rw [Finsupp.add_apply, show (Finsupp.single b 1 : Divisor X) x = 0 from
+          Finsupp.single_eq_of_ne hxb, add_zero]
+        exact hsep i j hij x hx
+      have h1 := cocycleFn_eq_vanishFn_sub_at hsep z hF0 hcb hx hK'x
+      have h2 : ∀ k : 𝔇.toFiniteCover.ι, ht k x = h0 k x - H x := fun k =>
+        repairAtX_apply_ne hxb
+      rw [h1, h2 i, h2 j, hh0def]
+      ring
+  -- engine hypothesis: slot-product extension at the unmarked K-points
+  have hext : ∀ a ∈ posSupp K, ∀ i₀, MLIsolated 𝔇 i₀ a →
+      SlotProductExtendsAt 𝔇 ht g i₀ a := by
+    intro a haS i₀ hiso
+    have hab : a ≠ b := fun hc => hbS (hc ▸ haS)
+    have haK' : 0 < (K + Finsupp.single b 1 : Divisor X) a := by
+      rw [Finsupp.add_apply, show (Finsupp.single b 1 : Divisor X) a = 0 from
+        Finsupp.single_eq_of_ne hab, add_zero]
+      exact mem_posSupp_iff.mp haS
+    obtain ⟨u, huan, hu0, hgv⟩ := hexact a i₀ hiso.1
+    have hgv' : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 i₀ a), g i₀ ζ
+        = (ζ - chartMap 𝔇 i₀ a) ^ ((K + Finsupp.single b 1 : Divisor X) a).toNat * u ζ := by
+      rw [show ((K + Finsupp.single b 1 : Divisor X) a).toNat = (K a).toNat from by
+        rw [Finsupp.add_apply, show (Finsupp.single b 1 : Divisor X) a = 0 from
+          Finsupp.single_eq_of_ne hab, add_zero]]
+      exact hgv
+    obtain ⟨q', hq', hev'⟩ := slotProductExtendsAt_vanishFn hF0 hg haK' hiso huan hgv'
+    refine ⟨q', hq', ?_⟩
+    have haN : a ∈ (tsupport θ)ᶜ ∩ ({b}ᶜ : Set X) :=
+      ⟨fun hc => (hθsupp hc).2 (by simpa using haS), by simpa using hab⟩
+    have hNopen : IsOpen ((tsupport θ)ᶜ ∩ ({b}ᶜ : Set X)) :=
+      (isClosed_tsupport θ).isOpen_compl.inter isOpen_compl_singleton
+    have hhteq : ∀ y ∈ (tsupport θ)ᶜ ∩ ({b}ᶜ : Set X), ht i₀ y = h0 i₀ y := by
+      intro y hy
+      have hyb : y ≠ b := by simpa using hy.2
+      show repairAtX b (fun x => h0 i₀ x - H x) y = h0 i₀ y
+      rw [repairAtX_apply_ne hyb]
+      show h0 i₀ y - H y = h0 i₀ y
+      have hθ0 : θ y = 0 := image_eq_zero_of_notMem_tsupport hy.1
+      show h0 i₀ y - θ y * h0 j₀ y = h0 i₀ y
+      rw [hθ0, zero_mul, sub_zero]
+    have hsrc : a ∈ (chartAt ℂ (𝔇.center i₀)).source := mem_chartSource_of_mem_U 𝔇 hiso.1
+    have hcont : ContinuousAt (chartAt ℂ (𝔇.center i₀)).symm (chartMap 𝔇 i₀ a) :=
+      (chartAt ℂ (𝔇.center i₀)).continuousAt_symm
+        ((chartAt ℂ (𝔇.center i₀)).map_source hsrc)
+    have hli : (chartAt ℂ (𝔇.center i₀)).symm (chartMap 𝔇 i₀ a) = a :=
+      (chartAt ℂ (𝔇.center i₀)).left_inv hsrc
+    have hmemN : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 i₀ a),
+        (chartAt ℂ (𝔇.center i₀)).symm ζ ∈ (tsupport θ)ᶜ ∩ ({b}ᶜ : Set X) := by
+      refine hcont.preimage_mem_nhds ?_
+      rw [hli]
+      exact hNopen.mem_nhds haN
+    refine Filter.EventuallyEq.trans ?_ hev'
+    filter_upwards [eventually_nhdsWithin_of_eventually_nhds hmemN] with ζ hζ
+    show ht i₀ ((chartAt ℂ (𝔇.center i₀)).symm ζ) * g i₀ ζ
+      = h0 i₀ ((chartAt ℂ (𝔇.center i₀)).symm ζ) * g i₀ ζ
+    rw [hhteq _ hζ]
+  -- engine hypothesis: punctured holomorphy of the `H`-read near the marked point
+  have hH0' : ∀ᶠ x in 𝓝[≠] b, DifferentiableAt ℂ
+      (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ x) := by
+    obtain ⟨V₁, hV₁sub, hV₁open, hbV₁⟩ := eventually_nhds_iff.mp hHev
+    rw [eventually_nhdsWithin_iff]
+    filter_upwards [hV₁open.mem_nhds hbV₁, (𝔇.U j₀).isOpen.mem_nhds hb,
+      (posSupp K).finite_toSet.isClosed.isOpen_compl.mem_nhds (by simpa using hbS)]
+      with x hx1 hx2 hx3 hxb
+    have hxb' : x ≠ b := by simpa using hxb
+    have hsrc : x ∈ (chartAt ℂ (𝔇.center j₀)).source := mem_chartSource_of_mem_U 𝔇 hx2
+    have hcont : ContinuousAt (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ x) :=
+      (chartAt ℂ (𝔇.center j₀)).continuousAt_symm
+        ((chartAt ℂ (𝔇.center j₀)).map_source hsrc)
+    have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ x) = x :=
+      (chartAt ℂ (𝔇.center j₀)).left_inv hsrc
+    have hev2 : (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ))
+        =ᶠ[𝓝 (chartMap 𝔇 j₀ x)]
+          fun ζ => h0 j₀ ((chartAt ℂ (𝔇.center j₀)).symm ζ) := by
+      have hmem : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j₀ x),
+          (chartAt ℂ (𝔇.center j₀)).symm ζ ∈ V₁ := by
+        refine hcont.preimage_mem_nhds ?_
+        rw [hli]
+        exact hV₁open.mem_nhds hx1
+      filter_upwards [hmem] with ζ hζ
+      exact hV₁sub _ hζ
+    exact (h0hol j₀ x hx2 (hnotpos x hxb' (by simpa using hx3))).congr_of_eventuallyEq hev2
+  -- engine hypothesis: holomorphy of the corrected presentation off `S ∪ {b}`
+  have hhol' : ∀ i, ∀ x ∈ (𝔇.U i : Set X), x ∉ ((posSupp K : Finset X) : Set X) → x ≠ b →
+      DifferentiableAt ℂ (fun ζ => ht i ((chartAt ℂ (𝔇.center i)).symm ζ)
+        + H ((chartAt ℂ (𝔇.center i)).symm ζ)) (chartMap 𝔇 i x) := by
+    intro i x hx hxS hxb
+    have heqN : ∀ y : X, y ≠ b → ht i y + H y = h0 i y := by
+      intro y hyb
+      show repairAtX b (fun w => h0 i w - H w) y + H y = h0 i y
+      rw [repairAtX_apply_ne hyb]
+      ring
+    have hsrc : x ∈ (chartAt ℂ (𝔇.center i)).source := mem_chartSource_of_mem_U 𝔇 hx
+    have hcont : ContinuousAt (chartAt ℂ (𝔇.center i)).symm (chartMap 𝔇 i x) :=
+      (chartAt ℂ (𝔇.center i)).continuousAt_symm ((chartAt ℂ (𝔇.center i)).map_source hsrc)
+    have hli : (chartAt ℂ (𝔇.center i)).symm (chartMap 𝔇 i x) = x :=
+      (chartAt ℂ (𝔇.center i)).left_inv hsrc
+    have hev2 : (fun ζ => ht i ((chartAt ℂ (𝔇.center i)).symm ζ)
+          + H ((chartAt ℂ (𝔇.center i)).symm ζ))
+        =ᶠ[𝓝 (chartMap 𝔇 i x)] fun ζ => h0 i ((chartAt ℂ (𝔇.center i)).symm ζ) := by
+      have hmem : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 i x),
+          (chartAt ℂ (𝔇.center i)).symm ζ ∈ ({b}ᶜ : Set X) := by
+        refine hcont.preimage_mem_nhds ?_
+        rw [hli]
+        exact isOpen_compl_singleton.mem_nhds (by simpa using hxb)
+      filter_upwards [hmem] with ζ hζ
+      exact heqN _ (by simpa using hζ)
+    exact (h0hol i x hx (hnotpos x hxb hxS)).congr_of_eventuallyEq hev2
+  -- the marked simple pole, transferred to `H`
+  obtain ⟨r, hr0, hpole⟩ := (dd.toTestCocycleData hb).exists_slotProductSimplePoleAt
+    hn hm hKb0 hg hexact hF0 (dd.cup_component_eq hb)
+  obtain ⟨q, hqan, hpe0⟩ := hpole
+  have hpe : (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ b)]
+        fun ζ => r * (ζ - chartMap 𝔇 j₀ b)⁻¹ + q ζ := by
+    refine Filter.EventuallyEq.trans ?_ hpe0
+    obtain ⟨V₁, hV₁sub, hV₁open, hbV₁⟩ := eventually_nhds_iff.mp hHev
+    have hsrc : b ∈ (chartAt ℂ (𝔇.center j₀)).source := mem_chartSource_of_mem_U 𝔇 hb
+    have hcont : ContinuousAt (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ b) :=
+      (chartAt ℂ (𝔇.center j₀)).continuousAt_symm
+        ((chartAt ℂ (𝔇.center j₀)).map_source hsrc)
+    have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ b) = b :=
+      (chartAt ℂ (𝔇.center j₀)).left_inv hsrc
+    have hmem : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j₀ b),
+        (chartAt ℂ (𝔇.center j₀)).symm ζ ∈ V₁ := by
+      refine hcont.preimage_mem_nhds ?_
+      rw [hli]
+      exact hV₁open.mem_nhds hbV₁
+    refine Filter.eventuallyEq_of_mem (mem_nhdsWithin_of_mem_nhds hmem) fun ζ hζ => ?_
+    show H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ
+      = h0 j₀ ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ
+    rw [hV₁sub _ hζ]
+  -- the W1 engine evaluation
+  have heval : resFunctional 𝔇 (⟨glueCoeff 𝔇 (cocycleFn 𝔇 hsep z) g,
+      glueCoeff_cocycleFn_mem 𝔇 hsep z hg⟩ : oneOneCoeff 𝔇) = -r :=
+    resFunctional_eq_neg_residue_of_global_correction
+      (S := posSupp K) (w := cocycleFn 𝔇 hsep z) (H := H) (b := b)
+      _ rfl hg hSiso hsm hδ hext hb hHsupp hHsm hH0' hhol' hqan hpe
+  rw [resCocycle_apply, heval]
+  exact neg_ne_zero.mpr hr0
+
 end Engine
 
 end Dolbeault
