@@ -257,9 +257,10 @@ theorem exists_finite_generating_loops (x₀ : X)
   obtain ⟨S, hS⟩ := IsNoetherian.noetherian A
   have hsub : ∀ s : S, ∃ γ : AnalyticLoop X x₀, loopToHomology γ = (s : H1 X x₀) := by
     intro s
-    refine exists_loop_of_mem_span (v := (s : H1 X x₀)) ?_
-    rw [← hS]
-    exact Submodule.subset_span s.2
+    have h1 : (s : H1 X x₀) ∈ Submodule.span ℤ ((S : Finset (H1 X x₀)) : Set (H1 X x₀)) :=
+      Submodule.subset_span s.2
+    rw [hS, hA] at h1
+    exact exists_loop_of_mem_span h1
   choose f hf using hsub
   refine ⟨S.card, fun i => f (S.equivFin.symm i), fun δ => ?_⟩
   have hrange : (Set.range fun i => loopToHomology (f (S.equivFin.symm i)))
