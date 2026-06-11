@@ -155,6 +155,7 @@ theorem basepointPeriodFunctional_increment (x₀ P : X) {Q : X}
   rw [hloop]
   ring
 
+omit [CompactSpace X] in
 /-- The potential increment formula: if `Λ` kills all loop periods at `x₀`,
 then the potential `u = Λ ∘ basepointPeriodFunctional x₀` changes across a
 chart ball exactly by the `Λ`-value of the chart-segment functional. -/
@@ -166,6 +167,142 @@ theorem potential_increment (x₀ : X)
       Λ (basepointPeriodFunctional x₀ P) + Λ (segmentPeriodFunctional P hQ) := by
   rw [basepointPeriodFunctional_increment x₀ P hQ, map_sub, map_add,
     hΛ (incrementLoop x₀ P hQ), sub_zero]
+
+/-! ## `Λ` in coordinates and the associated holomorphic 1-form -/
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- An ℝ-linear functional applied to a ℂ-scalar multiple, split into real
+and imaginary contributions. -/
+theorem linMap_apply_complex_smul
+    (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) (z : ℂ)
+    (F : HolomorphicOneForm X →ₗ[ℂ] ℂ) :
+    Λ (z • F) = z.re * Λ F + z.im * Λ (Complex.I • F) := by
+  have hz : z • F = z.re • F + z.im • (Complex.I • F) := by
+    calc z • F = ((z.re : ℂ) + (z.im : ℂ) * Complex.I) • F := by
+          rw [Complex.re_add_im]
+      _ = (z.re : ℂ) • F + ((z.im : ℂ) * Complex.I) • F := add_smul _ _ _
+      _ = z.re • F + z.im • (Complex.I • F) := by
+          rw [mul_smul, ← Complex.coe_algebraMap, algebraMap_smul,
+            algebraMap_smul]
+  rw [hz, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
+
+/-- The complex coefficient vector attached to an ℝ-linear functional on the
+dual of the holomorphic 1-forms, against a basis `bω`: `Λ` acts as
+`F ↦ Re (∑ j, lamCoeff j * F (bω j))` (see `linMap_apply_eq_re_sum`). -/
+def lamCoeff (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) (j : Fin n) : ℂ :=
+  (Λ (bω.coord j) : ℂ) - Complex.I * (Λ (Complex.I • bω.coord j) : ℂ)
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+theorem lamCoeff_mul_re (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) (j : Fin n) (z : ℂ) :
+    (lamCoeff Λ bω j * z).re =
+      z.re * Λ (bω.coord j) + z.im * Λ (Complex.I • bω.coord j) := by
+  simp only [lamCoeff, Complex.sub_re, Complex.sub_im, Complex.mul_re,
+    Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
+    Complex.ofReal_im]
+  ring
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- **`Λ` in coordinates.** Every ℝ-linear functional on the dual of the
+forms acts as the real part of a ℂ-linear pairing against `lamCoeff`. -/
+theorem linMap_apply_eq_re_sum (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ)
+    {n : ℕ} (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X))
+    (F : HolomorphicOneForm X →ₗ[ℂ] ℂ) :
+    Λ F = (∑ j, lamCoeff Λ bω j * F (bω j)).re := by
+  conv_lhs => rw [← Module.Basis.sum_dual_apply_smul_coord bω F]
+  rw [map_sum, Complex.re_sum]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [linMap_apply_complex_smul, lamCoeff_mul_re]
+
+/-- The holomorphic 1-form attached to `Λ`: `η = ∑ j, lamCoeff j • bω j`.
+`Λ` vanishes identically iff `η = 0` (through `linMap_apply_eq_re_sum`). -/
+def lamForm (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) :
+    HolomorphicOneForm X :=
+  ∑ j, lamCoeff Λ bω j • bω j
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- The chart coefficient family of `lamForm` is the matching combination of
+the basis coefficients. -/
+theorem lamForm_coeff (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) (P : X) (z : ℂ) :
+    (lamForm Λ bω).coeff P z = ∑ j, lamCoeff Λ bω j * (bω j).coeff P z := by
+  classical
+  have h : ((lamForm Λ bω : HolomorphicOneForm X) : X → ℂ → ℂ)
+      = ∑ j, ((lamCoeff Λ bω j • bω j : HolomorphicOneForm X) : X → ℂ → ℂ) := by
+    simp [lamForm]
+  calc (lamForm Λ bω).coeff P z
+      = ((lamForm Λ bω : HolomorphicOneForm X) : X → ℂ → ℂ) P z := rfl
+    _ = (∑ j, ((lamCoeff Λ bω j • bω j : HolomorphicOneForm X) : X → ℂ → ℂ)) P z := by
+        rw [h]
+    _ = ∑ j, ((lamCoeff Λ bω j • bω j : HolomorphicOneForm X) : X → ℂ → ℂ) P z := by
+        simp [Finset.sum_apply]
+    _ = ∑ j, lamCoeff Λ bω j * (bω j).coeff P z := by
+        refine Finset.sum_congr rfl fun j _ => ?_
+        rfl
+
+/-! ## The local holomorphic potential -/
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- The chosen chart-target ball at `P` as a `PathChartBall` (the canonical
+primitive carrier of `DevelopingMap`). -/
+def potentialChartBall (P : X) : PathChartBall X where
+  p := P
+  c := (chartAt ℂ P) P
+  r := chartTargetBallRadius P
+  ball_subset_target := chartTargetBall_subset_extChartAt_target P
+
+/-- The local holomorphic potential of `Λ` at `P`:
+`H_P(z) = ∑ j, lamCoeff j * (primitive of (bω j).coeff P)(z)` on the chosen
+chart ball. Its derivative is the coefficient of `lamForm` at `P`. -/
+def localPotential (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) (P : X) : ℂ → ℂ :=
+  fun z => ∑ j, lamCoeff Λ bω j *
+    pathChartBallPrimitive (bω j) (potentialChartBall P) z
+
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+/-- On the chart ball, the local potential is a primitive of the coefficient
+of `lamForm` at `P`. -/
+theorem localPotential_hasDerivAt
+    (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ) {n : ℕ}
+    (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X)) (P : X) {z : ℂ}
+    (hz : z ∈ Metric.ball ((chartAt ℂ P) P) (chartTargetBallRadius P)) :
+    HasDerivAt (localPotential Λ bω P) ((lamForm Λ bω).coeff P z) z := by
+  rw [lamForm_coeff]
+  exact HasDerivAt.fun_sum fun j _ =>
+    (pathChartBallPrimitive_hasDerivAt (bω j) (potentialChartBall P) z hz).const_mul _
+
+omit [CompactSpace X] in
+/-- **Local formula for the potential.** Under the loop-period hypothesis,
+across the chart ball at `P` the potential `u` is
+`u(P) + Re H_P(chart Q) - Re H_P(chart P)`. -/
+theorem potential_eq_localPotential (x₀ : X)
+    (Λ : (HolomorphicOneForm X →ₗ[ℂ] ℂ) →ₗ[ℝ] ℝ)
+    (hΛ : ∀ γ : AnalyticLoop X x₀, Λ (loopPeriodFunctional x₀ γ) = 0)
+    {n : ℕ} (bω : Module.Basis (Fin n) ℂ (HolomorphicOneForm X))
+    (P : X) {Q : X} (hQ : Q ∈ chartBallSource P) :
+    Λ (basepointPeriodFunctional x₀ Q) =
+      Λ (basepointPeriodFunctional x₀ P)
+        + ((localPotential Λ bω P) ((chartAt ℂ P) Q)).re
+        - ((localPotential Λ bω P) ((chartAt ℂ P) P)).re := by
+  rw [potential_increment x₀ Λ hΛ P hQ]
+  have hseg : ∀ j, segmentPeriodFunctional P hQ (bω j)
+      = pathChartBallPrimitive (bω j) (potentialChartBall P) ((chartAt ℂ P) Q)
+        - pathChartBallPrimitive (bω j) (potentialChartBall P) ((chartAt ℂ P) P) := by
+    intro j
+    rw [segmentPeriodFunctional_apply]
+    exact canonicalArcIntegral_chartSegmentArc P hQ (bω j)
+      (pathChartBallPrimitive_hasDerivAt (bω j) (potentialChartBall P))
+  rw [linMap_apply_eq_re_sum Λ bω (segmentPeriodFunctional P hQ)]
+  have hsum : ∑ j, lamCoeff Λ bω j * segmentPeriodFunctional P hQ (bω j)
+      = localPotential Λ bω P ((chartAt ℂ P) Q)
+        - localPotential Λ bω P ((chartAt ℂ P) P) := by
+    rw [localPotential, localPotential, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [hseg j, mul_sub]
+  rw [hsum, Complex.sub_re]
+  ring
 
 end
 
