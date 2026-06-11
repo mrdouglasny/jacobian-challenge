@@ -51,12 +51,17 @@ Final assembly (all inside the tail model, pair frame `(ω₀, K)` from
 
 | Rung | File | Content | Status target |
 |------|------|---------|--------|
-| T1 | `TailCoeffFull.lean` | FULL Laurent coefficients (`stripFun` leading-term peeling over the proven `laurentCoeff`; honest at every order, junk-free): linearity (no order hypotheses), order law `(∀ k < m, c_k = 0) ↔ m ≤ ord`, germ-congruence, level-shift | unconditional |
-| T2 | `TailSpaceGlobal.lean` | global truncated-tail space `𝒯[D] ⊆ X →₀ (ℤ →₀ ℂ)`, truncation maps, window subspace `W(D,D')` with `dim = deg D' − deg D` | unconditional |
-| T3 | same file | `α_D : ℳ(X) →ₗ 𝒯[D]`, kernel `= L(D)` mod germ junk (gap law), junk-invariance | unconditional |
-| T4 | `TailRR1.lean` | finiteness `h¹_t(D) < ∞` (window pigeonhole vs the M-bound, NO Čech vanishing needed) + the 6-term window sequence + tail RR-I via comparable-pair χ-constancy (`posPart` common refinement, no single-step induction) | unconditional |
-| T5 | `TailSerre.lean` | the residue pairing `L(K−D) → H¹_t(D)*` (well-defined ⟸ the ONE analytic atom below), injectivity (order law), surjectivity (recovery + `serre_surjectivity_dim_core` pigeonhole, rung-2 regularity for the division step) | conditional on the atom |
-| T6 | `TailRiemannRochProof.lean` | assembly 1–5 above | conditional on the atom |
+| T1 | `TailCoeffFull.lean` | FULL Laurent coefficients (`stripFun` leading-term peeling over the proven `laurentCoeff`; honest at every order, junk-free): linearity (no order hypotheses), order law `(∀ k < m, c_k = 0) ↔ m ≤ ord`, germ-congruence, level-shift | **LANDED, unconditional** |
+| T2 | `TailSpaceGlobal.lean` | global truncated-tail space `𝒯[D] ⊆ (X×ℤ) →₀ ℂ` (uncurried), upper space, truncation maps, window subspace with `dim = deg D' − deg D` (+ Pi model) | **LANDED, unconditional** |
+| T3 | same file | `α_D : ℳ(X) →ₗ`, kernel `= L(D)` (order law), junk-invariance, level compatibility | **LANDED, unconditional** |
+| T4 | `TailRR1.lean` | finiteness `h¹_t(D) < ∞` (deep-truncation kill + M-bound, NO Čech vanishing) + window exactness + tail RR-I via comparable-pair χ-constancy (`posPart` common refinement) | **LANDED, unconditional** |
+| T5 | `TailSerre.lean` | `planarCoeff` + window product law; `TailPairFrame` (slots + residue atom); pairing well-defined + linear + junk-free; **injectivity half landed**; surjectivity = named input `PairingSurjective` | **LANDED, conditional pieces as planned** |
+| T6 | `TailSerre.lean` Part E | assembly: `tailRiemannRoch_of_pairingSurjective : TailPairFrame → PairingSurjective → TailRiemannRoch X` | **LANDED** |
+
+**Status 2026-06-11: T1–T6 all landed (standard-3, no custom axioms, no sorries).
+`TailRiemannRoch X` is a theorem conditional on exactly two named hypotheses —
+frame existence (slots + the residue atom) and the surjectivity half.  Residual-input
+ledger: `docs/planning/TAILRR_BLOCKER.md`.**
 
 ### The ONE isolated analytic atom: the pair-frame residue theorem
 

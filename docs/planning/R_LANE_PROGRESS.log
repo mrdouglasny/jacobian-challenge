@@ -393,3 +393,4 @@ implementation over cup/h1InclMono/RR), then the conditional two-RR subtraction 
 08:31 TAILRR: T1 (TailCoeffFull) + T2/T3 (TailSpaceGlobal) COMPILED+COMMITTED; next T4 tail H1 + RR-I
 09:16 TAILRR: T4 LANDED — tail_riemannRoch_I proven (finiteness + chi-pair + posPart); next T5 duality (pairing/injectivity/surjectivity)
 09:37 TAILRR: T5 A-D LANDED (pairing + injectivity half over TailPairFrame); next: Part E conditional assembly -> TailRiemannRoch
+09:42 TAILRR: T5E+gates DONE — all headliners standard-3; TailRiemannRoch = thm mod (TailPairFrame, PairingSurjective); Layer-3 flip chain verified wired (equivFinsupp map_zero + bridgeKDFormEquiv); blocker doc written
