@@ -97,8 +97,8 @@ telescoping is replaced by the relocation collapse).
 
 | # | Piece | Status |
 |---|-------|--------|
-| W0 | `TailDictionary.lean`: `cechTailComparison_of_unwindRegularity` (the reduction; with rung 4 this is the formal EQUIVALENCE), `K_apply_eq_zero_of_not_isolated` (D2), per-instance corollary `cechTailComparison_concrete_of_isolated` | this branch |
-| W1 | The common-discrepancy evaluation engine in `MeroVanish.lean`: modified Leibniz split (`∂̄h̃ = −∂̄H` replaces `∂̄h = 0`), the `(1,1)` family `∂̄H̃·g̃` + relocation collapse to chart `j₀`, final (D1) atom evaluation; headline `resFunctional_eq_neg_residue_of_global_correction` | this branch (partial → DICT_BLOCKER) |
+| W0 | `TailDictionary.lean`: `cechTailComparison_of_unwindRegularity` (the reduction; with rung 4 this is the formal EQUIVALENCE), `K_apply_eq_zero_of_not_isolated` (D2), per-instance corollary `cechTailComparison_concrete_of_isolated` | **DONE** (standard-3) |
+| W1 | The common-discrepancy evaluation engine, `FineResidue/GlobalCorrection.lean`: modified Leibniz split (`∂̄h̃ = −∂̄H` replaces `∂̄h = 0`), the `(1,1)` family `corrFam = ∂̄H̃·g̃` + relocation collapse to chart `j₀` (`corrC`), final (D1) atom evaluation; headline `resFunctional_eq_neg_residue_of_global_correction` | **DONE** (standard-3) |
 | W2 | Deep-matching skyscraper: per star chart `U i ∋ b`, a section `c_i ∈ 𝒪_{Ě+b}(U i)` whose FULL window tail at `b` (orders `−(m+1) … −(E b+1)`, ambient chart) matches a prescribed target — triangular induction on the window over `ExactOrderWitness`; then `δ⁰c ∈ Z¹(𝒪_E)`, trivialized at level `D` by `c` itself.  (The single-coefficient cone `coneB0` only gives level-`Ě`; insufficient for `m > E b`.) | open |
 | W3 | The X-side cutoff `θ` (planar bump through chart `j₀`, `pouCoeff`-style two-open smoothness argument) + the one-point repair of `h̃` at `b` | open |
 | W4 | Pairing-side bookkeeping: `h̃ := vanishFn(c⁰) − θ·vanishFn(c⁰)_{j₀}` honest presentation, `IsCoboundaryOn` at the repaired point, `SlotProductExtendsAt` inheritance at unmarked K-points | open |
