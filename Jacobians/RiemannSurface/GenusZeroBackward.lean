@@ -262,7 +262,7 @@ theorem holomorphicOneForm_eq_zero_of_simplyConnectedSpace
         refine ⟨?_, ?_⟩
         · rw [← extChartAt_source 𝓘(ℂ)]
           exact hy_src
-        · show (chartAt ℂ p) y ∈ Metric.ball ((chartAt ℂ p) p)
+        · change (chartAt ℂ p) y ∈ Metric.ball ((chartAt ℂ p) p)
             (chartTargetBallRadius p)
           have : (chartAt ℂ p) y = (extChartAt 𝓘(ℂ) p) y := rfl
           rw [this, hyw]
@@ -283,14 +283,14 @@ theorem holomorphicOneForm_eq_zero_of_simplyConnectedSpace
   apply HolomorphicOneForm.ext_of_coeff
   rw [HolomorphicOneForm.coeff_zero]
   funext x z
-  show form.coeff x z = 0
+  change form.coeff x z = 0
   by_cases hz : z ∈ (extChartAt 𝓘(ℂ) x).target
   · set q : X := (extChartAt 𝓘(ℂ) x).symm z with hq_def
     have hq_src : q ∈ (extChartAt 𝓘(ℂ) q).source := mem_extChartAt_source q
     have h := hcocy x q z hz hq_src
     have hcenter : form.coeff q ((extChartAt 𝓘(ℂ) q) q) = 0 :=
       hcoeff_ball q _ (Metric.mem_ball_self (chartTargetBallRadius_pos q))
-    show form.1 x z = 0
+    change form.1 x z = 0
     rw [h]
     have : form.1 q ((extChartAt 𝓘(ℂ) q) ((extChartAt 𝓘(ℂ) x).symm z)) =
         form.coeff q ((extChartAt 𝓘(ℂ) q) q) := rfl
