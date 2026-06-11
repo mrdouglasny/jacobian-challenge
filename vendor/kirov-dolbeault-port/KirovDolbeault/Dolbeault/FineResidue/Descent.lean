@@ -230,3 +230,123 @@ theorem holomorphicOnOverlaps_cocycleFn (hsep : SeparatesPoles 𝔇 K)
   · simp only [cocycleFn, dif_neg h]
     have ha := holoFn_chart_analyticAt (cocycle_pair_mem_zero 𝔇 hsep c h) hx
     exact (analyticAt_chart_change_to (mem_chartSource_of_mem_U 𝔇 hx.1) ha).differentiableAt
+
+/-! ### The cocycle identity, from germs to points
+
+The Čech cocycle identity (`c ∈ ker δ¹`) is an `MGerm` identity on triple overlaps; the analytic
+representatives are continuous there, so it holds pointwise (`eq_at_of_toGerm_eq`).  Diagonal
+pairs are handled by the forced vanishing of the diagonal germs. -/
+
+omit [Nonempty X] in
+/-- The Čech 1-cocycle identity of `c`, evaluated at a triple `(a, b, c')`, as an `MGerm`
+identity on the triple overlap (the value-level unfolding of `cechDelta1 c = 0`). -/
+theorem cocycle_germ_identity (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    (a b c' : 𝔇.toFiniteCover.ι) :
+    rawRestrictG (le_inf (inf_le_left.trans inf_le_right) inf_le_right)
+        ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (b, c'))
+      - rawRestrictG (le_inf (inf_le_left.trans inf_le_left) inf_le_right)
+          ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, c'))
+      + rawRestrictG inf_le_left
+          ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, b)) = 0 := by
+  have hker : 𝔇.toFiniteCover.toFiniteFamily.cechDelta1
+      (c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) = 0 :=
+    LinearMap.mem_ker.mp c.2.1
+  have h := congrFun hker (a, b, c')
+  simpa only [FiniteFamily.cechDelta1, LinearMap.pi_apply, LinearMap.sub_apply,
+    LinearMap.add_apply, LinearMap.comp_apply, LinearMap.proj_apply, Pi.zero_apply] using h
+
+omit [Nonempty X] in
+/-- **The diagonal germs of a 1-cocycle vanish** (after restriction below a triple overlap
+`U b ⊓ U a ⊓ U a`): the cocycle identity at `(b, a, a)` telescopes to the diagonal alone. -/
+theorem cocycle_diag_restrict_eq_zero (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    (a b : 𝔇.toFiniteCover.ι) :
+    rawRestrictG (le_inf (inf_le_left.trans inf_le_right) inf_le_right :
+        (𝔇.U b ⊓ 𝔇.U a ⊓ 𝔇.U a : Opens X) ≤ 𝔇.U a ⊓ 𝔇.U a)
+      ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, a)) = 0 := by
+  have h := cocycle_germ_identity 𝔇 c b a a
+  -- the two `(b, a)`-restrictions are along proofs of the same `≤`, hence equal terms
+  have hpe : rawRestrictG
+        (le_inf (inf_le_left.trans inf_le_left) inf_le_right :
+          (𝔇.U b ⊓ 𝔇.U a ⊓ 𝔇.U a : Opens X) ≤ 𝔇.U b ⊓ 𝔇.U a)
+        ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (b, a))
+      = rawRestrictG inf_le_left
+        ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (b, a)) := rfl
+  rw [hpe, sub_add_cancel] at h
+  exact h
+
+omit [Nonempty X] in
+/-- Any further restriction of a diagonal cocycle germ vanishes. -/
+theorem cocycle_diag_restrict_eq_zero' (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    {a b : 𝔇.toFiniteCover.ι} {V : Opens X}
+    (hV : V ≤ 𝔇.U b ⊓ 𝔇.U a ⊓ 𝔇.U a) (h2 : V ≤ 𝔇.U a ⊓ 𝔇.U a) :
+    rawRestrictG h2 ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, a)) = 0 := by
+  calc rawRestrictG h2 ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, a))
+      = rawRestrictG hV (rawRestrictG
+          (le_inf (inf_le_left.trans inf_le_right) inf_le_right :
+            (𝔇.U b ⊓ 𝔇.U a ⊓ 𝔇.U a : Opens X) ≤ 𝔇.U a ⊓ 𝔇.U a)
+          ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, a))) :=
+        (FiniteFamily.rawRestrictG_comp_apply _ _ _).symm
+    _ = 0 := by rw [cocycle_diag_restrict_eq_zero 𝔇 c a b, map_zero]
+
+omit [Nonempty X] in
+/-- **The extraction is an overlap cocycle** (R2 input predicate): pointwise on every triple
+overlap, from the germ-level `δ¹c = 0` through continuity of the analytic representatives. -/
+theorem isOverlapCocycle_cocycleFn (hsep : SeparatesPoles 𝔇 K)
+    (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K)) :
+    IsOverlapCocycle 𝔇 (cocycleFn 𝔇 hsep c) := by
+  intro a b c' x hx
+  by_cases hab : a = b
+  · subst hab
+    rw [cocycleFn_diag]
+    simp
+  by_cases hbc : b = c'
+  · subst hbc
+    rw [cocycleFn_diag]
+    simp
+  -- germ branch: `a ≠ b`, `b ≠ c'`; the middle pair may still be diagonal (`a = c'`)
+  have h1 : (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c' : Opens X) ≤ 𝔇.U b ⊓ 𝔇.U c' :=
+    le_inf (inf_le_left.trans inf_le_right) inf_le_right
+  have h2 : (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c' : Opens X) ≤ 𝔇.U a ⊓ 𝔇.U c' :=
+    le_inf (inf_le_left.trans inf_le_left) inf_le_right
+  have h3 : (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c' : Opens X) ≤ 𝔇.U a ⊓ 𝔇.U b := inf_le_left
+  have hg1 := toGerm_cocycleFn_restrict 𝔇 hsep c hbc h1
+  have hg3 := toGerm_cocycleFn_restrict 𝔇 hsep c hab h3
+  have hg2 : toGerm (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c')
+      (fun v => cocycleFn 𝔇 hsep c a c' v.1)
+      = rawRestrictG h2 ((c : 𝔇.toFiniteCover.toFiniteFamily.Cochain1) (a, c')) := by
+    by_cases hac : a = c'
+    · subst hac
+      rw [cocycleFn_diag,
+        cocycle_diag_restrict_eq_zero' 𝔇 c (b := b)
+          (le_inf (le_inf (inf_le_left.trans inf_le_right) inf_le_right) inf_le_right) h2]
+      exact map_zero _
+    · exact toGerm_cocycleFn_restrict 𝔇 hsep c hac h2
+  have hsplit : (fun v : ↥(𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c') =>
+        cocycleFn 𝔇 hsep c b c' v.1 - cocycleFn 𝔇 hsep c a c' v.1
+          + cocycleFn 𝔇 hsep c a b v.1)
+      = (fun v : ↥(𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c') => cocycleFn 𝔇 hsep c b c' v.1)
+        - (fun v => cocycleFn 𝔇 hsep c a c' v.1)
+        + fun v => cocycleFn 𝔇 hsep c a b v.1 := rfl
+  have hgerm : toGerm (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c')
+      (fun v => cocycleFn 𝔇 hsep c b c' v.1 - cocycleFn 𝔇 hsep c a c' v.1
+        + cocycleFn 𝔇 hsep c a b v.1)
+      = toGerm (𝔇.U a ⊓ 𝔇.U b ⊓ 𝔇.U c') (fun v => (0 : X → ℂ) v.1) := by
+    rw [hsplit, map_add, map_sub, hg1, hg2, hg3,
+      cocycle_germ_identity 𝔇 c a b c']
+    exact (map_zero _).symm
+  have hpt := eq_at_of_toGerm_eq hgerm hx
+    (((continuousAt_cocycleFn 𝔇 hsep c ⟨hx.1.2, hx.2⟩).sub
+        (continuousAt_cocycleFn 𝔇 hsep c ⟨hx.1.1, hx.2⟩)).add
+      (continuousAt_cocycleFn 𝔇 hsep c hx.1))
+    continuousAt_const
+  exact hpt
+
+/-- **The R3 glue law applies to the extraction**: the glued `(1,1)` family of an extracted
+cocycle against any holomorphic `(1,0)` slot family is a global `(1,1)` chart-coefficient
+family. -/
+theorem glueCoeff_cocycleFn_mem (hsep : SeparatesPoles 𝔇 K)
+    (c : ↥(𝔇.toFiniteCover.toFiniteFamily.cocycles1 K))
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) :
+    glueCoeff 𝔇 (cocycleFn 𝔇 hsep c) g ∈ oneOneCoeff 𝔇 :=
+  glueCoeff_mem_oneOneCoeff 𝔇 (smoothOnOverlaps_cocycleFn 𝔇 hsep c)
+    (isOverlapCocycle_cocycleFn 𝔇 hsep c) (holomorphicOnOverlaps_cocycleFn 𝔇 hsep c) hg
