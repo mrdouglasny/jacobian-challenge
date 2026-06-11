@@ -450,12 +450,814 @@ theorem ofCurveImpl_basepoint_independent {X : Type u} [TopologicalSpace X] [T2S
 
 /-! ### Properties of `ofCurveImpl` (axioms for now) -/
 
-/-- **Axiom.** The Abel-Jacobi map is smooth/holomorphic. -/
-axiom AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
+
+/-! ### Chart-line descent helpers for `AX_ofCurve_contMDiff`
+
+These lemmas package the straight chart-line `Bridge.chartLine` as an
+`AnalyticArc` and compute its canonical period integral in closed form,
+so the chart-level model of the Abel–Jacobi map can be compared to
+`ofCurveAmbient` via `AX_Period_Triangle`.  They also supply the
+parametric-integral analyticity used for chart-level smoothness. -/
+section ChartLineDescent
+
+open Jacobians.Bridge
+open MeasureTheory Filter
+
+variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+
+/-- Continuity of `chartLine` at a parameter whose affine image lies in the
+chart target. (Transcribed from the private companion in
+`Bridge.KirovLineIntegral`.) -/
+private lemma aux_chartLine_continuousAt (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    ContinuousAt (chartLine (X := X) P z) t := by
+  let η : ℝ → ℂ := fun s =>
+    (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hsymm_cont :
+      ContinuousAt ((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) (η t) := by
+    exact (continuousOn_extChartAt_symm P).continuousAt
+      (hOpen.mem_nhds (by simpa [η] using hz))
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hcomp :
+      ContinuousAt (((extChartAt 𝓘(ℂ, ℂ) P).symm : ℂ → X) ∘ η) t :=
+    hsymm_cont.comp hη_cont
+  change ContinuousAt
+    (fun s : ℝ =>
+      (extChartAt 𝓘(ℂ, ℂ) P).symm
+        ((1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z)) t
+  simpa [η, Function.comp_def] using hcomp
+
+/- Real-differentiability of the current-chart pullback of `chartLine`.
+(Transcribed from the private companion in `Bridge.KirovLineIntegral`.) -/
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
+private lemma aux_chartLine_chartDiff (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    DifferentiableAt ℝ
+      ((chartAt (H := ℂ) (chartLine (X := X) P z t)).toFun ∘
+        chartLine (X := X) P z) t := by
+  let w : ℂ := (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z
+  let y : X := chartLine (X := X) P z t
+  have hy_eq : y = (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+    simp [y, w, chartLine]
+  have htrans_diff_C : DifferentiableAt ℂ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w := by
+    have hsymm_mdiff_within : MDifferentiableWithinAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm (Set.range (𝓘(ℂ, ℂ))) w := by
+      simpa [w] using mdifferentiableWithinAt_extChartAt_symm hz
+    have hsymm_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) P).symm w := by
+      have hrange :
+          (Set.range (𝓘(ℂ, ℂ) : ModelWithCorners ℂ ℂ ℂ)) = Set.univ :=
+        ModelWithCorners.range_eq_univ _
+      rw [← mdifferentiableWithinAt_univ, ← hrange]
+      exact hsymm_mdiff_within
+    have hchart_mdiff : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+        (extChartAt 𝓘(ℂ, ℂ) y) ((extChartAt 𝓘(ℂ, ℂ) P).symm w) := by
+      apply mdifferentiableAt_extChartAt
+      rw [← extChartAt_source (I := 𝓘(ℂ, ℂ)), ← hy_eq]
+      exact mem_extChartAt_source y
+    exact (hchart_mdiff.comp w hsymm_mdiff).differentiableAt
+  have htrans_diff_R : DifferentiableAt ℝ
+      ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) P).symm) w :=
+    htrans_diff_C.restrictScalars ℝ
+  have haff : DifferentiableAt ℝ
+      (fun s : ℝ => (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z) t := by
+    fun_prop
+  have hcomp := htrans_diff_R.comp t haff
+  simpa [chartLine, y, w, extChartAt_coe, modelWithCornersSelf_coe,
+    Function.comp_def] using hcomp
+
+/-- The fixed-chart derivative of `chartLine` equals the constant velocity
+`z - (extChartAt P) P`. (Transcribed from `Bridge.KirovLineIntegral`.) -/
+private lemma aux_pathSpeed_chartLine (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    fderiv ℝ ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z)
+        t (1 : ℝ) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  let a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P
+  let η : ℝ → ℂ := fun s => (1 - s) • a + s • z
+  have hOpen : IsOpen (extChartAt 𝓘(ℂ, ℂ) P).target := by
+    rw [extChartAt_target]
+    simp [(chartAt ℂ P).open_target]
+  have hη_cont : ContinuousAt η t := by
+    dsimp [η]
+    fun_prop
+  have hη_target : ∀ᶠ s in 𝓝 t, η s ∈ (extChartAt 𝓘(ℂ, ℂ) P).target :=
+    hη_cont.eventually (hOpen.mem_nhds (by simpa [η, a] using hz))
+  have heq :
+      ((extChartAt 𝓘(ℂ, ℂ) P).toFun ∘ chartLine (X := X) P z) =ᶠ[𝓝 t]
+        η := by
+    filter_upwards [hη_target] with s hs
+    exact extChartAt_chartLine (X := X) P z (by simpa [η, a] using hs)
+  have hder : fderiv ℝ η t (1 : ℝ) = z - a := by
+    have hder' : HasDerivAt (fun s : ℝ => a + s • (z - a)) (z - a) t := by
+      simpa only [Pi.add_apply, zero_add, one_smul, id_eq] using
+        (hasDerivAt_const (x := t) (c := a)).add
+          ((hasDerivAt_id t).smul_const (z - a))
+    have hfun : (fun s : ℝ => (1 - s) • a + s • z) =
+        fun s : ℝ => a + s • (z - a) := by
+      funext s
+      rw [sub_smul, one_smul]
+      module
+    exact (hder'.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hfun)).deriv
+  simpa [a] using
+    (congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq.fderiv_eq).trans hder
+
+/-- The manifold derivative of the fixed chart applied to the chart-line
+speed equals the constant velocity. (Transcribed from
+`Bridge.KirovLineIntegral`.) -/
+private lemma aux_mfderiv_pathSpeed_chartLine (P : X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P)
+        (chartLine (X := X) P z t))
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+  have hspeed := mfderiv_extChartAt_apply_pathSpeed (x := P)
+    (γ := chartLine (X := X) P z) (t := t)
+    (aux_chartLine_continuousAt (X := X) P z hz)
+    (aux_chartLine_chartDiff (X := X) P z hz)
+    (by
+      have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+      simpa [chartLine] using hsrc)
+  exact hspeed.trans (aux_pathSpeed_chartLine (X := X) P z hz)
+
+/-- The `bridgeForm` integrand along `chartLine` in closed form.
+(Transcribed from `Bridge.KirovLineIntegral`.) -/
+private lemma aux_bridgeForm_chartLine_integrand
+    (P : X) (form : HolomorphicOneForm X) (z : ℂ) {t : ℝ}
+    (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+      (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+      form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  let y : X := chartLine (X := X) P z t
+  have hy_self : y ∈ (extChartAt 𝓘(ℂ, ℂ) y).source := mem_extChartAt_source y
+  have hy_fixed : y ∈ (extChartAt 𝓘(ℂ, ℂ) P).source := by
+    have hsrc := (extChartAt 𝓘(ℂ, ℂ) P).map_target hz
+    simpa [y, chartLine] using hsrc
+  have hswap : (Jacobians.Bridge.bridgeForm form).toFun y =
+      BridgeForm.rawCLM form P y := by
+    change BridgeForm.rawCLM form y y = BridgeForm.rawCLM form P y
+    exact BridgeForm.rawCLM_swap_chart form hy_self hy_fixed
+  have hcoord :
+      (extChartAt 𝓘(ℂ, ℂ) P) y =
+        (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z := by
+    simpa [y] using extChartAt_chartLine (X := X) P z hz
+  have hspeed :
+      (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) P) y)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) =
+        z - (extChartAt 𝓘(ℂ, ℂ) P) P := by
+    simpa [y] using aux_mfderiv_pathSpeed_chartLine (X := X) P z hz
+  calc
+    (Jacobians.Bridge.bridgeForm form).toFun (chartLine (X := X) P z t)
+        (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)
+        = BridgeForm.rawCLM form P y
+            (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t) := by
+          rw [hswap]
+    _ = form.coeff P ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+        (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+          unfold BridgeForm.rawCLM
+          rw [hcoord]
+          change form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) •
+              ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
+                (extChartAt 𝓘(ℂ, ℂ) P) y)
+                (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) t)) =
+            form.coeff P
+              ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z) *
+              (z - (extChartAt 𝓘(ℂ, ℂ) P) P)
+          rw [hspeed]
+          rfl
+
+/-- The canonical moving-chart integrand of `chartLine` agrees with the
+closed-form fixed-chart integrand. -/
+private lemma aux_canonicalIntegrand_chartLine
+    (P : X) (form : HolomorphicOneForm X) (z : ℂ) {r : ℝ}
+    (hr : (1 - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z ∈
+      (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    form.coeff (chartLine (X := X) P z r)
+        ((extChartAt 𝓘(ℂ, ℂ) (chartLine (X := X) P z r))
+          (chartLine (X := X) P z r))
+        * deriv (fun u => (extChartAt 𝓘(ℂ, ℂ) (chartLine (X := X) P z r))
+            (chartLine (X := X) P z u)) r
+      = form.coeff P ((1 - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z) *
+          (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  set y : X := chartLine (X := X) P z r
+  have hmf := mfderiv_extChartAt_apply_pathSpeed (x := y)
+    (γ := chartLine (X := X) P z) (t := r)
+    (aux_chartLine_continuousAt (X := X) P z hr)
+    (aux_chartLine_chartDiff (X := X) P z hr)
+    (mem_extChartAt_source y)
+  have hbr := aux_bridgeForm_chartLine_integrand (X := X) P form z hr
+  rw [show deriv (fun u => (extChartAt 𝓘(ℂ,ℂ) y) (chartLine (X := X) P z u)) r
+      = mfderiv 𝓘(ℂ,ℂ) 𝓘(ℂ,ℂ) (extChartAt 𝓘(ℂ,ℂ) y) y
+          (Jacobians.Vendor.Kirov.pathSpeed (chartLine (X := X) P z) r) from by
+        rw [hmf]; rfl]
+  exact hbr
+
+/-- Global continuity of the clamped chart-line `extend` used to build an
+`AnalyticArc`. -/
+private lemma aux_chartLineDescent_continuous (P : X) (z : ℂ)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
+          (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    Continuous (fun t : ℝ => chartLine (X := X) P z (max 0 (min t 1))) := by
+  rw [continuous_iff_continuousAt]
+  intro t
+  have hcl_mem : max 0 (min t 1) ∈ Set.Icc (0:ℝ) 1 :=
+    ⟨le_max_left _ _, max_le (by norm_num) (min_le_right t 1)⟩
+  have hcl_cont : ContinuousAt (fun s : ℝ => max 0 (min s 1)) t := by fun_prop
+  exact ContinuousAt.comp (g := chartLine (X := X) P z) (f := fun s : ℝ => max 0 (min s 1))
+    (aux_chartLine_continuousAt (X := X) P z (hseg _ hcl_mem)) hcl_cont
+
+/-- Strong piecewise analyticity of the clamped chart-line `extend`. -/
+private lemma aux_chartLineDescent_analytic (P : X) (z : ℂ)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
+          (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    IsAnalyticArcStrong X
+      (fun t : ℝ => chartLine (X := X) P z (max 0 (min t 1)))
+      ({0, 1} : Finset ℝ) := by
+  intro a ha b hb hab _hcons
+  have ha2 : a = 0 ∨ a = 1 := by simpa [Finset.mem_insert, Finset.mem_singleton] using ha
+  have hb2 : b = 0 ∨ b = 1 := by simpa [Finset.mem_insert, Finset.mem_singleton] using hb
+  have hab01 : a = 0 ∧ b = 1 := by
+    rcases ha2 with rfl | rfl <;> rcases hb2 with rfl | rfl <;>
+      first
+        | exact ⟨rfl, rfl⟩
+        | (exfalso; linarith)
+  obtain ⟨rfl, rfl⟩ := hab01
+  refine ⟨{0, 1}, by simp, by simp, ?_, ?_⟩
+  · intro x hx
+    simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
+      Set.mem_singleton_iff] at hx
+    rcases hx with rfl | rfl <;> exact ⟨by norm_num, by norm_num⟩
+  · intro s hs t ht hst _hcons'
+    have hs2 : s = 0 ∨ s = 1 := by simpa [Finset.mem_insert, Finset.mem_singleton] using hs
+    have ht2 : t = 0 ∨ t = 1 := by simpa [Finset.mem_insert, Finset.mem_singleton] using ht
+    have hst01 : s = 0 ∧ t = 1 := by
+      rcases hs2 with rfl | rfl <;> rcases ht2 with rfl | rfl <;>
+        first
+          | exact ⟨rfl, rfl⟩
+          | (exfalso; linarith)
+    obtain ⟨rfl, rfl⟩ := hst01
+    refine ⟨P, Set.univ, fun r => (1 - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z,
+      isOpen_univ, Set.subset_univ _, ?_, ?_, ?_⟩
+    · intro x _
+      exact ((analyticAt_const.sub analyticAt_id).smul analyticAt_const).add
+        (analyticAt_id.smul analyticAt_const)
+    · intro r hr
+      have hr' : r ∈ Set.Icc (0:ℝ) 1 := hr.2
+      have hcl : max 0 (min r 1) = r := by
+        rw [min_eq_left hr'.2, max_eq_right hr'.1]
+      show chartLine (X := X) P z (max 0 (min r 1)) ∈ (extChartAt 𝓘(ℂ, ℂ) P).source
+      rw [hcl]
+      have := (extChartAt 𝓘(ℂ, ℂ) P).map_target (hseg r hr')
+      simpa [chartLine] using this
+    · intro r hr
+      have hr' : r ∈ Set.Icc (0:ℝ) 1 := hr.2
+      have hcl : max 0 (min r 1) = r := by
+        rw [min_eq_left hr'.2, max_eq_right hr'.1]
+      show (extChartAt 𝓘(ℂ, ℂ) P) (chartLine (X := X) P z (max 0 (min r 1)))
+        = (1 - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z
+      rw [hcl]
+      exact extChartAt_chartLine (X := X) P z (hseg r hr')
+
+/-- The chart-line packaged as an `AnalyticArc`, clamped to `[0,1]` so that
+its `extend` is globally continuous. -/
+noncomputable def chartLineDescentArc (P : X) (z : ℂ)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
+          (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    AnalyticArc X where
+  extend := fun t : ℝ => chartLine (X := X) P z (max 0 (min t 1))
+  continuous' := aux_chartLineDescent_continuous P z hseg
+  partition := {0, 1}
+  partition_subset := by
+    intro x hx
+    simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
+      Set.mem_singleton_iff] at hx
+    rcases hx with rfl | rfl <;> exact ⟨by norm_num, by norm_num⟩
+  zero_mem := by simp
+  one_mem := by simp
+  is_analytic_strong := aux_chartLineDescent_analytic P z hseg
+
+@[simp] private lemma chartLineDescentArc_extend (P : X) (z : ℂ)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
+          (extChartAt 𝓘(ℂ, ℂ) P).target) (t : ℝ) :
+    (chartLineDescentArc (X := X) P z hseg).extend t =
+      chartLine (X := X) P z (max 0 (min t 1)) := rfl
+
+/-- The canonical period integral of the chart-line arc, in closed form. -/
+private lemma aux_canonicalArcIntegral_chartLineDescentArc
+    (P : X) (z : ℂ) (form : HolomorphicOneForm X)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
+          (extChartAt 𝓘(ℂ, ℂ) P).target) :
+    canonicalArcIntegral (chartLineDescentArc (X := X) P z hseg) form
+      = ∫ t in (0 : ℝ)..1,
+          form.coeff P ((1 - (t : ℂ)) • (extChartAt 𝓘(ℂ, ℂ) P) P + (t : ℂ) • z)
+            * (z - (extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  unfold canonicalArcIntegral
+  refine intervalIntegral.integral_congr_ae ?_
+  have hsub : {(1:ℝ)}ᶜ ∈ MeasureTheory.ae (volume : Measure ℝ) := by
+    rw [mem_ae_iff, compl_compl]; exact measure_singleton 1
+  filter_upwards [hsub] with r hr1 hr_uIoc
+  have hr : r ∈ Set.Ioo (0:ℝ) 1 := by
+    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)] at hr_uIoc
+    exact ⟨hr_uIoc.1, lt_of_le_of_ne hr_uIoc.2 (by simpa using hr1)⟩
+  have hr_icc : r ∈ Set.Icc (0:ℝ) 1 := Set.Ioo_subset_Icc_self hr
+  have hr_tgt := hseg r hr_icc
+  have hcl_r : max 0 (min r 1) = r := by
+    rw [min_eq_left (le_of_lt hr.2), max_eq_right (le_of_lt hr.1)]
+  have hext_eq : (chartLineDescentArc (X:=X) P z hseg).extend =ᶠ[nhds r]
+      chartLine (X:=X) P z := by
+    filter_upwards [Ioo_mem_nhds hr.1 hr.2] with u hu
+    rw [chartLineDescentArc_extend]
+    congr 1
+    rw [min_eq_left (le_of_lt hu.2), max_eq_right (le_of_lt hu.1)]
+  simp only [canonicalIntegrand]
+  rw [show (chartLineDescentArc (X:=X) P z hseg).extend r = chartLine (X:=X) P z r from by
+        rw [chartLineDescentArc_extend, hcl_r]]
+  rw [show deriv (fun u => (extChartAt 𝓘(ℂ,ℂ) (chartLine (X:=X) P z r))
+            ((chartLineDescentArc (X:=X) P z hseg).extend u)) r
+        = deriv (fun u => (extChartAt 𝓘(ℂ,ℂ) (chartLine (X:=X) P z r))
+            (chartLine (X:=X) P z u)) r
+      from Filter.EventuallyEq.deriv_eq
+        (hext_eq.fun_comp (extChartAt 𝓘(ℂ,ℂ) (chartLine (X:=X) P z r)))]
+  rw [show ((1 : ℂ) - (r : ℂ)) • (extChartAt 𝓘(ℂ, ℂ) P) P + (r : ℂ) • z
+        = ((1 : ℝ) - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z from by
+      simp only [Complex.real_smul, smul_eq_mul]; push_cast; ring]
+  exact aux_canonicalIntegrand_chartLine (X:=X) P form z hr_tgt
+
+/-- **Chart-line triangle.**  Modulo the period lattice, the Abel–Jacobi
+vector along the bridge path `P → Q` equals the bridge path `P → Qstar`
+plus the chart-line leg `Qstar → Q`. -/
+private lemma aux_ofCurveAmbient_chartLine_mem
+    (P Qstar Q : X)
+    (hQ_src : Q ∈ (extChartAt 𝓘(ℂ, ℂ) Qstar).source)
+    (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        (1 - s) • (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar
+            + s • (extChartAt 𝓘(ℂ, ℂ) Qstar) Q ∈
+          (extChartAt 𝓘(ℂ, ℂ) Qstar).target) :
+    (fun i => ofCurveAmbient X P Q i
+        - (ofCurveAmbient X P Qstar i
+          + ∫ t in (0 : ℝ)..1,
+              (jacobianBasis X i).coeff Qstar
+                ((1 - (t : ℂ)) • (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar
+                  + (t : ℂ) • (extChartAt 𝓘(ℂ, ℂ) Qstar) Q)
+                * ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q
+                  - (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar)))
+      ∈ periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X) := by
+  have htri := AX_Period_Triangle (X := X) (x := P) (y := Qstar) (z := Q)
+    (p_xy := Jacobians.Bridge.bridgePathArc (X := X) P Qstar)
+    (p_yz := chartLineDescentArc (X := X) Qstar ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) hseg)
+    (p_xz := Jacobians.Bridge.bridgePathArc (X := X) P Q)
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [chartLineDescentArc])
+    (by
+      show chartLine (X := X) Qstar ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) (max 0 (min 1 1)) = Q
+      simp only [min_self, max_eq_right (zero_le_one), chartLine_at_one]
+      exact (extChartAt 𝓘(ℂ, ℂ) Qstar).left_inv hQ_src)
+    (by simp [Jacobians.Bridge.bridgePathArc])
+    (by simp [Jacobians.Bridge.bridgePathArc])
+  have hfun :
+      (fun i => ofCurveAmbient X P Q i
+          - (ofCurveAmbient X P Qstar i
+            + ∫ t in (0 : ℝ)..1,
+                (jacobianBasis X i).coeff Qstar
+                  ((1 - (t : ℂ)) • (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar
+                    + (t : ℂ) • (extChartAt 𝓘(ℂ, ℂ) Qstar) Q)
+                  * ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q
+                    - (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar)))
+        = (fun i =>
+            canonicalArcIntegral (Jacobians.Bridge.bridgePathArc (X := X) P Q)
+                (jacobianBasis X i)
+            - (canonicalArcIntegral (Jacobians.Bridge.bridgePathArc (X := X) P Qstar)
+                (jacobianBasis X i)
+              + canonicalArcIntegral
+                  (chartLineDescentArc (X := X) Qstar ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) hseg)
+                  (jacobianBasis X i))) := by
+    funext i
+    have h3 := aux_canonicalArcIntegral_chartLineDescentArc (X := X) Qstar
+      ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) (jacobianBasis X i) hseg
+    rw [show ofCurveAmbient X P Q i
+          = canonicalArcIntegral (Jacobians.Bridge.bridgePathArc (X := X) P Q)
+              (jacobianBasis X i) from rfl,
+      show ofCurveAmbient X P Qstar i
+          = canonicalArcIntegral (Jacobians.Bridge.bridgePathArc (X := X) P Qstar)
+              (jacobianBasis X i) from rfl,
+      ← h3]
+  rw [hfun]
+  exact htri
+
+/-- **Parametric analyticity of the chart-line vector.**  The chart-line
+integral is `ContDiffAt ℂ ω` (analytic) in the endpoint at the chart
+centre. -/
+private lemma aux_chartLineVec_contDiffAt
+    (P : X) (form : HolomorphicOneForm X) :
+    ContDiffAt ℂ ω
+      (fun z : ℂ => ∫ t in (0 : ℝ)..1,
+        form.coeff P ((1 - (t : ℂ)) • (extChartAt 𝓘(ℂ, ℂ) P) P + (t : ℂ) • z)
+          * (z - (extChartAt 𝓘(ℂ, ℂ) P) P))
+      ((extChartAt 𝓘(ℂ, ℂ) P) P) := by
+  set a : ℂ := (extChartAt 𝓘(ℂ, ℂ) P) P with ha_def
+  have hfun : (fun z : ℂ => ∫ t in (0:ℝ)..1,
+        form.coeff P ((1-(t:ℂ))•a+(t:ℂ)•z) * (z-a))
+      = (fun z : ℂ => (∫ t in (0:ℝ)..1, form.coeff P ((1-(t:ℂ))•a+(t:ℂ)•z)) * (z-a)) := by
+    funext z; rw [intervalIntegral.integral_mul_const]
+  rw [hfun]
+  have htgt_open := isOpen_extChartAt_target (I := 𝓘(ℂ,ℂ)) P
+  have ha_tgt : a ∈ (extChartAt 𝓘(ℂ,ℂ) P).target := by
+    rw [ha_def]; exact (extChartAt 𝓘(ℂ,ℂ) P).map_source (mem_extChartAt_source P)
+  obtain ⟨ρ, hρ_pos, hρ_sub⟩ := Metric.isOpen_iff.mp htgt_open a ha_tgt
+  set R : ℝ := ρ / 2 with hR_def
+  have hR_pos : 0 < R := by positivity
+  have hclosed_sub : Metric.closedBall a R ⊆ (extChartAt 𝓘(ℂ,ℂ) P).target := by
+    intro w hw
+    apply hρ_sub
+    rw [Metric.mem_closedBall] at hw
+    rw [Metric.mem_ball]
+    have : R < ρ := by rw [hR_def]; linarith
+    linarith
+  have hcoeff_an : AnalyticOnNhd ℂ (form.coeff P) (extChartAt 𝓘(ℂ,ℂ) P).target :=
+    (htgt_open.analyticOn_iff_analyticOnNhd).mp (form.2.1 P)
+  have hderiv_an : AnalyticOnNhd ℂ (deriv (form.coeff P)) (extChartAt 𝓘(ℂ,ℂ) P).target :=
+    hcoeff_an.deriv
+  have hderiv_cont : ContinuousOn (deriv (form.coeff P)) (Metric.closedBall a R) :=
+    (hderiv_an.mono hclosed_sub).continuousOn
+  obtain ⟨M, hM⟩ := (isCompact_closedBall a R).exists_bound_of_continuousOn hderiv_cont
+  have hseg_mem : ∀ x ∈ Metric.ball a R, ∀ t : ℝ, t ∈ Set.Icc (0:ℝ) 1 →
+      (1-(t:ℂ))•a+(t:ℂ)•x ∈ Metric.closedBall a R := by
+    intro x hx t ht
+    have hxc : x ∈ Metric.closedBall a R := Metric.ball_subset_closedBall hx
+    rw [Metric.mem_closedBall] at hxc ⊢
+    have hdist : dist ((1-(t:ℂ))•a+(t:ℂ)•x) a = t * dist x a := by
+      rw [Complex.dist_eq, Complex.dist_eq]
+      have he : (1-(t:ℂ))•a+(t:ℂ)•x - a = (t:ℂ)*(x-a) := by
+        simp only [smul_eq_mul]; ring
+      rw [he, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht.1]
+    rw [hdist]
+    nlinarith [ht.1, ht.2, dist_nonneg (x:=x) (y:=a), hxc]
+  have hcont_t : ∀ z ∈ Metric.ball a R,
+      ContinuousOn (fun t : ℝ => form.coeff P ((1-(t:ℂ))•a+(t:ℂ)•z)) (Set.Icc (0:ℝ) 1) := by
+    intro z hz
+    have haff : ContinuousOn (fun t : ℝ => (1-(t:ℂ))•a+(t:ℂ)•z) (Set.Icc (0:ℝ) 1) := by fun_prop
+    exact (hcoeff_an.continuousOn.mono hclosed_sub).comp haff
+      (fun t ht => hseg_mem z hz t ht)
+  have key : ContDiffAt ℂ ω
+      (fun z : ℂ => ∫ t in (0:ℝ)..1, form.coeff P ((1-(t:ℂ))•a+(t:ℂ)•z)) a := by
+    have hDiffOn : DifferentiableOn ℂ
+        (fun z : ℂ => ∫ t in (0:ℝ)..1, form.coeff P ((1-(t:ℂ))•a+(t:ℂ)•z))
+        (Metric.ball a R) := by
+      intro z₁ hz₁
+      have hball_nhds : Metric.ball a R ∈ 𝓝 z₁ := Metric.isOpen_ball.mem_nhds hz₁
+      have hres := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+        (a := (0:ℝ)) (b := 1) (μ := volume) (x₀ := z₁) (s := Metric.ball a R)
+        (bound := fun _ => max M 0)
+        (F := fun z t => form.coeff P ((1-(t:ℂ))•a + (t:ℂ)•z))
+        (F' := fun z t => deriv (form.coeff P) ((1-(t:ℂ))•a+(t:ℂ)•z) * (t:ℂ))
+        hball_nhds ?hF_meas ?hF_int ?hF'_meas ?h_bound ?bound_int ?h_diff
+      · exact (hres.2).differentiableAt.differentiableWithinAt
+      case hF_meas =>
+        filter_upwards [Metric.isOpen_ball.mem_nhds hz₁] with z hz
+        exact (hcont_t z hz).aestronglyMeasurable_of_subset_isCompact isCompact_Icc
+          measurableSet_uIoc (by rw [Set.uIoc_of_le zero_le_one]; exact Set.Ioc_subset_Icc_self)
+      case hF_int =>
+        exact (hcont_t z₁ hz₁).intervalIntegrable_of_Icc zero_le_one
+      case hF'_meas =>
+        have hcont' : ContinuousOn
+            (fun t : ℝ => deriv (form.coeff P) ((1-(t:ℂ))•a+(t:ℂ)•z₁) * (t:ℂ))
+            (Set.Icc (0:ℝ) 1) := by
+          have haff : ContinuousOn (fun t : ℝ => (1-(t:ℂ))•a+(t:ℂ)•z₁) (Set.Icc (0:ℝ) 1) := by
+            fun_prop
+          exact ((hderiv_an.continuousOn.mono hclosed_sub).comp haff
+            (fun t ht => hseg_mem z₁ hz₁ t ht)).mul (by fun_prop)
+        exact hcont'.aestronglyMeasurable_of_subset_isCompact isCompact_Icc
+          measurableSet_uIoc (by rw [Set.uIoc_of_le zero_le_one]; exact Set.Ioc_subset_Icc_self)
+      case h_bound =>
+        filter_upwards with t ht x hx
+        have htIcc : t ∈ Set.Icc (0:ℝ) 1 := by
+          have : t ∈ Set.Ioc (0:ℝ) 1 := by rwa [Set.uIoc_of_le zero_le_one] at ht
+          exact Set.Ioc_subset_Icc_self this
+        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg htIcc.1]
+        have hb := hM _ (hseg_mem x hx t htIcc)
+        calc ‖deriv (form.coeff P) ((1-(t:ℂ))•a+(t:ℂ)•x)‖ * t
+            ≤ M * 1 := by
+              apply mul_le_mul hb htIcc.2 htIcc.1 (le_trans (norm_nonneg _) hb)
+          _ = M := by ring
+          _ ≤ max M 0 := le_max_left _ _
+      case bound_int =>
+        exact intervalIntegrable_const
+      case h_diff =>
+        filter_upwards with t ht x hx
+        have htIcc : t ∈ Set.Icc (0:ℝ) 1 := by
+          have : t ∈ Set.Ioc (0:ℝ) 1 := by rwa [Set.uIoc_of_le zero_le_one] at ht
+          exact Set.Ioc_subset_Icc_self this
+        have hpt_tgt : (1-(t:ℂ))•a+(t:ℂ)•x ∈ (extChartAt 𝓘(ℂ,ℂ) P).target :=
+          hclosed_sub (hseg_mem x hx t htIcc)
+        have hcoeff_hd : HasDerivAt (form.coeff P)
+            (deriv (form.coeff P) ((1-(t:ℂ))•a+(t:ℂ)•x)) ((1-(t:ℂ))•a+(t:ℂ)•x) :=
+          ((hcoeff_an _ hpt_tgt).differentiableAt).hasDerivAt
+        have haff_hd : HasDerivAt (fun z : ℂ => (1-(t:ℂ))•a+(t:ℂ)•z) (t:ℂ) x := by
+          simpa using ((hasDerivAt_id x).const_mul (t:ℂ)).const_add ((1-(t:ℂ))•a)
+        exact hcoeff_hd.comp x haff_hd
+    exact ((hDiffOn.analyticOnNhd Metric.isOpen_ball) a (Metric.mem_ball_self hR_pos)).contDiffAt
+  exact key.mul (contDiffAt_id.sub contDiffAt_const)
+
+end ChartLineDescent
+
+/-- **Theorem.** The Abel-Jacobi map is smooth/holomorphic.
+
+The proof factors through `ULift.up` (smooth by `contMDiff_ulift_up`)
+and sets up the quotient-descent scaffold (lattice constant `c₀`,
+`extChartAt` representatives `y₀`, `z₀`). The remaining obligation —
+chart-level smoothness of the torus-valued map — follows the same
+pattern as `complexTorus_pushforward_contMDiff_engine` with the linear
+model replaced by the chart-line integral; the chart-line integral's
+analyticity (and hence `ContDiffAt ℂ ω`) is the content of the
+parametric-FTC step (`chartLine_FTC` + `DifferentiableOn.analyticOn`).
+-/
+theorem AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (P : X) :
     ContMDiff 𝓘(ℂ, ℂ) (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) ω
-      (ofCurveImpl X P)
+      (ofCurveImpl X P) := by
+  -- ═══════════════════════════════════════════════════════════════════
+  -- Abel-Jacobi smoothness — structured proof skeleton
+  -- ═══════════════════════════════════════════════════════════════════
+  -- Step 0: Notation
+  let IY := modelWithCornersSelf ℂ (Fin (genus X) → ℂ)
+  -- Step 1: ContMDiff = ∀ Qstar, ContMDiffAt. Fix an arbitrary target point.
+  intro Qstar
+  -- Step 2: Factor  ofCurveImpl X P = ULift.up ∘ φ  and peel off ULift.up.
+  -- φ Q := QuotientAddGroup.mk' Λ.toAddSubgroup (ofCurveAmbient X P Q − ofCurveAmbient X P P)
+  show ContMDiffAt 𝓘(ℂ, ℂ) IY ω (ofCurveImpl X P) Qstar
+
+  set Λ := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X) with hΛ
+  -- `φ Q := mk' Λ (ofCurveAmbient X P Q − ofCurveAmbient X P P)`, bound with an
+  -- explicit `JacobianAmbient X` (= `ComplexTorus`) codomain so every
+  -- `contMDiffAt_iff` computation resolves to the `ComplexTorus` atlas
+  -- (matching `contMDiff_ulift_up`), as in
+  -- `complexTorus_pushforward_contMDiff_engine`.
+  set φ : X → JacobianAmbient X := fun Q =>
+    QuotientAddGroup.mk' Λ.toAddSubgroup
+      (ofCurveAmbient X P Q - ofCurveAmbient X P P)
+    with hφ_def
+  have hφ : ContMDiffAt 𝓘(ℂ, ℂ) IY ω φ Qstar := by
+    -- ───────────────────────────────────────────────────────────────────
+    -- Step 3: Quotient-descent scaffold (mirrors complexTorus_pushforward_contMDiff_engine)
+    -- ───────────────────────────────────────────────────────────────────
+    set target_q : JacobianAmbient X := φ Qstar with htgt
+    set v₀ : Fin (genus X) → ℂ := ofCurveAmbient X P Qstar - ofCurveAmbient X P P with hv₀
+    -- v₀ lifts target_q
+    have hv₀_mk :
+        (QuotientAddGroup.mk' Λ.toAddSubgroup v₀ : JacobianAmbient X) = target_q := rfl
+    -- Pick the extChartAt lift of target_q in the torus (ComplexTorus atlas).
+    set y₀ := extChartAt IY target_q target_q with hy₀_def
+    have htgt_src : target_q ∈ (extChartAt IY target_q).source :=
+      mem_extChartAt_source target_q
+    have hy₀_tgt : y₀ ∈ (extChartAt IY target_q).target :=
+      (extChartAt IY target_q).map_source htgt_src
+    -- The torus chart symm at y₀ is mk' v₀  (up to lattice)
+    have hy₀_mk :
+        (QuotientAddGroup.mk' Λ.toAddSubgroup y₀ : JacobianAmbient X) = target_q :=
+      (Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+        (L := Λ) target_q
+        ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+          (L := Λ) target_q).1 hy₀_tgt)).symm.trans
+        ((extChartAt IY target_q).left_inv htgt_src)
+    -- Lattice constant c₀ := y₀ − v₀
+    set c₀ := y₀ - v₀ with hc₀_def
+    have hc₀_mem : c₀ ∈ Λ.toAddSubgroup := by
+      have hmk_eq :
+          (QuotientAddGroup.mk' Λ.toAddSubgroup y₀ : JacobianAmbient X) =
+          QuotientAddGroup.mk' Λ.toAddSubgroup v₀ := by
+        rw [hy₀_mk, ← hv₀_mk]
+      rw [QuotientAddGroup.mk'_eq_mk'] at hmk_eq
+      obtain ⟨z, hz_mem, hz_eq⟩ := hmk_eq
+      have hc₀z : c₀ = -z := by
+        change y₀ - v₀ = -z
+        have : y₀ = v₀ + (-z) := by rw [← hz_eq]; abel
+        rw [this]; abel
+      rw [hc₀z]; exact AddSubgroup.neg_mem _ hz_mem
+    have hy₀_eq : y₀ = v₀ + c₀ := by change y₀ = v₀ + (y₀ - v₀); abel
+    -- Shift lemma: mk'(w + c₀) = mk'(w)  for any w
+    have hshift : ∀ w : Fin (genus X) → ℂ,
+        (QuotientAddGroup.mk' Λ.toAddSubgroup (w + c₀) :
+          JacobianAmbient X) =
+        QuotientAddGroup.mk' Λ.toAddSubgroup w := by
+      intro w
+      apply Quotient.sound'
+      rw [QuotientAddGroup.leftRel_apply]
+      have : -(w + c₀) + w = -c₀ := by abel
+      rw [this]; exact AddSubgroup.neg_mem _ hc₀_mem
+    -- ─────────────────────────────────────────────────────────────────
+    -- Step 4: The local model function (chart-line integral vector)
+    -- ─────────────────────────────────────────────────────────────────
+    set z₀ := (extChartAt 𝓘(ℂ, ℂ) Qstar) Qstar with hz₀_def
+    -- chartLineVec z i = ∫₀¹ (jacobianBasis X i).coeff Qstar ((1−t)•z₀ + t•z) · (z − z₀) dt
+    -- This is the chart-line integral from z₀ to z in the chart centered at Qstar.
+    set chartLineVec : ℂ → Fin (genus X) → ℂ := fun z i =>
+      ∫ t in (0 : ℝ)..1,
+        (jacobianBasis X i).coeff Qstar ((1 - ↑t) • z₀ + ↑t • z) * (z - z₀)
+    -- localModel z := v₀ + chartLineVec z
+    set localModel : ℂ → Fin (genus X) → ℂ := fun z => v₀ + chartLineVec z
+    -- localModel z₀ = v₀  (since chartLineVec z₀ = 0:  integrand has factor z₀ − z₀ = 0)
+    have hCLV_zero : chartLineVec z₀ = 0 := by
+      ext i; simp [chartLineVec, sub_self, mul_zero]
+    have hLM_z₀ : localModel z₀ = v₀ := by simp [localModel, hCLV_zero]
+    -- ─────────────────────────────────────────────────────────────────
+    -- Step 5: Prove ContMDiffAt via comparison map + congr_of_eventuallyEq
+    -- ─────────────────────────────────────────────────────────────────
+    -- APPROACH: Do NOT rw [contMDiffAt_iff] on φ directly (charted-space
+    -- diamond). Instead prove ContMDiffAt for a "comparison map" ψ that
+    -- composes mk' ∘ (localModel + c₀) ∘ extChartAt, then transfer via
+    -- ContMDiffAt.congr_of_eventuallyEq using the period-lattice equality.
+    have hQstar_src : Qstar ∈ (extChartAt 𝓘(ℂ, ℂ) Qstar).source :=
+      mem_extChartAt_source Qstar
+    have hmk_cont : Continuous (QuotientAddGroup.mk' Λ.toAddSubgroup) :=
+      continuous_quotient_mk'
+    have hCLV_contAt : ∀ i, ContinuousAt (fun y => chartLineVec y i) z₀ := by
+      intro i
+      have heq : (fun y => chartLineVec y i) = fun y =>
+          (∫ t in (0:ℝ)..1, (jacobianBasis X i).coeff Qstar
+            ((1 - ↑t) • z₀ + ↑t • y)) * (y - z₀) := by
+        ext y; simp only [chartLineVec]
+        simp_rw [mul_comm _ (y - z₀)]
+        rw [intervalIntegral.integral_const_mul, mul_comm]
+      rw [heq]
+      exact (Jacobians.Bridge.chartLine_average_coeff_continuousAt
+        (X := X) Qstar (jacobianBasis X i)).mul
+        (continuousAt_id.sub continuousAt_const)
+    have hLM_cont : ContinuousAt localModel z₀ := by
+      apply ContinuousAt.add continuousAt_const
+      exact continuousAt_pi.mpr hCLV_contAt
+    have hz₀_tgt : z₀ ∈ (extChartAt 𝓘(ℂ, ℂ) Qstar).target :=
+      (extChartAt 𝓘(ℂ, ℂ) Qstar).map_source hQstar_src
+    have hmem_tgt :
+        localModel z₀ + c₀ ∈ (extChartAt IY target_q).target := by
+      rw [hLM_z₀, ← hy₀_eq]; exact hy₀_tgt
+    -- ─── Smoothness of localModel + c₀ ────────────────────────────
+    have hsmooth_LM : ContDiffAt ℂ ω (fun z => localModel z + c₀) z₀ := by
+      apply ContDiffAt.add _ contDiffAt_const
+      apply ContDiffAt.add contDiffAt_const
+      apply contDiffAt_pi.mpr; intro i
+      -- The chart-line vector is analytic in the endpoint (parametric
+      -- analyticity of the chart-line integral); see
+      -- `aux_chartLineVec_contDiffAt`.
+      have hbridge : (fun x : ℂ => chartLineVec x i)
+          = (fun z : ℂ => ∫ t in (0:ℝ)..1, (jacobianBasis X i).coeff Qstar
+              ((1 - (t:ℂ)) • z₀ + (t:ℂ) • z) * (z - z₀)) := by
+        funext z
+        simp only [chartLineVec]
+        refine intervalIntegral.integral_congr (fun t _ => ?_)
+        congr 2
+        all_goals first
+          | rfl
+          | (simp only [Complex.real_smul, smul_eq_mul]; push_cast; ring)
+      rw [hbridge, hz₀_def]
+      exact aux_chartLineVec_contDiffAt (X := X) Qstar (jacobianBasis X i)
+    -- ─── Comparison map ψ ────────────────────────────────────────
+    -- ψ Q = mk'(localModel(extChartAt Qstar Q) + c₀) : JacobianAmbient X
+    -- We prove ContMDiffAt for ψ via contMDiffAt_iff, using
+    -- extChartAt_apply_quotient_mk (no right_inv, no diamond).
+    -- First establish: ψ Qstar = target_q
+    have hψ_val : (QuotientAddGroup.mk' Λ.toAddSubgroup
+        (localModel z₀ + c₀) : JacobianAmbient X) = target_q := by
+      rw [hLM_z₀]; exact (hshift v₀).trans hv₀_mk
+    -- The comparison map, bound with an explicit `JacobianAmbient X`
+    -- (= `ComplexTorus`) codomain so that `contMDiffAt_iff` resolves to the
+    -- `ComplexTorus` atlas (matching `contMDiff_ulift_up`), exactly as in
+    -- `complexTorus_pushforward_contMDiff_engine`.
+    set psiMap : X → JacobianAmbient X :=
+      fun Q => QuotientAddGroup.mk' Λ.toAddSubgroup
+        (localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) + c₀)
+      with hpsiMap_def
+    -- `psiMap Qstar` is definitionally `mk' (localModel z₀ + c₀)` (as `z₀ =
+    -- extChartAt Qstar Qstar`), which equals `target_q` by `hψ_val`.
+    have hpsiMap_Qstar : psiMap Qstar = target_q := hψ_val
+    have hcomp : ContMDiffAt 𝓘(ℂ,ℂ) IY ω psiMap Qstar := by
+      refine contMDiffAt_iff.mpr ⟨?_, ?_⟩
+      · -- ContinuousAt of ψ at Qstar
+        exact hmk_cont.continuousAt.comp
+          (hsmooth_LM.continuousAt.comp (continuousAt_extChartAt (I := 𝓘(ℂ,ℂ)) Qstar))
+      · -- ContDiffWithinAt — chart composition
+        simp only [modelWithCornersSelf_coe, Set.range_id]
+        rw [contDiffWithinAt_univ]
+        apply hsmooth_LM.congr_of_eventuallyEq
+        filter_upwards [
+          (isOpen_extChartAt_target (I := 𝓘(ℂ,ℂ)) Qstar).mem_nhds hz₀_tgt,
+          hsmooth_LM.continuousAt.preimage_mem_nhds
+            ((isOpen_extChartAt_target (I := IY) target_q).mem_nhds hmem_tgt)
+        ] with z hz_chart hz_torus
+        -- `hz_torus : localModel z + c₀ ∈ (extChartAt IY target_q).target`
+        have hsymm_y :
+            (extChartAt IY target_q).symm (localModel z + c₀) =
+              (QuotientAddGroup.mk' Λ.toAddSubgroup (localModel z + c₀) :
+                JacobianAmbient X) :=
+          Jacobians.AbelianVariety.ComplexTorus.extChartAt_symm_eq_quotient_mk
+            (L := Λ) target_q
+            ((Jacobians.AbelianVariety.ComplexTorus.mem_extChartAt_target_iff
+              (L := Λ) target_q).1 hz_torus)
+        have hpsi_eq :
+            psiMap ((extChartAt 𝓘(ℂ,ℂ) Qstar).symm z) =
+              (extChartAt IY target_q).symm (localModel z + c₀) := by
+          rw [hsymm_y, hpsiMap_def]
+          show (QuotientAddGroup.mk' Λ.toAddSubgroup
+              (localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) ((extChartAt 𝓘(ℂ,ℂ) Qstar).symm z)) + c₀)
+              : JacobianAmbient X)
+            = QuotientAddGroup.mk' Λ.toAddSubgroup (localModel z + c₀)
+          rw [(extChartAt 𝓘(ℂ,ℂ) Qstar).right_inv hz_chart]
+        simp only [Function.comp_apply, hpsiMap_Qstar]
+        rw [hpsi_eq]
+        exact (extChartAt IY target_q).right_inv hz_torus
+    -- ─── Period-lattice eventuallyEq: psiMap =ᶠ φ near Qstar ─────────
+    -- φ Q = mk'(ofCurveAmbient P Q - ofCurveAmbient P P)
+    -- psiMap Q = mk'(localModel(extChartAt Q) + c₀) = mk'(localModel(extChartAt Q))
+    -- These agree near Qstar by AX_Period_Triangle.
+    have hperiod_filter : psiMap =ᶠ[𝓝 Qstar] φ := by
+      obtain ⟨ρ, hρ_pos, hρ_sub⟩ :=
+        Metric.isOpen_iff.mp
+          (isOpen_extChartAt_target (I := 𝓘(ℂ,ℂ)) Qstar) z₀ hz₀_tgt
+      filter_upwards [
+        (continuousAt_extChartAt (I := 𝓘(ℂ,ℂ)) Qstar).preimage_mem_nhds
+          (Metric.ball_mem_nhds z₀ hρ_pos),
+        extChartAt_source_mem_nhds (I := 𝓘(ℂ,ℂ)) Qstar
+      ] with Q hQ_ball hQ_src
+      -- The chart-line segment from `z₀` to `(extChartAt Qstar) Q` stays in
+      -- the chart target, since `(extChartAt Qstar) Q` lies in the ball.
+      have hseg : ∀ s ∈ Set.Icc (0:ℝ) 1,
+          (1 - s) • (extChartAt 𝓘(ℂ,ℂ) Qstar) Qstar
+              + s • (extChartAt 𝓘(ℂ,ℂ) Qstar) Q
+            ∈ (extChartAt 𝓘(ℂ,ℂ) Qstar).target := by
+        intro s hs
+        apply hρ_sub
+        have hline :
+            (1 - s) • z₀ + s • (extChartAt 𝓘(ℂ,ℂ) Qstar) Q ∈
+              segment ℝ z₀ ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) := by
+          rw [← AffineMap.lineMap_apply_module]
+          exact lineMap_mem_segment ℝ _ _ hs
+        have hball :=
+          (convex_ball _ _).segment_subset (Metric.mem_ball_self hρ_pos) hQ_ball hline
+        simpa using hball
+      have hmem := aux_ofCurveAmbient_chartLine_mem (X := X) P Qstar Q hQ_src hseg
+      -- Convert the lattice membership into the quotient equality.
+      show (QuotientAddGroup.mk' Λ.toAddSubgroup
+          (localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) + c₀) : JacobianAmbient X)
+        = QuotientAddGroup.mk' Λ.toAddSubgroup
+            (ofCurveAmbient X P Q - ofCurveAmbient X P P)
+      rw [show localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) + c₀
+            = (v₀ + chartLineVec ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q)) + c₀ from rfl,
+        hshift (v₀ + chartLineVec ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q))]
+      apply (QuotientAddGroup.eq_iff_sub_mem (N := Λ.toAddSubgroup)).mpr
+      rw [Submodule.mem_toAddSubgroup]
+      have hneg := Submodule.neg_mem _ hmem
+      have heqv :
+          (v₀ + chartLineVec ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q))
+              - (ofCurveAmbient X P Q - ofCurveAmbient X P P)
+            = -(fun i => ofCurveAmbient X P Q i
+                - (ofCurveAmbient X P Qstar i
+                  + ∫ t in (0:ℝ)..1,
+                      (jacobianBasis X i).coeff Qstar
+                        ((1 - (t:ℂ)) • (extChartAt 𝓘(ℂ,ℂ) Qstar) Qstar
+                          + (t:ℂ) • (extChartAt 𝓘(ℂ,ℂ) Qstar) Q)
+                        * ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q
+                          - (extChartAt 𝓘(ℂ,ℂ) Qstar) Qstar))) := by
+        funext i
+        have hclv : chartLineVec ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) i
+            = ∫ t in (0:ℝ)..1,
+                (jacobianBasis X i).coeff Qstar
+                  ((1 - (t:ℂ)) • (extChartAt 𝓘(ℂ,ℂ) Qstar) Qstar
+                    + (t:ℂ) • (extChartAt 𝓘(ℂ,ℂ) Qstar) Q)
+                  * ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q
+                    - (extChartAt 𝓘(ℂ,ℂ) Qstar) Qstar) := by
+          simp only [chartLineVec, hz₀_def]
+          refine intervalIntegral.integral_congr (fun t _ => ?_)
+          congr 2
+          all_goals first
+            | rfl
+            | (simp only [Complex.real_smul, smul_eq_mul]; push_cast; ring)
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.neg_apply, hclv, hv₀]
+        ring
+      rw [heqv]
+      exact hneg
+    exact hcomp.congr_of_eventuallyEq hperiod_filter.symm
+  refine (Jacobians.Jacobian.contMDiff_ulift_up).contMDiffAt.comp Qstar ?_
+  exact hφ
 
 /-- **Theorem (derived 2026-04-23).** The Abel-Jacobi map sends the
 basepoint to zero — definitional from the subtraction in `ofCurveImpl`. -/
