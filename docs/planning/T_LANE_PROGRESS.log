@@ -37,3 +37,4 @@ Route (after full inventory): direct Miranda step-1 construction with fibre-satu
   hinf: reciprocal clusters at f-poles + annulus contour algebra (largest new piece).
 Files: new FrameTraceWall*.lean engine (no import of FrameTrace), final in-place assembly in
 FrameTrace.lean. Fallback at cutoff: re-isolate unfinished fields as ONE named sorry lemma.
+16:14 cluster+assembly done; next: hoff wiring + hinf
