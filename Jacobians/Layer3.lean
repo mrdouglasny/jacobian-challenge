@@ -5,3 +5,4 @@ import Jacobians.Layer3.PeriodLattice
 import Jacobians.Layer3.RiemannBilinear
 import Jacobians.Layer3.Periods
 import Jacobians.Layer3.PeriodSpan
+import Jacobians.Layer3.PeriodLatticeDiscrete
