@@ -1,1 +1,13 @@
 2026-06-10 T+0:35 inventory complete (monodromy/quotient-covering/exp-covering all at pin; no SVK, no pi1(S1)); route (c) chosen; SVK_ROUTE.md written
+20:23 part A (monodromy_mk/injective/surjective, pathClassEquivFiber, pi1EquivFiber) compiles clean, committed
+20:29 CoveringPi1.lean COMPLETE (deckMulEquivPi1 + generator identification), standard-3 verified, committed
+20:34 M1 COMPLETE: pi1PuncturedPlaneInt + generator identification, standard-3, committed
+20:39 IntOn/eq_fromPath/indep lemmas compile, committed; starting WindingNumber.lean (M2)
+20:45 M2-lite COMPLETE: windingHom + both computation rules, standard-3, committed
+20:52 PunctureLoops stage1 (mk_eq_refl, circleAround generator, conj plumbing) compiles, committed
+20:54 stage2 transport invariance compiles, committed
+20:58 stage3 lasso winding theorems compile, committed
+21:02 M3-PARTIAL COMPLETE: exists_winding_dual_loops, standard-3, committed
+21:08 aggregator wired, full lake build Jacobians green
+M4 COMPLETE: pi1MulEquivOfHomeomorph + puncturedSphereHomeo + pi1PuncturedSphere + pi1SphereTwoPoints, standard-3, committed
+FINAL: M1 done, M2-lite done (winding homs both rules), M3-partial done (delta-winding lasso family exists_winding_dual_loops; generation/freeness documented in SVK_BLOCKER.md), M4 done. Full lake build Jacobians green. All headline decls #print-axioms = [propext, Classical.choice, Quot.sound].
