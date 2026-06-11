@@ -450,6 +450,104 @@ private theorem centerRead_data {j₀ : 𝔇.toFiniteCover.ι} {b : X}
   · rw [meromorphicOrderAt_congr (hev.filter_mono nhdsWithin_le_nhds),
       meromorphicOrderAt_comp_of_deriv_ne_zero hσan hσd, hσpt]
 
+/-- **`SeparatesPoles` is stable under marking one cover-isolated point**: overlaps of distinct
+cover sets avoid the isolated point, so the marked divisor `K + b` is still non-positive there. -/
+theorem separatesPoles_add_single (hsep : SeparatesPoles 𝔇 K) {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+    (hbiso : MLIsolated 𝔇 j₀ b) :
+    SeparatesPoles 𝔇 (K + Finsupp.single b 1) := by
+  intro i j hij x hx
+  have hxb : x ≠ b := by
+    intro hc
+    subst hc
+    by_cases hi : i = j₀
+    · exact hbiso.2 j (fun hj => hij (hi.trans hj.symm)) hx.2
+    · exact hbiso.2 i hi hx.1
+  rw [Kb_apply_ne hxb]
+  exact hsep i j hij x hx
+
+/-- **The marked-membership bookkeeping** (Forster 17.7's order count): `f ∈ L(K−E)` with exact
+order `n = m − K b` at `b` lies in the shifted system `L((K+b) − (Ě+b))`,
+`Ě := E + (m − E b)·b` — the exact membership the cup with the test cochain needs to land in
+`𝒪_{K+b}`.  Off `b` the bound is the `L(K−E)` bound; at `b` it is `orderW f b ≥ n`, exact. -/
+theorem mem_linearSystem_marked {E : Divisor X} {f : MeromorphicFunction X}
+    (hfE : f ∈ linearSystem (X := X) (K - E)) {b : X} {n m : ℤ}
+    (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b) :
+    f ∈ linearSystem (X := X)
+      ((K + Finsupp.single b 1) - (E + Finsupp.single b (m - E b) + Finsupp.single b 1)) := by
+  intro x
+  by_cases hx : x = b
+  · subst hx
+    have h1 : ((K + Finsupp.single x 1
+        - (E + Finsupp.single x (m - E x) + Finsupp.single x 1) : Divisor X)) x = -n := by
+      simp only [Finsupp.sub_apply, Finsupp.add_apply, Finsupp.single_eq_same]
+      omega
+    rw [h1, hn]
+    have h2 : (- -n : ℤ) ≤ n := by omega
+    exact_mod_cast h2
+  · have hbx : b ≠ x := fun hc => hx hc.symm
+    have h1 : ((K + Finsupp.single b 1
+        - (E + Finsupp.single b (m - E b) + Finsupp.single b 1) : Divisor X)) x
+        = (K - E : Divisor X) x := by
+      simp only [Finsupp.sub_apply, Finsupp.add_apply,
+        Finsupp.single_eq_of_ne (a := b) (a' := x) hx]
+      ring
+    rw [h1]
+    exact hfE x
+
+namespace TestCocycleData
+
+variable {E : Divisor X} {j₀ : 𝔇.toFiniteCover.ι} {b : X} {hb : b ∈ (𝔇.U j₀ : Set X)} {m : ℤ}
+
+/-- **Level-`K+b` membership of the cup 0-cochain** `f · n̂`: the product of `f ∈ L(K−E)` (exact
+order `n = m − K b` at `b`) with the skyscraper test cochain is a `sections0 (K+b)` cochain —
+poles cancel against the linear-system bounds everywhere except the single marked simple
+excess at `b`. -/
+theorem cup_mem_sections0 (td : TestCocycleData 𝔇 E j₀ b hb m)
+    {f : MeromorphicFunction X} (hfE : f ∈ linearSystem (X := X) (K - E))
+    {n : ℤ} (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b) :
+    cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1) := by
+  intro i
+  by_cases hi : i = j₀
+  · subst hi
+    rw [cupCochain0_apply, td.cochain_self]
+    exact mulConstG_omegaDGerm (mem_linearSystem_marked hfE hn hm) ⟨td.γ, td.mem, rfl⟩
+  · rw [cupCochain0_apply, td.cochain_of_ne hi, mul_zero]
+    exact Submodule.zero_mem _
+
+/-- The honest product representative `(f∘val)·γ` of the marked cup component. -/
+noncomputable def cupRep (td : TestCocycleData 𝔇 E j₀ b hb m) (f : MeromorphicFunction X) :
+    ↥(𝔇.U j₀) → ℂ :=
+  (f.toFun ∘ Subtype.val) * td.γ
+
+/-- The product representative represents the marked cup-cochain component. -/
+theorem toGerm_cupRep (td : TestCocycleData 𝔇 E j₀ b hb m) (f : MeromorphicFunction X) :
+    toGerm (𝔇.U j₀) (td.cupRep f)
+      = cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain j₀ := by
+  rw [cupCochain0_apply, td.cochain_self, globalGerm]
+  rfl
+
+/-- The product representative is meromorphic on the distinguished cover set. -/
+theorem isMeromorphic_cupRep (td : TestCocycleData 𝔇 E j₀ b hb m) (f : MeromorphicFunction X) :
+    IsMeromorphic ((𝔇.U j₀ : Opens X) : Type _) (td.cupRep f) :=
+  fun u => ((isMeromorphic_val f) u).mul (td.mem.1 u)
+
+/-- **The exact simple-excess order**: the product representative has order EXACTLY
+`−K b − 1` at the marked point — `n` from the function, `−(m+1)` from the test section,
+`m = n + K b`.  Order additivity is exact because both factor orders are finite. -/
+theorem ordU_cupRep (td : TestCocycleData 𝔇 E j₀ b hb m) {f : MeromorphicFunction X}
+    {n : ℤ} (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b) :
+    ordU (td.cupRep f) ⟨b, hb⟩ = ((-(K b) - 1 : ℤ) : WithTop ℤ) := by
+  rw [cupRep, ordU_globalMul f td.mem.1 ⟨b, hb⟩, hn, td.ord]
+  have hcast : ((n : ℤ) : WithTop ℤ) + ((-m - 1 : ℤ) : WithTop ℤ)
+      = ((n + (-m - 1) : ℤ) : WithTop ℤ) := by
+    norm_cast
+  rw [hcast]
+  congr 1
+  omega
+
+end TestCocycleData
+
 end Evaluation
 
 end Dolbeault
