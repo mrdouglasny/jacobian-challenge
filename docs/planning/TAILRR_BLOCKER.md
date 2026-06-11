@@ -25,6 +25,15 @@ hypotheses (no axioms introduced):
 
 ## Residual input 1 — `Nonempty (TailPairFrame X)` (frame construction)
 
+**STATUS (2026-06-11, F-lane): DISCHARGED at positive genus — sorry-free, axiom-free.**
+`TailFrameWitness.lean`: `nonempty_tailPairFrame_of_kirovGenus_pos : 0 < kirovGenus X →
+Nonempty (TailPairFrame X)` (kernel standard-3). The atom `∑Res(F·ω₀) = 0` was NOT new
+analysis: with `ω₀ := holToMero α` for a nonzero holomorphic `α` (exists iff genus > 0),
+it is the PROVEN Gate-A `residueTheorem_unconditional`, transported by two new bridges —
+`resAt_eq_planarCoeff_neg_one` (contour residue = planar `c₋₁`, leading-monomial stripping)
+and `MeromorphicFunction.repair` (holoRepr junk repair giving the honest-analyticity
+hypothesis). Genus 0 is intentionally out of scope (no nonzero holomorphic frame form).
+
 ```
 structure TailPairFrame where
   data : CanonicalForm17Data X            -- PROVEN nonempty (nonempty_canonicalForm17Data)
