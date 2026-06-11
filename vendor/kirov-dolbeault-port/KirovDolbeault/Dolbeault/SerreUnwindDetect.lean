@@ -832,7 +832,7 @@ theorem resCocycle_cup_testCocycle_ne_zero (hsep : SeparatesPoles 𝔇 K)
         rw [show ((K + Finsupp.single b 1 : Divisor X) a).toNat = (K a).toNat from by
           rw [Kb_apply_ne hab]]
         exact hgv
-      exact slotProductExtendsAt_vanishFn hsep' hF0 hg haK' hiso' huan hgv'
+      exact slotProductExtendsAt_vanishFn hF0 hg haK' hiso' huan hgv'
   rw [heval]
   exact neg_ne_zero.mpr hr0
 

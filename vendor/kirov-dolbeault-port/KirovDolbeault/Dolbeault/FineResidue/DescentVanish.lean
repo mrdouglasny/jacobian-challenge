@@ -316,8 +316,9 @@ variable {𝔇} {K : Divisor X} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
 /-- **The product-germ trick**: at a K-point `a` (isolated in `U j₀`) where the slot vanishes
 to order `≥ K a`, the product of the meromorphic 0-cochain component with the slot pullback is
 an `𝒪`-class near `a`, and its `holoFn` is the analytic extension demanded by the R6b engine:
-`SlotProductExtendsAt` holds for the off-K-points extraction. -/
-theorem slotProductExtendsAt_vanishFn (hsep : SeparatesPoles 𝔇 K)
+`SlotProductExtendsAt` holds for the off-K-points extraction.  (No pole-separation
+hypothesis: the proof only erases the OTHER K-points from the distinguished set.) -/
+theorem slotProductExtendsAt_vanishFn
     {f : 𝔇.toFiniteCover.toFiniteFamily.Cochain0}
     (hf : f ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 K) (hg : IsOneZeroCoeff 𝔇 g)
     {a : X} (haK : 0 < K a) {j₀ : 𝔇.toFiniteCover.ι} (hiso : MLIsolated 𝔇 j₀ a)
@@ -556,7 +557,7 @@ theorem resCocycle_vanish_coboundary (hsep : SeparatesPoles 𝔇 K)
   · intro a haS j₀ hiso
     have haK : 0 < K a := mem_posSupp_iff.mp haS
     obtain ⟨u, hu, hgv⟩ := hslot a haK j₀ hiso.1
-    exact slotProductExtendsAt_vanishFn hsep hfK hg haK hiso hu hgv
+    exact slotProductExtendsAt_vanishFn hfK hg haK hiso hu hgv
 
 /-- **The unconditional `liftQ` descent at general `K`**: the fine-sheaf residue functional on
 `cechH1 K`, with the coboundary-vanishing leg PROVEN (no `K ≤ 0` restriction). -/
