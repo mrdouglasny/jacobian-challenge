@@ -391,3 +391,4 @@ implementation over cup/h1InclMono/RR), then the conditional two-RR subtraction 
   records the two residual inputs (TailRiemannRoch; CechTailComparison) honestly.
 08:10 TAILRR lane: route doc committed (cheap bridges rejected; Miranda tail tower T1-T6; PairResidueTheorem isolated)
 08:31 TAILRR: T1 (TailCoeffFull) + T2/T3 (TailSpaceGlobal) COMPILED+COMMITTED; next T4 tail H1 + RR-I
+09:16 TAILRR: T4 LANDED — tail_riemannRoch_I proven (finiteness + chi-pair + posPart); next T5 duality (pairing/injectivity/surjectivity)
