@@ -183,4 +183,132 @@ theorem fundamentalGroupMulEquivOfPath_pi1PuncturedPlaneIntAt (s : ℂ)
     MonoidHom.ext_mint key
   exact DFunLike.congr_fun hcomp g
 
+/-! ## Lassos -/
+
+/-- A lasso around a nullhomotopic circle is trivial: `P · C · P⁻¹ ≃ refl` when
+`C ≃ refl`. -/
+theorem fromPath_conj_eq_one {X : Type*} [TopologicalSpace X] {x c : X}
+    (P : Path x c) (C : Path c c)
+    (hC : Path.Homotopic.Quotient.mk C = Path.Homotopic.Quotient.mk (Path.refl c)) :
+    FundamentalGroup.fromPath
+      (Path.Homotopic.Quotient.mk (P.trans (C.trans P.symm))) = 1 := by
+  have h1 : Path.Homotopic.Quotient.mk (P.trans (C.trans P.symm))
+      = (Path.Homotopic.Quotient.mk P).trans ((Path.Homotopic.Quotient.mk C).trans
+          (Path.Homotopic.Quotient.mk P.symm)) := by
+    rw [Path.Homotopic.Quotient.mk_trans, Path.Homotopic.Quotient.mk_trans]
+  have h3 : Path.Homotopic.Quotient.mk ((Path.refl c).trans P.symm)
+      = Path.Homotopic.Quotient.mk P.symm :=
+    Quotient.sound ⟨Path.Homotopy.reflTrans P.symm⟩
+  have h5 : Path.Homotopic.Quotient.mk (P.trans P.symm)
+      = Path.Homotopic.Quotient.mk (Path.refl x) :=
+    Quotient.sound ⟨(Path.Homotopy.reflTransSymm P).symm⟩
+  show FundamentalGroup.fromPath
+    (Path.Homotopic.Quotient.mk (P.trans (C.trans P.symm))) = 1
+  rw [h1, hC, ← Path.Homotopic.Quotient.mk_trans, h3, ← Path.Homotopic.Quotient.mk_trans, h5]
+  rfl
+
+variable {S : Set ℂ}
+
+/-- The circle through `z` around the puncture `s ∈ S`, as a loop in the multiply
+punctured plane (under the hypothesis that it avoids all punctures). -/
+noncomputable def circleInPunctured (s : ℂ) (z : {w : ℂ // w ∉ S})
+    (hcirc : ∀ t : unitInterval,
+      s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ S) :
+    Path z z where
+  toFun t := ⟨s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)), hcirc t⟩
+  continuous_toFun := by fun_prop
+  source' := Subtype.ext (by simp)
+  target' := Subtype.ext (by simp [twoPiI, Complex.exp_two_pi_mul_I])
+
+/-- **Diagonal winding of a lasso.** The lasso `P · circle · P⁻¹` around `s` has
+winding number `1` around `s`. -/
+theorem windingHom_lasso_self {s : ℂ} (hs : s ∈ S)
+    {x₀ z : {w : ℂ // w ∉ S}} (P : Path x₀ z)
+    (hcirc : ∀ t : unitInterval,
+      s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ S) :
+    windingHom hs x₀ (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
+        (P.trans ((circleInPunctured s z hcirc).trans P.symm))))
+      = Multiplicative.ofAdd 1 := by
+  show (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
+      (FundamentalGroup.mapOfEq (puncturedInclusion hs) rfl
+        (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
+          (P.trans ((circleInPunctured s z hcirc).trans P.symm)))))
+    = Multiplicative.ofAdd 1
+  rw [FundamentalGroup.mapOfEq_apply]
+  have hcast : ((P.trans ((circleInPunctured s z hcirc).trans P.symm)).map
+        (puncturedInclusion hs).continuous).cast (Eq.symm rfl) (Eq.symm rfl)
+      = (P.map (puncturedInclusion hs).continuous).trans
+          ((circleAround s (puncturedInclusion hs z)).trans
+            (P.map (puncturedInclusion hs).continuous).symm) := by
+    rw [Path.cast_rfl_rfl, Path.map_trans, Path.map_trans, Path.map_symm]
+    have hmid : (circleInPunctured s z hcirc).map (puncturedInclusion hs).continuous
+        = circleAround s (puncturedInclusion hs z) := by
+      ext t
+      rfl
+    rw [hmid]
+  rw [hcast]
+  have hconj := fundamentalGroupMulEquivOfPath_fromPath
+    (P.map (puncturedInclusion hs).continuous).symm
+    (circleAround s (puncturedInclusion hs z))
+  rw [Path.symm_symm] at hconj
+  rw [← hconj, ← pi1PuncturedPlaneIntAt_ofAdd_one,
+    fundamentalGroupMulEquivOfPath_pi1PuncturedPlaneIntAt]
+  exact MulEquiv.symm_apply_apply _ _
+
+/-- **Off-diagonal winding of a lasso.** If the circle of the lasso around `s` lies
+in a convex set avoiding the puncture `s'`, the lasso has winding number `0`
+around `s'` (the connecting path `P` is arbitrary). -/
+theorem windingHom_lasso_ne {s s' : ℂ} (hs' : s' ∈ S)
+    {x₀ z : {w : ℂ // w ∉ S}} (P : Path x₀ z)
+    (hcirc : ∀ t : unitInterval,
+      s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ S)
+    {K : Set ℂ} (hK : Convex ℝ K) (hs'K : s' ∉ K)
+    (hcircK : ∀ t : unitInterval,
+      s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∈ K) :
+    windingHom hs' x₀ (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
+        (P.trans ((circleInPunctured s z hcirc).trans P.symm)))) = 1 := by
+  haveI : ContractibleSpace K := hK.contractibleSpace ⟨_, hcircK 0⟩
+  have hzK : (z : ℂ) ∈ K := by
+    have h0 := hcircK 0
+    simpa using h0
+  set ptK : K := ⟨(z : ℂ), hzK⟩ with hptK
+  -- the circle, corestricted to `K`
+  set circleK : Path ptK ptK :=
+    { toFun := fun t ↦ ⟨s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)), hcircK t⟩
+      continuous_toFun := by fun_prop
+      source' := Subtype.ext (by simp [hptK])
+      target' := Subtype.ext (by simp [hptK, twoPiI, Complex.exp_two_pi_mul_I]) } with hcircleK
+  set ιK : C(K, {w : ℂ // w ≠ s'}) :=
+    ⟨fun w ↦ ⟨w.1, fun h ↦ hs'K (by rw [← h]; exact w.2)⟩,
+      continuous_subtype_val.subtype_mk _⟩ with hιK
+  -- the mapped circle is nullhomotopic in `ℂ ∖ {s'}`
+  have hmidtriv : Path.Homotopic.Quotient.mk
+        ((circleInPunctured s z hcirc).map (puncturedInclusion hs').continuous)
+      = Path.Homotopic.Quotient.mk (Path.refl (puncturedInclusion hs' z)) := by
+    have h1 : Path.Homotopic.Quotient.mk circleK
+        = Path.Homotopic.Quotient.mk (Path.refl ptK) := Subsingleton.elim _ _
+    have h2 := congrArg (fun q : Path.Homotopic.Quotient ptK ptK ↦ q.map ιK) h1
+    simp only [← Path.Homotopic.Quotient.mk_map] at h2
+    have e1 : circleK.map ιK.continuous
+        = (circleInPunctured s z hcirc).map (puncturedInclusion hs').continuous := by
+      ext t
+      rfl
+    have e2 : (Path.refl ptK).map ιK.continuous = Path.refl (puncturedInclusion hs' z) := by
+      ext t
+      rfl
+    rwa [e1, e2] at h2
+  show (pi1PuncturedPlaneIntAt s' (puncturedInclusion hs' x₀)).symm
+      (FundamentalGroup.mapOfEq (puncturedInclusion hs') rfl
+        (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
+          (P.trans ((circleInPunctured s z hcirc).trans P.symm))))) = 1
+  rw [FundamentalGroup.mapOfEq_apply]
+  have hcast : ((P.trans ((circleInPunctured s z hcirc).trans P.symm)).map
+        (puncturedInclusion hs').continuous).cast (Eq.symm rfl) (Eq.symm rfl)
+      = (P.map (puncturedInclusion hs').continuous).trans
+          (((circleInPunctured s z hcirc).map (puncturedInclusion hs').continuous).trans
+            (P.map (puncturedInclusion hs').continuous).symm) := by
+    rw [Path.cast_rfl_rfl, Path.map_trans, Path.map_trans, Path.map_symm]
+  rw [hcast, fromPath_conj_eq_one _ _ hmidtriv]
+  exact map_one _
+
 end Jacobians.Topology
