@@ -733,4 +733,342 @@ theorem sum_integral_pouCoeff_corrFam (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Se
 
 end Collapse
 
+/-! ### The final R0 evaluation of the planar cut -/
+
+section FinalAtom
+
+variable {H : X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+
+/-- **The R0 evaluation of the correction cut**: if the chart-`j₀` slot product `H̃·g̃` has
+the simple-pole shape `r·(ζ−α)⁻¹ + q` at the marked coordinate, then `∫ corrC = −π·r` —
+split off a bump-smeared simple pole (the GENERAL R0 atom, no local constancy), repair the
+remainder, and Stokes-kill it. -/
+theorem integral_corrC_eq_neg_pi_residue (hb : b ∈ (𝔇.U j₀ : Set X))
+    (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X))
+    (hHsm : ∀ x : X, x ≠ b → ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) H x)
+    (hg : IsOneZeroCoeff 𝔇 g) {r : ℂ} {q : ℂ → ℂ}
+    (hq : AnalyticAt ℂ q (chartMap 𝔇 j₀ b))
+    (hpe : (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ b)] fun ζ => r * (ζ - chartMap 𝔇 j₀ b)⁻¹ + q ζ) :
+    ∫ z, corrC 𝔇 H g b j₀ z = -π * r := by
+  classical
+  set α := chartMap 𝔇 j₀ b with hαdef
+  set U' : Set ℂ := chartMap 𝔇 j₀ '' (𝔇.U j₀ : Set X) with hU'def
+  set K' : Set ℂ := chartMap 𝔇 j₀ '' tsupport H with hK'def
+  have hU'open : IsOpen U' := isOpen_chartMap_image 𝔇 j₀ (𝔇.U j₀).isOpen (subset_refl _)
+  have hK'cpt : IsCompact K' := isCompact_chartMap_image_tsupport hHsupp
+  have hK'U' : K' ⊆ U' := Set.image_mono hHsupp
+  have hαU : α ∈ U' := ⟨b, hb, rfl⟩
+  set Φ : ℂ → ℂ := U'.indicator
+    (fun w => H ((chartAt ℂ (𝔇.center j₀)).symm w) * g j₀ w) with hΦdef
+  -- the indicator is inactive near interior points
+  have hΦev : ∀ w ∈ U', Φ =ᶠ[𝓝 w]
+      fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ := by
+    intro w hw
+    filter_upwards [hU'open.mem_nhds hw] with ζ hζ
+    exact Set.indicator_of_mem hζ _
+  have hΦsing : Φ =ᶠ[𝓝[≠] α] fun ζ => r * (ζ - α)⁻¹ + q ζ :=
+    ((hΦev α hαU).filter_mono nhdsWithin_le_nhds).trans hpe
+  -- Φ vanishes off the compact K'
+  have hΦ0 : ∀ w ∉ K', Φ w = 0 := by
+    intro w hw
+    by_cases hwU : w ∈ U'
+    · obtain ⟨x, hxU, rfl⟩ := hwU
+      have hxs : x ∉ tsupport H := fun hs => hw (Set.mem_image_of_mem _ hs)
+      have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ x) = x :=
+        (chartAt ℂ (𝔇.center j₀)).left_inv (mem_chartSource_of_mem_U 𝔇 hxU)
+      have hmem : chartMap 𝔇 j₀ x ∈ U' := ⟨x, hxU, rfl⟩
+      rw [hΦdef, Set.indicator_of_mem hmem, hli,
+        image_eq_zero_of_notMem_tsupport hxs, zero_mul]
+    · exact Set.indicator_of_notMem hwU _
+  have hΦcs : HasCompactSupport Φ := HasCompactSupport.intro hK'cpt hΦ0
+  -- Φ is smooth off α
+  have hΦsmall : ∀ w : ℂ, w ≠ α → ContDiffAt ℝ (⊤ : ℕ∞) Φ w := by
+    intro w hwα
+    by_cases hwU : w ∈ U'
+    · obtain ⟨x, hxU, rfl⟩ := hwU
+      have hxb : x ≠ b := fun hc => hwα (by rw [hc])
+      have hzt : chartMap 𝔇 j₀ x ∈ (chartAt ℂ (𝔇.center j₀)).target :=
+        chartMap_image_U_subset_target 𝔇 j₀ ⟨x, hxU, rfl⟩
+      have hli : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ x) = x :=
+        (chartAt ℂ (𝔇.center j₀)).left_inv (mem_chartSource_of_mem_U 𝔇 hxU)
+      have hH : ContDiffAt ℝ (⊤ : ℕ∞)
+          (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ x) := by
+        refine contDiffAt_chartSymmRead_of_contMDiffAt hzt ?_
+        rw [hli]
+        exact hHsm x hxb
+      have hgc : ContDiffAt ℝ (⊤ : ℕ∞) (g j₀) (chartMap 𝔇 j₀ x) :=
+        ((hg.1 j₀ x hxU).restrictScalars (𝕜 := ℝ)).contDiffAt
+      exact (hH.mul hgc).congr_of_eventuallyEq (hΦev (chartMap 𝔇 j₀ x) ⟨x, hxU, rfl⟩)
+    · have hwK : w ∉ K' := fun hc => hwU (hK'U' hc)
+      refine (contDiffAt_const (c := (0 : ℂ))).congr_of_eventuallyEq ?_
+      filter_upwards [hK'cpt.isClosed.isOpen_compl.mem_nhds hwK] with ζ hζ
+      exact hΦ0 ζ hζ
+  -- the bump and the smeared simple pole
+  set ψb : ContDiffBump α :=
+    { rIn := 1, rOut := 2, rIn_pos := one_pos, rIn_lt_rOut := one_lt_two } with hψbdef
+  obtain ⟨hψsm, hψcs⟩ := DbarLocal.contDiff_hasCompactSupport_ofReal_contDiffBump ψb
+  set ψ : ℂ → ℂ := fun w => ((ψb w : ℝ) : ℂ) with hψdef
+  have hψ1 : ∀ᶠ w in 𝓝 α, ψ w = 1 := by
+    filter_upwards [Metric.closedBall_mem_nhds α one_pos] with w hw
+    show ((ψb w : ℝ) : ℂ) = 1
+    rw [show ψb w = 1 from ψb.one_of_mem_closedBall hw, Complex.ofReal_one]
+  set χ : ℂ → ℂ := fun w => r * ψ w with hχdef
+  have hχcd : ContDiff ℝ (⊤ : ℕ∞) χ := contDiff_const.mul hψsm
+  have hχcs : HasCompactSupport χ := hψcs.mul_left
+  have hχα : χ α = r := by
+    show r * ((ψb α : ℝ) : ℂ) = r
+    rw [show ψb α = 1 from ψb.one_of_mem_closedBall
+      (Metric.mem_closedBall_self one_pos.le), Complex.ofReal_one, mul_one]
+  set sing : ℂ → ℂ := fun w => χ w * (w - α)⁻¹ with hsingdef
+  -- the repaired remainder
+  set Φ₁ : ℂ → ℂ := fun w => Φ w - sing w with hΦ₁def
+  set u' : ℂ → ℂ := pointRepair Φ₁ ({α} : Finset ℂ) with hu'def
+  have hΦ₁ext : Φ₁ =ᶠ[𝓝[≠] α] q := by
+    filter_upwards [hΦsing, hψ1.filter_mono nhdsWithin_le_nhds] with ζ hζ hζψ
+    show Φ ζ - sing ζ = q ζ
+    rw [hζ]
+    show r * (ζ - α)⁻¹ + q ζ - χ ζ * (ζ - α)⁻¹ = q ζ
+    rw [show χ ζ = r * ψ ζ from rfl, hζψ]
+    ring
+  have hu'cd : ContDiff ℝ (⊤ : ℕ∞) u' := by
+    rw [contDiff_iff_contDiffAt]
+    intro z
+    by_cases hzα : z = α
+    · subst hzα
+      exact ((hq.restrictScalars (𝕜 := ℝ)).contDiffAt).congr_of_eventuallyEq
+        (pointRepair_eventuallyEq_of_extends (Finset.mem_singleton_self α) hq hΦ₁ext)
+    · have hsingcd : ContDiffAt ℝ (⊤ : ℕ∞) sing z := by
+        refine hχcd.contDiffAt.mul ?_
+        exact (contDiffAt_id.sub contDiffAt_const).inv (sub_ne_zero.mpr hzα)
+      exact ((hΦsmall z hzα).sub hsingcd).congr_of_eventuallyEq
+        (pointRepair_eventuallyEq_off (by simpa using hzα))
+  have hu'cs : HasCompactSupport u' := by
+    refine HasCompactSupport.intro (K := (K' ∪ tsupport ψ) ∪ ({α} : Set ℂ))
+      ((hK'cpt.union hψcs).union isCompact_singleton) fun w hw => ?_
+    have hwK : w ∉ K' := fun hc => hw (Set.mem_union_left _ (Set.mem_union_left _ hc))
+    have hwψ : w ∉ tsupport ψ := fun hc =>
+      hw (Set.mem_union_left _ (Set.mem_union_right _ hc))
+    have hwα : w ≠ α := fun hc => hw (Set.mem_union_right _ (by simpa using hc))
+    rw [hu'def, pointRepair_eq_off (by simpa using hwα)]
+    show Φ w - sing w = 0
+    rw [hΦ0 w hwK]
+    show (0 : ℂ) - χ w * (w - α)⁻¹ = 0
+    rw [show χ w = r * ψ w from rfl, image_eq_zero_of_notMem_tsupport hwψ]
+    ring
+  -- the singular piece: the GENERAL R0 atom
+  have hval : ∫ ζ, DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ = -π * r := by
+    rw [integral_dbar_smearedSimplePole hχcd hχcs α, hχα]
+  -- the continuous a.e. representative of `∂̄(χ·(·−α)⁻¹)`
+  have hχconst : χ =ᶠ[𝓝 α] fun _ => r := by
+    filter_upwards [hψ1] with ζ hζ
+    show r * ψ ζ = r
+    rw [hζ, mul_one]
+  have hdχ0 : ∀ᶠ ζ in 𝓝 α, DbarDisk.dbar χ ζ = 0 := by
+    filter_upwards [hχconst.eventuallyEq_nhds] with ζ hζ
+    rw [dbar_congr_of_eventuallyEq hζ]
+    exact DbarDisk.dbar_const r ζ
+  set Gf : ℂ → ℂ := fun ζ => DbarDisk.dbar χ ζ * (ζ - α)⁻¹ with hGdef
+  have hGzero : Gf =ᶠ[𝓝 α] fun _ => (0 : ℂ) := by
+    filter_upwards [hdχ0] with ζ hζ
+    show DbarDisk.dbar χ ζ * (ζ - α)⁻¹ = 0
+    rw [hζ, zero_mul]
+  have hGcont : Continuous Gf := by
+    rw [continuous_iff_continuousAt]
+    intro ζ
+    by_cases hζα : ζ = α
+    · subst hζα
+      exact continuousAt_const.congr hGzero.symm
+    · exact ((DbarDisk.continuous_dbar hχcd).continuousAt).mul
+        ((continuousAt_id.sub continuousAt_const).inv₀ (sub_ne_zero.mpr hζα))
+  have hGcs : HasCompactSupport Gf := (DbarDisk.hasCompactSupport_dbar hχcs).mul_right
+  have hane : ∀ᵐ z : ℂ ∂volume, z ≠ α := by
+    refine ae_iff.mpr ?_
+    simp only [ne_eq, not_not, Set.setOf_eq_eq_singleton]
+    exact measure_singleton _
+  have hGae : (fun ζ => DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ) =ᵐ[volume] Gf := by
+    filter_upwards [hane] with ζ hζ
+    show DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ = DbarDisk.dbar χ ζ * (ζ - α)⁻¹
+    rw [dbar_smul_inv_sub hχcd α hζ, div_eq_mul_inv]
+  have hIsing : Integrable fun ζ => DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) ζ :=
+    (hGcont.integrable_of_hasCompactSupport hGcs).congr hGae.symm
+  have hI1 : Integrable (DbarDisk.dbar u') :=
+    (DbarDisk.continuous_dbar hu'cd).integrable_of_hasCompactSupport
+      (DbarDisk.hasCompactSupport_dbar hu'cs)
+  -- the a.e. identification `corrC = ∂̄u' + ∂̄(smeared pole)`
+  have hsplit : (fun z => corrC 𝔇 H g b j₀ z) =ᵐ[volume]
+      fun z => DbarDisk.dbar u' z + DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z := by
+    filter_upwards [hane] with z hzα
+    -- `corrC z = ∂̄Φ z` off `α`
+    have hcorrΦ : corrC 𝔇 H g b j₀ z = DbarDisk.dbar Φ z := by
+      by_cases hzU : z ∈ U'
+      · obtain ⟨x, hxU, hxz⟩ := hzU
+        have hxb : x ≠ b := by
+          intro hc
+          subst hc
+          exact hzα hxz.symm
+        have hzt : z ∈ (chartAt ℂ (𝔇.center j₀)).target := by
+          rw [← hxz]
+          exact chartMap_image_U_subset_target 𝔇 j₀ ⟨x, hxU, rfl⟩
+        have hli : (chartAt ℂ (𝔇.center j₀)).symm z = x := by
+          rw [← hxz]
+          exact (chartAt ℂ (𝔇.center j₀)).left_inv (mem_chartSource_of_mem_U 𝔇 hxU)
+        have hHd : DifferentiableAt ℝ
+            (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) z := by
+          have h1 : ContDiffAt ℝ (⊤ : ℕ∞)
+              (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) z := by
+            refine contDiffAt_chartSymmRead_of_contMDiffAt hzt ?_
+            rw [hli]
+            exact hHsm x hxb
+          exact h1.differentiableAt (by simp)
+        have hgdC : DifferentiableAt ℂ (g j₀) z := by
+          rw [← hxz]
+          exact (hg.1 j₀ x hxU).differentiableAt
+        have hΦd : DbarDisk.dbar Φ z = DbarDisk.dbar
+            (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) z :=
+          dbar_congr_of_eventuallyEq (hΦev z ⟨x, hxU, hxz⟩)
+        have hmul : DbarDisk.dbar
+            (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) z
+            = DbarDisk.dbar (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) z
+                * g j₀ z := by
+          rw [dbar_mul hHd (hgdC.restrictScalars ℝ),
+            DbarDisk.dbar_eq_zero_of_differentiableAt hgdC, mul_zero, add_zero]
+        have hcv : corrC 𝔇 H g b j₀ z
+            = DbarDisk.dbar (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) z
+                * g j₀ z := by
+          have hmem : z ∈ U' := ⟨x, hxU, hxz⟩
+          rw [corrC, Set.indicator_of_mem hmem, corrFam_apply]
+          refine if_neg ?_
+          rintro ⟨_, hzb⟩
+          exact hzα hzb
+        rw [hcv, hΦd, hmul]
+      · have hzK : z ∉ K' := fun hc => hzU (hK'U' hc)
+        have hΦz : DbarDisk.dbar Φ z = 0 := by
+          refine dbar_eq_zero_of_eventuallyEq_zero ?_
+          filter_upwards [hK'cpt.isClosed.isOpen_compl.mem_nhds hzK] with ζ hζ
+          exact hΦ0 ζ hζ
+        rw [show corrC 𝔇 H g b j₀ z = 0 from Set.indicator_of_notMem hzU _, hΦz]
+    -- `∂̄Φ = ∂̄u' + ∂̄(smeared pole)` off `α`
+    have hsingd : DifferentiableAt ℝ sing z := by
+      have h1 : ContDiffAt ℝ (⊤ : ℕ∞) sing z := by
+        refine hχcd.contDiffAt.mul ?_
+        exact (contDiffAt_id.sub contDiffAt_const).inv (sub_ne_zero.mpr hzα)
+      exact h1.differentiableAt (by simp)
+    have hu'ev : u' =ᶠ[𝓝 z] Φ₁ := pointRepair_eventuallyEq_off (by simpa using hzα)
+    have hΦeq : Φ =ᶠ[𝓝 z] fun w => u' w + sing w := by
+      filter_upwards [hu'ev] with w hw
+      rw [hw]
+      show Φ w = Φ w - sing w + sing w
+      ring
+    have hu'd : DifferentiableAt ℝ u' z :=
+      hu'cd.contDiffAt.differentiableAt (by simp)
+    rw [hcorrΦ, dbar_congr_of_eventuallyEq hΦeq, DbarOpenDisk.dbar_add hu'd hsingd]
+  calc ∫ z, corrC 𝔇 H g b j₀ z
+      = ∫ z, (DbarDisk.dbar u' z + DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z) :=
+        integral_congr_ae hsplit
+    _ = (∫ z, DbarDisk.dbar u' z) + ∫ z, DbarDisk.dbar (fun ξ => χ ξ * (ξ - α)⁻¹) z :=
+        integral_add hI1 hIsing
+    _ = -π * r := by
+        rw [integral_dbar_eq_zero hu'cd hu'cs, hval, zero_add]
+
+end FinalAtom
+
+/-! ### The headline -/
+
+section Headline
+
+variable {S : Finset X} {w : 𝔇.toFiniteCover.ι → 𝔇.toFiniteCover.ι → X → ℂ}
+    {h : 𝔇.toFiniteCover.ι → X → ℂ} {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+    {H : X → ℂ} {j₀ : 𝔇.toFiniteCover.ι} {b : X}
+
+/-- **THE GLOBAL-CORRECTION EVALUATION HEADLINE — the residue functional evaluates
+coboundaries with a marked simple-pole point WITHOUT any cover-isolation of the marked
+point.**  Data shape: `w i j = h j − h i` on overlaps with `h` smooth off the isolated bad
+set `S` AND smooth at the marked point `b ∉ S` (the global-cutoff-subtracted presentation);
+the original holomorphy is recorded as `∂̄(h + H) = 0` off `S ∪ {b}` for a global scalar
+`H` supported in the distinguished chart `U j₀ ∋ b`, holomorphic near `b` off `b`, whose
+slot product `H̃·g̃_{j₀}` has the simple-pole shape `r·(ζ−α)⁻¹ + q`.  Then
+
+  `resFunctional 𝔇 t = −r`.
+
+Same conclusion and sign convention as the isolated marked engine
+(`resFunctional_eq_neg_residue_of_mero_coboundary`); the proof routes the entire residue
+through the single distinguished-chart correction integral (`DICT_ROUTE.md`, D1–D3). -/
+theorem resFunctional_eq_neg_residue_of_global_correction (t : oneOneCoeff 𝔇)
+    (ht : (t : 𝔇.toFiniteCover.ι → ℂ → ℂ) = glueCoeff 𝔇 w g)
+    (hg : IsOneZeroCoeff 𝔇 g) (hiso : ∀ a ∈ S, ∃ i₀, MLIsolated 𝔇 i₀ a)
+    (hsm : SmoothOnSetsOff 𝔇 (S : Set X) h) (hδ : IsCoboundaryOn 𝔇 w h)
+    (hext : ∀ a ∈ S, ∀ i₀, MLIsolated 𝔇 i₀ a → SlotProductExtendsAt 𝔇 h g i₀ a)
+    (hb : b ∈ (𝔇.U j₀ : Set X))
+    (hHsupp : tsupport H ⊆ (𝔇.U j₀ : Set X))
+    (hHsm : ∀ x : X, x ≠ b → ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) H x)
+    (hH0 : ∀ᶠ x in 𝓝[≠] b, DifferentiableAt ℂ
+      (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ)) (chartMap 𝔇 j₀ x))
+    (hhol' : ∀ i, ∀ x ∈ (𝔇.U i : Set X), x ∉ (S : Set X) → x ≠ b →
+      DifferentiableAt ℂ (fun z => h i ((chartAt ℂ (𝔇.center i)).symm z)
+        + H ((chartAt ℂ (𝔇.center i)).symm z)) (chartMap 𝔇 i x))
+    {r : ℂ} {q : ℂ → ℂ} (hq : AnalyticAt ℂ q (chartMap 𝔇 j₀ b))
+    (hpe : (fun ζ => H ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝[≠] (chartMap 𝔇 j₀ b)] fun ζ => r * (ζ - chartMap 𝔇 j₀ b)⁻¹ + q ζ) :
+    resFunctional 𝔇 t = -r := by
+  have hcorr : IsOneOneCoeff 𝔇 (corrFam 𝔇 H g b) := isOneOneCoeff_corrFam hb hHsm hH0 hg
+  have htmem : IsOneOneCoeff 𝔇 (glueCoeff 𝔇 w g) := ht ▸ t.2
+  -- the relocated curvature double sum dies (the R5 mechanism, verbatim)
+  have hcurv : ∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+      * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+          * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) = 0 := by
+    calc ∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z))
+        = ∑ j, ∑ k, ∫ z, pouCoeff 𝔇 k z
+            * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) :=
+          Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ =>
+            integral_overlapTerm_relocate_mero hiso hsm hg j k
+      _ = ∑ k, ∑ j, ∫ z, pouCoeff 𝔇 k z
+            * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) :=
+          Finset.sum_comm
+      _ = 0 := Finset.sum_eq_zero fun k _ =>
+            sum_integral_relocated_eq_zero_mero hiso hsm hg k
+  -- the Stokes sum dies chart by chart (the vanish-engine kill — no marked evaluation)
+  have hstokes : ∀ j : 𝔇.toFiniteCover.ι, ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+      * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z = 0 := fun j =>
+    integral_dbar_pouCoeff_pouAverage_eq_zero hiso hsm hg hext j
+  -- the correction sum is the distinguished-chart R0 evaluation
+  have hcorrsum : ∑ j, ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z = -π * r := by
+    rw [sum_integral_pouCoeff_corrFam hHsupp hcorr]
+    exact integral_corrC_eq_neg_pi_residue hb hHsupp hHsm hg hq hpe
+  have hIfun : resIntegralFun 𝔇 (glueCoeff 𝔇 w g) = (π : ℂ) * r := by
+    calc resIntegralFun 𝔇 (glueCoeff 𝔇 w g)
+        = ∑ j, ∫ z, pouCoeff 𝔇 j z * glueCoeff 𝔇 w g j z := rfl
+      _ = ∑ j, ((∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+              * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                  * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+            - (∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z)
+            - ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z) :=
+          Finset.sum_congr rfl fun j _ =>
+            integral_pouCoeff_glueCoeff_corr_split hiso hsm hδ hg htmem hcorr hHsm hhol' j
+      _ = ((∑ j, ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+              * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                  * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm z) * g j z)))
+            - ∑ j, ∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+                * (pouAverage 𝔇 h ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z)
+            - ∑ j, ∫ z, pouCoeff 𝔇 j z * corrFam 𝔇 H g b j z := by
+          rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib]
+      _ = (π : ℂ) * r := by
+          rw [hcurv, Finset.sum_congr rfl fun j _ => hstokes j, hcorrsum]
+          simp
+  have hI : resIntegral 𝔇 t = (π : ℂ) * r := by
+    have hfun : resIntegral 𝔇 t = resIntegralFun 𝔇 (glueCoeff 𝔇 w g) := by
+      rw [← ht]
+      rfl
+    rw [hfun, hIfun]
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  rw [resFunctional_apply, hI, resNormalization]
+  field_simp
+
+end Headline
+
 end Jacobians.Dolbeault.FineResidue
