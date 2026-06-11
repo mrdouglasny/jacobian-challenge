@@ -6,6 +6,7 @@ Authors: Michael R Douglas
 import KirovDolbeault.Dolbeault.SerreResidueRamifiedMultiplicityBridge
 import KirovDolbeault.Dolbeault.FormTraceInftyFibreNF
 import KirovDolbeault.Dolbeault.CanonicalFormDifferential
+import KirovDolbeault.Dolbeault.TailFrameGenus0
 
 /-!
 # The conservation-of-number engine for the plain value trace (T lane)
@@ -196,8 +197,7 @@ theorem sum_fibre_eq_sum_slices {f : MeromorphicFunction X} (hdiv : (f.div : Div
       exact ⟨x, hx, hy, hyU⟩
     · rintro ⟨x, _, hy, _⟩
       exact hy
-  · intro x hx x' hx' hne
-    intro s hs hs' y hy
+  · intro x hx x' hx' hne s hs hs' y hy
     have h1 : y ∈ slice hdiv P x z := hs hy
     have h2 : y ∈ slice hdiv P x' z := hs' hy
     rw [mem_slice] at h1 h2
@@ -286,6 +286,233 @@ theorem slice_eq_singleton_of_weight_one {f : MeromorphicFunction X}
   slice_eq_of_exhibited hdiv P hx hz {y}
     (Finset.singleton_subset_iff.mpr (mem_slice.mpr ⟨hyfib, hyU⟩))
     (by rw [hm, Finset.card_singleton]; norm_num)
+
+/-! ## Regularity bridges
+
+The local degree is `1` exactly when the chart-pullback derivative of `f.holoRepr` is nonzero;
+for an `ω₀ = df` datum the latter is read off the canonical-divisor order (`K x = 0`). -/
+
+/-- An analytic function with nonvanishing derivative has a **simple** level set: the order of
+`g − g(p)` at `p` is exactly `1`. -/
+theorem analyticOrderAt_sub_eq_one_of_deriv_ne_zero {g : ℂ → ℂ} {p c : ℂ}
+    (hg : AnalyticAt ℂ g p) (hval : g p = c) (hd : deriv g p ≠ 0) :
+    analyticOrderAt (fun ζ => g ζ - c) p = 1 := by
+  have hga : AnalyticAt ℂ (fun ζ => g ζ - c) p := hg.sub analyticAt_const
+  -- the order is finite (else `g` is locally constant, killing the derivative)
+  have hne_top : analyticOrderAt (fun ζ => g ζ - c) p ≠ ⊤ := by
+    intro htop
+    rw [analyticOrderAt_eq_top] at htop
+    have hconst : g =ᶠ[𝓝 p] fun _ => c := by
+      filter_upwards [htop] with ζ hζ
+      exact sub_eq_zero.mp hζ
+    rw [hconst.deriv_eq, deriv_const] at hd
+    exact hd rfl
+  -- the order is nonzero (the value vanishes)
+  have hne_zero : analyticOrderAt (fun ζ => g ζ - c) p ≠ 0 :=
+    analyticOrderAt_ne_zero.mpr ⟨hga, by simp [hval]⟩
+  -- write the order as a natural number `n ≥ 1` and factorize
+  obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.mp hne_top
+  have hn1 : 1 ≤ n := by
+    rcases Nat.eq_zero_or_pos n with h0 | h1
+    · exact absurd (by rw [← hn, h0]; rfl) hne_zero
+    · exact h1
+  -- if `n ≥ 2` the derivative would vanish at `p`
+  rcases Nat.lt_or_ge n 2 with hlt | hge
+  · have hn1' : n = 1 := by omega
+    rw [← hn, hn1']
+    rfl
+  · exfalso
+    obtain ⟨u, hu_an, hu_ne, hfac⟩ := hga.analyticOrderAt_eq_natCast.mp hn.symm
+    have hd0 : deriv (fun ζ => g ζ - c) p = 0 := by
+      have hpow : HasDerivAt (fun ζ : ℂ => (ζ - p) ^ n)
+          ((n : ℂ) * (p - p) ^ (n - 1)) p := by
+        simpa using ((hasDerivAt_id p).sub_const p).pow n
+      have hprod := hpow.smul hu_an.differentiableAt.hasDerivAt
+      have hderiv_eq : deriv ((fun ζ : ℂ => (ζ - p) ^ n) • u) p
+          = (p - p) ^ n • deriv u p + ((n : ℂ) * (p - p) ^ (n - 1)) • u p := hprod.deriv
+      rw [(EventuallyEq.deriv_eq hfac : deriv (fun ζ => g ζ - c) p = _),
+        show (fun ζ : ℂ => (ζ - p) ^ n • u ζ) = (fun ζ : ℂ => (ζ - p) ^ n) • u from rfl,
+        hderiv_eq, sub_self, zero_pow (by omega : n ≠ 0), zero_pow (by omega : n - 1 ≠ 0)]
+      simp
+    rw [deriv_sub_const] at hd0
+    exact hd hd0
+
+/-- **`localDeg = 1` at a fibre point with nonvanishing `holoRepr`-pullback derivative.** -/
+theorem localDeg_eq_one_of_deriv_ne_zero (f : MeromorphicFunction X)
+    (hdiv : (f.div : Divisor X) ≠ 0) {z : ℂ} {y : X}
+    (hy : f.toRiemannSphere y = ((z : ℂ) : RiemannSphere))
+    (hd : deriv (fun ζ => f.holoRepr ((chartAt (H := ℂ) y).symm ζ))
+      ((chartAt (H := ℂ) y) y) ≠ 0) :
+    localDeg f (((z : ℂ) : RiemannSphere)) y = 1 := by
+  have hnp := nonpole_of_fibre_coe hy
+  obtain ⟨_, hord, heq⟩ := analyticOrderAt_holoRepr_sub_eq_mult f hdiv hy hnp
+  have hg_an : AnalyticAt ℂ (fun ζ => f.holoRepr ((chartAt (H := ℂ) y).symm ζ))
+      ((chartAt (H := ℂ) y) y) :=
+    f.analyticAt_holoRepr_chartPullback_of_orderNonneg hnp
+  have hval : (fun ζ => f.holoRepr ((chartAt (H := ℂ) y).symm ζ)) ((chartAt (H := ℂ) y) y)
+      = z := by
+    show f.holoRepr ((chartAt (H := ℂ) y).symm ((chartAt (H := ℂ) y) y)) = z
+    rw [(chartAt (H := ℂ) y).left_inv (mem_chart_source ℂ y)]
+    exact holoRepr_of_fibre_coe hy
+  have h1 := analyticOrderAt_sub_eq_one_of_deriv_ne_zero hg_an hval hd
+  rw [h1] at hord
+  have : (localDeg f (((z : ℂ) : RiemannSphere)) y).toNat = 1 := by
+    exact_mod_cast hord.symm
+  omega
+
+/-- **The `df`-datum unramifiedness bridge**: at a non-pole `x` where the chart-pullback
+derivative of `f.toFun` has meromorphic order `0` (i.e. `K x = 0` for the canonical divisor of
+`df`), the `holoRepr`-pullback derivative is nonzero. -/
+theorem holoRepr_pullback_deriv_ne_zero_of_derivOrder_zero (f : MeromorphicFunction X)
+    {x : X} (hnp : 0 ≤ f.orderAtPoint x)
+    (hK : meromorphicOrderAt (deriv (f.toFun ∘ (chartAt (H := ℂ) x).symm))
+      ((chartAt (H := ℂ) x) x) = 0) :
+    deriv (fun ζ => f.holoRepr ((chartAt (H := ℂ) x).symm ζ)) ((chartAt (H := ℂ) x) x) ≠ 0 := by
+  set pre := (chartAt (H := ℂ) x) x with hpre
+  have hpre_tgt : pre ∈ (chartAt (H := ℂ) x).target :=
+    (chartAt (H := ℂ) x).map_source (mem_chart_source ℂ x)
+  have hg_an : AnalyticAt ℂ (f.holoRepr ∘ (chartAt (H := ℂ) x).symm) pre :=
+    f.analyticAt_holoRepr_chartPullback_of_orderNonneg hnp
+  -- transport the order through the punctured germ agreement
+  have hagree : deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm) =ᶠ[𝓝[≠] pre]
+      deriv (f.toFun ∘ (chartAt (H := ℂ) x).symm) :=
+    Jacobians.Dolbeault.deriv_eventuallyEq_punctured
+      (holoRepr_pullback_eventuallyEq_toFun f x hpre_tgt)
+  have hord : meromorphicOrderAt (deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm)) pre = 0 := by
+    rw [meromorphicOrderAt_congr hagree]
+    exact hK
+  -- order `0` means the (analytic, hence continuous) derivative has a nonzero punctured limit
+  have hd_an : AnalyticAt ℂ (deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm)) pre := hg_an.deriv
+  obtain ⟨u, hu_an, hu_ne, hev⟩ :=
+    (meromorphicOrderAt_eq_int_iff hd_an.meromorphicAt).mp hord
+  have hval : deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm) pre = u pre := by
+    have h1 : Tendsto (deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm)) (𝓝[≠] pre)
+        (𝓝 (deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm) pre)) :=
+      hd_an.continuousAt.continuousWithinAt.tendsto
+    have h2 : Tendsto (deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm)) (𝓝[≠] pre)
+        (𝓝 (u pre)) := by
+      refine (hu_an.continuousAt.continuousWithinAt.tendsto).congr' ?_
+      filter_upwards [hev] with ζ hζ
+      rw [hζ]
+      simp
+    exact tendsto_nhds_unique h1 h2
+  intro hv0
+  rw [show deriv (fun ζ => f.holoRepr ((chartAt (H := ℂ) x).symm ζ)) pre
+      = deriv (f.holoRepr ∘ (chartAt (H := ℂ) x).symm) pre from rfl, hval] at hv0
+  exact hu_ne hv0
+
+/-! ## The unramified section sum
+
+At a centre `c` whose fibre is enumerated by weight-`1` sheet points `xs i` carrying planar
+sections `s i` (analytic at `c`, based at the chart images, right-inverting the
+`holoRepr`-pullback), the value trace agrees **on a full neighbourhood of `c`** with the moving
+section sum `w ↦ ∑ i, F.holoRepr (chart⁻¹ (s i w))`. -/
+
+/-- The non-pole locus of a meromorphic function is open. -/
+theorem isOpen_nonpole (f : MeromorphicFunction X) : IsOpen {y : X | 0 ≤ f.orderAtPoint y} := by
+  have : {y : X | 0 ≤ f.orderAtPoint y} = {y | f.orderAtPoint y < 0}ᶜ := by
+    ext y; simp [not_lt]
+  rw [this]
+  exact (f.finite_poles.isClosed).isOpen_compl
+
+/-- **The unramified section-sum identification.**  Given a patching datum `P` at the finite
+centre `c`, an injective enumeration `xs` of its fibre points, weight-`1` sheets, and planar
+sections `s i` of the cover through each fibre point, the value trace equals the moving section
+sum near `c`. -/
+theorem valueTrace_eventuallyEq_sectionSum (F f : MeromorphicFunction X)
+    (hdiv : (f.div : Divisor X) ≠ 0) {c : ℂ}
+    (P : MultiplicityPatchingData f (((c : ℂ) : RiemannSphere)))
+    {ι : Type*} [Fintype ι] (xs : ι → X) (hinj : Function.Injective xs)
+    (himg : ∀ y, y ∈ P.xs ↔ ∃ i, xs i = y)
+    (hm : ∀ i, P.m (xs i) = 1)
+    (s : ι → ℂ → ℂ)
+    (hs_an : ∀ i, AnalyticAt ℂ (s i) c)
+    (hs_base : ∀ i, s i c = (chartAt (H := ℂ) (xs i)) (xs i))
+    (hrinv : ∀ i, ∀ᶠ w in 𝓝 c, f.holoRepr ((chartAt (H := ℂ) (xs i)).symm (s i w)) = w) :
+    valueTrace F f =ᶠ[𝓝 c]
+      fun w => ∑ i, F.holoRepr ((chartAt (H := ℂ) (xs i)).symm (s i w)) := by
+  classical
+  have hxs_mem : ∀ i, xs i ∈ P.xs := fun i => (himg (xs i)).mpr ⟨i, rfl⟩
+  have hxs_fib : ∀ i, f.toRiemannSphere (xs i) = (((c : ℂ) : RiemannSphere)) := fun i => by
+    have : xs i ∈ (P.xs : Set X) := hxs_mem i
+    rwa [P.xs_coe] at this
+  -- the moving fibre point of the `i`-th sheet
+  set yy : ι → ℂ → X := fun i w => (chartAt (H := ℂ) (xs i)).symm (s i w) with hyy
+  -- (a) eventually the value lies in the patching neighbourhood
+  have hW : ∀ᶠ w in 𝓝 c, (((w : ℂ) : RiemannSphere)) ∈ P.W := by
+    have hcont : ContinuousAt (fun w : ℂ => ((w : ℂ) : RiemannSphere)) c :=
+      OnePoint.continuous_coe.continuousAt
+    exact hcont (P.W_open.mem_nhds P.w₀_mem_W)
+  -- (b) per sheet: eventually the moving point is in the sheet, a non-pole, and on the fibre
+  have hsheet : ∀ i, ∀ᶠ w in 𝓝 c,
+      f.toRiemannSphere (yy i w) = (((w : ℂ) : RiemannSphere)) ∧ yy i w ∈ P.U (xs i) := by
+    intro i
+    -- the moving point tends to `xs i`
+    have hcm : ContinuousAt (yy i) c := by
+      have h1 : ContinuousAt (chartAt (H := ℂ) (xs i)).symm (s i c) := by
+        rw [hs_base i]
+        exact (chartAt (H := ℂ) (xs i)).continuousAt_symm
+          ((chartAt (H := ℂ) (xs i)).map_source (mem_chart_source ℂ (xs i)))
+      exact h1.comp (hs_an i).continuousAt
+    have hyc : yy i c = xs i := by
+      rw [hyy]
+      simp only
+      rw [hs_base i, (chartAt (H := ℂ) (xs i)).left_inv (mem_chart_source ℂ (xs i))]
+    -- eventually in the open sheet
+    have hU : ∀ᶠ w in 𝓝 c, yy i w ∈ P.U (xs i) := by
+      have : P.U (xs i) ∈ 𝓝 (yy i c) := by
+        rw [hyc]
+        exact (P.U_open (xs i) (hxs_mem i)).mem_nhds (P.mem_U_self (xs i) (hxs_mem i))
+      exact hcm this
+    -- eventually a non-pole
+    have hnp : ∀ᶠ w in 𝓝 c, 0 ≤ f.orderAtPoint (yy i w) := by
+      have : {y : X | 0 ≤ f.orderAtPoint y} ∈ 𝓝 (yy i c) := by
+        rw [hyc]
+        exact (isOpen_nonpole f).mem_nhds (nonpole_of_fibre_coe (hxs_fib i))
+      exact hcm this
+    filter_upwards [hU, hnp, hrinv i] with w hwU hwnp hwval
+    refine ⟨?_, hwU⟩
+    rw [f.toRiemannSphere_of_nonneg hwnp]
+    exact congrArg (fun t : ℂ => ((t : ℂ) : RiemannSphere)) hwval
+  have hsheets : ∀ᶠ w in 𝓝 c, ∀ i,
+      f.toRiemannSphere (yy i w) = (((w : ℂ) : RiemannSphere)) ∧ yy i w ∈ P.U (xs i) :=
+    Filter.eventually_all.mpr hsheet
+  -- assemble
+  filter_upwards [hW, hsheets] with w hwW hwsheets
+  have hxs_img : P.xs = (Finset.univ : Finset ι).image xs := by
+    ext y
+    simp only [Finset.mem_image, Finset.mem_univ, true_and]
+    rw [himg y]
+  rw [valueTrace_eq_sum_slices F f hdiv P hwW, hxs_img,
+    Finset.sum_image (fun i _ j _ h => hinj h)]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [slice_eq_singleton_of_weight_one hdiv P (hxs_mem i) hwW (hm i)
+    (hwsheets i).1 (hwsheets i).2, Finset.sum_singleton]
+
+/-- **Analyticity of the value trace at an unramified `F`-regular centre** (the `hoff` shape):
+with the section data of `valueTrace_eventuallyEq_sectionSum` and `F` non-polar on the fibre,
+the value trace is analytic at `c`. -/
+theorem analyticAt_valueTrace_of_sections (F f : MeromorphicFunction X)
+    (hdiv : (f.div : Divisor X) ≠ 0) {c : ℂ}
+    (P : MultiplicityPatchingData f (((c : ℂ) : RiemannSphere)))
+    {ι : Type*} [Fintype ι] (xs : ι → X) (hinj : Function.Injective xs)
+    (himg : ∀ y, y ∈ P.xs ↔ ∃ i, xs i = y)
+    (hm : ∀ i, P.m (xs i) = 1)
+    (s : ι → ℂ → ℂ)
+    (hs_an : ∀ i, AnalyticAt ℂ (s i) c)
+    (hs_base : ∀ i, s i c = (chartAt (H := ℂ) (xs i)) (xs i))
+    (hrinv : ∀ i, ∀ᶠ w in 𝓝 c, f.holoRepr ((chartAt (H := ℂ) (xs i)).symm (s i w)) = w)
+    (hFnp : ∀ i, 0 ≤ F.orderAtPoint (xs i)) :
+    AnalyticAt ℂ (valueTrace F f) c := by
+  have hsum : AnalyticAt ℂ
+      (fun w => ∑ i, F.holoRepr ((chartAt (H := ℂ) (xs i)).symm (s i w))) c := by
+    refine Finset.analyticAt_fun_sum _ fun i _ => ?_
+    have hF_an : AnalyticAt ℂ (F.holoRepr ∘ (chartAt (H := ℂ) (xs i)).symm) (s i c) := by
+      rw [hs_base i]
+      exact F.analyticAt_holoRepr_chartPullback_of_orderNonneg (hFnp i)
+    exact hF_an.comp (hs_an i)
+  exact hsum.congr
+    (valueTrace_eventuallyEq_sectionSum F f hdiv P xs hinj himg hm s hs_an hs_base hrinv).symm
 
 end Jacobians.Dolbeault.FrameTraceWall
 
