@@ -617,6 +617,141 @@ theorem ordU_cupRep (td : TestCocycleData 𝔇 E j₀ b hb m) {f : MeromorphicFu
   congr 1
   omega
 
+/-- **The marked simple pole of the slot-product** (the §17.7 evaluation core): the
+off-`(K+b)`-points extraction of the cup 0-cochain `f·n̂`, read in the center chart and paired
+against an exact-`K` slot, has a SIMPLE pole at the marked coordinate with NONZERO residue.
+Orders are exact: `(−K b − 1) + K b = −1`, and order exactly `−1` forces a nonvanishing
+leading coefficient. -/
+theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
+    {f : MeromorphicFunction X}
+    {n : ℤ} (hn : f.orderW b = (n : WithTop ℤ)) (hm : m = n + K b) (hKb : 0 ≤ K b)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) (hexact : SlotExactK 𝔇 g K)
+    (hF0 : cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain
+      ∈ 𝔇.toFiniteCover.toFiniteFamily.sections0 (K + Finsupp.single b 1)) :
+    ∃ r : ℂ, r ≠ 0 ∧ SlotProductSimplePoleAt 𝔇
+      (vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0)
+      g j₀ b r := by
+  classical
+  set α := chartMap 𝔇 j₀ b with hαdef
+  set W : Opens X := 𝔇.U j₀ ⊓ offPos (K + Finsupp.single b 1) with hWdef
+  set F : ↥W → ℂ := td.cupRep f ∘ openIncl (inf_le_left : W ≤ 𝔇.U j₀) with hFdef
+  -- `F` represents the restricted cup-cochain class on `W`
+  have hgF : toGerm W F = rawRestrictG (inf_le_left : W ≤ 𝔇.U j₀)
+      (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain j₀) := by
+    rw [← td.toGerm_cupRep f]
+    rfl
+  -- punctured neighbourhoods of `b` lie in `W`
+  have hWnear : ∀ᶠ x in 𝓝[≠] b, x ∈ W := by
+    set T : Finset X := (posSupp (K + Finsupp.single b 1)).erase b with hTdef
+    have hTcl : IsClosed ((T : Finset X) : Set X) := T.finite_toSet.isClosed
+    have hbT : b ∉ ((T : Finset X) : Set X) := by simp [hTdef]
+    rw [eventually_nhdsWithin_iff]
+    filter_upwards [(𝔇.U j₀).isOpen.mem_nhds hb, hTcl.isOpen_compl.mem_nhds hbT]
+      with x hx1 hx2 hxb
+    have hxb' : x ≠ b := by simpa using hxb
+    refine ⟨hx1, mem_offPos_iff.mpr ?_⟩
+    by_contra hpos
+    push_neg at hpos
+    exact hx2 (Finset.mem_erase.mpr ⟨hxb', mem_posSupp_iff.mpr hpos⟩)
+  -- the ambient-chart meromorphy and EXACT order `−K b − 1` of the honest representative
+  have hcmer : MeromorphicAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) :=
+    Gext_meromorphicAt (td.isMeromorphic_cupRep f) hb
+  have hcord : meromorphicOrderAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) = ((-(K b) - 1 : ℤ) : WithTop ℤ) := by
+    rw [← ordU_eq_orderAt_Gext (td.cupRep f) hb]
+    exact td.ordU_cupRep hn hm
+  -- transfer to the `W`-restricted extension (they agree on punctured neighbourhoods)
+  have hGFeq : ∀ᶠ x in 𝓝[≠] b, Gext F x = Gext (td.cupRep f) x := by
+    filter_upwards [hWnear] with x hxW
+    rw [Gext_apply_mem F hxW, Gext_apply_mem (td.cupRep f)
+      ((inf_le_left : W ≤ 𝔇.U j₀) hxW : x ∈ 𝔇.U j₀)]
+    rfl
+  have hψtend : Tendsto (chartAt (H := ℂ) b).symm (𝓝[≠] ((chartAt (H := ℂ) b) b)) (𝓝[≠] b) := by
+    have h := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) b) b)
+      (by simpa using (chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b))
+    simpa [(chartAt (H := ℂ) b).left_inv (mem_chart_source ℂ b)] using h
+  have hreadeq : (Gext F ∘ (chartAt (H := ℂ) b).symm)
+      =ᶠ[𝓝[≠] ((chartAt (H := ℂ) b) b)] (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm) :=
+    hψtend.eventually hGFeq
+  have hFmer : MeromorphicAt (Gext F ∘ (chartAt (H := ℂ) b).symm) ((chartAt (H := ℂ) b) b) :=
+    hcmer.congr hreadeq.symm
+  have hFord : meromorphicOrderAt (Gext F ∘ (chartAt (H := ℂ) b).symm)
+      ((chartAt (H := ℂ) b) b) = ((-(K b) - 1 : ℤ) : WithTop ℤ) := by
+    rw [meromorphicOrderAt_congr hreadeq]
+    exact hcord
+  -- the read-back: the extraction agrees with the honest representative near `b`
+  have hread : ∀ᶠ x in 𝓝[≠] b,
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀ x
+        = Gext F x :=
+    holoFn_eventuallyEq_near_marked (restrict_mem_omegaDGerm_zero hF0 j₀) hgF hWnear hFmer hFord
+  -- transfer the agreement to the center chart
+  have hbsrc : b ∈ (chartAt ℂ (𝔇.center j₀)).source := mem_chartSource_of_mem_U 𝔇 hb
+  have hctend : Tendsto (chartAt ℂ (𝔇.center j₀)).symm (𝓝[≠] α) (𝓝[≠] b) := by
+    have hli : (chartAt ℂ (𝔇.center j₀)).symm α = b :=
+      (chartAt ℂ (𝔇.center j₀)).left_inv hbsrc
+    have h := (chartAt ℂ (𝔇.center j₀)).symm.tendsto_nhdsNE (x := α)
+      (by simpa using (chartAt ℂ (𝔇.center j₀)).map_source hbsrc)
+    rwa [hli] at h
+  have hcenterEq : ∀ᶠ ζ in 𝓝[≠] α,
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+          ((chartAt ℂ (𝔇.center j₀)).symm ζ)
+        = Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) := by
+    filter_upwards [hctend.eventually hread, hctend.eventually hGFeq] with ζ h1 h2
+    exact h1.trans h2
+  -- the center-chart order of the honest representative
+  obtain ⟨hcmer', hcord'⟩ := centerRead_data hb (Gext (td.cupRep f)) hcmer
+  rw [hcord] at hcord'
+  -- the slot order is exactly `K b`
+  obtain ⟨u, huan, hu0, hgv⟩ := hexact b j₀ hb
+  have hgan : AnalyticAt ℂ (g j₀) α := hg.1 j₀ b hb
+  have hgord : meromorphicOrderAt (g j₀) α = ((K b : ℤ) : WithTop ℤ) := by
+    refine (meromorphicOrderAt_eq_int_iff hgan.meromorphicAt).mpr ⟨u, huan, hu0, ?_⟩
+    filter_upwards [hgv.filter_mono nhdsWithin_le_nhds] with ζ hζ
+    rw [hζ, smul_eq_mul]
+    congr 1
+    rw [show (ζ - α) ^ (K b) = (ζ - α) ^ (((K b).toNat : ℤ)) from by
+      rw [Int.toNat_of_nonneg hKb], zpow_natCast]
+  -- the product order is exactly `−1`
+  have hRgmer : MeromorphicAt (fun ζ =>
+      Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α := by
+    have h := hcmer'.mul hgan.meromorphicAt
+    exact h
+  have hRgord : meromorphicOrderAt (fun ζ =>
+      Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α
+      = ((-1 : ℤ) : WithTop ℤ) := by
+    rw [show (fun ζ => Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+        = (fun ζ => Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ)) * g j₀ from rfl,
+      meromorphicOrderAt_mul hcmer' hgan.meromorphicAt, hcord', hgord]
+    have harith : (-(K b) - 1) + K b = (-1 : ℤ) := by ring
+    exact_mod_cast congrArg (fun z : ℤ => (z : WithTop ℤ)) harith
+  -- transfer to the extraction's slot-product
+  have htargetEq : (fun ζ =>
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+          ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ)
+      =ᶠ[𝓝[≠] α] (fun ζ =>
+        Gext (td.cupRep f) ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) := by
+    filter_upwards [hcenterEq] with ζ hζ
+    rw [hζ]
+  have htmer : MeromorphicAt (fun ζ =>
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+        ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α :=
+    hRgmer.congr htargetEq.symm
+  have htord : meromorphicOrderAt (fun ζ =>
+      vanishFn (cupCochain0 (𝔘 := 𝔇.toFiniteCover.toFiniteFamily) f td.cochain) hF0 j₀
+        ((chartAt ℂ (𝔇.center j₀)).symm ζ) * g j₀ ζ) α = ((-1 : ℤ) : WithTop ℤ) := by
+    rw [meromorphicOrderAt_congr htargetEq]
+    exact hRgord
+  -- order exactly `−1` ⟹ the simple-pole shape with nonzero residue
+  obtain ⟨w', hw'an, hw'0, hw'e⟩ := (meromorphicOrderAt_eq_int_iff htmer).mp htord
+  refine ⟨w' α, hw'0, ?_⟩
+  obtain ⟨p, hp⟩ := hw'an
+  refine ⟨dslope w' α, ⟨p.fslope, hp.has_fpower_series_dslope_fslope⟩, ?_⟩
+  filter_upwards [hw'e, eventually_mem_nhdsWithin] with ζ hζ hζne
+  have hζα : ζ ≠ α := hζne
+  rw [hζ, dslope_of_ne _ hζα, slope_def_field, zpow_neg_one, smul_eq_mul, div_eq_mul_inv]
+  ring
+
 end TestCocycleData
 
 end Evaluation
