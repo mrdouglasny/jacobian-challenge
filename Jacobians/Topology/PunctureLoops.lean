@@ -113,4 +113,74 @@ theorem fundamentalGroupMulEquivOfPath_fromPath {X : Type*} [TopologicalSpace X]
   rw [Iso.conj_apply]
   rfl
 
+/-- The covering `expAround s` is periodic with period `2πi`. -/
+theorem expAround_add_twoPiI (s w : ℂ) : expAround s (twoPiI + w) = expAround s w := by
+  apply Subtype.ext
+  simp [Complex.exp_add, twoPiI, Complex.exp_two_pi_mul_I]
+
+/-- **The ℤ-isomorphisms of `π₁(ℂ ∖ {s})` at different basepoints commute with
+basepoint transport**: transporting the `n`-fold circle class along any path gives
+the `n`-fold circle class at the new basepoint. Proved by an explicit three-segment
+lift through `expAround s`. -/
+theorem fundamentalGroupMulEquivOfPath_pi1PuncturedPlaneIntAt (s : ℂ)
+    {z z' : {w : ℂ // w ≠ s}} (α : Path z z') (g : Multiplicative ℤ) :
+    FundamentalGroup.fundamentalGroupMulEquivOfPath α (pi1PuncturedPlaneIntAt s z g)
+      = pi1PuncturedPlaneIntAt s z' g := by
+  have key : FundamentalGroup.fundamentalGroupMulEquivOfPath α
+      (pi1PuncturedPlaneIntAt s z (Multiplicative.ofAdd 1))
+      = pi1PuncturedPlaneIntAt s z' (Multiplicative.ofAdd 1) := by
+    rw [pi1PuncturedPlaneIntAt_ofAdd_one s z, fundamentalGroupMulEquivOfPath_fromPath]
+    refine Eq.symm ?_
+    set cov := (isAddQuotientCoveringMap_expAround s).isCoveringMap with hcov
+    set e₀' := Complex.log (z'.1 - s) with he₀'
+    have hze' : expAround s e₀' = z' :=
+      Subtype.ext (by simp [he₀', Complex.exp_log (sub_ne_zero.mpr z'.2)])
+    -- lift `α.symm` from `e₀'`
+    set Γ₁ : C(unitInterval, ℂ) :=
+      cov.liftPath (α.symm : C(unitInterval, {w : ℂ // w ≠ s})) e₀'
+        (α.symm.source.trans hze'.symm) with hΓ₁
+    have hΓ₁lifts : ∀ t, expAround s (Γ₁ t) = α.symm t := fun t ↦
+      congr_fun (cov.liftPath_lifts ..) t
+    have hΓ₁zero : Γ₁ 0 = e₀' := cov.liftPath_zero ..
+    have hexpend : Complex.exp (Γ₁ 1) = z.1 - s := by
+      have h1 : (expAround s (Γ₁ 1) : ℂ) = (z : ℂ) := by
+        rw [hΓ₁lifts 1]
+        exact congrArg Subtype.val α.symm.target
+      rw [expAround_coe] at h1
+      linear_combination h1
+    -- the three lift segments
+    set Γ₁p : Path e₀' (Γ₁ 1) := ⟨Γ₁, hΓ₁zero, rfl⟩ with hΓ₁p
+    set Γ₂p : Path (Γ₁ 1) (twoPiI + Γ₁ 1) :=
+      ⟨⟨fun t ↦ twoPiI * (t : ℝ) + Γ₁ 1, by fun_prop⟩, by simp, by simp⟩ with hΓ₂p
+    set Γ₃p : Path (twoPiI + Γ₁ 1) (twoPiI + e₀') :=
+      Γ₁p.symm.map (continuous_const.add continuous_id) with hΓ₃p
+    have hmid : ∀ u : unitInterval, expAround s (Γ₂p u) = circleAround s z u := by
+      intro u
+      apply Subtype.ext
+      rw [circleAround_coe]
+      show (expAround s (twoPiI * (u : ℝ) + Γ₁ 1) : ℂ)
+        = s + ((z : ℂ) - s) * Complex.exp (twoPiI * (u : ℝ))
+      rw [expAround_coe, Complex.exp_add, hexpend]
+      ring
+    have hthird : ∀ u : unitInterval, expAround s (Γ₃p u) = α u := by
+      intro u
+      show expAround s (twoPiI + Γ₁ (unitInterval.symm u)) = α u
+      rw [expAround_add_twoPiI, hΓ₁lifts]
+      show α.symm (unitInterval.symm u) = α u
+      simp [Path.symm_apply]
+    refine pi1PuncturedPlaneIntOn_eq_fromPath s e₀' z' hze' 1 _
+      ((Γ₁p.trans (Γ₂p.trans Γ₃p)).cast rfl (by rw [one_smul])) (fun t ↦ ?_)
+    show expAround s ((Γ₁p.trans (Γ₂p.trans Γ₃p)) t)
+      = (α.symm.trans ((circleAround s z).trans α)) t
+    simp only [Path.trans_apply]
+    split_ifs
+    · exact hΓ₁lifts _
+    · exact hmid _
+    · exact hthird _
+  have hcomp : ((FundamentalGroup.fundamentalGroupMulEquivOfPath α).toMonoidHom.comp
+        (pi1PuncturedPlaneIntAt s z).toMonoidHom)
+      = (pi1PuncturedPlaneIntAt s z').toMonoidHom :=
+    MonoidHom.ext_mint key
+  exact DFunLike.congr_fun hcomp g
+
 end Jacobians.Topology
