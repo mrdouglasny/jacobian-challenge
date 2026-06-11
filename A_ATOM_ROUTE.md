@@ -87,3 +87,54 @@ Remaining for full discharge (next session): construct `FrameResidueTrace` for t
 `FibreRegularData g f b` of the slit tower is frame-free; per-sheet integrand is
 `F ∘ sheet` by `frameRes_df_read` + section-inverse `(f ∘ sheet)' = 1`), assembled per
 sphere centre with `planarCoeff_neg_one_branch` at the ramified clusters.
+
+## T-lane session (2026-06-11, branch `feat/frame-trace`): the trace datum — wall pushed to Miranda step 1
+
+New file `KirovDolbeault/Dolbeault/FrameTrace.lean` (wired into the aggregator).  PROVEN layers
+(single residual `sorry` remains, see below):
+
+1. **Principal-part reduction** (`frameResidueTrace_of_laurentForm`): the `FibreTrace` fields of
+   `FrameResidueTrace` are a representation device — the principal-part fibre
+   (`principalPartFibre L p`: one identity sheet carrying `L.R`) discharges `hL32` and the
+   finite-centre trace residues definitionally.  A `FrameResidueTrace data F` exists as soon as a
+   `LaurentForm L` realizes the two residue transports (**fin**: `∑_{centres} Res(L.R) = ` the
+   finite-fibre `frameRes` sums; **inf**: `Res_∞(L.R) = ` the `∞`-fibre sum).
+2. **Unramified frame-fibre layer** (mirror of `FormTraceFibre` with the atom's integrand):
+   `frameChartIntegrand` + bridge `resAt_frameChartIntegrand` (contour ↔ planar),
+   `frameFibreTrace` over a `FibreRegularData` (frame-free, reused as-is), Lemma 3.2
+   `resAt_traceCoeff_frameFibreTrace`, `Finset` re-indexing `frameFibreResidueSum_eq_filter`.
+3. **The `df` value-trace collapse** (`frameFibreTrace_summand_df`,
+   `frameFibreTrace_traceCoeff_df`): for `ω₀ = df` and cover `= f`, the per-sheet pushforward is
+   the PLAIN VALUE `F ∘ sheet` (section Jacobian `(f̂∘sheet)' = 1`), so the fibre trace
+   coefficient is germ-equal to the plain value trace `w ↦ ∑ᵢ F(sheet i w)`.
+4. **One-variable rationality reduction** (Miranda §VIII.3 steps 2–3,
+   `exists_laurentForm_of_traceData`): from `T : ℂ → ℂ` analytic off a finite `C ⊆ ball 0 ρ` and
+   meromorphic at each centre, the principal-part `LaurentForm` (`tailLaurentForm`, uniform-depth
+   padding) has the SAME finite residues and the SAME `∞`-residue (junk-repaired remainder is
+   entire; Cauchy–Goursat kills its large contour).  No Liouville/vanishing needed — only the
+   residues transfer, which is all the trace datum requires.
+5. **Assembly** (`exists_traceLaurentForm_of_functionData` → `exists_traceLaurentForm_df` →
+   `frameTraceHypothesis_of_df` → `exists_canonicalData_frameTraceHypothesis`): the keystone's
+   exact input shape, proven over the single residual.
+
+### THE RESIDUAL (single named `sorry`): `exists_frameTraceFunctionData_df`
+
+`∃ S ⊇ supp(div F) ∪ supp K, Nonempty (FrameTraceFunctionData data F f S)` — the Miranda
+step-1 trace-FUNCTION datum for the plain value trace of `F` through `f`:
+
+* `T : ℂ → ℂ`, `C : Finset ℂ` (exceptional values), `ρ` with `C ⊆ ball 0 ρ`;
+* `hoff` — `T` analytic off `C` (IFT sections + conservation of number at unexceptional
+  values; brick 3 above identifies the local model);
+* `hmero` — `T` meromorphic at each exceptional value (the cluster/symmetric-descent argument;
+  the port's `SymmetricFunctionDescent` has the weighted version — the value trace needs the
+  UNWEIGHTED power-sum collapse `∑_j ζ^{jn} = m·[m|n]`, same toolbox);
+* `hres` — Lemma 3.2 at each exceptional value: `Res_c T = ∑_{fibre} frameRes` (unramified part
+  = brick 2+3; ramified clusters = `planarCoeff_neg_one_branch`'s `e·a₋ₑ` normalization);
+* `hcover`, `hinf` — value coverage + Lemma 3.2 at `∞` (reciprocal chart).
+
+All LaurentForm/residue bookkeeping is DONE; what remains is genuinely the trace-function
+geometry (T's definition + its local analytic facts).  Next session: define `T` from the
+fibre `Finset` of `f.toRiemannSphere` (`ProperMapDegreeSheets` has fibre finiteness +
+`holoRepr` machinery), prove `hoff` at regular non-pole values from conservation of number,
+and attack `hmero`/`hres` per exceptional class (F-pole over regular value; ramified;
+`∞`-fibre).

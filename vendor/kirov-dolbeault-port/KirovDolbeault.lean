@@ -64,6 +64,7 @@ import KirovDolbeault.Dolbeault.TailSurjectivity
 import KirovDolbeault.Dolbeault.TailFrameWitness
 import KirovDolbeault.Dolbeault.TailFrameGenus0
 import KirovDolbeault.Dolbeault.ResidueAtom
+import KirovDolbeault.Dolbeault.FrameTrace
 import KirovDolbeault.Dolbeault.TailRegularity
 import KirovDolbeault.Dolbeault.TailUnwind
 import KirovDolbeault.Dolbeault.TailDictionary
