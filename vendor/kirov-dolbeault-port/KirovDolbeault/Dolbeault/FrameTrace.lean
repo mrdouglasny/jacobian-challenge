@@ -5,6 +5,7 @@ Authors: Michael R Douglas
 -/
 import KirovDolbeault.Dolbeault.ResidueAtom
 import KirovDolbeault.Dolbeault.FormTraceFibre
+import KirovDolbeault.Dolbeault.FormTracePrincipalPart
 import KirovDolbeault.Dolbeault.CanonicalFormDifferential
 
 /-!
@@ -63,8 +64,8 @@ Reference: Miranda, *Algebraic Curves and Riemann Surfaces* (GSM 5), §VIII.3; F
 
 noncomputable section
 
-open scoped Manifold ContDiff Topology Classical
-open Filter
+open scoped Manifold ContDiff Topology Classical Real
+open Filter Complex Metric
 
 set_option linter.unusedSectionVars false
 
@@ -240,6 +241,254 @@ theorem frameFibreResidueSum_eq_filter (data : CanonicalForm17Data X)
     · rintro ⟨i, rfl⟩; exact ⟨(hxs_mem i).1, (hxs_mem i).2⟩
     · rintro ⟨ha_mem, ha_fib⟩; exact hxs_surj a ha_mem ha_fib
   rw [← hImg, Finset.sum_image (fun i _ j _ h => hxs_inj h)]
+
+/-! ## The one-variable rationality reduction
+
+`Miranda §VIII.3 steps 2–3, proven`: from a coefficient `T : ℂ → ℂ` analytic off a finite
+centre set `C` and meromorphic at each centre, build a `LaurentForm` (the finite principal
+parts of `T`, padded to uniform depth) whose finite residues equal `T`'s and whose `∞`-residue
+equals `T`'s.  The entire remainder `T − L.R` is killed on the large contour by Cauchy–Goursat
+(after repairing the finitely many junk values).  Built on the frame-free principal-part
+extraction `FormTracePrincipalPart.exists_principalPart_meromorphicAt`. -/
+
+open Jacobians.Dolbeault.FormTracePrincipalPart
+
+/-- A finite sum of circle-integrable functions is circle-integrable. -/
+theorem circleIntegrable_finsum {ι : Type*} (s : Finset ι) (f : ι → ℂ → ℂ) {c : ℂ} {ρ : ℝ}
+    (hf : ∀ i ∈ s, CircleIntegrable (f i) c ρ) :
+    CircleIntegrable (fun z => ∑ i ∈ s, f i z) c ρ := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    simp only [Finset.sum_empty]
+    exact circleIntegrable_const (0 : ℂ) c ρ
+  | insert j s hj ih =>
+    have hsplit : (fun z => ∑ i ∈ insert j s, f i z)
+        = f j + fun z => ∑ i ∈ s, f i z := by
+      funext z; rw [Finset.sum_insert hj]; rfl
+    rw [hsplit]
+    exact (hf j (Finset.mem_insert_self j s)).add
+      (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
+
+/-- The partial-fraction coefficient `L.R` is circle-integrable on the enclosing contour
+(termwise `circleIntegrable_monomial`). -/
+theorem circleIntegrable_laurentR (L : LaurentForm) : CircleIntegrable L.R 0 L.ρ :=
+  circleIntegrable_finsum Finset.univ _ fun i _ => L.circleIntegrable_monomial i
+
+/-- The padded `Fin`-indexed tail sum collapses to the `negTail` of depth `N ≤ M`. -/
+theorem sum_fin_pad_eq_negTail (cv : ℂ) (b : ℕ → ℂ) {N M : ℕ} (hNM : N ≤ M) (z : ℂ) :
+    (∑ j : Fin M, (if (j : ℕ) + 1 ≤ N then b ((j : ℕ) + 1) else 0)
+        * (z - cv) ^ (-(((j : ℕ) : ℤ) + 1)))
+      = negTail cv b N z := by
+  rw [negTail]
+  rw [Fin.sum_univ_eq_sum_range
+    (fun j => (if j + 1 ≤ N then b (j + 1) else 0) * (z - cv) ^ (-((j : ℤ) + 1)))]
+  have h1 : ∀ j ∈ Finset.range M,
+      (if j + 1 ≤ N then b (j + 1) else 0) * (z - cv) ^ (-((j : ℤ) + 1))
+        = if j + 1 ≤ N then b (j + 1) * (z - cv) ^ (-((j : ℤ) + 1)) else 0 := by
+    intro j _
+    split <;> simp
+  rw [Finset.sum_congr rfl h1, ← Finset.sum_filter]
+  have h2 : (Finset.range M).filter (fun j => j + 1 ≤ N) = Finset.range N := by
+    ext j
+    simp only [Finset.mem_filter, Finset.mem_range]
+    omega
+  rw [h2, show Finset.Icc 1 N = Finset.Ico 1 (N + 1) by rw [Finset.Ico_add_one_right_eq_Icc],
+    Finset.sum_Ico_eq_sum_range]
+  simp only [Nat.add_sub_cancel]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  congr 1
+  · rw [Nat.add_comm]
+  · congr 1
+    push_cast
+    ring
+
+/-- **The principal-part `LaurentForm`** over a finite centre set `C ⊆ ball 0 ρ`: per centre
+`c ∈ C` the depth-`M` padded tail with coefficients `b c` (zero beyond depth `N c`). -/
+def tailLaurentForm (C : Finset ℂ) (ρ : ℝ) (hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ)
+    (N : {x // x ∈ C} → ℕ) (b : {x // x ∈ C} → ℕ → ℂ) (M : ℕ) : LaurentForm where
+  ι := {x // x ∈ C} × Fin M
+  fintype_ι := inferInstance
+  decEq_ι := Classical.decEq _
+  c := fun i => if (i.2 : ℕ) + 1 ≤ N i.1 then b i.1 ((i.2 : ℕ) + 1) else 0
+  a := fun i => i.1.1
+  n := fun i => -(((i.2 : ℕ) : ℤ) + 1)
+  ρ := ρ
+  centers_mem := fun i => hball i.1.1 i.1.2
+
+/-- The coefficient of the principal-part form is the sum of the per-centre `negTail`s. -/
+theorem tailLaurentForm_R (C : Finset ℂ) (ρ : ℝ)
+    (hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ)
+    (N : {x // x ∈ C} → ℕ) (b : {x // x ∈ C} → ℕ → ℂ) {M : ℕ}
+    (hNM : ∀ c, N c ≤ M) :
+    (tailLaurentForm C ρ hball N b M).R
+      = fun z => ∑ c ∈ C.attach, negTail c.1 (b c) (N c) z := by
+  funext z
+  show ∑ i : {x // x ∈ C} × Fin M, _ = _
+  rw [Fintype.sum_prod_type, ← Finset.univ_eq_attach]
+  exact Finset.sum_congr rfl fun c _ => sum_fin_pad_eq_negTail c.1 (b c) (hNM c) z
+
+/-- The centres of the principal-part form are exactly `C` (the padding keeps every centre's
+index inhabited). -/
+theorem tailLaurentForm_image_a (C : Finset ℂ) (ρ : ℝ)
+    (hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ)
+    (N : {x // x ∈ C} → ℕ) (b : {x // x ∈ C} → ℕ → ℂ) {M : ℕ} (hM : 0 < M) :
+    Finset.univ.image (tailLaurentForm C ρ hball N b M).a = C := by
+  ext x
+  simp only [Finset.mem_image, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨i, rfl⟩
+    exact i.1.2
+  · intro hx
+    exact ⟨⟨⟨x, hx⟩, ⟨0, hM⟩⟩, rfl⟩
+
+/-- **The one-variable rationality reduction (Miranda §VIII.3 steps 2–3, proven).**  For
+`T : ℂ → ℂ` analytic off the finite centre set `C ⊆ ball 0 ρ` and meromorphic at each centre,
+there is a `LaurentForm` on the contour `C(0, ρ)` with centres exactly `C`, the same finite
+residues as `T`, and the same residue at infinity.  (`L` is the finite principal part of `T`;
+the remainder is entire after junk repair, so it contributes nothing to any of the contours.) -/
+theorem exists_laurentForm_of_traceData (T : ℂ → ℂ) (C : Finset ℂ) (ρ : ℝ) (hρ : 0 < ρ)
+    (hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ)
+    (hoff : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ T z)
+    (hmero : ∀ c ∈ C, MeromorphicAt T c) :
+    ∃ L : LaurentForm, L.ρ = ρ ∧ Finset.univ.image L.a = C ∧
+      (∀ c ∈ C, resAt L.R c = resAt T c) ∧
+      resAtInfty L.R L.ρ = resAtInfty T ρ := by
+  classical
+  -- Principal parts at each centre.
+  choose N b R hR_an hT_eq using
+    fun c : {x // x ∈ C} => exists_principalPart_meromorphicAt (hmero c.1 c.2)
+  -- Uniform padding depth.
+  set M : ℕ := max (C.attach.sup fun c => N c) 1 with hMdef
+  have hM1 : 0 < M := lt_of_lt_of_le Nat.one_pos (le_max_right _ 1)
+  have hNM : ∀ c : {x // x ∈ C}, N c ≤ M :=
+    fun c => le_trans (Finset.le_sup (Finset.mem_attach C c)) (le_max_left _ _)
+  set L : LaurentForm := tailLaurentForm C ρ hball N b M with hLdef
+  have hLR : L.R = fun z => ∑ c ∈ C.attach, negTail c.1 (b c) (N c) z :=
+    tailLaurentForm_R C ρ hball N b hNM
+  -- `L.R` is analytic away from `C`.
+  have hLR_off : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ L.R z := by
+    intro z hz
+    rw [hLR]
+    refine Finset.analyticAt_fun_sum _ fun c _ => ?_
+    exact analyticAt_negTail_of_ne (b c) (N c) (fun h => hz (h ▸ c.2))
+  -- The germ-analytic remainder at each centre.
+  have hgerm : ∀ c₀ : {x // x ∈ C},
+      ∃ Efun : ℂ → ℂ, AnalyticAt ℂ Efun c₀.1 ∧
+        (fun z => T z - L.R z) =ᶠ[𝓝[≠] (c₀.1 : ℂ)] Efun := by
+    intro c₀
+    refine ⟨fun z => R c₀ z - ∑ c ∈ C.attach.erase c₀, negTail c.1 (b c) (N c) z, ?_, ?_⟩
+    · refine (hR_an c₀).sub (Finset.analyticAt_fun_sum _ fun c hc => ?_)
+      refine analyticAt_negTail_of_ne (b c) (N c) fun h => ?_
+      exact (Finset.mem_erase.mp hc).1 (Subtype.ext h.symm)
+    · filter_upwards [hT_eq c₀] with z hz
+      have hLRz : L.R z = ∑ c ∈ C.attach, negTail c.1 (b c) (N c) z := by rw [hLR]
+      have hsplit : ∑ c ∈ C.attach, negTail c.1 (b c) (N c) z
+          = negTail c₀.1 (b c₀) (N c₀) z
+            + ∑ c ∈ C.attach.erase c₀, negTail c.1 (b c) (N c) z :=
+        (Finset.add_sum_erase _ _ (Finset.mem_attach C c₀)).symm
+      rw [hz, hLRz, hsplit]
+      ring
+  -- The finite residues agree.
+  have hres : ∀ c ∈ C, resAt L.R c = resAt T c := by
+    intro c hc
+    obtain ⟨Efun, hEfun_an, hEgerm⟩ := hgerm ⟨c, hc⟩
+    have hTsplit : T = L.R + fun z => T z - L.R z := by
+      funext z
+      simp only [Pi.add_apply]
+      ring
+    have hE_mero : MeromorphicAt (fun z => T z - L.R z) c :=
+      (hmero c hc).sub (meromorphicAt_laurentR L c)
+    have hadd : resAt T c = resAt L.R c + resAt (fun z => T z - L.R z) c := by
+      conv_lhs => rw [hTsplit]
+      exact resAt_add (MeromorphicAt.holoPunctured (meromorphicAt_laurentR L c))
+        (MeromorphicAt.holoPunctured hE_mero)
+    rw [hadd, resAt_congr hEgerm, resAt_eq_zero_of_analyticAt hEfun_an, add_zero]
+  -- The residues at infinity agree: the remainder is entire after junk repair, so its large
+  -- contour integral vanishes (Cauchy–Goursat off the countable junk set).
+  have hinfty : resAtInfty L.R ρ = resAtInfty T ρ := by
+    set E : ℂ → ℂ := fun z => T z - L.R z with hEdef
+    -- The junk-repaired remainder.
+    set E' : ℂ → ℂ := fun z =>
+      if hz : z ∈ C then Classical.choose (hgerm ⟨z, hz⟩) z else E z with hE'def
+    -- `E` is analytic off `C`.
+    have hE_an : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ E z :=
+      fun z hz => (hoff z hz).sub (hLR_off z hz)
+    -- Off `C`, `E'` agrees with `E` on a full neighbourhood.
+    have hE'_eq_off : ∀ z : ℂ, z ∉ C → E' =ᶠ[𝓝 z] E := by
+      intro z hz
+      have hop : IsOpen ((↑C : Set ℂ))ᶜ := C.finite_toSet.isClosed.isOpen_compl
+      filter_upwards [hop.mem_nhds hz] with w hw
+      have hwC : w ∉ C := by simpa using hw
+      simp only [hE'def]
+      rw [dif_neg hwC]
+    -- At a centre, `E'` agrees with the analytic continuation on a full neighbourhood.
+    have hE'_eq_centre : ∀ (c : ℂ) (hc : c ∈ C),
+        E' =ᶠ[𝓝 c] Classical.choose (hgerm ⟨c, hc⟩) := by
+      intro c hc
+      have hpure : E' =ᶠ[pure c] Classical.choose (hgerm ⟨c, hc⟩) := by
+        rw [Filter.EventuallyEq, Filter.eventually_pure, hE'def]
+        simp only
+        rw [dif_pos hc]
+      have hpunct : E' =ᶠ[𝓝[≠] c] Classical.choose (hgerm ⟨c, hc⟩) := by
+        have hop : IsOpen ((↑(C.erase c) : Set ℂ))ᶜ :=
+          (C.erase c).finite_toSet.isClosed.isOpen_compl
+        have hmem : ((↑(C.erase c) : Set ℂ))ᶜ ∈ 𝓝[≠] c :=
+          nhdsWithin_le_nhds (hop.mem_nhds (by simp))
+        filter_upwards [(Classical.choose_spec (hgerm ⟨c, hc⟩)).2, hmem,
+          self_mem_nhdsWithin] with w hw1 hw2 hw3
+        have hwc : w ≠ c := hw3
+        have hwC : w ∉ C := by
+          intro hwC
+          exact hw2 (by simp [hwc, hwC])
+        simp only [hE'def]
+        rw [dif_neg hwC]
+        exact hw1
+      have hsup : E' =ᶠ[𝓝[≠] c ⊔ pure c] Classical.choose (hgerm ⟨c, hc⟩) :=
+        Filter.eventually_sup.mpr ⟨hpunct, hpure⟩
+      rwa [nhdsNE_sup_pure] at hsup
+    -- `E'` is continuous on the closed disk.
+    have hE'_cont : ContinuousOn E' (Metric.closedBall (0 : ℂ) ρ) := by
+      intro z _
+      by_cases hz : z ∈ C
+      · exact ((Classical.choose_spec (hgerm ⟨z, hz⟩)).1.continuousAt.congr
+          (hE'_eq_centre z hz).symm).continuousWithinAt
+      · exact ((hE_an z hz).continuousAt.congr (hE'_eq_off z hz).symm).continuousWithinAt
+    -- `E'` is differentiable off the (countable) centre set.
+    have hE'_diff : ∀ z ∈ Metric.ball (0 : ℂ) ρ \ (↑C : Set ℂ), DifferentiableAt ℂ E' z := by
+      intro z hz
+      exact (hE_an z hz.2).differentiableAt.congr_of_eventuallyEq (hE'_eq_off z hz.2)
+    -- Cauchy–Goursat: the repaired remainder's large contour integral vanishes.
+    have hE'_zero : (∮ z in C((0 : ℂ), ρ), E' z) = 0 :=
+      circleIntegral_eq_zero_of_differentiable_on_off_countable hρ.le
+        C.finite_toSet.countable hE'_cont hE'_diff
+    -- `E` and `E'` agree on the contour (which avoids `C ⊆ ball`).
+    have hsphere : ∀ z ∈ Metric.sphere (0 : ℂ) ρ, z ∉ C := by
+      intro z hz hzC
+      have h1 : dist z 0 = ρ := Metric.mem_sphere.mp hz
+      have h2 : dist z 0 < ρ := Metric.mem_ball.mp (hball z hzC)
+      exact absurd h1 (ne_of_lt h2)
+    have hE_zero : (∮ z in C((0 : ℂ), ρ), E z) = 0 := by
+      rw [show (∮ z in C((0 : ℂ), ρ), E z) = ∮ z in C((0 : ℂ), ρ), E' z from
+        circleIntegral.integral_congr hρ.le fun z hz => by
+          simp only [hE'def]
+          rw [dif_neg (hsphere z hz)]]
+      exact hE'_zero
+    -- Split the large contour integral of `T` and conclude.
+    have hEint : CircleIntegrable E 0 ρ := by
+      refine ContinuousOn.circleIntegrable hρ.le fun z hz => ?_
+      exact ((hE_an z (hsphere z hz)).continuousAt).continuousWithinAt
+    have hPint : CircleIntegrable L.R 0 ρ := circleIntegrable_laurentR L
+    have hTsplit : (∮ z in C((0 : ℂ), ρ), T z)
+        = (∮ z in C((0 : ℂ), ρ), L.R z) + ∮ z in C((0 : ℂ), ρ), E z := by
+      have h1 : T = L.R + E := by
+        funext z
+        simp only [Pi.add_apply, hEdef]
+        ring
+      rw [h1]
+      simpa using circleIntegral.integral_add hPint hEint
+    rw [resAtInfty, resAtInfty, hTsplit, hE_zero, add_zero]
+  exact ⟨L, rfl, tailLaurentForm_image_a C ρ hball N b hM1, hres, hinfty⟩
 
 /-! ## The residual wall (single named `sorry`)
 
