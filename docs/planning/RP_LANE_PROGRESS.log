@@ -1,0 +1,16 @@
+# RP-lane progress log — B-4 image-lattice re-plumb (issue #206)
+
+## 2026-06-11 session start
+
+Branch `feat/b4-image-replumb` off origin/main (92250fb, post-#203).
+Scope (issue #206, accepted proposal):
+1. Restate the B-4 residual over the image lattice
+   `loopPeriodLattice x₀ b = span ℤ (range (loopPeriodVec x₀ b))`:
+   new residual TR-DISC := `DiscreteTopology (loopPeriodLattice x₀ b)`;
+   derive basis/rank via Mathlib ZLattice with NO `Module.Free ℤ (H1)`
+   (and check whether `Module.Finite ℤ (H1)` drops too).
+2. Keep old statements compiling; document route relationship.
+3. Annotate `Layer3/PeriodSpan.lean:span_range_loopIntegralToH1_eq_top`
+   as axiom-downstream (circularity finding).
+4. Record landing; TRANK_SCOPING.md lives on PR #205 (unmerged) — record
+   here + coordinate at merge.
