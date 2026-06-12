@@ -10,7 +10,7 @@ words of `ArcBoundaryWordData` reduce to:
 * `boundaryForm (fun _ => c) (fun z => c·z) = normSq c · 2i` — the classic
   area integral `∮_{∂[0,1]²} conj z dz = 2i` (`word_R2`'s right side).
 
-Stage 2 assembles the `ArcBoundaryWordData` structure over the elliptic
+Stage 2 delivers the integral lemmas and loop layer; stage 3 (next session) assembles the `ArcBoundaryWordData` structure over the elliptic
 `aLoop`/`bLoop` with the orientation-normalized constant
 `c := √(±Im (ω₂ · conj ω₁))`.
 -/
