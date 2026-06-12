@@ -10,7 +10,36 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 18** — all **18** in our own modules (the
+**Active project axioms: 15** — all **15** in our own modules (the
+**GENUS-0 UNIFORMIZATION FLIP**, 2026-06-11 (PR #209, parallel-account
+delivery), discharged the challenge-critical `AX_genus_eq_zero_iff_homeo` to a
+theorem: forward leg via the keystone-backed Riemann–Roch pole extraction —
+`h⁰((p)) = 2` at `g = 0` gives a degree-one function, upgraded by
+`degreeOne_equiv_projectiveLine` to a biholomorphism `X ≃ ℙ¹`, composed with
+the stereographic `ℙ¹ ≃ₜ S²` (`RiemannSurface/GenusZeroForward.lean`);
+backward leg via the S2-lane `genus_eq_zero_of_homeo_sphere_unconditional`
+(#199+#205: ported two-open van Kampen `π₁(S²) = 1` + Liouville developing
+map); the challenge headline `genus_eq_zero_iff_homeo` is now **standard-3**;
+net −1, 16 → 15, challenge-critical 3 → **2**; the
+**functoriality-cluster completion**, 2026-06-11 (#31), discharged the final
+two Abel–Jacobi functoriality axioms `AX_pullbackAmbient_preserves_lattice` +
+`AX_pushforward_pullback` to theorems — route per daouid's closed PR #191
+(credit), with his two smuggled lattice-comparison axioms PROVEN: the new
+`Bridge/KirovDolbeaultPeriods.lean` establishes the keystone comparison
+"developing value = the Dolbeault port's moving-chart line integral" (cell
+FTC over chart-ball subdivisions) in both directions — any port
+`IsClosedSmoothLoop`'s period vector is a `periodLatticeInBasis` vector, and
+any `H1` class has a polygonal smooth representative with matching developing
+values (zero-velocity chart-affine hops through anchored balls; no homotopy
+needed, both sides compute against the same chart-ball primitives) — so
+`truePeriodLattice` and `periodLatticeInBasis` correspond under
+`latticeBridgeEquiv`; the pullback lattice preservation then follows from the
+port's `PreimageCycle` monodromy theorem
+(`ambientPullbackJac_preserves_truePeriodLattice`), and `push∘pull = deg·id`
+from the port's conservation-of-number + the ℝ-spanning ℤ-basis of the period
+lattice (`AX_PeriodLattice`, a theorem) + `degreeImpl_eq_degreeFiber` (our
+`AX_BranchLocus` fibre-weighted count = the port's regular-value fibre
+cardinality); net −2, 18 → 16, challenge-critical 5 → **3**; the
 **KEYSTONE FLIP**, 2026-06-11, discharged the final two Layer-3 cohomology
 axioms `h1coh_zero_finrank` + `serreDuality_equiv` to theorems AND de-opaqued
 `canonicalDivisor` (axiom → `noncomputable def`, the `Classical.choose` of the
@@ -342,11 +371,11 @@ Per the review plan, axioms are split into the following triage buckets. Classes
 1 and 2 are the original audit buckets; Class 3 tracks newly introduced Layer-3
 primitives that are statement-vetted but not yet discharged.
 
-- **Class 1 — standard form, textbook-proven** (10 axioms). Statements are
+- **Class 1 — standard form, textbook-proven** (9 axioms). Statements are
   the standard textbook ones, citable, with no ambiguity about their form;
   discharging them is "port the textbook proof / wait for Mathlib." These
   are the *trusted* axioms.
-- **Class 2 — form or proof not yet clear** (9 axioms). Either the Lean
+- **Class 2 — form or proof not yet clear** (6 axioms). Either the Lean
   encoding is a project-specific stub whose faithfulness needs checking, or
   the statement asserts good behaviour of one of our constructions (and
   could mask a bad definition), or it is a large atlas/analysis fact with no
@@ -361,9 +390,9 @@ primitives that are statement-vetted but not yet discharged.
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 10 | classical theorems, citable | high |
+| 1 — textbook-standard | 9 | classical theorems, citable | high (`AX_genus_eq_zero_iff_homeo` **DISCHARGED 2026-06-11**, PR #209) |
 | 2a — data-existence | 3 | "this function/object exists with spec S" | spec needs review |
-| 2b — definition-asserting | 2 | "my construction has good property P" | **may mask a bad def** |
+| 2b — definition-asserting | 0 | both functoriality entries **DISCHARGED 2026-06-11 (#31)** (now theorems) | — |
 | 2c — atlas / structure | 3 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 0 | `h1coh_zero_finrank`+`serreDuality_equiv` **DISCHARGED 2026-06-11 (keystone flip)** — statements verbatim, now theorems via the FlipPrep composition over the T-lane frame-trace wall; the keystone-gating sorry `exists_serreDualityData` is GONE (replaced by the proven ∃-cover `exists_serreDualityData_cover`); `canonicalDivisor` de-opaqued to the chosen Serre divisor in the same commit. (`H1coh`(+3 instances) and `cohomologyLES` were already discharged 2026-06-10.) | — |
@@ -380,7 +409,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 |-------|-----------|-----------|
 | `AX_AbelTheorem` | `Axioms/AbelTheorem.lean:80` | Forster §21; Miranda Ch. VIII (degree-0 restricted form). **DT-re-vetted post-fix 2026-06-09: SATISFIABLE/FAITHFUL** — basepoint-independence on deg-0 makes `Classical.arbitrary` harmless; g=0 and lattice-quotient cases clean; ⊓-typing sound |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean:55` | Griffiths–Harris Ch. 2 (Plücker). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — degree-genus via adjunction (smooth ⇒ genera coincide); ℕ-truncated subtraction exactly absorbs d=1, `(d−1)(d−2)` always even so `/2` exact; hypotheses sufficient (irreducibility redundant-but-safe by Bézout) |
-| `AX_genus_eq_zero_iff_homeo` | `Axioms/Uniformization0.lean:55` | uniformization, genus 0 (Forster §27). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — → via uniformization/RR, ← via b₁ homeo-invariance + Hodge `b₁=2h^{1,0}`; no empty-space vacuity (`ConnectedSpace` ⇒ `Nonempty`); `EuclideanSpace` sphere is the genuine L² S² |
+| `AX_genus_eq_zero_iff_homeo` | ✅ **DISCHARGED 2026-06-11** (PR #209, parallel-account delivery) — now a `theorem`, statement verbatim at `Axioms/Uniformization0.lean` (see Recently discharged) | uniformization, genus 0 (Forster §27). *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — → via uniformization/RR, ← via b₁ homeo-invariance + Hodge `b₁=2h^{1,0}`; no empty-space vacuity (`ConnectedSpace` ⇒ `Nonempty`); `EuclideanSpace` sphere is the genuine L² S². Discharged along exactly the vetted routes (→ RR pole extraction, ← homeo-invariance of simple connectedness + Liouville) |
 | `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean:237` | H₁ cycle basis + arc-level Riemann bilinear relations (standard: Griffiths–Harris Ch. 2 §2, Forster §§20–21). **D1 merge of `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2` (2026-06-10), DT-vetted: SATISFIABLE/FAITHFUL** — strictly implied by the three 2026-06-09-vetted predecessors (instantiate RBR1/2 at the chosen symplectic basis; weaker-or-equal, never stronger), so satisfiability is inherited; `loops_to_basis` Hurewicz tie remains the anti-vacuity pin; **index-split alignment guard (DT finding 5)**: `arcPeriodVec` is defined through `αEmbed`/`βEmbed` so component 1 = A-periods, component 2 = B-periods, exactly `Q`'s layout, pinned by the `@[simp]` lemmas `arcPeriodVec_fst`/`arcPeriodVec_snd` + a docstring layout contract; g=0 empty-basis witness re-proved (`projectiveLineCycleBasis`, R1 empty sum / R2 vacuous) |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
@@ -389,9 +418,10 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
 | `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
 
-*Note.* `AX_genus_eq_zero_iff_homeo` is still an axiom **only** for the
-abstract `genus_eq_zero_iff_homeo`; the concrete `genus ℙ¹ = 0` no longer
-uses it (proven directly — see Recently discharged).
+*Note.* `AX_genus_eq_zero_iff_homeo` is **fully discharged** (2026-06-11,
+PR #209): the abstract `genus_eq_zero_iff_homeo` is now standard-3, and the
+concrete `genus ℙ¹ = 0` was already proven directly (see Recently
+discharged).
 
 ---
 
@@ -420,9 +450,9 @@ concrete witness (see [`docs/validation-plan.md`](docs/validation-plan.md) §C).
 | Axiom | File:Line | Note |
 |-------|-----------|------|
 | `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — now a theorem: the chart-line descent proof of Abel–Jacobi holomorphy (analytic core at 𝕜 = ℂ; the `Classical.choice` path discrepancy is compared only mod Λ and landed in the lattice via the `AX_Period_Triangle` theorem → `loopDevValH1Hom` → the cycle-basis `loops_to_basis` pin); headline `ofCurve_contMDiff` is standard-3 + `AX_PeriodCycleBasis` only. **Conditionality transfer:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-10: FLAGGED (conditional)** — correctly typed, non-vacuous, mathematically true *for the genuine objects*, but as a definition-asserting axiom about `ofCurveImpl` its truth was exactly equivalent to (i) homotopy invariance of the arc integral and (ii) completeness of the `periodMap`/H1 lattice model: if `periodLatticeInBasis` missed any piecewise-analytic loop period, the `Classical.choice` path discrepancies would survive the quotient and the concrete map would be discontinuous (axiom FALSE). |
-| `AX_pushforward_pullback` | `Axioms/AbelJacobiMap.lean:782` | push∘pull = deg multiplication. **DT-vetted 2026-06-10 (retry after timeout): Likely correct** — ambient composite = dual of `Tr_f ∘ f^*` conjugated by `eY`; classical projection formula gives `deg(f)·id`, and its descent through `QuotientAddGroup.map` is exactly `nsmul` (no descent subtlety). Constant-`f` edge verified safe: the real `pullbackOneForm` vanishes for constants, so LHS `= 0 = 0 • P` regardless of the opaque trace; genus-0 / Riemann–Hurwitz cases reduce to `0 = 0`. |
+| `AX_pushforward_pullback` | ✅ **DISCHARGED 2026-06-11** (#31, route per daouid's closed PR #191, credit) — now a theorem: ambient identity `Φ ∘ Tᵀ = deg • id` from the port's `PreimageCycle` conservation-of-number over the ℝ-spanning ℤ-basis of the period lattice, transported through the PROVEN `latticeBridge` inclusions, with `degreeImpl_eq_degreeFiber` pinning the degree; quotient descent through `jacobianHomOfAmbient`. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-10 (retry after timeout): Likely correct** — ambient composite = dual of `Tr_f ∘ f^*` conjugated by `eY`; classical projection formula gives `deg(f)·id`, and its descent through `QuotientAddGroup.map` is exactly `nsmul` (no descent subtlety). Constant-`f` edge verified safe: the real `pullbackOneForm` vanishes for constants, so LHS `= 0 = 0 • P` regardless of the opaque trace; genus-0 / Riemann–Hurwitz cases reduce to `0 = 0`. |
 | `AX_pushforwardAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#30) — now a theorem: representative-loop induction over the developing-value naturality engine (`DevelopingNaturality.lean` axiom-free, `LoopLattice.lean` standard-3 + `AX_PeriodCycleBasis`; `pullbackOneForm_isPullbackCoeffRel` standard-3); headline closures drop to standard-3 + `AX_PeriodCycleBasis`. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pushforwardAmbientLinear` is the dual of the REAL `pullbackOneForm` (direction verified in code), so this is classical Albanese naturality `∫_{f_*γ}ω = ∫_γ f^*ω` + integrality of `f_*γ`; basepoint-free as a subset. (A DT direction-flag was a prose artifact; resolved against the defs.) |
-| `AX_pullbackAmbient_preserves_lattice` | `Axioms/AbelJacobiMap.lean:505` | period-map naturality. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pullbackAmbientLinear` is the dual of the OPAQUE trace; satisfiable by the genuine trace (Picard pullback / `∫_{f^*δ}η = ∫_δ Tr η`); jointly with `_id`/`_comp` it pins the trace against the zero-mask (not alone — recorded honestly) |
+| `AX_pullbackAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#31, route per daouid's closed PR #191, credit) — now a theorem: lattice vector → port coordinates (`truePeriodLattice_le_periodLatticeInBasis`: `H1` representative loop → polygonal smooth representative with matching developing values, `Bridge/KirovDolbeaultPeriods.lean`), port `PreimageCycle` monodromy (`ambientPullbackJac_preserves_truePeriodLattice`), back through `latticeBridge_truePeriodLattice_le` (developing value = moving-chart line integral on closed `C¹` loops). *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — `pullbackAmbientLinear` is the dual of the OPAQUE trace; satisfiable by the genuine trace (Picard pullback / `∫_{f^*δ}η = ∫_δ Tr η`); jointly with `_id`/`_comp` it pins the trace against the zero-mask (not alone — recorded honestly) |
 | `AX_pushforwardOneForm_id` / `_comp` | ✅ **DISCHARGED 2026-06-10** (#27/#28, same PR as #26) — now `theorem`s conjugating the port's `traceFormTotal_id`/`traceFormTotal_comp` across `bridgeKDFormEquiv` (proof shape = the `AX_pullbackOneForm_id`/`_comp` theorems); the DT-vetted constancy edge cases are realized verbatim by the port's case-splits; standard-3 | functoriality of trace. *(Pre-discharge vetting, retained for the record:)* **DT-vetted 2026-06-10: Likely correct (both)** — `_id`: genuine trace satisfies `Tr_id = id` (degree-1 unbranched cover, chart derivative 1); proof-term sensitivity to `contMDiff_id` is a non-issue (proof irrelevance); genuinely non-vacuous (rules out the all-zero trace for g > 0). `_comp`: Lean `comp` order matches covariance `(g∘f)_* = g_* ∘ f_*`; constant-map cases check out under the zero-for-constants convention (0 absorbing under composition); for non-constant f, g the composite is automatically non-constant, and the classical fiber decomposition + multiplicativity of local orders applies. Jointly with the lattice axioms these pin the opaque trace against degenerate models. |
 
 *Retired 2026-06-05.* `AX_ofCurve_inj` is now a theorem in
@@ -495,6 +525,7 @@ for the goal to typecheck) is **done** (`Jacobian/Construction.lean`,
 
 | Was axiom | Discharged via | Proof lives in |
 |-----------|----------------|----------------|
+| `AX_genus_eq_zero_iff_homeo` *(PR #209, parallel-account delivery, 2026-06-11 — genus-0 uniformization flip, challenge-critical)* | statement verbatim, now a theorem. **Forward** (`g = 0 ⇒ X ≃ₜ S²`): the keystone-backed `riemannRoch` at a point divisor gives `h⁰((p)) = 2` at genus 0 (the dual term dies by `deg(K−(p)) = −3 < 0`); a non-constant `F ∈ L((p)) \ L(0)` has a single simple pole, so `exists_degreeOne_of_genus_zero` produces a degree-one map, and `degreeOne_equiv_projectiveLine` (the exposed-equivalence refactor of `degreeOne_genus_zero`: weighted-fiber-sum bijectivity + IFT inverse analyticity) upgrades it to a biholomorphism `X ≃ ℙ¹`, composed with the stereographic `ProjectiveLine.stereographic : ℙ¹ ≃ₜ S²` (`RiemannSurface/GenusZeroForward.lean` chain). **Backward** (`X ≃ₜ S² ⇒ g = 0`): transport `SimplyConnectedSpace S²` (S2-lane ported two-open van Kampen, `Topology/SphereSimplyConnected.lean`) across the homeomorphism, then every holomorphic 1-form has a global developing-map primitive, constant by Liouville — `genus_eq_zero_of_homeo_sphere_unconditional` (#199+#205, `Bridge/SphereGenusZero.lean`). *(Pre-discharge vetting, retained for the record:)* DT-vetted 2026-06-09 SATISFIABLE/FAITHFUL; discharged along exactly the vetted routes. `#print axioms`: the challenge headline `genus_eq_zero_iff_homeo` and the forward-chain lemmas **standard-3**; no `sorryAx`. Net −1 (16 → 15), challenge-critical 3 → **2**. | `Axioms/Uniformization0.lean` (the theorem); forward: `RiemannSurface/GenusZeroForward.lean` (new) + `RiemannSurface/DegreeOneGenusZero.lean` (equiv exposed) + `RiemannSurface/Cohomology/RiemannRochAPI.lean`; backward: `Bridge/SphereGenusZero.lean` + `Topology/SphereSimplyConnected.lean` |
 | **THE KEYSTONE FLIP — `h1coh_zero_finrank`, `serreDuality_equiv`, `canonicalDivisor` (all 3)** *(2026-06-11, `docs/planning/FLIP_CHECKLIST.md` executed)* | the T-lane frame-trace wall closed the last analytic residual: `FrameTrace.exists_canonicalData_residueAtom` (the canonical `ω₀ = df` datum of `exists_nonconstant_meromorphic` satisfies its own residue atom `∑ Res_p(F·ω₀) = 0` for EVERY global meromorphic `F` — Miranda §VIII.3 trace route: one-variable rationality reduction + reciprocal-chart cluster descent at poles/∞, sorry-free) feeds the #194 genus split (`exists_residueAtom_of_exists_frameTrace`; `g > 0` needs no atom) and the #193 capstone (`exists_serreDualityData_cover_of_genus_split_residueAtom`), producing the PROVEN ∃-cover keystone `exists_serreDualityData_cover` — the port's ∀-cover keystone sorry `exists_serreDualityData` (`SerreDualityPairing.lean:134`, the only sorry on the RR path) is DELETED, with `exists_riemannRoch_divisor` re-pinned to the exhibited cover via the data-parametrized `riemannRoch_equality_of_data` (base-file split `RiemannRochDegree.lean` breaks the `KeystonePackaging → … → RiemannRoch` import cycle). On our side the FlipPrep composition (`h1coh_zero_finrank_of_frameTrace`, `serreDuality_equiv_exists_of_frameTrace`) makes both Layer-3 axiom statements theorems VERBATIM, with `canonicalDivisor` de-opaqued (axiom → `noncomputable def := Classical.choose serreDuality_equiv_exists`; the verbatim `serreDuality_equiv` is its `choose_spec`). `#print axioms`: `riemannRochL3`, `serreDualityL3`, `h0_canonical_L3`, `canonicalDivisor_deg_L3`, `canonicalDivisor`, `exists_riemannRoch_divisor`, `exists_serreDualityData_cover` all **standard-3** (`AX_RiemannRoch`/`AX_SerreDuality`: standard-3 + only the two opaque `LineBundle` type stubs in their statements), no `sorryAx` (`docs/planning/FLIP_VERIFICATION.log`). Net −3 (21 → 18). | port: `vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/{FrameTrace,FrameTraceWall*,KeystonePackaging,SerreDualityPairing,DolbeaultLadder}.lean`, `KirovDolbeault/{RiemannRoch,RiemannRochDegree}.lean`; ours: `Jacobians/Layer3/{FlipPrep,Cohomology}.lean`, `Jacobians/RiemannSurface/Cohomology/LineBundleBasic.lean` |
 | `AX_pushforwardAmbient_preserves_lattice` *(#30, 2026-06-11)* | the developing-value naturality route (KIROV_ROUTE_IDEAS item 7 — span-induction idea credited to Kirov's tree, implementation ours): a lattice vector is the period vector of an `H1` class; every `H1` class is the class of a representative loop `γ`; dual-basis algebra turns `pushforwardAmbientLinear v` into the `γ`-integrals of `pullbackOneForm f (jacobianBasis Y j)`; the engine `developingValue_comp_of_isPullbackCoeffRel` (joint Lebesgue subdivision fine for X-charts of `γ` and Y-charts of `f∘γ`, primitive endpoint-difference transport across `f`) fed by `pullbackOneForm_isPullbackCoeffRel` (Kirov-bridge unwind: `sectionCoeff`/`localRep` → pointwise `mfderiv` pullback → chart-read `fderiv` factor by the chain rule) rewrites them as periods of the honest image loop `f∘γ`; `devVal_loop_mem_periodLatticeInBasis_any` (H1 functional at the loop's own basepoint + path-conjugation transport) lands that period vector in the target lattice at any basepoint. `#print axioms`: theorem = standard-3 + `AX_PeriodCycleBasis`; `DevelopingNaturality` axiom-free, `LoopLattice`'s headline standard-3 + `AX_PeriodCycleBasis`; no sorryAx. Net −1 (22 → 21); affected headlines `pushforward`/`_contMDiff`/`_id_apply`/`_comp_apply` drop to standard-3 + `AX_PeriodCycleBasis`. | `RiemannSurface/DevelopingNaturality.lean` + `RiemannSurface/LoopLattice.lean` (engine) + `Axioms/AbelJacobiMap.lean` (bridge unwind + the theorem) |
 | **Odd-atlas infinity-chart cluster — all 7**: `infinityChart`, `infinityInverseMap`, `infinityChart_mem_source`, `infinityChart_compat_affineLiftProjX`, `affineLiftProjX_compat_infinityChart`, `infinityChart_compat_affineLiftProjY`, `affineLiftProjY_compat_infinityChart` *(PR #183, @daouid, 2026-06-11)* | real defs/theorems with the **correct analytic branch**, resolving the #178 review: the uniformizer at ∞ is `t H w = w · S H (w²)` with `S = √lc · (lc⁻¹ · f.reverse.eval ·)^(2⁻¹)` — a `cpow` analytic on the slit-plane preimage `U_S`, `Complex.sqrt` applied only to the *constant* `leadingCoeff`, never the variable (the discontinuous-principal-branch bug `Complex.sqrt (f.eval x)` of the reverted Phase-3 attempt is gone) — inverted by the IFT (`tLocalHomeomorph`, `t_deriv_ne_zero`); `infinityInverseMap` sets `x := W⁻¹^2`, `y := z·x^(g+1)` for `W = (tLocalHomeomorph H).symm z`, with `y² = f.eval x` **proved** (`y_sq_eq_eval_x`) and the right/left-inverse companions the review demanded (`infinityForward_infinityInverseMap_eq_self`, `t_w_q`, `w_q_sq_eq_inv`); chart V open / Vᶜ compact via the bounded-roots argument; the 4 compat transitions proved by the transition algebra; `contDiffOn_symm_toOpenPartialHomeomorph_local` added to the IFT toolkit. `#print axioms` **standard-3 on all 7**, and downstream `Hyperelliptic.instChartedSpace`/`instIsManifold` + the #175 `nonempty_periodCycleBasis_of_branchCutSystem` witness are now standard-3 (the last atlas-axiom dependency of the unified `Hyperelliptic` manifold structure is gone). Net −7 (29 → 22). | `…/OddAtlas/InfinityInverse.lean` (new), `…/OddAtlas/InfinityChart.lean`, `GeneralResults/InverseFunctionTheorem.lean` |
@@ -551,7 +582,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 18 — the vendored Kirov subtree is now axiom-free, so 18 is the total (after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
+#   prints 15 — the vendored Kirov subtree is now axiom-free, so 15 is the total (after the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -568,7 +599,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 18
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 15
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

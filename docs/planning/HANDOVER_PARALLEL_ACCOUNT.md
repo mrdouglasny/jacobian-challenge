@@ -156,3 +156,53 @@ Lands `Group.FG (FundamentalGroup X x₀)` unconditionally via your
 `moduleFinite_H1_of_fundamentalGroup_fg` → the discreteness chain.
 
 Same ground rules as above; tag PRs with this file.
+
+---
+
+# UPDATE 3 (2026-06-12): package queue after #209
+
+#209 (package 3, the genus-0 flip) received — under review; ledger may need a
+refresh against post-#207 main (16 active / 3 critical) before merge. Package 4
+(GC-1) remains open and is still the highest-leverage topology item. Additional
+packages, in priority order — pick the next free one, tag PRs with this file:
+
+## Package 5: LineBundle/H1 stub retirement (active-count reduction)
+
+Six of the 16 active axioms are OPAQUE TYPE STUBS, now retirable post-keystone:
+`LineBundle` (#65), `H1` + its two instances (#66-#68), `LineBundle.ofDivisor`
+(#70) — see their tracker issues + `AXIOM_AUDIT.md` rows. The real objects now
+exist: the port's Čech `H1coh`/cohomology (Layer-3, `Jacobians/Layer3/`) and
+`riemannRochSpace`-based divisor modules. Work: replace each stub `axiom` with
+a real `def` against the existing machinery (the pattern = #201's
+`canonicalDivisor` de-opaque: keep fully-qualified names, consumers must
+elaborate unchanged), flip `AX_RiemannRoch`/`AX_SerreDuality` (#37/#38) to
+theorems over the de-opaqued types if their statements then close (they are
+already standard-3 + stubs-only). Ledger: each retirement −1 active, full
+reconcile per protocol IN THE SAME PR (do them in one PR or per-stub PRs,
+your call; kernel count from `scripts/check_axiom_consistency.sh` each time).
+Files: `Jacobians/RiemannSurface/Cohomology/LineBundleBasic.lean` + consumers
+(grep each stub name first; statement-preservation is the whole game).
+Potential: active 16 → 10.
+
+## Package 6: Abel A-block plumbing (root-side, engine-agnostic)
+
+The Abel ⊆ campaign's root-side assembly, written against NAMED ENGINE OUTPUTS
+as hypotheses (the port-side engine is primary-owned and in flight — your work
+must not import the AbelSubset* port files, only STATE the bridge):
+read `docs/planning/AB_ROUTE.md` A-block rungs. Deliverable: 
+`Jacobians/RiemannSurface/AbelPlumbing.lean` — (A1) unfold `AX_AbelTheorem`'s
+⊆ statement (Jacobians/Axioms/AbelJacobiMap.lean — read verbatim) to the
+divisor/period-lattice shape; (A2) the divisor bridge (degree-0 divisor ↦ the
+data the engine consumes); (A3) the assembly theorem: [named hypothesis: the
+§20 solvability/Weierstrass output] → the ⊆ statement. All standard-3 +
+named hypotheses; NO AX_AbelTheorem in closures.
+
+## Package 7: existing work-package issues
+
+GitHub issues #171 (π₁ of punctured sphere is free — SVK-lite, feeds the
+PeriodCycleBasis topology stack) and #172 (hyperelliptic PeriodCycleBasis
+witness via branch-cut loops) are pre-scoped work packages from the main
+program — fair game, root-side, same rules.
+
+Active primary lanes (no-touch refresher): `vendor/.../Dolbeault/AbelSubset*`,
+`Jacobians/Bridge/KirovDolbeault*`, `Jacobians/RiemannSurface/{BilinearRelations*,PeriodDiscreteness}.lean`.

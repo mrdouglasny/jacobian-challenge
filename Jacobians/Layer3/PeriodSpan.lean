@@ -15,6 +15,12 @@ These route through the chosen witness only to identify arbitrary-loop
 functionals with `loopIntegralToH1` values (`LoopIntegralHom`), so they carry
 `AX_PeriodCycleBasis` in their closure; the engine headline itself
 (`span_loopPeriodFunctional_eq_top`) does not.
+
+Consequence (issue #206 finding): NONE of these downstream forms may be
+cited inside an `AX_PeriodCycleBasis` discharge chain — that would be
+circular. Discharge-grade spanning is the axiom-free layer:
+`span_loopPeriodFunctional_eq_top` / `span_real_loopPeriodLattice_eq_top` /
+`loopDevValH1Hom`.
 -/
 import Jacobians.RiemannSurface.PeriodNondegeneracy
 import Jacobians.RiemannSurface.LoopIntegralHom
@@ -44,7 +50,19 @@ theorem loopPeriodFunctional_eq_loopIntegralToH1 (x₀ : X)
     loopDevValH1Hom_loopToHomology]
 
 /-- **C2: the `H₁`-level period image spans ℝ-linearly** (Forster §21.4
-non-degeneracy, transported along the homology identification). -/
+non-degeneracy, transported along the homology identification).
+
+**WARNING — axiom-downstream, NOT usable in `AX_PeriodCycleBasis` discharge
+chains** (issue #206 finding): `loopIntegralToH1` is *defined* via
+`Classical.choice (AX_PeriodCycleBasis x₀)` (`LoopIntegral.lean`), so this
+spanning statement lives downstream of the axiom being discharged — citing
+it in a discharge chain is circular. Discharge-grade spanning lives in the
+axiom-free layer: `span_loopPeriodFunctional_eq_top`
+(`PeriodNondegeneracy.lean`, over `loopPeriodFunctional` /
+`canonicalArcIntegral`) and its coordinate form
+`span_real_loopPeriodLattice_eq_top` (`PeriodDiscreteness.lean`); the
+axiom-free `H₁`-level functional is `loopDevValH1Hom`
+(`LoopIntegralHom.lean`). -/
 theorem span_range_loopIntegralToH1_eq_top (x₀ : X) :
     Submodule.span ℝ (Set.range (loopIntegralToH1 x₀)) = ⊤ := by
   rw [eq_top_iff, ← span_loopPeriodFunctional_eq_top x₀]
