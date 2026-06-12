@@ -77,3 +77,79 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   winding pin + integer-unit algebra force any admissible system's lasso
   exponent to ±1, hence plain closure = top, NO winding computation needed.
   Standard-3. Remaining: the binary-split induction step (the last rung).
+
+## 2026-06-12 TOPO lane (takeover, P8 queue) — G3/G4 induction session
+
+- ARCHITECTURE DECISION (continuing route-doc option (b) + its own G4
+  "strengthen the induction over ALL basepoints/spokes" note): run the
+  binary-split induction in ABSTRACT-SUBGROUP MEMBERSHIP FORM (the G1
+  house pattern) with spoke-conjugated generators. All transports
+  (side-homeo, basepoint, rotation) become `Subgroup.comap` along pi1
+  homs — no normalClosure-mapping lemmas, and the meridian-conjugacy
+  "mountain" (4th-pass filling kernel) is NOT needed for the concrete
+  headline: generation by spoked small circles. The 2D telescope remains
+  only for the arbitrary-PuncturedCellSystem statement (non-blocking,
+  Mathlib-grade generality).
+- SpokeAlgebra.lean LANDED: spokedClass + complete algebra (transport
+  eval, composition law for fundamentalGroupMulEquivOfPath, refl law,
+  spoke-congruence, quotient assoc/cancel, composite-spoke peeling,
+  naturality under maps). Kernel standard-3 on all 9 decls. Umbrella
+  wired (Edit tool, grep-verified).
+- HalfPlaneHomeo toolkit COMPLETED: negHalfPlaneHomeo + halfPlaneHomeoGT
+  (right half-plane via negation + halfPlaneHomeo). Standard-3.
+- G3/G4 ENGINE LANDED: Jacobians/Topology/CellGeneration.lean —
+  fromPath_mem_of_cellSpokes_subset: any subgroup of pi1(C \ T, x0)
+  containing all cell-spoke classes (loops inside an open once-punctured-
+  plane cell W with W cap T = {s}, conjugated along arbitrary spokes)
+  contains every loop class. Strong induction on T.card; ONE side_transfer
+  lemma instantiates both half-plane sides AND the 90-degree rotation
+  (all-equal-re configs); rebasing via cellGenAt_rebase (spokes absorb
+  conjugators). Kernel standard-3 on headline + all engine lemmas.
+  Gotchas hit: combining-circumflex identifiers (T-hat, p-hat, delta-hat)
+  break tokenization (precomposed Ŵ/ŝ/ŷ/â are fine); structure-field
+  tactic blocks with rw-at can throw "unknown free variable" (fixed by
+  extracting aux lemmas); congrArg-vs-expected-type eager unification
+  across subtype layers (fixed by show + rw).
+- Remaining for B1: Layer B (circle-ization) — every cell-spoke class is
+  a power of a spoked SMALL CIRCLE (tiny circle inside the cell via
+  Metric.infDist, winding-unit argument in pi1(cell) = Z), giving
+  generation by the explicit circleInPunctured lassos; then the
+  one-lasso-per-puncture normalClosure corollary (radius/spoke comparison
+  inside a common punctured disk; needs puncturedDiskHomeo).
+- B1 HEADLINE LANDED (G5 / Layer B): Jacobians/Topology/LassoGeneration.lean
+  - closure_circleLassos_eq_top: pi1(C \ T, x0) is generated — PLAIN
+    Subgroup.closure, spokes absorb conjugation, no normal closure needed —
+    by the explicit spoked circle lassos p.trans((circleInPunctured s z
+    hcirc).trans p.symm), the same loop shape as exists_winding_dual_loops.
+  - Membership form fromPath_mem_of_circleLassos_mem for abstract-H
+    consumers.
+  - Circle-ization: per cell-spoke generator, G2 (fromPath_eq_cellLasso_zpow)
+    makes the loop a cell-lasso power; a tiny explicit circle in a ball
+    B(s,r) inside the cell has winding 1 around s; the Z-iso of the cell +
+    integer-unit algebra forces tiny circle = cell generator up to sign.
+  - Kernel standard-3 on all headline decls. B1 = issue #171 T1 upper-bound
+    half: DONE (with identified explicit generators, not just abstract FG).
+- G6 (SHARP B1) LANDED: Jacobians/Topology/IsolatingLasso.lean +
+  puncturedBallHomeo (HalfPlaneHomeo.lean) + End-mul lemmas
+  (SpokeAlgebra: fromPath_mul rfl-level!, fromPath_symm_eq_inv,
+  spokedClass_loop_conj = "spoking by a loop is conjugation").
+  - isolatingLasso_conj: meridian conjugacy for isolating lassos around
+    the same puncture — common punctured ball via puncturedBallHomeo,
+    same winding-unit epsilon pins both to the same cell-generator power
+    (no case split: m*eps=1 twice + mul_right_cancel), spokes absorb the
+    difference as an explicit loop conjugator.
+  - normalClosure_isolatingLassos_eq_top: ONE isolating lasso per
+    puncture (any choice) normally generates pi1(C \ T, x0). This is
+    the #171 T1 upper-bound in its finite, identified-generator form;
+    with windingHom_lasso_self/_ne it gives the full
+    generators-with-delta-winding presentation interface.
+  - All standard-3 kernel-verified.
+- Route-doc note: the 4th-pass "mountain" (2D homotopy telescope /
+  filling kernel) is NOT needed for any of B1's concrete forms — the
+  abstract-H + all-spokes induction makes every transport a comap, and
+  meridian conjugacy for ISOLATING lassos is elementary (common
+  punctured-ball cell). The telescope remains only for the
+  arbitrary-PuncturedCellSystem generality (Mathlib-grade, non-blocking).
+- PR #227 opened (G3-G6 complete chain, base main). Route doc fifth pass +
+  GOODCOVER_BLOCKER GC-2 re-scoping note included. Session end state:
+  root build green (8,981 jobs), all headline decls standard-3.
