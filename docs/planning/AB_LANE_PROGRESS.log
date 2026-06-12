@@ -212,3 +212,4 @@ E4 status note: toLogDbarDatum DEMANDS the pairing (RawLogDbarDatum field) — t
 construction does not expose it for free. E4 sub-bricks (route doc updated): per-arc planar
 Stokes value 2πi·∫_[za,zb], segment↔arc-piece homotopy equality, fold additivity (pairing
 accumulator through the fold). E6 adapter untouched per lane scope.
+2026-06-12T00:00 [E4-relaunch] session start: AB-E4 lane relaunch at bbbc419 (E3 tip); goal = discharge E4 pairing field, exists_meromorphic_of_zeroPeriodChain' unconditional
