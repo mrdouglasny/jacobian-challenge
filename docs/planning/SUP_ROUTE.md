@@ -68,7 +68,7 @@ at most).
 | **S4a** (branch values) | `branchValues f : Set ProjectiveLine` (finite, via `AX_BranchLocus`-the-theorem) + `mapAnalyticOrderAt_eq_one_of_not_branchValue` (regular fibers are unramified) | **PROVEN** (this lane) |
 | **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (Wallace `IsHolomorphicAt.localInverse` + Mathlib `analyticAt_localInverse`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` near `y₀` (kfold uniqueness + properness) — `exists_fiberDivisor_sections` in `AbelSupsetSections.lean` | **PROVEN** (this lane) |
 | **S4c** (pencil smoothness at regular values) | `contMDiffAt_fiberAJ`: `Φ = fiberAJ f hf` is `ContMDiffAt` at every `y₀ ∉ branchValues f` — REVISED ROUTE: no ambient lift; compose the proven `AX_ofCurve_contMDiff` (AJ is `ContMDiff ω` into the Jacobian) with the S4b sections through `map_sum` + the Jacobian `LieAddGroup` (`ContMDiffAt.sum`) | **PROVEN** (this lane) |
-| **S5** (removable across branch) | the load-bearing lemma: symmetric sum of endpoint integrals bounded near a branch value ⇒ holomorphic extension (`analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) | open |
+| **S5** (removable across branch) | `mdifferentiable_fiberAJ` (`AbelSupsetPencil.lean`): `Φ` is `MDifferentiable` on ALL of `ℙ¹` — S5a `eventually_fiberDivisor_cluster` (general kfold clustering at any value, prescribed neighborhoods) + `continuousAt_fiberAJ` (sumset-neighborhood brick `exists_nhds_zero_finsetSum_mem` + continuity of AJ) + S5b `mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt` (generic manifold-valued removable singularity via Mathlib `analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt` in the target chart) | **PROVEN** (this lane) |
 | **S6** (lift + Liouville) | `ℙ¹` simply connected (`Topology/SphereSimplyConnected`) ⇒ lift `Φ` through `ℂ^g → ℂ^g/Λ` (#199 `simplyConnectedPrimitive` pattern, Kirov `ZLatticeQuotient` local-homeo API); compact source ⇒ constant (`MDifferentiable.exists_eq_const_of_compactSpace` per coordinate / `Differentiable.exists_eq_const_of_bounded`) | open |
 | **S7** (assembly) | `Φ(0) = Φ(∞)` + S2 + S1 ⇒ `AX_AbelSupset` becomes a theorem in place (Phase-C in-place conversion in `Axioms/AbelTheorem.lean`) | open |
 | **B** (reserve) | chain↔lattice bridging (Route-C insurance, route-independent) | parked |
@@ -120,3 +120,12 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   in the Jacobian chart — no explicit `ℂ^g` lift needed at S5);
   then `mdifferentiable_fiberAJ` everywhere. The explicit lift through
   `ℂ^g → ℂ^g/Λ` is needed only at S6 (Liouville).
+- 2026-06-12 (SUP-2 session): S5 PROVEN — `AbelSupsetPencil.lean`:
+  `exists_nhds_zero_finsetSum_mem` (sumset brick, standard-3),
+  `mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt`
+  (S5b generic removable singularity, standard-3),
+  `eventually_fiberDivisor_cluster` (S5a clustering, standard-3),
+  `continuousAt_fiberAJ` + `mdifferentiable_fiberAJ` (standard-3 +
+  `AX_PeriodCycleBasis`). The pencil map is holomorphic on all of `ℙ¹`.
+  Remaining: S6 (lift through `ℂ^g → ℂ^g/Λ` over simply connected `ℙ¹`
+  + Liouville per coordinate ⇒ `FiberAJConstancy`), then the S7 flip.

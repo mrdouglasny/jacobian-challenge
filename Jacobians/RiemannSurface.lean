@@ -56,6 +56,7 @@ import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.AbelPlumbing
 import Jacobians.RiemannSurface.AbelSupsetPlumbing
 import Jacobians.RiemannSurface.AbelSupsetSections
+import Jacobians.RiemannSurface.AbelSupsetPencil
 import Jacobians.RiemannSurface.GenusZeroBackward
 import Jacobians.RiemannSurface.GenusZeroForward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
