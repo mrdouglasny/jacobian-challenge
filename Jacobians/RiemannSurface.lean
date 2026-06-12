@@ -53,6 +53,7 @@ import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.GenusZeroBackward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
 import Jacobians.RiemannSurface.PeriodDiscreteness
+import Jacobians.RiemannSurface.HomologyGeneration
 import Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
 import Jacobians.RiemannSurface.IntersectionForm

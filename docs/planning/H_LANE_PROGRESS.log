@@ -1,0 +1,102 @@
+# H-lane progress log — homology generation for PeriodGeneratingLoops
+
+2026-06-11 session start. Branch feat/homology-generation @ origin/main (90c1da7).
+Goal: attack `PeriodGeneratingLoops` via `of_homology_span` — produce 2g analytic
+loops whose `loopToHomology` classes ℤ-generate every loop's class, WITHOUT
+AX_PeriodCycleBasis in the kernel closure.
+
+Statement-chain analysis (initial):
+- Target: ∃ γs : Fin (2*genus X) → AnalyticLoop X x₀,
+    ∀ δ, loopToHomology δ ∈ span ℤ (range (loopToHomology ∘ γs)).
+- Key insight 1 (no smoothing needed): the loop classes form an AddSubgroup of
+  H1 (trans/reverse/refl of analytic loops are analytic — ArcAlgebra has
+  arc-level trans/reverse; constant arc generalizes Line/Witnesses.constLoop).
+  So the span A := span ℤ (range loopToHomology) EQUALS the set of loop classes,
+  and any generating set extracted from A consists of analytic-loop classes
+  automatically.
+- Key insight 2 (Noetherian extraction): if H1 X x₀ is a f.g. ℤ-module, A is
+  f.g. (ℤ Noetherian), and its generators are loop classes ⇒ Fin n version of
+  the hypothesis, pure module theory.
+- Key insight 3 (n vs 2g): n > 2g does NOT give discreteness (ℤ+ℤ√2 dense in ℝ:
+  a f.g. subgroup of ℝ^N ℝ-spanning with > N generators can be dense). The
+  count ≤ 2g is where the genus comparison (rank H1 ≤ 2·g_analytic) enters —
+  genus X here is ANALYTIC genus (finrank ℂ HolomorphicOneForm). Note only ≤ is
+  needed; ≥ comes free from B-3 ℝ-spanning.
+- Reduction of n→2g: A ⊆ H1 free f.g. (Submodule.basisOfPid over PID ℤ) given
+  [Module.Free ℤ H1] + [Module.Finite ℤ H1]; basis of A has card ≤ finrank H1
+  ≤ 2g; basis elements ARE loop classes (insight 1); pad with constant loops.
+- Mathlib FG inventory: NO finite-generation results for FundamentalGroup of
+  compact spaces/manifolds at pin (no Group.FG near AlgebraicTopology or
+  Topology/Homotopy). π₁-f.g.-of-compact-manifold must be built or named.
+
+Planned bricks in Jacobians/RiemannSurface/HomologyGeneration.lean:
+A. AnalyticLoop.trans/reverse/refl + loopToHomology hom lemmas
+B. loopClasses AddSubgroup; span range loopToHomology = range loopToHomology
+C. [Module.Finite ℤ (H1 X x₀)] ⇒ ∃ n γs, homology span (Fin n)
+D. + [Module.Free] + finrank ≤ 2g ⇒ Fin (2g) version (basisOfPid + padding)
+E. wiring: ⇒ PeriodGeneratingLoops ⇒ DiscreteTopology (loopPeriodLattice),
+   axiom-free; kernel check NO AX_PeriodCycleBasis.
+
+Residual after this session (named, for future lanes):
+- T-FG: Module.Finite ℤ (H1 X x₀) for compact manifolds (π₁ f.g.; real topology)
+- T-RANK: Module.Free ℤ (H1 X x₀) ∧ finrank ℤ (H1 X x₀) ≤ 2 * genus X
+  (Betti-number/analytic-genus comparison; classification or Hodge/Dolbeault).
+
+T+1h: Stage 1 (loop algebra + Hurewicz hom lemmas) compiled clean & committed.
+Stages 2-4 written (loopHomologyClasses subgroup, Noetherian extraction,
+basisOfPid 2g-count, wiring to PeriodGeneratingLoops/discreteness).
+Build environment under FD pressure: ~20 concurrent lean processes from other
+lanes cause flapping "missing data file"/"Too many open files" at import time;
+running compile in retry loop.
+
+Statement-chain finding (sharpened): the topological residual of the WHOLE
+Forster 21.4 ladder is exactly the ≤-weakened content of former
+AX_H1FreeRank2g: Module.Finite ℤ (H1 X x₀) + Module.Free ℤ (H1 X x₀) +
+finrank ℤ (H1 X x₀) ≤ 2*genus X. No analytic representatives, no Hurewicz
+tie, no R1/R2 — the loop-subgroup trick (loopHomologyClasses) supplies the
+analytic representatives for free. rank ≥ 2g never needed (B-3 gives it).
+
+T+2h: stages 2-4 COMPILE CLEAN (617af1d): loopHomologyClasses subgroup,
+exists_finite_generating_loops (Fin n from Module.Finite ℤ H1),
+exists_generating_loops (Fin 2g from + Free + finrank ≤ 2g via basisOfPid),
+exists_periodGeneratingLoops / discreteTopology_loopPeriodLattice_of_H1 /
+exists_loopPeriodLattice_basis_of_H1. Umbrella wired.
+Adding T-FG bridge: instance moduleFinite_H1_of_fundamentalGroup_fg
+([Group.FG (FundamentalGroup X x₀)] ⇒ Module.Finite ℤ (H1 X x₀)) so T-FG
+can be supplied in canonical π₁ form. Mathlib chain: Group.fg_of_surjective
+(Abelianization.of surjective) + GroupFG.iff_add_fg + Module.Finite.iff_addGroup_fg.
+Next: kernel closure check (NO AX_PeriodCycleBasis) + full lake build.
+
+T+2.5h: T-FG bridge compiles (committed). lake build of module olean in retry
+loop (FD pressure persists: 20 lean procs from other lanes). Next: #print
+axioms closure check via /tmp/hlane_check.lean, then full lake build.
+
+T+3h: KERNEL CLOSURE VERIFIED — all 9 headliners standard-3
+[propext, Classical.choice, Quot.sound], NO AX_PeriodCycleBasis:
+  loopToHomology_refl/_trans/_reverse, coe_span_range_loopToHomology,
+  exists_finite_generating_loops, exists_generating_loops,
+  exists_periodGeneratingLoops, discreteTopology_loopPeriodLattice_of_H1,
+  exists_loopPeriodLattice_basis_of_H1.
+Check file: scripts/hlane_axiom_check.lean.txt. One style lint fixed
+(show→change). Full lake build running.
+
+SESSION SUMMARY (deliverable):
+1. Statement chain: PeriodGeneratingLoops (B-4 residual) ⟸ of_homology_span
+   ⟸ [Module.Finite ℤ H1] + [Module.Free ℤ H1] + finrank ℤ H1 ≤ 2g
+   — i.e. exactly the ≤-weakened former AX_H1FreeRank2g, with NO analytic
+   representatives needed (loop-class subgroup supplies them) and NO rank ≥
+   (B-3 covers it). Module.Finite suppliable as Group.FG (π₁) via new instance.
+2. n-vs-2g: n > 2g generators do NOT give discreteness (ℤ+ℤ√2 dense); the
+   2g count is exactly where T-RANK enters; no alternative ZSpan route for
+   n > 2g exists (rank of f.g. subgroup of ℝ^N can exceed N).
+3. Mathlib FG inventory: NO π₁ finite-generation results at pin (no Group.FG
+   near FundamentalGroup); π₁-f.g.-of-compact-manifold must be built (grid
+   cover/SVK; multi-week — same family as SVK_BLOCKER B1) OR H1-rank facts
+   supplied by future Hodge work (which would give T-RANK too).
+4. Residuals for future lanes (both pure topology/Hodge, loop-free):
+   T-FG : Group.FG (FundamentalGroup X x₀)   (compact manifold π₁ f.g.)
+   T-RANK: Module.Free ℤ (H1 X x₀) ∧ finrank ℤ (H1 X x₀) ≤ 2 * genus X
+
+T+3.5h SESSION END: full lake build GREEN (8944 jobs, only pre-existing
+Extensions/AbelJacobi sorries). All work committed locally on
+feat/homology-generation (not pushed per lane instructions).
