@@ -27,6 +27,7 @@ import KirovDolbeault.PeriodLattice
 import KirovDolbeault.TracePullback
 import KirovDolbeault.Abel
 import KirovDolbeault.Degree
+import KirovDolbeault.RiemannRochDegree
 import KirovDolbeault.OfCurveAnalyticitySkeleton
 import KirovDolbeault.ULiftManifold
 import KirovDolbeault.Dolbeault.SerreSurjectivitySkeleton

@@ -8,6 +8,7 @@ import KirovDolbeault.Dolbeault.TailFrameGenus0
 import KirovDolbeault.Dolbeault.TailDictionaryFull
 import KirovDolbeault.Dolbeault.FineResidue.CupWitness
 import KirovDolbeault.Dolbeault.ChartDiskCoverGeneric
+import KirovDolbeault.Dolbeault.FrameTrace
 
 /-!
 # Keystone packaging: `exists_serreDualityData` (∃-cover) from the residue atom alone
@@ -228,6 +229,21 @@ theorem exists_serreDualityData_cover_of_residueAtom (data : CanonicalForm17Data
     ∃ 𝔘 : FiniteCover X, 𝔘.IsLeray ∧ 𝔘.LocallyRealizable ∧
       Nonempty (SerreDualityData 𝔘) :=
   exists_serreDualityData_cover_of_genus_split_residueAtom fun _ => ⟨data, hres⟩
+
+/-! ## THE KEYSTONE, unconditional -/
+
+/-- **THE KEYSTONE, unconditional**: an exhibited Leray + locally-realizable cover carrying
+the Forster-§17 Serre-duality data, on EVERY compact connected Riemann surface — the T-lane
+frame-trace assembly (`FrameTrace.exists_canonicalData_residueAtom`: the canonical
+`ω₀ = df` datum satisfies its own residue atom) fed through the #194 genus split and the
+#193 capstone. This replaces the former ∀-cover keystone sorry
+(`SerreDualityPairing.exists_serreDualityData`); the sole top-level consumer
+(`RiemannRoch.exists_riemannRoch_divisor`) takes the cover exhibited here. -/
+theorem exists_serreDualityData_cover :
+    ∃ 𝔘 : FiniteCover X, 𝔘.IsLeray ∧ 𝔘.LocallyRealizable ∧
+      Nonempty (SerreDualityData 𝔘) := by
+  obtain ⟨data, hres⟩ := exists_canonicalData_residueAtom (X := X)
+  exact exists_serreDualityData_cover_of_residueAtom data hres
 
 end Dolbeault
 

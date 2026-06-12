@@ -49,41 +49,31 @@ theorem finiteDimensional_cechH1 (𝔘 : FiniteCover X) (D : Divisor X) :
 map + `skyDim=1`); base `h⁰(0)=1` + divisor induction + the 6-term alternating-sum crank are axiom-clean.
 So `cohomological_riemannRoch` is in scope here via the import — no longer an unproved leaf of this file. -/
 
-/-- **Serre duality at `D = 0` — arithmetic kirovGenus = geometric kirovGenus.** `h¹(X, 𝒪) = dim Ω(X) = kirovGenus X`.
-Now PROVEN via the **direct Forster §17 route** (`SerreDualityPairing`, the residue-pairing perfectness),
-modulo the single §17 instantiation input `exists_serreDualityData` — **no `hodge_symmetry`, no Dolbeault
-comparison** (Forster §16–17 are PDE-free; the comparison/conjugation detour is not needed). -/
-theorem arithmeticGenus_eq_genus (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
-    (hR : 𝔘.LocallyRealizable) :
-    𝔘.h1Dim 0 = kirovGenus X :=
-  arithmeticGenus_eq_genus_serre 𝔘 hL hR
-
-/-- **General Serre duality.** `h¹(D) = l(K − D)` for a canonical divisor `K` (the perfect residue
-pairing). Together with `cohomological_riemannRoch` this turns the cohomological form into the classical
-`l(D) − l(K−D) = deg D + 1 − g`. Now PROVEN via the **direct Forster §17 route** (`SerreDualityPairing`),
-modulo the single §17 instantiation input `exists_serreDualityData` (Forster 17.11). -/
-theorem serre_h1_eq (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray) (hR : 𝔘.LocallyRealizable) :
-    ∃ K : Divisor X, ∀ D : Divisor X, 𝔘.h1Dim D = lDim (K - D) :=
-  serre_h1_eq_serre 𝔘 hL hR
+/- The former ∀-cover wrappers `arithmeticGenus_eq_genus`, `serre_h1_eq`, and
+`riemannRoch_equality_of_ladder` lived here, routed through the ∀-cover keystone sorry
+`exists_serreDualityData` (`SerreDualityPairing.lean`). The keystone flip replaced that
+sorry by the PROVEN ∃-cover keystone (`KeystonePackaging.exists_serreDualityData_cover`),
+so the ladder composition is now data-parametrized: the consumer takes the cover and
+`SerreDualityData` EXHIBITED by the keystone. -/
 
 /- **Bridge: Čech global sections = the linear system** (`h⁰(𝔘, 𝒪_D) = l(D)`). PROVEN in
 `CechH0` (`FiniteCover.h0Dim_eq_lDim`) modulo the single gluing/surjectivity gap
 (`cechRestrictL_surjective`) — no longer a leaf of this file. -/
 
-/-- **The ladder composes** (complete; no new content). For any *Leray* finite cover `𝔘` there is a
-canonical divisor `K` (supplied by general Serre `serre_h1_eq`) such that the classical Riemann–Roch
-equality `l(D) − l(K−D) = deg D + 1 − g` holds for every `D`. It falls out of the ladder by
-substitution: cohomological RR + the `h⁰ = l` bridge + general Serre `h¹(D)=l(K−D)` + Serre-at-0
-`h¹(0)=g`. This is what shows the scaffold is genuinely wired to the headline — once the leaves above
-are discharged, `exists_riemannRoch_divisor` follows (modulo existence of a Leray cover). -/
-theorem riemannRoch_equality_of_ladder (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
-    (hR : 𝔘.LocallyRealizable) :
+/-- **The ladder composes** (complete; no new content). Given `SerreDualityData` on a
+locally-realizable cover `𝔘`, the canonical divisor `data.K` satisfies the classical
+Riemann–Roch equality `l(D) − l(K−D) = deg D + 1 − g` for every `D`. It falls out of the
+ladder by substitution: cohomological RR + the `h⁰ = l` bridge + general Serre
+`h¹(D)=l(K−D)` (`data.serre_eq`) + Serre-at-0 `h¹(0)=g` (`data.arithmeticGenus`). The
+data is EXHIBITED, cover included, by the unconditional ∃-cover keystone
+`KeystonePackaging.exists_serreDualityData_cover`. -/
+theorem riemannRoch_equality_of_data (𝔘 : FiniteCover X)
+    (hR : 𝔘.LocallyRealizable) (data : SerreDualityData 𝔘) :
     ∃ K : Divisor X, ∀ D : Divisor X,
       (lDim D : ℤ) - lDim (K - D) = Divisor.deg X D + 1 - kirovGenus X := by
-  obtain ⟨K, hK⟩ := serre_h1_eq 𝔘 hL hR
-  refine ⟨K, fun D => ?_⟩
+  refine ⟨data.K, fun D => ?_⟩
   have h := cohomological_riemannRoch 𝔘 hR D
-  rw [𝔘.h0Dim_eq_lDim D, hK D, arithmeticGenus_eq_genus 𝔘 hL hR] at h
+  rw [𝔘.h0Dim_eq_lDim D, data.serre_eq D, data.arithmeticGenus] at h
   exact h
 
 end Jacobians.Dolbeault
