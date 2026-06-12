@@ -135,9 +135,9 @@ Each appears in exactly one Buzzard declaration and has its own proof path.
 
 ### Cluster C — Functoriality block
 
-Six entries, of which the trace trio (status note below) and the pushforward
-lattice-preservation statement (#30, 2026-06-11) are now **discharged** and
-**two remain as axioms**. All appear in the `pushforward`/`pullback` declarations. The dependency structure
+Six entries, ALL now **discharged** (the trace trio; the pushforward
+lattice-preservation #30; and `AX_pullbackAmbient_preserves_lattice` +
+`AX_pushforward_pullback`, #31/#34, 2026-06-11 — the cluster is fully closed). All appear in the `pushforward`/`pullback` declarations. The dependency structure
 within the cluster is more nuanced than "all follow from one root":
 
 | Axiom | Primary dependency | Role |
