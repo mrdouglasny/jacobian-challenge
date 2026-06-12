@@ -52,10 +52,12 @@ import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.ChartSegmentArc
+import Jacobians.RiemannSurface.AbelPlumbing
 import Jacobians.RiemannSurface.GenusZeroBackward
 import Jacobians.RiemannSurface.GenusZeroForward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
 import Jacobians.RiemannSurface.PeriodDiscreteness
+import Jacobians.RiemannSurface.PeriodDiscretenessFromR2
 import Jacobians.RiemannSurface.HomologyGeneration
 import Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
