@@ -24,12 +24,18 @@ solution for the divisor `(b) − (a)`:
   divisor `D` — everything except the E4 pairing identity, which enters only through the
   constructor `ArcWeakSolution.toRaw` as an explicit hypothesis (E4 is rung-separate; the
   constructor is *conditional on the pairing field*, as `AB_E_ROUTE.md` §2 prescribes);
-* **the per-arc constructor** (`exists_arcWeakSolution`): the lifted weak solution
-  `F = F̃ ∘ e` on `U j₀` (extended by `1`), the one-chart `(0,1)` datum
-  `σ = (lift H)·∂̄(lift ψ)` (the `exists_pairOmega_pos` single-chart support pattern), and
-  the four geometric fields: nonvanishing, chart-read differentiability, the logarithmic
-  `∂̄`-identity in every cover chart, and the local normal form `(z−za)^{∓1}·unit` at the
-  endpoints (`dslope` of the biholomorphic chart transition).
+* **the per-arc constructor** (`exists_arcWeakSolution_avoiding` / `exists_arcWeakSolution`):
+  the lifted weak solution `F = F̃ ∘ e` on `U j₀` (extended by `1`), the one-chart `(0,1)`
+  datum `σ = (lift H)·∂̄(lift ψ)` (the `exists_pairOmega_pos` single-chart support pattern),
+  the geometric fields (nonvanishing, chart-read differentiability, the logarithmic
+  `∂̄`-identity in every cover chart, the local normal form `(z−za)^{∓1}·(analytic unit)` at
+  the endpoints via `dslope` of the biholomorphic chart transition), and **tameness at any
+  prescribed finite avoid set** (analytic read + vanishing `σ`, the tube shrunk by
+  `SegTube.exists_segTube_avoiding`);
+* **the chain fold** (`ArcWeakSolution.exists_mul`): the product of two weak-solution data
+  is one for the divisor sum — `F₁·F₂` patched at cancellation points by the product of
+  the analytic units (the zero of one arc cancels the pole of the next), `σ₁ + σ₂`; the
+  factors must be `TameAt` each other's unshared support, which the avoid set supplies.
 
 References: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.4–20.5; Miranda,
 *Algebraic Curves and Riemann Surfaces* (GSM 5), Ch. VIII §4.
