@@ -150,4 +150,125 @@ theorem lineIntegral_cell_eq_primitive_sub
   have hFTC := intervalIntegral.integral_eq_sub_of_hasDerivAt key hint
   simpa [hu_def] using hFTC
 
+/-! ## Developing value = port line integral, for closed `C¹` loops -/
+
+/-- The continuous-map restriction of a loop `γ : ℝ → Y` to the unit
+interval. -/
+def loopToContinuousMap (γ : ℝ → Y) (hγ : Continuous γ) : C(unitInterval, Y) :=
+  ⟨fun u => γ (u : ℝ), hγ.comp continuous_subtype_val⟩
+
+/-- The `Path` view of a closed loop. -/
+def loopToPath (γ : ℝ → Y) (hγ : _root_.Jacobians.IsClosedSmoothLoop γ) :
+    Path (γ 0) (γ 0) where
+  toFun u := γ (u : ℝ)
+  continuous_toFun := hγ.cont.comp continuous_subtype_val
+  source' := by simp
+  target' := by simpa using hγ.closed.symm
+
+@[simp] theorem loopToPath_coe (γ : ℝ → Y) (hγ : _root_.Jacobians.IsClosedSmoothLoop γ) :
+    ((loopToPath γ hγ : Path (γ 0) (γ 0)) : C(unitInterval, Y)) =
+      loopToContinuousMap γ hγ.cont := rfl
+
+/-- **Developing value = moving-chart line integral** for a closed `C¹` loop
+(the port's `IsClosedSmoothLoop`): subdivide by chart balls, apply the cell
+FTC on each cell, and compare with the developing increments. -/
+theorem developingValue_eq_lineIntegral_of_isClosedSmoothLoop
+    (form : HolomorphicOneForm Y) (γ : ℝ → Y)
+    (hγ : _root_.Jacobians.IsClosedSmoothLoop γ) (x₀ : Y) :
+    developingValue x₀ form (loopToContinuousMap γ hγ.cont) =
+      Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form) γ := by
+  classical
+  set γc : C(unitInterval, Y) := loopToContinuousMap γ hγ.cont with hγc_def
+  set S := chosenPathChartBallSubdivision γc with hS_def
+  set f : ℝ → ℂ := fun t =>
+    (bridgeForm form).toFun (γ t) (Jacobians.Vendor.Kirov.pathSpeed γ t) with hf_def
+  -- Global integrability of the moving-chart integrand from `velCont`.
+  have hint01 : IntervalIntegrable f MeasureTheory.volume 0 1 := by
+    have h := _root_.Jacobians.intervalIntegrable_form_pathSpeed_of_velContinuous
+      (bridgeKDFormEquiv form) γ hγ.velCont
+    exact h
+  -- The subdivision points as a real-valued sequence.
+  set A : ℕ → ℝ := fun k => (S.t ⟨min k S.n, by omega⟩ : ℝ) with hA_def
+  have hA_mono : ∀ j k, j ≤ k → A j ≤ A k := by
+    intro j k hjk
+    exact S.monotone_t (by simp [Fin.le_def]; omega)
+  have hA_mem : ∀ k, A k ∈ Set.Icc (0 : ℝ) 1 := fun k => (S.t _).2
+  have hA0 : A 0 = 0 := by
+    have : (⟨min 0 S.n, by omega⟩ : Fin (S.n + 1)) = 0 := by
+      ext; simp
+    rw [hA_def]
+    simp only [this, S.zero_eq]
+    rfl
+  have hAn : A S.n = 1 := by
+    have : (⟨min S.n S.n, by omega⟩ : Fin (S.n + 1)) = Fin.last S.n := by
+      ext; simp
+    rw [hA_def]
+    simp only [this, S.one_eq]
+    rfl
+  -- Cell-wise integrability.
+  have hint_cell : ∀ k < S.n, IntervalIntegrable f MeasureTheory.volume (A k) (A (k + 1)) := by
+    intro k hk
+    refine hint01.mono_set ?_
+    rw [Set.uIcc_of_le (hA_mono k (k + 1) (by omega)), Set.uIcc_of_le zero_le_one]
+    exact Set.Icc_subset_Icc (hA_mem k).1 (hA_mem (k + 1)).2
+  -- Per-cell FTC.
+  have hcell : ∀ i : Fin S.n,
+      (∫ t in A i.val..A (i.val + 1), f t) = developingIncrement form γc S i := by
+    intro i
+    have h1 : (⟨min i.val S.n, by omega⟩ : Fin (S.n + 1)) = i.castSucc := by
+      ext
+      simp [Nat.min_eq_left i.isLt.le]
+    have h2 : (⟨min (i.val + 1) S.n, by omega⟩ : Fin (S.n + 1)) = i.succ := by
+      ext
+      simp [Nat.min_eq_left i.isLt]
+    have hAi : A i.val = (S.t i.castSucc : ℝ) := by
+      simp only [hA_def, h1]
+    have hAi1 : A (i.val + 1) = (S.t i.succ : ℝ) := by
+      simp only [hA_def, h2]
+    set a : ℝ := (S.t i.castSucc : ℝ)
+    set b : ℝ := (S.t i.succ : ℝ)
+    have hab : a ≤ b := S.monotone_t (Fin.castSucc_le_succ i)
+    have h01 : Set.Icc a b ⊆ Set.Icc (0 : ℝ) 1 :=
+      Set.Icc_subset_Icc (S.t i.castSucc).2.1 (S.t i.succ).2.2
+    have hmem : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt ℂ (S.cellBall i).p).source ∧
+        (extChartAt 𝓘(ℂ) (S.cellBall i).p) (γ t) ∈
+          Metric.ball (S.cellBall i).c (S.cellBall i).r := by
+      intro t ht
+      have ht01 : t ∈ Set.Icc (0 : ℝ) 1 := h01 ht
+      set u : unitInterval := ⟨t, ht01⟩ with hu_def
+      have hu_cell : u ∈ Set.Icc (S.t i.castSucc) (S.t i.succ) := by
+        constructor
+        · exact Subtype.coe_le_coe.mp ht.1
+        · exact Subtype.coe_le_coe.mp ht.2
+      have huB := S.cell_subset i hu_cell
+      exact huB
+    have hdiff : ∀ t ∈ Set.Icc a b,
+        DifferentiableAt ℝ ((chartAt (H := ℂ) (γ t)).toFun ∘ γ) t := by
+      intro t ht
+      have ht01 : t ∈ Set.Icc (0 : ℝ) 1 := h01 ht
+      exact hγ.diff t (by rwa [Set.uIcc_of_le zero_le_one])
+    have hintab : IntervalIntegrable f MeasureTheory.volume a b := by
+      have := hint_cell i.val i.isLt
+      rwa [hAi, hAi1] at this
+    have hFTC := lineIntegral_cell_eq_primitive_sub form (S.cellBall i) γ hab
+      hγ.cont hdiff hmem hintab
+    rw [hAi, hAi1]
+    rw [hFTC]
+    rfl
+  -- Assemble: developing value = sum of increments = sum of cell integrals
+  -- = the full line integral.
+  have hsum := intervalIntegral.sum_integral_adjacent_intervals
+    (μ := MeasureTheory.volume) (a := A) (f := f) hint_cell
+  calc developingValue x₀ form γc
+      = developingValueOfSubdivision form γc S :=
+        developingValue_eq_developingValueOfSubdivision x₀ form γc S
+    _ = ∑ i : Fin S.n, developingIncrement form γc S i := rfl
+    _ = ∑ i : Fin S.n, ∫ t in A i.val..A (i.val + 1), f t := by
+        refine Finset.sum_congr rfl (fun i _ => (hcell i).symm)
+    _ = ∑ k ∈ Finset.range S.n, ∫ t in A k..A (k + 1), f t :=
+        Fin.sum_univ_eq_sum_range (fun k => ∫ t in A k..A (k + 1), f t) S.n
+    _ = ∫ t in A 0..A S.n, f t := hsum
+    _ = ∫ t in (0 : ℝ)..1, f t := by rw [hA0, hAn]
+    _ = Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form) γ := rfl
+
 end Jacobians.Bridge
