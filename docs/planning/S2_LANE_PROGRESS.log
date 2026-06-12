@@ -1,0 +1,46 @@
+# S2 lane — S² topology campaign (HANDOVER_PARALLEL_ACCOUNT.md Package 1)
+
+Append-only progress log. Branch: `feat/s2-topology`, based on main @ d306ce4.
+
+## 2026-06-11 session 1
+
+- Read CLAUDE.md / AGENTS.md / HANDOVER_PARALLEL_ACCOUNT.md / SVK_ROUTE.md /
+  SVK_BLOCKER.md. Consumers confirmed:
+  - Goal A: `genus_eq_zero_of_homeo_sphere` (PR #199, `feat/genus0-backward`)
+    takes `hS : SimplyConnectedSpace (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)`.
+  - Goal B: `moduleFinite_H1_of_fundamentalGroup_fg` (merged, #198) takes
+    `[Group.FG (FundamentalGroup X x₀)]`.
+- **FINDING (changes the Goal A plan).** The Kirov Dolbeault port already
+  contains a complete two-open van Kampen development:
+  `vendor/kirov-dolbeault-port/KirovDolbeault/SphereSimplyConnected.lean`
+  (charts/overlap side conditions for `OnePoint ℂ`, transport to S²) and
+  `KirovDolbeault/VanKampen.lean` (Lebesgue-subdivision + telescoping proof of
+  `TwoOpenVanKampen`, ending in the UNCONDITIONAL
+  `instance : SimplyConnectedSpace (Metric.sphere (0:EuclideanSpace ℝ (Fin 3)) 1)`
+  at line 426). Landed in the S2-integration commit aa2adbf (2026-06-10).
+  Text-level grep: no `sorry`, no `axiom` in either file. **Nothing imports
+  these modules**, so they have never been compiled (lakefile: only imported
+  port modules build) — CI has never checked them.
+- Plan: (1) compile `KirovDolbeault.VanKampen` + kernel-check the instance;
+  (2) Goal A = thin bridge file `Jacobians/Topology/SphereSimplyConnected.lean`
+  re-exporting the instance into the umbrella (repo-standard bridge pattern;
+  no new vendoring — the port is an existing in-tree dependency);
+  (3) Goal B = new `Jacobians/Topology/` development: finite simply-connected
+  good cover ⇒ `Group.FG (FundamentalGroup X x₀)` via a product-form telescope
+  (≤ N³ + 2N² + 1 generators, factor class depends only on the index triple);
+  good-cover EXISTENCE for compact surfaces re-isolated as the named gap.
+- `lake build KirovDolbeault.VanKampen` started (first compile of that chain).
+
+- Port build GREEN: `lake build KirovDolbeault.VanKampen` (2912 jobs, first
+  compile of the SphereSimplyConnected/VanKampen chain).
+- **Goal A kernel check PASSED**: both `s2probe : SimplyConnectedSpace
+  (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) := inferInstance` and
+  `Jacobians.RiemannSphere.VanKampen.twoOpenVanKampen_holds` print exactly
+  `[propext, Classical.choice, Quot.sound]` (standard-3).
+- Goal A bridge `Jacobians/Topology/SphereSimplyConnected.lean` compiles
+  (`lake env lean` green); wired into `Jacobians/Topology.lean` umbrella.
+- Goal B engine written: `Jacobians/Topology/FiniteGoodCover.lean` —
+  `SimplyConnectedGoodCover` structure, ι-indexed Lebesgue subdivision,
+  membership-form telescope, factor classification via anchor spokes
+  (generators `coverGen b e₁ e₂`, ≤ n·(n²+1)² of them), main theorem
+  `fundamentalGroup_fg_of_goodCover`. First compile iteration in progress.
