@@ -41,9 +41,14 @@ primary account's port-side lane; nothing here imports it.
 
 * **A3 (assembly)** — `abel_subset_of_engine`: the named hypothesis
   `ZeroPeriodChainSolvability` (degree-0 + zero-period presentation ⟹
-  principal) yields the verbatim ⊆ inclusion. `AX_AbelTheorem` itself is
-  NEVER used; once the Liouville ⊇ direction lands,
-  `AX_AbelTheorem := le_antisymm` closes tracker #14.
+  principal) yields the verbatim ⊆ inclusion. `AX_AbelTheorem` is not
+  imported here (this file sits BELOW the theorem in the import graph
+  since the 2026-06-12 split-flip: `Axioms/AbelTheorem.lean` now imports
+  the E6 adapter, which imports this file). The hypothesis is DISCHARGED
+  in `Jacobians/Bridge/AbelEngineAdapter.lean`
+  (`zeroPeriodChainSolvability_of_engine`), and
+  `AX_AbelTheorem := le_antisymm` is a theorem there over the remainder
+  axiom `AX_AbelSupset`.
 -/
 
 noncomputable section
