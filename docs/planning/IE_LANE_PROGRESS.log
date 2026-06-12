@@ -1,0 +1,32 @@
+# IE-lane progress log — interior-holomorphy boundary-word engines
+# BW_ROUTE.md ladder rungs 1-5 (+ optional 6). Branch: feat/interior-engine.
+
+2026-06-12 R1 DONE rectBoundaryIntegral_eq_zero_of_continuousOn_of_differentiableOn_unitBox
+           (InteriorEngine.lean) — wraps Mathlib split Cauchy at z=0, w=1+i.
+2026-06-12 R2 DONE riemann_R1_of_boundaryWord_interior — rung 1 + R1 algebra.
+2026-06-12 R3 DONE integral_normSq_eq_boundary_interior — greenOnUnitBox already had the
+           closed-continuity/open-derivative split; replaced GreenPositivity's derived
+           continuity lemmas (continuousOn_Pfun/Qfun/normSq, integrableOn_integrand) with
+           _of_continuousOn variants consuming boundary continuity directly. Key point:
+           integrand_eq is hypothesis-free, so integrability of the Green integrand needs
+           only continuity of h on the closed box.
+2026-06-12 R4 DONE boundaryForm_eq_area_interior + boundaryForm_pos_interior.
+2026-06-12 R5 DONE riemann_R2_posDef_of_boundaryWord_interior — combo continuity now from
+           continuousOn_finsetSum over the continuity fields instead of HasDerivAt on U.
+2026-06-12 Extras: wCLM_image_prod / _closedBox / _openBox dictionary (wCLM '' box = ×ℂ strip),
+           bridging Green-side (wCLM image) and Cauchy-side (reProdIm) box descriptions.
+2026-06-12 lake env lean InteriorEngine.lean: clean (exit 0, no warnings).
+           Aggregator KirovDolbeault.lean wired. No new axioms, no sorries.
+2026-06-12 R6 (bonus) DONE ArcBoundaryWordDataInterior + periodCycleBasisOfBoundaryWordInterior
+           (Jacobians/RiemannSurface/BilinearRelationsBoundaryWordInterior.lean) — root-side
+           mirror of BilinearRelationsBoundaryWord.lean over the interior engines; plus
+           ArcBoundaryWordData.toInterior (closed-box data restricts to interior data, so the
+           interior interface is strictly weaker). Aggregator Jacobians/RiemannSurface.lean wired.
+2026-06-12 KERNEL VERIFY (standard-3, direct module import + #print axioms): all 13 new
+           declarations depend only on [propext, Classical.choice, Quot.sound]:
+           rectBoundaryIntegral_eq_zero_of_continuousOn_of_differentiableOn_unitBox,
+           riemann_R1_of_boundaryWord_interior, integral_normSq_eq_boundary_interior,
+           boundaryForm_eq_area_interior, boundaryForm_pos_interior,
+           riemann_R2_posDef_of_boundaryWord_interior, wCLM_image_prod,
+           ArcBoundaryWordDataInterior.{periodMatrix_symm,periodGram_posDef,r1_field,r2_field},
+           periodCycleBasisOfBoundaryWordInterior, ArcBoundaryWordData.toInterior.

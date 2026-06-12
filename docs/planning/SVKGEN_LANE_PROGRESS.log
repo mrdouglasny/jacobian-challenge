@@ -56,3 +56,24 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   explicit circle class. Standard-3. This is the base case of the packaged
   induction (route doc G3/G4 notes, option (b)); the induction step is the
   next session-scale item.
+
+## 2026-06-12 session 1 (cont.) — post-#212-merge, induction lane opened
+
+- #212 MERGED (review blocker was a stale-head read; maintainer resolved).
+  Handover UPDATE 4: critical-only, P8 = this chain, then P9/P10 witnesses.
+- New branch feat/svk-induction (off the #212 merge). Statement layer landed:
+  `Jacobians/Topology/PuncturedPlaneGeneration.lean` —
+  - `PuncturedCellSystem T x₀`: per-puncture once-punctured cell ∋ x₀ with
+    the DUAL pin (cell-lasso + winding ±1 self / 0 off) — the conjunction
+    that evades the perfect-group trap while tying cells to punctures.
+  - `normalClosure_lassos_eq_top_of_empty` + the simply-connected
+    `T = ∅` engine; both standard-3. Umbrella wired (Edit tool, verified).
+- Next: |T| = 1 case (closure_circleAround_eq_top + winding pins force
+  cellLasso = gen^{±1}), then the binary-split induction step.
+
+- |T| = 1 base case DONE: `normalClosure_lassos_eq_top_of_singleton` —
+  the whole once-punctured plane is itself an admissible cell (Set.univ +
+  singletonComplHomeo), so G2 makes pi1 cyclic on the universe lasso; the
+  winding pin + integer-unit algebra force any admissible system's lasso
+  exponent to ±1, hence plain closure = top, NO winding computation needed.
+  Standard-3. Remaining: the binary-split induction step (the last rung).
