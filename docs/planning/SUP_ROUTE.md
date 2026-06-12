@@ -69,7 +69,7 @@ at most).
 | **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (Wallace `IsHolomorphicAt.localInverse` + Mathlib `analyticAt_localInverse`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` near `y₀` (kfold uniqueness + properness) — `exists_fiberDivisor_sections` in `AbelSupsetSections.lean` | **PROVEN** (this lane) |
 | **S4c** (pencil smoothness at regular values) | `contMDiffAt_fiberAJ`: `Φ = fiberAJ f hf` is `ContMDiffAt` at every `y₀ ∉ branchValues f` — REVISED ROUTE: no ambient lift; compose the proven `AX_ofCurve_contMDiff` (AJ is `ContMDiff ω` into the Jacobian) with the S4b sections through `map_sum` + the Jacobian `LieAddGroup` (`ContMDiffAt.sum`) | **PROVEN** (this lane) |
 | **S5** (removable across branch) | `mdifferentiable_fiberAJ` (`AbelSupsetPencil.lean`): `Φ` is `MDifferentiable` on ALL of `ℙ¹` — S5a `eventually_fiberDivisor_cluster` (general kfold clustering at any value, prescribed neighborhoods) + `continuousAt_fiberAJ` (sumset-neighborhood brick `exists_nhds_zero_finsetSum_mem` + continuity of AJ) + S5b `mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt` (generic manifold-valued removable singularity via Mathlib `analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt` in the target chart) | **PROVEN** (this lane) |
-| **S6** (lift + Liouville) | `ℙ¹` simply connected (`Topology/SphereSimplyConnected`) ⇒ lift `Φ` through `ℂ^g → ℂ^g/Λ` (#199 `simplyConnectedPrimitive` pattern, Kirov `ZLatticeQuotient` local-homeo API); compact source ⇒ constant (`MDifferentiable.exists_eq_const_of_compactSpace` per coordinate / `Differentiable.exists_eq_const_of_bounded`) | open |
+| **S6** (lift + Liouville) | `fiberAJ_eq` / `fiberAJConstancy` (`AbelSupsetLiouville.lean`): `ℙ¹` simply connected (`simplyConnectedSpace_projectiveLine`, Kirov van-Kampen capstone for `OnePoint ℂ`); continuous lift through the lattice covering (Mathlib `IsCoveringMap.existsUnique_continuousMap_lifts`); the lift is holomorphic (`ComplexTorus.mdifferentiable_lift_of_mdifferentiable` — locally chart-composite + one lattice constant, discrete-subgroup isolation); constant by `MDifferentiable.apply_eq_of_compactSpace` ⇒ **`FiberAJConstancy X` HOLDS** | **PROVEN** (this lane) |
 | **S7** (assembly) | `Φ(0) = Φ(∞)` + S2 + S1 ⇒ `AX_AbelSupset` becomes a theorem in place (Phase-C in-place conversion in `Axioms/AbelTheorem.lean`) | open |
 | **B** (reserve) | chain↔lattice bridging (Route-C insurance, route-independent) | parked |
 
@@ -129,3 +129,13 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   `AX_PeriodCycleBasis`). The pencil map is holomorphic on all of `ℙ¹`.
   Remaining: S6 (lift through `ℂ^g → ℂ^g/Λ` over simply connected `ℙ¹`
   + Liouville per coordinate ⇒ `FiberAJConstancy`), then the S7 flip.
+- 2026-06-12 (SUP-2 session): S6 PROVEN — `AbelSupsetLiouville.lean`:
+  `simplyConnectedSpace_projectiveLine` (standard-3, Kirov van-Kampen
+  capstone), `ComplexTorus.mdifferentiable_lift_of_mdifferentiable`
+  (standard-3, generic), `fiberAJ_eq` + `fiberAJConstancy` (standard-3 +
+  `AX_PeriodCycleBasis`). GOTCHA recorded in the file header: the vendor
+  `KirovDolbeault.ProjectiveLine` carries a competing
+  `ChartedSpace ℂ (OnePoint ℂ)` instance; the vendor package must be
+  imported BEFORE the main package modules so the main `ProjectiveLine`
+  instances win resolution. Next: the S7 in-place flip of
+  `AX_AbelSupset`.
