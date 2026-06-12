@@ -65,7 +65,9 @@ at most).
 | **S1** (kernel converse, = R1) | `mem_abelJacobiDiv_ker_of_mem_lattice`: `deg D = 0` + `divisorPeriodVector x₀ D ∈ Λ` ⇒ `D ∈ (abelJacobiDiv X).ker` (converse of A1's `divisorPeriodVector_mem_lattice_of_mem_ker`, via `ulift_abelJacobiDiv_apply`); + reduction `abel_supset_of_principalPeriodVectorInLattice` over the named hypothesis `∀ f, divisorPeriodVector x₀ (divisor f) ∈ Λ` | **PROVEN** (this lane) |
 | **S2** (fiber divisor, = R2a) | `fiberDivisor f hf y : Divisor X` (fiber of `toP1 f` weighted by `mapAnalyticOrderAt`) + `divisor_eq_fiberDivisor_zero_sub_infty`: `divisor f = fiberDivisor 0 − fiberDivisor ∞` for nonconstant `f` (coefficientwise from `toP1_eq_zero_iff` / `toP1_eq_infty_iff` / `mapAnalyticOrderAt_toP1*`) | **PROVEN** (this lane) |
 | **S3** (Φ + constancy reduction) | `fiberAJ f hf y := abelJacobiDiv X (fiberDivisor f hf y)` (the Jacobi pencil map, Jacobian-valued); named hypothesis `FiberAJConstancy`; `abel_supset_of_fiberAJConstancy` (`AJ(div f) = Φ(0) − Φ(∞) = 0`); degenerate case `divisor_eq_zero_of_not_nonconstant` (de-privatized `orderAtMF_eq_zero_of_not_nonconstant` in `DegreeTheorem.lean`); bonus `deg_fiberDivisor_const` (fiber-degree constancy in divisor form, for the S6 basepoint bookkeeping) | **PROVEN** (this lane) |
-| **S4** (holomorphy off branch) | local holomorphic root functions of `toP1 f` off the branch locus (IFT / `AnalyticLocalMapping`); `Φ` locally = sum of `ofCurveAmbient`-developments along IFT tracks ⇒ holomorphic on `ℙ¹ ∖ B` | open |
+| **S4a** (branch values) | `branchValues f : Set ProjectiveLine` (finite, via `AX_BranchLocus`-the-theorem) + `mapAnalyticOrderAt_eq_one_of_not_branchValue` (regular fibers are unramified) | **PROVEN** (this lane) |
+| **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (chart-level `exists_local_biholomorphism_strong`, Wallace `AnalyticLocalMapping`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` on `V` (sheet tracking via `weightedFiberConservation`) | open (next) |
+| **S4c** (local lift of Φ) | local ambient lift `φ : V → Fin (genus X) → ℂ` of `Φ` along the sections: `φ(y) = ∑ᵢ (ofCurveAmbient x₀ (sᵢ y₀) + development from sᵢ y₀ to sᵢ y)`, holomorphic via the `developingValue` endpoint-analyticity brick (HI workstream / `AX_ofCurve_contMDiff` discharge route); `Φ = mk ∘ φ` on `V` | open |
 | **S5** (removable across branch) | the load-bearing lemma: symmetric sum of endpoint integrals bounded near a branch value ⇒ holomorphic extension (`analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) | open |
 | **S6** (lift + Liouville) | `ℙ¹` simply connected (`Topology/SphereSimplyConnected`) ⇒ lift `Φ` through `ℂ^g → ℂ^g/Λ` (#199 `simplyConnectedPrimitive` pattern, Kirov `ZLatticeQuotient` local-homeo API); compact source ⇒ constant (`MDifferentiable.exists_eq_const_of_compactSpace` per coordinate / `Differentiable.exists_eq_const_of_bounded`) | open |
 | **S7** (assembly) | `Φ(0) = Φ(∞)` + S2 + S1 ⇒ `AX_AbelSupset` becomes a theorem in place (Phase-C in-place conversion in `Axioms/AbelTheorem.lean`) | open |
@@ -88,3 +90,8 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   hypothesis: `PrincipalPeriodVectorInLattice` (ambient form, S1) or
   `FiberAJConstancy` (Jacobian form, S3). Next: S4 (pencil holomorphy off
   the branch locus — the analytic core).
+- 2026-06-12 (same session): S4a proven — `branchValues` +
+  `branchValues_finite` + `mapAnalyticOrderAt_eq_one_of_not_branchValue`
+  (closures standard-3 only). S4 decomposed into S4a/S4b/S4c in the
+  ladder; the next rung is S4b (local holomorphic sections over a regular
+  value — the first genuinely analytic step).

@@ -274,6 +274,37 @@ theorem abelJacobiDiv_divisor_eq_fiberAJ_sub (f : MeromorphicFunctionField X)
   rw [divisor_eq_fiberDivisor_zero_sub_infty f hf, map_sub]
   rfl
 
+/-! ## S4a: branch values and regular fibers of the pencil -/
+
+/-- **S4a (branch values).** The branch-value set of the pencil: the points
+of `ℙ¹` over which `toP1 f` has a ramified fiber point (`localOrder > 1`).
+Off this finite set, the pencil is an unramified `d`-sheeted cover and the
+fiber points are locally holomorphic functions of `y` (S4b). -/
+def branchValues (f : MeromorphicFunctionField X) : Set ProjectiveLine :=
+  { y | ∃ p, toP1 f p = y ∧ 1 < Jacobians.Axioms.localOrder (toP1 f) p y }
+
+/-- The branch-value set is finite (`AX_BranchLocus`, a theorem). -/
+theorem branchValues_finite (f : MeromorphicFunctionField X)
+    (hf : Nonconstant f) : (branchValues f).Finite := by
+  obtain ⟨d, _, _, hfin⟩ := Jacobians.Axioms.AX_BranchLocus (toP1 f)
+    (toP1_contMDiff f) (toP1_nonconst hf)
+  exact hfin
+
+/-- **Regular fibers are unramified.** Over a non-branch value, every fiber
+point of the pencil has local mapping degree exactly `1`. -/
+theorem mapAnalyticOrderAt_eq_one_of_not_branchValue
+    (f : MeromorphicFunctionField X) (hf : Nonconstant f)
+    {y : ProjectiveLine} (hy : y ∉ branchValues f) {p : X}
+    (hp : toP1 f p = y) :
+    mapAnalyticOrderAt (toP1 f) p = 1 := by
+  have hpos : 0 < mapAnalyticOrderAt (toP1 f) p :=
+    mapAnalyticOrderAt_pos_of_contMDiff (toP1_contMDiff f)
+      (toP1_nonconst hf) p
+  have hnlt : ¬ 1 < Jacobians.Axioms.localOrder (toP1 f) p y := fun hlt =>
+    hy ⟨p, hp, hlt⟩
+  rw [Jacobians.Axioms.localOrder_eq_mapAnalyticOrderAt_of_mem_fiber hp] at hnlt
+  omega
+
 end MeromorphicFunctionField
 
 open MeromorphicFunctionField in
