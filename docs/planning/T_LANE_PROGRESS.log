@@ -49,3 +49,17 @@ FrameTrace.lean: in-place construction (S = fibre-saturated support + infinity f
 C = finite f-values of base support) + NEW exists_canonicalData_residueAtom (unconditional).
 NOTE: machine under heavy concurrent-agent load (system-wide fd exhaustion, ENFILE);
 full-build + kernel checks retried until clean — results recorded below.
+=== T2-lane KERNEL VERIFICATION (2026-06-11 17:1x PDT) ===
+FULL `lake build` GREEN (whole project, retried through transient system-wide fd
+exhaustion caused by ~100 concurrent lean processes from parallel agents).
+#print axioms — ALL standard-3 [propext, Classical.choice, Quot.sound], NO sorryAx:
+  Jacobians.Dolbeault.FrameTraceWall.valueTrace_resAtInfty_df
+  Jacobians.Dolbeault.FrameTraceWall.infCluster_descent
+  Jacobians.Dolbeault.FrameTraceWall.cluster_descent
+  Jacobians.Dolbeault.FrameTraceWall.valueTrace_meromorphicAt_and_resAt
+  Jacobians.Dolbeault.exists_frameTraceFunctionData_df        <- THE WALL
+  Jacobians.Dolbeault.exists_traceLaurentForm_df
+  Jacobians.Dolbeault.frameTraceHypothesis_of_df
+  Jacobians.Dolbeault.exists_canonicalData_frameTraceHypothesis
+  Jacobians.Dolbeault.exists_canonicalData_residueAtom        <- keystone atom, UNCONDITIONAL
+=== T2-lane session end — WALL CLOSED, CHAIN KERNEL-VERIFIED ===
