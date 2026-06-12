@@ -85,7 +85,16 @@ declarations. Four boundaries to keep the claim honest:
    pin), where it belongs. Filling the 5 therefore still includes
    settling X1, now inside the Cluster-A discharge.
 
-## The 5 challenge-critical axioms
+## The 3 challenge-critical axioms
+
+> **STATUS NOTE — functoriality-cluster completion (#31, 2026-06-11).** The last
+> two Cluster-C axioms — `AX_pullbackAmbient_preserves_lattice` and
+> `AX_pushforward_pullback` — are now **theorems** (route per daouid's closed
+> PR #191, with the lattice-comparison inclusions proven in
+> `Bridge/KirovDolbeaultPeriods.lean` / `Bridge/KirovDolbeaultLattice.lean`).
+> Challenge-critical count **5 → 3**: `AX_PeriodCycleBasis`,
+> `AX_genus_eq_zero_iff_homeo`, `AX_AbelTheorem`. Sections below retain the
+> pre-discharge analysis for the record.
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
@@ -137,8 +146,8 @@ within the cluster is more nuanced than "all follow from one root":
 | `AX_pushforwardOneForm_id` | `pushforwardOneForm` real | `Tr_id = id`; immediate once the trace is real |
 | `AX_pushforwardOneForm_comp` | `pushforwardOneForm` real | `Tr_{g∘f} = Tr_g ∘ Tr_f`; functoriality of the fiber sum |
 | `AX_pushforwardAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#30) | Now a theorem: `∫_{f_*(γ)} ω = ∫_γ f*ω` realized by the developing-value naturality engine (`DevelopingNaturality.lean` + `LoopLattice.lean`, axiom-free) over the Kirov-backed `pullbackOneForm`; representative-loop induction, the image cycle is the honest loop `f∘γ`. Headlines `pushforward`/`_contMDiff`/`_id_apply`/`_comp_apply` now standard-3 + `AX_PeriodCycleBasis`. |
-| `AX_pullbackAmbient_preserves_lattice` | `pushforwardOneForm` (trace, axiom) | `pullbackAmbientLinear` is defined as the dual of `pushforwardOneForm f` — so the trace IS the dependency. Content: `∫_γ f*ω = ∫_{f_*(γ)} ω` from the other side. **Trace-gated.** |
-| `AX_pushforward_pullback` | trace-norm relation | `pushforward_f ∘ pullback_f = [deg f]` on Jac(Y): follows from `Tr_f(f*ω) = deg(f)·ω`. Forster §12 / Miranda. |
+| `AX_pullbackAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#31) | Now a theorem: lattice vector → port coordinates (polygonal smooth representative of the `H1` class), port `PreimageCycle` monodromy (`ambientPullbackJac_preserves_truePeriodLattice`), back via developing value = moving-chart line integral. Route per daouid's closed PR #191 (credit), inclusions proven. |
+| `AX_pushforward_pullback` | ✅ **DISCHARGED 2026-06-11** (#31) | Now a theorem: ambient `Φ ∘ Tᵀ = deg • id` from the port's conservation-of-number over the lattice's ℝ-spanning ℤ-basis + `degreeImpl_eq_degreeFiber`; quotient descent. NOT via a form-level `Tr_f(f*ω) = deg(f)·ω` (the port does not have that law; the identity lives at the period level). |
 
 > **Status 2026-06-10:** the first three rows — `pushforwardOneForm`,
 > `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` — are **DISCHARGED**
@@ -149,12 +158,14 @@ within the cluster is more nuanced than "all follow from one root":
 > it is the dual of a REAL trace.
 
 With the trace real and the pushforward lattice statement a theorem (#30),
-the remaining Cluster-C axioms are `AX_pullbackAmbient_preserves_lattice`
-(dual of the now-real trace; the #30 engine is the template — what is missing
-is the trace-side analogue of `pullbackOneForm_isPullbackCoeffRel`, i.e. the
-fibre-sum coefficient law for `pushforwardOneForm`) and
-`AX_pushforward_pullback`. Both are period-naturality / projection-formula
-content over real maps; neither is gated by an opaque construction any more.
+**(historical)** the remaining Cluster-C axioms were
+`AX_pullbackAmbient_preserves_lattice` and `AX_pushforward_pullback` — both
+**discharged 2026-06-11 (#31)**: rather than the trace-side fibre-sum
+coefficient law for `developingValue` (which would have required re-deriving
+the monodromy decomposition in our framework), the discharge transports the
+whole problem into the Dolbeault port across the proven
+`truePeriodLattice ↔ periodLatticeInBasis` correspondence and reuses the
+port's `PreimageCycle` machinery. Cluster C is now **fully discharged**.
 
 ---
 
@@ -214,7 +225,7 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 ## Summary: the closure picture
 
 ```
-5 challenge-critical axioms
+3 challenge-critical axioms (5 before #31, 2026-06-11)
     │
     ├── Cluster A (1) — in EVERY Buzzard declaration
     │      AX_PeriodCycleBasis  (D1 merge: loops + H₁ basis + Hurewicz tie
@@ -233,8 +244,6 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
            (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge;
             AX_pushforwardAmbient_preserves_lattice discharged #30 via the
             developing-value naturality engine)
-           AX_pullbackAmbient_preserves_lattice     (dual of the real trace)
-           AX_pushforward_pullback                  (projection formula, deg f)
 ```
 
 ### Bottleneck assessment
