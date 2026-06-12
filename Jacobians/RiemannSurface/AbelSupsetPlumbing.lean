@@ -226,6 +226,87 @@ theorem divisor_eq_fiberDivisor_zero_sub_infty
       exact_mod_cast hpos
     omega
 
+/-! ## S3: the Jacobi pencil map and the constancy reduction -/
+
+/-- A `toP1`-constant meromorphic-function-field element has zero divisor
+(degenerate case of the constancy reduction). -/
+theorem divisor_eq_zero_of_not_nonconstant {f : MeromorphicFunctionField X}
+    (hf : ¬ Nonconstant f) :
+    MeromorphicFunctionField.divisor f = 0 := by
+  refine divisor_ext fun p => ?_
+  rw [coeff_divisor f p, orderAtMF_eq_zero_of_not_nonconstant hf p, map_zero]
+  rfl
+
+/-- The degree of the fiber divisor is the weighted fiber sum of the
+branched cover `toP1 f`. -/
+theorem deg_fiberDivisor (f : MeromorphicFunctionField X)
+    (hf : Nonconstant f) (y : ProjectiveLine) :
+    Divisor.deg X (fiberDivisor f hf y) =
+      (((toP1_fiber_finite hf y).toFinset.sum (mapAnalyticOrderAt (toP1 f)) : ℕ) : ℤ) := by
+  rw [fiberDivisor, map_sum, Nat.cast_sum]
+  refine Finset.sum_congr rfl fun p _ => ?_
+  rw [map_zsmul, show Divisor.deg X (FreeAbelianGroup.of p) = 1 from
+    FreeAbelianGroup.lift_apply_of _ _, smul_eq_mul, mul_one]
+
+/-- **Fiber-degree constancy** in divisor form: all fiber divisors of the
+pencil have the same degree (the degree of the branched cover), from
+`toP1_weightedFiberSum_const`. -/
+theorem deg_fiberDivisor_const (f : MeromorphicFunctionField X)
+    (hf : Nonconstant f) (y y' : ProjectiveLine) :
+    Divisor.deg X (fiberDivisor f hf y) = Divisor.deg X (fiberDivisor f hf y') := by
+  rw [deg_fiberDivisor, deg_fiberDivisor,
+    toP1_weightedFiberSum_const hf y, toP1_weightedFiberSum_const hf y']
+
+/-- **S3 (the Jacobi pencil map).** The Abel–Jacobi image of the fiber
+divisor: `Φ(y) = AJ(f⁻¹(y)) ∈ Jacobian X`. The Liouville route proves this
+map is constant in `y` (holomorphic on the compact simply-connected `ℙ¹`
+after lifting through `ℂ^g → ℂ^g/Λ`). -/
+def fiberAJ (f : MeromorphicFunctionField X) (hf : Nonconstant f)
+    (y : ProjectiveLine) : Jacobian X :=
+  abelJacobiDiv X (fiberDivisor f hf y)
+
+/-- The Abel–Jacobi image of a principal divisor is the difference of the
+pencil map at `0` and `∞`. -/
+theorem abelJacobiDiv_divisor_eq_fiberAJ_sub (f : MeromorphicFunctionField X)
+    (hf : Nonconstant f) :
+    abelJacobiDiv X (MeromorphicFunctionField.divisor f) =
+      fiberAJ f hf (((0 : ℂ) : ProjectiveLine)) - fiberAJ f hf (∞ : ProjectiveLine) := by
+  rw [divisor_eq_fiberDivisor_zero_sub_infty f hf, map_sub]
+  rfl
+
 end MeromorphicFunctionField
+
+open MeromorphicFunctionField in
+/-- **S3 (named hypothesis): constancy of the Jacobi pencil map.** For
+every nonconstant meromorphic function, the fiber Abel–Jacobi map
+`Φ(y) = AJ(f⁻¹(y))` is constant on `ℙ¹`. This is the output shape of the
+Liouville argument (S4–S6 of `docs/planning/SUP_ROUTE.md`): `Φ` is
+holomorphic off the branch locus, extends across it, lifts to `ℂ^g` over
+the simply-connected `ℙ¹`, and is constant by Liouville/compactness. -/
+def FiberAJConstancy (X : Type u) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] : Prop :=
+  ∀ (f : MeromorphicFunctionField X) (hf : Nonconstant f)
+    (y y' : ProjectiveLine), fiberAJ f hf y = fiberAJ f hf y'
+
+/-- **S3 (constancy reduction).** Over the named pencil-constancy
+hypothesis, the `AX_AbelSupset` statement holds verbatim: every principal
+divisor is in the Abel–Jacobi kernel — `AJ(div f) = Φ(0) − Φ(∞) = 0`,
+with the `toP1`-constant degenerate case handled by `divisor f = 0`. -/
+theorem abel_supset_of_fiberAJConstancy (h : FiberAJConstancy X) :
+    PrincipalDivisors X ≤ (abelJacobiDiv X).ker := by
+  intro D hD
+  rw [PrincipalDivisors] at hD
+  rcases hD with ⟨f, hdiv⟩
+  have hdivisor : MeromorphicFunctionField.divisor f = D := by
+    rw [show MeromorphicFunctionField.divHom f =
+        Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) from rfl] at hdiv
+    exact Multiplicative.ofAdd.injective hdiv
+  show abelJacobiDiv X D = 0
+  rw [← hdivisor]
+  by_cases hf : Nonconstant f
+  · rw [abelJacobiDiv_divisor_eq_fiberAJ_sub f hf,
+      h f hf (((0 : ℂ) : ProjectiveLine)) (∞ : ProjectiveLine), sub_self]
+  · rw [divisor_eq_zero_of_not_nonconstant hf, map_zero]
 
 end Jacobians.RiemannSurface
