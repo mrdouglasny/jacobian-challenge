@@ -15,11 +15,14 @@ Stage 2 assembles the `ArcBoundaryWordData` structure over the elliptic
 `c := √(±Im (ω₂ · conj ω₁))`.
 -/
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
+import Jacobians.RiemannSurface.ArcAlgebra
+import Jacobians.ProjectiveCurve.Elliptic.Witnesses
 
 namespace Jacobians.RiemannSurface
 namespace BoundaryWordElliptic
 
 open Complex intervalIntegral
+open Jacobians.ProjectiveCurve
 
 /-- Cauchy on the box for the `word_R1` integrand: `∮ (c·z)·c dz = 0`. -/
 theorem rectBoundary_linear_mul_const (c : ℂ) :
@@ -148,6 +151,60 @@ theorem boundaryForm_const_linear (c : ℂ) :
     simp [Complex.conj_I]
   rw [e₁, e₂, e₃, e₄]
   ring_nf
+
+/-! ### Stage 2: the elliptic data — singleton form basis and oriented loops -/
+
+section EllipticData
+
+variable (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω₁, ω₂])
+
+noncomputable instance uniqueFinGenus :
+    Unique (Fin (genus (Elliptic ω₁ ω₂ h))) :=
+  Equiv.unique (finCongr (genus_Elliptic_eq_one ω₁ ω₂ h))
+
+/-- The singleton basis of holomorphic 1-forms on the torus, on the
+invariant differential `ellipticDz`. -/
+noncomputable def ellipticFormBasis :
+    Module.Basis (Fin (genus (Elliptic ω₁ ω₂ h))) ℂ
+      (HolomorphicOneForm (Elliptic ω₁ ω₂ h)) :=
+  basisOfLinearIndependentOfCardEqFinrank
+    ((linearIndependent_unique_iff
+      (v := fun _ : Fin (genus (Elliptic ω₁ ω₂ h)) =>
+        ellipticDz ω₁ ω₂ h)).mpr (ellipticDz_ne_zero ω₁ ω₂ h))
+    (by
+      rw [Fintype.card_fin]
+      rfl)
+
+@[simp]
+theorem ellipticFormBasis_apply (i : Fin (genus (Elliptic ω₁ ω₂ h))) :
+    ellipticFormBasis ω₁ ω₂ h i = ellipticDz ω₁ ω₂ h := by
+  have hcoe : ⇑(ellipticFormBasis ω₁ ω₂ h)
+      = fun _ => ellipticDz ω₁ ω₂ h :=
+    coe_basisOfLinearIndependentOfCardEqFinrank _ _
+  exact congrFun hcoe i
+
+/-- The B-cycle reversed, as an `AnalyticLoop` (for orientation
+normalization). -/
+noncomputable def bLoopRev : AnalyticLoop (Elliptic ω₁ ω₂ h) 0 where
+  arc := (bLoop ω₁ ω₂ h).arc.reverse
+  start_eq := by
+    rw [AnalyticArc.reverse_extend_zero]
+    exact (bLoop ω₁ ω₂ h).end_eq
+  end_eq := by
+    rw [AnalyticArc.reverse_extend_one]
+    exact (bLoop ω₁ ω₂ h).start_eq
+
+/-- The oriented elliptic loop family: `aLoop` in the A-slot; in the B-slot
+`bLoop` or its reverse, so that the imaginary part of `ω₂'·conj ω₁` is
+positive. -/
+noncomputable def ellipticLoops :
+    Fin (2 * genus (Elliptic ω₁ ω₂ h)) → AnalyticLoop (Elliptic ω₁ ω₂ h) 0 :=
+  fun i =>
+    if (i : ℕ) = 0 then aLoop ω₁ ω₂ h
+    else if 0 < (ω₂ * (starRingEnd ℂ) ω₁).im then bLoop ω₁ ω₂ h
+    else bLoopRev ω₁ ω₂ h
+
+end EllipticData
 
 end BoundaryWordElliptic
 end Jacobians.RiemannSurface
