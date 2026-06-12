@@ -54,7 +54,7 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ## What filling the 2 does — and does not — claim
 
-Discharging both remaining axioms makes every Buzzard declaration print exactly
+Discharging the remaining axiom makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -300,7 +300,7 @@ older discharge analysis is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vett
 **Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) — formerly the
 deepest single theorem — was **discharged in PR #209** (genus-0 flip: RR pole
 extraction forward, S2-lane simple connectedness + Liouville backward).
-`AX_AbelSupset` remains (the ⊇/AJ half; the former hard ⊆ half is now a theorem via the §20 engine).
+`AX_AbelSupset` is now DISCHARGED (Liouville pencil route, this PR) (the ⊇/AJ half; the former hard ⊆ half is now a theorem via the §20 engine).
 (`AX_ofCurve_contMDiff` was discharged in PR #179; its HI/lattice-completeness
 conditionality now lives in Cluster A's discharge obligation.)
 
