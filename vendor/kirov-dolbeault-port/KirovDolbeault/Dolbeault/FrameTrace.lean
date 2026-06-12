@@ -7,6 +7,7 @@ import KirovDolbeault.Dolbeault.ResidueAtom
 import KirovDolbeault.Dolbeault.FormTraceFibre
 import KirovDolbeault.Dolbeault.FormTracePrincipalPart
 import KirovDolbeault.Dolbeault.CanonicalFormDifferential
+import KirovDolbeault.Dolbeault.FrameTraceWallInfty
 
 /-!
 # The frame-trace datum for the canonical `ω₀ = df` frame (T lane)
@@ -44,19 +45,15 @@ per-sheet coefficients the atom's own chart integrands, the per-sheet residue br
 per-sheet pushforward collapses to the **plain value trace** `F ∘ sheet`
 (`frameFibreTrace_traceCoeff_df_eventuallyEq`) — `(f̂ ∘ sheet)' = 1` kills the Jacobian.
 
-## The residual wall (single named `sorry`)
+## The wall, CLOSED
 
-`exists_traceLaurentForm_df` — the §VIII.3 trace assembly for the plain value trace: the
-existence of the `LaurentForm` realizing (fin) + (inf) for the `ω₀ = df` datum.  Mathematically
-TRUE (Miranda §VIII.3: the value trace of `F` through the branched cover `f` is a rational
-function of the base coordinate; its `1`-form `Tr(F)·dw` has finite residues the fibre sums
-and `∞`-residue the `∞`-fibre sum).  The proven §5 slit tower constructs exactly this datum
-for a holomorphic frame; the `df` instance needs strictly less per-sheet data (the plain value
-trace).  Discharge plan: `A_ATOM_ROUTE.md`.
-
-Everything downstream of the wall is proven: `frameTraceHypothesis_of_df` and the existential
-`exists_canonicalData_frameTraceHypothesis` feed the keystone corollaries of `ResidueAtom.lean`
-(`h1Dim_zero_chartDiskCover_eq_kirovGenus_of_frameTrace`, …).
+`exists_frameTraceFunctionData_df` — the §VIII.3 trace assembly for the plain value trace —
+is **proven**: the trace-function datum is constructed from the conservation-of-number engine
+(`FrameTraceWallEngine`), the unweighted symmetric descent (`FrameTraceWallDescent`), the
+per-centre cluster descents (`FrameTraceWallCluster`), and Lemma 3.2 at `∞`
+(`FrameTraceWallInfty`).  Hence `frameTraceHypothesis_of_df`, the existential
+`exists_canonicalData_frameTraceHypothesis`, and the unconditional keystone atom
+`exists_canonicalData_residueAtom` are all sorry-free.
 
 Reference: Miranda, *Algebraic Curves and Riemann Surfaces* (GSM 5), §VIII.3; Forster,
 *Lectures on Riemann Surfaces* (GTM 81), §17.3.
@@ -705,30 +702,200 @@ theorem exists_traceLaurentForm_of_functionData (data : CanonicalForm17Data X)
     rw [hLρ] at hLinf ⊢
     exact hLinf.trans D.hinf
 
-/-! ## The residual wall (single named `sorry`)
+/-! ## The wall, closed: the trace-function datum for `ω₀ = df`
 
-The §VIII.3 trace assembly for the canonical `ω₀ = df` frame, now reduced to the
-**trace-function level**: the existence of the value trace `T` with its local residue
-transports.  Mathematically TRUE: the plain value trace `Tr(F)(w) = ∑_{sheets over w}
-F(sheet)` of `F` through the branched cover `F = f.toRiemannSphere` is analytic off the
-finitely many exceptional values (IFT sections off the branch locus; symmetric-descent
-clusters across it), meromorphic at each of them, its local residues are the fibre residue
-sums of `F·df` (per-sheet: `frameRes_df_read` + section-inverse `(f̂ ∘ sheet)' = 1`; ramified
-clusters: `planarCoeff_neg_one_branch`'s `e·a_{−e}` normalization), and its `∞`-residue is the
-`∞`-fibre sum (the reciprocal-chart cluster).  The proven §5 slit tower constructs exactly
-this datum for a holomorphic frame (strictly more per-sheet data than the plain value trace
-needs).  Discharge plan: `A_ATOM_ROUTE.md`. -/
+The §VIII.3 trace assembly for the canonical `ω₀ = df` frame at the **trace-function level**,
+CONSTRUCTED over the `FrameTraceWall` engine: the plain value trace
+`Tr(F)(w) = ∑_{fibre over w} F.holoRepr` of `F` through the branched cover
+`𝔉 = f.toRiemannSphere` is analytic off the finitely many exceptional values
+(conservation-of-number section sums), meromorphic at each of them with the fibre residue sums
+of `F·df` as residues (the per-centre cluster descents, ramified clusters included), and its
+`∞`-residue is the `∞`-fibre sum (the reciprocal-chart clusters + the large-contour
+computation). -/
 
-/-- **[THE RESIDUAL WALL — single named `sorry`].**  The trace-function datum of the plain
-value trace of `F` through `f`, for the canonical `ω₀ = df` datum.  (NOT VERIFIED — Miranda
-§VIII.3 step 1 + Lemma 3.2 at the exceptional values; see the module docstring and
-`A_ATOM_ROUTE.md` for the discharge plan.) -/
+/-- **The trace-function datum of the plain value trace** of `F` through `f`, for the canonical
+`ω₀ = df` datum — Miranda §VIII.3 step 1 + Lemma 3.2 at the exceptional values, CONSTRUCTED:
+
+* `T := valueTrace F f` (the junk-free fibre sum), `C :=` the finite `f`-values of
+  `supp(div F) ∪ supp K`, `S :=` the fibre saturation of `supp(div F) ∪ supp K` (plus the
+  `∞`-fibre) — since `supp K` contains every ramification point and every pole of `f`, all the
+  branch values are exceptional and `hcover` holds by construction;
+* `hoff` — off `C` every fibre point is an unramified (`K = 0` ⟹ `localDeg = 1`) non-`F`-pole
+  point, so the conservation-of-number section sum applies
+  (`analyticAt_valueTrace_of_sections`);
+* `hmero`/`hres` — the per-centre cluster descent (`valueTrace_meromorphicAt_and_resAt`),
+  ramified clusters included;
+* `hinf` — Lemma 3.2 at `∞` (`valueTrace_resAtInfty_df`, the reciprocal-chart cluster). -/
 theorem exists_frameTraceFunctionData_df (f : MeromorphicFunction X)
     (hf : ¬ IsGermConstant f) (data : CanonicalForm17Data X)
     (hω : data.ω₀ = differentialForm f) (F : MeromorphicFunction X) :
     ∃ S : Finset X, F.div.support ∪ data.K.support ⊆ S ∧
       Nonempty (FrameTraceFunctionData data F f S) := by
-  sorry
+  classical
+  have hdiv : (f.div : Divisor X) ≠ 0 :=
+    SerreResidueTheorem.div_ne_zero_of_not_isGermConstant f hf
+  -- the exceptional sets: base support, its finite value set, and the fibre saturation
+  set S₀ : Finset X := F.div.support ∪ data.K.support with hS₀_def
+  set C : Finset ℂ := (S₀.filter (fun a => 0 ≤ f.orderAtPoint a)).image f.holoRepr with hC_def
+  set S : Finset X := (S₀ ∪ C.biUnion
+      (fun c => FrameTraceWall.fibreFinset f hdiv (((c : ℂ) : RiemannSphere))))
+      ∪ FrameTraceWall.fibreFinset f hdiv OnePoint.infty with hS_def
+  -- the contour radius
+  obtain ⟨ρ₀, hρ₀⟩ := C.finite_toSet.isBounded.subset_closedBall 0
+  set ρ : ℝ := max ρ₀ 0 + 1 with hρ_def
+  have hρ : 0 < ρ := by
+    have h0 : (0 : ℝ) ≤ max ρ₀ 0 := le_max_right _ _
+    rw [hρ_def]
+    linarith
+  have hball : ∀ c ∈ C, c ∈ Metric.ball (0 : ℂ) ρ := by
+    intro c hc
+    have h1 : c ∈ Metric.closedBall (0 : ℂ) ρ₀ := hρ₀ (Finset.mem_coe.mpr hc)
+    rw [Metric.mem_closedBall] at h1
+    rw [Metric.mem_ball]
+    calc dist c 0 ≤ ρ₀ := h1
+      _ ≤ max ρ₀ 0 := le_max_left _ _
+      _ < ρ := by rw [hρ_def]; linarith
+  -- the finite value of a non-pole base-support point is exceptional
+  have hmemC : ∀ a ∈ S₀, 0 ≤ f.orderAtPoint a → f.holoRepr a ∈ C := fun a ha hnp =>
+    Finset.mem_image_of_mem _ (Finset.mem_filter.mpr ⟨ha, hnp⟩)
+  -- fibres over exceptional values are inside the saturated `S`
+  have hfibS : ∀ c ∈ C, ∀ y : X,
+      f.toRiemannSphere y = (((c : ℂ) : RiemannSphere)) → y ∈ S := by
+    intro c hc y hy
+    refine Finset.mem_union_left _ (Finset.mem_union_right _ ?_)
+    exact Finset.mem_biUnion.mpr ⟨c, hc, FrameTraceWall.mem_fibreFinset.mpr hy⟩
+  -- `hoff`: analyticity off the exceptional values, by the unramified section sum
+  have hoff : ∀ z : ℂ, z ∉ C → AnalyticAt ℂ (FrameTraceWall.valueTrace F f) z := by
+    intro z hzC
+    set P : Jacobians.MultiplicityPatching.MultiplicityPatchingData f
+        (((z : ℂ) : RiemannSphere)) :=
+      FrameTraceWall.patchAt f hdiv (((z : ℂ) : RiemannSphere)) with hP_def
+    have hPfib : ∀ y, y ∈ P.xs → f.toRiemannSphere y = (((z : ℂ) : RiemannSphere)) := by
+      intro y hy
+      have h1 : y ∈ (P.xs : Set X) := hy
+      rwa [P.xs_coe] at h1
+    have hnotS₀ : ∀ y ∈ P.xs, y ∉ S₀ := by
+      intro y hy hyS₀
+      have hyfib := hPfib y hy
+      have hnp := FrameTraceWall.nonpole_of_fibre_coe hyfib
+      have hmem := hmemC y hyS₀ hnp
+      rw [FrameTraceWall.holoRepr_of_fibre_coe hyfib] at hmem
+      exact hzC hmem
+    have hderiv : ∀ y ∈ P.xs,
+        deriv (fun ζ => f.holoRepr ((chartAt (H := ℂ) y).symm ζ))
+          ((chartAt (H := ℂ) y) y) ≠ 0 := by
+      intro y hy
+      have hyfib := hPfib y hy
+      have hnp := FrameTraceWall.nonpole_of_fibre_coe hyfib
+      have hK0 : data.K y = 0 := Finsupp.notMem_support_iff.mp
+        (fun hc => hnotS₀ y hy (Finset.mem_union_right _ hc))
+      have hKord : meromorphicOrderAt (deriv (f.toFun ∘ (chartAt (H := ℂ) y).symm))
+          ((chartAt (H := ℂ) y) y) = 0 := by
+        have h := data.order_eq y
+        rw [hω, formOrderW_differentialForm] at h
+        rw [h, hK0]
+        norm_num
+      exact FrameTraceWall.holoRepr_pullback_deriv_ne_zero_of_derivOrder_zero f hnp hKord
+    have hm1 : ∀ y ∈ P.xs, P.m y = 1 := by
+      intro y hy
+      rw [FrameTraceWall.patch_m_eq_localDeg hdiv P hy,
+        FrameTraceWall.localDeg_eq_one_of_deriv_ne_zero f hdiv (hPfib y hy) (hderiv y hy)]
+    have hsec : ∀ y : {a // a ∈ P.xs}, ∃ s : ℂ → ℂ, AnalyticAt ℂ s z ∧
+        s z = (chartAt (H := ℂ) y.1) y.1 ∧ deriv s z ≠ 0 ∧
+        ∀ᶠ w in 𝓝 z, f.holoRepr ((chartAt (H := ℂ) y.1).symm (s w)) = w := by
+      intro y
+      have hyfib := hPfib y.1 y.2
+      have hnp := FrameTraceWall.nonpole_of_fibre_coe hyfib
+      have hφ_an : AnalyticAt ℂ (fun ζ => f.holoRepr ((chartAt (H := ℂ) y.1).symm ζ))
+          ((chartAt (H := ℂ) y.1) y.1) :=
+        f.analyticAt_holoRepr_chartPullback_of_orderNonneg hnp
+      have hφval : (fun ζ => f.holoRepr ((chartAt (H := ℂ) y.1).symm ζ))
+          ((chartAt (H := ℂ) y.1) y.1) = z := by
+        show f.holoRepr ((chartAt (H := ℂ) y.1).symm ((chartAt (H := ℂ) y.1) y.1)) = z
+        rw [(chartAt (H := ℂ) y.1).left_inv (mem_chart_source ℂ y.1)]
+        exact FrameTraceWall.holoRepr_of_fibre_coe hyfib
+      obtain ⟨s, h1, h2, h3, h4⟩ := exists_planar_section hφ_an (hderiv y.1 y.2) hφval
+      exact ⟨s, h1, h2, h3, h4⟩
+    choose sfun hs_an hs_base hs_dne hrinv using hsec
+    refine FrameTraceWall.analyticAt_valueTrace_of_sections F f hdiv P
+      (fun y : {a // a ∈ P.xs} => y.1) Subtype.val_injective ?_ (fun i => hm1 i.1 i.2)
+      sfun hs_an hs_base hrinv ?_
+    · intro y
+      constructor
+      · intro hy
+        exact ⟨⟨y, hy⟩, rfl⟩
+      · rintro ⟨i, rfl⟩
+        exact i.2
+    · intro i
+      have h0 : F.orderAtPoint i.1 = 0 := Finsupp.notMem_support_iff.mp
+        (fun hc => hnotS₀ i.1 i.2 (Finset.mem_union_left _ hc))
+      exact le_of_eq h0.symm
+  -- `hres`: the per-centre cluster residue, re-read over the saturated `S`
+  have hres : ∀ c ∈ C, resAt (FrameTraceWall.valueTrace F f) c
+      = ∑ a ∈ S with f.toRiemannSphere a = (((c : ℂ) : RiemannSphere)),
+          frameRes data F a := by
+    intro c hc
+    rw [(FrameTraceWall.valueTrace_meromorphicAt_and_resAt data F f hω hdiv c).2]
+    apply Finset.sum_congr ?_ (fun _ _ => rfl)
+    ext y
+    rw [FrameTraceWall.mem_fibreFinset, Finset.mem_filter]
+    exact ⟨fun hy => ⟨hfibS c hc y hy, hy⟩, fun hy => hy.2⟩
+  -- `hcover`: every finite `f`-value of `S` is exceptional
+  have hcover : (S.image f.toRiemannSphere).erase OnePoint.infty
+      ⊆ C.image (fun c : ℂ => ((c : ℂ) : RiemannSphere)) := by
+    intro v hv
+    rw [Finset.mem_erase] at hv
+    obtain ⟨hvne, hvmem⟩ := hv
+    obtain ⟨a, haS, hav⟩ := Finset.mem_image.mp hvmem
+    have hnp : 0 ≤ f.orderAtPoint a := by
+      by_contra h
+      rw [f.toRiemannSphere_of_pole (not_le.mp h)] at hav
+      exact hvne hav.symm
+    rw [f.toRiemannSphere_of_nonneg hnp] at hav
+    have hC : f.holoRepr a ∈ C := by
+      rcases Finset.mem_union.mp haS with h01 | hinfty
+      · rcases Finset.mem_union.mp h01 with h0 | hbi
+        · exact hmemC a h0 hnp
+        · obtain ⟨c, hcC, hcfib⟩ := Finset.mem_biUnion.mp hbi
+          have hcv := FrameTraceWall.mem_fibreFinset.mp hcfib
+          rw [FrameTraceWall.holoRepr_of_fibre_coe hcv]
+          exact hcC
+      · -- an `∞`-fibre point is a pole, contradicting `0 ≤ order`
+        exfalso
+        have hpole := FrameTraceWall.mem_fibreFinset.mp hinfty
+        rw [f.toRiemannSphere_of_nonneg hnp] at hpole
+        exact OnePoint.coe_ne_infty _ hpole
+    rw [← hav]
+    exact Finset.mem_image_of_mem _ hC
+  -- `hinf`: Lemma 3.2 at `∞`, re-read over the saturated `S`
+  have hinf : resAtInfty (FrameTraceWall.valueTrace F f) ρ
+      = ∑ a ∈ S with f.toRiemannSphere a = OnePoint.infty, frameRes data F a := by
+    rw [FrameTraceWall.valueTrace_resAtInfty_df data F f hω hdiv C hρ hball hoff]
+    apply Finset.sum_congr ?_ (fun _ _ => rfl)
+    ext y
+    rw [FrameTraceWall.mem_fibreFinset, Finset.mem_filter]
+    constructor
+    · intro hy
+      exact ⟨Finset.mem_union_right _ (FrameTraceWall.mem_fibreFinset.mpr hy), hy⟩
+    · exact fun hy => hy.2
+  -- assemble
+  refine ⟨S, ?_, ⟨{
+      T := FrameTraceWall.valueTrace F f
+      C := C
+      ρ := ρ
+      hρ := hρ
+      hball := hball
+      hoff := hoff
+      hmero := fun c _ =>
+        (FrameTraceWall.valueTrace_meromorphicAt_and_resAt data F f hω hdiv c).1
+      hres := hres
+      hcover := hcover
+      hinf := hinf }⟩⟩
+  calc F.div.support ∪ data.K.support = S₀ := rfl
+    _ ⊆ S₀ ∪ C.biUnion
+        (fun c => FrameTraceWall.fibreFinset f hdiv (((c : ℂ) : RiemannSphere))) :=
+      Finset.subset_union_left
+    _ ⊆ S := Finset.subset_union_left
 
 /-- **The `LaurentForm` wall conclusion** (proven over `exists_frameTraceFunctionData_df`):
 the partial-fraction form of the value trace with its two residue transports. -/
@@ -767,6 +934,13 @@ theorem exists_canonicalData_frameTraceHypothesis :
   obtain ⟨K, hK⟩ := exists_differentialForm_divisor f (differentialForm_ne_zero hf)
   exact ⟨canonicalForm17DataOfDivisor f hf K hK,
     frameTraceHypothesis_of_df f hf (canonicalForm17DataOfDivisor f hf K hK) rfl⟩
+
+/-- **The keystone atom, unconditional**: a canonical `ω₀ = df` datum satisfying its own
+residue atom `∑_{p ∈ supp(div F) ∪ supp K} Res_p(F·ω₀) = 0` (for EVERY global meromorphic
+`F`) exists on every compact connected Riemann surface. -/
+theorem exists_canonicalData_residueAtom :
+    ∃ data : CanonicalForm17Data X, data.ResidueAtom :=
+  exists_residueAtom_of_exists_frameTrace exists_canonicalData_frameTraceHypothesis
 
 end Dolbeault
 
