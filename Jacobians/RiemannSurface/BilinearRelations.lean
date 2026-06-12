@@ -234,6 +234,25 @@ theorem arc_R1_of_genus_le_one (hg : genus X ≤ 1)
   arc_R1_of_periodMatrix_symm loops cω
     (arcPeriodMatrix_symm_of_genus_le_one hg loops _) η ζ
 
+/-- **R2 is vacuous at genus 0** (given any `Fin (genus X)`-indexed ℂ-basis
+of forms): there is no nonzero holomorphic 1-form to test. Companion of
+`arc_R1_of_genus_le_one` for the genus-0 witness. -/
+theorem arc_R2_of_genus_eq_zero (hg : genus X = 0)
+    (loops : Fin (2 * genus X) → AnalyticLoop X x₀)
+    (cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (η : HolomorphicOneForm X) (hη : η ≠ 0) :
+    0 < (Complex.I *
+        Q (arcPeriodVec loops η) (conjArcPeriodVec loops η)).re := by
+  exfalso
+  apply hη
+  haveI : IsEmpty (Fin (genus X)) := by
+    rw [hg]
+    exact Fin.isEmpty
+  have hexp : η = ∑ i, cω.equivFun η i • cω i := by
+    conv_lhs => rw [← cω.equivFun.symm_apply_apply η]
+    rw [cω.equivFun_symm_apply]
+  rw [hexp, Finset.univ_eq_empty, Finset.sum_empty]
+
 /-- **R2 collapse (Brick 2).** If the arc-period Gram form `I•(AᵀB̄ − BᵀĀ)`
 of one ℂ-basis of holomorphic 1-forms is positive definite, then the `R2`
 field of `PeriodCycleBasis` holds: the Hodge quadratic form is strictly
