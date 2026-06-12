@@ -1,0 +1,58 @@
+# SVKGEN lane — issue #171 B1: puncture-lasso generation
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 3, Package 7; route: B1_GENERATION_ROUTE.md)
+
+Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243.
+
+## 2026-06-12 session 1
+
+- Route doc landed (B1_GENERATION_ROUTE.md, posted to issue #171): G1-G5,
+  generation-half-only extraction, G4 normal-closure decision pinned.
+- G1 DONE: `Jacobians/Topology/CoverGeneration.lean` —
+  - `fromPath_mem_of_loops_mem`: over an open cover with path-connected
+    pairwise intersections all containing x₀, a subgroup containing every
+    single-cover-set loop class contains every loop class (generation half
+    of van Kampen, membership form). Extraction of the FiniteGoodCover
+    engine with the anchor layer removed; compiled clean on first attempt.
+  - `fromPath_mem_of_two_open`: the classical two-open corollary (ι = Bool).
+  - Kernel: both standard-3. Umbrella wired (Jacobians/Topology.lean).
+- Next (G2): cell computation — spoke-conjugated loop in a once-punctured
+  cell is a lasso power, via pi1PuncturedPlaneIntAt + pi1MulEquivOfHomeomorph.
+
+## 2026-06-12 session 1 (cont.)
+
+- PR #212 (G1) opened; CI green (22m55s).
+- G2 DONE: `Jacobians/Topology/CellLassoPower.lean` —
+  `fromPath_eq_cellLasso_zpow`: a loop staying inside a cell homeomorphic to
+  a once-punctured plane is, in pi1 of the ambient space, an integer power of
+  the cell lasso (the inclusion image of the phi-pullback of circleAround).
+  Assembly: pi1PuncturedPlaneIntAt + generator pin + pi1MulEquivOfHomeomorph
+  + mapOfEq functoriality; helpers pathCorestrict / inclusionCM /
+  mapOfEq_inclusionCM_pathCorestrict. Kernel: standard-3. Umbrella wired.
+- Pushed to the same branch (PR #212 becomes G1+G2; un-reviewed, so one
+  SVKGEN PR keeps review surface in one place).
+- Next (G3/G4): half-plane homeo toolkit + separating-line induction in the
+  normal-closure form.
+
+- G3 toolkit (half 1) DONE: `Jacobians/Topology/HalfPlaneHomeo.lean` —
+  `halfPlaneHomeo c : {z : ℂ // z.re < c} ≃ₜ ℂ`, explicit componentwise
+  (−log(c−Re), Im) with inverse (c−exp(−Re), Im). Kernel standard-3.
+  Remaining toolkit: finite-puncture restriction of a homeo; then the G3
+  separating-line induction + G4 normal-closure bookkeeping.
+- Note from main: TD-lane discharged TR-DISC (#214) and the Abel P-block
+  completed (#213) — the cycle-basis program is converging from the other
+  side; B1 generation remains on the critical path for the slit-sheet route.
+
+- REVIEW FLAG (maintainer pre-verification, PR #212): the sed-based umbrella
+  wiring silently no-opped — Jacobians/Topology.lean never imported the new
+  modules, so per-file umbrella checks were green VACUOUSLY and root CI never
+  compiled them. Fixed with the Edit tool + grep verification; root build now
+  8,962 jobs (+3 over main). Gotcha: always grep-verify sed edits or use the
+  Edit tool; vacuous-green umbrella checks are invisible without a job-count
+  comparison.
+- Maintainer pre-verification on #210/#211: CLEAN, awaiting external review.
+
+- n=1 anchor DONE: `closure_circleAround_eq_top` (CellLassoPower.lean) —
+  pi1 of the once-punctured plane is generated (plain closure) by the
+  explicit circle class. Standard-3. This is the base case of the packaged
+  induction (route doc G3/G4 notes, option (b)); the induction step is the
+  next session-scale item.
