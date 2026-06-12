@@ -231,4 +231,252 @@ theorem pairOmega_apply (σ : ↥(OneFormsZeroOne X)) (α : HolomorphicOneForms 
     pairOmega 𝔇 σ α
       = resIntegral 𝔇 (pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 α)) := rfl
 
+/-! ## P4 — the Stokes kill: `∫_X ∂̄u ∧ ω = 0`
+
+Per chart: the cutoff pullback of `∂̄u` is the planar `∂̄` of the chart read of `u`
+(`cutoffPullback_dbarL`, the chart-bridge + chain-rule computation), the Leibniz split
+`ρ̃ⱼ·∂̄ũⱼ·gⱼ = ∂̄(ρ̃ⱼ·ũⱼ·gⱼ) − ∂̄ρ̃ⱼ·(ũⱼ·gⱼ)` (its total-derivative part dying by the planar
+Stokes atom), and then the **proven** relocation + PoU-reinsertion kill of `CoboundaryVanish`
+at the global weight `β = u`. -/
+
+/-- **P4a — the cutoff pullback of `∂̄u` is the planar `∂̄` of the chart read of `u`** on the
+chart image of the cover disk.  The intrinsic Wirtinger scalar transported to the cover chart:
+chart bridge at `x`'s own chart (`dbar_apply_one_eq_dbarDisk`), conjugate-homogeneity of the
+`(0,1)` fiber (`proj01_eq_conj_smul`), the frame identity
+(`frameVector_eq_deriv_transition_symm`), and the Wirtinger chain rule reassembling the two
+`conj` factors. -/
+theorem cutoffPullback_dbarL {u : SmoothCFunctions X} {j : 𝔇.toFiniteCover.ι} {x : X}
+    (hx : x ∈ (𝔇.U j : Set X)) :
+    𝔇.cutoffPullback j (dbarL u) (chartMap 𝔇 j x)
+      = DbarDisk.dbar (fun ζ => u ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) := by
+  set ej := extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) with hej
+  set ex := extChartAt 𝓘(ℝ, ℂ) x with hexx
+  set z₀ := chartMap 𝔇 j x with hz₀
+  set σtr := (ex : X → ℂ) ∘ (ej.symm : ℂ → X) with hσtr
+  have hxsrc : x ∈ ej.source := 𝔇.subset_chart_source j hx
+  have hsymm : ej.symm z₀ = x := ej.left_inv hxsrc
+  -- The disk bump is `1` on the disk.
+  have hball : ej x ∈ Metric.ball (ej (𝔇.center j)) (𝔇.radius j) := by
+    have h := hx
+    rw [𝔇.isDisk j] at h
+    exact h.1
+  have hχ : (𝔇.diskBump j) z₀ = 1 :=
+    (𝔇.diskBump j).one_of_mem_closedBall (Metric.ball_subset_closedBall hball)
+  -- Unfold the cutoff pullback at `z₀` and substitute the frame vector.
+  rw [show 𝔇.cutoffPullback j (dbarL u) z₀ = ((𝔇.diskBump j) z₀ : ℝ) •
+      ((dbarL u) (ej.symm z₀)) ((Bundle.Trivialization.symmL ℝ
+        (trivializationAt ℂ (TangentSpace (𝓘(ℝ, ℂ))) (𝔇.center j)) (ej.symm z₀)) (1 : ℂ))
+    from rfl, hχ, hsymm, one_smul,
+    frameVector_eq_deriv_transition_symm (𝔇.center j) x hxsrc]
+  -- Re-read the left side as `proj01 (mfderiv u x)` applied to the (planar) `deriv σtr (ej x)`,
+  -- so the conjugate-homogeneity + chart bridge apply.
+  show proj01 (mfderiv 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⇑u) x) (deriv σtr (ej x))
+    = DbarDisk.dbar (fun ζ => u ((chartAt ℂ (𝔇.center j)).symm ζ)) z₀
+  rw [proj01_eq_conj_smul, dbar_apply_one_eq_dbarDisk u x]
+  -- Read the right-hand side through the holomorphic inverse transition `σtr = eₓ ∘ ej.symm`.
+  have hσdiff : DifferentiableAt ℂ σtr z₀ :=
+    differentiableAt_chartTransition_symm (𝔇.center j) x hxsrc
+  have hσz₀ : σtr z₀ = ex x := by
+    rw [hσtr]
+    simp only [Function.comp_apply, hsymm]
+  have hev : (fun ζ => u ((chartAt ℂ (𝔇.center j)).symm ζ))
+      =ᶠ[𝓝 z₀] (fun ζ => u (ex.symm ζ)) ∘ σtr := by
+    have hcont : ContinuousAt ej.symm z₀ :=
+      continuousAt_extChartAt_symm'' (ej.map_source hxsrc)
+    have hmem : ∀ᶠ ζ in 𝓝 z₀, ej.symm ζ ∈ ex.source := by
+      refine hcont.preimage_mem_nhds ?_
+      rw [hsymm]
+      exact (isOpen_extChartAt_source x).mem_nhds (mem_extChartAt_source x)
+    filter_upwards [hmem] with ζ hζ
+    simp only [Function.comp_apply, hσtr]
+    rw [ex.left_inv hζ]
+    rfl
+  have hudiff : DifferentiableAt ℝ (fun ζ => u (ex.symm ζ)) (σtr z₀) := by
+    rw [hσz₀]
+    exact (contDiffAt_chartSymmRead u.contMDiff
+      ((chartAt ℂ x).map_source (mem_chart_source ℂ x))).differentiableAt (by simp)
+  rw [dbar_congr_of_eventuallyEq hev,
+    dbarDisk_comp_holo (fun ζ => u (ex.symm ζ)) σtr z₀ hudiff hσdiff, hσz₀]
+  rfl
+
+/-- **P4b — the per-chart Leibniz/Stokes step at a global smooth `β`** (the `∂̄u`-pairing
+analogue of `integral_pouCoeff_glueCoeff_of_coboundary`): the `j`-th summand of the pairing
+integral is, after the Leibniz split
+
+  `ρ̃ⱼ·∂̄β̃ⱼ·gⱼ = ∂̄(ρ̃ⱼ·(β̃ⱼ·gⱼ)) − ∂̄ρ̃ⱼ·(β̃ⱼ·gⱼ)`
+
+and the planar Stokes atom on the total-derivative term, minus the PoU-reinserted overlap sum
+ready for the (proven) relocation. -/
+theorem integral_pouCoeff_dbarRead_mul {β : X → ℂ}
+    (hβ : ContMDiff 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) β) {g : 𝔇.toFiniteCover.ι → ℂ → ℂ}
+    (hg : IsOneZeroCoeff 𝔇 g) (j : 𝔇.toFiniteCover.ι) :
+    ∫ z, pouCoeff 𝔇 j z
+        * (DbarDisk.dbar (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ)) z * g j z)
+      = - ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+  have hBsm := contDiffAt_pouAverageRead_mul 𝔇 hβ hg j
+  -- the everywhere pointwise Leibniz identity
+  have hpt : ∀ z, pouCoeff 𝔇 j z
+      * (DbarDisk.dbar (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ)) z * g j z)
+      = DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+        - DbarDisk.dbar (pouCoeff 𝔇 j) z
+            * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) := by
+    intro z
+    by_cases hzU : z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hzU
+      have hzt : chartMap 𝔇 j x ∈ (chartAt ℂ (𝔇.center j)).target :=
+        (chartAt ℂ (𝔇.center j)).map_source (mem_chartSource_of_mem_U 𝔇 hxU)
+      have hβd : DifferentiableAt ℝ
+          (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ)) (chartMap 𝔇 j x) :=
+        (contDiffAt_chartSymmRead hβ hzt).differentiableAt (by simp)
+      have hgd : DifferentiableAt ℝ (g j) (chartMap 𝔇 j x) :=
+        ((hg.1 j x hxU).restrictScalars (𝕜 := ℝ)).differentiableAt
+      have hdbarB : DbarDisk.dbar
+            (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ) (chartMap 𝔇 j x)
+          = DbarDisk.dbar (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ))
+              (chartMap 𝔇 j x) * g j (chartMap 𝔇 j x) := by
+        rw [dbar_mul hβd hgd,
+          DbarDisk.dbar_eq_zero_of_differentiableAt (hg.1 j x hxU).differentiableAt,
+          mul_zero, add_zero]
+      have hdbarPB : DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) (chartMap 𝔇 j x)
+          = DbarDisk.dbar (pouCoeff 𝔇 j) (chartMap 𝔇 j x)
+              * (β ((chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x))
+                  * g j (chartMap 𝔇 j x))
+            + pouCoeff 𝔇 j (chartMap 𝔇 j x)
+              * DbarDisk.dbar
+                  (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)
+                  (chartMap 𝔇 j x) :=
+        dbar_mul ((contDiff_pouCoeff 𝔇 j).differentiable (by simp) _)
+          ((hBsm _ ⟨x, hxU, rfl⟩).differentiableAt (by simp))
+      rw [hdbarPB, hdbarB]
+      ring
+    · have hzs : z ∉ chartMap 𝔇 j '' tsupport (cechPoU 𝔇 j) := fun hc =>
+        hzU (Set.image_mono (fun y hy => cechPoU_subordinate 𝔇 j hy) hc)
+      have hP0 : pouCoeff 𝔇 j z = 0 := Set.indicator_of_notMem hzU _
+      have hD0 : DbarDisk.dbar (pouCoeff 𝔇 j) z = 0 :=
+        dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hzs
+      have hPB0 : DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+          * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z = 0 := by
+        refine dbar_eq_zero_of_eventuallyEq_zero ?_
+        filter_upwards [(isCompact_image_tsupport_cechPoU 𝔇
+          j).isClosed.isOpen_compl.mem_nhds hzs] with ζ hζ
+        rw [pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hζ, zero_mul]
+      rw [hP0, hD0, hPB0, zero_mul, zero_mul, sub_zero]
+  -- integrability bookkeeping (the `CoboundaryVanish` clearance pattern)
+  have hDBcd : ContDiff ℝ (⊤ : ℕ∞) fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+    contDiff_of_chartImage_clearance 𝔇
+      (fun z hz => (ChartDiskCover.contDiffAt_dbar_chartDisk
+        (contDiff_pouCoeff 𝔇 j).contDiffAt).mul (hBsm z hz))
+      (fun z hz => by rw [dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hz, zero_mul])
+  have hDBcs : HasCompactSupport fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+    (DbarDisk.hasCompactSupport_dbar (hasCompactSupport_pouCoeff 𝔇 j)).mul_right
+  have hI1 : Integrable fun z => DbarDisk.dbar (pouCoeff 𝔇 j) z
+      * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+    hDBcd.continuous.integrable_of_hasCompactSupport hDBcs
+  have hPBcd : ContDiff ℝ (⊤ : ℕ∞) fun ζ => pouCoeff 𝔇 j ζ
+      * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ) :=
+    contDiff_pouCoeff_mul 𝔇 hBsm
+  have hPBcs : HasCompactSupport fun ζ => pouCoeff 𝔇 j ζ
+      * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ) :=
+    (hasCompactSupport_pouCoeff 𝔇 j).mul_right
+  have hI2 : Integrable fun z => DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+      * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z :=
+    (DbarDisk.continuous_dbar hPBcd).integrable_of_hasCompactSupport
+      (DbarDisk.hasCompactSupport_dbar hPBcs)
+  calc ∫ z, pouCoeff 𝔇 j z
+      * (DbarDisk.dbar (fun ζ => β ((chartAt ℂ (𝔇.center j)).symm ζ)) z * g j z)
+      = ∫ z, (DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z
+          - DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) :=
+        integral_congr_ae (Eventually.of_forall hpt)
+    _ = (∫ z, DbarDisk.dbar (fun ζ => pouCoeff 𝔇 j ζ
+            * (β ((chartAt ℂ (𝔇.center j)).symm ζ) * g j ζ)) z)
+          - ∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) :=
+        integral_sub hI2 hI1
+    _ = - ∫ z, DbarDisk.dbar (pouCoeff 𝔇 j) z
+          * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z) := by
+        rw [integral_dbar_eq_zero hPBcd hPBcs, zero_sub]
+    _ = - ∫ z, ∑ k, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+        congr 1
+        refine integral_congr_ae (Eventually.of_forall fun z => ?_)
+        simp only [← Finset.sum_mul, sum_rhoC_apply, one_mul]
+    _ = - ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) := by
+        congr 1
+        refine integral_finsetSum Finset.univ fun k _ => ?_
+        have hcd : ContDiff ℝ (⊤ : ℕ∞) fun z =>
+            rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+              * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+                  * (β ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) :=
+          contDiff_of_chartImage_clearance 𝔇
+            (fun z hz => (contDiffAt_chartSymmRead (rhoC 𝔇 k).contMDiff
+              (chartMap_image_U_subset_target 𝔇 j hz)).mul hDBcd.contDiffAt)
+            (fun z hz => by
+              rw [dbar_pouCoeff_eq_zero_of_notMem_image_tsupport 𝔇 hz, zero_mul, mul_zero])
+        exact hcd.continuous.integrable_of_hasCompactSupport hDBcs.mul_left
+
+/-- **P4 — the Stokes kill.**  The period pairing annihilates the image of `∂̄`:
+
+  `∮_X ∂̄u ∧ ω = 0`
+
+for every real-smooth `u : X → ℂ` and every holomorphic `(1,0)` slot family.  Per chart the
+integrand is `ρ̃ⱼ·∂̄ũⱼ·gⱼ` (P4a); Leibniz + planar Stokes (P4b), the proven relocation
+(`integral_overlapTerm_relocate` at `β = u`), and the PoU-reinsertion kill
+(`sum_integral_relocated_eq_zero`) finish exactly as in Forster §17.3 step 5. -/
+theorem pairFormL_dbarL {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g)
+    (u : SmoothCFunctions X) :
+    pairFormL 𝔇 hg ⟨dbarL u, dbarL_mem_zeroOne u⟩ = 0 := by
+  have happly : pairFormL 𝔇 hg ⟨dbarL u, dbarL_mem_zeroOne u⟩
+      = ∑ j, ∫ z, pouCoeff 𝔇 j z * (𝔇.cutoffPullback j (dbarL u) z * g j z) := rfl
+  rw [happly]
+  -- replace the cutoff pullback of `∂̄u` by the planar `∂̄` of the chart read (P4a)
+  have hcongr : ∀ j, (∫ z, pouCoeff 𝔇 j z * (𝔇.cutoffPullback j (dbarL u) z * g j z))
+      = ∫ z, pouCoeff 𝔇 j z
+          * (DbarDisk.dbar (fun ζ => u ((chartAt ℂ (𝔇.center j)).symm ζ)) z * g j z) := by
+    intro j
+    refine integral_congr_ae (Eventually.of_forall fun z => ?_)
+    dsimp only
+    by_cases hzU : z ∈ chartMap 𝔇 j '' (𝔇.U j : Set X)
+    · obtain ⟨x, hxU, rfl⟩ := hzU
+      rw [cutoffPullback_dbarL 𝔇 hxU]
+    · rw [show pouCoeff 𝔇 j z = 0 from Set.indicator_of_notMem hzU _, zero_mul, zero_mul]
+  calc ∑ j, ∫ z, pouCoeff 𝔇 j z * (𝔇.cutoffPullback j (dbarL u) z * g j z)
+      = ∑ j, ∫ z, pouCoeff 𝔇 j z
+          * (DbarDisk.dbar (fun ζ => u ((chartAt ℂ (𝔇.center j)).symm ζ)) z * g j z) :=
+        Finset.sum_congr rfl fun j _ => hcongr j
+    _ = ∑ j, - ∑ k, ∫ z, rhoC 𝔇 k ((chartAt ℂ (𝔇.center j)).symm z)
+          * (DbarDisk.dbar (pouCoeff 𝔇 j) z
+              * (u ((chartAt ℂ (𝔇.center j)).symm z) * g j z)) :=
+        Finset.sum_congr rfl fun j _ =>
+          integral_pouCoeff_dbarRead_mul 𝔇 u.contMDiff hg j
+    _ = - ∑ j, ∑ k, ∫ z, pouCoeff 𝔇 k z
+          * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+              * (u ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) := by
+        rw [← Finset.sum_neg_distrib]
+        exact Finset.sum_congr rfl fun j _ => congrArg Neg.neg <|
+          Finset.sum_congr rfl fun k _ =>
+            integral_overlapTerm_relocate 𝔇 u.contMDiff hg j k
+    _ = - ∑ k, ∑ j, ∫ z, pouCoeff 𝔇 k z
+          * (DbarDisk.dbar (fun ζ => rhoC 𝔇 j ((chartAt ℂ (𝔇.center k)).symm ζ)) z
+              * (u ((chartAt ℂ (𝔇.center k)).symm z) * g k z)) := by
+        rw [Finset.sum_comm]
+    _ = 0 := by
+        rw [Finset.sum_eq_zero fun k _ => sum_integral_relocated_eq_zero 𝔇 u.contMDiff hg k,
+          neg_zero]
+
+/-- **P4 at the canonical slot**: `∮_X ∂̄u ∧ α = 0` for every global holomorphic 1-form. -/
+theorem pairOmega_dbarL (u : SmoothCFunctions X) (α : HolomorphicOneForms X) :
+    pairOmega 𝔇 ⟨dbarL u, dbarL_mem_zeroOne u⟩ α = 0 :=
+  pairFormL_dbarL 𝔇 (isOneZeroCoeff_omegaCoeff 𝔇 α) u
+
 end Jacobians.Dolbeault.FineResidue
