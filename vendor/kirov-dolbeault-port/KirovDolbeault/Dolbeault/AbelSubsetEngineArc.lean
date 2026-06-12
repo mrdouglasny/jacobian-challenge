@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michael R Douglas
 -/
 import KirovDolbeault.Dolbeault.AbelSubsetEngineLocal
+import KirovDolbeault.Dolbeault.SegmentPeriod
 
 /-!
 # Abel ⊆ campaign, E3: the per-arc weak solution (Forster 20.5)
@@ -405,6 +406,9 @@ other arcs' endpoints. -/
 theorem exists_arcWeakSolution_avoiding (A : Finset X) {a b : X}
     (ha : a ∈ (𝔇.U j₀ : Set X)) (hb : b ∈ (𝔇.U j₀ : Set X)) (hab : a ≠ b) :
     ∃ W : ArcWeakSolution 𝔇 (Finsupp.single b 1 - Finsupp.single a 1),
+      (∀ α : HolomorphicOneForms X,
+        FineResidue.pairOmega 𝔇 W.σ α
+          = (Real.pi : ℂ) * segPeriod α (𝔇.center j₀) (chartMap 𝔇 j₀ a) (chartMap 𝔇 j₀ b)) ∧
       ∀ q ∈ A, q ≠ a →
         AnalyticAt ℂ (fun ζ => W.F ((chartAt (H := ℂ) q).symm ζ)) ((chartAt (H := ℂ) q) q)
         ∧ (W.σ : SmoothCOneForms X) q = 0 := by
@@ -769,6 +773,122 @@ theorem exists_arcWeakSolution_avoiding (A : Finset X) {a b : X}
           field_simp [hsub]
         rw [hvzb]
         ring
+  -- E4 pairing value: collapse to chart `j₀` and apply the planar atom
+  have hσK : ∀ y, y ∉ K → σ₀ y = 0 := by
+    intro y hyK
+    have hψ0ev : ⇑ψl =ᶠ[𝓝 y] fun _ => (0 : ℂ) := by
+      filter_upwards [hKcl.isOpen_compl.mem_nhds hyK] with y' hy'
+      exact hψzero y' hy'
+    have hdb : dbarL ψl y = 0 := dbarL_apply_eq_zero_of_eventuallyEq_const ψl hψ0ev
+    rw [hσ₀, cSmulForm_apply, hdb]
+    module
+  have hpair : ∀ α : HolomorphicOneForms X,
+      FineResidue.pairOmega 𝔇 (⟨σ₀, hσmem⟩ : ↥(OneFormsZeroOne X)) α
+        = (Real.pi : ℂ) * segPeriod α (𝔇.center j₀) za zb := by
+    intro α
+    set g : ℂ → ℂ := omegaCoeff 𝔇 α j₀ with hgdef
+    set ballc := Metric.ball (e (𝔇.center j₀)) (𝔇.radius j₀) with hballc
+    have hball_tgt : ∀ {w : ℂ}, w ∈ ballc → w ∈ e.target := fun {w} hw =>
+      𝔇.closedBall_subset_target j₀ (Metric.ball_subset_closedBall hw)
+    have hchart_tgt : ∀ {w : ℂ}, w ∈ ballc → w ∈ (chartAt ℂ (𝔇.center j₀)).target := by
+      intro w hw
+      have hyU : e.symm w ∈ (𝔇.U j₀ : Set X) := symm_mem_U_of_mem_ball 𝔇 hw
+      have h := (chartAt ℂ (𝔇.center j₀)).map_source (mem_chartSource_of_mem_U 𝔇 hyU)
+      rwa [show (chartAt ℂ (𝔇.center j₀)) (e.symm w) = w from e.right_inv (hball_tgt hw)] at h
+    -- `∂̄ψ` vanishes off the closed tube
+    have hψ_supp0 : ∀ {w : ℂ}, w ∉ cthickening T.δ (segment ℝ za zb) →
+        DbarDisk.dbar T.psiC w = 0 := by
+      intro w hw
+      refine dbar_eq_zero_of_eventuallyEq_const (c := 0) ?_
+      filter_upwards [(isClosed_cthickening).isOpen_compl.mem_nhds hw] with w' hw'
+      show ((T.ψ w' : ℝ) : ℂ) = 0
+      rw [T.ψ_zero fun hth => hw' (thickening_subset_cthickening _ _ hth)]
+      simp
+    -- pointwise: the chart-`j₀` integrand is `Hfun·∂̄ψ·g`
+    have hpt : ∀ z, pairCoeff 𝔇 σ₀ (omegaCoeff 𝔇 α) j₀ z
+        = T.Hfun z * DbarDisk.dbar T.psiC z * g z := by
+      intro z
+      by_cases hzc : z ∈ ballc
+      · have hyU : e.symm z ∈ (𝔇.U j₀ : Set X) := symm_mem_U_of_mem_ball 𝔇 hzc
+        have hzx' : chartMap 𝔇 j₀ (e.symm z) = z := e.right_inv (hball_tgt hzc)
+        have hHread' : Hl (e.symm z) = T.Hfun z := chartLift_symm_read 𝔇 j₀ hzc
+        have hcut : 𝔇.cutoffPullback j₀ σ₀ z
+            = T.Hfun z * 𝔇.cutoffPullback j₀ (dbarL ψl) z := by
+          rw [hσ₀, cutoffPullback_cSmulForm]
+          congr 1
+        have hcdb : 𝔇.cutoffPullback j₀ (dbarL ψl) z = DbarDisk.dbar T.psiC z := by
+          have h1 := cutoffPullback_dbarL 𝔇 (u := ψl) hyU
+          rw [hzx'] at h1
+          rw [h1]
+          have hev : (fun ζ => ψl ((chartAt ℂ (𝔇.center j₀)).symm ζ))
+              =ᶠ[𝓝 z] T.psiC := by
+            filter_upwards [Metric.isOpen_ball.mem_nhds hzc] with ζ hζc
+            exact chartLift_symm_read 𝔇 j₀ hζc
+          exact dbar_congr_of_eventuallyEq hev
+        rw [pairCoeff_apply, hcut, hcdb]
+      · have hzth : z ∉ cthickening T.δ (segment ℝ za zb) := fun hc => hzc (htube_ball hc)
+        have hcut0 : 𝔇.cutoffPullback j₀ σ₀ z = 0 := by
+          by_contra hne
+          obtain ⟨hztgt, hzS⟩ := cutoffPullback_ne_zero 𝔇 hσK hne
+          obtain ⟨w', hw', heq⟩ := hzS
+          have hw't : w' ∈ e.target :=
+            𝔇.closedBall_subset_target j₀
+              (Metric.ball_subset_closedBall (htube_ball hw'))
+          have hzw : z = w' := by
+            have h1 : e (e.symm z) = z := e.right_inv hztgt
+            have h2 : e (e.symm w') = w' := e.right_inv hw't
+            rw [← h1, ← heq]
+            exact h2
+          exact hzc (hzw ▸ htube_ball hw')
+        rw [pairCoeff_apply, hcut0, zero_mul, hψ_supp0 hzth]
+        ring
+    -- the planar atom hypotheses
+    have hψcsupp : HasCompactSupport T.psiC := by
+      refine HasCompactSupport.intro (K := cthickening T.δ (segment ℝ za zb))
+        ((isCompact_segment za zb).cthickening) ?_
+      intro w hw
+      show ((T.ψ w : ℝ) : ℂ) = 0
+      rw [T.ψ_zero fun hth => hw (thickening_subset_cthickening _ _ hth)]
+      simp
+    have hψUsub : tsupport T.psiC ⊆ ballc := by
+      have hsupp_sub : Function.support T.psiC ⊆ thickening T.δ (segment ℝ za zb) := by
+        intro w hw
+        by_contra hth
+        refine hw ?_
+        show ((T.ψ w : ℝ) : ℂ) = 0
+        rw [T.ψ_zero hth]
+        simp
+      calc tsupport T.psiC
+          ⊆ closure (thickening T.δ (segment ℝ za zb)) := closure_mono hsupp_sub
+        _ ⊆ cthickening T.δ (segment ℝ za zb) := closure_thickening_subset_cthickening _ _
+        _ ⊆ ballc := htube_ball
+    have hψ1 : Set.EqOn T.psiC 1 (thickening (T.δ / 2) (segment ℝ za zb)) := by
+      intro w hw
+      show ((T.ψ w : ℝ) : ℂ) = 1
+      rw [T.ψ_one (thickening_subset_cthickening _ _ hw)]
+      simp
+    have hHθ : ∀ ζ, DbarDisk.dbar T.psiC ζ ≠ 0 → T.Hfun ζ = slitLogRatio za zb ζ := by
+      intro ζ hζ
+      have hζth : ζ ∉ thickening (T.δ / 2) (segment ℝ za zb) := by
+        intro hth
+        refine hζ (dbar_eq_zero_of_eventuallyEq_const (c := 1) ?_)
+        filter_upwards [isOpen_thickening.mem_nhds hth] with w hw
+        exact hψ1 hw
+      have hζ4 : ζ ∉ thickening (T.δ / 4) (segment ℝ za zb) := fun h4 =>
+        hζth (thickening_mono (by linarith [T.δ_pos]) _ h4)
+      show ((T.θ ζ : ℝ) : ℂ) * slitLogRatio za zb ζ = slitLogRatio za zb ζ
+      rw [T.θ_one hζ4]
+      simp
+    have hgdiff : DifferentiableOn ℂ g ballc := fun w hw =>
+      (coeffAt_analyticAt α (𝔇.center j₀)
+        (hchart_tgt hw)).differentiableAt.differentiableWithinAt
+    rw [pairOmega_apply,
+      resIntegral_pairElem_of_support 𝔇 hσmem (isOneZeroCoeff_omegaCoeff 𝔇 α) hKcl hKU hσK,
+      MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hpt),
+      integral_slitLog_dbar_mul (by linarith [T.δ_pos] : (0 : ℝ) < T.δ / 2)
+        Metric.isOpen_ball T.psiC_smooth hψcsupp hψUsub hψ1 hHθ hgdiff,
+      segPeriod, mul_assoc]
+    simp only [hgdef, omegaCoeff_apply]
   -- assemble, then discharge the avoidance conclusions
   refine ⟨{
     F := F
@@ -777,7 +897,7 @@ theorem exists_arcWeakSolution_avoiding (A : Finset X) {a b : X}
     diff_off := hdiff
     dbar_eq := hdbar
     σ_vanish := hσsupp
-    norm_form := hnorm }, ?_⟩
+    norm_form := hnorm }, hpair, ?_⟩
   intro q hqA hqa
   have hsymmq : (chartAt ℂ q).symm ((chartAt ℂ q) q) = q :=
     (chartAt ℂ q).left_inv (mem_chart_source ℂ q)
@@ -849,7 +969,7 @@ theorem exists_arcWeakSolution_avoiding (A : Finset X) {a b : X}
 theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
     (hb : b ∈ (𝔇.U j₀ : Set X)) (hab : a ≠ b) :
     Nonempty (ArcWeakSolution 𝔇 (Finsupp.single b 1 - Finsupp.single a 1)) := by
-  obtain ⟨W, -⟩ := exists_arcWeakSolution_avoiding 𝔇 j₀ ∅ ha hb hab
+  obtain ⟨W, -, -⟩ := exists_arcWeakSolution_avoiding 𝔇 j₀ ∅ ha hb hab
   exact ⟨W⟩
 
 end ArcLift
@@ -902,6 +1022,7 @@ theorem ArcWeakSolution.exists_mul {D₁ D₂ : Divisor X}
     (h₁ : ∀ x, D₂ x ≠ 0 → D₁ x = 0 → W₁.TameAt x)
     (h₂ : ∀ x, D₁ x ≠ 0 → D₂ x = 0 → W₂.TameAt x) :
     ∃ W : ArcWeakSolution 𝔇 (D₁ + D₂),
+      W.σ = W₁.σ + W₂.σ ∧
       ∀ q : X, (D₁ + D₂) q = 0 → (D₁ q = 0 → W₁.TameAt q) → (D₂ q = 0 → W₂.TameAt q) →
         W.TameAt q := by
   classical
@@ -1176,7 +1297,7 @@ theorem ArcWeakSolution.exists_mul {D₁ D₂ : Divisor X}
     diff_off := hdiff
     dbar_eq := hdbar
     σ_vanish := hσvan
-    norm_form := hnorm }, ?_⟩
+    norm_form := hnorm }, hσs, ?_⟩
   intro q hq0 ht₁ ht₂
   rw [hsum_apply] at hq0
   by_cases hq1 : D₁ q = 0
@@ -1451,7 +1572,7 @@ theorem exists_arcWeakSolution_dipoleList (S : Finset X) (L : List (X × X))
       exact ⟨W₁, hsupp₁, htame₁⟩
     · obtain ⟨j, haU, hbU⟩ := hdisk hd List.mem_cons_self
       obtain ⟨haS, hbS⟩ := hS hd List.mem_cons_self
-      obtain ⟨W₂, hW₂⟩ := exists_arcWeakSolution_avoiding 𝔇 j S haU hbU hab
+      obtain ⟨W₂, -, hW₂⟩ := exists_arcWeakSolution_avoiding 𝔇 j S haU hbU hab
       have hW₂tame : ∀ q ∈ S, q ≠ hd.1 → W₂.TameAt q :=
         fun q hq hqa => ⟨(hW₂ q hq hqa).1, (hW₂ q hq hqa).2⟩
       have h₁ : ∀ x, dipoleDiv tl x ≠ 0 → dipole hd x = 0 → W₂.TameAt x :=
@@ -1463,7 +1584,7 @@ theorem exists_arcWeakSolution_dipoleList (S : Finset X) (L : List (X × X))
           rcases eq_fst_or_snd_of_dipole_ne_zero hx with rfl | rfl
           exacts [haS, hbS]
         exact htame₁ x hxS h0
-      obtain ⟨W, hWtame⟩ := ArcWeakSolution.exists_mul W₂ W₁ h₁ h₂
+      obtain ⟨W, -, hWtame⟩ := ArcWeakSolution.exists_mul W₂ W₁ h₁ h₂
       rw [dipoleDiv_cons]
       refine ⟨W, ?_, ?_⟩
       · intro x hx
