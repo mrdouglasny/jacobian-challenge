@@ -7,7 +7,8 @@ assembly), on top of the G3/G4 engine (`CellGeneration`).
 **Main result** (`fromPath_mem_of_circleLassos_mem`, set form
 `closure_circleLassos_eq_top`): every subgroup of `π₁(ℂ ∖ T, x₀)`
 containing the classes of all **circle lassos** — spoke-conjugated
-explicit circles `p · (circleInPunctured s z) · p⁻¹` around punctures —
+explicit **isolating** circles `p · (circleInPunctured s z) · p⁻¹`
+(the open ball of twice the radius meets `T` only at `s`) —
 contains every loop class; equivalently the circle-lasso classes generate
 `π₁(ℂ ∖ T, x₀)` (plain `Subgroup.closure`).
 
@@ -68,8 +69,9 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
     (H : Subgroup (FundamentalGroup {z : ℂ // z ∉ (T : Set ℂ)} x₀))
     (hlasso : ∀ (s : ℂ), s ∈ T → ∀ (z : {w : ℂ // w ∉ (T : Set ℂ)})
       (hcirc : ∀ t : unitInterval,
-        s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ))
-      (p : Path x₀ z),
+        s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ)),
+      Metric.ball s (2 * ‖(z : ℂ) - s‖) ∩ (T : Set ℂ) ⊆ {s} →
+      ∀ p : Path x₀ z,
       FundamentalGroup.fromPath (Qmk
         (p.trans ((circleInPunctured s z hcirc).trans p.symm))) ∈ H) :
     CellSpokes T x₀ ⊆ (H : Set _) := by
@@ -254,9 +256,20 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
           congr 1
           rw [spokedClass_trans]
           exact (spokedClass_eq_transport p _).symm
+  have hzcnorm : ‖zc - s‖ = r/2 := by
+    rw [hzcsub, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+  have hisoX : Metric.ball s (2 * ‖(zcX : ℂ) - s‖) ∩ (T : Set ℂ) ⊆ {s} := by
+    intro w hw
+    have h2r : 2 * ‖(zcX : ℂ) - s‖ = r := by
+      show 2 * ‖zc - s‖ = r
+      rw [hzcnorm]
+      ring
+    rw [h2r] at hw
+    have hmem : w ∈ W ∩ (T : Set ℂ) := ⟨hball hw.1, hw.2⟩
+    rwa [hWT] at hmem
   rw [SetLike.mem_coe, hfinal]
   exact Subgroup.zpow_mem H
-    (hlasso s hsT zcX hcirc (p.trans (ρ.map (inclusionCM A).continuous))) _
+    (hlasso s hsT zcX hcirc hisoX (p.trans (ρ.map (inclusionCM A).continuous))) _
 
 /-- **B1 headline (membership form).**  Any subgroup of `π₁(ℂ ∖ T, x₀)`
 containing the classes of all spoked circle lassos contains every loop
@@ -266,8 +279,9 @@ theorem fromPath_mem_of_circleLassos_mem (T : Finset ℂ)
     (H : Subgroup (FundamentalGroup {z : ℂ // z ∉ (T : Set ℂ)} x₀))
     (hlasso : ∀ (s : ℂ), s ∈ T → ∀ (z : {w : ℂ // w ∉ (T : Set ℂ)})
       (hcirc : ∀ t : unitInterval,
-        s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ))
-      (p : Path x₀ z),
+        s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ)),
+      Metric.ball s (2 * ‖(z : ℂ) - s‖) ∩ (T : Set ℂ) ⊆ {s} →
+      ∀ p : Path x₀ z,
       FundamentalGroup.fromPath (Qmk
         (p.trans ((circleInPunctured s z hcirc).trans p.symm))) ∈ H)
     (γ : Path x₀ x₀) :
@@ -275,12 +289,13 @@ theorem fromPath_mem_of_circleLassos_mem (T : Finset ℂ)
   fromPath_mem_of_cellSpokes_subset T x₀ H
     (cellSpokes_subset_of_circleLassos_mem T x₀ H hlasso) γ
 
-/-- The set of spoked circle-lasso classes. -/
+/-- The set of spoked isolating circle-lasso classes. -/
 def circleLassos (T : Finset ℂ) (x₀ : {z : ℂ // z ∉ (T : Set ℂ)}) :
     Set (FundamentalGroup {z : ℂ // z ∉ (T : Set ℂ)} x₀) :=
   {g | ∃ (s : ℂ) (_ : s ∈ T) (z : {w : ℂ // w ∉ (T : Set ℂ)})
     (hcirc : ∀ t : unitInterval,
       s + ((z : ℂ) - s) * Complex.exp (twoPiI * (t : ℝ)) ∉ (T : Set ℂ))
+    (_ : Metric.ball s (2 * ‖(z : ℂ) - s‖) ∩ (T : Set ℂ) ⊆ {s})
     (p : Path x₀ z),
     g = FundamentalGroup.fromPath (Qmk
       (p.trans ((circleInPunctured s z hcirc).trans p.symm)))}
@@ -297,7 +312,7 @@ theorem closure_circleLassos_eq_top (T : Finset ℂ)
   have hg : g = FundamentalGroup.fromPath (Qmk γ) := hγ.symm
   rw [hg]
   refine fromPath_mem_of_circleLassos_mem T x₀ _ ?_ γ
-  intro s hs z hcirc p
-  exact Subgroup.subset_closure ⟨s, hs, z, hcirc, p, rfl⟩
+  intro s hs z hcirc hiso p
+  exact Subgroup.subset_closure ⟨s, hs, z, hcirc, hiso, p, rfl⟩
 
 end Jacobians.Topology
