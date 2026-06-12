@@ -81,3 +81,26 @@
     serreDuality_equiv_exists_of_frameTrace(+'), serreDuality_equiv_for_chosen_K,
     layer3Flip_composition(+'). No Layer-3 axiom, no sorryAx in any closure
     (residual carried as hypothesis — non-circular by construction).
+
+2026-06-11 (FLIP lane) — THE KEYSTONE FLIP LANDED (branch feat/keystone-flip).
+  FLIP_CHECKLIST.md executed in full: §1.1 base-file split (RiemannRochDegree.lean;
+    SerreDualityGenus0/TailSerre/SerreSurjectivitySkeleton redirected), §1.2 keystone
+    sorry exists_serreDualityData + both _serre wrappers DELETED, §1.3 ladder reshaped
+    to riemannRoch_equality_of_data, §1.4 exists_serreDualityData_cover proven
+    unconditional (fed by FrameTrace.exists_canonicalData_residueAtom — the T-lane
+    wall), §1.5 exists_riemannRoch_divisor re-pinned to the exhibited cover,
+    §2.1 canonicalDivisor de-opaqued (Classical.choose of serreDuality_equiv_exists),
+    §2.2 h1coh_zero_finrank + serreDuality_equiv axiom→theorem, statements VERBATIM.
+  Kernel: 21 → 18 (check_axiom_consistency.sh PASS). Closures standard-3
+    (docs/planning/FLIP_VERIFICATION.log): riemannRochL3, serreDualityL3,
+    h0_canonical_L3, canonicalDivisor_deg_L3, canonicalDivisor(+spec),
+    exists_serreDualityData_cover, exists_riemannRoch_divisor,
+    exists_singleSimplePole_of_genus_zero_of_rr. Full lake build green.
+  Deviations from the checklist as written: (1) worktree branched from
+    feat/frame-trace-wall, so origin/main (FlipPrep/#197) was merged in first;
+    (2) the unconditional keystone uses exists_canonicalData_residueAtom (the
+    T-lane shipped the ATOM form directly) via _cover_of_residueAtom, not the
+    genus-split frameTrace packaging of §1.4's sketch — same statement, simpler feed;
+    (3) H0_equiv_riemannRochSpace now spells Axioms.Divisor qualified (the FlipPrep
+    import closure brings RiemannSurface.Divisor into scope, shadowing inside that
+    namespace). Tracker issues (#126 lineage) to be closed when the PR lands.
