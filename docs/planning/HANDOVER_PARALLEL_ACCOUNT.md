@@ -206,3 +206,56 @@ program — fair game, root-side, same rules.
 
 Active primary lanes (no-touch refresher): `vendor/.../Dolbeault/AbelSubset*`,
 `Jacobians/Bridge/KirovDolbeault*`, `Jacobians/RiemannSurface/{BilinearRelations*,PeriodDiscreteness}.lean`.
+
+---
+
+# UPDATE 4 (2026-06-12): CRITICAL-ONLY PRIORITY — drop everything else
+
+Owner directive: prioritize the 2 challenge-critical axioms. Ledger: 13 active /
+2 critical (`AX_PeriodCycleBasis`, `AX_AbelTheorem`). The primary account owns
+Track B (Abel ⊆ engine, E-block in flight) + the general dissection adaptation
++ all reviews/merges. **Your queue, in strict order — park packages 5/7
+remnants and anything non-critical:**
+
+## P8 (FIRST): finish your open PRs, then the topology chain end-to-end
+
+#211 and #212 are pre-verified CLEAN (kernel facts posted on each) and await
+external review — keep rungs landing on #212's branch as you have been
+(G1/G2/G3-half ✓). THEN the unbroken chain to `PeriodGeneratingLoops`:
+G3/G4 → B1 (per your `B1_GENERATION_ROUTE.md`) → GC-1
+(`SimplyConnectedGoodCover X` for compact RS — your `GOODCOVER_BLOCKER.md`)
+→ T-FG unconditional → with #198's `moduleFinite_H1_of_fundamentalGroup_fg`
++ T-RANK (`Module.Free ℤ H1` + `finrank ≤ 2g`, your TRANK_SCOPING.md) →
+`exists_periodGeneratingLoops` (HomologyGeneration.lean) → **the
+`PeriodGeneratingLoops` input of `discreteTopology_of_arcBoundaryWordData`
+(#214) is DISCHARGED**. That closes Input B of the completion plan
+(docs/planning/CHALLENGE_COMPLETION_PLAN.md — read the POST-MERGE section).
+
+## P9: the g=1 ArcBoundaryWordData witness (explicit square)
+
+`Jacobians/RiemannSurface/BilinearRelationsBoundaryWord.lean` (#203) defines
+`ArcBoundaryWordData loops cω` (fields h, F, U, hbox, hh, hF, word_R1,
+word_R2, nondeg) feeding the port's box-Cauchy/Green engines. On the torus
+`ComplexTorus`/`Elliptic` the fundamental square is EXPLICIT and the two
+loops are the edge translations; `arc_R1_of_genus_le_one` is already
+unconditional, so the datum's value at g=1 is the R2/nondeg fields over the
+explicit square. Deliverable: `elliptic` instance of the datum (or the named
+minimal gap) — it would make the ENTIRE `AX_PeriodCycleBasis` chain
+(#203+#208+#214 + your P8) concrete at g=1, the first full-family witness.
+Files: new `Jacobians/RiemannSurface/BoundaryWordElliptic.lean`; read the
+elliptic witness prior art (grep Elliptic in Jacobians/, the
+`elliptic_ofCurve_injective` machinery, `AX_Elliptic_H1_symplectic`'s row).
+
+## P10: the hyperelliptic branch-cut witness (#172)
+
+Issue #172 is pre-scoped: branch-cut loops on `HyperellipticEvenProj` give
+explicit arcs for the datum at every genus — the family-level witness.
+Take after P9 (the g=1 case will teach the field-filling patterns).
+
+## Standing rules unchanged
+
+CLAUDE.md/AGENTS.md discipline; no new axioms; kernel-verify everything;
+no-touch: `vendor/.../Dolbeault/AbelSubset*`, `Jacobians/Bridge/KirovDolbeault*`,
+`Jacobians/RiemannSurface/{BilinearRelations*,PeriodDiscreteness*}.lean` (read
+them, don't edit — witness files are NEW files), ledger only for your own
+count changes (P8-P10 add none). Tag PRs with this file.
