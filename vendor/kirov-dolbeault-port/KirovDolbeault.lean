@@ -75,6 +75,8 @@ import KirovDolbeault.Dolbeault.TailGenusTarget
 import KirovDolbeault.Dolbeault.KeystonePackaging
 import KirovDolbeault.Dolbeault.AbelSubsetCriterion
 import KirovDolbeault.Dolbeault.AbelSubsetThirdKind
+import KirovDolbeault.Dolbeault.AbelSubsetPairing
+import KirovDolbeault.Dolbeault.AbelSubsetEngine
 
 /-
 

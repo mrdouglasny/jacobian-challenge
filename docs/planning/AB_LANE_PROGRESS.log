@@ -122,3 +122,50 @@ pairPeriodL_surjective, exists_pairOmega_pos, pairOmega_dbarL ALL = standard-3
 Full port lake build: success (8798 jobs) post-merge of origin/main (399a243).
 Commits: daadb11 (P1-P3), bfef19d (P4), 47a0fa8 (P5a-b), b28c48b (P5c+nondegeneracy),
 2b6d678 (P5d+P6). Zero sorries, zero new axioms in the P-block.
+
+=== 2026-06-12 — AB-E lane (feat/abel-engine): E-block opened — E0/E1/E2/E5 landed ===
+Route doc: docs/planning/AB_E_ROUTE.md (commit 88a45e3) — E-block rung ladder + the exact
+#211 contract analysis (ZeroPeriodChainSolvability / HasZeroPeriodLoopPresentation, root
+vocabulary; engine port-side, adapter E6 root-side; open-path developing↔lineIntegral E6a
+is the one fresh bridge brick — the closed-loop version is already proven in
+Bridge/KirovDolbeaultPeriods.lean:718).
+Route note recorded: the §20 engine dissolves both Route-B analytic layers — the
+"period correction into 2πiℤ" never happens on a meromorphic form (the chain absorbs the
+lattice part root-side in #211; port-side residue = E1 spanning-family extension), and
+exp well-definedness needs NO developing/homotopy layer (u global single-valued from P6;
+F single-valued per-arc by exp(ψ·log) construction).
+New file vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/AbelSubsetEngine.lean
+(wired into the KirovDolbeault aggregator, + retro-wired AbelSubsetPairing):
+* E0 SmoothOneChain: ℤ-weighted IsSmoothPath family; boundary (Finsupp divisor),
+  deg_boundary = 0; period α c = Σ nᵢ·lineIntegral α γᵢ; period_add/period_smul
+  (integrability from velCont via intervalIntegrable_form_pathSpeed_of_velContinuous);
+  periodL : H⁰(Ω¹) →ₗ[ℂ] ℂ.
+* E1 period_eq_zero_of_spanning: periods vanish on a spanning family ⟹ vanish ∀α
+  (span ≤ ker periodL). Adapter feeds bridged jacobianBasis here.
+* E2 LogDbarDatum 𝔇 c (Forster 20.4/20.5 interface): F, σ ∈ A^{0,1}, E4 pairing field
+  (pairOmega 𝔇 σ α = 2πi·period α c), W1/W2 walls in consequence form
+  (mero_correction / div_correction at any u with ∂̄u = σ). E3 constructor = open.
+* E5 exists_meromorphic_of_logDbarDatum + exists_meromorphic_of_zeroPeriodChain:
+  zero periods → pairOmega σ · = 0 → P6 dbar_solvable_of_pairOmega_eq_zero → f = F·e^{−u},
+  div f = ∂c. THE ENGINE SHAPE the E6 adapter consumes.
+Kernel closures (#print axioms): deg_boundary, period_eq_zero_of_spanning,
+exists_meromorphic_of_logDbarDatum, exists_meromorphic_of_zeroPeriodChain ALL standard-3
+(propext, Classical.choice, Quot.sound). No AX_AbelTheorem, no sorries, no new axioms.
+Port build: lake build KirovDolbeault green (8799 jobs).
+Open rungs: E3 (per-arc weak solution, H), E4 discharge (pairing identity, H),
+W1/W2 (local planar analysis, M), E6 adapter (M/H).
+
+--- 2026-06-12 (same session, +1 checkpoint): E3 groundwork — slit-segment log layer ---
+AbelSubsetEngine.lean gains the planar geometric core of the Forster 20.5 one-disk weak
+solution exp(ψ·log((z−b)/(z−a))):
+* ratio_mem_slitPlane_of_notMem_segment — z ∉ [a,b] ⟹ (z−b)/(z−a) ∈ ℂ∖ℝ≤0 (a nonpositive
+  real value t forces z = (−t·a+b)/(1−t) ∈ segment; linear_combination algebra).
+* slitLogRatio a b z := log((z−b)/(z−a)); differentiableAt_slitLogRatio (DifferentiableAt.clog
+  off the segment); exp_slitLogRatio (exp∘log = ratio, zero at b / pole at a shape).
+* isCompact_segment (ℂ; via segment_eq_image).
+All four closures standard-3. W1's planar Wirtinger core located ALREADY IN-TREE:
+differentiableOn_complex_of_dbar_eq_zero_local (CechFinitenessBallSolve.lean:933) — W1
+reduces to manifold plumbing + removable singularity at the boundary points.
+Remaining E3: smooth cutoff ψ ≡ 1 near segment, supp ⊂ disk (Mathlib bump functions);
+glue exp(ψ·slitLogRatio) with the Möbius ratio across the open segment; arc chart-disk
+subdivision; fold to LogDbarDatum (incl. E4 field discharge).
