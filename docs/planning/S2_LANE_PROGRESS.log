@@ -55,3 +55,15 @@ Append-only progress log. Branch: `feat/s2-topology`, based on main @ d306ce4.
 - Kernel checks (both standard-3, exactly [propext, Classical.choice, Quot.sound]):
   - `Jacobians.Topology.SimplyConnectedGoodCover.fundamentalGroup_fg_of_goodCover`
   - `Jacobians.RiemannSurface.genus_eq_zero_of_homeo_sphere_unconditional`
+
+- Stretch goal T-RANK: scoping doc delivered (`docs/planning/TRANK_SCOPING.md`).
+  Decomposition TR-0 (glue) + TR-DISC (named analytic core: period image
+  discrete in C^g) + TR-CNT (Mathlib ZLattice). GC-2 ANSWERED: no
+  Hodge-side shortcut — C-valued pairings are blind to torsion and to
+  Z-rank beyond R-independence; only route to TR-DISC at pin is a de Rham
+  comparison layer. Re-plumbing dividend identified: restating B-4 over the
+  image lattice drops Module.Free Z (H1) (TR-TORS) entirely. Circularity
+  flagged: span_range_loopIntegralToH1_eq_top routes through
+  AX_PeriodCycleBasis (loopIntegralToH1 is defined by Classical.choice of
+  it) — discharge-grade spanning must be restated over loopDevValH1Hom.
+- PR #205 opened (Goals A+B); CI green (build 21m14s).
