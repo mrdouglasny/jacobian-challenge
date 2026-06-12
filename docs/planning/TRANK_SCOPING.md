@@ -135,3 +135,12 @@ Recommended next actions, in order:
    the Mathlib Riemannian-geometry watch already noted in
    `GOODCOVER_BLOCKER.md` (GC-1 route 3), since both gaps wait on
    upstream geometry/analysis infrastructure.
+
+
+## §4 status stamp (2026-06-11, RP-lane)
+
+The issue-#206 re-plumb LANDED (branch feat/b4-image-replumb): the image route
+needs NEITHER `Module.Free ℤ (H1)` nor `Module.Finite ℤ (H1)` — discreteness
+alone gives freeness/finiteness/rank via Mathlib ZLattice. Residual stack:
+T-SPAN′ (PROVEN, B-3) + **TR-DISC** (`DiscreteTopology (loopPeriodLattice x₀ b)`,
+the single open input; alternative feeds: the #198 H1 route, or route (a) §2).
