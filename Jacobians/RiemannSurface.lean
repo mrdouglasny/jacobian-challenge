@@ -51,6 +51,7 @@ import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
+import Jacobians.RiemannSurface.BilinearRelationsBoundaryWordInterior
 import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.AbelPlumbing
 import Jacobians.RiemannSurface.GenusZeroBackward
