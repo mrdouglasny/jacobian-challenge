@@ -50,3 +50,9 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   Edit tool; vacuous-green umbrella checks are invisible without a job-count
   comparison.
 - Maintainer pre-verification on #210/#211: CLEAN, awaiting external review.
+
+- n=1 anchor DONE: `closure_circleAround_eq_top` (CellLassoPower.lean) —
+  pi1 of the once-punctured plane is generated (plain closure) by the
+  explicit circle class. Standard-3. This is the base case of the packaged
+  induction (route doc G3/G4 notes, option (b)); the induction step is the
+  next session-scale item.

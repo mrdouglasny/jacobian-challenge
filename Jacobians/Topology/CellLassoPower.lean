@@ -96,4 +96,24 @@ theorem fromPath_eq_cellLasso_zpow {A : Set X} {a : ℂ}
   rw [← mapOfEq_inclusionCM_pathCorestrict hx₀ δ hδ]
   exact h3
 
+/-- **The `n = 1` anchor of the generation induction** (route doc G3/G4
+notes): the fundamental group of the once-punctured plane is generated —
+plain closure, not just normal closure — by the explicit circle class. -/
+theorem closure_circleAround_eq_top (a : ℂ) (z : {w : ℂ // w ≠ a}) :
+    Subgroup.closure {FundamentalGroup.fromPath (Qmk (circleAround a z))}
+      = (⊤ : Subgroup (FundamentalGroup {w : ℂ // w ≠ a} z)) := by
+  rw [Subgroup.eq_top_iff']
+  intro g
+  set iso := pi1PuncturedPlaneIntAt a z with hiso
+  have hg : g = (FundamentalGroup.fromPath (Qmk (circleAround a z)))
+      ^ (Multiplicative.toAdd (iso.symm g)) := by
+    rw [← pi1PuncturedPlaneIntAt_ofAdd_one, ← map_zpow]
+    rw [show (Multiplicative.ofAdd (1 : ℤ)) ^ (Multiplicative.toAdd (iso.symm g))
+        = Multiplicative.ofAdd (Multiplicative.toAdd (iso.symm g)) by
+      rw [← ofAdd_zsmul, smul_eq_mul, mul_one]]
+    rw [ofAdd_toAdd, MulEquiv.apply_symm_apply]
+  rw [hg]
+  refine Subgroup.zpow_mem _ ?_ _
+  exact Subgroup.subset_closure (Set.mem_singleton _)
+
 end Jacobians.Topology
