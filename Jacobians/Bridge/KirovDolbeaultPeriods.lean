@@ -567,7 +567,7 @@ private theorem port_lineIntegral_reverse_of_smooth
 
 /-- The zero-velocity smooth segment `x → B.p → x'` through the anchor of an
 anchored chart ball, together with its computed line integral. -/
-private theorem exists_segment_through_anchor (form_indep : True)
+private theorem exists_segment_through_anchor
     {B : PathChartBall Y} (hB : IsAnchoredBall B) {x x' : Y}
     (hx_src : x ∈ (chartAt ℂ B.p).source)
     (hx_ball : (extChartAt 𝓘(ℂ) B.p) x ∈ Metric.ball B.c B.r)
@@ -648,5 +648,139 @@ private theorem exists_segment_through_anchor (form_indep : True)
           rw [hconv, hconv, hhop_x, hhop_x']
       _ = pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) x') -
             pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) x) := by ring
+
+/-! ## The chain glue with computed line integrals -/
+
+/-- n-piece zero-velocity glue carrying the line-integral values: a chain of
+zero-velocity smooth segments with known line integrals glues to a single
+zero-velocity smooth path whose line integral is the sum. Replays the port's
+`exists_zeroVel_smoothPath_aux` with the integral bookkeeping added. -/
+private theorem exists_zeroVel_chain_with_integral (v : ℕ → Y)
+    (inc : ℕ → HolomorphicOneForm Y → ℂ) :
+    ∀ m, (∀ k, k < m → ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k+1)) g ∧
+          _root_.Jacobians.pathSpeed g 0 = 0 ∧ _root_.Jacobians.pathSpeed g 1 = 0 ∧
+          ∀ form : HolomorphicOneForm Y,
+            _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) g = inc k form) →
+      ∃ g, _root_.Jacobians.IsSmoothPath (v 0) (v m) g ∧
+        _root_.Jacobians.pathSpeed g 0 = 0 ∧ _root_.Jacobians.pathSpeed g 1 = 0 ∧
+        ∀ form : HolomorphicOneForm Y,
+          _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) g =
+            ∑ k ∈ Finset.range m, inc k form := by
+  intro m
+  induction m with
+  | zero =>
+    intro _
+    refine ⟨fun _ => v 0, _root_.Jacobians.isSmoothPath_const (v 0),
+      by rw [_root_.Jacobians.pathSpeed_const], by rw [_root_.Jacobians.pathSpeed_const],
+      fun form => ?_⟩
+    have hzero : ∀ t : ℝ, (bridgeKDFormEquiv form).toFun ((fun _ => v 0) t)
+        (_root_.Jacobians.pathSpeed (fun _ : ℝ => v 0) t) = 0 := by
+      intro t
+      rw [_root_.Jacobians.pathSpeed_const]
+      exact map_zero _
+    show (∫ t in (0:ℝ)..1, (bridgeKDFormEquiv form).toFun ((fun _ => v 0) t)
+        (_root_.Jacobians.pathSpeed (fun _ : ℝ => v 0) t)) = _
+    simp_rw [hzero]
+    simp
+  | succ m ih =>
+    intro hstep
+    obtain ⟨g, hg_sm, hg_v0, hg_v1, hg_val⟩ := ih (fun k hk => hstep k (by omega))
+    obtain ⟨g', hg'_sm, hg'_v0, hg'_v1, hg'_val⟩ := hstep m (by omega)
+    have h0uIcc : (0:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨le_refl _, zero_le_one⟩
+    have h1uIcc : (1:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨zero_le_one, le_refl _⟩
+    refine ⟨_root_.Jacobians.concat g g', hg_sm.concat hg'_sm hg_v1 hg'_v0, ?_, ?_, ?_⟩
+    · have hd : DifferentiableAt ℝ ((chartAt (H := ℂ) (g (2 * 0))).toFun ∘ g) (2 * 0) := by
+        rw [show (2:ℝ)*0 = 0 from by norm_num]; exact hg_sm.diff 0 h0uIcc
+      rw [_root_.Jacobians.pathSpeed_concat_left g g' 0 (by norm_num) hd,
+        show (2:ℝ)*0 = 0 from by norm_num, hg_v0, mul_zero]
+    · have hd : DifferentiableAt ℝ ((chartAt (H := ℂ) (g' (2 * 1 - 1))).toFun ∘ g') (2 * 1 - 1) := by
+        rw [show (2:ℝ)*1-1 = 1 from by norm_num]; exact hg'_sm.diff 1 h1uIcc
+      rw [_root_.Jacobians.pathSpeed_concat_right g g' 1 (by norm_num) hd,
+        show (2:ℝ)*1-1 = 1 from by norm_num, hg'_v1, mul_zero]
+    · intro form
+      rw [port_lineIntegral_concat_of_smooth (bridgeKDFormEquiv form) hg_sm hg'_sm,
+        hg_val form, hg'_val form, Finset.sum_range_succ]
+
+/-! ## The main converse: smooth representative with matching developing values -/
+
+/-- **Smooth-loop representative of a continuous loop, with matching
+developing values.** Given any continuous loop `δ` at `y`, there is a closed
+`C¹` loop `γ'` (the port's `IsClosedSmoothLoop`) based at `y` whose
+moving-chart line integral of every bridged holomorphic 1-form equals the
+developing value of `δ`. Construction: anchored chart-ball subdivision of
+`δ`; replace each cell by the zero-velocity chart-affine segment through the
+cell's anchor; the per-cell line integral is the developing increment by the
+hop FTC, and the increments telescope to `developingValue`. (No homotopy
+between `δ` and `γ'` is needed: both sides are computed against the same
+chart-ball primitives.) -/
+theorem exists_isClosedSmoothLoop_lineIntegral_eq_developingValue
+    (y : Y) (δ : Path y y) :
+    ∃ γ' : ℝ → Y, _root_.Jacobians.IsClosedSmoothLoop γ' ∧ γ' 0 = y ∧
+      ∀ form : HolomorphicOneForm Y,
+        _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) γ' =
+          developingValue y form (δ : C(unitInterval, Y)) := by
+  classical
+  set γc : C(unitInterval, Y) := (δ : C(unitInterval, Y)) with hγc_def
+  obtain ⟨S, hS⟩ := exists_anchored_pathChartBallSubdivision γc
+  -- Vertices of the subdivision.
+  set v : ℕ → Y := fun k => γc (S.t ⟨min k S.n, by omega⟩) with hv_def
+  have hv0 : v 0 = y := by
+    have h0 : (⟨min 0 S.n, by omega⟩ : Fin (S.n + 1)) = 0 := by ext; simp
+    rw [hv_def]
+    simp only [h0, S.zero_eq]
+    simpa [hγc_def] using δ.source
+  have hvn : v S.n = y := by
+    have hn : (⟨min S.n S.n, by omega⟩ : Fin (S.n + 1)) = Fin.last S.n := by ext; simp
+    rw [hv_def]
+    simp only [hn, S.one_eq]
+    simpa [hγc_def] using δ.target
+  -- Per-cell zero-velocity segments through the anchors.
+  have hstep : ∀ k (hk : k < S.n), ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k+1)) g ∧
+      _root_.Jacobians.pathSpeed g 0 = 0 ∧ _root_.Jacobians.pathSpeed g 1 = 0 ∧
+      ∀ form : HolomorphicOneForm Y,
+        _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) g =
+          developingIncrement form γc S ⟨k, hk⟩ := by
+    intro k hk
+    have h1 : (⟨min k S.n, by omega⟩ : Fin (S.n + 1)) = (⟨k, hk⟩ : Fin S.n).castSucc := by
+      ext; simp [Nat.min_eq_left hk.le]
+    have h2 : (⟨min (k + 1) S.n, by omega⟩ : Fin (S.n + 1)) = (⟨k, hk⟩ : Fin S.n).succ := by
+      ext; simp [Nat.min_eq_left hk]
+    have hvk : v k = γc (S.t (⟨k, hk⟩ : Fin S.n).castSucc) := by
+      rw [hv_def]; simp only [h1]
+    have hvk1 : v (k + 1) = γc (S.t (⟨k, hk⟩ : Fin S.n).succ) := by
+      rw [hv_def]; simp only [h2]
+    have hleft := S.left_mem_pathChartBallSet (⟨k, hk⟩ : Fin S.n)
+    have hright := S.right_mem_pathChartBallSet (⟨k, hk⟩ : Fin S.n)
+    obtain ⟨g, hg_sm, hg0, hg1, hgval⟩ :=
+      exists_segment_through_anchor (hS (⟨k, hk⟩ : Fin S.n))
+        (x := γc (S.t (⟨k, hk⟩ : Fin S.n).castSucc))
+        (x' := γc (S.t (⟨k, hk⟩ : Fin S.n).succ))
+        hleft.1 hleft.2 hright.1 hright.2
+    refine ⟨g, ?_, hg0, hg1, fun form => ?_⟩
+    · rwa [hvk, hvk1]
+    · rw [hgval form]
+      rfl
+  obtain ⟨g, hg_sm, _hg0, _hg1, hg_val⟩ :=
+    exists_zeroVel_chain_with_integral v
+      (fun k form => if hk : k < S.n then developingIncrement form γc S ⟨k, hk⟩ else 0)
+      S.n
+      (fun k hk => by
+        obtain ⟨g, h1, h2, h3, h4⟩ := hstep k hk
+        exact ⟨g, h1, h2, h3, fun form => by rw [h4 form]; simp [hk]⟩)
+  have hg_start : g 0 = y := by rw [hg_sm.start, hv0]
+  have hg_end : g 1 = y := by rw [hg_sm.finish, hvn]
+  refine ⟨g, ⟨hg_start.trans hg_end.symm, hg_sm.cont, hg_sm.diff, hg_sm.velCont⟩,
+    hg_start, fun form => ?_⟩
+  rw [hg_val form,
+    developingValue_eq_developingValueOfSubdivision y form γc S]
+  have hsum : developingValueOfSubdivision form γc S =
+      ∑ i : Fin S.n, developingIncrement form γc S i := rfl
+  rw [hsum]
+  rw [← Fin.sum_univ_eq_sum_range
+    (fun k => if hk : k < S.n then developingIncrement form γc S ⟨k, hk⟩ else 0) S.n]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  simp [i.isLt]
 
 end Jacobians.Bridge
