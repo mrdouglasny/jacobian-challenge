@@ -839,6 +839,324 @@ theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
 
 end ArcLift
 
+/-! ## The chain fold: multiplying arc solutions
+
+The product of two weak-solution data, with the zero of one arc cancelling the pole of the
+next at shared boundary points.  The product `F₁·F₂` is patched at cancellation points by
+the product of the analytic normal-form units (the pointwise product is `0·junk` there);
+the `(0,1)` data add.  At *mixed* support points (in the support of one divisor only) the
+other arc must be tame — `TameAt`, exactly what `exists_arcWeakSolution_avoiding`
+guarantees at every avoided point. -/
+
+section ChainFold
+
+variable {𝔇 : ChartDiskCover X}
+
+/-- **Tameness** of a weak-solution datum at a point: the own-chart read of `F` is
+analytic and `σ` vanishes there.  Holds at every avoided point of
+`exists_arcWeakSolution_avoiding`; the fold hypothesis at the other factor's support. -/
+def ArcWeakSolution.TameAt {D : Divisor X} (W : ArcWeakSolution 𝔇 D) (q : X) : Prop :=
+  AnalyticAt ℂ (fun ζ => W.F ((chartAt (H := ℂ) q).symm ζ)) ((chartAt (H := ℂ) q) q)
+    ∧ (W.σ : SmoothCOneForms X) q = 0
+
+/-- A section vanishing at the surface point has vanishing cutoff pullback at the
+corresponding planar point. -/
+theorem cutoffPullback_apply_eq_zero {σ : SmoothCOneForms X} {j : 𝔇.toFiniteCover.ι}
+    {z : ℂ} (h : σ ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z) = 0) :
+    𝔇.cutoffPullback j σ z = 0 := by
+  show ((𝔇.diskBump j) z : ℝ) •
+    (σ ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z))
+      ((Bundle.Trivialization.symmL ℝ
+        (trivializationAt ℂ (TangentSpace (𝓘(ℝ, ℂ))) (𝔇.center j))
+        ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z)) (1 : ℂ)) = 0
+  rw [h]
+  simp
+
+/-- **The binary chain fold** (Forster §20.5, the product over the chain): the product of
+two weak-solution data is a weak-solution datum for the divisor sum.  `F = F₁·F₂` patched
+at cancellation points by the product of the analytic units, `σ = σ₁ + σ₂`.  Each factor
+must be tame (`TameAt`) at the support points it does not share with the other. -/
+theorem ArcWeakSolution.exists_mul {D₁ D₂ : Divisor X}
+    (W₁ : ArcWeakSolution 𝔇 D₁) (W₂ : ArcWeakSolution 𝔇 D₂)
+    (h₁ : ∀ x, D₂ x ≠ 0 → D₁ x = 0 → W₁.TameAt x)
+    (h₂ : ∀ x, D₁ x ≠ 0 → D₂ x = 0 → W₂.TameAt x) :
+    Nonempty (ArcWeakSolution 𝔇 (D₁ + D₂)) := by
+  classical
+  -- the cancellation (patch) set: finite, closed
+  set P : Set X := {x | D₁ x ≠ 0 ∧ D₁ x + D₂ x = 0} with hP
+  have hPfin : P.Finite :=
+    D₁.support.finite_toSet.subset fun x hx => Finsupp.mem_support_iff.mpr hx.1
+  have hPcl : IsClosed P := hPfin.isClosed
+  have hD2ne : ∀ {x : X}, D₁ x ≠ 0 → D₁ x + D₂ x = 0 → D₂ x ≠ 0 := by
+    intro x hx1 hsum hx2
+    rw [hx2, add_zero] at hsum
+    exact hx1 hsum
+  have hsum_apply : ∀ x : X, (D₁ + D₂) x = D₁ x + D₂ x := fun x => Finsupp.add_apply D₁ D₂ x
+  -- the patched product
+  set Fp : X → ℂ := fun x =>
+    if h : D₁ x ≠ 0 ∧ D₁ x + D₂ x = 0 then
+      (W₁.norm_form x h.1).choose ((chartAt (H := ℂ) x) x)
+        * (W₂.norm_form x (hD2ne h.1 h.2)).choose ((chartAt (H := ℂ) x) x)
+    else W₁.F x * W₂.F x
+    with hFp
+  have hFp_off : ∀ {x : X}, x ∉ P → Fp x = W₁.F x * W₂.F x := by
+    intro x hx
+    rw [hFp]
+    exact dif_neg hx
+  have hFp_on : ∀ {x : X} (hx1 : D₁ x ≠ 0) (hx0 : D₁ x + D₂ x = 0),
+      Fp x = (W₁.norm_form x hx1).choose ((chartAt (H := ℂ) x) x)
+        * (W₂.norm_form x (hD2ne hx1 hx0)).choose ((chartAt (H := ℂ) x) x) := by
+    intro x hx1 hx0
+    rw [hFp]
+    exact dif_pos ⟨hx1, hx0⟩
+  -- the added (0,1) datum
+  set σs : ↥(OneFormsZeroOne X) := W₁.σ + W₂.σ with hσs
+  have hσs_apply : ∀ x : X, (σs : SmoothCOneForms X) x
+      = (W₁.σ : SmoothCOneForms X) x + (W₂.σ : SmoothCOneForms X) x := by
+    intro x
+    rw [hσs]
+    simp only [Submodule.coe_add, ContMDiffSection.coe_add, Pi.add_apply]
+  -- F_ne
+  have hFne : ∀ x : X, (D₁ + D₂) x = 0 → Fp x ≠ 0 := by
+    intro x hx0
+    rw [hsum_apply] at hx0
+    by_cases hx1 : D₁ x = 0
+    · have hx2 : D₂ x = 0 := by rwa [hx1, zero_add] at hx0
+      have hxP : x ∉ P := fun h => h.1 hx1
+      rw [hFp_off hxP]
+      exact mul_ne_zero (W₁.F_ne x hx1) (W₂.F_ne x hx2)
+    · rw [hFp_on hx1 hx0]
+      exact mul_ne_zero (W₁.norm_form x hx1).choose_spec.2.1
+        (W₂.norm_form x (hD2ne hx1 hx0)).choose_spec.2.1
+  -- σ_vanish
+  have hσvan : ∀ x : X, (D₁ + D₂) x ≠ 0 → (σs : SmoothCOneForms X) x = 0 := by
+    intro x hx
+    rw [hsum_apply] at hx
+    have hσ1 : (W₁.σ : SmoothCOneForms X) x = 0 := by
+      by_cases hx1 : D₁ x = 0
+      · have hx2 : D₂ x ≠ 0 := fun h => hx (by rw [hx1, h, add_zero])
+        exact (h₁ x hx2 hx1).2
+      · exact W₁.σ_vanish x hx1
+    have hσ2 : (W₂.σ : SmoothCOneForms X) x = 0 := by
+      by_cases hx2 : D₂ x = 0
+      · have hx1 : D₁ x ≠ 0 := fun h => hx (by rw [h, hx2, add_zero])
+        exact (h₂ x hx1 hx2).2
+      · exact W₂.σ_vanish x hx2
+    rw [hσs_apply x, hσ1, hσ2, add_zero]
+  -- norm_form
+  have hnorm : ∀ p : X, (D₁ + D₂) p ≠ 0 → ∃ w : ℂ → ℂ,
+      AnalyticAt ℂ w ((chartAt (H := ℂ) p) p) ∧ w ((chartAt (H := ℂ) p) p) ≠ 0 ∧
+      ∀ᶠ ζ in 𝓝[≠] ((chartAt (H := ℂ) p) p),
+        Fp ((chartAt (H := ℂ) p).symm ζ)
+          = (ζ - (chartAt (H := ℂ) p) p) ^ ((D₁ + D₂) p) * w ζ := by
+    intro p hp
+    have hpP : p ∉ P := by
+      intro h
+      rw [hsum_apply] at hp
+      exact hp h.2
+    have hsymmp : (chartAt ℂ p).symm ((chartAt ℂ p) p) = p :=
+      (chartAt ℂ p).left_inv (mem_chart_source ℂ p)
+    have hsymmcp : ContinuousAt (chartAt ℂ p).symm ((chartAt ℂ p) p) :=
+      (chartAt ℂ p).continuousAt_symm ((chartAt ℂ p).map_source (mem_chart_source ℂ p))
+    have hPev : ∀ᶠ ζ in 𝓝 ((chartAt ℂ p) p), (chartAt ℂ p).symm ζ ∈ (Pᶜ : Set X) :=
+      hsymmcp.preimage_mem_nhds (by rw [hsymmp]; exact hPcl.isOpen_compl.mem_nhds hpP)
+    by_cases hp1 : D₁ p = 0
+    · -- the form lives on `D₂`; `W₁` is tame
+      have hp2 : D₂ p ≠ 0 := by
+        intro h
+        rw [hsum_apply, hp1, h, add_zero] at hp
+        exact hp rfl
+      obtain ⟨ht_an, -⟩ := h₁ p hp2 hp1
+      obtain ⟨w₂, hw₂a, hw₂0, hw₂ev⟩ := W₂.norm_form p hp2
+      refine ⟨fun ζ => W₁.F ((chartAt (H := ℂ) p).symm ζ) * w₂ ζ, ht_an.mul hw₂a, ?_, ?_⟩
+      · exact mul_ne_zero (by rw [hsymmp]; exact W₁.F_ne p hp1) hw₂0
+      · filter_upwards [hw₂ev, hPev.filter_mono nhdsWithin_le_nhds] with ζ hζ2 hζP
+        rw [hFp_off hζP, hζ2, hsum_apply, hp1, zero_add]
+        ring
+    · by_cases hp2 : D₂ p = 0
+      · -- the form lives on `D₁`; `W₂` is tame
+        obtain ⟨ht_an, -⟩ := h₂ p hp1 hp2
+        obtain ⟨w₁, hw₁a, hw₁0, hw₁ev⟩ := W₁.norm_form p hp1
+        refine ⟨fun ζ => w₁ ζ * W₂.F ((chartAt (H := ℂ) p).symm ζ), hw₁a.mul ht_an, ?_, ?_⟩
+        · exact mul_ne_zero hw₁0 (by rw [hsymmp]; exact W₂.F_ne p hp2)
+        · filter_upwards [hw₁ev, hPev.filter_mono nhdsWithin_le_nhds] with ζ hζ1 hζP
+          rw [hFp_off hζP, hζ1, hsum_apply, hp2, add_zero]
+          ring
+      · -- a genuinely shared support point: units multiply, exponents add
+        obtain ⟨w₁, hw₁a, hw₁0, hw₁ev⟩ := W₁.norm_form p hp1
+        obtain ⟨w₂, hw₂a, hw₂0, hw₂ev⟩ := W₂.norm_form p hp2
+        refine ⟨fun ζ => w₁ ζ * w₂ ζ, hw₁a.mul hw₂a, mul_ne_zero hw₁0 hw₂0, ?_⟩
+        filter_upwards [hw₁ev, hw₂ev, hPev.filter_mono nhdsWithin_le_nhds,
+          self_mem_nhdsWithin] with ζ hζ1 hζ2 hζP hζne
+        have hζsub : ζ - (chartAt ℂ p) p ≠ 0 :=
+          sub_ne_zero.mpr (by exact hζne)
+        rw [hFp_off hζP, hζ1, hζ2, hsum_apply, zpow_add₀ hζsub]
+        ring
+  -- the analytic continuation across a cancellation point, in any cover chart
+  have hkey : ∀ (j : 𝔇.toFiniteCover.ι) (x : X), x ∈ (𝔇.U j : Set X) → x ∈ P →
+      ∃ g : ℂ → ℂ, AnalyticAt ℂ g (chartMap 𝔇 j x) ∧
+        (fun ζ => Fp ((chartAt (H := ℂ) (𝔇.center j)).symm ζ))
+          =ᶠ[𝓝 (chartMap 𝔇 j x)] g := by
+    intro j x hxU hxP
+    obtain ⟨hx1, hx0⟩ := hxP
+    have hx2 : D₂ x ≠ 0 := hD2ne hx1 hx0
+    obtain ⟨hw₁a, hw₁0, hw₁ev⟩ := (W₁.norm_form x hx1).choose_spec
+    obtain ⟨hw₂a, hw₂0, hw₂ev⟩ := (W₂.norm_form x (hD2ne hx1 hx0)).choose_spec
+    have hxsrcj : x ∈ (chartAt ℂ (𝔇.center j)).source := mem_chartSource_of_mem_U 𝔇 hxU
+    have hsymmxj : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+      (chartAt ℂ (𝔇.center j)).left_inv hxsrcj
+    have hsymmcj : ContinuousAt (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) :=
+      (chartAt ℂ (𝔇.center j)).continuousAt_symm ((chartAt ℂ (𝔇.center j)).map_source hxsrcj)
+    -- the transition into the own chart of `x`
+    have hτa : AnalyticAt ℂ ((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm)
+        (chartMap 𝔇 j x) :=
+      analyticAt_atlasTransition (chart_mem_atlas ℂ (𝔇.center j)) (chart_mem_atlas ℂ x)
+        hxsrcj (mem_chart_source ℂ x)
+    have hτz : ((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) (chartMap 𝔇 j x)
+        = (chartAt ℂ x) x := by
+      show (chartAt ℂ x) ((chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x)) = (chartAt ℂ x) x
+      rw [hsymmxj]
+    have hτc : Filter.Tendsto ((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm)
+        (𝓝 (chartMap 𝔇 j x)) (𝓝 ((chartAt ℂ x) x)) := by
+      rw [← hτz]
+      exact hτa.continuousAt
+    -- pull the punctured norm forms back along the transition
+    have hτev1 := hτc.eventually (eventually_nhdsWithin_iff.mp hw₁ev)
+    have hτev2 := hτc.eventually (eventually_nhdsWithin_iff.mp hw₂ev)
+    -- the source/patch/target bookkeeping
+    have hsrcev : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j x),
+        (chartAt ℂ (𝔇.center j)).symm ζ ∈ (chartAt ℂ x).source :=
+      hsymmcj.preimage_mem_nhds
+        (by rw [hsymmxj]; exact (chartAt ℂ x).open_source.mem_nhds (mem_chart_source ℂ x))
+    have hPev' : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j x),
+        (chartAt ℂ (𝔇.center j)).symm ζ ∈ ((P \ {x})ᶜ : Set X) :=
+      hsymmcj.preimage_mem_nhds
+        (by
+          rw [hsymmxj]
+          exact ((hPfin.subset Set.diff_subset).isClosed).isOpen_compl.mem_nhds
+            fun h => h.2 rfl)
+    have htgtev : ∀ᶠ ζ in 𝓝 (chartMap 𝔇 j x), ζ ∈ (chartAt ℂ (𝔇.center j)).target :=
+      (chartAt ℂ (𝔇.center j)).open_target.mem_nhds
+        ((chartAt ℂ (𝔇.center j)).map_source hxsrcj)
+    refine ⟨fun ζ => (W₁.norm_form x hx1).choose
+          (((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ)
+        * (W₂.norm_form x (hD2ne hx1 hx0)).choose
+          (((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ),
+      ((by rw [hτz]; exact hw₁a : AnalyticAt ℂ _ _).comp hτa).mul
+        ((by rw [hτz]; exact hw₂a : AnalyticAt ℂ _ _).comp hτa), ?_⟩
+    filter_upwards [hτev1, hτev2, hsrcev, hPev', htgtev] with ζ hτ1 hτ2 hζsrc hζP hζtgt
+    by_cases hζx : (chartAt ℂ (𝔇.center j)).symm ζ = x
+    · -- at the cancellation point itself: the patch value
+      have hζz : ζ = chartMap 𝔇 j x := by
+        have h := (chartAt ℂ (𝔇.center j)).right_inv hζtgt
+        rw [hζx] at h
+        exact h.symm
+      rw [hζz, hsymmxj, hτz]
+      exact hFp_on hx1 hx0
+    · -- nearby: the two norm forms cancel against each other
+      have hζP'' : (chartAt ℂ (𝔇.center j)).symm ζ ∉ P := fun h => hζP ⟨h, hζx⟩
+      have hτζo : ((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ ≠ (chartAt ℂ x) x := by
+        intro h
+        exact hζx ((chartAt ℂ x).injOn hζsrc (mem_chart_source ℂ x) h)
+      have h1eq := hτ1 hτζo
+      have h2eq := hτ2 hτζo
+      have hback : (chartAt ℂ x).symm (((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ)
+          = (chartAt ℂ (𝔇.center j)).symm ζ := (chartAt ℂ x).left_inv hζsrc
+      rw [hback] at h1eq h2eq
+      rw [hFp_off hζP'', h1eq, h2eq]
+      have hτsub : ((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ - (chartAt ℂ x) x ≠ 0 :=
+        sub_ne_zero.mpr hτζo
+      have hzz : (((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ - (chartAt ℂ x) x)
+            ^ (D₁ x)
+          * (((chartAt ℂ x) ∘ (chartAt ℂ (𝔇.center j)).symm) ζ - (chartAt ℂ x) x)
+            ^ (D₂ x) = 1 := by
+        rw [← zpow_add₀ hτsub, hx0, zpow_zero]
+      rw [mul_mul_mul_comm, hzz, one_mul]
+  -- diff_off
+  have hdiff : ∀ (j : 𝔇.toFiniteCover.ι) (x : X), x ∈ (𝔇.U j : Set X) → (D₁ + D₂) x = 0 →
+      DifferentiableAt ℝ (fun w => Fp ((chartAt (H := ℂ) (𝔇.center j)).symm w))
+        (chartMap 𝔇 j x) := by
+    intro j x hxU hx0
+    by_cases hxP : x ∈ P
+    · obtain ⟨g, hgan, hgev⟩ := hkey j x hxU hxP
+      exact hgev.differentiableAt_iff.mpr (hgan.differentiableAt.restrictScalars ℝ)
+    · have hxsrcj : x ∈ (chartAt ℂ (𝔇.center j)).source := mem_chartSource_of_mem_U 𝔇 hxU
+      have hsymmxj : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+        (chartAt ℂ (𝔇.center j)).left_inv hxsrcj
+      have hsymmcj : ContinuousAt (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) :=
+        (chartAt ℂ (𝔇.center j)).continuousAt_symm
+          ((chartAt ℂ (𝔇.center j)).map_source hxsrcj)
+      rw [hsum_apply] at hx0
+      have hx1 : D₁ x = 0 := by
+        by_contra h
+        exact hxP ⟨h, hx0⟩
+      have hx2 : D₂ x = 0 := by rwa [hx1, zero_add] at hx0
+      have hev : (fun w => Fp ((chartAt (H := ℂ) (𝔇.center j)).symm w))
+          =ᶠ[𝓝 (chartMap 𝔇 j x)] fun ζ =>
+            W₁.F ((chartAt (H := ℂ) (𝔇.center j)).symm ζ)
+              * W₂.F ((chartAt (H := ℂ) (𝔇.center j)).symm ζ) := by
+        filter_upwards [hsymmcj.preimage_mem_nhds
+          (by rw [hsymmxj]; exact hPcl.isOpen_compl.mem_nhds hxP)] with ζ hζ
+        exact hFp_off hζ
+      exact hev.differentiableAt_iff.mpr
+        ((W₁.diff_off j x hxU hx1).mul (W₂.diff_off j x hxU hx2))
+  -- dbar_eq
+  have hdbar : ∀ (j : 𝔇.toFiniteCover.ι) (x : X), x ∈ (𝔇.U j : Set X) → (D₁ + D₂) x = 0 →
+      DbarDisk.dbar (fun w => Fp ((chartAt (H := ℂ) (𝔇.center j)).symm w)) (chartMap 𝔇 j x)
+        = Fp x * 𝔇.cutoffPullback j (σs : SmoothCOneForms X) (chartMap 𝔇 j x) := by
+    intro j x hxU hx0
+    have hxsrcj : x ∈ (chartAt ℂ (𝔇.center j)).source := mem_chartSource_of_mem_U 𝔇 hxU
+    have hsymmxj : (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+      (chartAt ℂ (𝔇.center j)).left_inv hxsrcj
+    have hsymmxj' : (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm (chartMap 𝔇 j x) = x :=
+      (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).left_inv (𝔇.subset_chart_source j hxU)
+    have hsymmcj : ContinuousAt (chartAt ℂ (𝔇.center j)).symm (chartMap 𝔇 j x) :=
+      (chartAt ℂ (𝔇.center j)).continuousAt_symm
+        ((chartAt ℂ (𝔇.center j)).map_source hxsrcj)
+    have hcpadd : 𝔇.cutoffPullback j (σs : SmoothCOneForms X) (chartMap 𝔇 j x)
+        = 𝔇.cutoffPullback j (W₁.σ : SmoothCOneForms X) (chartMap 𝔇 j x)
+          + 𝔇.cutoffPullback j (W₂.σ : SmoothCOneForms X) (chartMap 𝔇 j x) := by
+      rw [hσs, Submodule.coe_add, ChartDiskCover.cutoffPullback_add]
+      rfl
+    by_cases hxP : x ∈ P
+    · -- cancelled point: both sides vanish
+      obtain ⟨g, hgan, hgev⟩ := hkey j x hxU hxP
+      obtain ⟨hx1, hxsum⟩ := hxP
+      rw [dbar_congr_of_eventuallyEq hgev,
+        DbarDisk.dbar_eq_zero_of_differentiableAt hgan.differentiableAt, hcpadd,
+        cutoffPullback_apply_eq_zero (by rw [hsymmxj']; exact W₁.σ_vanish x hx1),
+        cutoffPullback_apply_eq_zero
+          (by rw [hsymmxj']; exact W₂.σ_vanish x (hD2ne hx1 hxsum))]
+      ring
+    · -- generic point: planar Leibniz against the two logarithmic identities
+      rw [hsum_apply] at hx0
+      have hx1 : D₁ x = 0 := by
+        by_contra h
+        exact hxP ⟨h, hx0⟩
+      have hx2 : D₂ x = 0 := by rwa [hx1, zero_add] at hx0
+      have hev : (fun w => Fp ((chartAt (H := ℂ) (𝔇.center j)).symm w))
+          =ᶠ[𝓝 (chartMap 𝔇 j x)] fun ζ =>
+            W₁.F ((chartAt (H := ℂ) (𝔇.center j)).symm ζ)
+              * W₂.F ((chartAt (H := ℂ) (𝔇.center j)).symm ζ) := by
+        filter_upwards [hsymmcj.preimage_mem_nhds
+          (by rw [hsymmxj]; exact hPcl.isOpen_compl.mem_nhds hxP)] with ζ hζ
+        exact hFp_off hζ
+      rw [dbar_congr_of_eventuallyEq hev,
+        dbarFun_mul' (W₁.diff_off j x hxU hx1) (W₂.diff_off j x hxU hx2),
+        W₁.dbar_eq j x hxU hx1, W₂.dbar_eq j x hxU hx2, hsymmxj, hcpadd,
+        hFp_off hxP]
+      ring
+  exact ⟨{
+    F := Fp
+    σ := σs
+    F_ne := hFne
+    diff_off := hdiff
+    dbar_eq := hdbar
+    σ_vanish := hσvan
+    norm_form := hnorm }⟩
+
+end ChainFold
+
 end Jacobians.Dolbeault
 
 end
