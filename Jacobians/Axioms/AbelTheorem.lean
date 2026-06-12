@@ -75,6 +75,7 @@ Reference: Mumford Vol I §II.3.3–II.3.5; Forster Ch. III (§§20–21).
 import Jacobians.Axioms.AbelJacobiDivDef
 import Jacobians.RiemannSurface.MeromorphicFunctionField
 import Jacobians.RiemannSurface.Cohomology.DegreeTheorem
+import Jacobians.RiemannSurface.AbelSupsetLiouville
 import Jacobians.Bridge.AbelEngineAdapter
 
 namespace Jacobians.Axioms
@@ -83,32 +84,35 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- **Axiom (Abel ⊇, Abel–Jacobi side).** Every principal divisor lies in
-the kernel of the Abel-Jacobi map on divisors: for a nonzero global
-meromorphic function `f`, `AJ(div f) = 0` in `Jacobian X = ℂ^g/Λ`.
+/-- **Abel ⊇, Abel–Jacobi side (former axiom, now a THEOREM — 2026-06-12
+SUP-lane flip).** Every principal divisor lies in the kernel of the
+Abel-Jacobi map on divisors: for a nonzero global meromorphic function
+`f`, `AJ(div f) = 0` in `Jacobian X = ℂ^g/Λ`.
 
-    Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.7
-    (Abel's theorem, the "only if" direction); Mumford, *Tata Lectures on
-    Theta* I, §II.3.3–II.3.5; Griffiths–Harris Ch. 2 §2.
-    Strategy: the Liouville / symmetric-product route
-    (`docs/planning/ABEL_SUPSET_LIOUVILLE_ROUTE.md`): for `f : X → ℙ¹`
-    with `div f = D`, the fiber Abel-Jacobi map `Φ(y) = AJ(f⁻¹(y))` is
-    well-defined (`weightedFiberConservation`), holomorphic off the branch
-    locus (implicit function theorem), extends across it (symmetric sums
-    of integrals of HOLOMORPHIC forms stay bounded ⇒ removable
-    singularity — no residue theorem needed), and is constant by
-    Liouville on the compact simply-connected `ℙ¹`; then
-    `AJ(zeros) = Φ(0) = Φ(∞) = AJ(poles)`.
+Proof: the Liouville / symmetric-product route, exactly as planned
+(`docs/planning/ABEL_SUPSET_LIOUVILLE_ROUTE.md`, rungs S1–S6 of
+`docs/planning/SUP_ROUTE.md`): the fiber Abel-Jacobi map
+`Φ(y) = AJ(f⁻¹(y))` (`fiberAJ`, S2/S3) is `ContMDiffAt` off the finite
+branch locus (local holomorphic sections through the unramified fibers,
+S4), continuous everywhere and `MDifferentiable` across the branch
+values (cluster decomposition + manifold-valued removable singularity,
+S5), and constant by lifting through the lattice covering over the
+simply connected `ℙ¹` + Liouville on the compact `ℙ¹` (S6,
+`fiberAJConstancy`); then `AJ(div f) = Φ(0) − Φ(∞) = 0`
+(`abel_supset_of_fiberAJConstancy`, S3). No residue theorem, no Stokes.
 
-This is the strictly-smaller remainder of the former full
-`AX_AbelTheorem` axiom after the 2026-06-12 split-flip (the ⊆ direction
-and the degree half of ⊇ are now theorems). It is implied by the
-previously Class-1-vetted full statement, so satisfiability/strength
-vetting is inherited; tracked for discharge on the Liouville route. -/
-axiom AX_AbelSupset {X : Type u} [TopologicalSpace X] [T2Space X]
+The historical `AX_` name is kept so downstream consumers are untouched
+(Phase-C in-place conversion pattern). Kernel closure: standard-3 +
+`AX_PeriodCycleBasis` (the Jacobian-layer pin).
+
+Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.7
+(Abel's theorem, the "only if" direction); Mumford, *Tata Lectures on
+Theta* I, §II.3.3–II.3.5; Griffiths–Harris Ch. 2 §2. -/
+theorem AX_AbelSupset {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    PrincipalDivisors X ≤ (abelJacobiDiv X).ker
+    PrincipalDivisors X ≤ (abelJacobiDiv X).ker :=
+  abel_supset_of_fiberAJConstancy (fiberAJConstancy X)
 
 /-- **Principal divisors have degree zero** (subgroup form of the degree
 theorem `deg_divisor_eq_zero`): the degree half of Abel ⊇. -/
