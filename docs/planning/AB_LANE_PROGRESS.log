@@ -1,0 +1,20 @@
+# AB-lane progress log — Abel ⊆ campaign (AX_AbelTheorem remaining direction)
+
+Lane: feat/abel-subset (worktree agent-a87c07235d42e59e2, AB account; relaunch
+after quota-killed first attempt). Local commits only; no push.
+
+Scope: open the ⊆ campaign — degree-0 divisor with vanishing Abel-Jacobi image
+is principal. ⊇ (principal ⟹ AJ = 0) already proven via Liouville. Port-side
+engine work is reserved to this lane; if a parallel account lands a fallback
+docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
+
+## 2026-06-11 session start
+
+- Branch reset to origin/main @ 67af290 (post-keystone-flip: Serre duality is
+  a THEOREM via exists_serreDualityData_cover).
+- Warm build started; reading pass: AbelTheorem.lean (exact AX statement),
+  KIROV_ROUTE_IDEAS.md item 1 (Forster §20 route), KeystonePackaging /
+  TailSerre / DolbeaultLadder / FineResidue stack, ⊇ Liouville interfaces.
+- Goal 1: docs/planning/AB_ROUTE.md — route verdict
+  (∂̄-solvability-from-SerreDualityData vs third-kind-exponential) +
+  rung-by-rung decomposition. Goal 2: first proven bricks.
