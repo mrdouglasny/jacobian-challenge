@@ -22,3 +22,21 @@ Route map (after reading #185 engine, daouid's closed #191, port TracePullback/P
   not the form-trace law.
 First actions: verify port-side key theorems' axiom closures; port daouid's clean
 linear algebra with credit; then attack (A).
+
+=== 2026-06-11 mid-session checkpoint ===
+DONE (all compiled, committed):
+- Bridge/KirovDolbeaultPeriods.lean (NEW): cell FTC; devVal = port lineIntegral for
+  any IsClosedSmoothLoop (inclusion-1 content); anchored subdivisions; hop FTC;
+  general-form concat/reverse smooth-path algebra; chain glue with integral
+  bookkeeping; exists_isClosedSmoothLoop_lineIntegral_eq_developingValue
+  (inclusion-2 content, NO homotopy needed - same chart-ball primitives both sides).
+- Bridge/KirovDolbeaultLattice.lean (NEW): daouid's #191 linear algebra (credited),
+  his 2 smuggled axioms now THEOREMS (latticeBridge_truePeriodLattice_le,
+  truePeriodLattice_le_periodLatticeInBasis); JacobianTorus.ambientPhi_ambientPullback_eq.
+- Axioms/AbelJacobiMap.lean: BOTH FLIPS in place, statements verbatim:
+  AX_pullbackAmbient_preserves_lattice (theorem), AX_pushforward_pullback (theorem);
+  + degreeImpl_eq_degreeFiber (AX_BranchLocus count = port degreeFiber via common
+  regular value); + compat lemmas (daouid's).
+REMAINING: full lake build (running), kernel closures (#print axioms), ledger
+(AXIOM_AUDIT 18->16, class 2b 2->0, README 18->16 & 5->3 challenge-critical),
+axiom-report regeneration.
