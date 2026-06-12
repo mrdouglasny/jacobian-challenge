@@ -68,7 +68,7 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 factors are real-differentiable.  Local re-proof of `dbarFun_mul` (`GluedDbarDatum.lean`),
 which cannot be imported here: its import closure (via `CechFinitenessBallSolve`) collides
 with `AbelSubsetPairing`'s (duplicate `rhoC` vs `DolbeaultComparisonInverse`). -/
-private theorem dbarFun_mul' {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℝ f z)
+theorem dbarFun_mul' {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℝ f z)
     (hg : DifferentiableAt ℝ g z) :
     DbarDisk.dbar (fun x => f x * g x) z
       = g z * DbarDisk.dbar f z + f z * DbarDisk.dbar g z := by

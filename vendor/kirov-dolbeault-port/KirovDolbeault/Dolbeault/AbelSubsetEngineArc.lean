@@ -47,6 +47,9 @@ namespace Jacobians.Dolbeault
 
 open FineResidue
 
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
+    [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
+
 /-! ## The planar layer: the segment tube system -/
 
 /-- **The segment tube system** (the planar geometry of Forster 20.5): for the segment
@@ -88,7 +91,7 @@ theorem SegTube.exists_segTube {a b c₀ : ℂ} {R : ℝ}
   -- the co-cutoff θ: `0` on the closed eighth-tube, `1` off the open quarter-tube
   obtain ⟨θ, hθ0, hθ1, -⟩ := exists_contMDiffMap_zero_one_of_isClosed (n := (⊤ : ℕ∞))
     (I := 𝓘(ℝ, ℂ)) (isClosed_cthickening (δ := δ / 8) (E := segment ℝ a b))
-    isOpen_thickening.isClosed_compl
+    (isOpen_thickening (δ := δ / 4) (E := segment ℝ a b)).isClosed_compl
     (disjoint_compl_right.mono_left
       (cthickening_subset_thickening' (by linarith) (by linarith) (segment ℝ a b)))
   exact ⟨{
@@ -146,7 +149,7 @@ theorem Hfun_smooth : ContDiff ℝ (⊤ : ℕ∞) T.Hfun := by
     have hzs : z ∉ segment ℝ a b := fun hmem =>
       hz (self_subset_thickening (by linarith [T.δ_pos]) _ hmem)
     exact ((Complex.ofRealCLM.contDiff.comp T.θ_smooth).contDiffAt).mul
-      (T.contDiffAt_slitLogRatio_real hzs)
+      (contDiffAt_slitLogRatio_real hzs)
 
 /-- Off the segment, the weak solution is the exponential `exp(ψ·log)`. -/
 theorem Ffun_eq_exp {z : ℂ} (hz : z ∉ segment ℝ a b) :
@@ -179,8 +182,8 @@ theorem Ffun_ne_zero {z : ℂ} (hza : z ≠ a) (hzb : z ≠ b) : T.Ffun z ≠ 0 
   · exact div_ne_zero (sub_ne_zero.mpr hzb) (sub_ne_zero.mpr hza)
   · exact Complex.exp_ne_zero _
 
-/-- The weak solution is real-differentiable off the endpoints. -/
-theorem differentiableAt_Ffun {z : ℂ} (hza : z ≠ a) (hzb : z ≠ b) :
+/-- The weak solution is real-differentiable off the pole `a` (even at the zero `b`). -/
+theorem differentiableAt_Ffun {z : ℂ} (hza : z ≠ a) :
     DifferentiableAt ℝ T.Ffun z := by
   by_cases hz : z ∈ thickening (T.δ / 2) (segment ℝ a b)
   · -- across the segment: the ratio is holomorphic at `z ≠ a`
@@ -199,15 +202,15 @@ theorem differentiableAt_Ffun {z : ℂ} (hza : z ≠ a) (hzb : z ≠ b) :
       filter_upwards [(isCompact_segment a b).isClosed.isOpen_compl.mem_nhds hzs] with w hw
       exact T.Ffun_eq_exp hw
     have hv : DifferentiableAt ℝ (fun w => T.psiC w * slitLogRatio a b w) z :=
-      (T.psiC_smooth.contDiffAt.differentiableAt le_top).mul
-        ((T.contDiffAt_slitLogRatio_real hzs).differentiableAt le_top)
+      (T.psiC_smooth.contDiffAt.differentiableAt (by simp)).mul
+        ((contDiffAt_slitLogRatio_real hzs).differentiableAt (by simp))
     exact hev.differentiableAt_iff.mpr hv.cexp
 
 /-- **The master planar `∂̄`-identity** (Forster 20.5): off the endpoints,
 `∂̄F̃ = F̃·(H·∂̄ψ)`.  Across the segment both sides vanish (the ratio is holomorphic, the
 cutoff locally constant); off the half-tube `θ ≡ 1` makes `H` the slit logarithm and the
 chain rule on `exp(ψ·log)` produces exactly `F̃·log·∂̄ψ`. -/
-theorem dbar_Ffun {z : ℂ} (hza : z ≠ a) (hzb : z ≠ b) :
+theorem dbar_Ffun {z : ℂ} (hza : z ≠ a) :
     DbarDisk.dbar T.Ffun z = T.Ffun z * (T.Hfun z * DbarDisk.dbar T.psiC z) := by
   by_cases hz : z ∈ thickening (T.δ / 2) (segment ℝ a b)
   · -- across the segment: `∂̄(ratio) = 0` and `∂̄ψ = 0`
@@ -235,9 +238,9 @@ theorem dbar_Ffun {z : ℂ} (hza : z ≠ a) (hzb : z ≠ b) :
       filter_upwards [(isCompact_segment a b).isClosed.isOpen_compl.mem_nhds hzs] with w hw
       exact T.Ffun_eq_exp hw
     have hψd : DifferentiableAt ℝ T.psiC z :=
-      T.psiC_smooth.contDiffAt.differentiableAt le_top
+      T.psiC_smooth.contDiffAt.differentiableAt (by simp)
     have hLd : DifferentiableAt ℝ (slitLogRatio a b) z :=
-      (T.contDiffAt_slitLogRatio_real hzs).differentiableAt le_top
+      (contDiffAt_slitLogRatio_real hzs).differentiableAt (by simp)
     have hv : DifferentiableAt ℝ (fun w => T.psiC w * slitLogRatio a b w) z := hψd.mul hLd
     rw [dbar_congr_of_eventuallyEq hev, dbarFun_exp hv,
       dbarFun_mul' hψd hLd,
@@ -291,17 +294,16 @@ def ArcWeakSolution.toRaw {𝔇 : ChartDiskCover X} {D : Divisor X}
     (W : ArcWeakSolution 𝔇 D) (c : SmoothOneChain X) (hD : c.boundary = D)
     (hpair : ∀ α : HolomorphicOneForms X,
       FineResidue.pairOmega 𝔇 W.σ α = 2 * (Real.pi : ℂ) * Complex.I * c.period α) :
-    RawLogDbarDatum 𝔇 c where
-  F := W.F
-  σ := W.σ
-  pairing := hpair
-  F_ne := fun x hx => W.F_ne x (by rw [← hD]; exact hx)
-  diff_off := fun j x hxU hx0 => W.diff_off j x hxU (by rw [← hD]; exact hx0)
-  dbar_eq := fun j x hxU hx0 => W.dbar_eq j x hxU (by rw [← hD]; exact hx0)
-  norm_form := fun x hx => by
-    have h := W.norm_form x (by rw [← hD] at hx; exact hx)
-    rw [← hD] at h
-    exact h
+    RawLogDbarDatum 𝔇 c := by
+  subst hD
+  exact {
+    F := W.F
+    σ := W.σ
+    pairing := hpair
+    F_ne := W.F_ne
+    diff_off := W.diff_off
+    dbar_eq := W.dbar_eq
+    norm_form := W.norm_form }
 
 end Jacobians.Dolbeault
 
