@@ -1,0 +1,24 @@
+
+=== P2-lane session start 2026-06-11 ===
+Targets: AX_pullbackAmbient_preserves_lattice (#31) + AX_pushforward_pullback.
+Route map (after reading #185 engine, daouid's closed #191, port TracePullback/PeriodLattice):
+- daouid's architecture is sound EXCEPT his two smuggled axioms, which are exactly the
+  two lattice-comparison inclusions between our periodLatticeInBasis (devVal/H1-based)
+  and the port's truePeriodLattice (lineIntegral/smooth-loop-based):
+    (1) latticeBridge maps truePeriodLattice -> periodLatticeInBasis
+    (2) latticeBridgeInv maps periodLatticeInBasis -> truePeriodLattice
+- (1) reduces (via daouid's latticeBridge_periodVec + span induction +
+  devVal_loop_mem_periodLatticeInBasis_any from #185) to the integral comparison (A):
+  devVal(form, smooth loop) = port lineIntegral(bridgeKD form, loop).
+- (2) needs smooth (port-IsClosedSmoothLoop) representatives of H1 classes:
+  chart-polygonal smoothstep approximation (port ChartBallPath/smoothStep01/zeroVelHop
+  machinery) + homotopy within chart balls + special case of (A) per segment.
+- AX_pushforward_pullback then follows from daouid's linear algebra
+  (pullback_pushforward_ambient_eq via port's PreimageCycle conservation-of-number,
+  needs (2) only, + IsZLattice of our lattice [discharged PR #137]).
+- Trace-law finding so far: port does NOT have form-level Tr(f^* w) = deg w; the
+  GH Ch2 identity lives at the ambient/period level via PreimageCycle + the
+  real-spanning lattice trick. FrameTrace tower (#195/#200) is residue/meromorphic-side,
+  not the form-trace law.
+First actions: verify port-side key theorems' axiom closures; port daouid's clean
+linear algebra with credit; then attack (A).
