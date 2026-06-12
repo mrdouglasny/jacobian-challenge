@@ -32,3 +32,12 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   SVKGEN PR keeps review surface in one place).
 - Next (G3/G4): half-plane homeo toolkit + separating-line induction in the
   normal-closure form.
+
+- G3 toolkit (half 1) DONE: `Jacobians/Topology/HalfPlaneHomeo.lean` —
+  `halfPlaneHomeo c : {z : ℂ // z.re < c} ≃ₜ ℂ`, explicit componentwise
+  (−log(c−Re), Im) with inverse (c−exp(−Re), Im). Kernel standard-3.
+  Remaining toolkit: finite-puncture restriction of a homeo; then the G3
+  separating-line induction + G4 normal-closure bookkeeping.
+- Note from main: TD-lane discharged TR-DISC (#214) and the Abel P-block
+  completed (#213) — the cycle-basis program is converging from the other
+  side; B1 generation remains on the critical path for the slit-sheet route.
