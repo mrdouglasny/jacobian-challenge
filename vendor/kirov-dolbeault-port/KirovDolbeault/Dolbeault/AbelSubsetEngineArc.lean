@@ -1662,6 +1662,473 @@ theorem exists_meromorphic_of_zeroPeriodChain_of_pairing (c : SmoothOneChain X)
     ∃ f : MeromorphicFunction X, MeromorphicFunction.div X f = c.boundary :=
   exists_meromorphic_of_logDbarDatum 𝔇 c ((W.toRaw c rfl hpair).toLogDbarDatum) hper
 
+
+/-! ### E4 COMPLETE: the pairing accumulator and the unconditional engine
+
+The E4 discharge: `pairOmega` is linear in the `(0,1)` slot, the per-arc constructor
+exposes its pairing value `π·segPeriod` (the planar atom), the chain fold adds the
+`σ`'s, and inside each chart ball the chart-segment value is the line-integral piece
+(`intervalIntegral_form_eq_segPeriod`).  Folding over the subdivided chain gives
+`pairOmega 𝔇 W.σ α = π·∫_c α` — and with zero periods the E2 pairing field is met,
+making `exists_meromorphic_of_zeroPeriodChain'` unconditional. -/
+
+/-- `pairOmega` is additive in the `(0,1)` slot (`pairFormL` is linear). -/
+theorem pairOmega_sigma_add (σ τ : ↥(OneFormsZeroOne X)) (α : HolomorphicOneForms X) :
+    FineResidue.pairOmega 𝔇 (σ + τ) α
+      = FineResidue.pairOmega 𝔇 σ α + FineResidue.pairOmega 𝔇 τ α := by
+  unfold FineResidue.pairOmega
+  exact map_add (FineResidue.pairFormL 𝔇 (FineResidue.isOneZeroCoeff_omegaCoeff 𝔇 α)) σ τ
+
+/-- `pairOmega` vanishes on the zero `(0,1)` datum. -/
+theorem pairOmega_sigma_zero (α : HolomorphicOneForms X) :
+    FineResidue.pairOmega 𝔇 (0 : ↥(OneFormsZeroOne X)) α = 0 := by
+  unfold FineResidue.pairOmega
+  exact map_zero (FineResidue.pairFormL 𝔇 (FineResidue.isOneZeroCoeff_omegaCoeff 𝔇 α))
+
+/-! #### Chart-tagged dipole lists
+
+The tagged analogues of `consecPairs`/`nsmulList`/`zsmulList`: each (source, target)
+pair carries the cover index of a disk containing both points, so the fold can
+accumulate the per-arc pairing values `segPeriod` in the *chosen* charts. -/
+
+section TaggedLists
+
+variable {ι : Type*}
+
+/-- Reverse the dipole of a tagged entry, keeping its chart tag. -/
+def swapTag (q : (X × X) × ι) : (X × X) × ι := ((q.1.2, q.1.1), q.2)
+
+@[simp] theorem swapTag_swapTag (q : (X × X) × ι) : swapTag (swapTag q) = q := rfl
+
+/-- Tagged consecutive pairs `((p k, p (k+1)), j k)`, `k < N`. -/
+def consecPairsTag (p : ℕ → X) (j : ℕ → ι) : ℕ → List ((X × X) × ι)
+  | 0 => []
+  | N + 1 => consecPairsTag p j N ++ [((p N, p (N + 1)), j N)]
+
+/-- Tagged `k`-fold concatenation. -/
+def nsmulListTag (L : List ((X × X) × ι)) : ℕ → List ((X × X) × ι)
+  | 0 => []
+  | k + 1 => L ++ nsmulListTag L k
+
+/-- Tagged ℤ-scalar: `n ≥ 0` repeats, `n < 0` repeats the reversal. -/
+def zsmulListTag (L : List ((X × X) × ι)) (n : ℤ) : List ((X × X) × ι) :=
+  if 0 ≤ n then nsmulListTag L n.toNat else nsmulListTag (L.map swapTag) (-n).toNat
+
+theorem map_fst_consecPairsTag (p : ℕ → X) (j : ℕ → ι) :
+    ∀ N, (consecPairsTag p j N).map Prod.fst = consecPairs p N
+  | 0 => rfl
+  | N + 1 => by
+    rw [consecPairsTag, consecPairs, List.map_append, map_fst_consecPairsTag p j N]
+    rfl
+
+theorem map_fst_nsmulListTag (L : List ((X × X) × ι)) :
+    ∀ k, (nsmulListTag L k).map Prod.fst = nsmulList (L.map Prod.fst) k
+  | 0 => rfl
+  | k + 1 => by
+    rw [nsmulListTag, nsmulList, List.map_append, map_fst_nsmulListTag L k]
+
+theorem map_fst_swapTag (L : List ((X × X) × ι)) :
+    (L.map swapTag).map Prod.fst = (L.map Prod.fst).map Prod.swap := by
+  rw [List.map_map, List.map_map]
+  rfl
+
+theorem map_fst_zsmulListTag (L : List ((X × X) × ι)) (n : ℤ) :
+    (zsmulListTag L n).map Prod.fst = zsmulList (L.map Prod.fst) n := by
+  rw [zsmulListTag, zsmulList]
+  split_ifs
+  · exact map_fst_nsmulListTag L _
+  · rw [map_fst_nsmulListTag, map_fst_swapTag]
+
+theorem mem_consecPairsTag {p : ℕ → X} {j : ℕ → ι} {q : (X × X) × ι} :
+    ∀ {N : ℕ}, q ∈ consecPairsTag p j N → ∃ k, k < N ∧ q = ((p k, p (k + 1)), j k)
+  | 0, h => absurd h (List.not_mem_nil)
+  | N + 1, h => by
+    rw [consecPairsTag] at h
+    rcases List.mem_append.mp h with h' | h'
+    · obtain ⟨k, hk, hq⟩ := mem_consecPairsTag h'
+      exact ⟨k, Nat.lt_succ_of_lt hk, hq⟩
+    · rw [List.mem_singleton] at h'
+      exact ⟨N, Nat.lt_succ_self N, h'⟩
+
+theorem mem_nsmulListTag {L : List ((X × X) × ι)} {q : (X × X) × ι} :
+    ∀ {k : ℕ}, q ∈ nsmulListTag L k → q ∈ L
+  | 0, h => absurd h (List.not_mem_nil)
+  | k + 1, h => by
+    rw [nsmulListTag] at h
+    rcases List.mem_append.mp h with h' | h'
+    · exact h'
+    · exact mem_nsmulListTag h'
+
+theorem mem_zsmulListTag {L : List ((X × X) × ι)} {n : ℤ} {q : (X × X) × ι}
+    (h : q ∈ zsmulListTag L n) : q ∈ L ∨ swapTag q ∈ L := by
+  rw [zsmulListTag] at h
+  split_ifs at h with hn
+  · exact Or.inl (mem_nsmulListTag h)
+  · obtain ⟨r, hr, hq⟩ := List.mem_map.mp (mem_nsmulListTag h)
+    right
+    rw [← hq, swapTag_swapTag]
+    exact hr
+
+/-- The mapped sum over tagged consecutive pairs is the range sum. -/
+theorem sum_map_consecPairsTag (f : (X × X) × ι → ℂ) (p : ℕ → X) (j : ℕ → ι) :
+    ∀ N, ((consecPairsTag p j N).map f).sum
+      = ∑ k ∈ Finset.range N, f ((p k, p (k + 1)), j k)
+  | 0 => by simp [consecPairsTag]
+  | N + 1 => by
+    rw [consecPairsTag, List.map_append, List.sum_append, sum_map_consecPairsTag f p j N,
+      Finset.sum_range_succ]
+    simp
+
+theorem sum_map_nsmulListTag (f : (X × X) × ι → ℂ) (L : List ((X × X) × ι)) :
+    ∀ k, ((nsmulListTag L k).map f).sum = k • (L.map f).sum
+  | 0 => by simp [nsmulListTag]
+  | k + 1 => by
+    rw [nsmulListTag, List.map_append, List.sum_append, sum_map_nsmulListTag f L k,
+      succ_nsmul]
+    ring
+
+theorem sum_map_neg_fun (f : (X × X) × ι → ℂ) (L : List ((X × X) × ι)) :
+    (L.map fun q => -f q).sum = -(L.map f).sum := by
+  induction L with
+  | nil => simp
+  | cons hd tl ih =>
+    rw [List.map_cons, List.sum_cons, List.map_cons, List.sum_cons, ih]
+    ring
+
+/-- The mapped sum over a tagged ℤ-scalar, for a swap-antisymmetric value. -/
+theorem sum_map_zsmulListTag (f : (X × X) × ι → ℂ) (hf : ∀ q, f (swapTag q) = -f q)
+    (L : List ((X × X) × ι)) (n : ℤ) :
+    ((zsmulListTag L n).map f).sum = (n : ℂ) * (L.map f).sum := by
+  rw [zsmulListTag]
+  split_ifs with hn
+  · rw [sum_map_nsmulListTag]
+    obtain ⟨k, rfl⟩ := Int.eq_ofNat_of_zero_le hn
+    rw [Int.toNat_natCast, nsmul_eq_mul]
+    push_cast
+    ring
+  · rw [sum_map_nsmulListTag]
+    have hswap : ((L.map swapTag).map f).sum = -(L.map f).sum := by
+      rw [List.map_map, show f ∘ swapTag = fun q => -f q from funext hf, sum_map_neg_fun]
+    rw [hswap, nsmul_eq_mul]
+    have hk : (((-n).toNat : ℝ) : ℂ) = ((-n : ℤ) : ℂ) := by
+      norm_cast
+      exact Int.toNat_of_nonneg (by linarith [lt_of_not_ge hn])
+    push_cast at hk ⊢
+    rw [hk]
+    ring
+
+end TaggedLists
+
+/-! #### The tagged master fold -/
+
+/-- **The chain fold over a chart-tagged dipole list, with the pairing accumulator**:
+the folded weak solution's `σ` pairs against every `α` to `π` times the sum of the
+chart-segment values of the entries. -/
+theorem exists_arcWeakSolution_dipoleListChart (S : Finset X)
+    (L : List ((X × X) × 𝔇.toFiniteCover.ι))
+    (hdisk : ∀ p ∈ L, p.1.1 ∈ (𝔇.U p.2 : Set X) ∧ p.1.2 ∈ (𝔇.U p.2 : Set X))
+    (hS : ∀ p ∈ L, p.1.1 ∈ S ∧ p.1.2 ∈ S) :
+    ∃ W : ArcWeakSolution 𝔇 (dipoleDiv (L.map Prod.fst)),
+      (∀ α : HolomorphicOneForms X,
+        FineResidue.pairOmega 𝔇 W.σ α
+          = (Real.pi : ℂ) * (L.map fun p => segPeriod α (𝔇.center p.2)
+              (chartMap 𝔇 p.2 p.1.1) (chartMap 𝔇 p.2 p.1.2)).sum) ∧
+      (∀ x : X, dipoleDiv (L.map Prod.fst) x ≠ 0 → x ∈ S) ∧
+      ∀ q ∈ S, dipoleDiv (L.map Prod.fst) q = 0 → W.TameAt q := by
+  induction L with
+  | nil =>
+    rw [List.map_nil, dipoleDiv_nil]
+    refine ⟨ArcWeakSolution.one 𝔇, ?_, fun x hx => (hx (by simp)).elim,
+      fun q _ _ => ArcWeakSolution.one_tameAt 𝔇 q⟩
+    intro α
+    show FineResidue.pairOmega 𝔇 (0 : ↥(OneFormsZeroOne X)) α = _
+    rw [pairOmega_sigma_zero]
+    simp
+  | cons hd tl ih =>
+    obtain ⟨W₁, hval₁, hsupp₁, htame₁⟩ := ih
+      (fun p hp => hdisk p (List.mem_cons_of_mem _ hp))
+      (fun p hp => hS p (List.mem_cons_of_mem _ hp))
+    by_cases hab : hd.1.1 = hd.1.2
+    · -- degenerate dipole: zero divisor AND zero segment value
+      have h0 : dipole hd.1 = 0 := by
+        rw [dipole, hab, sub_self]
+      rw [List.map_cons, dipoleDiv_cons, h0, zero_add]
+      refine ⟨W₁, ?_, hsupp₁, htame₁⟩
+      intro α
+      rw [hval₁ α, List.map_cons, List.sum_cons]
+      have hz : segPeriod α (𝔇.center hd.2) (chartMap 𝔇 hd.2 hd.1.1)
+          (chartMap 𝔇 hd.2 hd.1.2) = 0 := by
+        rw [hab, segPeriod, sub_self, zero_mul]
+      rw [hz, zero_add]
+    · obtain ⟨haU, hbU⟩ := hdisk hd List.mem_cons_self
+      obtain ⟨haS, hbS⟩ := hS hd List.mem_cons_self
+      obtain ⟨W₂, hval₂, hW₂⟩ := exists_arcWeakSolution_avoiding 𝔇 hd.2 S haU hbU hab
+      have hW₂tame : ∀ q ∈ S, q ≠ hd.1.1 → W₂.TameAt q :=
+        fun q hq hqa => ⟨(hW₂ q hq hqa).1, (hW₂ q hq hqa).2⟩
+      have h₁ : ∀ x, dipoleDiv (tl.map Prod.fst) x ≠ 0 → dipole hd.1 x = 0 → W₂.TameAt x :=
+        fun x hx hdx =>
+          hW₂tame x (hsupp₁ x hx) (ne_fst_of_dipole_apply_eq_zero hab hdx)
+      have h₂ : ∀ x, dipole hd.1 x ≠ 0 → dipoleDiv (tl.map Prod.fst) x = 0 → W₁.TameAt x := by
+        intro x hx h0
+        have hxS : x ∈ S := by
+          rcases eq_fst_or_snd_of_dipole_ne_zero hx with rfl | rfl
+          exacts [haS, hbS]
+        exact htame₁ x hxS h0
+      obtain ⟨W, hWσ, hWtame⟩ := ArcWeakSolution.exists_mul W₂ W₁ h₁ h₂
+      rw [List.map_cons, dipoleDiv_cons]
+      refine ⟨W, ?_, ?_, ?_⟩
+      · intro α
+        rw [hWσ, pairOmega_sigma_add, hval₂ α, hval₁ α, List.map_cons, List.sum_cons]
+        ring
+      · intro x hx
+        by_cases hx1 : dipole hd.1 x = 0
+        · refine hsupp₁ x fun h0 => hx ?_
+          rw [Finsupp.add_apply, hx1, h0, add_zero]
+        · rcases eq_fst_or_snd_of_dipole_ne_zero hx1 with rfl | rfl
+          exacts [haS, hbS]
+      · intro q hqS hq0
+        exact hWtame q hq0
+          (fun hd0 => hW₂tame q hqS (ne_fst_of_dipole_apply_eq_zero hab hd0))
+          (fun ht0 => htame₁ q hqS ht0)
+
+/-! #### Whole-piece chart-disk subdivision -/
+
+/-- The chart ball of a cover disk lies inside the chart target. -/
+theorem ball_subset_chartAt_target (j : 𝔇.toFiniteCover.ι) :
+    Metric.ball (chartMap 𝔇 j (𝔇.center j)) (𝔇.radius j)
+      ⊆ (chartAt ℂ (𝔇.center j)).target := by
+  intro w hw
+  have hyU : (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm w ∈ (𝔇.U j : Set X) :=
+    symm_mem_U_of_mem_ball 𝔇 hw
+  have h := (chartAt ℂ (𝔇.center j)).map_source (mem_chartSource_of_mem_U 𝔇 hyU)
+  rwa [show (chartAt ℂ (𝔇.center j)) ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm w) = w from
+    (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).right_inv
+      (𝔇.closedBall_subset_target j (Metric.ball_subset_closedBall hw))] at h
+
+/-- **Whole-piece chart-disk subdivision**: parameter points `k/N` with each WHOLE piece
+`γ([k/N, (k+1)/N])` inside one cover disk (Lebesgue number along the path; the piece has
+diameter `1/N < δ`).  Strengthens `exists_subdivision` from endpoint to piece
+containment, which is what the chart-ball period comparison consumes. -/
+theorem exists_subdivision_pieces {P Q : X} {γ : ℝ → X} (h : IsSmoothPath P Q γ) :
+    ∃ (N : ℕ) (j : ℕ → 𝔇.toFiniteCover.ι), 0 < N ∧
+      ∀ k, k < N → ∀ t ∈ Set.Icc ((k : ℝ) / N) (((k + 1 : ℕ) : ℝ) / N),
+        γ t ∈ (𝔇.U (j k) : Set X) := by
+  classical
+  have hcov : Set.Icc (0 : ℝ) 1 ⊆ ⋃ j : 𝔇.toFiniteCover.ι, γ ⁻¹' (𝔇.U j : Set X) := by
+    intro t _
+    obtain ⟨j, hj⟩ := TopologicalSpace.Opens.mem_iSup.mp
+      (𝔇.toFiniteCover.covers ▸ Set.mem_univ (γ t) : γ t ∈ ⨆ i, 𝔇.toFiniteCover.U i)
+    exact Set.mem_iUnion.mpr ⟨j, hj⟩
+  obtain ⟨δ, hδ, hball⟩ := lebesgue_number_lemma_of_metric isCompact_Icc
+    (fun j => (𝔇.U j).isOpen.preimage h.cont) hcov
+  obtain ⟨N, hN⟩ := exists_nat_gt (1 / δ)
+  have hNpos : (0 : ℝ) < N := lt_trans (by positivity) hN
+  have hNpos' : 0 < N := by exact_mod_cast hNpos
+  have hsel : ∀ k : ℕ, k < N → ∃ j : 𝔇.toFiniteCover.ι,
+      Metric.ball ((k : ℝ) / N) δ ⊆ γ ⁻¹' (𝔇.U j : Set X) := by
+    intro k hk
+    refine hball ((k : ℝ) / N) ⟨by positivity, ?_⟩
+    rw [div_le_one hNpos]
+    exact_mod_cast hk.le
+  have hne : Nonempty 𝔇.toFiniteCover.ι := by
+    obtain ⟨x⟩ := (inferInstance : Nonempty X)
+    obtain ⟨j, -⟩ := TopologicalSpace.Opens.mem_iSup.mp
+      (𝔇.toFiniteCover.covers ▸ Set.mem_univ x : x ∈ ⨆ i, 𝔇.toFiniteCover.U i)
+    exact ⟨j⟩
+  refine ⟨N, fun k => if hk : k < N then (hsel k hk).choose else hne.some, hNpos', ?_⟩
+  intro k hk t ht
+  have h1N : (1 : ℝ) / N < δ := by
+    rw [div_lt_iff₀ hNpos]
+    have h2 := (div_lt_iff₀ hδ).mp hN
+    linarith [mul_comm δ (N : ℝ)]
+  have hlen : ((k + 1 : ℕ) : ℝ) / N - (k : ℝ) / N = 1 / N := by
+    push_cast
+    ring
+  have htball : t ∈ Metric.ball ((k : ℝ) / N) δ := by
+    rw [Metric.mem_ball, Real.dist_eq, abs_of_nonneg (by linarith [ht.1])]
+    linarith [ht.2]
+  have hres := (hsel k hk).choose_spec htball
+  simpa [dif_pos hk] using hres
+
+/-! #### E4 COMPLETE: the boundary datum with its pairing value -/
+
+/-- **E4, complete**: every smooth 1-chain admits an arc weak solution for its boundary
+divisor whose `(0,1)` datum pairs against every holomorphic 1-form to `π·∫_c α` — the
+honest pairing identity in the Lebesgue-area chart-coefficient convention
+(`dz̄∧dz = 2i·dA`, so Forster's `∫∫ σ∧α = 2πi·∫_c α` reads `π·∫_c α`). -/
+theorem exists_arcWeakSolution_boundary_pairing (c : SmoothOneChain X) :
+    ∃ W : ArcWeakSolution 𝔇 c.boundary,
+      ∀ α : HolomorphicOneForms X,
+        FineResidue.pairOmega 𝔇 W.σ α = (Real.pi : ℂ) * c.period α := by
+  classical
+  choose N j hNpos hpiece using fun i : Fin c.n => exists_subdivision_pieces 𝔇 (c.smooth i)
+  set p : Fin c.n → ℕ → X := fun i k => c.path i ((k : ℝ) / (N i)) with hp
+  have hNR : ∀ i, (0 : ℝ) < ((N i : ℕ) : ℝ) := fun i => by exact_mod_cast hNpos i
+  -- endpoint identification
+  have hp0 : ∀ i, p i 0 = c.src i := by
+    intro i
+    show c.path i (((0 : ℕ) : ℝ) / (N i)) = c.src i
+    rw [Nat.cast_zero, zero_div]
+    exact (c.smooth i).start
+  have hpN : ∀ i, p i (N i) = c.tgt i := by
+    intro i
+    show c.path i (((N i : ℕ) : ℝ) / (N i)) = c.tgt i
+    rw [div_self (hNR i).ne']
+    exact (c.smooth i).finish
+  -- piece-parameter facts
+  have hk_left : ∀ i (k : ℕ),
+      (k : ℝ) / (N i) ∈ Set.Icc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)) := by
+    intro i k
+    refine ⟨le_rfl, ?_⟩
+    gcongr
+    linarith
+  have hk_right : ∀ i (k : ℕ),
+      ((k + 1 : ℕ) : ℝ) / (N i) ∈ Set.Icc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)) := by
+    intro i k
+    refine ⟨?_, le_rfl⟩
+    gcongr
+    linarith
+  have hmem : ∀ i (k : ℕ), k < N i → p i k ∈ (𝔇.U (j i k) : Set X)
+      ∧ p i (k + 1) ∈ (𝔇.U (j i k) : Set X) := fun i k hk =>
+    ⟨hpiece i k hk _ (hk_left i k), hpiece i k hk _ (hk_right i k)⟩
+  -- the tagged list
+  set L : List ((X × X) × 𝔇.toFiniteCover.ι) :=
+    (List.ofFn fun i : Fin c.n =>
+      zsmulListTag (consecPairsTag (p i) (j i) (N i)) (c.coeff i)).flatten with hL
+  -- divisor identification
+  have hfst : L.map Prod.fst
+      = (List.ofFn fun i : Fin c.n =>
+          zsmulList (consecPairs (p i) (N i)) (c.coeff i)).flatten := by
+    have hfun : (List.map (Prod.fst (β := 𝔇.toFiniteCover.ι)) ∘ fun i : Fin c.n =>
+        zsmulListTag (consecPairsTag (p i) (j i) (N i)) (c.coeff i))
+        = fun i : Fin c.n => zsmulList (consecPairs (p i) (N i)) (c.coeff i) := by
+      funext i
+      show (zsmulListTag (consecPairsTag (p i) (j i) (N i)) (c.coeff i)).map Prod.fst = _
+      rw [map_fst_zsmulListTag, map_fst_consecPairsTag]
+    rw [hL, List.map_flatten, List.map_ofFn, hfun]
+  have hdiv : dipoleDiv (L.map Prod.fst) = c.boundary := by
+    rw [hfst, dipoleDiv_flatten, List.map_ofFn, List.sum_ofFn, SmoothOneChain.boundary]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    show dipoleDiv (zsmulList (consecPairs (p i) (N i)) (c.coeff i)) = _
+    rw [dipoleDiv_zsmulList, dipoleDiv_consecPairs, hpN i, hp0 i]
+  -- chart-disk membership of the tagged entries
+  have hdiskL : ∀ q ∈ L, q.1.1 ∈ (𝔇.U q.2 : Set X) ∧ q.1.2 ∈ (𝔇.U q.2 : Set X) := by
+    intro q hq
+    rw [hL, List.mem_flatten] at hq
+    obtain ⟨l, hl, hql⟩ := hq
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hl
+    rcases mem_zsmulListTag hql with hmem' | hmem'
+    · obtain ⟨k, hk, rfl⟩ := mem_consecPairsTag hmem'
+      exact ⟨(hmem i k hk).1, (hmem i k hk).2⟩
+    · obtain ⟨k, hk, hswap⟩ := mem_consecPairsTag hmem'
+      have hq' : q = ((p i (k + 1), p i k), j i k) := by
+        have hss := congrArg swapTag hswap
+        rwa [swapTag_swapTag] at hss
+      rw [hq']
+      exact ⟨(hmem i k hk).2, (hmem i k hk).1⟩
+  -- the endpoint avoid set
+  set S : Finset X :=
+    ((L.map Prod.fst).map Prod.fst ++ (L.map Prod.fst).map Prod.snd).toFinset with hSdef
+  have hSL : ∀ q ∈ L, q.1.1 ∈ S ∧ q.1.2 ∈ S := by
+    intro q hq
+    rw [hSdef]
+    constructor
+    · rw [List.mem_toFinset, List.mem_append]
+      exact Or.inl (List.mem_map_of_mem (List.mem_map_of_mem hq))
+    · rw [List.mem_toFinset, List.mem_append]
+      exact Or.inr (List.mem_map_of_mem (List.mem_map_of_mem hq))
+  -- the tagged fold
+  obtain ⟨W, hval, -, -⟩ := exists_arcWeakSolution_dipoleListChart 𝔇 S L hdiskL hSL
+  -- per-path piece-sum identity: Σ segment values = line integral
+  have hper_i : ∀ (α : HolomorphicOneForms X) (i : Fin c.n),
+      ((consecPairsTag (p i) (j i) (N i)).map fun q => segPeriod α (𝔇.center q.2)
+          (chartMap 𝔇 q.2 q.1.1) (chartMap 𝔇 q.2 q.1.2)).sum
+        = lineIntegral α (c.path i) := by
+    intro α i
+    rw [sum_map_consecPairsTag]
+    have hint01 : IntervalIntegrable
+        (fun t => α.toFun (c.path i t) (pathSpeed (c.path i) t)) MeasureTheory.volume 0 1 :=
+      intervalIntegrable_form_pathSpeed_of_velContinuous α (c.path i) (c.smooth i).velCont
+    have hIccsub : ∀ k : ℕ, k < N i →
+        Set.Icc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)) ⊆ Set.Icc (0 : ℝ) 1 := by
+      intro k hk
+      refine Set.Icc_subset_Icc (by positivity) ?_
+      rw [div_le_one (hNR i)]
+      exact_mod_cast hk
+    have hle : ∀ k : ℕ, (k : ℝ) / (N i) ≤ ((k + 1 : ℕ) : ℝ) / (N i) := fun k =>
+      (hk_left i k).2
+    have huIcc_sub : ∀ k : ℕ, k < N i →
+        Set.uIcc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)) ⊆ Set.uIcc (0 : ℝ) 1 := by
+      intro k hk
+      rw [Set.uIcc_of_le (hle k), Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+      exact hIccsub k hk
+    have hpieceInt : ∀ k : ℕ, k < N i → IntervalIntegrable
+        (fun t => α.toFun (c.path i t) (pathSpeed (c.path i) t)) MeasureTheory.volume
+        ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)) := fun k hk =>
+      hint01.mono_set (huIcc_sub k hk)
+    calc ∑ k ∈ Finset.range (N i), segPeriod α (𝔇.center (j i k))
+            (chartMap 𝔇 (j i k) (p i k)) (chartMap 𝔇 (j i k) (p i (k + 1)))
+        = ∑ k ∈ Finset.range (N i), ∫ t in ((k : ℝ) / (N i))..(((k + 1 : ℕ) : ℝ) / (N i)),
+            α.toFun (c.path i t) (pathSpeed (c.path i) t) := by
+          refine Finset.sum_congr rfl fun k hk => ?_
+          rw [Finset.mem_range] at hk
+          have hsub := ball_subset_chartAt_target 𝔇 (j i k)
+          have hγ_in : ∀ t ∈ Set.Icc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)),
+              c.path i t ∈ (chartAt ℂ (𝔇.center (j i k))).source := fun t ht =>
+            mem_chartSource_of_mem_U 𝔇 (hpiece i k hk t ht)
+          have himg : ∀ t ∈ Set.Icc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)),
+              (chartAt ℂ (𝔇.center (j i k))) (c.path i t)
+                ∈ Metric.ball (chartMap 𝔇 (j i k) (𝔇.center (j i k))) (𝔇.radius (j i k)) := by
+            intro t ht
+            have hU := hpiece i k hk t ht
+            rw [𝔇.isDisk (j i k)] at hU
+            exact hU.1
+          have hγ_diff : ∀ t ∈ Set.uIcc ((k : ℝ) / (N i)) (((k + 1 : ℕ) : ℝ) / (N i)),
+              DifferentiableAt ℝ ((chartAt (H := ℂ) (𝔇.center (j i k))).toFun ∘ c.path i)
+                t := by
+            intro t ht
+            rw [Set.uIcc_of_le (hle k)] at ht
+            refine differentiableAt_chart_comp_transfer (𝔇.center (j i k)) ?_
+              (c.smooth i).cont ?_
+            · exact ((chartAt ℂ (𝔇.center (j i k))).open_source.preimage
+                (c.smooth i).cont).mem_nhds (hγ_in t ht)
+            · refine (c.smooth i).diff t ?_
+              rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+              exact hIccsub k hk ht
+          exact (intervalIntegral_form_eq_segPeriod α (𝔇.center (j i k)) (hle k) hsub
+            hγ_in himg (c.smooth i).cont hγ_diff (hpieceInt k hk)).symm
+      _ = ∫ t in (((0 : ℕ) : ℝ) / (N i))..(((N i : ℕ) : ℝ) / (N i)),
+            α.toFun (c.path i t) (pathSpeed (c.path i) t) :=
+          intervalIntegral.sum_integral_adjacent_intervals hpieceInt
+      _ = lineIntegral α (c.path i) := by
+          rw [lineIntegral, Nat.cast_zero, zero_div, div_self (hNR i).ne']
+  -- assemble the chain value
+  rw [← hdiv]
+  refine ⟨W, ?_⟩
+  intro α
+  rw [hval α, SmoothOneChain.period]
+  congr 1
+  rw [hL]
+  rw [List.map_flatten, List.sum_flatten, List.map_ofFn, List.map_ofFn, List.sum_ofFn]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  show ((zsmulListTag (consecPairsTag (p i) (j i) (N i)) (c.coeff i)).map fun q =>
+      segPeriod α (𝔇.center q.2) (chartMap 𝔇 q.2 q.1.1) (chartMap 𝔇 q.2 q.1.2)).sum = _
+  rw [sum_map_zsmulListTag _ (fun q => segPeriod_swap α (𝔇.center q.2) _ _), hper_i α i]
+
+include 𝔇 in
+/-- **THE UNCONDITIONAL ENGINE** (Forster §20, E-block COMPLETE): a smooth 1-chain all of
+whose periods vanish bounds a principal divisor.  E4 is discharged by
+`exists_arcWeakSolution_boundary_pairing`: the constructed datum pairs to `π·∫_c α = 0`,
+which (with the periods zero) meets the E2 pairing field `2πi·∫_c α = 0`. -/
+theorem exists_meromorphic_of_zeroPeriodChain' (c : SmoothOneChain X)
+    (hper : ∀ α : HolomorphicOneForms X, c.period α = 0) :
+    ∃ f : MeromorphicFunction X, MeromorphicFunction.div X f = c.boundary := by
+  obtain ⟨W, hW⟩ := exists_arcWeakSolution_boundary_pairing 𝔇 c
+  refine exists_meromorphic_of_zeroPeriodChain_of_pairing 𝔇 c W ?_ hper
+  intro α
+  rw [hW α, hper α, mul_zero, mul_zero]
+
+
 end ChainAssembly
 
 end Jacobians.Dolbeault
