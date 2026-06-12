@@ -1,0 +1,56 @@
+
+=== P2-lane session start 2026-06-11 ===
+Targets: AX_pullbackAmbient_preserves_lattice (#31) + AX_pushforward_pullback.
+Route map (after reading #185 engine, daouid's closed #191, port TracePullback/PeriodLattice):
+- daouid's architecture is sound EXCEPT his two smuggled axioms, which are exactly the
+  two lattice-comparison inclusions between our periodLatticeInBasis (devVal/H1-based)
+  and the port's truePeriodLattice (lineIntegral/smooth-loop-based):
+    (1) latticeBridge maps truePeriodLattice -> periodLatticeInBasis
+    (2) latticeBridgeInv maps periodLatticeInBasis -> truePeriodLattice
+- (1) reduces (via daouid's latticeBridge_periodVec + span induction +
+  devVal_loop_mem_periodLatticeInBasis_any from #185) to the integral comparison (A):
+  devVal(form, smooth loop) = port lineIntegral(bridgeKD form, loop).
+- (2) needs smooth (port-IsClosedSmoothLoop) representatives of H1 classes:
+  chart-polygonal smoothstep approximation (port ChartBallPath/smoothStep01/zeroVelHop
+  machinery) + homotopy within chart balls + special case of (A) per segment.
+- AX_pushforward_pullback then follows from daouid's linear algebra
+  (pullback_pushforward_ambient_eq via port's PreimageCycle conservation-of-number,
+  needs (2) only, + IsZLattice of our lattice [discharged PR #137]).
+- Trace-law finding so far: port does NOT have form-level Tr(f^* w) = deg w; the
+  GH Ch2 identity lives at the ambient/period level via PreimageCycle + the
+  real-spanning lattice trick. FrameTrace tower (#195/#200) is residue/meromorphic-side,
+  not the form-trace law.
+First actions: verify port-side key theorems' axiom closures; port daouid's clean
+linear algebra with credit; then attack (A).
+
+=== 2026-06-11 mid-session checkpoint ===
+DONE (all compiled, committed):
+- Bridge/KirovDolbeaultPeriods.lean (NEW): cell FTC; devVal = port lineIntegral for
+  any IsClosedSmoothLoop (inclusion-1 content); anchored subdivisions; hop FTC;
+  general-form concat/reverse smooth-path algebra; chain glue with integral
+  bookkeeping; exists_isClosedSmoothLoop_lineIntegral_eq_developingValue
+  (inclusion-2 content, NO homotopy needed - same chart-ball primitives both sides).
+- Bridge/KirovDolbeaultLattice.lean (NEW): daouid's #191 linear algebra (credited),
+  his 2 smuggled axioms now THEOREMS (latticeBridge_truePeriodLattice_le,
+  truePeriodLattice_le_periodLatticeInBasis); JacobianTorus.ambientPhi_ambientPullback_eq.
+- Axioms/AbelJacobiMap.lean: BOTH FLIPS in place, statements verbatim:
+  AX_pullbackAmbient_preserves_lattice (theorem), AX_pushforward_pullback (theorem);
+  + degreeImpl_eq_degreeFiber (AX_BranchLocus count = port degreeFiber via common
+  regular value); + compat lemmas (daouid's).
+REMAINING: full lake build (running), kernel closures (#print axioms), ledger
+(AXIOM_AUDIT 18->16, class 2b 2->0, README 18->16 & 5->3 challenge-critical),
+axiom-report regeneration.
+
+=== 2026-06-11 session end — BOTH AXIOMS FLIPPED ===
+- AX_pullbackAmbient_preserves_lattice: THEOREM. Kernel closure: standard-3 + AX_PeriodCycleBasis.
+- AX_pushforward_pullback: THEOREM. Kernel closure: standard-3 + AX_PeriodCycleBasis.
+- All Challenge.lean headlines (pullback, pullback_contMDiff, pullback_id_apply,
+  pullback_comp_apply, pushforward_pullback) now standard-3 + AX_PeriodCycleBasis.
+- Full lake build green (8953 jobs); check_axiom_consistency.sh PASS (kernel = 16).
+- Ledger: 18 -> 16 active, 5 -> 3 challenge-critical; class 2b now empty.
+- NO new axioms, no sorries; daouid credited in code + commit messages.
+- Trace-law finding for the record: the port does NOT contain the form-level
+  Tr(f^*w) = deg(f)·w; the GH Ch.2 deg-identity lives at the PERIOD level via
+  PreimageCycle conservation-of-number + the real-spanning lattice trick. The
+  FrameTrace tower (#195/#200) is residue/meromorphic-side machinery (Serre
+  keystone), not the form-trace law — it was not needed here.

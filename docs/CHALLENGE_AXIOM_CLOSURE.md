@@ -9,11 +9,12 @@ ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-11
 discharge + the PR #179 `AX_ofCurve_contMDiff` discharge, which dropped the
 challenge-critical count 7 → **6** + the PR #183 odd-atlas ∞-chart cluster
 discharge, −7 non-critical + the #30 `AX_pushforwardAmbient_preserves_lattice`
-discharge, which dropped the challenge-critical count 6 → **5** + the
-genus-0 uniformization flip (2026-06-11), which discharged
+discharge, which dropped the challenge-critical count 6 → **5** + the #31
+functoriality-cluster completion, 5 → **3** + the genus-0 uniformization flip
+(PR #209, parallel account, 2026-06-11), which discharged
 `AX_genus_eq_zero_iff_homeo` — the challenge headline
 `genus_eq_zero_iff_homeo` now prints standard-3 — dropping the
-challenge-critical count 5 → **4**) against the
+challenge-critical count 3 → **2**) against the
 21-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
@@ -51,9 +52,9 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ---
 
-## What filling the 4 does — and does not — claim
+## What filling the 2 does — and does not — claim
 
-Discharging all 4 makes every Buzzard declaration print exactly
+Discharging both remaining axioms makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -72,7 +73,7 @@ declarations. Four boundaries to keep the claim honest:
    are among the 24 obligations, and `ChallengeConformance.lean`
    machine-checks every signature verbatim against the pinned v0.4 spec —
    a hollow construction provably cannot satisfy both.
-3. **7 is the end-state count, not the work count.** Discharge routes pull
+3. **2 is the end-state count, not the work count.** Discharge routes pull
    in their own mathematics (e.g. `AX_AbelTheorem` classically routes
    through the RR/Serre tower, so the Serre keystone — not itself in the
    7 — is on the path). The set may grow transiently if a discharge
@@ -86,14 +87,32 @@ declarations. Four boundaries to keep the claim honest:
    `Classical.choice` path discrepancy is landed in the lattice via the
    cycle-basis `loops_to_basis` pin, so the condition transfers into
    `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis`
-   pin), where it belongs. Filling the 4 therefore still includes
+   pin), where it belongs. Filling the 2 therefore still includes
    settling X1, now inside the Cluster-A discharge.
 
-## The 4 challenge-critical axioms
+## The 2 challenge-critical axioms
+
+> **STATUS NOTE — functoriality-cluster completion (#31, 2026-06-11).** The last
+> two Cluster-C axioms — `AX_pullbackAmbient_preserves_lattice` and
+> `AX_pushforward_pullback` — are now **theorems** (route per daouid's closed
+> PR #191, with the lattice-comparison inclusions proven in
+> `Bridge/KirovDolbeaultPeriods.lean` / `Bridge/KirovDolbeaultLattice.lean`).
+> Challenge-critical count **5 → 3**: `AX_PeriodCycleBasis`,
+> `AX_genus_eq_zero_iff_homeo`, `AX_AbelTheorem`. Sections below retain the
+> pre-discharge analysis for the record.
+
+> **STATUS NOTE — genus-0 uniformization flip (PR #209, parallel-account
+> delivery, 2026-06-11).** `AX_genus_eq_zero_iff_homeo` is now a **theorem**
+> (forward: keystone-backed RR pole extraction → degree-one map →
+> `degreeOne_equiv_projectiveLine` → stereographic `S²`,
+> `RiemannSurface/GenusZeroForward.lean`; backward: S2-lane
+> `genus_eq_zero_of_homeo_sphere_unconditional`, #199+#205). The challenge
+> headline `genus_eq_zero_iff_homeo` prints standard-3. Challenge-critical
+> count **3 → 2**: `AX_PeriodCycleBasis`, `AX_AbelTheorem`.
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging all 4 gives a challenge closure over only
+obligations). Discharging both gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
 ### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
@@ -118,21 +137,21 @@ in the merge. They remain in the build as Part-3 topological-anchoring debt
 discharged by a genuine dissection, re-tying the form to that dissection is the
 recorded joint obligation.
 
-### Cluster B — One remaining classical theorem (two discharged: PR #179, genus-0 flip)
+### Cluster B — one classical theorem remaining (`AX_AbelTheorem`; uniformization discharged PR #209, smoothness discharged PR #179)
 
 Each appears in exactly one Buzzard declaration and has its own proof path.
 
 | Axiom | Mathematical content | Discharge path |
 |---|---|---|
-| `AX_genus_eq_zero_iff_homeo` | ✅ **DISCHARGED 2026-06-11** (genus-0 uniformization flip) — now a theorem, statement verbatim; the Buzzard headline `genus_eq_zero_iff_homeo` prints standard-3 | Forward: keystone-backed RR pole extraction (`h⁰((p)) = 2` at `g = 0` → degree-one function → biholomorphism to ℙ¹ → stereographic S², `RiemannSurface/GenusZeroForward.lean`). Backward: S2-lane `π₁(S²) = 1` + Liouville developing map (`Bridge/SphereGenusZero.lean`). |
+| `AX_genus_eq_zero_iff_homeo` | ✅ **DISCHARGED 2026-06-11** (PR #209, parallel-account delivery) — `genus X = 0 ↔ X ≅ₜ S²` is now a theorem, both directions | Forward: keystone-backed RR pole extraction (`h⁰((p)) = 2` at `g = 0`) → `exists_degreeOne_of_genus_zero` → `degreeOne_equiv_projectiveLine` → stereographic `S²` (`RiemannSurface/GenusZeroForward.lean`). Backward: S2-lane `π₁(S²) = 1` + Liouville developing map (`genus_eq_zero_of_homeo_sphere_unconditional`, #199+#205). The concrete `genus ℙ¹ = 0` was already axiom-free via Liouville. |
 | `AX_AbelTheorem` | Degree-0 kernel of `abelJacobiDiv` = `PrincipalDivisors` — Abel's theorem | Forster §21. The ⊇ direction (principal ⊆ ker) is underway via the Liouville route. The ⊆ direction (ker ⊆ principal, the Jacobi inversion step) is the hard half. |
 | `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — Abel–Jacobi smoothness is now a theorem (chart-line descent; standard-3 + `AX_PeriodCycleBasis` only) | **Transfer note:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. |
 
 ### Cluster C — Functoriality block
 
-Six entries, of which the trace trio (status note below) and the pushforward
-lattice-preservation statement (#30, 2026-06-11) are now **discharged** and
-**two remain as axioms**. All appear in the `pushforward`/`pullback` declarations. The dependency structure
+Six entries, ALL now **discharged** (the trace trio; the pushforward
+lattice-preservation #30; and `AX_pullbackAmbient_preserves_lattice` +
+`AX_pushforward_pullback`, #31/#34, 2026-06-11 — the cluster is fully closed). All appear in the `pushforward`/`pullback` declarations. The dependency structure
 within the cluster is more nuanced than "all follow from one root":
 
 | Axiom | Primary dependency | Role |
@@ -141,8 +160,8 @@ within the cluster is more nuanced than "all follow from one root":
 | `AX_pushforwardOneForm_id` | `pushforwardOneForm` real | `Tr_id = id`; immediate once the trace is real |
 | `AX_pushforwardOneForm_comp` | `pushforwardOneForm` real | `Tr_{g∘f} = Tr_g ∘ Tr_f`; functoriality of the fiber sum |
 | `AX_pushforwardAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#30) | Now a theorem: `∫_{f_*(γ)} ω = ∫_γ f*ω` realized by the developing-value naturality engine (`DevelopingNaturality.lean` + `LoopLattice.lean`, axiom-free) over the Kirov-backed `pullbackOneForm`; representative-loop induction, the image cycle is the honest loop `f∘γ`. Headlines `pushforward`/`_contMDiff`/`_id_apply`/`_comp_apply` now standard-3 + `AX_PeriodCycleBasis`. |
-| `AX_pullbackAmbient_preserves_lattice` | `pushforwardOneForm` (trace, axiom) | `pullbackAmbientLinear` is defined as the dual of `pushforwardOneForm f` — so the trace IS the dependency. Content: `∫_γ f*ω = ∫_{f_*(γ)} ω` from the other side. **Trace-gated.** |
-| `AX_pushforward_pullback` | trace-norm relation | `pushforward_f ∘ pullback_f = [deg f]` on Jac(Y): follows from `Tr_f(f*ω) = deg(f)·ω`. Forster §12 / Miranda. |
+| `AX_pullbackAmbient_preserves_lattice` | ✅ **DISCHARGED 2026-06-11** (#31) | Now a theorem: lattice vector → port coordinates (polygonal smooth representative of the `H1` class), port `PreimageCycle` monodromy (`ambientPullbackJac_preserves_truePeriodLattice`), back via developing value = moving-chart line integral. Route per daouid's closed PR #191 (credit), inclusions proven. |
+| `AX_pushforward_pullback` | ✅ **DISCHARGED 2026-06-11** (#31) | Now a theorem: ambient `Φ ∘ Tᵀ = deg • id` from the port's conservation-of-number over the lattice's ℝ-spanning ℤ-basis + `degreeImpl_eq_degreeFiber`; quotient descent. NOT via a form-level `Tr_f(f*ω) = deg(f)·ω` (the port does not have that law; the identity lives at the period level). |
 
 > **Status 2026-06-10:** the first three rows — `pushforwardOneForm`,
 > `AX_pushforwardOneForm_id`, `AX_pushforwardOneForm_comp` — are **DISCHARGED**
@@ -153,12 +172,14 @@ within the cluster is more nuanced than "all follow from one root":
 > it is the dual of a REAL trace.
 
 With the trace real and the pushforward lattice statement a theorem (#30),
-the remaining Cluster-C axioms are `AX_pullbackAmbient_preserves_lattice`
-(dual of the now-real trace; the #30 engine is the template — what is missing
-is the trace-side analogue of `pullbackOneForm_isPullbackCoeffRel`, i.e. the
-fibre-sum coefficient law for `pushforwardOneForm`) and
-`AX_pushforward_pullback`. Both are period-naturality / projection-formula
-content over real maps; neither is gated by an opaque construction any more.
+**(historical)** the remaining Cluster-C axioms were
+`AX_pullbackAmbient_preserves_lattice` and `AX_pushforward_pullback` — both
+**discharged 2026-06-11 (#31)**: rather than the trace-side fibre-sum
+coefficient law for `developingValue` (which would have required re-deriving
+the monodromy decomposition in our framework), the discharge transports the
+whole problem into the Dolbeault port across the proven
+`truePeriodLattice ↔ periodLatticeInBasis` correspondence and reuses the
+port's `PreimageCycle` machinery. Cluster C is now **fully discharged**.
 
 ---
 
@@ -218,7 +239,7 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 ## Summary: the closure picture
 
 ```
-5 challenge-critical axioms
+2 challenge-critical axioms (3 before the PR #209 genus-0 flip, 2026-06-11)
     │
     ├── Cluster A (1) — in EVERY Buzzard declaration
     │      AX_PeriodCycleBasis  (D1 merge: loops + H₁ basis + Hurewicz tie
@@ -227,9 +248,10 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
     │      Stokes for R1; Hodge positivity for R2 ← hardest, no Lean proof
     │      Kirov port has the proven boundary-word engine for R1/R2
     │
-    ├── Cluster B (2) — two independent classical theorems
-    │      AX_genus_eq_zero_iff_homeo  ← Wallace has best Lean progress
+    ├── Cluster B (1) — one independent classical theorem
     │      AX_AbelTheorem
+    │      (AX_genus_eq_zero_iff_homeo — discharged PR #209, parallel
+    │       account: RR pole extraction forward, S2-lane π₁(S²)=1 backward)
     │      (AX_ofCurve_contMDiff — discharged PR #179, conditionality
     │       transferred to AX_PeriodCycleBasis's loops_to_basis pin)
     │
@@ -237,8 +259,6 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
            (trace trio discharged #26/#27/#28 via the Kirov-Dolbeault bridge;
             AX_pushforwardAmbient_preserves_lattice discharged #30 via the
             developing-value naturality engine)
-           AX_pullbackAmbient_preserves_lattice     (dual of the real trace)
-           AX_pushforward_pullback                  (projection formula, deg f)
 ```
 
 ### Bottleneck assessment
@@ -250,10 +270,12 @@ L² theory / harmonic forms on a compact Riemann surface — no Lean proof exist
 slit-sheet route post-keystone — `docs/planning/CYCLEBASIS_ALTERNATIVES.md`). The
 older discharge analysis is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vetted.
 
-**Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) is the deepest single
-theorem. `AX_AbelTheorem`'s hard half is Jacobi inversion. (`AX_ofCurve_contMDiff`
-was discharged in PR #179; its HI/lattice-completeness conditionality now lives in
-Cluster A's discharge obligation.)
+**Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) — formerly the
+deepest single theorem — was **discharged in PR #209** (genus-0 flip: RR pole
+extraction forward, S2-lane simple connectedness + Liouville backward).
+`AX_AbelTheorem` remains; its hard half is Jacobi inversion.
+(`AX_ofCurve_contMDiff` was discharged in PR #179; its HI/lattice-completeness
+conditionality now lives in Cluster A's discharge obligation.)
 
 **Cluster C**: the trace trio is discharged (#26/#27/#28) and the pushforward
 lattice statement is a theorem (#30, developing-value naturality engine), so
@@ -280,7 +302,8 @@ period-cluster theorems, and sit in the challenge's dependency chain via
 **The RR/Serre cohomology branch** (`h1coh_zero_finrank`, `serreDuality_equiv`,
 line-bundle stubs) — this IS orthogonal to challenge closure. These axioms do not appear
 in any Buzzard `#print axioms`. The tower's RR/Serre discharge deepens mathematical
-trust without touching any of the 5.
+trust without touching either of the 2 (though the keystone-backed RR it proved
+is exactly what powered the PR #209 forward leg).
 
 The tower's indirect contribution to eventual challenge closure: the Kirov port
 integrated in Phase D contains `residueTheorem_unconditional` and the proven

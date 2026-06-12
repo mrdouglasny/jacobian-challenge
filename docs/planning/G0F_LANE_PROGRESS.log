@@ -42,3 +42,24 @@ Append-only progress log. Branch: `feat/genus0-forward`, based on main @ c5cced8
   row 4→3), docs/CHALLENGE_AXIOM_CLOSURE.md (5→4 critical, Cluster B row),
   docs/axiom-report.txt regenerated.
 - Umbrella: `Jacobians/RiemannSurface.lean` + GenusZeroForward.
+
+2026-06-11 — maintainer refresh (merge of post-#207/#208 main into feat/genus0-forward)
+- Merged origin/main (5bb3a32, 16 active / 3 critical after #207 functoriality
+  completion) into the PR branch; Bridge.lean import union; PR's stale ledger
+  delta (18→17 / 5→4) discarded and RE-APPLIED on top of main's state:
+  AXIOM_AUDIT.md 16→15 (Class 1: 10→9), README.md + CHALLENGE_AXIOM_CLOSURE.md
+  challenge-critical 3→**2** (remaining: AX_PeriodCycleBasis, AX_AbelTheorem).
+- docs/axiom-report.txt regenerated post-merge
+  (lake env lean scripts/axiom_report.lean); diff vs main = exactly one line:
+  genus_eq_zero_iff_homeo closure drops Axioms.AX_genus_eq_zero_iff_homeo.
+- Post-merge kernel re-verification (/tmp/g0f_kernel_check.lean,
+  lake env lean; all EXACTLY [propext, Classical.choice, Quot.sound] —
+  standard-3, no AX_*, no sorryAx):
+  - Jacobians.Axioms.AX_genus_eq_zero_iff_homeo  (the flipped theorem)
+  - genus_eq_zero_iff_homeo                      (challenge headline)
+  - Jacobians.RiemannSurface.nonempty_homeo_sphere_of_genus_eq_zero
+  - Jacobians.RiemannSurface.exists_degreeOne_of_genus_zero
+  - Jacobians.RiemannSurface.MeromorphicFunctionField.degreeOne_equiv_projectiveLine
+  - Jacobians.Topology.simplyConnectedSpace_sphere
+- Full lake build green (8959 jobs); scripts/check_axiom_consistency.sh run
+  post-merge (see commit).
