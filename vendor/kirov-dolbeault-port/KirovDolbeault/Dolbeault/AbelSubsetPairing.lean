@@ -479,4 +479,249 @@ theorem pairOmega_dbarL (u : SmoothCFunctions X) (α : HolomorphicOneForms X) :
     pairOmega 𝔇 ⟨dbarL u, dbarL_mem_zeroOne u⟩ α = 0 :=
   pairFormL_dbarL 𝔇 (isOneZeroCoeff_omegaCoeff 𝔇 α) u
 
+/-! ## P5a — chart-lift plumbing for the nondegeneracy witness
+
+The witness `(0,1)`-form of P5 is `σ = h·∂̄w` with `h, w` global smooth functions manufactured
+from planar data in a single cover chart: the disk bump of the cover (promoted to a
+`SmoothBumpFunction`) times the chart pullback.  Plus two planar atoms: `∂̄(conj) = 1` and the
+constant-rescaling read of `cSmulForm`. -/
+
+/-- The disk bump of cover index `j`, promoted to a manifold `SmoothBumpFunction` at the center
+(the cover's `closedBall ⊆ target` field discharges the support condition). -/
+noncomputable def diskSmoothBump (j : 𝔇.toFiniteCover.ι) :
+    SmoothBumpFunction 𝓘(ℝ, ℂ) (𝔇.center j) where
+  toContDiffBump := 𝔇.diskBump j
+  closedBall_subset := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ, Set.inter_univ]
+    exact 𝔇.diskBump_support_subset_target j
+
+/-- The **chart lift** of a planar smooth function `F` over cover index `j`: the global smooth
+function `x ↦ χⱼ(x)·F(eⱼ x)` with `χⱼ` the disk smooth bump — equal to `F ∘ eⱼ` on the cover
+disk (`chartLift_symm_read`), supported in the chart source over the support of `F`
+(`chartLift_ne_zero`). -/
+noncomputable def chartLift (j : 𝔇.toFiniteCover.ι) (F : ℂ → ℂ)
+    (hF : ContDiff ℝ (⊤ : ℕ∞) F) : SmoothCFunctions X :=
+  ⟨fun x => ((diskSmoothBump 𝔇 j) x : ℝ) • F (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) x),
+    (diskSmoothBump 𝔇 j).contMDiff_smul
+      (hF.contMDiff.comp_contMDiffOn contMDiffOn_extChartAt)⟩
+
+@[simp] theorem chartLift_apply (j : 𝔇.toFiniteCover.ι) (F : ℂ → ℂ)
+    (hF : ContDiff ℝ (⊤ : ℕ∞) F) (x : X) :
+    chartLift 𝔇 j F hF x
+      = ((diskSmoothBump 𝔇 j) x : ℝ) • F (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) x) := rfl
+
+/-- On the (chart image of the) cover disk, the chart lift reads back the planar function. -/
+theorem chartLift_symm_read (j : 𝔇.toFiniteCover.ι) {F : ℂ → ℂ}
+    {hF : ContDiff ℝ (⊤ : ℕ∞) F} {z : ℂ}
+    (hz : z ∈ Metric.ball (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) (𝔇.center j)) (𝔇.radius j)) :
+    chartLift 𝔇 j F hF ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z) = F z := by
+  set e := extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) with he
+  have hztgt : z ∈ e.target := 𝔇.closedBall_subset_target j (Metric.ball_subset_closedBall hz)
+  have hsrc : e.symm z ∈ e.source := e.map_target hztgt
+  have hez : e (e.symm z) = z := e.right_inv hztgt
+  have hchart : e.symm z ∈ (chartAt ℂ (𝔇.center j)).source := by
+    rwa [he, extChartAt_source] at hsrc
+  have h1 : (diskSmoothBump 𝔇 j) (e.symm z) = 1 := by
+    refine (diskSmoothBump 𝔇 j).one_of_dist_le hchart ?_
+    show dist (e (e.symm z)) (e (𝔇.center j)) ≤ 𝔇.radius j
+    rw [hez]
+    exact le_of_lt (Metric.mem_ball.mp hz)
+  show ((diskSmoothBump 𝔇 j) (e.symm z) : ℝ) • F (e (e.symm z)) = F z
+  rw [h1, hez, one_smul]
+
+/-- A nonvanishing point of a chart lift lies in the chart source, with chart coordinate in the
+support of the planar function. -/
+theorem chartLift_ne_zero {j : 𝔇.toFiniteCover.ι} {F : ℂ → ℂ}
+    {hF : ContDiff ℝ (⊤ : ℕ∞) F} {x : X} (hx : chartLift 𝔇 j F hF x ≠ 0) :
+    x ∈ (chartAt ℂ (𝔇.center j)).source
+      ∧ F (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) x) ≠ 0 := by
+  have hχ : (diskSmoothBump 𝔇 j) x ≠ 0 := by
+    intro h0
+    exact hx (by rw [chartLift_apply, h0]; simp)
+  have hF0 : F (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) x) ≠ 0 := by
+    intro h0
+    exact hx (by rw [chartLift_apply, h0, smul_zero])
+  exact ⟨(diskSmoothBump 𝔇 j).support_subset_source (Function.mem_support.mpr hχ), hF0⟩
+
+/-- The planar Wirtinger derivative of conjugation is `1`: `∂̄(conj) = 1`. -/
+theorem dbar_conj (z : ℂ) : DbarDisk.dbar (fun w => (starRingEnd ℂ) w) z = 1 := by
+  have hfun : (fun w : ℂ => (starRingEnd ℂ) w) = ⇑Complex.conjCLE :=
+    funext fun w => (Complex.conjCLE_apply w).symm
+  unfold DbarDisk.dbar
+  rw [hfun, Complex.conjCLE.fderiv]
+  simp only [ContinuousLinearEquiv.coe_coe, Complex.conjCLE_apply, map_one, Complex.conj_I]
+  ring_nf
+  rw [Complex.I_sq]
+  ring
+
+/-- The cutoff pullback of a `cSmulForm` rescaling reads the scalar at the surface point. -/
+theorem cutoffPullback_cSmulForm (j : 𝔇.toFiniteCover.ι) (c : SmoothCFunctions X)
+    (g : SmoothCOneForms X) (z : ℂ) :
+    𝔇.cutoffPullback j (cSmulForm c g) z
+      = c ((extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z) * 𝔇.cutoffPullback j g z := by
+  set y := (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z with hy
+  show ((𝔇.diskBump j) z : ℝ) • ((cSmulForm c g) y) ((Bundle.Trivialization.symmL ℝ
+        (trivializationAt ℂ (TangentSpace (𝓘(ℝ, ℂ))) (𝔇.center j)) y) (1 : ℂ))
+    = c y * (((𝔇.diskBump j) z : ℝ) • (g y) ((Bundle.Trivialization.symmL ℝ
+        (trivializationAt ℂ (TangentSpace (𝓘(ℝ, ℂ))) (𝔇.center j)) y) (1 : ℂ)))
+  rw [cSmulForm_apply, ContinuousLinearMap.smul_apply, smul_comm]
+  rfl
+
+/-! ## P5b — the single-chart collapse of the pairing integral
+
+For a `(0,1)`-form supported (as a section) in a closed subset of ONE cover disk, the pairing
+integral collapses to the single chart-`j₀` planar integral: relocate every PoU term to chart
+`j₀` (the R4 relocation lemma) and reinsert `∑ ρ = 1`. -/
+
+/-- If the section `σ` vanishes outside `S`, a nonvanishing value of `cutoffPullback j σ`
+forces the chart point into `S` (and the planar point into the chart target). -/
+theorem cutoffPullback_ne_zero {σ : SmoothCOneForms X} {S : Set X}
+    (hsupp : ∀ y, y ∉ S → σ y = 0) {j : 𝔇.toFiniteCover.ι} {z : ℂ}
+    (hz : 𝔇.cutoffPullback j σ z ≠ 0) :
+    z ∈ (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).target
+      ∧ (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z ∈ S := by
+  set y := (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm z with hy
+  have hχ : (𝔇.diskBump j) z ≠ 0 := by
+    intro h0
+    refine hz ?_
+    show ((𝔇.diskBump j) z : ℝ) • _ = 0
+    rw [h0]
+    simp
+  have hztgt : z ∈ (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).target := by
+    refine 𝔇.diskBump_support_subset_target j (Metric.ball_subset_closedBall ?_)
+    rw [← (𝔇.diskBump j).support_eq]
+    exact Function.mem_support.mpr hχ
+  refine ⟨hztgt, ?_⟩
+  by_contra hyS
+  refine hz ?_
+  show ((𝔇.diskBump j) z : ℝ) • (σ y) _ = 0
+  rw [hsupp y hyS]
+  simp
+
+/-- **P5b — the single-chart collapse.**  If `σ` vanishes outside a closed `S ⊆ U j₀`, the
+pairing integral is the single chart-`j₀` term:
+
+  `resIntegral (σ̃·g) = ∫_ℂ σ̃_{j₀}·g_{j₀}`.
+
+Each PoU summand vanishes off the `(l, j₀)` overlap image, relocates to chart `j₀`
+(`setIntegral_overlap_relocate` at the weight `ρ_l`), and the weights reinsert to `1`. -/
+theorem resIntegral_pairElem_of_support {σ : SmoothCOneForms X} (hσ : σ ∈ OneFormsZeroOne X)
+    {g : 𝔇.toFiniteCover.ι → ℂ → ℂ} (hg : IsOneZeroCoeff 𝔇 g) {j₀ : 𝔇.toFiniteCover.ι}
+    {S : Set X} (hS : IsClosed S) (hSU : S ⊆ (𝔇.U j₀ : Set X))
+    (hsupp : ∀ y, y ∉ S → σ y = 0) :
+    resIntegral 𝔇 (pairElem 𝔇 hσ hg) = ∫ z, pairCoeff 𝔇 σ g j₀ z := by
+  set t := pairCoeff 𝔇 σ g with ht
+  have htmem : IsOneOneCoeff 𝔇 t := pairCoeff_mem_oneOneCoeff 𝔇 hσ hg
+  -- the compact planar trace of the section support in chart `j₀`
+  have hScpt : IsCompact S := hS.isCompact
+  have hK : IsCompact (chartMap 𝔇 j₀ '' S) := by
+    refine hScpt.image_of_continuousOn ?_
+    exact (chartAt ℂ (𝔇.center j₀)).continuousOn.mono fun y hy =>
+      mem_chartSource_of_mem_U 𝔇 (hSU hy)
+  -- a nonvanishing value of `t j₀` happens only on the planar trace
+  have htj₀ : ∀ w, t j₀ w ≠ 0 → w ∈ chartMap 𝔇 j₀ '' S := by
+    intro w hw
+    have hcut : 𝔇.cutoffPullback j₀ σ w ≠ 0 := fun h0 => hw (by rw [ht]; simp [h0])
+    obtain ⟨hwtgt, hyS⟩ := cutoffPullback_ne_zero 𝔇 hsupp hcut
+    exact ⟨(extChartAt 𝓘(ℝ, ℂ) (𝔇.center j₀)).symm w, hyS, by
+      show (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j₀)) _ = w
+      exact (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j₀)).right_inv hwtgt⟩
+  -- per cover index: localize to the overlap, relocate to chart `j₀`, re-extend
+  have hterm : ∀ l, (∫ z, pouCoeff 𝔇 l z * t l z)
+      = ∫ w, rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w := by
+    intro l
+    -- step 1: the chart-`l` integrand vanishes off the `(l, j₀)` overlap image
+    have hvan1 : ∀ z, z ∉ overlapImage 𝔇 l j₀ → pouCoeff 𝔇 l z * t l z = 0 := by
+      intro z hz
+      by_cases hzU : z ∈ chartMap 𝔇 l '' (𝔇.U l : Set X)
+      · obtain ⟨y, hyU, rfl⟩ := hzU
+        by_cases hcut : 𝔇.cutoffPullback l σ (chartMap 𝔇 l y) = 0
+        · rw [ht]
+          simp [hcut]
+        · obtain ⟨-, hyS⟩ := cutoffPullback_ne_zero 𝔇 hsupp hcut
+          have hsymm : (extChartAt 𝓘(ℝ, ℂ) (𝔇.center l)).symm (chartMap 𝔇 l y) = y :=
+            (extChartAt 𝓘(ℝ, ℂ) (𝔇.center l)).left_inv (𝔇.subset_chart_source l hyU)
+          rw [hsymm] at hyS
+          exact absurd ⟨y, ⟨hyU, hSU hyS⟩, rfl⟩ hz
+      · rw [show pouCoeff 𝔇 l z = 0 from Set.indicator_of_notMem hzU _, zero_mul]
+    -- step 2: on the overlap image the PoU weight is the surface weight
+    have hcongr1 : ∀ z ∈ overlapImage 𝔇 l j₀,
+        pouCoeff 𝔇 l z * t l z
+          = rhoC 𝔇 l ((chartAt ℂ (𝔇.center l)).symm z) * t l z := by
+      rintro z ⟨y, hy, rfl⟩
+      have hsymm : (chartAt ℂ (𝔇.center l)).symm (chartMap 𝔇 l y) = y :=
+        (chartAt ℂ (𝔇.center l)).left_inv (mem_chartSource_of_mem_U 𝔇 hy.1)
+      rw [pouCoeff_chartMap 𝔇 hy.1, hsymm]
+    -- step 3: the chart-`j₀` integrand vanishes off the `(j₀, l)` overlap image
+    have hvan2 : ∀ w, w ∉ overlapImage 𝔇 j₀ l →
+        rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w = 0 := by
+      intro w hw
+      by_cases htw : t j₀ w = 0
+      · rw [htw, mul_zero]
+      · obtain ⟨y, hyS, rfl⟩ := htj₀ w htw
+        have hyU : y ∈ (𝔇.U j₀ : Set X) := hSU hyS
+        have hsymm : (chartAt ℂ (𝔇.center j₀)).symm (chartMap 𝔇 j₀ y) = y :=
+          (chartAt ℂ (𝔇.center j₀)).left_inv (mem_chartSource_of_mem_U 𝔇 hyU)
+        rw [hsymm]
+        have hyUl : y ∉ (𝔇.U l : Set X) := fun hyl => hw ⟨y, ⟨hyU, hyl⟩, rfl⟩
+        have hsupp_l : y ∉ tsupport (cechPoU 𝔇 l) := fun hs =>
+          hyUl (cechPoU_subordinate 𝔇 l hs)
+        have hr : rhoC 𝔇 l y = 0 := by
+          simp only [rhoC, ContMDiffMap.comp_apply, ofRealCM,
+            image_eq_zero_of_notMem_tsupport hsupp_l]
+          rfl
+        rw [hr, zero_mul]
+    calc ∫ z, pouCoeff 𝔇 l z * t l z
+        = ∫ z in overlapImage 𝔇 l j₀, pouCoeff 𝔇 l z * t l z :=
+          (setIntegral_eq_integral_of_forall_compl_eq_zero hvan1).symm
+      _ = ∫ z in overlapImage 𝔇 l j₀,
+            rhoC 𝔇 l ((chartAt ℂ (𝔇.center l)).symm z) * t l z :=
+          MeasureTheory.setIntegral_congr_fun
+            (isOpen_overlapImage 𝔇 l j₀).measurableSet hcongr1
+      _ = ∫ w in overlapImage 𝔇 j₀ l,
+            rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w :=
+          setIntegral_overlap_relocate 𝔇 htmem l j₀ fun y => rhoC 𝔇 l y
+      _ = ∫ w, rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w :=
+          setIntegral_eq_integral_of_forall_compl_eq_zero hvan2
+  -- continuity + compact support of the relocated integrands (clearance off the planar trace)
+  have htcont : ∀ w ∉ chartMap 𝔇 j₀ '' S, t j₀ w = 0 := fun w hw => by
+    by_contra h0
+    exact hw (htj₀ w h0)
+  have hcont : ∀ l, Continuous fun w =>
+      rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w := by
+    intro l
+    rw [continuous_iff_continuousAt]
+    intro w
+    by_cases hwK : w ∈ chartMap 𝔇 j₀ '' S
+    · obtain ⟨y, hyS, rfl⟩ := hwK
+      have hyU : y ∈ (𝔇.U j₀ : Set X) := hSU hyS
+      have hwtgt : chartMap 𝔇 j₀ y ∈ (chartAt ℂ (𝔇.center j₀)).target :=
+        (chartAt ℂ (𝔇.center j₀)).map_source (mem_chartSource_of_mem_U 𝔇 hyU)
+      refine ContinuousAt.mul ?_ (ContinuousAt.mul ?_ ?_)
+      · exact (contDiffAt_chartSymmRead (rhoC 𝔇 l).contMDiff hwtgt).continuousAt
+      · exact (𝔇.contDiff_cutoffPullback j₀ σ).continuous.continuousAt
+      · exact (hg.1 j₀ y hyU).continuousAt
+    · have hev : (fun w => rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w)
+          =ᶠ[𝓝 w] fun _ => (0 : ℂ) := by
+        filter_upwards [hK.isClosed.isOpen_compl.mem_nhds hwK] with w' hw'
+        rw [htcont w' hw', mul_zero]
+      exact continuousAt_const.congr hev.symm
+  have hsupport : ∀ l, HasCompactSupport fun w =>
+      rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w := by
+    intro l
+    refine HasCompactSupport.intro hK fun w hw => ?_
+    rw [htcont w hw, mul_zero]
+  -- assemble: sum the relocated terms and reinsert `∑ ρ = 1`
+  calc resIntegral 𝔇 (pairElem 𝔇 hσ hg)
+      = ∑ l, ∫ z, pouCoeff 𝔇 l z * t l z := rfl
+    _ = ∑ l, ∫ w, rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w :=
+        Finset.sum_congr rfl fun l _ => hterm l
+    _ = ∫ w, ∑ l, rhoC 𝔇 l ((chartAt ℂ (𝔇.center j₀)).symm w) * t j₀ w :=
+        (integral_finsetSum Finset.univ fun l _ =>
+          (hcont l).integrable_of_hasCompactSupport (hsupport l)).symm
+    _ = ∫ w, t j₀ w := by
+        refine integral_congr_ae (Eventually.of_forall fun w => ?_)
+        dsimp only
+        rw [← Finset.sum_mul, sum_rhoC_apply, one_mul]
+
 end Jacobians.Dolbeault.FineResidue
