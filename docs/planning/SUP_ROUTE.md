@@ -66,7 +66,7 @@ at most).
 | **S2** (fiber divisor, = R2a) | `fiberDivisor f hf y : Divisor X` (fiber of `toP1 f` weighted by `mapAnalyticOrderAt`) + `divisor_eq_fiberDivisor_zero_sub_infty`: `divisor f = fiberDivisor 0 − fiberDivisor ∞` for nonconstant `f` (coefficientwise from `toP1_eq_zero_iff` / `toP1_eq_infty_iff` / `mapAnalyticOrderAt_toP1*`) | **PROVEN** (this lane) |
 | **S3** (Φ + constancy reduction) | `fiberAJ f hf y := abelJacobiDiv X (fiberDivisor f hf y)` (the Jacobi pencil map, Jacobian-valued); named hypothesis `FiberAJConstancy`; `abel_supset_of_fiberAJConstancy` (`AJ(div f) = Φ(0) − Φ(∞) = 0`); degenerate case `divisor_eq_zero_of_not_nonconstant` (de-privatized `orderAtMF_eq_zero_of_not_nonconstant` in `DegreeTheorem.lean`); bonus `deg_fiberDivisor_const` (fiber-degree constancy in divisor form, for the S6 basepoint bookkeeping) | **PROVEN** (this lane) |
 | **S4a** (branch values) | `branchValues f : Set ProjectiveLine` (finite, via `AX_BranchLocus`-the-theorem) + `mapAnalyticOrderAt_eq_one_of_not_branchValue` (regular fibers are unramified) | **PROVEN** (this lane) |
-| **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (chart-level `exists_local_biholomorphism_strong`, Wallace `AnalyticLocalMapping`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` on `V` (sheet tracking via `weightedFiberConservation`) | open (next) |
+| **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (Wallace `IsHolomorphicAt.localInverse` + Mathlib `analyticAt_localInverse`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` near `y₀` (kfold uniqueness + properness) — `exists_fiberDivisor_sections` in `AbelSupsetSections.lean` | **PROVEN** (this lane) |
 | **S4c** (local lift of Φ) | local ambient lift `φ : V → Fin (genus X) → ℂ` of `Φ` along the sections: `φ(y) = ∑ᵢ (ofCurveAmbient x₀ (sᵢ y₀) + development from sᵢ y₀ to sᵢ y)`, holomorphic via the `developingValue` endpoint-analyticity brick (HI workstream / `AX_ofCurve_contMDiff` discharge route); `Φ = mk ∘ φ` on `V` | open |
 | **S5** (removable across branch) | the load-bearing lemma: symmetric sum of endpoint integrals bounded near a branch value ⇒ holomorphic extension (`analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) | open |
 | **S6** (lift + Liouville) | `ℙ¹` simply connected (`Topology/SphereSimplyConnected`) ⇒ lift `Φ` through `ℂ^g → ℂ^g/Λ` (#199 `simplyConnectedPrimitive` pattern, Kirov `ZLatticeQuotient` local-homeo API); compact source ⇒ constant (`MDifferentiable.exists_eq_const_of_compactSpace` per coordinate / `Differentiable.exists_eq_const_of_bounded`) | open |
@@ -95,3 +95,16 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   (closures standard-3 only). S4 decomposed into S4a/S4b/S4c in the
   ladder; the next rung is S4b (local holomorphic sections over a regular
   value — the first genuinely analytic step).
+- 2026-06-12 (SUP-2 session): S4b proven — new file
+  `Jacobians/RiemannSurface/AbelSupsetSections.lean`:
+  local-inverse API upgrades (`IsHolomorphicAt.localInverse_apply_self`,
+  `localInverse_tendsto`, `contMDiffAt_of_isHolomorphicAt_of_continuousAt`;
+  two DegreeOneGenusZero helpers de-privatized), single-point section
+  `exists_section_at`, and the headline `exists_fiberDivisor_sections`
+  (sections through every fiber point over a regular value + eventual
+  fiber-divisor trivialization `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)`).
+  Kernel closures: ALL standard-3 only (no `AX_PeriodCycleBasis` even).
+  Note for S4c: with `AX_ofCurve_contMDiff` a THEOREM, S4c can compose
+  `ofCurve`-smoothness with the S4b sections directly in the Jacobian
+  (no ambient chart-lift needed): `fiberAJ` is `ContMDiffAt` at every
+  non-branch value via `map_sum` over the section trivialization.
