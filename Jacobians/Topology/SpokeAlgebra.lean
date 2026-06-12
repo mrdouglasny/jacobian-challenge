@@ -73,6 +73,36 @@ theorem fundamentalGroupMulEquivOfPath_refl {x : X} (g : FundamentalGroup X x) :
     = Qmk γ
   simp [Path.refl_symm, Path.Homotopic.Quotient.mk_trans]
 
+/-- Basepoint transport depends only on the homotopy class of the path. -/
+theorem fundamentalGroupMulEquivOfPath_congr {x y : X} {α α' : Path x y}
+    (h : Qmk α = Qmk α') (g : FundamentalGroup X x) :
+    FundamentalGroup.fundamentalGroupMulEquivOfPath α g
+      = FundamentalGroup.fundamentalGroupMulEquivOfPath α' g := by
+  obtain ⟨γ, hγ⟩ := Path.Homotopic.Quotient.mk_surjective (FundamentalGroup.toPath g)
+  have hg : g = FundamentalGroup.fromPath (Qmk γ) := hγ.symm
+  have hsymm : Qmk α.symm = Qmk α'.symm :=
+    Quotient.sound (Path.Homotopic.symm₂ (Quotient.exact h))
+  rw [hg, fundamentalGroupMulEquivOfPath_fromPath,
+    fundamentalGroupMulEquivOfPath_fromPath]
+  show FundamentalGroup.fromPath (Qmk (α.symm.trans (γ.trans α)))
+    = FundamentalGroup.fromPath (Qmk (α'.symm.trans (γ.trans α')))
+  rw [Path.Homotopic.Quotient.mk_trans α.symm (γ.trans α),
+    Path.Homotopic.Quotient.mk_trans γ α,
+    Path.Homotopic.Quotient.mk_trans α'.symm (γ.trans α'),
+    Path.Homotopic.Quotient.mk_trans γ α', h, hsymm]
+
+/-- The inverse of basepoint transport is transport along the reversed
+path. -/
+theorem fundamentalGroupMulEquivOfPath_symm_eq {x y : X} (τ : Path x y)
+    (g : FundamentalGroup X y) :
+    (FundamentalGroup.fundamentalGroupMulEquivOfPath τ).symm g
+      = FundamentalGroup.fundamentalGroupMulEquivOfPath τ.symm g := by
+  apply (FundamentalGroup.fundamentalGroupMulEquivOfPath τ).injective
+  rw [MulEquiv.apply_symm_apply, ← fundamentalGroupMulEquivOfPath_trans,
+    fundamentalGroupMulEquivOfPath_congr
+      (Quotient.sound (Path.Homotopic.symm_trans τ)) g,
+    fundamentalGroupMulEquivOfPath_refl]
+
 /-- The trivial spoke gives the plain loop class. -/
 theorem spokedClass_refl {x₀ : X} (γ : Path x₀ x₀) :
     spokedClass (Path.refl x₀) γ = FundamentalGroup.fromPath (Qmk γ) := by
@@ -131,5 +161,16 @@ theorem mapOfEq_spokedClass {Y : Type*} [TopologicalSpace Y] (f : C(X, Y))
   rw [FundamentalGroup.mapOfEq_apply, Path.cast_rfl_rfl, Path.map_trans,
     Path.map_trans, ← Path.map_symm]
   rfl
+
+/-- Spoked classes of pointwise-equal data agree, across a propositional
+identification of the loop's basepoint. -/
+theorem spokedClass_of_eq {x₀ y y' : X} (h : y = y') (p : Path x₀ y)
+    (p' : Path x₀ y') (γ : Path y y) (γ' : Path y' y')
+    (hp : ∀ t, p t = p' t) (hγ : ∀ t, γ t = γ' t) :
+    spokedClass p γ = spokedClass p' γ' := by
+  subst h
+  have hpe : p = p' := by ext t; exact hp t
+  have hγe : γ = γ' := by ext t; exact hγ t
+  rw [hpe, hγe]
 
 end Jacobians.Topology

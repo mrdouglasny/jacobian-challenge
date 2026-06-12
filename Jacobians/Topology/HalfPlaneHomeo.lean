@@ -63,6 +63,29 @@ noncomputable def halfPlaneHomeo (c : ℝ) : {z : ℂ // z.re < c} ≃ₜ ℂ wh
     · exact (Complex.continuous_ofReal.comp Complex.continuous_im).mul
         continuous_const
 
+/-- Negation maps the open right half-plane `c < Re z` onto the open left
+half-plane `Re z < -c`. -/
+noncomputable def negHalfPlaneHomeo (c : ℝ) :
+    {z : ℂ // c < z.re} ≃ₜ {z : ℂ // z.re < -c} where
+  toFun z := ⟨-(z : ℂ), by
+    have := z.2
+    simp only [Complex.neg_re]
+    linarith⟩
+  invFun w := ⟨-(w : ℂ), by
+    have := w.2
+    simp only [Complex.neg_re]
+    linarith⟩
+  left_inv z := Subtype.ext (neg_neg _)
+  right_inv w := Subtype.ext (neg_neg _)
+  continuous_toFun := (continuous_subtype_val.neg).subtype_mk _
+  continuous_invFun := (continuous_subtype_val.neg).subtype_mk _
+
+/-- **The open right half-plane `c < Re z` is homeomorphic to `ℂ`** —
+the mirror companion of `halfPlaneHomeo`, for the right side of the
+separating-line split. -/
+noncomputable def halfPlaneHomeoGT (c : ℝ) : {z : ℂ // c < z.re} ≃ₜ ℂ :=
+  (negHalfPlaneHomeo c).trans (halfPlaneHomeo (-c))
+
 /-- A homeomorphism restricts to a homeomorphism between complements of a
 set and its image — the puncture-transport companion of `halfPlaneHomeo`
 (restricting it to a half-plane minus finitely many punctures gives the

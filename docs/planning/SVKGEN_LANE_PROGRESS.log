@@ -95,3 +95,24 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   spoke-congruence, quotient assoc/cancel, composite-spoke peeling,
   naturality under maps). Kernel standard-3 on all 9 decls. Umbrella
   wired (Edit tool, grep-verified).
+- HalfPlaneHomeo toolkit COMPLETED: negHalfPlaneHomeo + halfPlaneHomeoGT
+  (right half-plane via negation + halfPlaneHomeo). Standard-3.
+- G3/G4 ENGINE LANDED: Jacobians/Topology/CellGeneration.lean —
+  fromPath_mem_of_cellSpokes_subset: any subgroup of pi1(C \ T, x0)
+  containing all cell-spoke classes (loops inside an open once-punctured-
+  plane cell W with W cap T = {s}, conjugated along arbitrary spokes)
+  contains every loop class. Strong induction on T.card; ONE side_transfer
+  lemma instantiates both half-plane sides AND the 90-degree rotation
+  (all-equal-re configs); rebasing via cellGenAt_rebase (spokes absorb
+  conjugators). Kernel standard-3 on headline + all engine lemmas.
+  Gotchas hit: combining-circumflex identifiers (T-hat, p-hat, delta-hat)
+  break tokenization (precomposed Ŵ/ŝ/ŷ/â are fine); structure-field
+  tactic blocks with rw-at can throw "unknown free variable" (fixed by
+  extracting aux lemmas); congrArg-vs-expected-type eager unification
+  across subtype layers (fixed by show + rw).
+- Remaining for B1: Layer B (circle-ization) — every cell-spoke class is
+  a power of a spoked SMALL CIRCLE (tiny circle inside the cell via
+  Metric.infDist, winding-unit argument in pi1(cell) = Z), giving
+  generation by the explicit circleInPunctured lassos; then the
+  one-lasso-per-puncture normalClosure corollary (radius/spoke comparison
+  inside a common punctured disk; needs puncturedDiskHomeo).
