@@ -1,0 +1,15 @@
+# R1/R2 kernel-closure artifact (maintainer re-run, post #203 review P1)
+# script: scripts pattern, run 2026-06-12T02:23Z on feat/bilinear-relations
+import Jacobians.RiemannSurface.BilinearRelations
+import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
+open Jacobians.RiemannSurface
+#print axioms Jacobians.RiemannSurface.arc_R1_of_periodMatrix_symm
+#print axioms Jacobians.RiemannSurface.arc_R2_of_periodGram_posDef
+#print axioms Jacobians.RiemannSurface.arc_R1_of_genus_le_one
+#print axioms Jacobians.RiemannSurface.arc_R2_of_genus_eq_zero
+#print axioms Jacobians.RiemannSurface.ArcBoundaryWordData.r1_field
+#print axioms Jacobians.RiemannSurface.ArcBoundaryWordData.r2_field
+#print axioms Jacobians.RiemannSurface.periodCycleBasisOfBoundaryWord
+# verdict:
+declarations: 7
+all standard-3: True | sorryAx: False
