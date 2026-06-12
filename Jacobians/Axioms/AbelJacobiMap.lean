@@ -2007,6 +2007,90 @@ noncomputable def degreeImpl {X : Type u} [TopologicalSpace X] [T2Space X]
   exact if hc : ∃ c : Y, ∀ x : X, f x = c then 0
         else Classical.choose (AX_BranchLocus f hf hc)
 
+/-- `degreeImpl` (fiber-weighted count from `AX_BranchLocus`) agrees with the
+Dolbeault port's `degreeFiber` (regular-value fibre cardinality): both are
+the unramified fibre count at a value avoiding both branch loci. -/
+theorem degreeImpl_eq_degreeFiber {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
+    [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
+    [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) :
+    degreeImpl f hf = _root_.Jacobians.degreeFiber f hf := by
+  classical
+  by_cases hc : ∃ c : Y, ∀ x : X, f x = c
+  · have hcm : Jacobians.Discharge.IsConstantMap f := hc
+    rw [degreeImpl, dif_pos hc, _root_.Jacobians.degreeFiber]
+    exact (if_pos hcm).symm
+  · have hnc : ¬ Jacobians.Discharge.IsConstantMap f := fun h => hc h
+    obtain ⟨hd_pos, hd_sum, hd_branch⟩ := Classical.choose_spec (AX_BranchLocus f hf hc)
+    rw [degreeImpl, dif_neg hc]
+    -- A value avoiding our branch set and the port's critical values.
+    haveI : Infinite Y :=
+      Jacobians.Discharge.ContMDiff.Degree.y_infinite_of_chartedSpace_complex
+    have hcv_fin : (Jacobians.Discharge.Manifold.criticalValuesGeneral f).Finite :=
+      Jacobians.Discharge.Manifold.criticalValues_finite_general f hf hnc
+    have hunion_fin : ({ q : Y | ∃ p : X, f p = q ∧ localOrder f p q > 1 } ∪
+        Jacobians.Discharge.Manifold.criticalValuesGeneral f).Finite :=
+      hd_branch.union hcv_fin
+    obtain ⟨y₀, hy₀⟩ := hunion_fin.infinite_compl.nonempty
+    have hy₀_our : ¬ ∃ p : X, f p = y₀ ∧ localOrder f p y₀ > 1 :=
+      fun h => hy₀ (Or.inl h)
+    have hy₀_cv : y₀ ∉ Jacobians.Discharge.Manifold.criticalValuesGeneral f :=
+      fun h => hy₀ (Or.inr h)
+    -- Port side: degreeFiber is the fibre cardinality at `y₀`.
+    obtain ⟨w, hwval⟩ :=
+      Jacobians.Discharge.ContMDiff.Degree.exists_regularValueWitnessReg_value_eq
+        f hf hnc hy₀_cv
+    have hdeg : _root_.Jacobians.degreeFiber f hf = (f ⁻¹' {y₀}).ncard := by
+      rw [_root_.Jacobians.degreeFiber_eq_card_of_regularWitness f hf hnc w,
+        show w.card = w.toWitness.card from rfl, w.toWitness.card_eq_ncard, hwval]
+    -- Our side: the fiber-weighted sum at `y₀` is the plain fibre count.
+    have hfTop : ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) f := by
+      simpa using hf.of_le le_top
+    have hhol : Jacobians.Vendor.Wallace.HolomorphicForms.IsHolomorphic f :=
+      Jacobians.Vendor.Wallace.HolomorphicForms.isHolomorphic_of_contMDiff hfTop
+        (Jacobians.Vendor.Wallace.HolomorphicForms.hasLocalKfoldRamification_of_contMDiff hfTop)
+    have hfib_fin : (f ⁻¹' {y₀}).Finite :=
+      Jacobians.Vendor.Wallace.HolomorphicForms.isHolomorphic_finite_fiber hhol hc y₀
+    have hzero : ∀ p ∉ hfib_fin.toFinset, localOrder f p y₀ = 0 := by
+      intro p hp
+      refine localOrder_eq_zero_of_not_mem_fiber ?_
+      intro hpq
+      exact hp ((Set.Finite.mem_toFinset hfib_fin).mpr hpq)
+    have hone : ∀ p ∈ hfib_fin.toFinset, localOrder f p y₀ = 1 := by
+      intro p hp
+      have hpf : f p = y₀ := (Set.Finite.mem_toFinset hfib_fin).mp hp
+      have hngt : ¬ localOrder f p y₀ > 1 := fun hgt => hy₀_our ⟨p, hpf, hgt⟩
+      have hpos : 0 < Jacobians.Vendor.Wallace.HolomorphicForms.mapAnalyticOrderAt f p :=
+        Jacobians.Vendor.Wallace.HolomorphicForms.mapAnalyticOrderAt_pos_of_contMDiff
+          hfTop hc p
+      rw [localOrder_eq_mapAnalyticOrderAt_of_mem_fiber hpf] at hngt ⊢
+      omega
+    calc Classical.choose (AX_BranchLocus f hf hc)
+        = ∑' p : X, localOrder f p y₀ := (hd_sum y₀).symm
+      _ = ∑ p ∈ hfib_fin.toFinset, localOrder f p y₀ := tsum_eq_sum hzero
+      _ = ∑ _p ∈ hfib_fin.toFinset, 1 := Finset.sum_congr rfl hone
+      _ = hfib_fin.toFinset.card := by simp
+      _ = (f ⁻¹' {y₀}).ncard := ((f ⁻¹' {y₀}).ncard_eq_toFinset_card hfib_fin).symm
+      _ = _root_.Jacobians.degreeFiber f hf := hdeg.symm
+
+/-- The ambient composite "pullback then pushforward" is multiplication by
+the degree (daouid, PR #191, with the lattice transport now proven and the
+degree pinned to `degreeImpl`). -/
+theorem pullback_pushforward_ambient_eq {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] [Nonempty X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y] [Nonempty Y]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (v : Fin (genus Y) → ℂ) :
+    pushforwardAmbientLinear f hf (pullbackAmbientLinear f hf v) =
+      (degreeImpl f hf : ℂ) • v := by
+  set w := latticeBridgeInv Y v with hw_def
+  have h_eq : v = latticeBridge Y w := (latticeBridgeInv_right_inverse v).symm
+  rw [h_eq, pullbackAmbientLinear_eq_compat, pushforwardAmbientLinear_eq_compat]
+  have h_comp := Jacobians.Bridge.JacobianTorus.ambientPhi_ambientPullback_eq f hf w
+  rw [h_comp, degreeImpl_eq_degreeFiber, map_nsmul, ← Nat.cast_smul_eq_nsmul ℂ]
+
 /-! ### Property axioms for pushforward / pullback / degree
 
 These are properties of the real `def`s above. Each retires via a
@@ -2308,14 +2392,91 @@ theorem AX_pullback_comp_apply
           (pullbackAmbientLinear f hf) (AX_pullbackAmbient_preserves_lattice f hf)
           hZX P
 
-/-- **Axiom.** The composition "pullback then pushforward" multiplies by degree. -/
-axiom AX_pushforward_pullback {X : Type u} [TopologicalSpace X] [T2Space X]
+/-- **Theorem (derived 2026-06-11).** The composition "pullback then
+pushforward" multiplies by degree (Griffiths–Harris Ch. 2 §2.7,
+`f_* ∘ f^* = deg(f) • id`).
+
+Formerly an axiom; route per daouid's closed PR #191 (credit): the ambient
+identity `pullback_pushforward_ambient_eq` (port `PreimageCycle`
+conservation-of-number + the ℝ-spanning ℤ-basis of the period lattice,
+with the lattice transport inclusions now proven) descends through
+`jacobianHomOfAmbient`, and `degreeImpl_eq_degreeFiber` pins the degree. -/
+theorem AX_pushforward_pullback {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] {Y : Type v} [TopologicalSpace Y] [T2Space Y]
     [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y]
     [IsManifold 𝓘(ℂ) ω Y] (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f)
     (P : Jacobian Y) :
-    pushforwardImpl X Y f hf (pullbackImpl X Y f hf P) = (degreeImpl f hf) • P
+    pushforwardImpl X Y f hf (pullbackImpl X Y f hf P) = (degreeImpl f hf) • P := by
+  unfold pushforwardImpl pullbackImpl
+  have h_comp : ∀ v ∈ (periodLatticeInBasis Y (Classical.arbitrary Y)
+        (jacobianBasis Y)).toAddSubgroup,
+      ((pushforwardAmbientLinear f hf).comp (pullbackAmbientLinear f hf)) v ∈
+        (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup := by
+    intro v hv
+    simp only [LinearMap.comp_apply]
+    exact AX_pushforwardAmbient_preserves_lattice f hf _
+      (AX_pullbackAmbient_preserves_lattice f hf v hv)
+  have h_congr : (pushforwardAmbientLinear f hf).comp (pullbackAmbientLinear f hf) =
+      (degreeImpl f hf : ℂ) •
+        (LinearMap.id : (Fin (genus Y) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ)) := by
+    apply LinearMap.ext
+    intro v
+    simp only [LinearMap.comp_apply, LinearMap.smul_apply, LinearMap.id_apply]
+    exact pullback_pushforward_ambient_eq f hf v
+  have h_lattice : (periodLatticeInBasis Y (Classical.arbitrary Y)
+        (jacobianBasis Y)).toAddSubgroup ≤
+      (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup.comap
+        ((degreeImpl f hf : ℂ) •
+          (LinearMap.id : (Fin (genus Y) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ))).toAddMonoidHom := by
+    intro v hv
+    simp only [AddSubgroup.mem_comap, LinearMap.toAddMonoidHom_coe,
+      LinearMap.smul_apply, LinearMap.id_apply]
+    have h_smul : (degreeImpl f hf : ℂ) • v = (degreeImpl f hf : ℤ) • v := by
+      ext i
+      simp only [Pi.smul_apply, zsmul_eq_mul]
+      push_cast
+      rfl
+    rw [h_smul]
+    exact Submodule.smul_mem _ (degreeImpl f hf : ℤ) hv
+  have h1 : pushforwardImpl X Y f hf (pullbackImpl X Y f hf P) =
+      jacobianHomOfAmbient Y Y
+        ((pushforwardAmbientLinear f hf).comp (pullbackAmbientLinear f hf)) h_comp P :=
+    (jacobianHomOfAmbient_comp_apply Y X Y
+      (pullbackAmbientLinear f hf) (AX_pullbackAmbient_preserves_lattice f hf)
+      (pushforwardAmbientLinear f hf) (AX_pushforwardAmbient_preserves_lattice f hf)
+      h_comp P).symm
+  have h2 : jacobianHomOfAmbient Y Y
+        ((pushforwardAmbientLinear f hf).comp (pullbackAmbientLinear f hf)) h_comp P =
+      jacobianHomOfAmbient Y Y ((degreeImpl f hf : ℂ) •
+        (LinearMap.id : (Fin (genus Y) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ))) h_lattice P :=
+    jacobianHomOfAmbient_congr_apply Y Y h_congr h_comp h_lattice P
+  have h3 : jacobianHomOfAmbient Y Y ((degreeImpl f hf : ℂ) •
+        (LinearMap.id : (Fin (genus Y) → ℂ) →ₗ[ℂ] (Fin (genus Y) → ℂ))) h_lattice P =
+      (degreeImpl f hf) • P := by
+    rcases P with ⟨P⟩
+    refine Quotient.inductionOn P ?_
+    intro x
+    apply ULift.ext
+    change
+      (QuotientAddGroup.map
+        (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup
+        (periodLatticeInBasis Y (Classical.arbitrary Y) (jacobianBasis Y)).toAddSubgroup
+        ((degreeImpl f hf : ℂ) • LinearMap.id).toAddMonoidHom h_lattice ⟦x⟧) =
+      ((degreeImpl f hf) • (⟨⟦x⟧⟩ : Jacobians.Jacobian Y)).down
+    have hx_mk : (⟦x⟧ : _ ⧸ (periodLatticeInBasis Y (Classical.arbitrary Y)
+          (jacobianBasis Y)).toAddSubgroup) =
+        QuotientAddGroup.mk' (periodLatticeInBasis Y (Classical.arbitrary Y)
+          (jacobianBasis Y)).toAddSubgroup x := rfl
+    rw [hx_mk, QuotientAddGroup.map_mk']
+    dsimp
+    have h_eq : (degreeImpl f hf : ℂ) • x = (degreeImpl f hf : ℕ) • x := by
+      ext i
+      simp only [Pi.smul_apply, smul_eq_mul, nsmul_eq_mul]
+    rw [h_eq]
+    exact map_nsmul (QuotientAddGroup.mk' (periodLatticeInBasis Y (Classical.arbitrary Y)
+      (jacobianBasis Y)).toAddSubgroup) (degreeImpl f hf) x
+  exact h1.trans (h2.trans h3)
 
 /-- The Lie group structure on the universe-lifted Jacobian, now derived
 through the ULift transfer lemmas in `Jacobian/Construction.lean`. -/
