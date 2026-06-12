@@ -70,3 +70,10 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
     `T = ∅` engine; both standard-3. Umbrella wired (Edit tool, verified).
 - Next: |T| = 1 case (closure_circleAround_eq_top + winding pins force
   cellLasso = gen^{±1}), then the binary-split induction step.
+
+- |T| = 1 base case DONE: `normalClosure_lassos_eq_top_of_singleton` —
+  the whole once-punctured plane is itself an admissible cell (Set.univ +
+  singletonComplHomeo), so G2 makes pi1 cyclic on the universe lasso; the
+  winding pin + integer-unit algebra force any admissible system's lasso
+  exponent to ±1, hence plain closure = top, NO winding computation needed.
+  Standard-3. Remaining: the binary-split induction step (the last rung).

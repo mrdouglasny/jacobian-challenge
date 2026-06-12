@@ -92,4 +92,92 @@ theorem normalClosure_lassos_eq_top_of_empty
   haveI := subsingleton_fundamentalGroup_compl_empty x₀
   exact Subsingleton.elim _ _
 
+/-- The once-punctured plane in `Finset`-complement form is homeomorphic to
+its `≠`-form. -/
+noncomputable def singletonComplHomeo (a : ℂ) :
+    {w : ℂ // w ∉ (({a} : Finset ℂ) : Set ℂ)} ≃ₜ {w : ℂ // w ≠ a} :=
+  Homeomorph.setCongr (s := ((({a} : Finset ℂ) : Set ℂ)ᶜ : Set ℂ))
+    (t := {w : ℂ | w ≠ a}) (by ext w; simp)
+
+/-- **Base case `T = {a}`** of the generation induction: over the
+once-punctured plane, the normal closure (indeed the plain closure) of any
+admissible system's lasso is everything.  No winding computation around the
+ambient generator is needed: the whole space is itself an admissible cell,
+so `π₁` is cyclic on the universe-cell lasso (G2), and the winding pin
+forces the system lasso's exponent to be a unit. -/
+theorem normalClosure_lassos_eq_top_of_singleton (a : ℂ)
+    (x₀ : {w : ℂ // w ∉ (({a} : Finset ℂ) : Set ℂ)})
+    (C : PuncturedCellSystem {a} x₀) :
+    Subgroup.normalClosure C.lassos = ⊤ := by
+  classical
+  -- the universe cell: the whole space presented as a once-punctured plane
+  let ψ : (Set.univ : Set {w : ℂ // w ∉ (({a} : Finset ℂ) : Set ℂ)})
+      ≃ₜ {w : ℂ // w ≠ a} :=
+    (Homeomorph.Set.univ _).trans (singletonComplHomeo a)
+  have hx₀univ : x₀ ∈ (Set.univ : Set {w : ℂ // w ∉ (({a} : Finset ℂ) : Set ℂ)}) :=
+    Set.mem_univ _
+  let u := cellLasso ψ hx₀univ
+  -- every element is a power of the universe lasso (π₁ is cyclic on `u`)
+  have hcyc : ∀ g : FundamentalGroup _ x₀, ∃ m : ℤ, g = u ^ m := by
+    intro g
+    obtain ⟨γ, hγ⟩ : ∃ γ : Path x₀ x₀,
+        FundamentalGroup.fromPath (Qmk γ) = g :=
+      ⟨(FundamentalGroup.toPath g).out,
+        congrArg FundamentalGroup.fromPath (Quotient.out_eq _)⟩
+    obtain ⟨m, hm⟩ := fromPath_eq_cellLasso_zpow ψ hx₀univ γ
+      (fun s => Set.mem_univ _)
+    exact ⟨m, by rw [← hγ, hm]⟩
+  -- the puncture index and the system's lasso
+  have hamem : a ∈ ({a} : Finset ℂ) := Finset.mem_singleton_self a
+  let s₀ : ({a} : Finset ℂ) := ⟨a, hamem⟩
+  let ℓ := cellLasso (C.homeo s₀) (C.mem_cell s₀)
+  have hℓmem : ℓ ∈ C.lassos := ⟨s₀, rfl⟩
+  -- the system lasso is a power of the universe lasso
+  obtain ⟨n, hn⟩ := hcyc ℓ
+  -- winding algebra: the exponent is a unit
+  have hwind := C.winding_self s₀
+  have hpow : windingHom (Finset.mem_coe.mpr s₀.2) x₀ ℓ
+      = Multiplicative.ofAdd (n * Multiplicative.toAdd
+          (windingHom (Finset.mem_coe.mpr s₀.2) x₀ u)) := by
+    rw [hn, map_zpow]
+    conv_lhs => rw [← ofAdd_toAdd (windingHom (Finset.mem_coe.mpr s₀.2) x₀ u)]
+    rw [← ofAdd_zsmul, smul_eq_mul]
+  have hunit : n = 1 ∨ n = -1 := by
+    have hnw : n * Multiplicative.toAdd
+        (windingHom (Finset.mem_coe.mpr s₀.2) x₀ u) = 1 ∨
+        n * Multiplicative.toAdd
+          (windingHom (Finset.mem_coe.mpr s₀.2) x₀ u) = -1 := by
+      rcases hwind with h | h
+      · left
+        have h2 := hpow.symm.trans h
+        exact Multiplicative.ofAdd.injective h2
+      · right
+        have h2 := hpow.symm.trans h
+        exact Multiplicative.ofAdd.injective h2
+    have : IsUnit n := by
+      rcases hnw with h | h
+      · exact IsUnit.of_mul_eq_one _ h
+      · refine IsUnit.of_mul_eq_one
+          (-(Multiplicative.toAdd (windingHom (Finset.mem_coe.mpr s₀.2) x₀ u)))
+          ?_
+        linarith [h]
+    exact Int.isUnit_iff.mp this
+  -- closure of the system lasso is everything
+  have hclos : Subgroup.closure ({ℓ} : Set (FundamentalGroup _ x₀)) = ⊤ := by
+    have hℓu : Subgroup.closure ({ℓ} : Set (FundamentalGroup _ x₀))
+        = Subgroup.closure {u} := by
+      rcases hunit with h | h
+      · rw [hn, h, zpow_one]
+      · rw [hn, h, zpow_neg, zpow_one]
+        exact Subgroup.closure_singleton_inv u
+    rw [hℓu, Subgroup.eq_top_iff']
+    intro g
+    obtain ⟨m, hm⟩ := hcyc g
+    rw [hm]
+    exact Subgroup.zpow_mem _ (Subgroup.subset_closure (Set.mem_singleton _)) _
+  -- conclude through `closure ≤ normalClosure`
+  rw [eq_top_iff, ← hclos]
+  exact le_trans (Subgroup.closure_mono (Set.singleton_subset_iff.mpr hℓmem))
+    Subgroup.closure_le_normalClosure
+
 end Jacobians.Topology
