@@ -70,7 +70,7 @@ at most).
 | **S4c** (pencil smoothness at regular values) | `contMDiffAt_fiberAJ`: `Φ = fiberAJ f hf` is `ContMDiffAt` at every `y₀ ∉ branchValues f` — REVISED ROUTE: no ambient lift; compose the proven `AX_ofCurve_contMDiff` (AJ is `ContMDiff ω` into the Jacobian) with the S4b sections through `map_sum` + the Jacobian `LieAddGroup` (`ContMDiffAt.sum`) | **PROVEN** (this lane) |
 | **S5** (removable across branch) | `mdifferentiable_fiberAJ` (`AbelSupsetPencil.lean`): `Φ` is `MDifferentiable` on ALL of `ℙ¹` — S5a `eventually_fiberDivisor_cluster` (general kfold clustering at any value, prescribed neighborhoods) + `continuousAt_fiberAJ` (sumset-neighborhood brick `exists_nhds_zero_finsetSum_mem` + continuity of AJ) + S5b `mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt` (generic manifold-valued removable singularity via Mathlib `analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt` in the target chart) | **PROVEN** (this lane) |
 | **S6** (lift + Liouville) | `fiberAJ_eq` / `fiberAJConstancy` (`AbelSupsetLiouville.lean`): `ℙ¹` simply connected (`simplyConnectedSpace_projectiveLine`, Kirov van-Kampen capstone for `OnePoint ℂ`); continuous lift through the lattice covering (Mathlib `IsCoveringMap.existsUnique_continuousMap_lifts`); the lift is holomorphic (`ComplexTorus.mdifferentiable_lift_of_mdifferentiable` — locally chart-composite + one lattice constant, discrete-subgroup isolation); constant by `MDifferentiable.apply_eq_of_compactSpace` ⇒ **`FiberAJConstancy X` HOLDS** | **PROVEN** (this lane) |
-| **S7** (assembly) | `Φ(0) = Φ(∞)` + S2 + S1 ⇒ `AX_AbelSupset` becomes a theorem in place (Phase-C in-place conversion in `Axioms/AbelTheorem.lean`) | open |
+| **S7** (assembly) | **EXECUTED**: `AX_AbelSupset` is a `theorem` in place (`Axioms/AbelTheorem.lean`, statement verbatim, `abel_supset_of_fiberAJConstancy (fiberAJConstancy X)`); ledger 13 → 12, challenge-critical 2 → 1; full protocol run (audit/README/closure-doc/report regen/guard/verification log) | **DONE** (this lane) |
 | **B** (reserve) | chain↔lattice bridging (Route-C insurance, route-independent) | parked |
 
 Critical-path risk concentrates in S4–S5 (the same analytic content as the
@@ -139,3 +139,18 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   imported BEFORE the main package modules so the main `ProjectiveLine`
   instances win resolution. Next: the S7 in-place flip of
   `AX_AbelSupset`.
+- 2026-06-12 (SUP-2 session): **S7 EXECUTED — `AX_AbelSupset` is a
+  THEOREM.** In-place conversion in `Axioms/AbelTheorem.lean`
+  (statement verbatim; proof `abel_supset_of_fiberAJConstancy
+  (fiberAJConstancy X)`). Kernel: `AX_AbelSupset`, `AX_AbelTheorem`,
+  `Jacobian.ofCurve_inj` all standard-3 + `AX_PeriodCycleBasis`; full
+  `lake build` green; `scripts/check_axiom_consistency.sh` ✓ at 12.
+  Ledger: 13 → 12 axioms, challenge-critical 2 → **1**
+  (`AX_PeriodCycleBasis` alone). Artifacts: AXIOM_AUDIT.md (header,
+  Class-1 row, Recently-discharged row, by-class table, verification
+  block), README.md (at-a-glance + topic table),
+  docs/CHALLENGE_AXIOM_CLOSURE.md (status note + Cluster B),
+  docs/axiom-report.txt regenerated,
+  docs/planning/ABEL_FLIP_VERIFICATION.log (SUP section). The lane is
+  COMPLETE: every rung S1–S7 proven on one route, no new axioms, no
+  sorries.
