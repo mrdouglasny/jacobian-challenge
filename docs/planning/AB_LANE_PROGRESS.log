@@ -59,3 +59,14 @@ docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
   Kernel: all three #print axioms = standard 3; no sorryAx, no custom axioms.
 - TK2 (both poles + opposite residues via the residue atom at F = α/ω₀) left
   open — next TK bite; P-block (pairing) is the main-line next.
+
+## 2026-06-11 session end
+
+- Root `lake build` green (CI-equivalent; only the two pre-existing
+  Extensions/AbelJacobi.lean sorries, unchanged from main).
+- Commits this session (local only, not pushed): 7e6376a (log), 9d3895c
+  (AB_ROUTE.md), 1522f58 (S-block), 8e3ccc1 (TK-block).
+- Next bites: TK2 (opposite residues via the residue atom at F = α/ω₀);
+  main line P1 (zeroOneCoeff chart read of OneFormsZeroOne with the conj φ′
+  law) → P2/P3 (pairing through FineResidue.resIntegral) → P4 Stokes kill →
+  P5 Gram surjectivity → P6 assembled criterion; then the §20 engine E-block.
