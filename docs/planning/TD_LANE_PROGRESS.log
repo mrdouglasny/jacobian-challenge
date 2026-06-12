@@ -1,0 +1,26 @@
+# TD-lane progress log — TR-DISC from R2 positivity over ArcBoundaryWordData
+
+## Session 2026-06-12 (session start)
+
+Goal: prove TR-DISC — `DiscreteTopology (loopPeriodLattice x₀ b)` — from the
+boundary-word datum's R1/R2 (no AX_PeriodCycleBasis), the last lattice-side
+residual of the image route (#208).
+
+Plan (after reading BilinearRelations(BoundaryWord), PeriodDiscreteness,
+Layer3/Periods + the PeriodLattice/RiemannBilinear engine):
+
+* Honest split confirmed: the UNCONDITIONAL result over the datum is
+  discreteness of the 2g-FAMILY sublattice
+  `span ℤ (range fun k => loopPeriodVec x₀ cω (loops k))` — via the Siegel
+  engine: Gram PosDef ⇒ A-block invertible ⇒ τ = B·A⁻¹ with (R1 ⇒ symm,
+  R1+R2 ⇒ Im τ ≻ 0) ⇒ periodColumns τ ℝ-independent (engine) ⇒ transport by
+  the ℂ-automorphism w ↦ Aᵀ·w sends [I|τ]-columns to the loop period vectors
+  ⇒ ℝ-independent family of card 2g = finrank ⇒ ℤ-span of an ℝ-basis ⇒
+  discrete (ZSpan). NO B-3 spanning, NO generation hypothesis.
+* Full TR-DISC = sublattice version + PeriodGeneratingLoops (the topology
+  residual; hgen.lattice_eq collapses the full lattice onto the family span).
+* Residual stack for AX_PeriodCycleBasis after this lands:
+  {ArcBoundaryWordData datum} + {PeriodGeneratingLoops / homology generation}
+  — no analytic gap left on the lattice side.
+
+New file: Jacobians/RiemannSurface/PeriodDiscretenessFromR2.lean.
