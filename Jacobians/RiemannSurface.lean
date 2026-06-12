@@ -53,6 +53,8 @@ import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWordInterior
 import Jacobians.RiemannSurface.BoundaryWordElliptic
+import Jacobians.RiemannSurface.BoundaryWordPolynomial
+import Jacobians.RiemannSurface.BoundaryWordEllipticPoly
 import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.AbelPlumbing
 import Jacobians.RiemannSurface.GenusZeroBackward
