@@ -44,3 +44,14 @@ Append-only progress log. Branch: `feat/s2-topology`, based on main @ d306ce4.
   membership-form telescope, factor classification via anchor spokes
   (generators `coverGen b e₁ e₂`, ≤ n·(n²+1)² of them), main theorem
   `fundamentalGroup_fg_of_goodCover`. First compile iteration in progress.
+
+- Goal B engine COMPLETE: `FiniteGoodCover.lean` compiles green
+  (`lake env lean` + `lake build`), no sorry/axiom. Good-cover EXISTENCE
+  re-isolated as named gap GC-1 in `docs/planning/GOODCOVER_BLOCKER.md`.
+- Goal A consumer wired: `Jacobians/Bridge/SphereGenusZero.lean` —
+  `genus_eq_zero_of_homeo_sphere_unconditional` composes PR #199's reduction
+  with `simplyConnectedSpace_sphere`, closing the backward leg of
+  `AX_genus_eq_zero_iff_homeo` unconditionally.
+- Kernel checks (both standard-3, exactly [propext, Classical.choice, Quot.sound]):
+  - `Jacobians.Topology.SimplyConnectedGoodCover.fundamentalGroup_fg_of_goodCover`
+  - `Jacobians.RiemannSurface.genus_eq_zero_of_homeo_sphere_unconditional`
