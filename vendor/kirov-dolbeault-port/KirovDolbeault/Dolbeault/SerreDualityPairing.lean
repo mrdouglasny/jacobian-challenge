@@ -39,14 +39,13 @@ canonical `K`, the residue pairing, its injectivity and surjectivity, and the fi
 `finrank_le_of_injective_to_dual` directly; the `≥` half uses the bundled surjectivity (whose eventual
 construction runs `serre_surjectivity_dim_core` on the §17.9 dimension count).
 
-## The remaining work (isolated to one named input)
+## The keystone (CLOSED by the flip)
 
-`exists_serreDualityData` — constructing the §17 instantiation for a general `X`: the residue functional
-`Res : H¹(X,Ω) → ℂ` (well-defined via the **1-form residue theorem** `∑Res = 0`, Miranda §VIII.3
-trace-to-ℙ¹), the pairing, its injectivity (the §17.6 residue-1 witness `exists_formFnResidue_eq_one`),
-and its surjectivity (the §17.9 count, gated on cohomological RR / finiteness).
-This single input **replaces both** former ladder leaves
-`arithmeticGenus_eq_genus` and `serre_h1_eq`.
+The §17 instantiation, formerly the ∀-cover sorry `exists_serreDualityData` here, is now
+PROVEN in its honest ∃-cover form `exists_serreDualityData_cover`
+(`KeystonePackaging.lean`): the T-lane frame-trace construction
+(`FrameTrace.exists_canonicalData_residueAtom`) through the #194 genus split and the
+#193 capstone. See the note at the end of this file.
 
 References: Forster, *Lectures on Riemann Surfaces* (GTM 81), §17.4–17.11; Miranda, *Algebraic Curves and
 Riemann Surfaces*, §VIII.3.
@@ -117,35 +116,14 @@ theorem serreH1 (data : SerreDualityData 𝔘) :
 
 end SerreDualityData
 
-/-- **[ISOLATED INPUT — the §17 instantiation].** A compact Riemann surface admits the Forster-§17
-Serre-duality data: a canonical divisor and the perfect residue pairing. This single named input
-replaces both ladder leaves `arithmeticGenus_eq_genus` and `serre_h1_eq`. Its construction (the residue
-functional via the 1-form residue theorem, the pairing, 17.6 injectivity, 17.9 surjectivity) is the
-genuine remaining §17 analytic work — the one remaining gap.
-
-The hypothesis `hR : 𝔘.LocallyRealizable` is required by every Riemann–Roch input of the §17.9
-surjectivity count (`cohomological_riemannRoch`, `riemannRoch_inequality` — local Mittag–Leffler
-realizability of the cover, proven for the chart-disk cover by `locallyRealizable_chartDiskCover`);
-the sole downstream consumer (`exists_riemannRoch_divisor`) instantiates at a cover carrying both
-`hL` and `hR` (`exists_realizableLerayCover`). -/
-theorem exists_serreDualityData (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
-    (hR : 𝔘.LocallyRealizable) :
-    Nonempty (SerreDualityData 𝔘) :=
-  sorry
-
-/-- **`arithmeticGenus_eq_genus` via the direct §17 route** (the plan of record). -/
-theorem arithmeticGenus_eq_genus_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
-    (hR : 𝔘.LocallyRealizable) :
-    𝔘.h1Dim 0 = kirovGenus X := by
-  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL hR
-  exact data.arithmeticGenus
-
-/-- **`serre_h1_eq` via the direct §17 route** (the plan of record). -/
-theorem serre_h1_eq_serre (𝔘 : FiniteCover X) (hL : 𝔘.IsLeray)
-    (hR : 𝔘.LocallyRealizable) :
-    ∃ K : Divisor X, ∀ D : Divisor X, 𝔘.h1Dim D = lDim (X := X) (K - D) := by
-  obtain ⟨data⟩ := exists_serreDualityData 𝔘 hL hR
-  exact data.serreH1
+/-! The former ∀-cover keystone sorry `exists_serreDualityData` (and its two `_serre`
+wrappers `arithmeticGenus_eq_genus_serre` / `serre_h1_eq_serre`) lived here. The keystone
+flip replaced it by the honest **∃-cover form**, PROVEN unconditionally in
+`KeystonePackaging.lean` (`exists_serreDualityData_cover`): the T-lane frame-trace
+construction (`FrameTrace.exists_canonicalData_residueAtom`) fed through the #194 genus
+split and the #193 capstone. The sole top-level consumer
+(`RiemannRoch.exists_riemannRoch_divisor`) now takes the cover EXHIBITED by the keystone
+(`DolbeaultLadder.riemannRoch_equality_of_data`); see `docs/planning/FLIP_CHECKLIST.md`. -/
 
 end Jacobians.Dolbeault
 

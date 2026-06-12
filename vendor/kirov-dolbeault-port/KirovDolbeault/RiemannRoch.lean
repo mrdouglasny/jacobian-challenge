@@ -9,23 +9,25 @@
   PROVEN (axiom-clean): the ℂ-module on `MeromorphicFunction X` (so `L(D)` can be a
   `Submodule ℂ`); `linearSystem D` as a `Submodule` + `lDim`.
 
-  ISOLATED INPUTS (the genuine wall — the only remaining gaps here):
-    • `exists_riemannRoch_divisor` — a canonical divisor `K` with `l(D)−l(K−D)=deg D+1−g`
-      (Forster 16.9; ⟸ Dolbeault/Serre, absent from Mathlib).
-    • `MeromorphicFunction.deg_div` — every principal divisor has degree 0 (residue theorem).
-
-  REAL REDUCTIONS STILL TO PROVE (no theater — these are genuine, not relocations):
-  faithfulness/identity theorem (nonzero ⟹ order ≠ ⊤), `l(0)=1` via Liouville, `l(D)=0` for
-  `deg D<0`, and the single-simple-pole extraction.
+  POST-FLIP STATUS: there are NO isolated inputs left here. `exists_riemannRoch_divisor`
+  is the data-parametrized ladder composition (`riemannRoch_equality_of_data`) at the
+  cover EXHIBITED by the unconditional ∃-cover keystone
+  (`KeystonePackaging.exists_serreDualityData_cover`). The residue-theorem degree facts
+  (`MeromorphicFunction.deg_div`, `lDim_eq_zero_of_deg_neg`) moved verbatim to
+  `RiemannRochDegree.lean` (base-file split breaking the
+  `KeystonePackaging → … → RiemannRoch` import cycle); they remain in scope here via the
+  import.
 -/
 import KirovDolbeault.Abel
 import KirovDolbeault.LinearSystem
 import KirovDolbeault.MeromorphicLiouville
 import KirovDolbeault.DegDivResidue
 import KirovDolbeault.ProperMapDegreeSheets
+import KirovDolbeault.RiemannRochDegree
 import KirovDolbeault.Dolbeault.DolbeaultLadder
 import KirovDolbeault.Dolbeault.LerayCoverExists
 import KirovDolbeault.Dolbeault.SkyscraperProductWitness
+import KirovDolbeault.Dolbeault.KeystonePackaging
 
 -- Many declarations here are purely algebraic (the ℂ-module on `MeromorphicFunction`) and use
 -- only `[ChartedSpace ℂ X]`, not the full compact-manifold hypotheses carried by the consumers.
@@ -42,86 +44,30 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 /-- **Riemann–Roch** (Forster Thm 16.9, Serre-dual form): a canonical divisor `K` with
 `l(D) − l(K−D) = deg D + 1 − g` for every `D`.
 
-**Now CONNECTED to its proof** (it was previously a standalone unproved obligation duplicating, but
-disconnected from, the ladder that proves it — the `CechSection → RiemannRoch` import cycle, broken
-by extracting `LinearSystem`). It is the PROVEN ladder composition
-`DolbeaultLadder.riemannRoch_equality_of_ladder`
-(cohomological RR + the `h⁰=l` bridge + Serre at `0`/general), instantiated at a Leray cover supplied
-by `LerayCoverExists.exists_lerayCover`. So discharging this is now exactly: the ladder leaves
-(`arithmeticGenus_eq_genus`, `serre_h1_eq`, `cohomological_riemannRoch`/`exists_skyscraperLES`,
-`h0Dim_eq_lDim`/`cechRestrictL_surjective`, finiteness) **plus** the one good-cover geometric input
-`hOverlaps` below — no separate opaque RR obligation.
-
-The Leray cover is supplied **UNCONDITIONALLY** by `exists_lerayCover` (STEP 2a, done): `IsLeray` was
-weakened to its first conjunct alone (acyclic SETS), which for `H¹` is all Cartan's comparison
-`0 → Ȟ¹(𝔘,𝒪) → H¹(X,𝒪) → Ȟ⁰(𝔘,ℋ¹)` needs (overlap acyclicity is `H²`+ only; `GoodCover` proved the
-conjunct unused). So there is NO good-cover `hOverlaps` gap; the only sorries beneath this are now the
-genuine analytic ladder leaves. -/
+**Now PROVEN, no isolated input.** The proof takes the cover EXHIBITED by the
+unconditional ∃-cover keystone `KeystonePackaging.exists_serreDualityData_cover` (the
+T-lane frame-trace construction through the #194 genus split and the #193 capstone) and
+applies the data-parametrized ladder composition
+`DolbeaultLadder.riemannRoch_equality_of_data` (cohomological RR + the `h⁰=l` bridge +
+the bundled Serre duality `data.serre_eq` / `data.arithmeticGenus`). This is the agreed
+∃-cover weakening + consumer re-pin (`docs/planning/COVER_WIRING.md`,
+`docs/planning/FLIP_CHECKLIST.md`). -/
 theorem exists_riemannRoch_divisor :
     ∃ K : Divisor X, ∀ D : Divisor X,
       (lDim (X := X) D : ℤ) - (lDim (X := X) (K - D) : ℤ)
         = Divisor.deg X D + 1 - (kirovGenus X : ℤ) := by
-  -- A *realizable* Leray cover exists: the canonical chart-disk cover is both Leray (acyclic sets)
-  -- and locally realizable (the product witness, `locallyRealizable_chartDiskCover`).
-  obtain ⟨𝔘, hL, hR⟩ := Dolbeault.exists_realizableLerayCover (X := X)
-  -- The RR equality on that cover is the PROVEN ladder composition (mod the ladder's named leaves).
-  exact Dolbeault.riemannRoch_equality_of_ladder 𝔘 hL hR
+  -- The keystone EXHIBITS a Leray, locally realizable cover carrying `SerreDualityData`.
+  obtain ⟨𝔘, hL, hR, ⟨data⟩⟩ := Dolbeault.exists_serreDualityData_cover (X := X)
+  -- The RR equality on that cover is the PROVEN data-parametrized ladder composition.
+  exact Dolbeault.riemannRoch_equality_of_data 𝔘 hR data
 
-/-- Every principal divisor has degree `0` (Forster Cor. 4.25 / the argument principle). **PROVEN**
-via the **degree route**: `deg (div f) = zerosCount f − polesCount f` (`deg_div_eq_zeros_sub_poles`),
-and both counts equal a common proper-map degree `d` (`ProperMapDegreeSheets.exists_properMapDegree_proven`,
-the §17.9 conservation-of-number construction — now axiom-clean), so the difference is `0`. The RR
-derivations below consume this `deg_div`. (The old standalone `DegDivResidue.exists_properMapDegree`
-that approach is now superseded by this proven route and no longer on any critical path.) -/
-theorem MeromorphicFunction.deg_div (f : MeromorphicFunction X) :
-    Divisor.deg X f.div = 0 := by
-  obtain ⟨d, hz, hp⟩ := Jacobians.ProperMapDegreeSheets.exists_properMapDegree_proven f
-  rw [deg_div_eq_zeros_sub_poles, hz, hp, sub_self]
+/-! ## Part 3 (MOVED): `MeromorphicFunction.deg_div` + `lDim_eq_zero_of_deg_neg`
 
-/-! ## Part 3: negative-degree vanishing (explicit finiteness, dim 0)
-
-The first genuine consequence, proved outright from `deg_div` + faithfulness: a linear system of
-negative degree is trivial. This is `FiniteDimensional` with `l(D) = 0`, the cleanest explicit
-finiteness — and it uses *only* the residue-theorem input, not the general finiteness theorem. -/
-
-/-- `l(D) = 0` when `deg D < 0`. Any `f ∈ L(D)` with nonzero germ would give (by faithfulness) a
-divisor `div f ≥ −D` with `deg(div f) = 0 ≥ −deg D > 0`, impossible; so every `f ∈ L(D)` is germ-
-zero, the quotient `L(D)/germZero` is trivial, and its dimension is `0`. -/
-theorem lDim_eq_zero_of_deg_neg (D : Divisor X) (hD : Divisor.deg X D < 0) :
-    lDim (X := X) D = 0 := by
-  have hsub : linearSystem (X := X) D ≤ germZeroSubmodule := by
-    intro f hf
-    by_contra hng
-    have hex : ∃ x₀, f.orderW x₀ ≠ ⊤ := by
-      by_contra h; push_neg at h; exact hng h
-    have hfaith : ∀ z : X, f.orderW z ≠ ⊤ := fun z =>
-      MeromorphicFunction.orderW_ne_top_of_exists f hex z
-    have hdiv : ∀ x, -(D x) ≤ (f.div : Divisor X) x := by
-      intro x
-      have hmem : (-(D x) : WithTop ℤ) ≤ f.orderW x := hf x
-      obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.mp (hfaith x)
-      rw [← hn] at hmem
-      have hdivx : (f.div : Divisor X) x = n := by
-        show (f.orderW x).untop₀ = n
-        rw [← hn]; rfl
-      rw [hdivx]; exact WithTop.coe_le_coe.mp hmem
-    have heff : ∀ x, 0 ≤ (f.div + D) x := fun x => by
-      rw [Finsupp.add_apply]; linarith [hdiv x]
-    have hdeg_eff : (0 : ℤ) ≤ Divisor.deg X (f.div + D) := by
-      change (0 : ℤ) ≤ ∑ i ∈ (f.div + D).support, (f.div + D) i
-      exact Finset.sum_nonneg fun i _ => heff i
-    rw [map_add, MeromorphicFunction.deg_div f] at hdeg_eff
-    omega
-  rw [lDim]
-  have htop : (germZeroSubmodule (X := X)).submoduleOf (linearSystem (X := X) D) = ⊤ :=
-    Submodule.comap_subtype_eq_top.mpr hsub
-  rw [htop]
-  haveI : Subsingleton (↥(linearSystem (X := X) D) ⧸
-      (⊤ : Submodule ℂ ↥(linearSystem (X := X) D))) :=
-    ⟨fun a b => Quotient.inductionOn₂' a b fun x y =>
-      (Submodule.Quotient.eq ⊤).mpr Submodule.mem_top⟩
-  exact Module.finrank_zero_of_subsingleton
-
+Both moved VERBATIM to `RiemannRochDegree.lean` (base-file split, keystone flip §1.1):
+`SerreDualityGenus0` / `TailSerre` / `SerreSurjectivitySkeleton` consume only those two
+degree facts from this file, and the flip's `KeystonePackaging` import above would
+otherwise close an import cycle through them. They remain in scope here via
+`import KirovDolbeault.RiemannRochDegree`. -/
 
 /-! ## Part 4: standard RR consequences (pure arithmetic from RR + `l(0)=1`) -/
 

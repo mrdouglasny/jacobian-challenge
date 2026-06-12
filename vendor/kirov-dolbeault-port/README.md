@@ -98,12 +98,12 @@ Our seven Layer-3 cohomology axioms map to what this port has proved:
 |---|---|---|
 | `cohomologyLES` (Forster §16 LES) | `exists_skyscraperLES` | **sorry-free** |
 | `H1coh` + finiteness instances | `exists_cechModel` | **sorry-free** |
-| `serreDuality_equiv` (full Serre iso) | `lDim_le_h1Dim` (easy) + `exists_serreDualityData` (hard) | easy half proved; **hard half open** |
-| `h1coh_zero_finrank` (`h¹(𝒪) = g`) | `arithmeticGenus_eq_genus_serre` | **blocked by `exists_serreDualityData`** |
+| `serreDuality_equiv` (full Serre iso) | `exists_serreDualityData_cover` (unconditional, 2026-06-11 flip) | **PROVED** |
+| `h1coh_zero_finrank` (`h¹(𝒪) = g`) | `h1Dim_zero_chartDiskCover_eq_kirovGenus` chain | **PROVED** |
 
 Everything upstream of the connecting map — residue theorem, §17.3 well-definedness,
 §17.6 easy half, the full Čech machinery — is now sorry-free at our Mathlib version.
-The single remaining chokepoint for full Serre duality is `exists_serreDualityData`
+The former chokepoint `exists_serreDualityData` was closed by the 2026-06-11 keystone flip (`exists_serreDualityData_cover`, fed by the unconditional residue atom)
 (§17.5 connecting map `H⁰(principal parts) → H¹(𝒪_D)`).
 
 ### Trust level of our `serreDuality_equiv`

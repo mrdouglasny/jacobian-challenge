@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michael R Douglas
 -/
 import KirovDolbeault.Dolbeault.SerreAssemblyPrep
-import KirovDolbeault.RiemannRoch
+import KirovDolbeault.RiemannRochDegree
 
 /-!
 # Keystone `g = 0` leg — Serre duality data at genus zero (route decision: `docs/planning/G0_ROUTE.md`)

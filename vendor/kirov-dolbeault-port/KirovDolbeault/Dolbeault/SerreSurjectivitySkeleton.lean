@@ -7,7 +7,7 @@ import KirovDolbeault.Dolbeault.SerreResiduePairing
 import KirovDolbeault.Dolbeault.SerreOmega0
 import KirovDolbeault.Dolbeault.CechFinitenessWiring
 import KirovDolbeault.Dolbeault.CechH0
-import KirovDolbeault.RiemannRoch
+import KirovDolbeault.RiemannRochDegree
 
 /-!
 # Forster §17.9 — the surjectivity dimension-count skeleton

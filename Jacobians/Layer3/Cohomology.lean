@@ -1,5 +1,6 @@
 import Jacobians.Layer3.CohomologyLESBridge
 import Jacobians.Layer3.EulerChar
+import Jacobians.Layer3.FlipPrep
 import Jacobians.RiemannSurface.Cohomology.RiemannRochBase
 import Jacobians.RiemannSurface.Cohomology.LineBundleBasic
 import Mathlib.LinearAlgebra.Dimension.Constructions
@@ -11,11 +12,15 @@ This file records the Phase-B cohomological scaffold for Challenge Layer 3.
 The cohomology space `H1coh` with its vector-space/finiteness instances
 (`Jacobians.Layer3.CechH1Bridge`) and the six-term cohomology LES
 `cohomologyLES` (`Jacobians.Layer3.CohomologyLESBridge`) are real
-definitions backed by the Kirov Dolbeault port; the remaining analytic
-inputs (`h1coh_zero_finrank`, `serreDuality_equiv`) are isolated as axioms
-about the actual Riemann-Roch spaces `L(D) = riemannRochSpace D`;
-Riemann-Roch and the numerical Serre duality identity are then proved from
-the six-term Euler-characteristic engine.
+definitions backed by the Kirov Dolbeault port. The two formerly-axiomatic
+analytic inputs (`h1coh_zero_finrank`, `serreDuality_equiv`) are now
+THEOREMS (keystone flip, docs/planning/FLIP_CHECKLIST.md): the FlipPrep
+composition over the T-lane frame-trace construction
+(`FrameTrace.exists_canonicalData_frameTraceHypothesis`), with
+`canonicalDivisor` de-opaqued in `LineBundleBasic` to the chosen
+Serre-duality divisor. Riemann-Roch and the numerical Serre duality
+identity are then proved from the six-term Euler-characteristic engine,
+axiom-free over the port.
 -/
 
 noncomputable section
@@ -45,21 +50,30 @@ backed by the port's skyscraper LES at the chart-disk cover through the
 `L(D)` bridge (A4 steps (ii)-(iii), docs/planning/PHASE_D_BRIDGE_PLAN.md).
 -/
 
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** The base first-cohomology dimension:
-`h¹(O_X) = genus(X)`.
+/-- **Formerly a Layer-3 axiom (vetted DT+CX 2026-06-09; DISCHARGED by the keystone flip
+2026-06-11).** The base first-cohomology dimension: `h¹(O_X) = genus(X)`. Statement
+verbatim; the proof is the FlipPrep route (`h1coh_zero_finrank_of_frameTrace`) with the
+genus-split trace residual discharged by the T-lane wall
+(`FrameTrace.exists_canonicalData_frameTraceHypothesis`).
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §§16-17. -/
-axiom h1coh_zero_finrank :
-    Module.finrank ℂ (H1coh (0 : Divisor X)) = genus X
+theorem h1coh_zero_finrank :
+    Module.finrank ℂ (H1coh (0 : Divisor X)) = genus X :=
+  h1coh_zero_finrank_of_frameTrace
+    fun _ => Jacobians.Dolbeault.exists_canonicalData_frameTraceHypothesis
 
-/-- **Layer-3 axiom (vetted DT+CX 2026-06-09, SATISFIABLE/FAITHFUL; not yet discharged).** Serre duality as a perfect pairing,
-packaged as a linear equivalence with the dual of `L(K-D)`.
+/-- **Formerly a Layer-3 axiom (vetted DT+CX 2026-06-09; DISCHARGED by the keystone flip
+2026-06-11).** Serre duality as a perfect pairing, packaged as a linear equivalence with
+the dual of `L(K-D)`. Statement verbatim; with `canonicalDivisor` de-opaqued
+(`LineBundleBasic`: the `Classical.choose` of the proven ∃-K Serre package), this is its
+`Classical.choose_spec`.
 
 Reference: Forster, *Lectures on Riemann Surfaces*, §17. -/
-axiom serreDuality_equiv (D : Divisor X) :
+theorem serreDuality_equiv (D : Divisor X) :
     Nonempty
       (H1coh D ≃ₗ[ℂ]
-        Module.Dual ℂ (riemannRochSpace (canonicalDivisor X - D)))
+        Module.Dual ℂ (riemannRochSpace (canonicalDivisor X - D))) :=
+  (canonicalDivisor_spec (X := X)).2 D
 
 /-- The Layer-3 Euler characteristic `χ(D) = h⁰(D) - h¹(D)`. -/
 def eulerCharL3 (D : Divisor X) : ℤ :=

@@ -28,3 +28,9 @@
   FLIP RECIPE for the A-lane: prove (some data).ResidueAtom; then
     exists_serreDualityData_cover_of_residueAtom data hres gives the ∃-cover keystone;
     replace the keystone sorry by the ∃-form + RiemannRoch.lean:66 one-line re-pin.
+
+2026-06-11 (FLIP lane) — flip recipe EXECUTED: the T-lane atom
+  (exists_canonicalData_residueAtom) fed exists_serreDualityData_cover_of_residueAtom;
+  exists_serreDualityData_cover is now an unconditional THEOREM (standard-3), the
+  keystone sorry is deleted, and exists_riemannRoch_divisor is standard-3.
+  Kernel 21 → 18. See FLIP_VERIFICATION.log.

@@ -6,7 +6,7 @@ Authors: Michael R Douglas
 import KirovDolbeault.Dolbeault.TailRR1
 import KirovDolbeault.Dolbeault.TailGenusTarget
 import KirovDolbeault.Dolbeault.FormRemovableSingularity
-import KirovDolbeault.RiemannRoch
+import KirovDolbeault.RiemannRochDegree
 
 /-!
 # The tail residue pairing and the injectivity half of tail Serre duality (tail tower T5)

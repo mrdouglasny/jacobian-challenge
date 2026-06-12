@@ -1,0 +1,67 @@
+# FLIP_VERIFICATION.log — kernel closures of the keystone flip (2026-06-11)
+
+Branch: feat/keystone-flip (= feat/frame-trace-wall + origin/main merge + the flip).
+Checklist executed: docs/planning/FLIP_CHECKLIST.md (PR #197 pre-write).
+Full `lake build` (root, port + Jacobians): **green** (only pre-existing
+Extensions/AbelJacobi sorries warn; none on any RR path).
+`bash scripts/check_axiom_consistency.sh`: **kernel axiom count: 18** —
+"✓ axiom count consistent across docs + breakdown (= 18)" (21 − h1coh_zero_finrank
+− serreDuality_equiv − canonicalDivisor).
+`docs/axiom-report.txt` regenerated: **byte-identical** (the 43 tracked headliners
+were never on the flipped path).
+
+## Verbatim `#print axioms` output — Jacobians side
+(verify file: import Jacobians + RiemannRochAPI + SerreDualityAPI)
+
+'Jacobians.Layer3.h1coh_zero_finrank' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Layer3.serreDuality_equiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Axioms.canonicalDivisor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Axioms.canonicalDivisor_spec' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Axioms.serreDuality_equiv_exists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Layer3.riemannRochL3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Layer3.serreDualityL3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Layer3.h0_canonical_L3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Layer3.canonicalDivisor_deg_L3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Axioms.AX_RiemannRoch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.LineBundle,
+ Jacobians.Axioms.LineBundle.ofDivisor]
+'Jacobians.Axioms.AX_SerreDuality' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.LineBundle,
+ Jacobians.Axioms.LineBundle.ofDivisor]
+'Jacobians.Dolbeault.exists_serreDualityData_cover' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+## Verbatim `#print axioms` output — port side
+(verify file: import KirovDolbeault.RiemannRoch + KirovDolbeault.GenusSphereHeadline)
+
+'Jacobians.Dolbeault.exists_serreDualityData_cover' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Dolbeault.riemannRoch_equality_of_data' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.exists_riemannRoch_divisor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.MeromorphicFunction.deg_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.lDim_eq_zero_of_deg_neg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.exists_singleSimplePole_of_genus_zero_of_rr' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Dolbeault.exists_canonicalData_residueAtom' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Dolbeault.exists_canonicalData_frameTraceHypothesis' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+
+## Reading
+
+* THE LAYER-3 RR CLOSURE IS STANDARD-3 + NOTHING: `riemannRochL3`, `serreDualityL3`,
+  `h0_canonical_L3`, `canonicalDivisor_deg_L3`, the two flipped theorems
+  (`h1coh_zero_finrank`, `serreDuality_equiv` — statements verbatim), and the
+  de-opaqued `canonicalDivisor` (+ spec) depend only on
+  [propext, Classical.choice, Quot.sound]. No `sorryAx` anywhere.
+* `AX_RiemannRoch` / `AX_SerreDuality` (the public wrappers): standard-3 plus ONLY
+  the two opaque `LineBundle` type stubs that appear in their own statement types
+  (`H0`/`H1` over `LineBundle.ofDivisor`) — the flip removed
+  `h1coh_zero_finrank`/`serreDuality_equiv`/`canonicalDivisor` from their closure.
+* PORT: `exists_riemannRoch_divisor` — classical Riemann–Roch on a compact connected
+  Riemann surface — is now standard-3: the keystone sorry
+  (`exists_serreDualityData`, SerreDualityPairing.lean:134, the only sorry on the RR
+  path) is DELETED, replaced by the PROVEN ∃-cover keystone
+  `exists_serreDualityData_cover` (T-lane `exists_canonicalData_residueAtom` →
+  #194 genus split → #193 capstone).
