@@ -169,3 +169,46 @@ reduces to manifold plumbing + removable singularity at the boundary points.
 Remaining E3: smooth cutoff ψ ≡ 1 near segment, supp ⊂ disk (Mathlib bump functions);
 glue exp(ψ·slitLogRatio) with the Möbius ratio across the open segment; arc chart-disk
 subdivision; fold to LogDbarDatum (incl. E4 field discharge).
+
+=== 2026-06-12 — AB-E2 lane (feat/abel-engine-2): E3 block, sessions 1–7 ===
+(retro-log for commits 652caa2..0201a41; the finish session writes this entry)
+* 652caa2 W1/W2 DISCHARGED — RawLogDbarDatum.toLogDbarDatum (AbelSubsetEngineLocal.lean):
+  raw geometric datum (F, σ, pairing, F_ne, diff_off, dbar_eq, punctured norm_form) ⟹ full
+  E2 LogDbarDatum. W1 = Wirtinger ∂̄-kill on the corrected F·e^{−u} + chart-read transport
+  (analyticAt_atlasTransition / analyticAt_chartRead_transfer extracted as public bricks) +
+  removable singularity at the support; W2 = meromorphicOrderAt_eq_int_iff order read-off.
+* 9e7fefb/2121bd9 SegTube planar layer (Forster 20.5 geometry): tube radius δ, smooth
+  Urysohn cutoff ψ (1 on half-tube, 0 off δ-tube) + co-cutoff θ (kills the slit-log
+  singularity); Ffun = ratio on half-tube / exp(ψ·slitLog) glued; master planar identity
+  dbar_Ffun: ∂̄F̃ = F̃·(H·∂̄ψ) off the pole. ArcWeakSolution interface = RawLogDbarDatum
+  geometric fields for a divisor (no pairing; toRaw conditional on E4 field).
+* 123dbc1 exists_arcWeakSolution per-arc constructor: lift through one cover chart,
+  single-chart σ = (lift H)·∂̄(lift ψ), ∂̄-identity in EVERY cover chart via dbarDisk_comp_holo
+  chain rule, Möbius normal forms (z−·)^{±1}·(analytic unit) by dslope of the transition.
+* 85f4f6c avoid-set strengthening exists_arcWeakSolution_avoiding: tube shrunk to miss any
+  finite A off the segment (SegTube.exists_segTube_avoiding); at q ∈ A, q ≠ pole: own-chart
+  read analytic + σ q = 0 (the TameAt package).
+* ce7d475 binary fold ArcWeakSolution.exists_mul: F₁·F₂ patched at cancellation points by
+  the product of analytic units (hkey continuation), σ₁+σ₂; TameAt hypotheses at unshared
+  support.
+* 0201a41 THIS SESSION — E3 COMPLETE:
+  - exists_mul strengthened in place: propagates tameness (cancellation points
+    unconditionally, via hkey + analyticAt_chartRead_transfer through the cover).
+  - ArcWeakSolution.one (zero divisor, tame everywhere).
+  - Dipole-list layer (dipole/dipoleDiv algebra, consecPairs telescoping, nsmulList/
+    zsmulList ℤ-coefficients with Prod.swap reversal, flatten).
+  - exists_subdivision: Lebesgue number of {γ⁻¹ U j} on Icc 0 1, uniform partition k/N.
+  - exists_arcWeakSolution_dipoleList: master induction, invariants = supp ⊆ S + TameOn S.
+  - exists_arcWeakSolution_boundary: EVERY SmoothOneChain has an ArcWeakSolution for ∂c.
+    UNCONDITIONAL. E3 closed.
+  - exists_meromorphic_of_zeroPeriodChain_of_pairing: the §20 engine with E4 as the SINGLE
+    remaining hypothesis (pairing of the constructed σ); toRaw → toLogDbarDatum (W1/W2) →
+    E5 over P6.
+Kernel closures (#print axioms, fresh oleans): exists_arcWeakSolution_boundary,
+exists_meromorphic_of_zeroPeriodChain_of_pairing, ArcWeakSolution.exists_mul,
+exists_arcWeakSolution_dipoleList, exists_subdivision ALL standard-3. No new axioms, no
+sorries, no AX_AbelTheorem anywhere in the closures.
+E4 status note: toLogDbarDatum DEMANDS the pairing (RawLogDbarDatum field) — the per-arc
+construction does not expose it for free. E4 sub-bricks (route doc updated): per-arc planar
+Stokes value 2πi·∫_[za,zb], segment↔arc-piece homotopy equality, fold additivity (pairing
+accumulator through the fold). E6 adapter untouched per lane scope.

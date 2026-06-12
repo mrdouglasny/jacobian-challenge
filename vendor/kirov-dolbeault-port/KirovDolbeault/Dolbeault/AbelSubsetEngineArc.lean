@@ -35,7 +35,16 @@ solution for the divisor `(b) − (a)`:
 * **the chain fold** (`ArcWeakSolution.exists_mul`): the product of two weak-solution data
   is one for the divisor sum — `F₁·F₂` patched at cancellation points by the product of
   the analytic units (the zero of one arc cancels the pole of the next), `σ₁ + σ₂`; the
-  factors must be `TameAt` each other's unshared support, which the avoid set supplies.
+  factors must be `TameAt` each other's unshared support, which the avoid set supplies,
+  and the fold propagates tameness (the list-fold invariant);
+* **E3 complete** (`exists_arcWeakSolution_boundary`): every `SmoothOneChain` admits an
+  `ArcWeakSolution` for its boundary divisor — chart-disk subdivision of each arc
+  (`exists_subdivision`, Lebesgue number), ℤ-coefficients as repeated/reversed dipole
+  lists (`zsmulList`), telescoping (`consecPairs`), master fold over the flat dipole list
+  (`exists_arcWeakSolution_dipoleList`);
+* **the E4-pinned engine** (`exists_meromorphic_of_zeroPeriodChain_of_pairing`): with E3
+  unconditional, the §20 engine's sole remaining obligation is the E4 pairing identity for
+  the constructed datum.
 
 References: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.4–20.5; Miranda,
 *Algebraic Curves and Riemann Surfaces* (GSM 5), Ch. VIII §4.
