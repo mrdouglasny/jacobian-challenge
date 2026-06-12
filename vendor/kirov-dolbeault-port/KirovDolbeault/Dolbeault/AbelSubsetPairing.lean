@@ -724,4 +724,282 @@ theorem resIntegral_pairElem_of_support {σ : SmoothCOneForms X} (hσ : σ ∈ O
         dsimp only
         rw [← Finset.sum_mul, sum_rhoC_apply, one_mul]
 
+/-! ## P5c — nondegeneracy: a nonzero form pairs nontrivially -/
+
+/-- A nonzero holomorphic 1-form has a nonvanishing chart coefficient **in some cover chart**:
+the nonvanishing own-chart coefficient point (`exists_localRep_self_ne_zero`) transferred
+through the chart-invariant form order (`formOrderW_chart_invariant`: order `0` in the own
+chart ⟹ order `0`, hence value `≠ 0`, in the covering chart). -/
+theorem exists_omegaCoeff_ne_zero_of_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
+    ∃ (j₀ : 𝔇.toFiniteCover.ι) (a : X), a ∈ (𝔇.U j₀ : Set X) ∧
+      omegaCoeff 𝔇 α j₀ (chartMap 𝔇 j₀ a) ≠ 0 := by
+  obtain ⟨a, ha⟩ := exists_localRep_self_ne_zero α hα
+  obtain ⟨j₀, haU⟩ : ∃ j₀, a ∈ (𝔇.U j₀ : Set X) := by
+    have hmem : a ∈ ((⨆ i, 𝔇.U i : Opens X) : Set X) := by
+      rw [𝔇.toFiniteCover.covers]
+      trivial
+    exact Opens.mem_iSup.mp hmem
+  -- order `0` at `a` in `a`'s own chart (the coefficient value there is `localRep α a a ≠ 0`)
+  have hself : a ∈ (chartAt ℂ a).source := mem_chart_source ℂ a
+  have htgt_a : (chartAt ℂ a) a ∈ (chartAt ℂ a).target := (chartAt ℂ a).map_source hself
+  have han_a : AnalyticAt ℂ (coeffAt α a) ((chartAt ℂ a) a) := coeffAt_analyticAt α a htgt_a
+  have hval : coeffAt α a ((chartAt ℂ a) a) ≠ 0 := by
+    show Jacobians.Montel.localRep α a ((chartAt ℂ a).symm ((chartAt ℂ a) a)) ≠ 0
+    rw [(chartAt ℂ a).left_inv hself]
+    exact ha
+  have hmero_a : meromorphicOrderAt (coeffAt α a) ((chartAt ℂ a) a) = ((0 : ℤ) : WithTop ℤ) := by
+    rw [han_a.meromorphicOrderAt_eq, han_a.analyticOrderAt_eq_zero.mpr hval]
+    rfl
+  have hord_a : (holToMero α).formOrderW a = ((0 : ℤ) : WithTop ℤ) := by
+    have h := formOrderW_chart_invariant (holToMero α) a a hself
+    have hcoeff : formCoeff (holToMero α).toFun a = coeffAt α a := formCoeff_holToSection α a
+    rw [hcoeff] at h
+    rw [h, hmero_a]
+  -- transfer to the covering chart: order `0` there, hence value `≠ 0`
+  have hsrc : a ∈ (chartAt ℂ (𝔇.center j₀)).source := mem_chartSource_of_mem_U 𝔇 haU
+  have htgt : chartMap 𝔇 j₀ a ∈ (chartAt ℂ (𝔇.center j₀)).target :=
+    (chartAt ℂ (𝔇.center j₀)).map_source hsrc
+  have han : AnalyticAt ℂ (coeffAt α (𝔇.center j₀)) (chartMap 𝔇 j₀ a) :=
+    coeffAt_analyticAt α (𝔇.center j₀) htgt
+  have hmero : meromorphicOrderAt (coeffAt α (𝔇.center j₀)) (chartMap 𝔇 j₀ a)
+      = ((0 : ℤ) : WithTop ℤ) := by
+    have h := formOrderW_chart_invariant (holToMero α) (𝔇.center j₀) a hsrc
+    have hcoeff : formCoeff (holToMero α).toFun (𝔇.center j₀) = coeffAt α (𝔇.center j₀) :=
+      formCoeff_holToSection α (𝔇.center j₀)
+    rw [hcoeff, hord_a] at h
+    exact h.symm
+  have hord : analyticOrderAt (coeffAt α (𝔇.center j₀)) (chartMap 𝔇 j₀ a) = 0 := by
+    rw [han.meromorphicOrderAt_eq] at hmero
+    cases hcase : analyticOrderAt (coeffAt α (𝔇.center j₀)) (chartMap 𝔇 j₀ a) with
+    | top =>
+      rw [hcase, ENat.map_top] at hmero
+      exact absurd hmero.symm WithTop.coe_ne_top
+    | coe n =>
+      rw [hcase, ENat.map_coe] at hmero
+      have hn : (n : ℤ) = 0 := WithTop.coe_inj.mp hmero
+      exact_mod_cast hn
+  exact ⟨j₀, a, haU, by simpa [omegaCoeff] using han.analyticOrderAt_eq_zero.mp hord⟩
+
+/-- A point of the coordinate disk pulls back into the cover set. -/
+theorem symm_mem_U_of_mem_ball {j : 𝔇.toFiniteCover.ι} {w : ℂ}
+    (hw : w ∈ Metric.ball (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j) (𝔇.center j)) (𝔇.radius j)) :
+    (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).symm w ∈ (𝔇.U j : Set X) := by
+  have hwt : w ∈ (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).target :=
+    𝔇.closedBall_subset_target j (Metric.ball_subset_closedBall hw)
+  rw [𝔇.isDisk j]
+  refine ⟨?_, (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).map_target hwt⟩
+  rw [Set.mem_preimage, (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).right_inv hwt]
+  exact hw
+
+/-- **P5 nondegeneracy — every nonzero holomorphic 1-form pairs nontrivially against some
+smooth `(0,1)`-form.**  The witness is the one-chart bump form `σ = h·∂̄w` (with `h, w` chart
+lifts of `χ₂·conj f` and `χ₁·conj z`): its pairing against `α` collapses to the single planar
+integral `∫ χ₂·|f|² > 0` at a disk where the coefficient `f` of `α` does not vanish. -/
+theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
+    ∃ σ : ↥(OneFormsZeroOne X), pairOmega 𝔇 σ α ≠ 0 := by
+  classical
+  obtain ⟨j₀, a, haU, hf0⟩ := exists_omegaCoeff_ne_zero_of_ne_zero 𝔇 α hα
+  set f : ℂ → ℂ := omegaCoeff 𝔇 α j₀ with hf
+  set e := extChartAt 𝓘(ℝ, ℂ) (𝔇.center j₀) with he
+  set za := chartMap 𝔇 j₀ a with hza
+  set ballc := Metric.ball (e (𝔇.center j₀)) (𝔇.radius j₀) with hballc
+  -- conjugation is real-smooth
+  have hconjfun : (fun w : ℂ => (starRingEnd ℂ) w) = ⇑Complex.conjCLE :=
+    funext fun w => (Complex.conjCLE_apply w).symm
+  have hconj : ContDiff ℝ (⊤ : ℕ∞) (fun w : ℂ => (starRingEnd ℂ) w) := by
+    rw [hconjfun]
+    exact Complex.conjCLE.contDiff
+  -- the chart target membership of disk points, and analyticity of `f` there
+  have hball_tgt : ∀ {w : ℂ}, w ∈ ballc → w ∈ e.target := fun {w} hw =>
+    𝔇.closedBall_subset_target j₀ (Metric.ball_subset_closedBall hw)
+  have hchart_tgt : ∀ {w : ℂ}, w ∈ ballc → w ∈ (chartAt ℂ (𝔇.center j₀)).target := by
+    intro w hw
+    have hyU : e.symm w ∈ (𝔇.U j₀ : Set X) := symm_mem_U_of_mem_ball 𝔇 hw
+    have h := (chartAt ℂ (𝔇.center j₀)).map_source (mem_chartSource_of_mem_U 𝔇 hyU)
+    rwa [show (chartAt ℂ (𝔇.center j₀)) (e.symm w) = w from e.right_inv (hball_tgt hw)] at h
+  have hfan : ∀ {w : ℂ}, w ∈ ballc → AnalyticAt ℂ f w := fun {w} hw =>
+    coeffAt_analyticAt α (𝔇.center j₀) (hchart_tgt hw)
+  -- the working disk: inside the coordinate disk AND inside `{f ≠ 0}`
+  have hza_ball : za ∈ ballc := by
+    have h := haU
+    rw [𝔇.isDisk j₀] at h
+    exact h.1
+  have hOopen : IsOpen (ballc ∩ f ⁻¹' {0}ᶜ) := by
+    refine ContinuousOn.isOpen_inter_preimage ?_ Metric.isOpen_ball isOpen_compl_singleton
+    intro w hw
+    exact (hfan hw).continuousAt.continuousWithinAt
+  have hzaO : za ∈ ballc ∩ f ⁻¹' {0}ᶜ := ⟨hza_ball, hf0⟩
+  obtain ⟨ε, hε, hball_sub⟩ := Metric.isOpen_iff.mp hOopen za hzaO
+  -- the two planar bumps and the planar data
+  set χ₂ : ContDiffBump za := ⟨ε / 8, ε / 4, by positivity, by linarith⟩ with hχ₂
+  set χ₁ : ContDiffBump za := ⟨ε / 4, ε / 2, by positivity, by linarith⟩ with hχ₁
+  set W : ℂ → ℂ := fun w => (χ₁ w : ℝ) • (starRingEnd ℂ) w with hW
+  set H : ℂ → ℂ := fun w => (χ₂ w : ℝ) • (starRingEnd ℂ) (f w) with hH
+  have hsub₄ : Metric.ball za (ε / 4) ⊆ Metric.ball za ε := Metric.ball_subset_ball (by linarith)
+  have hsub₄c : Metric.closedBall za (ε / 4) ⊆ Metric.ball za ε :=
+    Metric.closedBall_subset_ball (by linarith)
+  have hWsm : ContDiff ℝ (⊤ : ℕ∞) W := χ₁.contDiff.smul hconj
+  have hHsm : ContDiff ℝ (⊤ : ℕ∞) H := by
+    rw [contDiff_iff_contDiffAt]
+    intro w
+    by_cases hw : w ∈ Metric.ball za ε
+    · have hwc : w ∈ ballc := (hball_sub hw).1
+      exact χ₂.contDiff.contDiffAt.smul (hconj.contDiffAt.comp w
+        (((hfan hwc).restrictScalars (𝕜 := ℝ)).contDiffAt))
+    · refine (contDiffAt_const (c := (0 : ℂ))).congr_of_eventuallyEq ?_
+      have hw4 : w ∉ Metric.closedBall za (ε / 4) := fun hc => hw (hsub₄c hc)
+      filter_upwards [Metric.isClosed_closedBall.isOpen_compl.mem_nhds hw4] with w' hw'
+      have hχ0 : χ₂ w' = 0 := by
+        rw [← Function.notMem_support, χ₂.support_eq]
+        exact fun hc => hw' (Metric.ball_subset_closedBall hc)
+      rw [hH]
+      dsimp only
+      rw [hχ0]
+      simp
+  -- the global witness `(0,1)`-form
+  set wfn := chartLift 𝔇 j₀ W hWsm with hwfn
+  set hfn := chartLift 𝔇 j₀ H hHsm with hhfn
+  set σ₀ : SmoothCOneForms X := cSmulForm hfn (dbarL wfn) with hσ₀
+  have hσ₀mem : σ₀ ∈ OneFormsZeroOne X := cSmulForm_mem_zeroOne hfn (dbarL_mem_zeroOne wfn)
+  -- the support control: `σ₀` lives over the closed `ε/4`-disk inside `U j₀`
+  have hsupp_gen : ∀ y, σ₀ y ≠ 0 → ∃ w' ∈ Metric.ball za (ε / 4), y = e.symm w' := by
+    intro y hy
+    have hfny : hfn y ≠ 0 := by
+      intro h0
+      refine hy ?_
+      rw [hσ₀, cSmulForm_apply, h0]
+      exact zero_smul ℂ ((dbarL wfn) y)
+    obtain ⟨hysrc, hHy⟩ := chartLift_ne_zero 𝔇 hfny
+    have hχ2y : χ₂ (e y) ≠ 0 := by
+      intro h0
+      refine hHy ?_
+      show H (e y) = 0
+      rw [hH]
+      dsimp only
+      rw [h0]
+      simp
+    have hyball : e y ∈ Metric.ball za (ε / 4) := by
+      rw [← χ₂.support_eq]
+      exact Function.mem_support.mpr hχ2y
+    refine ⟨e y, hyball, ?_⟩
+    have hysrc' : y ∈ e.source := by
+      rw [he, extChartAt_source]
+      exact hysrc
+    exact (e.left_inv hysrc').symm
+  set S : Set X := e.symm '' Metric.closedBall za (ε / 4) with hSdef
+  have hScl : IsClosed S := by
+    refine IsCompact.isClosed ?_
+    refine (isCompact_closedBall za (ε / 4)).image_of_continuousOn ?_
+    exact (continuousOn_extChartAt_symm (𝔇.center j₀)).mono fun w hw =>
+      hball_tgt ((hball_sub (hsub₄c hw)).1)
+  have hSU : S ⊆ (𝔇.U j₀ : Set X) := by
+    rintro y ⟨w', hw', rfl⟩
+    exact symm_mem_U_of_mem_ball 𝔇 ((hball_sub (hsub₄c hw')).1)
+  have hsupp : ∀ y, y ∉ S → σ₀ y = 0 := by
+    intro y hyS
+    by_contra hy
+    obtain ⟨w', hw', rfl⟩ := hsupp_gen y hy
+    exact hyS ⟨w', Metric.ball_subset_closedBall hw', rfl⟩
+  refine ⟨⟨σ₀, hσ₀mem⟩, ?_⟩
+  rw [pairOmega_apply,
+    resIntegral_pairElem_of_support 𝔇 hσ₀mem (isOneZeroCoeff_omegaCoeff 𝔇 α) hScl hSU hsupp]
+  -- pointwise: the single-chart integrand is `χ₂·|f|²`
+  have hpt : ∀ z, pairCoeff 𝔇 σ₀ (omegaCoeff 𝔇 α) j₀ z
+      = ((χ₂ z * normSq (f z) : ℝ) : ℂ) := by
+    intro z
+    by_cases hzc : z ∈ ballc
+    · -- inside the coordinate disk: read everything back through the chart
+      have hcut : 𝔇.cutoffPullback j₀ σ₀ z = H z * 𝔇.cutoffPullback j₀ (dbarL wfn) z := by
+        rw [hσ₀, cutoffPullback_cSmulForm]
+        congr 1
+        exact chartLift_symm_read 𝔇 j₀ hzc
+      by_cases hz4 : z ∈ Metric.ball za (ε / 4)
+      · -- the bump core: `∂̄w` reads `∂̄(conj) = 1`
+        have hyU : e.symm z ∈ (𝔇.U j₀ : Set X) := symm_mem_U_of_mem_ball 𝔇 hzc
+        have hzx' : chartMap 𝔇 j₀ (e.symm z) = z := e.right_inv (hball_tgt hzc)
+        have hcdb : 𝔇.cutoffPullback j₀ (dbarL wfn) z = 1 := by
+          have h1 := cutoffPullback_dbarL 𝔇 (u := wfn) hyU
+          rw [hzx'] at h1
+          rw [h1]
+          have hev : (fun ζ => wfn ((chartAt ℂ (𝔇.center j₀)).symm ζ))
+              =ᶠ[𝓝 z] fun w => (starRingEnd ℂ) w := by
+            filter_upwards [Metric.isOpen_ball.mem_nhds hzc,
+              Metric.isOpen_ball.mem_nhds hz4] with ζ hζc hζ4
+            have hread : wfn ((chartAt ℂ (𝔇.center j₀)).symm ζ) = W ζ :=
+              chartLift_symm_read 𝔇 j₀ hζc
+            rw [hread, hW]
+            dsimp only
+            rw [χ₁.one_of_mem_closedBall (Metric.ball_subset_closedBall hζ4)]
+            simp
+          rw [dbar_congr_of_eventuallyEq hev, dbar_conj]
+        rw [pairCoeff_apply, hcut, hcdb, mul_one, hH]
+        dsimp only
+        calc ((χ₂ z : ℝ) • (starRingEnd ℂ) (f z)) * f z
+            = (χ₂ z : ℂ) * (f z * (starRingEnd ℂ) (f z)) := by
+              rw [Complex.real_smul]
+              ring
+          _ = (χ₂ z : ℂ) * ((normSq (f z) : ℝ) : ℂ) := by rw [Complex.mul_conj]
+          _ = ((χ₂ z * normSq (f z) : ℝ) : ℂ) := by
+              push_cast
+              ring
+      · -- inside the disk but outside the bump: both sides vanish
+        have hχ0 : χ₂ z = 0 := by
+          rw [← Function.notMem_support, χ₂.support_eq]
+          exact hz4
+        rw [pairCoeff_apply, hcut, hH]
+        dsimp only
+        rw [hχ0]
+        simp
+    · -- outside the coordinate disk: the section support forces the cutoff to vanish
+      have hz4 : z ∉ Metric.ball za (ε / 4) := fun hc => hzc ((hball_sub (hsub₄ hc)).1)
+      have hχ0 : χ₂ z = 0 := by
+        rw [← Function.notMem_support, χ₂.support_eq]
+        exact hz4
+      have hcut0 : 𝔇.cutoffPullback j₀ σ₀ z = 0 := by
+        by_contra hne
+        obtain ⟨hztgt, hzS⟩ := cutoffPullback_ne_zero 𝔇 hsupp hne
+        obtain ⟨w', hw', heq⟩ := hzS
+        have hw't : w' ∈ e.target := hball_tgt ((hball_sub (hsub₄c hw')).1)
+        have : z = w' := by
+          have h1 : e (e.symm z) = z := e.right_inv hztgt
+          have h2 : e (e.symm w') = w' := e.right_inv hw't
+          rw [← h1, ← heq]
+          exact h2
+        exact hzc (this ▸ (hball_sub (hsub₄c hw')).1)
+      rw [pairCoeff_apply, hcut0, zero_mul, hχ0]
+      simp
+  rw [integral_congr_ae (Eventually.of_forall hpt), integral_complex_ofReal]
+  -- positivity of the planar integral `∫ χ₂·|f|²`
+  set G : ℂ → ℝ := fun z => χ₂ z * normSq (f z) with hG
+  have hGnn : ∀ z, 0 ≤ G z := fun z => mul_nonneg χ₂.nonneg (normSq_nonneg _)
+  have hGcont : Continuous G := by
+    rw [continuous_iff_continuousAt]
+    intro w
+    by_cases hw : w ∈ Metric.closedBall za (ε / 4)
+    · have hwc : w ∈ ballc := (hball_sub (hsub₄c hw)).1
+      exact (χ₂.continuous.continuousAt).mul
+        (Complex.continuous_normSq.continuousAt.comp (hfan hwc).continuousAt)
+    · have hev : G =ᶠ[𝓝 w] fun _ => (0 : ℝ) := by
+        filter_upwards [Metric.isClosed_closedBall.isOpen_compl.mem_nhds hw] with w' hw'
+        have hχ0 : χ₂ w' = 0 := by
+          rw [← Function.notMem_support, χ₂.support_eq]
+          exact fun hc => hw' (Metric.ball_subset_closedBall hc)
+        rw [hG]
+        dsimp only
+        rw [hχ0, zero_mul]
+      exact continuousAt_const.congr hev.symm
+  have hGsupp : HasCompactSupport G := χ₂.hasCompactSupport.mul_right
+  have hGint : Integrable G := hGcont.integrable_of_hasCompactSupport hGsupp
+  have hsupport_sub : Metric.ball za (ε / 8) ⊆ Function.support G := by
+    intro z hz
+    have hχpos : 0 < χ₂ z := χ₂.pos_of_mem_ball
+      (Metric.ball_subset_ball (show ε / 8 ≤ χ₂.rOut from by rw [hχ₂]; linarith) hz)
+    have hfz : f z ≠ 0 := (hball_sub (Metric.ball_subset_ball (by linarith) hz)).2
+    exact Function.mem_support.mpr (ne_of_gt (mul_pos hχpos (normSq_pos.mpr hfz)))
+  have hpos : 0 < ∫ z, G z :=
+    (integral_pos_iff_support_of_nonneg_ae (Eventually.of_forall hGnn) hGint).mpr
+      (lt_of_lt_of_le (Metric.measure_ball_pos volume za (by positivity))
+        (measure_mono hsupport_sub))
+  exact_mod_cast Complex.ofReal_ne_zero.mpr (ne_of_gt hpos)
+
 end Jacobians.Dolbeault.FineResidue
