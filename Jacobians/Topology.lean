@@ -17,3 +17,4 @@ import Jacobians.Topology.FiniteGoodCover
 import Jacobians.Topology.CoverGeneration
 import Jacobians.Topology.CellLassoPower
 import Jacobians.Topology.HalfPlaneHomeo
+import Jacobians.Topology.PuncturedPlaneGeneration
