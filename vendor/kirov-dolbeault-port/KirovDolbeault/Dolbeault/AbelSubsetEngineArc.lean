@@ -75,13 +75,12 @@ structure SegTube (a b c₀ : ℂ) (R : ℝ) where
   θ_zero : Set.EqOn θ 0 (cthickening (δ / 8) (segment ℝ a b))
   θ_one : Set.EqOn θ 1 (thickening (δ / 4) (segment ℝ a b))ᶜ
 
-/-- A segment tube system exists for any segment inside an open ball: the tube radius from
-`IsCompact.exists_cthickening_subset_open`, the two cutoffs from the smooth Urysohn lemma
+/-- A segment tube system exists at any prescribed radius whose closed tube fits in the
+ball: the two cutoffs from the smooth Urysohn lemma
 (`exists_contMDiffMap_zero_one_of_isClosed` on the manifold `ℂ`). -/
-theorem SegTube.exists_segTube {a b c₀ : ℂ} {R : ℝ}
-    (hseg : segment ℝ a b ⊆ ball c₀ R) : Nonempty (SegTube a b c₀ R) := by
-  obtain ⟨δ, hδpos, hδsub⟩ :=
-    (isCompact_segment a b).exists_cthickening_subset_open isOpen_ball hseg
+theorem SegTube.exists_segTube_of_radius {a b c₀ : ℂ} {R δ : ℝ} (hδpos : 0 < δ)
+    (hδsub : cthickening δ (segment ℝ a b) ⊆ ball c₀ R) :
+    ∃ T : SegTube a b c₀ R, T.δ = δ := by
   -- the cutoff ψ: `0` off the open δ-tube, `1` on the closed half-tube
   obtain ⟨ψ, hψ0, hψ1, -⟩ := exists_contMDiffMap_zero_one_of_isClosed (n := (⊤ : ℕ∞))
     (I := 𝓘(ℝ, ℂ)) isOpen_thickening.isClosed_compl (isClosed_cthickening
@@ -105,7 +104,38 @@ theorem SegTube.exists_segTube {a b c₀ : ℂ} {R : ℝ}
     ψ_one := hψ1
     ψ_zero := hψ0
     θ_zero := hθ0
-    θ_one := hθ1 }⟩
+    θ_one := hθ1 }, rfl⟩
+
+/-- A segment tube system exists for any segment inside an open ball
+(`IsCompact.exists_cthickening_subset_open` picks the radius). -/
+theorem SegTube.exists_segTube {a b c₀ : ℂ} {R : ℝ}
+    (hseg : segment ℝ a b ⊆ ball c₀ R) : Nonempty (SegTube a b c₀ R) := by
+  obtain ⟨δ, hδpos, hδsub⟩ :=
+    (isCompact_segment a b).exists_cthickening_subset_open isOpen_ball hseg
+  obtain ⟨T, -⟩ := SegTube.exists_segTube_of_radius hδpos hδsub
+  exact ⟨T⟩
+
+/-- **Avoiding tube**: the tube radius can additionally be chosen so the closed tube misses
+any prescribed finite planar set off the segment (shrink into the ball minus those points).
+This is what lets a chain of arcs keep each tube's cutoff annulus away from all OTHER
+endpoints: a foreign point ON the segment is automatically in the half-tube where the weak
+solution is the holomorphic Möbius ratio, and a foreign point OFF the segment is now
+outside the whole tube, where the weak solution is `≡ 1`. -/
+theorem SegTube.exists_segTube_avoiding {a b c₀ : ℂ} {R : ℝ}
+    (hseg : segment ℝ a b ⊆ ball c₀ R) (A : Finset ℂ) :
+    ∃ T : SegTube a b c₀ R,
+      ∀ q ∈ A, q ∉ segment ℝ a b → q ∉ cthickening T.δ (segment ℝ a b) := by
+  have hopen : IsOpen (ball c₀ R ∩ ((↑A : Set ℂ) \ segment ℝ a b)ᶜ) :=
+    isOpen_ball.inter (A.finite_toSet.subset Set.diff_subset).isClosed.isOpen_compl
+  have hsub : segment ℝ a b ⊆ ball c₀ R ∩ ((↑A : Set ℂ) \ segment ℝ a b)ᶜ := fun z hz =>
+    ⟨hseg hz, fun hzd => hzd.2 hz⟩
+  obtain ⟨δ, hδpos, hδsub⟩ :=
+    (isCompact_segment a b).exists_cthickening_subset_open hopen hsub
+  obtain ⟨T, hTδ⟩ := SegTube.exists_segTube_of_radius hδpos
+    (hδsub.trans Set.inter_subset_left)
+  refine ⟨T, fun q hqA hqseg hqth => ?_⟩
+  rw [hTδ] at hqth
+  exact (hδsub hqth).2 ⟨Finset.mem_coe.mpr hqA, hqseg⟩
 
 namespace SegTube
 
@@ -351,10 +381,18 @@ theorem chartLift_read_of_mem_U {G : ℂ → ℂ} {hG : ContDiff ℝ (⊤ : ℕ�
 points `a ≠ b` of one cover disk carry an `ArcWeakSolution` for the divisor `(b) − (a)`:
 the lifted tube weak solution `F = F̃ ∘ e` (extended by `1` off the tube preimage), the
 single-chart `(0,1)` datum `σ = (lift H)·∂̄(lift ψ)`, the logarithmic `∂̄`-identity in every
-cover chart, and analytic-unit Möbius normal forms `(z−·)^{±1}·unit` at the endpoints. -/
-theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
-    (hb : b ∈ (𝔇.U j₀ : Set X)) (hab : a ≠ b) :
-    Nonempty (ArcWeakSolution 𝔇 (Finsupp.single b 1 - Finsupp.single a 1)) := by
+cover chart, and analytic-unit Möbius normal forms `(z−·)^{±1}·unit` at the endpoints.
+
+**Avoidance**: the tube additionally avoids any prescribed finite set `A` — at every
+`q ∈ A` other than the pole `a`, the own-chart read of `F` is *analytic* and `σ` vanishes
+(the tube's cutoff annulus misses `q`).  This is the tameness a chain fold needs at the
+other arcs' endpoints. -/
+theorem exists_arcWeakSolution_avoiding (A : Finset X) {a b : X}
+    (ha : a ∈ (𝔇.U j₀ : Set X)) (hb : b ∈ (𝔇.U j₀ : Set X)) (hab : a ≠ b) :
+    ∃ W : ArcWeakSolution 𝔇 (Finsupp.single b 1 - Finsupp.single a 1),
+      ∀ q ∈ A, q ≠ a →
+        AnalyticAt ℂ (fun ζ => W.F ((chartAt (H := ℂ) q).symm ζ)) ((chartAt (H := ℂ) q) q)
+        ∧ (W.σ : SmoothCOneForms X) q = 0 := by
   classical
   set e := extChartAt 𝓘(ℝ, ℂ) (𝔇.center j₀) with he
   set za := e a with hza
@@ -400,7 +438,7 @@ theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
   -- the planar tube
   have hseg : segment ℝ za zb ⊆ Metric.ball (e (𝔇.center j₀)) (𝔇.radius j₀) :=
     (convex_ball _ _).segment_subset haball hbball
-  obtain ⟨T⟩ := SegTube.exists_segTube hseg
+  obtain ⟨T, hTavoid⟩ := SegTube.exists_segTube_avoiding hseg (A.image fun q => e q)
   -- the global data
   set ψl := chartLift 𝔇 j₀ T.psiC T.psiC_smooth with hψl
   set Hl := chartLift 𝔇 j₀ T.Hfun T.Hfun_smooth with hHl
@@ -716,15 +754,88 @@ theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
           field_simp [hsub]
         rw [hvzb]
         ring
-  -- assemble
-  exact ⟨{
+  -- assemble, then discharge the avoidance conclusions
+  refine ⟨{
     F := F
     σ := ⟨σ₀, hσmem⟩
     F_ne := hFne
     diff_off := hdiff
     dbar_eq := hdbar
     σ_vanish := hσsupp
-    norm_form := hnorm }⟩
+    norm_form := hnorm }, ?_⟩
+  intro q hqA hqa
+  have hsymmq : (chartAt ℂ q).symm ((chartAt ℂ q) q) = q :=
+    (chartAt ℂ q).left_inv (mem_chart_source ℂ q)
+  have hsymmcq : ContinuousAt (chartAt ℂ q).symm ((chartAt ℂ q) q) :=
+    (chartAt ℂ q).continuousAt_symm ((chartAt ℂ q).map_source (mem_chart_source ℂ q))
+  by_cases hqK : q ∈ K
+  · -- in the tube preimage: avoidance forces `e q` ON the segment, where `F` is the ratio
+    have hqU : q ∈ (𝔇.U j₀ : Set X) := hKU hqK
+    have hqsrc : q ∈ e.source := 𝔇.subset_chart_source j₀ hqU
+    have hqth : e q ∈ cthickening T.δ (segment ℝ za zb) := by
+      obtain ⟨z', hz', hzq⟩ := hqK
+      have hz't : z' ∈ e.target :=
+        𝔇.closedBall_subset_target j₀ (Metric.ball_subset_closedBall (htube_ball hz'))
+      have heq : e q = z' := by
+        rw [← hzq]
+        exact e.right_inv hz't
+      rwa [heq]
+    have hqseg : e q ∈ segment ℝ za zb := by
+      by_contra hqs
+      exact hTavoid (e q) (Finset.mem_image_of_mem _ hqA) hqs hqth
+    have hqea : e q ≠ za := fun h => hqa (e.injOn hqsrc hasrc h)
+    constructor
+    · -- the read is the Möbius ratio of the holomorphic transition
+      have hτa : AnalyticAt ℂ ((chartAt ℂ (𝔇.center j₀)) ∘ (chartAt ℂ q).symm)
+          ((chartAt ℂ q) q) :=
+        analyticAt_atlasTransition (chart_mem_atlas ℂ q) (chart_mem_atlas ℂ (𝔇.center j₀))
+          (mem_chart_source ℂ q) (mem_chartSource_of_mem_U 𝔇 hqU)
+      have hτq : ((chartAt ℂ (𝔇.center j₀)) ∘ (chartAt ℂ q).symm) ((chartAt ℂ q) q) = e q := by
+        show (chartAt ℂ (𝔇.center j₀)) ((chartAt ℂ q).symm ((chartAt ℂ q) q)) = e q
+        rw [hsymmq]
+        rfl
+      have hread_an : AnalyticAt ℂ
+          (fun ζ => (((chartAt ℂ (𝔇.center j₀)) ∘ (chartAt ℂ q).symm) ζ - zb)
+            / (((chartAt ℂ (𝔇.center j₀)) ∘ (chartAt ℂ q).symm) ζ - za)) ((chartAt ℂ q) q) :=
+        (hτa.sub analyticAt_const).div (hτa.sub analyticAt_const)
+          (by rw [hτq]; exact sub_ne_zero.mpr hqea)
+      refine hread_an.congr ?_
+      have hth2 : e q ∈ thickening (T.δ / 2) (segment ℝ za zb) :=
+        self_subset_thickening (by linarith [T.δ_pos]) _ hqseg
+      filter_upwards [hsymmcq.preimage_mem_nhds
+          (by rw [hsymmq]; exact (𝔇.U j₀).isOpen.mem_nhds hqU),
+        hτa.continuousAt.preimage_mem_nhds
+          (by rw [hτq]; exact isOpen_thickening.mem_nhds hth2)] with ζ hζU hζT
+      rw [hFU hζU, ← T.Ffun_eq_ratio hζT]
+      rfl
+    · -- `lift ψ ≡ 1` near the segment kills `∂̄(lift ψ)` at `q`
+      have hdb : dbarL ψl q = 0 :=
+        dbarL_apply_eq_zero_of_eventuallyEq_const ψl (hψone_ev hqU hqseg)
+      show σ₀ q = 0
+      rw [hσ₀, cSmulForm_apply, hdb]
+      module
+  · -- off the tube preimage: `F ≡ 1`, `lift ψ ≡ 0` near `q`
+    constructor
+    · have hev : (fun ζ => F ((chartAt (H := ℂ) q).symm ζ))
+          =ᶠ[𝓝 ((chartAt ℂ q) q)] fun _ => (1 : ℂ) := by
+        filter_upwards [hsymmcq.preimage_mem_nhds
+          (by rw [hsymmq]; exact hKcl.isOpen_compl.mem_nhds hqK)] with ζ hζ
+        exact hFone _ hζ
+      exact analyticAt_const.congr hev.symm
+    · have hψ0ev : ⇑ψl =ᶠ[𝓝 q] fun _ => (0 : ℂ) := by
+        filter_upwards [hKcl.isOpen_compl.mem_nhds hqK] with y hy
+        exact hψzero y hy
+      have hdb : dbarL ψl q = 0 := dbarL_apply_eq_zero_of_eventuallyEq_const ψl hψ0ev
+      show σ₀ q = 0
+      rw [hσ₀, cSmulForm_apply, hdb]
+      module
+
+/-- **E3, the per-arc constructor** (plain form, no avoidance set). -/
+theorem exists_arcWeakSolution {a b : X} (ha : a ∈ (𝔇.U j₀ : Set X))
+    (hb : b ∈ (𝔇.U j₀ : Set X)) (hab : a ≠ b) :
+    Nonempty (ArcWeakSolution 𝔇 (Finsupp.single b 1 - Finsupp.single a 1)) := by
+  obtain ⟨W, -⟩ := exists_arcWeakSolution_avoiding 𝔇 j₀ ∅ ha hb hab
+  exact ⟨W⟩
 
 end ArcLift
 
