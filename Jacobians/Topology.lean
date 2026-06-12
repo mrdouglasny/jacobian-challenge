@@ -18,3 +18,4 @@ import Jacobians.Topology.CoverGeneration
 import Jacobians.Topology.CellLassoPower
 import Jacobians.Topology.HalfPlaneHomeo
 import Jacobians.Topology.PuncturedPlaneGeneration
+import Jacobians.Topology.SpokeAlgebra

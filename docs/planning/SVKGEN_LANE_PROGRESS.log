@@ -77,3 +77,21 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   winding pin + integer-unit algebra force any admissible system's lasso
   exponent to ±1, hence plain closure = top, NO winding computation needed.
   Standard-3. Remaining: the binary-split induction step (the last rung).
+
+## 2026-06-12 TOPO lane (takeover, P8 queue) — G3/G4 induction session
+
+- ARCHITECTURE DECISION (continuing route-doc option (b) + its own G4
+  "strengthen the induction over ALL basepoints/spokes" note): run the
+  binary-split induction in ABSTRACT-SUBGROUP MEMBERSHIP FORM (the G1
+  house pattern) with spoke-conjugated generators. All transports
+  (side-homeo, basepoint, rotation) become `Subgroup.comap` along pi1
+  homs — no normalClosure-mapping lemmas, and the meridian-conjugacy
+  "mountain" (4th-pass filling kernel) is NOT needed for the concrete
+  headline: generation by spoked small circles. The 2D telescope remains
+  only for the arbitrary-PuncturedCellSystem statement (non-blocking,
+  Mathlib-grade generality).
+- SpokeAlgebra.lean LANDED: spokedClass + complete algebra (transport
+  eval, composition law for fundamentalGroupMulEquivOfPath, refl law,
+  spoke-congruence, quotient assoc/cancel, composite-spoke peeling,
+  naturality under maps). Kernel standard-3 on all 9 decls. Umbrella
+  wired (Edit tool, grep-verified).
