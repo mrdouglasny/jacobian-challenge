@@ -1,6 +1,6 @@
 /-
 `AX_AbelTheorem`: Abel's theorem on the kernel of the Abel-Jacobi
-map on divisors.
+map on divisors — **now a THEOREM** (flipped 2026-06-12).
 
 **Statement (Lean, refined 2026-04-23; degree-0 restriction added
 2026-06-05).** There exists a ℤ-linear
@@ -22,6 +22,30 @@ de-opaqued to `range divHom`, which made the bare-kernel form a latent
 inconsistency.) All consumers feed only degree-0 divisors (differences
 `(Q₁) − (Q₂)`), so the restriction loses nothing.
 
+## Status after the 2026-06-12 split-flip
+
+`AX_AbelTheorem` is now `le_antisymm` over:
+
+* **⊆ (`ker ⊓ ker ≤ Principal`) — PROVEN.**
+  `Jacobians.Bridge.abel_subset`: the A-block plumbing
+  (`AbelPlumbing.lean`, PR #211) + the unconditional Forster §20
+  weak-solution engine (`exists_meromorphic_of_zeroPeriodChain'`,
+  E-block, port-side) + the E6 adapter
+  (`Jacobians/Bridge/AbelEngineAdapter.lean`). Kernel closure:
+  standard 3 + `AX_PeriodCycleBasis` (the Jacobian-layer pin).
+* **⊇, degree side (`Principal ≤ ker deg`) — PROVEN.**
+  `principalDivisors_le_deg_ker` below, from the degree theorem
+  `deg_divisor_eq_zero` (`Cohomology/DegreeTheorem.lean`).
+* **⊇, Abel–Jacobi side (`Principal ≤ ker abelJacobiDiv`) — the
+  strictly-smaller REMAINDER AXIOM `AX_AbelSupset` below.** Its
+  discharge route is the Liouville / symmetric-product argument
+  (`docs/planning/ABEL_SUPSET_LIOUVILLE_ROUTE.md`, ~800–1200 LOC,
+  no residue theorem / no Stokes).
+
+`abelJacobiDiv` itself moved to `Jacobians/Axioms/AbelJacobiDivDef.lean`
+(base-file split) so the proof chain can be imported here without an
+import cycle.
+
 ## Consequences
 
 * For `g > 0`, `ofCurveImpl X P : X → Jacobian X` is injective. This
@@ -36,29 +60,22 @@ inconsistency.) All consumers feed only degree-0 divisors (differences
   — the concrete form of the **Jacobian variety as the degree-0
   Picard group** `Pic⁰(X)`.
 
-## Why axiomatized
-
-Route 1 (Riemann theta divisor): gradients of theta functions + Riemann's
-theorem on theta zeros. Needs `RiemannTheta` (we have a scaffold in
-`Jacobians/AbelianVariety/Theta.lean`) + multivariable complex analysis.
-
-Route 2 (Forster-style residue argument): meromorphic differential
-residue calculus on compact Riemann surfaces. Needs meromorphic
-function theory + residues + Stokes.
-
-Either route is a substantial independent project.
-
 ## History
 
 - 2026-04-23 (A6 in completion plan): promoted from doc-only using the
   `Divisor / PrincipalDivisors / ofCurveImpl` layer.
+- 2026-06-12: split-flip. ⊆ proven via the Forster §20 engine + E6
+  adapter; ⊇ split into the proven degree half and the remainder
+  axiom `AX_AbelSupset`.
 
 See `docs/formalization-plan.md` §7, discharge priority #10;
 `docs/completion-plan.md` workstream A6.
-Reference: Mumford Vol I §II.3.3–II.3.5; Forster Ch. III.
+Reference: Mumford Vol I §II.3.3–II.3.5; Forster Ch. III (§§20–21).
 -/
-import Jacobians.Axioms.AbelJacobiMap
+import Jacobians.Axioms.AbelJacobiDivDef
 import Jacobians.RiemannSurface.MeromorphicFunctionField
+import Jacobians.RiemannSurface.Cohomology.DegreeTheorem
+import Jacobians.Bridge.AbelEngineAdapter
 
 namespace Jacobians.Axioms
 
@@ -66,20 +83,64 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians Jacobians.RiemannSurface
 
-/-- The Abel-Jacobi map extended linearly from
-points to divisors. On a formal combination `∑ n_P · P`, evaluates to
-`∑ n_P · ofCurveImpl P₀ P - (∑ n_P) · ofCurveImpl P₀ P₀`; basepoint
-`P₀` is chosen via `Classical.arbitrary`. -/
-noncomputable def abelJacobiDiv (X : Type u) [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X →+ Jacobian X :=
-  FreeAbelianGroup.lift (fun P => ofCurveImpl X (Classical.arbitrary X) P)
+/-- **Axiom (Abel ⊇, Abel–Jacobi side).** Every principal divisor lies in
+the kernel of the Abel-Jacobi map on divisors: for a nonzero global
+meromorphic function `f`, `AJ(div f) = 0` in `Jacobian X = ℂ^g/Λ`.
 
-/-- **Axiom (Abel's theorem).** The kernel of the Abel-Jacobi map on
-divisors is exactly the subgroup of principal divisors. -/
-axiom AX_AbelTheorem {X : Type u} [TopologicalSpace X] [T2Space X]
+    Reference: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.7
+    (Abel's theorem, the "only if" direction); Mumford, *Tata Lectures on
+    Theta* I, §II.3.3–II.3.5; Griffiths–Harris Ch. 2 §2.
+    Strategy: the Liouville / symmetric-product route
+    (`docs/planning/ABEL_SUPSET_LIOUVILLE_ROUTE.md`): for `f : X → ℙ¹`
+    with `div f = D`, the fiber Abel-Jacobi map `Φ(y) = AJ(f⁻¹(y))` is
+    well-defined (`weightedFiberConservation`), holomorphic off the branch
+    locus (implicit function theorem), extends across it (symmetric sums
+    of integrals of HOLOMORPHIC forms stay bounded ⇒ removable
+    singularity — no residue theorem needed), and is constant by
+    Liouville on the compact simply-connected `ℙ¹`; then
+    `AJ(zeros) = Φ(0) = Φ(∞) = AJ(poles)`.
+
+This is the strictly-smaller remainder of the former full
+`AX_AbelTheorem` axiom after the 2026-06-12 split-flip (the ⊆ direction
+and the degree half of ⊇ are now theorems). It is implied by the
+previously Class-1-vetted full statement, so satisfiability/strength
+vetting is inherited; tracked for discharge on the Liouville route. -/
+axiom AX_AbelSupset {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    (abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker = PrincipalDivisors X
+    PrincipalDivisors X ≤ (abelJacobiDiv X).ker
+
+/-- **Principal divisors have degree zero** (subgroup form of the degree
+theorem `deg_divisor_eq_zero`): the degree half of Abel ⊇. -/
+theorem principalDivisors_le_deg_ker {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] :
+    PrincipalDivisors X ≤ (Divisor.deg X).ker := by
+  intro D hD
+  rw [PrincipalDivisors] at hD
+  rcases hD with ⟨f, hdiv⟩
+  have hdivisor : MeromorphicFunctionField.divisor f = D := by
+    have h := hdiv
+    rw [show MeromorphicFunctionField.divHom f =
+        Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) from rfl] at h
+    exact Multiplicative.ofAdd.injective h
+  show Divisor.deg X D = 0
+  rw [← hdivisor]
+  exact deg_divisor_eq_zero f
+
+/-- **Abel's theorem** (former axiom, now a theorem — 2026-06-12
+split-flip). The kernel of the Abel-Jacobi map on degree-zero divisors
+is exactly the subgroup of principal divisors. The ⊆ direction is the
+Forster §20 weak-solution engine through the E6 adapter
+(`Jacobians.Bridge.abel_subset`); the ⊇ direction is the proven degree
+theorem plus the remainder axiom `AX_AbelSupset`. The historical `AX_`
+name is kept so downstream consumers are untouched (Phase-C in-place
+conversion pattern). -/
+theorem AX_AbelTheorem {X : Type u} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] :
+    (abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker = PrincipalDivisors X :=
+  le_antisymm Jacobians.Bridge.abel_subset
+    (le_inf AX_AbelSupset principalDivisors_le_deg_ker)
 
 end Jacobians.Axioms

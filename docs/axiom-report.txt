@@ -10,7 +10,7 @@
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- Axioms.AX_AbelTheorem,
+ Axioms.AX_AbelSupset,
  Axioms.AX_PeriodCycleBasis]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]

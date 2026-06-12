@@ -1,0 +1,43 @@
+# ABEL FLIP — kernel verification log
+
+Date: 2026-06-12, branch feat/abel-flip (E6/flip lane).
+Flip commit: bd2fe0f (split-flip of AX_AbelTheorem).
+
+## What was verified
+
+`lake build` at the flip commit: GREEN, 8977 jobs, full root build.
+`lake env lean scripts/axiom_report.lean` regenerated; only delta vs the
+pre-flip golden file: `Jacobian.ofCurve_inj`'s closure swaps
+`Axioms.AX_AbelTheorem` -> `Axioms.AX_AbelSupset` (the strictly-smaller
+split remainder). Total kernel axiom count unchanged (13);
+challenge-critical count unchanged (2) — HONEST split count: the full
+flip would have been 12, the authorized split-flip keeps the remainder
+axiom `AX_AbelSupset` (Abel ⊇, Abel–Jacobi side, Liouville route).
+
+## #print axioms output (kernel, post-flip)
+
+'Jacobians.Axioms.AX_AbelTheorem' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.AX_AbelSupset,
+ Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobians.Axioms.principalDivisors_le_deg_ker' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Bridge.abel_subset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobians.Bridge.zeroPeriodChainSolvability_of_engine' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobians.Bridge.mem_principalDivisors_of_port_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Axioms.AX_ofCurve_inj' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.AX_AbelSupset,
+ Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobian.ofCurve_inj' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ Jacobians.Axioms.AX_AbelSupset,
+ Jacobians.Axioms.AX_PeriodCycleBasis]
