@@ -206,6 +206,73 @@ theorem exists_meromorphic_of_zeroPeriodChain (𝔇 : ChartDiskCover X) (c : Smo
     ∃ f : MeromorphicFunction X, MeromorphicFunction.div X f = c.boundary :=
   exists_meromorphic_of_logDbarDatum 𝔇 c W (c.period_eq_zero_of_spanning b hspan h0)
 
+/-! ## E3 groundwork — the slit-segment logarithm (planar layer)
+
+The geometric core of the Forster 20.5 one-disk weak solution `exp(ψ·log((z−b)/(z−a)))`:
+off the closed segment `[a, b]`, the Möbius ratio `(z−b)/(z−a)` avoids the closed negative
+real axis, so `Complex.log` composes holomorphically and exponentiates back to the ratio.
+(The cutoff `ψ`, the gluing across the open segment, and the resulting `LogDbarDatum`
+constructor are the rest of rung E3.) -/
+
+section SlitSegment
+
+/-- A real segment in `ℂ` is compact (image of `[0,1]` under the affine parametrization). -/
+theorem isCompact_segment (a b : ℂ) : IsCompact (segment ℝ a b) := by
+  rw [segment_eq_image ℝ a b]
+  exact isCompact_Icc.image (by fun_prop)
+
+/-- **Slit avoidance**: off the closed segment `[a, b]`, the ratio `(z−b)/(z−a)` lies in
+the slit plane `ℂ ∖ ℝ≤0`.  (If the ratio were a nonpositive real `t`, then
+`z = (−t·a + b)/(1−t)` would be a convex combination of `a` and `b`.) -/
+theorem ratio_mem_slitPlane_of_notMem_segment {a b z : ℂ} (hz : z ∉ segment ℝ a b) :
+    (z - b) / (z - a) ∈ Complex.slitPlane := by
+  have hza : z ≠ a := fun h => hz (h ▸ left_mem_segment ℝ a b)
+  by_contra hmem
+  rw [Complex.mem_slitPlane_iff] at hmem
+  push Not at hmem
+  obtain ⟨hre, him⟩ := hmem
+  set w : ℂ := (z - b) / (z - a) with hw
+  set t : ℝ := w.re with ht
+  have hwt : w = (t : ℂ) := Complex.ext rfl (by simpa using him)
+  have hzb' : z - b = (t : ℂ) * (z - a) := by
+    have h1 : z - b = w * (z - a) := (div_eq_iff (sub_ne_zero.mpr hza)).mp hw.symm
+    rw [h1, hwt]
+  have ht0 : t ≤ 0 := hre
+  have h1t : (0 : ℝ) < 1 - t := by linarith
+  have h1t' : ((1 : ℂ) - (t : ℂ)) ≠ 0 := by exact_mod_cast h1t.ne'
+  have key : ((1 : ℂ) - (t : ℂ)) * z = b - (t : ℂ) * a := by linear_combination hzb'
+  refine hz ⟨-t / (1 - t), 1 / (1 - t), div_nonneg (neg_nonneg.mpr ht0) h1t.le,
+    by positivity, by field_simp; ring, ?_⟩
+  rw [Complex.real_smul, Complex.real_smul]
+  push_cast
+  field_simp
+  linear_combination -key
+
+/-- The **slit-segment logarithm** `log((z−b)/(z−a))`: the single-valued branch off the
+segment `[a, b]` whose exponential is the Möbius ratio with zero at `b` and pole at `a`.
+Forster 20.5's `g`. -/
+noncomputable def slitLogRatio (a b z : ℂ) : ℂ :=
+  Complex.log ((z - b) / (z - a))
+
+/-- The slit-segment logarithm is `ℂ`-differentiable off the segment. -/
+theorem differentiableAt_slitLogRatio {a b z : ℂ} (hz : z ∉ segment ℝ a b) :
+    DifferentiableAt ℂ (slitLogRatio a b) z := by
+  have hza : z ≠ a := fun h => hz (h ▸ left_mem_segment ℝ a b)
+  have hdiv : DifferentiableAt ℂ (fun w => (w - b) / (w - a)) z :=
+    (differentiableAt_id.sub_const b).div (differentiableAt_id.sub_const a)
+      (sub_ne_zero.mpr hza)
+  exact hdiv.clog (ratio_mem_slitPlane_of_notMem_segment hz)
+
+/-- Off the segment, `exp(slitLogRatio a b z) = (z−b)/(z−a)`: the weak solution really is
+the Möbius ratio wherever the cutoff is `1`. -/
+theorem exp_slitLogRatio {a b z : ℂ} (hz : z ∉ segment ℝ a b) :
+    Complex.exp (slitLogRatio a b z) = (z - b) / (z - a) := by
+  have hza : z ≠ a := fun h => hz (h ▸ left_mem_segment ℝ a b)
+  have hzb : z ≠ b := fun h => hz (h ▸ right_mem_segment ℝ a b)
+  exact Complex.exp_log (div_ne_zero (sub_ne_zero.mpr hzb) (sub_ne_zero.mpr hza))
+
+end SlitSegment
+
 end Jacobians.Dolbeault
 
 end

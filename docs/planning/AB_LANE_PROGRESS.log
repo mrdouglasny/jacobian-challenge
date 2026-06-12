@@ -154,3 +154,18 @@ exists_meromorphic_of_logDbarDatum, exists_meromorphic_of_zeroPeriodChain ALL st
 Port build: lake build KirovDolbeault green (8799 jobs).
 Open rungs: E3 (per-arc weak solution, H), E4 discharge (pairing identity, H),
 W1/W2 (local planar analysis, M), E6 adapter (M/H).
+
+--- 2026-06-12 (same session, +1 checkpoint): E3 groundwork — slit-segment log layer ---
+AbelSubsetEngine.lean gains the planar geometric core of the Forster 20.5 one-disk weak
+solution exp(ψ·log((z−b)/(z−a))):
+* ratio_mem_slitPlane_of_notMem_segment — z ∉ [a,b] ⟹ (z−b)/(z−a) ∈ ℂ∖ℝ≤0 (a nonpositive
+  real value t forces z = (−t·a+b)/(1−t) ∈ segment; linear_combination algebra).
+* slitLogRatio a b z := log((z−b)/(z−a)); differentiableAt_slitLogRatio (DifferentiableAt.clog
+  off the segment); exp_slitLogRatio (exp∘log = ratio, zero at b / pole at a shape).
+* isCompact_segment (ℂ; via segment_eq_image).
+All four closures standard-3. W1's planar Wirtinger core located ALREADY IN-TREE:
+differentiableOn_complex_of_dbar_eq_zero_local (CechFinitenessBallSolve.lean:933) — W1
+reduces to manifold plumbing + removable singularity at the boundary points.
+Remaining E3: smooth cutoff ψ ≡ 1 near segment, supp ⊂ disk (Mathlib bump functions);
+glue exp(ψ·slitLogRatio) with the Möbius ratio across the open segment; arc chart-disk
+subdivision; fold to LogDbarDatum (incl. E4 field discharge).
