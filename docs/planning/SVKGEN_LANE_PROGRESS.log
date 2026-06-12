@@ -17,3 +17,18 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   - Kernel: both standard-3. Umbrella wired (Jacobians/Topology.lean).
 - Next (G2): cell computation — spoke-conjugated loop in a once-punctured
   cell is a lasso power, via pi1PuncturedPlaneIntAt + pi1MulEquivOfHomeomorph.
+
+## 2026-06-12 session 1 (cont.)
+
+- PR #212 (G1) opened; CI green (22m55s).
+- G2 DONE: `Jacobians/Topology/CellLassoPower.lean` —
+  `fromPath_eq_cellLasso_zpow`: a loop staying inside a cell homeomorphic to
+  a once-punctured plane is, in pi1 of the ambient space, an integer power of
+  the cell lasso (the inclusion image of the phi-pullback of circleAround).
+  Assembly: pi1PuncturedPlaneIntAt + generator pin + pi1MulEquivOfHomeomorph
+  + mapOfEq functoriality; helpers pathCorestrict / inclusionCM /
+  mapOfEq_inclusionCM_pathCorestrict. Kernel: standard-3. Umbrella wired.
+- Pushed to the same branch (PR #212 becomes G1+G2; un-reviewed, so one
+  SVKGEN PR keeps review surface in one place).
+- Next (G3/G4): half-plane homeo toolkit + separating-line induction in the
+  normal-closure form.
