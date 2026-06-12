@@ -49,6 +49,8 @@ import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.HomotopyInvarianceDevelop
 import Jacobians.RiemannSurface.LoopIntegralHom
 import Jacobians.RiemannSurface.LoopIntegral
+import Jacobians.RiemannSurface.BilinearRelations
+import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.GenusZeroBackward
 import Jacobians.RiemannSurface.PeriodNondegeneracy

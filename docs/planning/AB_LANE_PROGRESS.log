@@ -1,0 +1,72 @@
+# AB-lane progress log — Abel ⊆ campaign (AX_AbelTheorem remaining direction)
+
+Lane: feat/abel-subset (worktree agent-a87c07235d42e59e2, AB account; relaunch
+after quota-killed first attempt). Local commits only; no push.
+
+Scope: open the ⊆ campaign — degree-0 divisor with vanishing Abel-Jacobi image
+is principal. ⊇ (principal ⟹ AJ = 0) already proven via Liouville. Port-side
+engine work is reserved to this lane; if a parallel account lands a fallback
+docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
+
+## 2026-06-11 session start
+
+- Branch reset to origin/main @ 67af290 (post-keystone-flip: Serre duality is
+  a THEOREM via exists_serreDualityData_cover).
+- Warm build started; reading pass: AbelTheorem.lean (exact AX statement),
+  KIROV_ROUTE_IDEAS.md item 1 (Forster §20 route), KeystonePackaging /
+  TailSerre / DolbeaultLadder / FineResidue stack, ⊇ Liouville interfaces.
+- Goal 1: docs/planning/AB_ROUTE.md — route verdict
+  (∂̄-solvability-from-SerreDualityData vs third-kind-exponential) +
+  rung-by-rung decomposition. Goal 2: first proven bricks.
+
+## 2026-06-11 milestone 1 — route doc + S-block landed
+
+- AB_ROUTE.md committed (9d3895c): VERDICT = Route A (Forster §20 ∂̄-engine,
+  solvability criterion derived from SerreDualityData; Route B third-kind kept
+  as reserve — still gated on AX_RiemannBilinear reciprocity + cycle basis).
+- S-block PROVEN in port file KirovDolbeault/Dolbeault/AbelSubsetCriterion.lean
+  (aggregator-wired, `lake build KirovDolbeault` green):
+  * S1 exists_serreDualityData_chartDiskCover — keystone with the ChartDiskCover
+    kept in the type (both genus legs already exhibit one).
+  * S2 h1Dim_zero_eq_kirovGenus_chartDiskCover — h¹(𝒪)=g at that cover (E3a).
+  * S3 finiteDimensional_dolbeaultH01 + finrank_real_dolbeaultH01_eq_two_mul_kirovGenus
+    — dim_ℝ H^{0,1}_∂̄ = 2g, intrinsic (comparison transport).
+  * S4 mem_dbarImage_of_periodFunctional — abstract Forster-19.10 criterion:
+    Λ kills im ∂̄ + Λ surjective ⟹ Λσ=0 → σ ∂̄-exact (dim count).
+  Kernel verification: all six `#print axioms` = [propext, Classical.choice,
+  Quot.sound]; NO sorryAx, NO custom axioms, NO AX_AbelTheorem. S4's two
+  hypotheses are exactly the P4 (Stokes kill) and P5 (Gram surjectivity)
+  obligations of the route — named hypotheses, not axioms.
+- Gotchas hit: LinearEquiv.finiteDimensional direction (needed .symm — instance
+  search otherwise wanders into Module ℂ ↥(OneFormsZeroOne X) and times out);
+  S4 needed `set_option maxHeartbeats 1000000` (respectTransparency-false whnf
+  cost, same as the comparison files); set_option must precede the docstring.
+
+## 2026-06-11 milestone 2 — TK-block landed (third-kind from RR)
+
+- KirovDolbeault/Dolbeault/AbelSubsetThirdKind.lean (aggregator-wired, build green):
+  * TK0 exists_canonical_serreData_of_kirovGenus_pos — keystone g>0 leg re-run
+    KEEPING the canonical frame: SerreDualityData with data.K = div ω₀ for an
+    exhibited holomorphic ω₀ ≠ 0. This solves the K-coherence gap: the RR
+    theorem's ∃K and the §17.4 iso's div ω₀ otherwise never share their K.
+  * TK0b exists_riemannRoch_at_form_divisor — RR identity AND deg K = 2g−2 at
+    that form divisor (inline ladder composition + deg_canonical).
+  * TK1 exists_thirdKind_pole — g>0, P≠Q ⟹ ∃ α ∈ Ω((P)+(Q)) with a genuine
+    simple pole at P or Q: omegaDim((P)+(Q)) = lDim((P)+(Q)+K) = g+1 > g =
+    omegaDim 0; pole-freeness would inject the junk-free quotient of Ω((P)+(Q))
+    into Ω(0)'s (inclusion + liftQ + ker_liftQ_eq_bot +
+    finrank_le_finrank_of_injective), forcing g+1 ≤ g.
+  Kernel: all three #print axioms = standard 3; no sorryAx, no custom axioms.
+- TK2 (both poles + opposite residues via the residue atom at F = α/ω₀) left
+  open — next TK bite; P-block (pairing) is the main-line next.
+
+## 2026-06-11 session end
+
+- Root `lake build` green (CI-equivalent; only the two pre-existing
+  Extensions/AbelJacobi.lean sorries, unchanged from main).
+- Commits this session (local only, not pushed): 7e6376a (log), 9d3895c
+  (AB_ROUTE.md), 1522f58 (S-block), 8e3ccc1 (TK-block).
+- Next bites: TK2 (opposite residues via the residue atom at F = α/ω₀);
+  main line P1 (zeroOneCoeff chart read of OneFormsZeroOne with the conj φ′
+  law) → P2/P3 (pairing through FineResidue.resIntegral) → P4 Stokes kill →
+  P5 Gram surjectivity → P6 assembled criterion; then the §20 engine E-block.

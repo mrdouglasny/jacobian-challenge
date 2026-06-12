@@ -153,3 +153,7 @@ An agent-assisted community project. Contributions span code, vendored proofs, a
 - [`docs/dependency-trace.md`](docs/dependency-trace.md) — transitive axiom audit per foundation definition.
 - [`docs/planning/`](docs/planning/) — per-axiom discharge plans (Gemini-vetted) + the dependency DAG.
 - [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md) — what we took from the sibling repos, considered, and rejected.
+
+---
+
+**Comparator-verified.** `Jacobians.Layer3.riemannRochL3` at commit `67af290` passes the [Lean FRO comparator](https://github.com/leanprover/comparator) (kernel replay via `lean4export` v4.30.0; axiom whitelist `propext`, `Quot.sound`, `Classical.choice`): "Your solution is okay!".
