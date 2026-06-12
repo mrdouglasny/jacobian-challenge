@@ -14,3 +14,66 @@ Scope (issue #206, accepted proposal):
    as axiom-downstream (circularity finding).
 4. Record landing; TRANK_SCOPING.md lives on PR #205 (unmerged) — record
    here + coordinate at merge.
+
+## 2026-06-11 — re-plumb LANDED (commit 5f61dce)
+
+### What landed
+
+1. **Image route (TR-DISC), `PeriodDiscreteness.lean`.** New section
+   `ImageRoute`: from the single residual
+   TR-DISC := `[DiscreteTopology (loopPeriodLattice x₀ b)]`
+   (image lattice L = span ℤ (range (loopPeriodVec x₀ b)) ⊆ ℂ^g):
+   - `finrank_loopPeriodLattice` : `finrank ℤ L = 2 * genus X`
+     (via `isZLattice_loopPeriodLattice` [B-3 spanning] + `ZLattice.rank ℝ`
+     + `finrank_real_genus_coords`);
+   - `exists_loopPeriodLattice_basis` :
+     `Nonempty (Basis (Fin (2g)) ℤ L)` (via `Module.finBasisOfFinrankEq`;
+     `Module.Free ℤ L` / `Module.Finite ℤ L` are automatic Mathlib
+     instances `instModuleFree/Finite_of_discrete_submodule` from
+     TR-DISC alone).
+   - **BOTH H1-module hypotheses drop**: `Module.Free ℤ (H1)` (TR-TORS)
+     AND `Module.Finite ℤ (H1)` (T-FG) are absent from the image route —
+     ZLattice needs only discreteness + the axiom-free B-3 ℝ-spanning
+     (T-SPAN′ = `span_real_loopPeriodLattice_eq_top`, already proven).
+
+2. **Old statements: KEPT, none replaced.** The H1 route
+   (`HomologyGeneration.lean`, #198) is the alternative FEED: T-FG +
+   T-RANK ⟹ `PeriodGeneratingLoops` ⟹ TR-DISC
+   (`discreteTopology_loopPeriodLattice_of_H1`). `exists_periodGeneratingLoops`'
+   only consumers are in-file (grep-verified); everything still compiles
+   unchanged. Route relationship documented in both module docstrings.
+
+3. **Circularity annotation, `Layer3/PeriodSpan.lean`.**
+   `span_range_loopIntegralToH1_eq_top` (and the module docstring) now
+   carry the issue #206 warning: `loopIntegralToH1` is defined via
+   `Classical.choice (AX_PeriodCycleBasis x₀)`, so citing it in a
+   discharge chain is circular; discharge-grade spanning =
+   `span_loopPeriodFunctional_eq_top` / `span_real_loopPeriodLattice_eq_top`
+   / `loopDevValH1Hom`.
+
+### Kernel closures (lake build oleans + #print axioms, this commit)
+
+  finrank_loopPeriodLattice            [propext, Classical.choice, Quot.sound]
+  exists_loopPeriodLattice_basis       [propext, Classical.choice, Quot.sound]
+  isZLattice_loopPeriodLattice         [propext, Classical.choice, Quot.sound]
+  span_real_loopPeriodLattice_eq_top   [propext, Classical.choice, Quot.sound]
+  discreteTopology_loopPeriodLattice_of_H1  [propext, Classical.choice, Quot.sound]
+
+No AX_PeriodCycleBasis, no project axioms — standard-3 throughout.
+
+### Residual stack for AX_PeriodCycleBasis after the re-plumb (B-4/B-5 side)
+
+  T-SPAN′  (B-3 ℝ-spanning over canonicalArcIntegral)  — PROVEN, axiom-free
+  TR-DISC  (DiscreteTopology (loopPeriodLattice x₀ b)) — the ONE open residual
+           on the image route; alternative feeds:
+           (i)  H1 route: T-FG + [Module.Free ℤ H1] + T-RANK  (#198, kept)
+           (ii) de Rham/Hodge route (a) of TRANK_SCOPING.md §2 (unfunded)
+
+### Coordination note
+
+`docs/planning/TRANK_SCOPING.md` lives on PR #205 (still OPEN at session
+end), so its §3/§4 "landed" stamp could not be edited from this branch
+without an add/add conflict. When #205 merges: append to its §4 that
+recommendation 1 (re-plumb) + recommendation 2 (TR-0/TR-CNT over named
+hypotheses, realized as the ImageRoute section) LANDED — pointer: this log
++ commit 5f61dce. Issue #206 comment is the orchestrator's.
