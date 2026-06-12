@@ -108,3 +108,32 @@ level of preparation.
 
 Status: G1 ✓ (CoverGeneration), G2 ✓ (CellLassoPower), toolkit ✓
 (halfPlaneHomeo + complCongr).  Next session: implement (b).
+
+## G3 cell-shape resolution (2026-06-12, third pass)
+
+Cell-shape analysis for the induction, recorded so the implementing session
+starts decided:
+
+* **Strip cells fail G1's hypotheses**: pairwise intersections of disjoint
+  strips are empty and cannot all contain the basepoint.
+* **T-shaped widenings (strip ∪ low corridor) are star-shaped, not convex**;
+  star-shaped-open ≃ₜ ℂ is classically true but NOT in Mathlib at pin — a
+  dead end for G2's homeo presentation.
+* **Decision: binary-split recursion over `fromPath_mem_of_two_open`** (the
+  delivered two-open corollary), never the n-open form: split at a
+  puncture-free vertical strip, `U`/`V` = half-planes minus their punctures
+  (path-connected, once the strip holds the basepoint — transport by
+  conjugation, `PunctureLoops.fundamentalGroupMulEquivOfPath_fromPath`),
+  `U ∩ V` = the convex strip.  Each side transports to a smaller
+  configuration through `halfPlaneHomeo` + `complCongr` — both delivered.
+  The package P(T) is proved by strong induction on `T.card` with the two
+  clauses of the second-pass notes; meridian conjugacy (clause (i)) at the
+  glue step uses a common disk-cell refinement near the puncture — the one
+  remaining piece of new construction (a disk ≃ₜ plane homeo with center
+  transport, same OrderIso pattern as `halfPlaneHomeo` radially, OR observe
+  that the binary recursion only ever compares a side-cell lasso with the
+  global cell lasso around the SAME puncture inside the SAME half-plane
+  side, where the side IS a common once-punctured cell — check this first:
+  if every comparison in the recursion is intra-side, clause (i) reduces to
+  the n = 1 anchor `closure_circleAround_eq_top` + G2 uniqueness inside one
+  cell, and no disk toolkit is needed.)
