@@ -40,6 +40,17 @@ Why `n` generators do not suffice for discreteness: a f.g. subgroup of
 `ℝ^N` with more than `N` generators can be dense (`ℤ + ℤ√2 ⊆ ℝ`), so the
 B-4 engine genuinely needs the `2g` count — that is exactly where T-RANK
 enters. See `docs/planning/H_LANE_PROGRESS.log`.
+
+**Route relationship (issue #206 re-plumb).** This file is the H1 FEED for
+the re-plumbed residual **TR-DISC** :=
+`DiscreteTopology (loopPeriodLattice x₀ b)` (`PeriodDiscreteness.lean`,
+image route): T-FG + T-RANK ⟹ `PeriodGeneratingLoops` ⟹ TR-DISC
+(`discreteTopology_loopPeriodLattice_of_H1`). The image route then derives
+basis/rank from TR-DISC alone (`finrank_loopPeriodLattice`,
+`exists_loopPeriodLattice_basis`) with no H1-module hypotheses — so any
+alternative source of TR-DISC (e.g. the de Rham/Hodge route (a) of
+`docs/planning/TRANK_SCOPING.md` §2) bypasses this file entirely. The two
+routes are alternative discharge paths for the same B-4/B-5 conclusions.
 -/
 import Jacobians.Layer3.PeriodLatticeDiscrete
 
@@ -360,7 +371,12 @@ theorem exists_periodGeneratingLoops (x₀ : X)
 
 /-- **B-4 discreteness from topology alone.** The Forster-model period
 lattice is discrete, given only the two named topological facts about
-`H1 X x₀` — no chosen cycle basis, no R1/R2, no axiom. -/
+`H1 X x₀` — no chosen cycle basis, no R1/R2, no axiom.
+
+This is exactly the H1-route discharge of **TR-DISC** (the image-lattice
+residual of `PeriodDiscreteness.lean`'s image route, issue #206): feed its
+conclusion to `finrank_loopPeriodLattice` / `exists_loopPeriodLattice_basis`
+and the H1-module hypotheses are no longer needed downstream. -/
 theorem discreteTopology_loopPeriodLattice_of_H1 (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
     [Module.Finite ℤ (H1 X x₀)] [Module.Free ℤ (H1 X x₀)]

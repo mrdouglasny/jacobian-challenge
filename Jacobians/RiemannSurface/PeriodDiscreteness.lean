@@ -27,9 +27,18 @@ the coordinate period vectors of **all** closed analytic loops based at
   the B-3 spanning, not the named hypothesis), a `Fin (2g)`-indexed ℤ-basis
   of the lattice (`PeriodGeneratingLoops.exists_basis`), and
   `PeriodGeneratingLoops.finrank_eq` (`finrank ℤ = 2g`).
+* **The image route (TR-DISC, issue #206 re-plumb).** The B-4 residual
+  restated over the image lattice alone: from the single hypothesis
+  `[DiscreteTopology (loopPeriodLattice x₀ b)]` (named **TR-DISC**),
+  Mathlib's ZLattice theory yields `Module.Free`/`Module.Finite` of the
+  lattice (instances), `finrank_loopPeriodLattice` (`finrank ℤ = 2g`) and
+  `exists_loopPeriodLattice_basis` — with **no** hypothesis on
+  `H1 X x₀` as a module (`Module.Free ℤ (H1 X x₀)` and
+  `Module.Finite ℤ (H1 X x₀)` both drop on this route).
 
 Design: `docs/planning/B_LANE_PROGRESS.log` (2026-06-11 session);
-`docs/planning/KIROV_ROUTE_IDEAS.md` §5 (B-1…B-5 ladder).
+`docs/planning/KIROV_ROUTE_IDEAS.md` §5 (B-1…B-5 ladder); issue #206 +
+`docs/planning/TRANK_SCOPING.md` §3 (image re-plumb, PR #205).
 -/
 import Mathlib.Algebra.Module.ZLattice.Basic
 import Mathlib.LinearAlgebra.Dimension.OrzechProperty
@@ -239,6 +248,49 @@ theorem isZLattice_loopPeriodLattice (x₀ : X)
     [DiscreteTopology (loopPeriodLattice x₀ b)] :
     IsZLattice ℝ (loopPeriodLattice x₀ b) :=
   ⟨span_real_loopPeriodLattice_eq_top x₀ b⟩
+
+/-! ## The image route: B-5 packaging from TR-DISC alone (issue #206)
+
+**TR-DISC** — the re-plumbed B-4 residual — is the single hypothesis
+`DiscreteTopology (loopPeriodLattice x₀ b)`, stated over the IMAGE lattice
+in `ℂ^g`, not over `H1 X x₀`. Combined with the axiom-free B-3 spanning
+(`span_real_loopPeriodLattice_eq_top`, the T-SPAN′ rung), Mathlib's
+ZLattice machinery produces everything the consumers need:
+
+* `Module.Finite ℤ` / `Module.Free ℤ` of the lattice are automatic
+  Mathlib instances (`instModuleFinite_of_discrete_submodule` /
+  `instModuleFree_of_discrete_submodule`) from TR-DISC alone;
+* `finrank_loopPeriodLattice` — ℤ-rank exactly `2g` (`ZLattice.rank`);
+* `exists_loopPeriodLattice_basis` — a `Fin (2g)`-indexed ℤ-basis.
+
+Neither `Module.Free ℤ (H1 X x₀)` (TR-TORS, classification-grade) nor
+`Module.Finite ℤ (H1 X x₀)` (T-FG) appears: both H1-module hypotheses
+drop on this route. The H1 route (`HomologyGeneration.lean`, PR #198)
+remains as an alternative FEED — its T-FG + T-RANK hypotheses *produce*
+TR-DISC via `PeriodGeneratingLoops.discreteTopology`; they are not needed
+to *consume* it. See `docs/planning/TRANK_SCOPING.md` §3. -/
+
+section ImageRoute
+
+variable (x₀ : X) (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+  [DiscreteTopology (loopPeriodLattice x₀ b)]
+
+/-- **B-5 rank from TR-DISC alone (image route).** A discrete subgroup of
+`ℂ^g` that ℝ-spans it (B-3, axiom-free) has ℤ-rank exactly
+`finrank ℝ (ℂ^g) = 2g` — no hypothesis on `H1 X x₀`. -/
+theorem finrank_loopPeriodLattice :
+    Module.finrank ℤ (loopPeriodLattice x₀ b) = 2 * genus X := by
+  haveI := isZLattice_loopPeriodLattice x₀ b
+  rw [ZLattice.rank ℝ (loopPeriodLattice x₀ b), finrank_real_genus_coords]
+
+/-- **B-5 basis from TR-DISC alone (image route).** A `Fin (2g)`-indexed
+ℤ-basis of the period lattice, from discreteness + the axiom-free B-3
+spanning — no `Module.Free ℤ (H1 X x₀)`, no `Module.Finite ℤ (H1 X x₀)`. -/
+theorem exists_loopPeriodLattice_basis :
+    Nonempty (Module.Basis (Fin (2 * genus X)) ℤ (loopPeriodLattice x₀ b)) :=
+  ⟨Module.finBasisOfFinrankEq ℤ _ (finrank_loopPeriodLattice x₀ b)⟩
+
+end ImageRoute
 
 end
 
