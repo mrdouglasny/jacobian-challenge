@@ -77,6 +77,10 @@ import KirovDolbeault.Dolbeault.AbelSubsetCriterion
 import KirovDolbeault.Dolbeault.AbelSubsetThirdKind
 import KirovDolbeault.Dolbeault.AbelSubsetPairing
 import KirovDolbeault.Dolbeault.AbelSubsetEngine
+import KirovDolbeault.Dolbeault.SlitLogIntegral
+import KirovDolbeault.Dolbeault.SegmentPeriod
+import KirovDolbeault.Dolbeault.AbelSubsetEngineLocal
+import KirovDolbeault.Dolbeault.AbelSubsetEngineArc
 import KirovDolbeault.InteriorEngine
 
 /-
