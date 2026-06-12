@@ -1,0 +1,44 @@
+# G0F lane — genus-0 forward + full AX_genus_eq_zero_iff_homeo flip
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 2, Package 3)
+
+Append-only progress log. Branch: `feat/genus0-forward`, based on main @ c5cced8
+(carries the three feat/s2-topology commits of PR #205, rebased).
+
+## 2026-06-11 session 1
+
+- Inventory (steps a–d of the handover): the port transport for (a) turned out
+  UNNECESSARY — the main tree's own keystone-backed RR API suffices:
+  `riemannRoch` (`Cohomology/RiemannRochAPI.lean:71`) kernel-checked
+  **standard-3** before starting, as did `deg_divisor_eq_zero`,
+  `degreeOne_genus_zero`, `ProjectiveLine.stereographic`,
+  `genus_projectiveLine_eq_zero`. No new bridges, no orderW/orderAtMF crossing.
+- Step (a) DONE: new `Jacobians/RiemannSurface/GenusZeroForward.lean` —
+  `h0_point_eq_two_of_genus_zero` (RR at `(p)`, dual term dies by
+  `deg(K−(p)) = −3 < 0`), `exists_mem_point_notMem_zero` (h⁰ comparison, no
+  finrank-mono needed), `mem_riemannRochSpace_zero_of_divisorOf_eq_zero`,
+  `exists_degreeOne_of_genus_zero` (orders ±1 from divisor coefficients;
+  nonconstancy via `toP1_eq_zero_iff`/`toP1_eq_infty_iff` at the zero/pole).
+  Re-used `divisorOf_eq_pointSub_of_mem_point` (de-privated in
+  `RiemannRochAPI.lean`, statement unchanged).
+- Step (b) DONE: `DegreeOneGenusZero.lean` refactored — new
+  `degreeOne_equiv_projectiveLine` exposes `e : X ≃ ProjectiveLine` with
+  ContMDiff both ways; `degreeOne_genus_zero` is now a corollary. No proof
+  content changed.
+- Step (c) DONE: `nonempty_homeo_sphere_of_genus_eq_zero` composes (a)+(b)
+  with `Equiv.toHomeomorphOfContinuousClosed` + `ProjectiveLine.stereographic`.
+- Kernel checks (all exactly [propext, Classical.choice, Quot.sound]):
+  - `Jacobians.RiemannSurface.nonempty_homeo_sphere_of_genus_eq_zero`
+  - `Jacobians.RiemannSurface.exists_degreeOne_of_genus_zero`
+  - `Jacobians.RiemannSurface.MeromorphicFunctionField.degreeOne_equiv_projectiveLine`
+- Step (d) THE FLIP: `Jacobians/Axioms/Uniformization0.lean` — `axiom` →
+  `theorem`, statement VERBATIM; forward = step (c), backward =
+  `genus_eq_zero_of_homeo_sphere_unconditional` (PR #205's Bridge file).
+  Kernel checks:
+  - `Jacobians.Axioms.AX_genus_eq_zero_iff_homeo` → standard-3
+  - challenge headline `genus_eq_zero_iff_homeo` → **standard-3**
+- Ledger reconciled in the same commit: AXIOM_AUDIT.md (header 18→17,
+  Class-1 count 10→9, axiom row → DISCHARGED, Recently-discharged entry,
+  verification block), README.md (17 active / 4 challenge-critical, cluster
+  row 4→3), docs/CHALLENGE_AXIOM_CLOSURE.md (5→4 critical, Cluster B row),
+  docs/axiom-report.txt regenerated.
+- Umbrella: `Jacobians/RiemannSurface.lean` + GenusZeroForward.

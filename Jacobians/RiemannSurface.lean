@@ -53,6 +53,7 @@ import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.ChartSegmentArc
 import Jacobians.RiemannSurface.GenusZeroBackward
+import Jacobians.RiemannSurface.GenusZeroForward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
 import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.RiemannSurface.HomologyGeneration

@@ -9,7 +9,11 @@ ChartedSpace, IsManifold, LieAddGroup, AddCommGroup). Reconciled 2026-06-11
 discharge + the PR #179 `AX_ofCurve_contMDiff` discharge, which dropped the
 challenge-critical count 7 → **6** + the PR #183 odd-atlas ∞-chart cluster
 discharge, −7 non-critical + the #30 `AX_pushforwardAmbient_preserves_lattice`
-discharge, which dropped the challenge-critical count 6 → **5**) against the
+discharge, which dropped the challenge-critical count 6 → **5** + the
+genus-0 uniformization flip (2026-06-11), which discharged
+`AX_genus_eq_zero_iff_homeo` — the challenge headline
+`genus_eq_zero_iff_homeo` now prints standard-3 — dropping the
+challenge-critical count 5 → **4**) against the
 21-axiom table.*
 
 > **STATUS NOTE — D1 merge + trace discharge (2026-06-10).** The challenge-critical
@@ -47,9 +51,9 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ---
 
-## What filling the 5 does — and does not — claim
+## What filling the 4 does — and does not — claim
 
-Discharging all 5 makes every Buzzard declaration print exactly
+Discharging all 4 makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -82,14 +86,14 @@ declarations. Four boundaries to keep the claim honest:
    `Classical.choice` path discrepancy is landed in the lattice via the
    cycle-basis `loops_to_basis` pin, so the condition transfers into
    `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis`
-   pin), where it belongs. Filling the 5 therefore still includes
+   pin), where it belongs. Filling the 4 therefore still includes
    settling X1, now inside the Cluster-A discharge.
 
-## The 5 challenge-critical axioms
+## The 4 challenge-critical axioms
 
 Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging all 5 gives a challenge closure over only
+obligations). Discharging all 4 gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
 ### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
@@ -114,13 +118,13 @@ in the merge. They remain in the build as Part-3 topological-anchoring debt
 discharged by a genuine dissection, re-tying the form to that dissection is the
 recorded joint obligation.
 
-### Cluster B — Two independent classical theorems (a third discharged, PR #179)
+### Cluster B — One remaining classical theorem (two discharged: PR #179, genus-0 flip)
 
 Each appears in exactly one Buzzard declaration and has its own proof path.
 
 | Axiom | Mathematical content | Discharge path |
 |---|---|---|
-| `AX_genus_eq_zero_iff_homeo` | `genus X = 0 ↔ X ≅ₜ S²` — uniformization for genus 0 | Forster §27. Wallace's GenusZero route (degree-1 cover → biholomorphism to ℙ¹) has the most Lean progress. The concrete `genus ℙ¹ = 0` is already proved axiom-free via Liouville. |
+| `AX_genus_eq_zero_iff_homeo` | ✅ **DISCHARGED 2026-06-11** (genus-0 uniformization flip) — now a theorem, statement verbatim; the Buzzard headline `genus_eq_zero_iff_homeo` prints standard-3 | Forward: keystone-backed RR pole extraction (`h⁰((p)) = 2` at `g = 0` → degree-one function → biholomorphism to ℙ¹ → stereographic S², `RiemannSurface/GenusZeroForward.lean`). Backward: S2-lane `π₁(S²) = 1` + Liouville developing map (`Bridge/SphereGenusZero.lean`). |
 | `AX_AbelTheorem` | Degree-0 kernel of `abelJacobiDiv` = `PrincipalDivisors` — Abel's theorem | Forster §21. The ⊇ direction (principal ⊆ ker) is underway via the Liouville route. The ⊆ direction (ker ⊆ principal, the Jacobi inversion step) is the hard half. |
 | `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — Abel–Jacobi smoothness is now a theorem (chart-line descent; standard-3 + `AX_PeriodCycleBasis` only) | **Transfer note:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. |
 

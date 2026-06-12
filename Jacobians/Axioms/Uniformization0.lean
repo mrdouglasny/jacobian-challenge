@@ -1,5 +1,6 @@
 /-
-`AX_genus_eq_zero_iff_homeo`: uniformization for genus 0.
+`AX_genus_eq_zero_iff_homeo`: uniformization for genus 0. **DISCHARGED** —
+theorem since 2026-06-11 (formerly an axiom).
 
 **Classical theorem.** A compact connected Riemann surface has genus 0
 iff it is homeomorphic (and in fact biholomorphic) to the Riemann
@@ -16,33 +17,30 @@ Buzzard's challenge asks for the biconditional in the `g = 0` case,
 phrased in terms of homeomorphism with
 `Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1`.
 
-**Why axiomatized.** The proof requires either:
-  1. **Riemann-Roch + Serre duality.** For `g = 0` a divisor of
-     degree 1 gives a degree-1 meromorphic function, hence a
-     biholomorphism `X ≃ ℂP¹`. Needs divisor + sheaf cohomology
-     infrastructure (not in Mathlib at this pin).
-  2. **Direct construction via harmonic functions** (Hilbert's
-     method). Solve a Dirichlet problem on an annulus, take the
-     real part to get a meromorphic function. Needs elliptic PDE
-     theory on manifolds.
-  3. **Hodge theory.** Use `H^0(X, Ω¹) = 0` (characterization of
-     `g = 0`) to construct harmonic differentials.
+**How it was discharged** (both legs theorem-grade, standard-3):
 
-All three are substantial independent formalization projects. The
-`⇐` direction `X ≃ₜ S² ⟹ g = 0` is easier (just pull back forms
-through the homeomorphism), but the axiom packages both.
+* `⇒` (`Jacobians/RiemannSurface/GenusZeroForward.lean`,
+  `nonempty_homeo_sphere_of_genus_eq_zero`): the keystone-backed
+  Riemann–Roch theorem at a point divisor gives `h⁰((p)) = 2` when
+  `g = 0`, hence a degree-one meromorphic function with principal
+  divisor `(Q₁) - (Q₂)`; such a function is a biholomorphism to `ℙ¹`
+  (`degreeOne_equiv_projectiveLine`), and `ℙ¹ ≃ₜ S²` by the
+  stereographic homeomorphism of `Jacobians/ProjectiveCurve/Line.lean`.
 
-Stereographic identification `ℂP¹ ≃ₜ S²` is constructed concretely
-in `Jacobians/ProjectiveCurve/Line.lean` via
-`onePointEquivSphereOfFinrankEq`. The axiom asserts the analogous
-identification for *any* compact Riemann surface of genus 0.
+* `⇐` (`Jacobians/Bridge/SphereGenusZero.lean`,
+  `genus_eq_zero_of_homeo_sphere_unconditional`): transport simple
+  connectedness of `S²` (proved via the ported two-open van Kampen
+  development, `Jacobians/Topology/SphereSimplyConnected.lean`) across
+  the homeomorphism, then every holomorphic 1-form has a global
+  primitive (developing map), which is constant by Liouville, so
+  `genus X = 0` (`Jacobians/RiemannSurface/GenusZeroBackward.lean`).
 
-See `docs/formalization-plan.md` §7; discharge priority: tied to
-`AX_RiemannRoch` and `AX_SerreDuality`.
 Reference: Forster, *Lectures on Riemann Surfaces*, Ch. IV;
 Farkas-Kra, *Riemann Surfaces*, Ch. IV §5.
 -/
 import Jacobians.RiemannSurface.Genus
+import Jacobians.RiemannSurface.GenusZeroForward
+import Jacobians.Bridge.SphereGenusZero
 
 namespace Jacobians.Axioms
 
@@ -50,11 +48,14 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-/-- **Axiom.** Genus-0 uniformization. A compact connected Riemann
-surface has genus 0 iff it is homeomorphic to the 2-sphere. -/
-axiom AX_genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- **Genus-0 uniformization** (formerly an axiom, now a theorem). A compact
+connected Riemann surface has genus 0 iff it is homeomorphic to the
+2-sphere. -/
+theorem AX_genus_eq_zero_iff_homeo {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] :
-    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1))
+    genus X = 0 ↔ Nonempty (X ≃ₜ (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)) :=
+  ⟨Jacobians.RiemannSurface.nonempty_homeo_sphere_of_genus_eq_zero,
+    Jacobians.RiemannSurface.genus_eq_zero_of_homeo_sphere_unconditional⟩
 
 end Jacobians.Axioms

@@ -9,7 +9,7 @@
  Axioms.AX_PeriodCycleBasis,
  Axioms.AX_pullbackAmbient_preserves_lattice]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
-'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_genus_eq_zero_iff_homeo]
+'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.ofCurve_inj' depends on axioms: [propext,
  Classical.choice,
