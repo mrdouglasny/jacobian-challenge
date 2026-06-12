@@ -40,3 +40,17 @@ DONE (all compiled, committed):
 REMAINING: full lake build (running), kernel closures (#print axioms), ledger
 (AXIOM_AUDIT 18->16, class 2b 2->0, README 18->16 & 5->3 challenge-critical),
 axiom-report regeneration.
+
+=== 2026-06-11 session end — BOTH AXIOMS FLIPPED ===
+- AX_pullbackAmbient_preserves_lattice: THEOREM. Kernel closure: standard-3 + AX_PeriodCycleBasis.
+- AX_pushforward_pullback: THEOREM. Kernel closure: standard-3 + AX_PeriodCycleBasis.
+- All Challenge.lean headlines (pullback, pullback_contMDiff, pullback_id_apply,
+  pullback_comp_apply, pushforward_pullback) now standard-3 + AX_PeriodCycleBasis.
+- Full lake build green (8953 jobs); check_axiom_consistency.sh PASS (kernel = 16).
+- Ledger: 18 -> 16 active, 5 -> 3 challenge-critical; class 2b now empty.
+- NO new axioms, no sorries; daouid credited in code + commit messages.
+- Trace-law finding for the record: the port does NOT contain the form-level
+  Tr(f^*w) = deg(f)·w; the GH Ch.2 deg-identity lives at the PERIOD level via
+  PreimageCycle conservation-of-number + the real-spanning lattice trick. The
+  FrameTrace tower (#195/#200) is residue/meromorphic-side machinery (Serre
+  keystone), not the form-trace law — it was not needed here.
