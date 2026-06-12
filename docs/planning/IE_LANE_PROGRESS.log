@@ -17,3 +17,16 @@
            bridging Green-side (wCLM image) and Cauchy-side (reProdIm) box descriptions.
 2026-06-12 lake env lean InteriorEngine.lean: clean (exit 0, no warnings).
            Aggregator KirovDolbeault.lean wired. No new axioms, no sorries.
+2026-06-12 R6 (bonus) DONE ArcBoundaryWordDataInterior + periodCycleBasisOfBoundaryWordInterior
+           (Jacobians/RiemannSurface/BilinearRelationsBoundaryWordInterior.lean) — root-side
+           mirror of BilinearRelationsBoundaryWord.lean over the interior engines; plus
+           ArcBoundaryWordData.toInterior (closed-box data restricts to interior data, so the
+           interior interface is strictly weaker). Aggregator Jacobians/RiemannSurface.lean wired.
+2026-06-12 KERNEL VERIFY (standard-3, direct module import + #print axioms): all 13 new
+           declarations depend only on [propext, Classical.choice, Quot.sound]:
+           rectBoundaryIntegral_eq_zero_of_continuousOn_of_differentiableOn_unitBox,
+           riemann_R1_of_boundaryWord_interior, integral_normSq_eq_boundary_interior,
+           boundaryForm_eq_area_interior, boundaryForm_pos_interior,
+           riemann_R2_posDef_of_boundaryWord_interior, wCLM_image_prod,
+           ArcBoundaryWordDataInterior.{periodMatrix_symm,periodGram_posDef,r1_field,r2_field},
+           periodCycleBasisOfBoundaryWordInterior, ArcBoundaryWordData.toInterior.
