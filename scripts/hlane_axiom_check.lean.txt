@@ -1,0 +1,16 @@
+-- H-lane kernel-closure check (run: lake env lean --run or as a scratch file)
+-- Expect every closure to be ⊆ {propext, Classical.choice, Quot.sound};
+-- in particular NO Jacobians.Axioms.AX_PeriodCycleBasis (circularity check).
+import Jacobians.RiemannSurface.HomologyGeneration
+
+open Jacobians.RiemannSurface
+
+#print axioms Jacobians.RiemannSurface.loopToHomology_refl
+#print axioms Jacobians.RiemannSurface.loopToHomology_trans
+#print axioms Jacobians.RiemannSurface.loopToHomology_reverse
+#print axioms Jacobians.RiemannSurface.coe_span_range_loopToHomology
+#print axioms Jacobians.RiemannSurface.exists_finite_generating_loops
+#print axioms Jacobians.RiemannSurface.exists_generating_loops
+#print axioms Jacobians.RiemannSurface.exists_periodGeneratingLoops
+#print axioms Jacobians.RiemannSurface.discreteTopology_loopPeriodLattice_of_H1
+#print axioms Jacobians.RiemannSurface.exists_loopPeriodLattice_basis_of_H1
