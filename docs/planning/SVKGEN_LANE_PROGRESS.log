@@ -150,3 +150,6 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   meridian conjugacy for ISOLATING lassos is elementary (common
   punctured-ball cell). The telescope remains only for the
   arbitrary-PuncturedCellSystem generality (Mathlib-grade, non-blocking).
+- PR #227 opened (G3-G6 complete chain, base main). Route doc fifth pass +
+  GOODCOVER_BLOCKER GC-2 re-scoping note included. Session end state:
+  root build green (8,981 jobs), all headline decls standard-3.
