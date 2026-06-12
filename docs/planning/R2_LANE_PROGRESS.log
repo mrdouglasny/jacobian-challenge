@@ -1,0 +1,7 @@
+# R-lane progress log — arc-level Riemann bilinear relations (R1/R2)
+
+2026-06-11 session start. Branch feat/bilinear-relations @ origin/main (67af290).
+Lane: Hodge half of AX_PeriodCycleBasis — the R1 (isotropy) / R2 (positivity)
+fields, arc-level over arcPeriodVec. Worktree-exclusive; commits local only.
+Plan: R1R2_ROUTE.md (route verdict + named-lemma decomposition) then bricks in
+Jacobians/RiemannSurface/BilinearRelations*.lean.
