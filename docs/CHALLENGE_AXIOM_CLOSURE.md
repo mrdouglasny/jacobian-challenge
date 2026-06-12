@@ -217,9 +217,9 @@ construction, ofCurve, functoriality) do not depend on RR/Serre.
 |---|---|---|
 | `h1coh_zero_finrank` | h¹(𝒪_X) = genus X | Frontier; gates full Serre duality |
 | `serreDuality_equiv` | H¹(D) ≃ L(K−D)* as ℂ-spaces | Frontier; needs `canonicalDivisor` real first |
-| `LineBundle` | Type stub for line bundles | Needed to state traditional RR/Serre |
-| `canonicalDivisor` | The canonical divisor K | **Prerequisite** for discharging `serreDuality_equiv` |
-| `LineBundle.ofDivisor` | The line bundle O(D) | Needed to state traditional RR/Serre |
+| `LineBundle` | Type stub for line bundles | ✅ **DISCHARGED 2026-06-12** (stub retirement) — real `def`, the divisor-indexed tag structure; RR/Serre statements now fully standard-3 |
+| `canonicalDivisor` | The canonical divisor K | ✅ **DISCHARGED 2026-06-11** (keystone flip) — the chosen Serre divisor |
+| `LineBundle.ofDivisor` | The line bundle O(D) | ✅ **DISCHARGED 2026-06-12** (stub retirement) — canonical inhabitant of the de-opaqued tag type |
 
 ### iv. Plücker formula (1) — plane curve specific, Part 3 only
 

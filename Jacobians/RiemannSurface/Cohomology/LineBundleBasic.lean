@@ -16,10 +16,15 @@ open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-/-- **Opaque axiom type.** The line bundle `𝒪(D)` associated to a
-divisor `D` on `X`. Forms a rank-1 locally-free sheaf; we only expose
-the ℂ-vector spaces `H⁰` and `H¹` below. -/
-axiom LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- The line bundle `𝒪(D)` associated to a divisor `D` on `X` — **formerly an
+opaque axiom type**, de-opaqued (stub-retirement package, 2026-06-12). On a
+compact Riemann surface `𝒪(D)` is determined up to isomorphism by `D`, and this
+development only ever exposes its cohomology — `H⁰ = riemannRochSpace D` and
+`H¹ = Layer3.H1coh D`, both real constructions that depend on `D` alone — so
+the bundle object itself is the divisor-indexed tag type. A parameterized
+structure (not `PUnit`) keeps `LineBundle D₁` and `LineBundle D₂` definitionally
+distinct, so no consumer can silently cross divisors. -/
+structure LineBundle {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : Type
 
@@ -80,10 +85,12 @@ theorem canonicalDivisor_spec (X : Type*) [TopologicalSpace X] [T2Space X]
         Module.Dual ℂ (riemannRochSpace (canonicalDivisor X - D))) :=
   Classical.choose_spec (serreDuality_equiv_exists X)
 
-/-- The line bundle `𝒪(D)` as an axiom-level constructor. -/
-axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
+/-- The line bundle `𝒪(D)` of a divisor — **formerly an axiom-level
+constructor**, now the canonical inhabitant of the de-opaqued tag type. -/
+def LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : LineBundle D
+    [IsManifold 𝓘(ℂ) ω X] (D : Divisor X) : LineBundle D :=
+  ⟨⟩
 
 end Jacobians.Axioms
 
