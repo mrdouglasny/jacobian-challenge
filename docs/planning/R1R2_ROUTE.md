@@ -138,6 +138,27 @@ F3 is **the consumption point for the future slit-sheet construction**: it makes
 "discharge `AX_PeriodCycleBasis`" equal to "produce the H₁ data + the
 boundary-word data", with zero remaining Hodge analysis.
 
+## 2b. Status — ALL BRICKS LANDED (2026-06-11, this branch)
+
+| Brick | File | Commit | Kernel closure |
+|---|---|---|---|
+| 1+2 (L1–L6, R1←, R2←, g≤1) | `Jacobians/RiemannSurface/BilinearRelations.lean` | `a1190ea` | standard-3, all 10 decls |
+| g=0 R2 vacuity | same file (`arc_R2_of_genus_eq_zero`) | follow-up | standard-3 |
+| 3 (F1–F3) | `Jacobians/RiemannSurface/BilinearRelationsBoundaryWord.lean` | `e8cd5c4` | standard-3, all 7 decls incl. `periodCycleBasisOfBoundaryWord` |
+
+`AX_PeriodCycleBasis` verified ABSENT from every closure (`#print axioms`,
+olean-backed). Brick 3 imports only the sorry-free port files
+(`KirovDolbeault.CutSurface`, `KirovDolbeault.BoundaryWordR2`); the sorry'd
+`CutSurfaceRelations.lean` (`exists_cutSurface`) is NOT imported. Full
+`lake build` green with both modules registered in
+`Jacobians/RiemannSurface.lean`.
+
+Interface-design note (issue-#82 discipline): `ArcBoundaryWordData` is a
+*structure* (hypothesis bundle), not an axiom — no kernel risk; its
+satisfiability for g ≥ 2 by a *geometric* witness inherits the C2 verdict's
+hh-weakening caveat (§3), deliberately NOT baked into the interface here so
+the eventual repair happens port-side without touching these bricks.
+
 ## 3. What stays open after the bricks (construction-side, NOT this lane)
 
 * **BW-DATA** — the boundary-word identities + `nondeg` for the constructed

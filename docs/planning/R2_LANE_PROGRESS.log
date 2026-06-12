@@ -5,3 +5,15 @@ Lane: Hodge half of AX_PeriodCycleBasis — the R1 (isotropy) / R2 (positivity)
 fields, arc-level over arcPeriodVec. Worktree-exclusive; commits local only.
 Plan: R1R2_ROUTE.md (route verdict + named-lemma decomposition) then bricks in
 Jacobians/RiemannSurface/BilinearRelations*.lean.
+
+2026-06-11 session end. Route (a') chosen + documented (R1R2_ROUTE.md).
+Bricks LANDED, all kernel-verified standard-3, AX_PeriodCycleBasis absent:
+- 83d13d9 route doc
+- a1190ea BilinearRelations.lean: arc blocks, Q algebra, R1<=blocks-symm,
+  R2<=Gram-PosDef, R1 theorem for genus<=1
+- e8cd5c4 BilinearRelationsBoundaryWord.lean: ArcBoundaryWordData +
+  r1_field/r2_field + periodCycleBasisOfBoundaryWord (full witness
+  constructor from H1 data + boundary words; port box engines consumed)
+- (HEAD) genus-0 R2 vacuity + library-root registration; full lake build green.
+Open (construction side): BW-DATA (slit-sheet boundary words + nondeg),
+hh-weakening of port engines for geometric g>=2 witnesses, H1 half (T-lanes).
