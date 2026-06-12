@@ -70,13 +70,14 @@ import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovCanonicalEq
 import Jacobians.Bridge.KirovDolbeaultTrace
+import Jacobians.Bridge.KirovDolbeaultLattice
 import Jacobians.Vendor.Kirov.ZLatticeQuotient
 
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology
 open scoped ContDiff
-open Jacobians Jacobians.RiemannSurface Jacobians.AbelianVariety
+open Jacobians Jacobians.RiemannSurface Jacobians.AbelianVariety Jacobians.Bridge
 
 /-! ### Primitive functional axioms: path-integral functional + local
 antiderivative + form-level primitives
@@ -1580,9 +1581,173 @@ theorem AX_pushforwardAmbient_preserves_lattice {X : Type u}
   exact devVal_loop_mem_periodLatticeInBasis_any (Classical.arbitrary Y)
     (jacobianBasis Y) (γp.map hf.continuous)
 
-/-- **Axiom.** Lattice preservation for pullback. Symmetric to
-`AX_pushforwardAmbient_preserves_lattice`. -/
-axiom AX_pullbackAmbient_preserves_lattice {X : Type u}
+/-- `pullbackAmbientLinear` reads as `ambientPullbackJac` through the
+lattice bridge (daouid, PR #191): dual-basis expansion + the
+trace-transpose adjoint identity. -/
+theorem pullbackAmbientLinear_eq_compat {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] [Nonempty X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y] [Nonempty Y]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (w : Fin (kirovGenus Y) → ℂ) :
+    pullbackAmbientLinear f hf (latticeBridge Y w) =
+      latticeBridge X (ambientPullbackJac f hf w) := by
+  funext j
+  unfold pullbackAmbientLinear
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_toLinearMap, Function.comp_apply,
+    Module.Basis.dualBasis_equivFun, LinearMap.dualMap_apply]
+  set η := pushforwardOneForm f hf (jacobianBasis X j)
+  have h_expansion : ∀ (v : Fin (genus Y) → ℂ) (form : HolomorphicOneForm Y),
+      ((jacobianBasis Y).dualBasis.equivFun.symm v) form =
+        ∑ k, (jacobianBasis Y).repr form k * v k := by
+    intro v form
+    have h_form : form = ∑ k, (jacobianBasis Y).repr form k • jacobianBasis Y k :=
+      ((jacobianBasis Y).sum_repr form).symm
+    conv_lhs => rw [h_form]
+    rw [map_sum]
+    simp only [map_smul, smul_eq_mul]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [show ((jacobianBasis Y).dualBasis.equivFun.symm v) (jacobianBasis Y k) = v k by
+      rw [← (jacobianBasis Y).dualBasis_equivFun, LinearEquiv.apply_symm_apply]]
+  rw [h_expansion (latticeBridge Y w) η]
+  unfold latticeBridge
+  simp only [LinearMap.coe_mk, AddHom.coe_mk]
+  have h_swap : ∑ k, (jacobianBasis Y).repr η k *
+        (∑ i, ((ambientIso Y).symm (bridgeKDFormEquiv (jacobianBasis Y k))) i * w i) =
+      ∑ i, (∑ k, (jacobianBasis Y).repr η k *
+        ((ambientIso Y).symm (bridgeKDFormEquiv (jacobianBasis Y k))) i) * w i := by
+    simp_rw [Finset.mul_sum]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    simp_rw [← mul_assoc]
+    rw [← Finset.sum_mul]
+  rw [h_swap]
+  have h_inner : ∀ i, ∑ k, (jacobianBasis Y).repr η k *
+        ((ambientIso Y).symm (bridgeKDFormEquiv (jacobianBasis Y k))) i =
+      ((ambientIso Y).symm (bridgeKDFormEquiv η)) i := by
+    intro i
+    have h_repr : η = ∑ k, (jacobianBasis Y).repr η k • jacobianBasis Y k :=
+      ((jacobianBasis Y).sum_repr η).symm
+    have h_lin : bridgeKDFormEquiv η =
+        ∑ k, (jacobianBasis Y).repr η k • bridgeKDFormEquiv (jacobianBasis Y k) := by
+      conv_lhs => rw [h_repr]
+      rw [map_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [map_smul]
+    have h_lin2 : (ambientIso Y).symm (bridgeKDFormEquiv η) =
+        ∑ k, (jacobianBasis Y).repr η k •
+          (ambientIso Y).symm (bridgeKDFormEquiv (jacobianBasis Y k)) := by
+      rw [h_lin, map_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [map_smul]
+    rw [h_lin2]
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  simp_rw [h_inner]
+  dsimp only [η]
+  unfold pushforwardOneForm
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_toLinearMap, Function.comp_apply]
+  rw [LinearEquiv.apply_symm_apply]
+  set u_j := (ambientIso X).symm (bridgeKDFormEquiv (jacobianBasis X j))
+  have h_u_inv : bridgeKDFormEquiv (jacobianBasis X j) = ambientIso X u_j :=
+    (LinearEquiv.apply_symm_apply (ambientIso X)
+      (bridgeKDFormEquiv (jacobianBasis X j))).symm
+  have h_trace : (ambientIso Y).symm
+        (traceFormTotal f hf (bridgeKDFormEquiv (jacobianBasis X j))) =
+      ambientTrace f hf u_j := by
+    unfold ambientTrace
+    set_option linter.unusedSimpArgs false in
+    simp only [dif_pos rfl]
+    rw [h_u_inv]
+    rfl
+  rw [h_trace]
+  have h_adj := adjoint_identity f hf u_j w
+  rw [← h_adj]
+
+/-- `pushforwardAmbientLinear` reads as `ambientPhi` through the lattice
+bridge (daouid, PR #191). -/
+theorem pushforwardAmbientLinear_eq_compat {X : Type u} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] [Nonempty X]
+    {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
+    [ConnectedSpace Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y] [Nonempty Y]
+    (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f) (u : Fin (kirovGenus X) → ℂ) :
+    pushforwardAmbientLinear f hf (latticeBridge X u) =
+      latticeBridge Y (ambientPhi f hf u) := by
+  funext j
+  unfold pushforwardAmbientLinear
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_toLinearMap, Function.comp_apply,
+    Module.Basis.dualBasis_equivFun, LinearMap.dualMap_apply]
+  set formY := jacobianBasis Y j
+  have h_expansion : ((jacobianBasis X).dualBasis.equivFun.symm (latticeBridge X u))
+        (pullbackOneForm f hf formY) =
+      ∑ i, ((ambientIso X).symm (bridgeKDFormEquiv (pullbackOneForm f hf formY))) i * u i := by
+    have h_pair : ((jacobianBasis X).dualBasis.equivFun.symm (latticeBridge X u)) =
+        pairingWithW u :=
+      eY_symm_latticeBridge u
+    rw [h_pair]
+    rfl
+  rw [h_expansion]
+  have h_unwind : (ambientIso X).symm (bridgeKDFormEquiv (pullbackOneForm f hf formY)) =
+      ambientPsi f hf ((ambientIso Y).symm (bridgeKDFormEquiv formY)) := by
+    unfold pullbackOneForm bridgeKDFormEquiv kdFormAlign ambientPsi
+    simp
+    rfl
+  rw [h_unwind]
+  set c := (ambientIso Y).symm (bridgeKDFormEquiv formY)
+  set Ψ := ambientPsi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+  set Φ := ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+  have h_transpose : ∑ i, (Ψ c) i * u i = ∑ k, c k * (Φ u) k := by
+    dsimp only [Φ]
+    unfold Jacobians.ambientPhi
+    set M := LinearMap.toMatrix (Pi.basisFun ℂ (Fin (kirovGenus Y)))
+      (Pi.basisFun ℂ (Fin (kirovGenus X))) Ψ.toLinearMap
+    change ∑ i, (Ψ c) i * u i = ∑ k, c k * Matrix.mulVec M.transpose u k
+    simp only [Matrix.mulVec, Matrix.transpose_apply]
+    have h_swap : ∀ k, c k * ((fun j => M j k) ⬝ᵥ u) = ∑ i, M i k * c k * u i := by
+      intro k
+      change c k * (∑ i, M i k * u i) = _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      ring
+    simp_rw [h_swap]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [← Finset.sum_mul]
+    congr 1
+    have h_c_decomp : c = ∑ k, c k • Pi.single k 1 := pi_eq_sum_univ' c
+    have h_Ψ_decomp : Ψ c = ∑ k, c k • Ψ (Pi.single k 1) := by
+      conv_lhs => rw [h_c_decomp]
+      rw [map_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [map_smul]
+    have h_i : (Ψ c) i = ∑ k, M i k * c k := by
+      rw [h_Ψ_decomp]
+      simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [show c k * Ψ (Pi.single k 1) i = M i k * c k by
+        unfold M
+        rw [LinearMap.toMatrix_apply, Pi.basisFun_repr, Pi.basisFun_apply, mul_comm]
+        rfl]
+    rw [h_i]
+  rw [h_transpose]
+  unfold latticeBridge
+  simp only [LinearMap.coe_mk, AddHom.coe_mk]
+  rfl
+
+/-- **Theorem (derived 2026-06-11, issue #31).** Lattice preservation for
+pullback. Symmetric to `AX_pushforwardAmbient_preserves_lattice`.
+
+Formerly an axiom; route per daouid's closed PR #191 (credit), with the two
+lattice-comparison inclusions now PROVEN
+(`Bridge/KirovDolbeaultPeriods.lean` + `Bridge/KirovDolbeaultLattice.lean`):
+transport the lattice vector to the port's coordinates
+(`truePeriodLattice_le_periodLatticeInBasis` — `H1` representative loop →
+polygonal smooth representative with matching developing values), apply the
+port's monodromy/preimage-cycle theorem
+(`ambientPullbackJac_preserves_truePeriodLattice`), and come back
+(`latticeBridge_truePeriodLattice_le` — developing value = moving-chart
+line integral on closed `C¹` loops). -/
+theorem AX_pullbackAmbient_preserves_lattice {X : Type u}
     [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
     [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     {Y : Type v} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
@@ -1592,7 +1757,16 @@ axiom AX_pullbackAmbient_preserves_lattice {X : Type u}
               (jacobianBasis Y)).toAddSubgroup,
       (pullbackAmbientLinear f hf) v ∈
         (periodLatticeInBasis X (Classical.arbitrary X)
-          (jacobianBasis X)).toAddSubgroup
+          (jacobianBasis X)).toAddSubgroup := by
+  intro v hv
+  rw [Submodule.mem_toAddSubgroup] at hv ⊢
+  set w := latticeBridgeInv Y v with hw_def
+  have h_eq : v = latticeBridge Y w := (latticeBridgeInv_right_inverse v).symm
+  rw [h_eq, pullbackAmbientLinear_eq_compat]
+  have hw_mem : w ∈ truePeriodLattice Y :=
+    truePeriodLattice_le_periodLatticeInBasis Y v hv
+  have h_pull := ambientPullbackJac_preserves_truePeriodLattice f hf hw_mem
+  exact latticeBridge_truePeriodLattice_le X _ h_pull
 
 /-! ### Helper: descend an ambient ℂ-linear lattice-preserving map to
 a continuous add-monoid hom of Jacobians. -/
