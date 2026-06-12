@@ -27,3 +27,36 @@ Append-only progress log. Branch: `feat/bw-elliptic`.
   index via aLoop/bLoop_period_eq + canonicalArcIntegral_reverse), the
   orientation constant c := sqrt(±Im(ω₂ conj ω₁)) with positivity from
   LinearIndependent ℝ ![ω₁, ω₂], and the ArcBoundaryWordData literal.
+
+## 2026-06-12 session 2 (P9-3 lane, stage 3)
+
+- Stage 3 DONE (branch feat/bw-elliptic-3, commit 362c7ed):
+  - im_mul_conj_ne_zero: lattice determinant Im(ω₂·conj ω₁) ≠ 0 from
+    LinearIndependent.pair_iff (two explicit dependence relations).
+  - orientedPeriod (ω₂ or −ω₂ matching the ellipticLoops switch) +
+    orientationConstant c := √|Im(ω₂·conj ω₁)|; orientedPeriod_im and
+    normSq_orientationConstant pin the sign bookkeeping.
+  - ellipticLoops_αEmbed/βEmbed (index arithmetic vs genus_Elliptic_eq_one
+    via omega — NB: rw at Fin-typed hypotheses hits dependent-motive
+    failures, keep genus as an atom), arcA/BPeriodMatrix_elliptic: blocks
+    are (ω₁) and (ω₂').
+  - ellipticArcBoundaryWordData : ArcBoundaryWordDataInterior
+    (ellipticLoops ω₁ ω₂ h) (ellipticFormBasis ω₁ ω₂ h) — ALL fields
+    filled: h := c, F := c·z, interior holomorphy trivial; word_R1 =
+    Cauchy-box zero vs mul_comm; word_R2 LHS = −normSq c·2i =
+    −boundaryForm (elliptic_word_R2_lhs via Complex.sub_conj); nondeg
+    from c > 0 at (1/2, 1/2).
+  - elliptic_periodMatrix_symm / elliptic_periodGram_posDef: R1/R2
+    CONCRETE + axiom-free at g=1 (through the interior port engines).
+  - ellipticPeriodCycleBasisOfH1: full PeriodCycleBasis conditional ONLY
+    on the H₁ fields (isBasis/loops_to_basis for ellipticLoops) — the
+    sole remaining content of AX_Elliptic_H1_symplectic. The wrapper
+    axiom is an opaque PeriodCycleBasis term, so its H₁ half cannot be
+    extracted for OUR oriented loops; covering-space π₁(ℂ/Λ) ≅ Λ work
+    remains the discharge path.
+  - Kernel-verified: all 5 headline decls standard-3; no
+    AX_PeriodCycleBasis, no AX_Elliptic_H1_symplectic in any closure.
+  - Umbrella-wired (Jacobians/RiemannSurface.lean, python string-ops).
+- Gotchas hit: `include h in` must precede the docstring, not sit between
+  docstring and theorem; Matrix.PosDef on ℂ needs `open scoped
+  ComplexOrder`; linter wants `change` not goal-changing `show`.
