@@ -137,3 +137,37 @@ starts decided:
   if every comparison in the recursion is intra-side, clause (i) reduces to
   the n = 1 anchor `closure_circleAround_eq_top` + G2 uniqueness inside one
   cell, and no disk toolkit is needed.)
+
+## G3/G4 fourth pass (2026-06-12) — the endgame named
+
+Working the glue lemma to its foundation:
+
+1. **Cell definition v2.** `PuncturedCellSystem` cells should be *paired*
+   presentations `φ : (W_s, s) ≃ₜ (ℂ, 0)` (cell = `W_s ∖ {s}`, `W_s` open in
+   the s-filled space): the punctured cell is then automatically a
+   once-punctured plane (restriction of `φ`) AND the filled cell is simply
+   connected — both G2 and the filling argument apply.  Mechanical refactor
+   of the delivered statement layer.
+2. **The mountain, precisely.** Every glue route (side-system lassos into
+   the global normal closure) reduces to ONE named lemma — the filling
+   kernel: *a loop in `X = ℂ∖T` that is nullhomotopic in the s-filled space
+   `Y = ℂ∖(T∖{s})` lies in `ncl(meridian of any paired cell around s)`.*
+   This is presentation-level SVK content and cannot be avoided by
+   generation-only tricks (the |T|=1 universe-cell trick does not scale:
+   there is no common cell).  Provable by the classical square-grid
+   argument: 2D Lebesgue subdivision of the nullhomotopy `I×I → Y`, cells
+   meeting `s` replaced by punctured detours costing `ncl(meridian)`
+   factors — i.e. a **2D homotopy-telescope** sibling of the delivered
+   1D membership telescope.  Substantial but well-understood; this is the
+   true multi-week core of B1 (and of any identified-generator π₁
+   computation of the punctured plane).
+3. **Split-line preprocessing** (distinct projections): pick `c` between
+   the real parts of any two punctures avoiding the finite set `re '' T`;
+   ties among other punctures are harmless.  All-equal-re configurations
+   use the imaginary split (axis-swap reflection is orientation-reversing
+   but the winding pin is ±-symmetric).
+4. **Decision point (B3, escalated on issue #171).** If the slit-sheet
+   consumer needs only H₁-level generation, the δ-winding matrix already
+   delivered may suffice and the 2D telescope can be deferred to the
+   Mathlib-grade T1 contract; if the full T1 is needed, the 2D telescope
+   is the next campaign and should be planned as its own lane.
