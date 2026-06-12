@@ -45,7 +45,17 @@ solution for the divisor `(b) − (a)`:
   (`exists_arcWeakSolution_dipoleList`);
 * **the E4-pinned engine** (`exists_meromorphic_of_zeroPeriodChain_of_pairing`): with E3
   unconditional, the §20 engine's sole remaining obligation is the E4 pairing identity for
-  the constructed datum.
+  the constructed datum;
+* **E4 complete — THE UNCONDITIONAL ENGINE** (`exists_meromorphic_of_zeroPeriodChain'`):
+  the per-arc constructor now exposes its pairing value `π·segPeriod` (the planar atom
+  `integral_slitLog_dbar_mul` after the single-chart collapse), the fold exposes
+  `σ = σ₁ + σ₂` and accumulates the values over chart-tagged dipole lists
+  (`exists_arcWeakSolution_dipoleListChart`), and inside each chart ball the segment
+  value is the line-integral piece (`intervalIntegral_form_eq_segPeriod` over the
+  whole-piece subdivision `exists_subdivision_pieces`) — so
+  `exists_arcWeakSolution_boundary_pairing` delivers `pairOmega 𝔇 W.σ α = π·∫_c α`
+  (the honest constant: Forster's `2πi` against `dz̄∧dz`, i.e. `π` against Lebesgue
+  area), and zero periods discharge the E2 pairing field.
 
 References: Forster, *Lectures on Riemann Surfaces* (GTM 81), §20.4–20.5; Miranda,
 *Algebraic Curves and Riemann Surfaces* (GSM 5), Ch. VIII §4.
