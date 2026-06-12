@@ -1,7 +1,14 @@
 /-
 Basic line-bundle stubs and the de-opaqued `H0` bridge.
+
+KEYSTONE FLIP (docs/planning/FLIP_CHECKLIST.md §2.1): `canonicalDivisor` is no longer an
+opaque axiom — it is the `Classical.choose` of the PROVEN ∃-K Serre-duality package
+`serreDuality_equiv_exists` (FlipPrep composition over the T-lane frame-trace
+construction), so the verbatim Layer-3 `serreDuality_equiv` statement is its
+`Classical.choose_spec`.
 -/
 import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
+import Jacobians.Layer3.FlipPrep
 
 namespace Jacobians.Axioms
 
@@ -37,12 +44,41 @@ noncomputable instance H0.instModule {X : Type*} [TopologicalSpace X] [T2Space X
     Module ℂ (H0 L) :=
   inferInstanceAs (Module ℂ (riemannRochSpace D))
 
-/-- **Opaque axiom.** The canonical sheaf `Ω¹_X` is a line bundle,
-represented by a distinguished divisor class `K : Divisor X` up to
-linear equivalence. -/
-axiom canonicalDivisor (X : Type*) [TopologicalSpace X] [T2Space X]
+/-- **The unconditional ∃-K Serre package at the `chartDiskCover` pin** (T-lane wall +
+FlipPrep composition): a divisor `K` with `dim L(K) = genus X` and, for EVERY `D`, a
+linear equivalence `H1coh D ≃ Dual(L(K − D))`. The genus-split trace residual is
+discharged by the T-lane's `exists_canonicalData_frameTraceHypothesis`
+(`FrameTrace.lean`: the canonical `ω₀ = df` datum carries its own frame-trace datum). -/
+theorem serreDuality_equiv_exists (X : Type*) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] : Divisor X
+    [IsManifold 𝓘(ℂ) ω X] :
+    ∃ K : Divisor X,
+      Module.finrank ℂ (riemannRochSpace K) = genus X ∧
+      ∀ D : Divisor X,
+        Nonempty (Jacobians.Layer3.H1coh D ≃ₗ[ℂ]
+          Module.Dual ℂ (riemannRochSpace (K - D))) :=
+  Jacobians.Layer3.serreDuality_equiv_exists_of_frameTrace
+    fun _ => Jacobians.Dolbeault.exists_canonicalData_frameTraceHypothesis
+
+/-- The canonical divisor: the chosen Serre-duality divisor — **formerly an opaque
+axiom**, de-opaqued by the keystone flip to the `Classical.choose` of the proven
+∃-K Serre package `serreDuality_equiv_exists`. -/
+noncomputable def canonicalDivisor (X : Type*) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] : Divisor X :=
+  Classical.choose (serreDuality_equiv_exists X)
+
+/-- The defining property of `canonicalDivisor`: `dim L(K) = genus X`, and Serre duality
+`H1coh D ≃ Dual(L(K − D))` at every `D` (the verbatim Layer-3 `serreDuality_equiv`
+statement is the second component). -/
+theorem canonicalDivisor_spec (X : Type*) [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] :
+    Module.finrank ℂ (riemannRochSpace (canonicalDivisor X)) = genus X ∧
+    ∀ D : Divisor X,
+      Nonempty (Jacobians.Layer3.H1coh D ≃ₗ[ℂ]
+        Module.Dual ℂ (riemannRochSpace (canonicalDivisor X - D))) :=
+  Classical.choose_spec (serreDuality_equiv_exists X)
 
 /-- The line bundle `𝒪(D)` as an axiom-level constructor. -/
 axiom LineBundle.ofDivisor {X : Type*} [TopologicalSpace X] [T2Space X]
@@ -60,8 +96,12 @@ variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
 /-- Since `H0 (LineBundle.ofDivisor D)` is definitionally `riemannRochSpace D`,
-the comparison is the identity linear equivalence. -/
-theorem H0_equiv_riemannRochSpace (D : Divisor X) :
+the comparison is the identity linear equivalence.
+
+(`Axioms.Divisor` is written qualified: the FlipPrep import closure brings
+`Jacobians.RiemannSurface.Divisor` into scope, which would otherwise shadow it
+inside this namespace.) -/
+theorem H0_equiv_riemannRochSpace (D : Axioms.Divisor X) :
     Nonempty (H0 (LineBundle.ofDivisor D) ≃ₗ[ℂ] riemannRochSpace D) :=
   ⟨LinearEquiv.refl ℂ (riemannRochSpace D)⟩
 
