@@ -97,14 +97,14 @@ Port-side files `vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/AbelSubset
 the no-more-vendoring policy). Difficulty: E = easy (≤1 day), M = medium (days),
 H = hard (week+).
 
-### S — the dimension block (criterion skeleton)   [FIRST BRICKS]
+### S — the dimension block (criterion skeleton)   [LANDED 2026-06-11]
 
 | rung | statement | diff | status |
 |---|---|---|---|
-| S1 `exists_serreDualityData_chartDiskCover` | the ∃-cover keystone strengthened to exhibit a **ChartDiskCover** (both keystone legs already produce one; re-statement of `exists_serreDualityData_cover_of_genus_split_residueAtom`'s proof) | E | target — this session (AbelSubsetCriterion.lean) |
-| S2 `h1Dim_zero_eq_kirovGenus` (at the S1 cover) | `data.arithmeticGenus` re-read | E | target — this session |
-| S3 `finrank_real_dolbeaultH01_eq_two_mul_kirovGenus` | `dim_ℝ H^{0,1} = 2g`, intrinsic (E3a payoff): S1 + S2 + `cechH1_dolbeault_comparison_proof` | E | target — this session |
-| S4 `mem_dbarImage_of_periodFunctional` | ABSTRACT criterion: any ℝ-linear `Λ : A^{0,1} → (Fin g → ℂ)` with `im ∂̄ ⊆ ker Λ` and `Λ` surjective has `ker Λ = im ∂̄` (descend to `DolbeaultH01`, S3 dim count, `LinearMap.injective_iff_surjective`-style finrank argument) | E/M | target — this session |
+| S1 `exists_serreDualityData_chartDiskCover` | the ∃-cover keystone strengthened to exhibit a **ChartDiskCover** (both keystone legs already produce one; re-statement of `exists_serreDualityData_cover_of_genus_split_residueAtom`'s proof) | E | **PROVEN** (`AbelSubsetCriterion.lean`, standard-3 kernel-verified) |
+| S2 `h1Dim_zero_eq_kirovGenus` (at the S1 cover) | `data.arithmeticGenus` re-read | E | **PROVEN** (`data.arithmeticGenus` at the S1 cover) |
+| S3 `finrank_real_dolbeaultH01_eq_two_mul_kirovGenus` | `dim_ℝ H^{0,1} = 2g`, intrinsic (E3a payoff): S1 + S2 + `cechH1_dolbeault_comparison_proof` | E | **PROVEN** (+ `finiteDimensional_dolbeaultH01`) |
+| S4 `mem_dbarImage_of_periodFunctional` | ABSTRACT criterion: any ℝ-linear `Λ : A^{0,1} → (Fin g → ℂ)` with `im ∂̄ ⊆ ker Λ` and `Λ` surjective has `ker Λ = im ∂̄` (descend to `DolbeaultH01`, S3 dim count, `LinearMap.injective_iff_surjective`-style finrank argument) | E/M | **PROVEN** (`mem_dbarImage_of_periodFunctional`; named hypotheses = P4/P5 obligations) |
 
 ### P — the pairing block (realize Λ)
 

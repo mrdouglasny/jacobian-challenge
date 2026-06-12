@@ -18,3 +18,26 @@ docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
 - Goal 1: docs/planning/AB_ROUTE.md — route verdict
   (∂̄-solvability-from-SerreDualityData vs third-kind-exponential) +
   rung-by-rung decomposition. Goal 2: first proven bricks.
+
+## 2026-06-11 milestone 1 — route doc + S-block landed
+
+- AB_ROUTE.md committed (9d3895c): VERDICT = Route A (Forster §20 ∂̄-engine,
+  solvability criterion derived from SerreDualityData; Route B third-kind kept
+  as reserve — still gated on AX_RiemannBilinear reciprocity + cycle basis).
+- S-block PROVEN in port file KirovDolbeault/Dolbeault/AbelSubsetCriterion.lean
+  (aggregator-wired, `lake build KirovDolbeault` green):
+  * S1 exists_serreDualityData_chartDiskCover — keystone with the ChartDiskCover
+    kept in the type (both genus legs already exhibit one).
+  * S2 h1Dim_zero_eq_kirovGenus_chartDiskCover — h¹(𝒪)=g at that cover (E3a).
+  * S3 finiteDimensional_dolbeaultH01 + finrank_real_dolbeaultH01_eq_two_mul_kirovGenus
+    — dim_ℝ H^{0,1}_∂̄ = 2g, intrinsic (comparison transport).
+  * S4 mem_dbarImage_of_periodFunctional — abstract Forster-19.10 criterion:
+    Λ kills im ∂̄ + Λ surjective ⟹ Λσ=0 → σ ∂̄-exact (dim count).
+  Kernel verification: all six `#print axioms` = [propext, Classical.choice,
+  Quot.sound]; NO sorryAx, NO custom axioms, NO AX_AbelTheorem. S4's two
+  hypotheses are exactly the P4 (Stokes kill) and P5 (Gram surjectivity)
+  obligations of the route — named hypotheses, not axioms.
+- Gotchas hit: LinearEquiv.finiteDimensional direction (needed .symm — instance
+  search otherwise wanders into Module ℂ ↥(OneFormsZeroOne X) and times out);
+  S4 needed `set_option maxHeartbeats 1000000` (respectTransparency-false whnf
+  cost, same as the comparison files); set_option must precede the docstring.
