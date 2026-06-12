@@ -10,13 +10,17 @@ words of `ArcBoundaryWordData` reduce to:
 * `boundaryForm (fun _ => c) (fun z => c·z) = normSq c · 2i` — the classic
   area integral `∮_{∂[0,1]²} conj z dz = 2i` (`word_R2`'s right side).
 
-Stage 2 delivers the integral lemmas and loop layer; stage 3 (next session) assembles the `ArcBoundaryWordData` structure over the elliptic
-`aLoop`/`bLoop` with the orientation-normalized constant
-`c := √(±Im (ω₂ · conj ω₁))`.
+Stages 1–2 deliver the integral lemmas and loop layer; stage 3 (below)
+assembles `ellipticArcBoundaryWordData : ArcBoundaryWordDataInterior` over
+the oriented elliptic loops with the orientation-normalized constant
+`c := √|Im (ω₂ · conj ω₁)|` — the first complete family witness for the
+analytic half of `AX_PeriodCycleBasis`.
 -/
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
+import Jacobians.RiemannSurface.BilinearRelationsBoundaryWordInterior
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.ProjectiveCurve.Elliptic.Witnesses
+import Jacobians.ProjectiveCurve.Elliptic.Periods
 
 namespace Jacobians.RiemannSurface
 namespace BoundaryWordElliptic
@@ -205,6 +209,215 @@ noncomputable def ellipticLoops :
     else bLoopRev ω₁ ω₂ h
 
 end EllipticData
+
+/-! ### Stage 3: period entries, the orientation constant, and the datum -/
+
+section Stage3
+
+open Jacobians.Axioms Matrix
+open scoped ComplexOrder
+
+variable (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω₁, ω₂])
+
+include h in
+/-- ℝ-independent periods have `Im (ω₂ · conj ω₁) ≠ 0` (the lattice
+determinant). -/
+theorem im_mul_conj_ne_zero : (ω₂ * (starRingEnd ℂ) ω₁).im ≠ 0 := by
+  intro h0
+  have hpair := LinearIndependent.pair_iff.mp h
+  have hexp := Complex.mul_im ω₂ ((starRingEnd ℂ) ω₁)
+  rw [Complex.conj_re, Complex.conj_im, h0] at hexp
+  -- hexp : 0 = ω₂.re * -ω₁.im + ω₂.im * ω₁.re
+  have h1 : (ω₂.im : ℝ) • ω₁ + (-ω₁.im : ℝ) • ω₂ = 0 := by
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.smul_re, smul_eq_mul, Complex.zero_re]
+      linear_combination -hexp
+    · simp only [Complex.add_im, Complex.smul_im, smul_eq_mul, Complex.zero_im]
+      ring
+  obtain ⟨h2im, h1im'⟩ := hpair _ _ h1
+  have h1im : ω₁.im = 0 := by linarith [neg_eq_zero.mp h1im']
+  have h2 : (ω₂.re : ℝ) • ω₁ + (-ω₁.re : ℝ) • ω₂ = 0 := by
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.smul_re, smul_eq_mul, Complex.zero_re]
+      ring
+    · simp only [Complex.add_im, Complex.smul_im, smul_eq_mul, Complex.zero_im,
+        h1im, h2im]
+      ring
+  obtain ⟨h2re, h1re'⟩ := hpair _ _ h2
+  have h1re : ω₁.re = 0 := neg_eq_zero.mp h1re'
+  have hω₁ : ω₁ = 0 := Complex.ext (by simp [h1re]) (by simp [h1im])
+  have := hpair 1 0 (by simp [hω₁])
+  exact one_ne_zero this.1
+
+/-- The oriented second period: `ω₂` or `−ω₂`, chosen so that
+`Im (ω₂' · conj ω₁) = |Im (ω₂ · conj ω₁)| ≥ 0`. -/
+noncomputable def orientedPeriod : ℂ :=
+  if 0 < (ω₂ * (starRingEnd ℂ) ω₁).im then ω₂ else -ω₂
+
+theorem orientedPeriod_im :
+    (orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁).im
+      = |(ω₂ * (starRingEnd ℂ) ω₁).im| := by
+  unfold orientedPeriod
+  split_ifs with hpos
+  · exact (abs_of_pos hpos).symm
+  · rw [not_lt] at hpos
+    rw [neg_mul, Complex.neg_im, abs_of_nonpos hpos]
+
+/-- The orientation constant `c := √|Im (ω₂ · conj ω₁)|`, normalizing the
+boundary-word area integral to the lattice determinant. -/
+noncomputable def orientationConstant : ℝ :=
+  Real.sqrt |(ω₂ * (starRingEnd ℂ) ω₁).im|
+
+theorem normSq_orientationConstant :
+    Complex.normSq ((orientationConstant ω₁ ω₂ : ℝ) : ℂ)
+      = |(ω₂ * (starRingEnd ℂ) ω₁).im| := by
+  rw [Complex.normSq_ofReal, orientationConstant]
+  exact Real.mul_self_sqrt (abs_nonneg _)
+
+include h in
+theorem orientationConstant_pos : 0 < orientationConstant ω₁ ω₂ :=
+  Real.sqrt_pos.mpr (abs_pos.mpr (im_mul_conj_ne_zero ω₁ ω₂ h))
+
+/-- The A-slot of `ellipticLoops` is `aLoop`. -/
+theorem ellipticLoops_αEmbed (i : Fin (genus (Elliptic ω₁ ω₂ h))) :
+    ellipticLoops ω₁ ω₂ h (αEmbed i) = aLoop ω₁ ω₂ h := by
+  have hi : ((αEmbed i : Fin (2 * genus (Elliptic ω₁ ω₂ h))) : ℕ) = 0 := by
+    change (i : ℕ) = 0
+    have hg := genus_Elliptic_eq_one ω₁ ω₂ h
+    have := i.isLt
+    omega
+  simp [ellipticLoops, hi]
+
+/-- The B-slot of `ellipticLoops` is the orientation-normalized B-cycle. -/
+theorem ellipticLoops_βEmbed (i : Fin (genus (Elliptic ω₁ ω₂ h))) :
+    ellipticLoops ω₁ ω₂ h (βEmbed i)
+      = if 0 < (ω₂ * (starRingEnd ℂ) ω₁).im then bLoop ω₁ ω₂ h
+        else bLoopRev ω₁ ω₂ h := by
+  have hi : ((βEmbed i : Fin (2 * genus (Elliptic ω₁ ω₂ h))) : ℕ) ≠ 0 := by
+    change genus (Elliptic ω₁ ω₂ h) + (i : ℕ) ≠ 0
+    have hg := genus_Elliptic_eq_one ω₁ ω₂ h
+    omega
+  simp only [ellipticLoops]
+  rw [if_neg hi]
+
+/-- **A-period entry**: every entry of the elliptic arc-A-period matrix is
+`ω₁`. -/
+theorem arcAPeriodMatrix_elliptic (i j : Fin (genus (Elliptic ω₁ ω₂ h))) :
+    arcAPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+      (fun m => ellipticFormBasis ω₁ ω₂ h m) i j = ω₁ := by
+  rw [arcAPeriodMatrix_apply, ellipticLoops_αEmbed]
+  simp [ellipticFormBasis_apply, aLoop_period_eq]
+
+/-- **B-period entry**: every entry of the elliptic arc-B-period matrix is
+the oriented period `ω₂'`. -/
+theorem arcBPeriodMatrix_elliptic (i j : Fin (genus (Elliptic ω₁ ω₂ h))) :
+    arcBPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+      (fun m => ellipticFormBasis ω₁ ω₂ h m) i j
+      = orientedPeriod ω₁ ω₂ := by
+  rw [arcBPeriodMatrix_apply, ellipticLoops_βEmbed]
+  unfold orientedPeriod
+  split_ifs with hpos
+  · simp [ellipticFormBasis_apply, bLoop_period_eq]
+  · rw [show (bLoopRev ω₁ ω₂ h).arc = (bLoop ω₁ ω₂ h).arc.reverse from rfl]
+    simp [ellipticFormBasis_apply, canonicalArcIntegral_reverse, bLoop_period_eq]
+
+/-- The `word_R2` left side collapses to `−|Im (ω₂ · conj ω₁)| · 2i`. -/
+theorem elliptic_word_R2_lhs :
+    ω₁ * (starRingEnd ℂ) (orientedPeriod ω₁ ω₂)
+        - orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁
+      = -((|(ω₂ * (starRingEnd ℂ) ω₁).im| : ℝ) * (2 * Complex.I)) := by
+  have hsub := Complex.sub_conj (orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁)
+  have hconj : ω₁ * (starRingEnd ℂ) (orientedPeriod ω₁ ω₂)
+      = (starRingEnd ℂ) (orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁) := by
+    rw [map_mul, Complex.conj_conj, mul_comm]
+  rw [hconj, ← orientedPeriod_im ω₁ ω₂,
+    show (starRingEnd ℂ) (orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁)
+        - orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁
+      = -(orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁
+          - (starRingEnd ℂ) (orientedPeriod ω₁ ω₂ * (starRingEnd ℂ) ω₁)) from by
+      ring, hsub]
+  push_cast
+  ring
+
+/-- **The g = 1 boundary-word witness**: the interior-form comparison datum
+for the elliptic curve, over the oriented loops and the `dz` basis, with
+constant cut pullback `h := c` and linear primitive `F := c·z` for the
+orientation constant `c = √|Im (ω₂ · conj ω₁)|`. All fields are explicit;
+no axiom enters (in particular neither `AX_PeriodCycleBasis` nor
+`AX_Elliptic_H1_symplectic`). -/
+noncomputable def ellipticArcBoundaryWordData :
+    ArcBoundaryWordDataInterior (ellipticLoops ω₁ ω₂ h)
+      (ellipticFormBasis ω₁ ω₂ h) where
+  h := fun _ _ => (orientationConstant ω₁ ω₂ : ℂ)
+  F := fun _ z => (orientationConstant ω₁ ω₂ : ℂ) * z
+  hhc := fun _ => continuousOn_const
+  hFc := fun _ => (continuous_const.mul continuous_id).continuousOn
+  hh := fun _ z _ => by
+    simpa using hasDerivAt_const z ((orientationConstant ω₁ ω₂ : ℝ) : ℂ)
+  hF := fun _ z _ => by
+    simpa using (hasDerivAt_id z).const_mul ((orientationConstant ω₁ ω₂ : ℝ) : ℂ)
+  word_R1 := by
+    intro i j
+    simp only [Matrix.sub_apply, Matrix.mul_apply, Matrix.transpose_apply,
+      arcAPeriodMatrix_elliptic ω₁ ω₂ h, arcBPeriodMatrix_elliptic ω₁ ω₂ h]
+    rw [rectBoundary_linear_mul_const, sub_eq_zero]
+    exact Finset.sum_congr rfl fun k _ => mul_comm _ _
+  word_R2 := by
+    intro i j
+    simp only [Matrix.sub_apply, Matrix.mul_apply, Matrix.transpose_apply,
+      Matrix.map_apply, arcAPeriodMatrix_elliptic ω₁ ω₂ h,
+      arcBPeriodMatrix_elliptic ω₁ ω₂ h, Fintype.sum_unique]
+    rw [boundaryForm_const_linear, normSq_orientationConstant]
+    exact elliptic_word_R2_lhs ω₁ ω₂
+  nondeg := by
+    intro v hv
+    refine ⟨(1 / 2, 1 / 2),
+      ⟨Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩,
+        Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩⟩, ?_⟩
+    rw [Fintype.sum_unique]
+    have hvd : v default ≠ 0 := by
+      intro h0
+      apply hv
+      funext j
+      rw [Unique.eq_default j]
+      simpa using h0
+    exact mul_ne_zero hvd
+      (Complex.ofReal_ne_zero.mpr (orientationConstant_pos ω₁ ω₂ h).ne')
+
+/-- **R1 at g = 1, concrete and axiom-free**: the elliptic arc-period blocks
+commute. -/
+theorem elliptic_periodMatrix_symm :
+    (arcAPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+        fun m => ellipticFormBasis ω₁ ω₂ h m)ᵀ
+        * (arcBPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+            fun m => ellipticFormBasis ω₁ ω₂ h m)
+      = (arcBPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+            fun m => ellipticFormBasis ω₁ ω₂ h m)ᵀ
+        * (arcAPeriodMatrix (ellipticLoops ω₁ ω₂ h)
+            fun m => ellipticFormBasis ω₁ ω₂ h m) :=
+  (ellipticArcBoundaryWordData ω₁ ω₂ h).periodMatrix_symm
+
+/-- **R2 at g = 1, concrete and axiom-free**: the elliptic arc-period Gram
+matrix is positive definite. -/
+theorem elliptic_periodGram_posDef :
+    (arcPeriodGram (ellipticLoops ω₁ ω₂ h)
+      fun m => ellipticFormBasis ω₁ ω₂ h m).PosDef :=
+  (ellipticArcBoundaryWordData ω₁ ω₂ h).periodGram_posDef
+
+/-- **Conditional g = 1 `PeriodCycleBasis`**: given the H₁ topology fields
+for the oriented elliptic loops (the sole remaining content of
+`AX_Elliptic_H1_symplectic`), the boundary-word datum completes a full
+`PeriodCycleBasis` witness with both Hodge fields PROVEN. -/
+noncomputable def ellipticPeriodCycleBasisOfH1
+    (isBasis : Module.Basis (Fin (2 * genus (Elliptic ω₁ ω₂ h))) ℤ
+      (H1 (Elliptic ω₁ ω₂ h) 0))
+    (loops_to_basis : ∀ i, isBasis i
+      = loopToHomology (ellipticLoops ω₁ ω₂ h i)) :
+    PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0 :=
+  periodCycleBasisOfBoundaryWordInterior isBasis loops_to_basis
+    (ellipticArcBoundaryWordData ω₁ ω₂ h)
+
+end Stage3
 
 end BoundaryWordElliptic
 end Jacobians.RiemannSurface
