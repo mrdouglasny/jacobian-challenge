@@ -139,8 +139,10 @@ H = hard (week+).
 
 | rung | statement | diff | notes |
 |---|---|---|---|
-| TK1 `exists_form_with_pole` | `P ≠ Q` ⟹ `∃ α ∈ Ω(P+Q)` with a genuine simple pole (dim count `g+1 > g`) | E/M | also feeds lattice B-4 |
-| TK2 `exists_thirdKind_form` | + poles at BOTH `P,Q`, residues `c, −c`, `c ≠ 0` (residue atom with `F = meroFormDiv α`) | M | |
+| TK0 `exists_canonical_serreData_of_kirovGenus_pos` | keystone re-run KEEPING the frame: `SerreDualityData` with `data.K = div ω₀`, `ω₀` holomorphic exhibited | E | **PROVEN** (`AbelSubsetThirdKind.lean`) — solves the K-coherence problem (RR's ∃K vs the §17.4 iso's `div ω₀` don't share their K) |
+| TK0b `exists_riemannRoch_at_form_divisor` | RR identity + `deg K = 2g−2` at an exhibited form divisor | E | **PROVEN** |
+| TK1 `exists_thirdKind_pole` | `g>0`, `P ≠ Q` ⟹ `∃ α ∈ Ω((P)+(Q))` with `ord_P α = −1` or `ord_Q α = −1` (dim count `g+1 > g` through the junk-free quotient inclusion) | E/M | **PROVEN**; also feeds lattice B-4 |
+| TK2 `exists_thirdKind_form` | + poles at BOTH `P,Q`, residues `c, −c`, `c ≠ 0` (residue atom with `F = meroFormDiv α`) | M | open |
 
 ## 3. Order of work & estimates
 

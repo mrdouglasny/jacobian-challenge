@@ -41,3 +41,21 @@ docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
   search otherwise wanders into Module ℂ ↥(OneFormsZeroOne X) and times out);
   S4 needed `set_option maxHeartbeats 1000000` (respectTransparency-false whnf
   cost, same as the comparison files); set_option must precede the docstring.
+
+## 2026-06-11 milestone 2 — TK-block landed (third-kind from RR)
+
+- KirovDolbeault/Dolbeault/AbelSubsetThirdKind.lean (aggregator-wired, build green):
+  * TK0 exists_canonical_serreData_of_kirovGenus_pos — keystone g>0 leg re-run
+    KEEPING the canonical frame: SerreDualityData with data.K = div ω₀ for an
+    exhibited holomorphic ω₀ ≠ 0. This solves the K-coherence gap: the RR
+    theorem's ∃K and the §17.4 iso's div ω₀ otherwise never share their K.
+  * TK0b exists_riemannRoch_at_form_divisor — RR identity AND deg K = 2g−2 at
+    that form divisor (inline ladder composition + deg_canonical).
+  * TK1 exists_thirdKind_pole — g>0, P≠Q ⟹ ∃ α ∈ Ω((P)+(Q)) with a genuine
+    simple pole at P or Q: omegaDim((P)+(Q)) = lDim((P)+(Q)+K) = g+1 > g =
+    omegaDim 0; pole-freeness would inject the junk-free quotient of Ω((P)+(Q))
+    into Ω(0)'s (inclusion + liftQ + ker_liftQ_eq_bot +
+    finrank_le_finrank_of_injective), forcing g+1 ≤ g.
+  Kernel: all three #print axioms = standard 3; no sorryAx, no custom axioms.
+- TK2 (both poles + opposite residues via the residue atom at F = α/ω₀) left
+  open — next TK bite; P-block (pairing) is the main-line next.
