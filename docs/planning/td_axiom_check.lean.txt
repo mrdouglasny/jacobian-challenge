@@ -1,0 +1,26 @@
+# TD-lane kernel-closure artifact (maintainer re-run, #214 review P2)
+import Jacobians.RiemannSurface.PeriodDiscretenessFromR2
+#print axioms Jacobians.RiemannSurface.arcAPeriodMatrix_isUnit
+#print axioms Jacobians.RiemannSurface.arcTauMatrix_im_posDef
+#print axioms Jacobians.RiemannSurface.discreteTopology_familyPeriodLattice_of_arcBoundaryWordData
+#print axioms Jacobians.RiemannSurface.span_real_familyPeriodVec_eq_top_of_arcBoundaryWordData
+#print axioms Jacobians.RiemannSurface.isZLattice_familyPeriodLattice_of_arcBoundaryWordData
+#print axioms Jacobians.RiemannSurface.discreteTopology_of_arcBoundaryWordData
+# raw output:
+'Jacobians.RiemannSurface.arcAPeriodMatrix_isUnit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.RiemannSurface.arcTauMatrix_im_posDef' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.RiemannSurface.discreteTopology_familyPeriodLattice_of_arcBoundaryWordData' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.RiemannSurface.span_real_familyPeriodVec_eq_top_of_arcBoundaryWordData' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.RiemannSurface.isZLattice_familyPeriodLattice_of_arcBoundaryWordData' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.RiemannSurface.discreteTopology_of_arcBoundaryWordData' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+# verdict:
+declarations: 6
+all standard-3: True | sorryAx: False
