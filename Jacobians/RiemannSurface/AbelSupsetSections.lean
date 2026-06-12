@@ -338,6 +338,38 @@ theorem exists_fiberDivisor_sections (f : MeromorphicFunctionField X)
     rw [hord_s p hp]
     simp
 
+/-! ## S4c: smoothness of the Jacobi pencil map at regular values
+
+With `AX_ofCurve_contMDiff` a THEOREM (the Abel–Jacobi map `ofCurveImpl` is
+`ContMDiff ω` into the Jacobian), the pencil map `fiberAJ` is smooth at every
+regular value directly in the Jacobian: near `y₀ ∉ branchValues f` the fiber
+divisor trivializes along the S4b sections, so
+`fiberAJ f hf y = ∑ᵢ ofCurveImpl x₀ (sᵢ y)` — a finite sum of compositions
+of `ContMDiff` maps, smooth by the `LieAddGroup` structure of the Jacobian.
+No ambient chart-lift is needed at this rung. -/
+
+/-- **S4c (pencil smoothness at regular values).** The Jacobi pencil map
+`Φ = fiberAJ f hf : ℙ¹ → Jacobian X` is `ContMDiffAt` at every non-branch
+value: along the S4b sections, `Φ(y) = ∑ᵢ AJ(sᵢ y)` near `y₀`. -/
+theorem contMDiffAt_fiberAJ (f : MeromorphicFunctionField X)
+    (hf : Nonconstant f) {y₀ : ProjectiveLine} (hy₀ : y₀ ∉ branchValues f) :
+    ContMDiffAt 𝓘(ℂ) (modelWithCornersSelf ℂ (Fin (genus X) → ℂ))
+      (⊤ : WithTop ℕ∞) (fiberAJ f hf) y₀ := by
+  obtain ⟨s, hs0, hsmooth, -, -, hdiv⟩ :=
+    exists_fiberDivisor_sections f hf hy₀
+  have hev : fiberAJ f hf =ᶠ[𝓝 y₀]
+      fun y => ∑ p ∈ (toP1_fiber_finite hf y₀).toFinset,
+        ofCurveImpl X (Classical.arbitrary X) (s p y) := by
+    filter_upwards [hdiv] with y hy
+    show abelJacobiDiv X (fiberDivisor f hf y) = _
+    rw [hy, map_sum]
+    exact Finset.sum_congr rfl fun p hp =>
+      FreeAbelianGroup.lift_apply_of _ _
+  refine ContMDiffAt.congr_of_eventuallyEq ?_ hev
+  refine ContMDiffAt.sum fun p hp => ?_
+  exact ((AX_ofCurve_contMDiff (Classical.arbitrary X)).contMDiffAt).comp
+    y₀ (hsmooth p hp)
+
 end MeromorphicFunctionField
 
 end Jacobians.RiemannSurface

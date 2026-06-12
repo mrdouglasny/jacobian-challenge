@@ -67,7 +67,7 @@ at most).
 | **S3** (Φ + constancy reduction) | `fiberAJ f hf y := abelJacobiDiv X (fiberDivisor f hf y)` (the Jacobi pencil map, Jacobian-valued); named hypothesis `FiberAJConstancy`; `abel_supset_of_fiberAJConstancy` (`AJ(div f) = Φ(0) − Φ(∞) = 0`); degenerate case `divisor_eq_zero_of_not_nonconstant` (de-privatized `orderAtMF_eq_zero_of_not_nonconstant` in `DegreeTheorem.lean`); bonus `deg_fiberDivisor_const` (fiber-degree constancy in divisor form, for the S6 basepoint bookkeeping) | **PROVEN** (this lane) |
 | **S4a** (branch values) | `branchValues f : Set ProjectiveLine` (finite, via `AX_BranchLocus`-the-theorem) + `mapAnalyticOrderAt_eq_one_of_not_branchValue` (regular fibers are unramified) | **PROVEN** (this lane) |
 | **S4b** (local sections) | over `y₀ ∉ branchValues f`: `d` disjoint local holomorphic sections `sᵢ : V → X` of `toP1 f` through the fiber points (Wallace `IsHolomorphicAt.localInverse` + Mathlib `analyticAt_localInverse`; order-1 by S4a), with `fiberDivisor f hf y = ∑ᵢ of (sᵢ y)` near `y₀` (kfold uniqueness + properness) — `exists_fiberDivisor_sections` in `AbelSupsetSections.lean` | **PROVEN** (this lane) |
-| **S4c** (local lift of Φ) | local ambient lift `φ : V → Fin (genus X) → ℂ` of `Φ` along the sections: `φ(y) = ∑ᵢ (ofCurveAmbient x₀ (sᵢ y₀) + development from sᵢ y₀ to sᵢ y)`, holomorphic via the `developingValue` endpoint-analyticity brick (HI workstream / `AX_ofCurve_contMDiff` discharge route); `Φ = mk ∘ φ` on `V` | open |
+| **S4c** (pencil smoothness at regular values) | `contMDiffAt_fiberAJ`: `Φ = fiberAJ f hf` is `ContMDiffAt` at every `y₀ ∉ branchValues f` — REVISED ROUTE: no ambient lift; compose the proven `AX_ofCurve_contMDiff` (AJ is `ContMDiff ω` into the Jacobian) with the S4b sections through `map_sum` + the Jacobian `LieAddGroup` (`ContMDiffAt.sum`) | **PROVEN** (this lane) |
 | **S5** (removable across branch) | the load-bearing lemma: symmetric sum of endpoint integrals bounded near a branch value ⇒ holomorphic extension (`analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`) | open |
 | **S6** (lift + Liouville) | `ℙ¹` simply connected (`Topology/SphereSimplyConnected`) ⇒ lift `Φ` through `ℂ^g → ℂ^g/Λ` (#199 `simplyConnectedPrimitive` pattern, Kirov `ZLatticeQuotient` local-homeo API); compact source ⇒ constant (`MDifferentiable.exists_eq_const_of_compactSpace` per coordinate / `Differentiable.exists_eq_const_of_bounded`) | open |
 | **S7** (assembly) | `Φ(0) = Φ(∞)` + S2 + S1 ⇒ `AX_AbelSupset` becomes a theorem in place (Phase-C in-place conversion in `Axioms/AbelTheorem.lean`) | open |
@@ -108,3 +108,15 @@ route doc's step 2–3). S1–S3 are assembly over landed toolkit.
   `ofCurve`-smoothness with the S4b sections directly in the Jacobian
   (no ambient chart-lift needed): `fiberAJ` is `ContMDiffAt` at every
   non-branch value via `map_sum` over the section trivialization.
+- 2026-06-12 (SUP-2 session): S4c proven on the revised (Jacobian-valued)
+  route — `contMDiffAt_fiberAJ` in `AbelSupsetSections.lean`. Kernel
+  closure: standard-3 + `AX_PeriodCycleBasis` (inherited from
+  `ofCurveImpl`). S5 decomposition (next): S5a continuity of `fiberAJ`
+  at ALL values (general kfold clustering + sumset-neighborhood lemma in
+  the topological group `Jacobian X`); S5b generic removable-singularity
+  for manifold-valued maps (`MDifferentiableAt` from `ContinuousAt` +
+  punctured-nbhd `MDifferentiableAt`, via `mdifferentiableAt_iff_of_mem_source`
+  charts + Mathlib `Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`
+  in the Jacobian chart — no explicit `ℂ^g` lift needed at S5);
+  then `mdifferentiable_fiberAJ` everywhere. The explicit lift through
+  `ℂ^g → ℂ^g/Λ` is needed only at S6 (Liouville).
