@@ -41,3 +41,12 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
 - Note from main: TD-lane discharged TR-DISC (#214) and the Abel P-block
   completed (#213) — the cycle-basis program is converging from the other
   side; B1 generation remains on the critical path for the slit-sheet route.
+
+- REVIEW FLAG (maintainer pre-verification, PR #212): the sed-based umbrella
+  wiring silently no-opped — Jacobians/Topology.lean never imported the new
+  modules, so per-file umbrella checks were green VACUOUSLY and root CI never
+  compiled them. Fixed with the Edit tool + grep verification; root build now
+  8,962 jobs (+3 over main). Gotcha: always grep-verify sed edits or use the
+  Edit tool; vacuous-green umbrella checks are invisible without a job-count
+  comparison.
+- Maintainer pre-verification on #210/#211: CLEAN, awaiting external review.
