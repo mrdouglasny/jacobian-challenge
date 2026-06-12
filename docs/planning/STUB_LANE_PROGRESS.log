@@ -1,0 +1,43 @@
+# STUB lane — LineBundle/H1 stub retirement
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 3, Package 5)
+
+Append-only progress log. Branch: `feat/stub-retirement`, based on main @ fcbb326.
+
+## 2026-06-12 session 1
+
+- Kernel enumeration first (script from check_axiom_consistency.sh): of the
+  package's six listed stubs, only TWO are still axioms in the kernel —
+  `Jacobians.Axioms.LineBundle` (#65) and `Jacobians.Axioms.LineBundle.ofDivisor`
+  (#70). The `H1` trio (#66-#68) was de-opaqued to `Layer3.H1coh` on 2026-06-09
+  and `AX_RiemannRoch`/`AX_SerreDuality` (#37/#38) are already theorems
+  (standard-3 + the two stubs in their statements). So Package 5's real scope
+  = retire the two type stubs; honest potential 16 -> 14, not 16 -> 10.
+- De-opaque (the #201 canonicalDivisor pattern, names + signatures verbatim):
+  - `LineBundle D` : axiom Type -> parameterized singleton `structure`
+    (divisor-indexed tag; the development only exposes H0/H1, which are real
+    over `riemannRochSpace D` / `Layer3.H1coh D` and depend on D alone;
+    a structure rather than PUnit keeps `LineBundle D1`/`LineBundle D2`
+    definitionally distinct so consumers cannot silently cross divisors).
+  - `LineBundle.ofDivisor D` : axiom -> `def ... := ⟨⟩`.
+- Consumer verification (statement preservation, per-file `lake env lean`, all
+  green): LineBundleBasic, Cohomology/LineBundle, RiemannRochAPI,
+  SerreDualityAPI, SheafCohomologySpec, Axioms/RiemannRoch, Axioms/SerreDuality.
+- Kernel checks (all exactly [propext, Classical.choice, Quot.sound]):
+  - `Jacobians.Axioms.AX_RiemannRoch`  (statement included — stubs GONE)
+  - `Jacobians.Axioms.AX_SerreDuality` (statement included — stubs GONE)
+  - `Jacobians.Axioms.LineBundle.ofDivisor`
+  - `Jacobians.RiemannSurface.H0_equiv_riemannRochSpace`
+- Ledger reconciled vs base main (16): 16 -> 14 active (AXIOM_AUDIT header +
+  Class-2a count 3 -> 1 + stub row -> DISCHARGED + Recently-discharged entry +
+  verification block; README at-a-glance + topic-table cluster row 4 -> 2;
+  CHALLENGE_AXIOM_CLOSURE §iii rows marked). Challenge-critical unchanged.
+  NOTE for merger: if PR #209 (genus-0 flip, 15) lands first, this PR's
+  reconcile becomes 15 -> 13 — same maintainer-refresh pattern as #209.
+
+## 2026-06-12 session 1 (cont.) — rebase onto post-#209 main
+
+- PR #209 MERGED (and #208, the B4 image re-plumb from issue #206, also
+  landed — TRANK residual now TR-DISC alone). Main at 15 axioms / 2 critical.
+- Rebased feat/stub-retirement onto 399a243; ledger reconcile redone:
+  15 -> 13 active, challenge-critical unchanged (2). Full build + regen +
+  consistency re-run post-rebase.
