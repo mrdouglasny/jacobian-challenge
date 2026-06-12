@@ -129,3 +129,24 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
     integer-unit algebra forces tiny circle = cell generator up to sign.
   - Kernel standard-3 on all headline decls. B1 = issue #171 T1 upper-bound
     half: DONE (with identified explicit generators, not just abstract FG).
+- G6 (SHARP B1) LANDED: Jacobians/Topology/IsolatingLasso.lean +
+  puncturedBallHomeo (HalfPlaneHomeo.lean) + End-mul lemmas
+  (SpokeAlgebra: fromPath_mul rfl-level!, fromPath_symm_eq_inv,
+  spokedClass_loop_conj = "spoking by a loop is conjugation").
+  - isolatingLasso_conj: meridian conjugacy for isolating lassos around
+    the same puncture — common punctured ball via puncturedBallHomeo,
+    same winding-unit epsilon pins both to the same cell-generator power
+    (no case split: m*eps=1 twice + mul_right_cancel), spokes absorb the
+    difference as an explicit loop conjugator.
+  - normalClosure_isolatingLassos_eq_top: ONE isolating lasso per
+    puncture (any choice) normally generates pi1(C \ T, x0). This is
+    the #171 T1 upper-bound in its finite, identified-generator form;
+    with windingHom_lasso_self/_ne it gives the full
+    generators-with-delta-winding presentation interface.
+  - All standard-3 kernel-verified.
+- Route-doc note: the 4th-pass "mountain" (2D homotopy telescope /
+  filling kernel) is NOT needed for any of B1's concrete forms — the
+  abstract-H + all-spokes induction makes every transport a comap, and
+  meridian conjugacy for ISOLATING lassos is elementary (common
+  punctured-ball cell). The telescope remains only for the
+  arbitrary-PuncturedCellSystem generality (Mathlib-grade, non-blocking).

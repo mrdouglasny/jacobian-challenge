@@ -162,6 +162,37 @@ theorem mapOfEq_spokedClass {Y : Type*} [TopologicalSpace Y] (f : C(X, Y))
     Path.map_trans, ← Path.map_symm]
   rfl
 
+/-- Multiplication in the fundamental group is reverse concatenation of
+representatives. -/
+theorem fromPath_mul {x₀ : X} (a b : Path x₀ x₀) :
+    FundamentalGroup.fromPath (Qmk a) * FundamentalGroup.fromPath (Qmk b)
+      = FundamentalGroup.fromPath (Qmk (b.trans a)) :=
+  rfl
+
+/-- The constant loop represents the identity. -/
+theorem fromPath_refl_eq_one {x₀ : X} :
+    FundamentalGroup.fromPath (Qmk (Path.refl x₀)) = 1 :=
+  (FundamentalGroupoid.id_eq_path_refl (FundamentalGroupoid.mk x₀)).symm
+
+/-- The reversed loop represents the inverse. -/
+theorem fromPath_symm_eq_inv {x₀ : X} (p : Path x₀ x₀) :
+    FundamentalGroup.fromPath (Qmk p.symm)
+      = (FundamentalGroup.fromPath (Qmk p))⁻¹ := by
+  refine eq_inv_of_mul_eq_one_left ?_
+  rw [fromPath_mul]
+  have h : Qmk (p.trans p.symm) = Qmk (Path.refl x₀) :=
+    Quotient.sound ⟨(Path.Homotopy.reflTransSymm p).symm⟩
+  rw [h, fromPath_refl_eq_one]
+
+/-- **Spoking by a loop is conjugation** by the loop's class. -/
+theorem spokedClass_loop_conj {x₀ : X} (w σ : Path x₀ x₀) :
+    spokedClass w σ
+      = (FundamentalGroup.fromPath (Qmk w))⁻¹
+          * FundamentalGroup.fromPath (Qmk σ)
+          * FundamentalGroup.fromPath (Qmk w) := by
+  rw [← fromPath_symm_eq_inv, fromPath_mul, fromPath_mul]
+  rfl
+
 /-- Spoked classes of pointwise-equal data agree, across a propositional
 identification of the loop's basepoint. -/
 theorem spokedClass_of_eq {x₀ y y' : X} (h : y = y') (p : Path x₀ y)
