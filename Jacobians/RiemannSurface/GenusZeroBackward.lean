@@ -130,7 +130,7 @@ theorem chartSegmentPath_mem_pathChartBallSet (p : X) {y : X}
     rw [← hext]
     have hcoord := chartSegmentPath_coord_eq p hy hu
     have hball := chartSegment_flatSegment_mem_ball p hy hu
-    show (extChartAt 𝓘(ℂ) p) ((chartSegmentPath p hy).extend (u : ℝ)) ∈
+    change (extChartAt 𝓘(ℂ) p) ((chartSegmentPath p hy).extend (u : ℝ)) ∈
       Metric.ball ((chartAt ℂ p) p) (chartTargetBallRadius p)
     have hchart_eq : (extChartAt 𝓘(ℂ) p) ((chartSegmentPath p hy).extend (u : ℝ)) =
         (chartAt ℂ p) ((chartSegmentPath p hy).extend (u : ℝ)) := rfl
