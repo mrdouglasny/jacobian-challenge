@@ -1,0 +1,19 @@
+# BWELL lane — P9: the g=1 ArcBoundaryWordData witness
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 4 P9; plan: P9_ELLIPTIC_WITNESS_PLAN.md)
+
+Append-only progress log. Branch: `feat/bw-elliptic`.
+
+## 2026-06-12 session 1
+
+- Plan banked (P9_ELLIPTIC_WITNESS_PLAN.md): constant-h/linear-F field
+  choices collapse the datum to two explicit integrals.
+- Stage 1 DONE: `Jacobians/RiemannSurface/BoundaryWordElliptic.lean` —
+  - `rectBoundary_linear_mul_const`: word_R1's RHS vanishes (Cauchy on the
+    box for the entire function (c·z)·c).
+  - `boundaryForm_const_linear`: word_R2's RHS = normSq c · 2i (the classic
+    area integral over the unit square, via the reusable
+    `integral_conj_affine` edge lemma).
+  - Both kernel standard-3. NOT yet in any umbrella (stage 2 will wire).
+- Stage 2 (next): the cω singleton basis on ellipticDz, period entries via
+  aLoop/bLoop_period_eq, orientation normalization
+  c := sqrt(±Im(ω₂·conj ω₁)), and the ArcBoundaryWordData structure literal.
