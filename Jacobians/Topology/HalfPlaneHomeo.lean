@@ -63,4 +63,13 @@ noncomputable def halfPlaneHomeo (c : ℝ) : {z : ℂ // z.re < c} ≃ₜ ℂ wh
     · exact (Complex.continuous_ofReal.comp Complex.continuous_im).mul
         continuous_const
 
+/-- A homeomorphism restricts to a homeomorphism between complements of a
+set and its image — the puncture-transport companion of `halfPlaneHomeo`
+(restricting it to a half-plane minus finitely many punctures gives the
+plane minus their images). -/
+noncomputable def complCongr {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] (φ : X ≃ₜ Y) (s : Set X) :
+    (↥sᶜ) ≃ₜ (↥(⇑φ '' s)ᶜ) :=
+  (φ.image sᶜ).trans (Homeomorph.setCongr (Equiv.image_compl φ.toEquiv s))
+
 end Jacobians.Topology

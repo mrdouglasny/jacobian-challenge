@@ -66,3 +66,45 @@ by a homeomorphism). Everything else is verbatim the same telescope.
 
 Standard-3 gate per file; no new axioms; statements `Path`-level and
 basepointed per the issue's interface freeze.
+
+## G3/G4 statement-design notes (2026-06-12, second pass)
+
+**Trap recorded — the naive induction statement is FALSE.** "For H normal
+containing, per puncture s, the class of SOME loop with winding vector δ_s:
+H = ⊤" fails in general: winding pins only the abelianized image, and
+quotients of free groups by one relator-per-generator with trivialized
+abelianization can be nontrivial **perfect** groups (balanced presentations
+of perfect groups). So the inductive hypothesis cannot be winding-level; it
+must carry honest **cell-lasso** elements (G2's `cellLasso`, pinned up to
+the cell's ℤ-iso, not up to winding).
+
+**Consequences for the induction package.** P(n) must bundle:
+(i) *meridian conjugacy*: any two cell-lassos around the same puncture
+    (cells containing the basepoint) are conjugate in `π₁(ℂ ∖ T)` — for
+    n = 1 this is free (π₁ ≅ ℤ, equal not just conjugate); inductively it
+    rides along with (ii);
+(ii) *normal generation*: the normal closure of one cell-lasso per puncture
+    is ⊤.
+The conceptual proof of (ii) — "filling the punctures kills exactly the
+meridians" — is the AMALGAMATION half of SVK (kernel computation), which
+the generation-only extraction deliberately avoided.  Two honest options:
+  (a) prove the *filling* statement
+      `π₁(ℂ∖T)/ncl(lasso_s) ≅ π₁(ℂ∖(T∖{s}))` directly by a covering-space
+      argument (universal-cover surgery; heavy), or
+  (b) run the separating-line induction with BOTH clauses in the package,
+      using G1 for the generation step and the strip's convexity to keep
+      conjugators tracked.  Sketch for (ii) at the induction step: G1 over
+      {U, V} reduces any class to a product of U- and V-loop classes; the
+      IH (transported through `halfPlaneHomeo` + `complCongr`) expresses
+      each side-class in side-cell lassos; clause (i) (transported) plus
+      strip-based conjugator paths rewrite side-cell lassos as conjugates
+      of the chosen global cell-lassos.  The (i)-step at size n reduces to
+      the (i)-step at size 1 inside a common refined cell — the n=1 case
+      is the anchor.
+Option (b) stays within the delivered machinery (G1 + G2 + toolkit) and is
+the recommended route; its hard new content is the transport bookkeeping,
+not new topology.  Estimated 1–2 focused sessions for (i)+(ii) at this
+level of preparation.
+
+Status: G1 ✓ (CoverGeneration), G2 ✓ (CellLassoPower), toolkit ✓
+(halfPlaneHomeo + complCongr).  Next session: implement (b).
