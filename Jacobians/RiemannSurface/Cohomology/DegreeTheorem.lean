@@ -123,7 +123,10 @@ private theorem deg_eq_sum_order_support (f : MeromorphicFunctionField X) :
   intro p hp
   simpa [fs, FreeAbelianGroup.coeff] using coeff_divisor f p
 
-private theorem orderAtMF_eq_zero_of_not_nonconstant {f : MeromorphicFunctionField X}
+/-- A `toP1`-constant meromorphic-function-field element has vanishing
+order everywhere. (De-privatized 2026-06-12: the SUP-lane Abel-⊇ plumbing
+needs the constant-function degenerate case `divisor f = 0`.) -/
+theorem orderAtMF_eq_zero_of_not_nonconstant {f : MeromorphicFunctionField X}
     (hf : ¬ Nonconstant f) (p : X) :
     orderAtMF p f = 0 := by
   classical

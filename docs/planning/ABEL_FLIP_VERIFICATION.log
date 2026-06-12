@@ -41,3 +41,34 @@ axiom `AX_AbelSupset` (Abel ⊇, Abel–Jacobi side, Liouville route).
  Quot.sound,
  Jacobians.Axioms.AX_AbelSupset,
  Jacobians.Axioms.AX_PeriodCycleBasis]
+
+================================================================
+SUP-lane ⊇ flip (2026-06-12, feat/abel-supset): AX_AbelSupset → theorem
+================================================================
+
+Kernel closures recorded at the flip commit (lake env lean, #print axioms):
+
+'Jacobians.Axioms.AX_AbelSupset' depends on axioms: [propext,
+ Classical.choice, Quot.sound, Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobians.Axioms.AX_AbelTheorem' depends on axioms: [propext,
+ Classical.choice, Quot.sound, Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobian.ofCurve_inj' depends on axioms: [propext, Classical.choice,
+ Quot.sound, Axioms.AX_PeriodCycleBasis]            (docs/axiom-report.txt)
+
+Ladder closures (each verified at its rung commit):
+  S4b exists_fiberDivisor_sections / exists_section_at /
+      localInverse_apply_self / localInverse_tendsto /
+      contMDiffAt_of_isHolomorphicAt_of_continuousAt   — standard-3 only
+  S4c contMDiffAt_fiberAJ                              — standard-3 + AX_PeriodCycleBasis
+  S5  exists_nhds_zero_finsetSum_mem,
+      mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt,
+      eventually_fiberDivisor_cluster                  — standard-3 only
+      continuousAt_fiberAJ, mdifferentiable_fiberAJ    — standard-3 + AX_PeriodCycleBasis
+  S6  simplyConnectedSpace_projectiveLine,
+      ComplexTorus.mdifferentiable_lift_of_mdifferentiable — standard-3 only
+      fiberAJ_eq, fiberAJConstancy                     — standard-3 + AX_PeriodCycleBasis
+
+Guard: scripts/check_axiom_consistency.sh → kernel axiom count 12,
+"✓ axiom count consistent across docs + breakdown (= 12)".
+No sorryAx anywhere in the chain; no AX_AbelSupset in any closure
+(no circularity — the ladder files sit BELOW Axioms/AbelTheorem.lean).

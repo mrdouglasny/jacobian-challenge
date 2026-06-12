@@ -290,7 +290,10 @@ private theorem toP1_bijective_of_weightedFiberSum_one {f : MeromorphicFunctionF
     rw [hxfin, Finset.mem_singleton] at hxmem
     rwa [hxmem]
 
-private theorem IsHolomorphicAt.localInverse_eventually_right_inverse
+/-- The Wallace manifold-level local inverse is an eventual right inverse:
+`F (localInverse y) = y` for `y` near `F p`. (De-privatized for the SUP-lane
+local-section construction, `AbelSupsetSections.lean`.) -/
+theorem IsHolomorphicAt.localInverse_eventually_right_inverse
     {Y : Type*} [TopologicalSpace Y] [ChartedSpace ℂ Y]
     {F : X → Y} {p : X} (hF : IsHolomorphicAt F p)
     (hcont : ContinuousAt F p)
@@ -357,7 +360,10 @@ private theorem IsHolomorphicAt.localInverse_eventually_right_inverse
     chartAt ℂ (F p) y
   simpa [chartLocalAt, Function.comp_def, (chartAt ℂ p).right_inv hrt] using hchart
 
-private theorem deriv_ne_zero_of_mapAnalyticOrderAt_eq_one
+/-- At a point of local mapping degree `1`, the chart-local presentation has
+nonvanishing derivative — the hypothesis of the analytic local inverse.
+(De-privatized for the SUP-lane local-section construction.) -/
+theorem deriv_ne_zero_of_mapAnalyticOrderAt_eq_one
     {Y : Type*} [TopologicalSpace Y] [ChartedSpace ℂ Y]
     {F : X → Y} {p : X} (hF : IsHolomorphicAt F p)
     (horder : mapAnalyticOrderAt F p = 1) :

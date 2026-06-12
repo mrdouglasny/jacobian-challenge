@@ -54,7 +54,7 @@ remaining axioms must be discharged to produce a fully axiom-free challenge clos
 
 ## What filling the 2 does — and does not — claim
 
-Discharging both remaining axioms makes every Buzzard declaration print exactly
+Discharging the remaining axiom makes every Buzzard declaration print exactly
 `[propext, Classical.choice, Quot.sound]` — the same closure as Mathlib
 itself. That is the strongest claim the kernel can express, it is enforced
 continuously by the regenerate-and-diff CI gate on `docs/axiom-report.txt`,
@@ -121,10 +121,25 @@ declarations. Four boundaries to keep the claim honest:
 > only headline affected is `ofCurve_inj`, whose closure swaps
 > `AX_AbelTheorem` → `AX_AbelSupset`. Kernel log:
 > `docs/planning/ABEL_FLIP_VERIFICATION.log`.
+>
+> **ABEL ⊇ FLIP (2026-06-12, SUP lane `feat/abel-supset`).** `AX_AbelSupset` is
+> now a **theorem** — the planned Liouville / symmetric-product route executed
+> in full (S1–S7 of `docs/planning/SUP_ROUTE.md`): the Jacobi pencil map
+> `Φ(y) = AJ(f⁻¹(y))` is `ContMDiffAt` at regular values (local holomorphic
+> sections of the pencil, `AbelSupsetSections.lean`), continuous everywhere and
+> `MDifferentiable` across the branch values (kfold cluster decomposition +
+> manifold-valued removable singularity, `AbelSupsetPencil.lean`), and constant
+> by the lattice-covering lift over the simply connected `ℙ¹` + Liouville
+> (`AbelSupsetLiouville.lean`); `abel_supset_of_fiberAJConstancy` closes the
+> statement verbatim in place. **Challenge-critical count 2 → 1:
+> `AX_PeriodCycleBasis` alone.** Every Buzzard headline — including
+> `ofCurve_inj` and `AX_AbelTheorem` — now prints standard-3 +
+> `AX_PeriodCycleBasis`. Kernel log: `docs/planning/ABEL_FLIP_VERIFICATION.log`
+> (SUP section).
 
-Exactly these axioms appear in `#print axioms` for one or more Buzzard declarations
+Exactly this axiom appears in `#print axioms` for one or more Buzzard declarations
 (from `docs/axiom-report.txt`, which now covers both property theorems and instance
-obligations). Discharging both gives a challenge closure over only
+obligations). Discharging it gives a challenge closure over only
 `[propext, Classical.choice, Quot.sound]`.
 
 ### Cluster A — Core Jacobian structure (appears in ALL Buzzard declarations)
@@ -149,14 +164,14 @@ in the merge. They remain in the build as Part-3 topological-anchoring debt
 discharged by a genuine dissection, re-tying the form to that dissection is the
 recorded joint obligation.
 
-### Cluster B — one classical half-theorem remaining (`AX_AbelSupset`, the ⊇/AJ remainder of `AX_AbelTheorem` after the 2026-06-12 split-flip; uniformization discharged PR #209, smoothness discharged PR #179)
+### Cluster B — ALL DISCHARGED (`AX_AbelSupset` discharged 2026-06-12 SUP lane; uniformization discharged PR #209, smoothness discharged PR #179)
 
 Each appears in exactly one Buzzard declaration and has its own proof path.
 
 | Axiom | Mathematical content | Discharge path |
 |---|---|---|
 | `AX_genus_eq_zero_iff_homeo` | ✅ **DISCHARGED 2026-06-11** (PR #209, parallel-account delivery) — `genus X = 0 ↔ X ≅ₜ S²` is now a theorem, both directions | Forward: keystone-backed RR pole extraction (`h⁰((p)) = 2` at `g = 0`) → `exists_degreeOne_of_genus_zero` → `degreeOne_equiv_projectiveLine` → stereographic `S²` (`RiemannSurface/GenusZeroForward.lean`). Backward: S2-lane `π₁(S²) = 1` + Liouville developing map (`genus_eq_zero_of_homeo_sphere_unconditional`, #199+#205). The concrete `genus ℙ¹ = 0` was already axiom-free via Liouville. |
-| `AX_AbelSupset` | `PrincipalDivisors ≤ ker abelJacobiDiv` — Abel ⊇, AJ side (the split remainder; the full `AX_AbelTheorem` is now a theorem over it) | Forster §20.7. The ⊆ direction (the hard half) was PROVEN 2026-06-12 via the Forster §20 weak-solution engine + E6 adapter; the degree half of ⊇ is `deg_divisor_eq_zero`. Remaining: the Liouville / symmetric-product route (`ABEL_SUPSET_LIOUVILLE_ROUTE.md`). |
+| `AX_AbelSupset` | ✅ **DISCHARGED 2026-06-12** (SUP lane) — `PrincipalDivisors ≤ ker abelJacobiDiv` is now a theorem; with it the full `AX_AbelTheorem` is a theorem at standard-3 + `AX_PeriodCycleBasis` | Forster §20.7. The ⊆ direction was PROVEN 2026-06-12 via the Forster §20 weak-solution engine + E6 adapter; the degree half of ⊇ is `deg_divisor_eq_zero`; the AJ half of ⊇ closed on the Liouville / symmetric-product route (`ABEL_SUPSET_LIOUVILLE_ROUTE.md`, executed as `SUP_ROUTE.md` S1–S7: pencil sections → cluster continuity → removable singularity → covering lift → Liouville). |
 | `AX_ofCurve_contMDiff` | ✅ **DISCHARGED 2026-06-11** (PR #179, @Deicyde) — Abel–Jacobi smoothness is now a theorem (chart-line descent; standard-3 + `AX_PeriodCycleBasis` only) | **Transfer note:** the 2026-06-10 DT flag's HI/lattice-completeness condition is NOT settled by this proof — it transfers into `AX_PeriodCycleBasis`'s discharge obligation (the `loops_to_basis` pin), where it belongs. |
 
 ### Cluster C — Functoriality block
@@ -285,7 +300,7 @@ older discharge analysis is in `docs/planning/AX_AnalyticCycleBasis.md`. DT-vett
 **Cluster B**: Uniformization (`AX_genus_eq_zero_iff_homeo`) — formerly the
 deepest single theorem — was **discharged in PR #209** (genus-0 flip: RR pole
 extraction forward, S2-lane simple connectedness + Liouville backward).
-`AX_AbelSupset` remains (the ⊇/AJ half; the former hard ⊆ half is now a theorem via the §20 engine).
+`AX_AbelSupset` is now DISCHARGED (Liouville pencil route, this PR) (the ⊇/AJ half; the former hard ⊆ half is now a theorem via the §20 engine).
 (`AX_ofCurve_contMDiff` was discharged in PR #179; its HI/lattice-completeness
 conditionality now lives in Cluster A's discharge obligation.)
 
