@@ -1,0 +1,24 @@
+import Jacobians.RiemannSurface.PeriodDiscreteness
+import Jacobians.Layer3.PeriodLatticeDiscrete
+
+-- Engine (must be standard-3 only)
+#print axioms Jacobians.RiemannSurface.discreteTopology_span_int_of_card_eq_finrank
+#print axioms Jacobians.RiemannSurface.isZLattice_span_int_of_span_real_eq_top
+#print axioms Jacobians.RiemannSurface.exists_basis_span_int_of_card_eq_finrank
+#print axioms Jacobians.RiemannSurface.span_real_loopPeriodLattice_eq_top
+#print axioms Jacobians.RiemannSurface.PeriodGeneratingLoops.discreteTopology
+#print axioms Jacobians.RiemannSurface.PeriodGeneratingLoops.exists_basis
+#print axioms Jacobians.RiemannSurface.PeriodGeneratingLoops.finrank_eq
+#print axioms Jacobians.RiemannSurface.isZLattice_loopPeriodLattice
+
+-- Transport (expected: standard-3 + AX_PeriodCycleBasis, nothing else)
+#print axioms Jacobians.Layer3.choiceLoops_periodGenerating
+#print axioms Jacobians.Layer3.loopPeriodLattice_eq_periodLatticeInBasis
+#print axioms Jacobians.Layer3.periodLatticeInBasis_discreteTopology_of_loopSpan
+#print axioms Jacobians.Layer3.periodLatticeInBasis_isZLattice_of_loopSpan
+#print axioms Jacobians.Layer3.exists_periodLatticeInBasis_basis_of_loopSpan
+
+-- Axiom-free reduction (added after first pass; all verified standard-3)
+#print axioms Jacobians.Layer3.devValPeriodVec
+#print axioms Jacobians.Layer3.devValPeriodVec_loopToHomology
+#print axioms Jacobians.Layer3.PeriodGeneratingLoops.of_homology_span

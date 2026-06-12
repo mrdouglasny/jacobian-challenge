@@ -77,8 +77,6 @@ theorem devVal_loop_mem_periodLatticeInBasis_of_path {y₁ y₂ : Y}
           ((δ : Path y₁ y₁) : C(unitInterval, Y)) =
         developingValue y₁ (b i) ((δ : Path y₁ y₁) : C(unitInterval, Y)) :=
       developingValue_basepoint_indep y₂ y₁ (b i) _
-    have hbase_p : developingValue y₂ (b i) ((p : Path y₁ y₂) : C(unitInterval, Y)) =
-        developingValue y₂ (b i) ((p : Path y₁ y₂) : C(unitInterval, Y)) := rfl
     rw [hbase]
     ring
   rw [heq] at hmem
