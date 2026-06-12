@@ -1,0 +1,19 @@
+# SVKGEN lane — issue #171 B1: puncture-lasso generation
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 3, Package 7; route: B1_GENERATION_ROUTE.md)
+
+Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243.
+
+## 2026-06-12 session 1
+
+- Route doc landed (B1_GENERATION_ROUTE.md, posted to issue #171): G1-G5,
+  generation-half-only extraction, G4 normal-closure decision pinned.
+- G1 DONE: `Jacobians/Topology/CoverGeneration.lean` —
+  - `fromPath_mem_of_loops_mem`: over an open cover with path-connected
+    pairwise intersections all containing x₀, a subgroup containing every
+    single-cover-set loop class contains every loop class (generation half
+    of van Kampen, membership form). Extraction of the FiniteGoodCover
+    engine with the anchor layer removed; compiled clean on first attempt.
+  - `fromPath_mem_of_two_open`: the classical two-open corollary (ι = Bool).
+  - Kernel: both standard-3. Umbrella wired (Jacobians/Topology.lean).
+- Next (G2): cell computation — spoke-conjugated loop in a once-punctured
+  cell is a lasso power, via pi1PuncturedPlaneIntAt + pi1MulEquivOfHomeomorph.
