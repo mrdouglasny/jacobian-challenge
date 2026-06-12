@@ -881,12 +881,20 @@ theorem cutoffPullback_apply_eq_zero {σ : SmoothCOneForms X} {j : 𝔇.toFinite
 /-- **The binary chain fold** (Forster §20.5, the product over the chain): the product of
 two weak-solution data is a weak-solution datum for the divisor sum.  `F = F₁·F₂` patched
 at cancellation points by the product of the analytic units, `σ = σ₁ + σ₂`.  Each factor
-must be tame (`TameAt`) at the support points it does not share with the other. -/
+must be tame (`TameAt`) at the support points it does not share with the other.
+
+The construction also **propagates tameness** — the invariant the full chain fold carries
+along a dipole list: at any off-support point of the sum where each factor is tame
+wherever its own divisor vanishes, the product is tame.  At a shared cancellation point
+this holds *unconditionally*, via the patched analytic continuation transported into the
+point's own chart (`analyticAt_chartRead_transfer`). -/
 theorem ArcWeakSolution.exists_mul {D₁ D₂ : Divisor X}
     (W₁ : ArcWeakSolution 𝔇 D₁) (W₂ : ArcWeakSolution 𝔇 D₂)
     (h₁ : ∀ x, D₂ x ≠ 0 → D₁ x = 0 → W₁.TameAt x)
     (h₂ : ∀ x, D₁ x ≠ 0 → D₂ x = 0 → W₂.TameAt x) :
-    Nonempty (ArcWeakSolution 𝔇 (D₁ + D₂)) := by
+    ∃ W : ArcWeakSolution 𝔇 (D₁ + D₂),
+      ∀ q : X, (D₁ + D₂) q = 0 → (D₁ q = 0 → W₁.TameAt q) → (D₂ q = 0 → W₂.TameAt q) →
+        W.TameAt q := by
   classical
   -- the cancellation (patch) set: finite, closed
   set P : Set X := {x | D₁ x ≠ 0 ∧ D₁ x + D₂ x = 0} with hP
@@ -1152,16 +1160,379 @@ theorem ArcWeakSolution.exists_mul {D₁ D₂ : Divisor X}
         W₁.dbar_eq j x hxU hx1, W₂.dbar_eq j x hxU hx2, hsymmxj, hcpadd,
         hFp_off hxP]
       ring
-  exact ⟨{
+  refine ⟨{
     F := Fp
     σ := σs
     F_ne := hFne
     diff_off := hdiff
     dbar_eq := hdbar
     σ_vanish := hσvan
-    norm_form := hnorm }⟩
+    norm_form := hnorm }, ?_⟩
+  intro q hq0 ht₁ ht₂
+  rw [hsum_apply] at hq0
+  by_cases hq1 : D₁ q = 0
+  · -- both factors tame near `q`; the product read is the product of analytic reads
+    have hq2 : D₂ q = 0 := by rwa [hq1, zero_add] at hq0
+    have hqP : q ∉ P := fun h => h.1 hq1
+    obtain ⟨ha₁, hs₁⟩ := ht₁ hq1
+    obtain ⟨ha₂, hs₂⟩ := ht₂ hq2
+    have hsymmq : (chartAt ℂ q).symm ((chartAt ℂ q) q) = q :=
+      (chartAt ℂ q).left_inv (mem_chart_source ℂ q)
+    have hsymmcq : ContinuousAt (chartAt ℂ q).symm ((chartAt ℂ q) q) :=
+      (chartAt ℂ q).continuousAt_symm ((chartAt ℂ q).map_source (mem_chart_source ℂ q))
+    refine ⟨?_, ?_⟩
+    · refine (ha₁.mul ha₂).congr ?_
+      filter_upwards [hsymmcq.preimage_mem_nhds
+        (by rw [hsymmq]; exact hPcl.isOpen_compl.mem_nhds hqP)] with ζ hζ
+      exact (hFp_off hζ).symm
+    · show (σs : SmoothCOneForms X) q = 0
+      rw [hσs_apply, hs₁, hs₂, add_zero]
+  · -- `q` is a cancellation point: the patched continuation, transported to the own chart
+    have hqP : q ∈ P := ⟨hq1, hq0⟩
+    obtain ⟨j, hqU⟩ := TopologicalSpace.Opens.mem_iSup.mp
+      (𝔇.toFiniteCover.covers ▸ Set.mem_univ q : q ∈ ⨆ i, 𝔇.toFiniteCover.U i)
+    obtain ⟨g, hgan, hgev⟩ := hkey j q hqU hqP
+    refine ⟨?_, ?_⟩
+    · have hcov_an : AnalyticAt ℂ (Fp ∘ (chartAt ℂ (𝔇.center j)).symm)
+          ((chartAt ℂ (𝔇.center j)) q) := hgan.congr hgev.symm
+      exact analyticAt_chartRead_transfer (chart_mem_atlas ℂ q)
+        (chart_mem_atlas ℂ (𝔇.center j)) (mem_chart_source ℂ q)
+        (mem_chartSource_of_mem_U 𝔇 hqU) hcov_an
+    · show (σs : SmoothCOneForms X) q = 0
+      rw [hσs_apply, W₁.σ_vanish q hq1, W₂.σ_vanish q (hD2ne hq1 hq0), add_zero]
 
 end ChainFold
+
+/-! ## The full chain fold: from a `SmoothOneChain` to its weak-solution datum
+
+The assembly of E3: subdivide each arc of the chain into chart-disk-sized steps
+(Lebesgue number of the cover along the path), expand the ℤ-coefficients into repeated
+(or reversed) dipole lists, and fold `exists_arcWeakSolution_avoiding` over the resulting
+flat dipole list with `ArcWeakSolution.exists_mul`, carrying the tameness invariant at
+the global endpoint set.  The boundary divisor telescopes to `∂c`. -/
+
+section ChainAssembly
+
+variable (𝔇 : ChartDiskCover X)
+
+/-- The zero `(0,1)` datum evaluates to zero at every point. -/
+theorem zeroOneForm_apply (x : X) :
+    (((0 : ↥(OneFormsZeroOne X))) : SmoothCOneForms X) x = 0 := by
+  rw [ZeroMemClass.coe_zero, ContMDiffSection.coe_zero]
+  rfl
+
+/-- **The trivial weak-solution datum** for the zero divisor: `F ≡ 1`, `σ = 0`.  The base
+case of the chain fold. -/
+def ArcWeakSolution.one : ArcWeakSolution 𝔇 (0 : Divisor X) where
+  F := fun _ => 1
+  σ := 0
+  F_ne := fun _ _ => one_ne_zero
+  diff_off := fun j x _ _ => differentiableAt_const 1
+  dbar_eq := fun j x _ _ => by
+    have hR : 𝔇.cutoffPullback j (((0 : ↥(OneFormsZeroOne X))) : SmoothCOneForms X)
+        (chartMap 𝔇 j x) = 0 :=
+      cutoffPullback_apply_eq_zero (zeroOneForm_apply _)
+    rw [hR, mul_zero]
+    exact DbarDisk.dbar_const 1 (chartMap 𝔇 j x)
+  σ_vanish := fun x _ => zeroOneForm_apply x
+  norm_form := fun a ha => absurd (by simp) ha
+
+/-- The trivial datum is tame everywhere. -/
+theorem ArcWeakSolution.one_tameAt (q : X) : (ArcWeakSolution.one 𝔇).TameAt q :=
+  ⟨analyticAt_const, zeroOneForm_apply q⟩
+
+/-! ### The dipole-list layer -/
+
+/-- The boundary dipole of one (source, target) pair: `(target) − (source)`. -/
+def dipole (p : X × X) : Divisor X :=
+  Finsupp.single p.2 1 - Finsupp.single p.1 1
+
+theorem dipole_apply_eq_zero {p : X × X} {x : X} (hx1 : x ≠ p.1) (hx2 : x ≠ p.2) :
+    dipole p x = 0 := by
+  rw [dipole, Finsupp.sub_apply, Finsupp.single_eq_of_ne hx2,
+    Finsupp.single_eq_of_ne hx1, sub_zero]
+
+theorem eq_fst_or_snd_of_dipole_ne_zero {p : X × X} {x : X} (h : dipole p x ≠ 0) :
+    x = p.1 ∨ x = p.2 := by
+  by_contra hcon
+  push Not at hcon
+  exact h (dipole_apply_eq_zero hcon.1 hcon.2)
+
+theorem dipole_apply_fst {p : X × X} (hab : p.1 ≠ p.2) : dipole p p.1 = -1 := by
+  rw [dipole, Finsupp.sub_apply, Finsupp.single_eq_of_ne hab, Finsupp.single_eq_same]
+  ring
+
+theorem ne_fst_of_dipole_apply_eq_zero {p : X × X} (hab : p.1 ≠ p.2) {x : X}
+    (h : dipole p x = 0) : x ≠ p.1 := by
+  rintro rfl
+  rw [dipole_apply_fst hab] at h
+  norm_num at h
+
+/-- The boundary divisor of a list of dipoles. -/
+def dipoleDiv (L : List (X × X)) : Divisor X :=
+  (L.map dipole).sum
+
+@[simp] theorem dipoleDiv_nil : dipoleDiv ([] : List (X × X)) = 0 := rfl
+
+theorem dipoleDiv_cons (p : X × X) (L : List (X × X)) :
+    dipoleDiv (p :: L) = dipole p + dipoleDiv L := by
+  rw [dipoleDiv, dipoleDiv, List.map_cons, List.sum_cons]
+
+theorem dipoleDiv_append (L₁ L₂ : List (X × X)) :
+    dipoleDiv (L₁ ++ L₂) = dipoleDiv L₁ + dipoleDiv L₂ := by
+  rw [dipoleDiv, dipoleDiv, dipoleDiv, List.map_append, List.sum_append]
+
+/-- The telescoping list of consecutive pairs `(p k, p (k+1))`, `k < N`. -/
+def consecPairs (p : ℕ → X) : ℕ → List (X × X)
+  | 0 => []
+  | N + 1 => consecPairs p N ++ [(p N, p (N + 1))]
+
+/-- **Telescoping**: the dipole divisor of the consecutive-pair list is the endpoint
+dipole. -/
+theorem dipoleDiv_consecPairs (p : ℕ → X) :
+    ∀ N : ℕ, dipoleDiv (consecPairs p N)
+      = Finsupp.single (p N) 1 - Finsupp.single (p 0) 1
+  | 0 => by rw [consecPairs, dipoleDiv_nil, sub_self]
+  | N + 1 => by
+    rw [consecPairs, dipoleDiv_append, dipoleDiv_consecPairs p N, dipoleDiv_cons,
+      dipoleDiv_nil, dipole]
+    abel
+
+theorem mem_consecPairs {p : ℕ → X} {q : X × X} :
+    ∀ {N : ℕ}, q ∈ consecPairs p N → ∃ k, k < N ∧ q = (p k, p (k + 1))
+  | 0, h => absurd h (List.not_mem_nil)
+  | N + 1, h => by
+    rw [consecPairs] at h
+    rcases List.mem_append.mp h with h' | h'
+    · obtain ⟨k, hk, hq⟩ := mem_consecPairs h'
+      exact ⟨k, Nat.lt_succ_of_lt hk, hq⟩
+    · rw [List.mem_singleton] at h'
+      exact ⟨N, Nat.lt_succ_self N, h'⟩
+
+/-- `k` concatenated copies of a dipole list (ℕ-scalar of the divisor). -/
+def nsmulList (L : List (X × X)) : ℕ → List (X × X)
+  | 0 => []
+  | k + 1 => L ++ nsmulList L k
+
+theorem dipoleDiv_nsmulList (L : List (X × X)) :
+    ∀ k : ℕ, dipoleDiv (nsmulList L k) = k • dipoleDiv L
+  | 0 => by rw [nsmulList, dipoleDiv_nil, zero_nsmul]
+  | k + 1 => by
+    rw [nsmulList, dipoleDiv_append, dipoleDiv_nsmulList L k, succ_nsmul]
+    abel
+
+theorem mem_nsmulList {L : List (X × X)} {q : X × X} :
+    ∀ {k : ℕ}, q ∈ nsmulList L k → q ∈ L
+  | 0, h => absurd h (List.not_mem_nil)
+  | k + 1, h => by
+    rw [nsmulList] at h
+    rcases List.mem_append.mp h with h' | h'
+    · exact h'
+    · exact mem_nsmulList h'
+
+/-- Reversing every dipole negates the divisor. -/
+theorem dipoleDiv_swap (L : List (X × X)) :
+    dipoleDiv (L.map Prod.swap) = -dipoleDiv L := by
+  induction L with
+  | nil => rw [List.map_nil, dipoleDiv_nil, neg_zero]
+  | cons hd tl ih =>
+    rw [List.map_cons, dipoleDiv_cons, dipoleDiv_cons, ih, dipole, dipole,
+      Prod.fst_swap, Prod.snd_swap]
+    abel
+
+/-- The ℤ-scalar of a dipole list: `n ≥ 0` repeats it, `n < 0` repeats its reversal. -/
+def zsmulList (L : List (X × X)) (n : ℤ) : List (X × X) :=
+  if 0 ≤ n then nsmulList L n.toNat else nsmulList (L.map Prod.swap) (-n).toNat
+
+theorem dipoleDiv_zsmulList (L : List (X × X)) (n : ℤ) :
+    dipoleDiv (zsmulList L n) = n • dipoleDiv L := by
+  rw [zsmulList]
+  split_ifs with hn
+  · obtain ⟨k, rfl⟩ := Int.eq_ofNat_of_zero_le hn
+    rw [dipoleDiv_nsmulList, Int.toNat_natCast, natCast_zsmul]
+  · have hk : (((-n).toNat : ℤ)) = -n :=
+      Int.toNat_of_nonneg (by linarith [lt_of_not_ge hn])
+    rw [dipoleDiv_nsmulList, dipoleDiv_swap, smul_neg, ← natCast_zsmul, hk, neg_smul,
+      neg_neg]
+
+theorem mem_zsmulList {L : List (X × X)} {n : ℤ} {q : X × X} (h : q ∈ zsmulList L n) :
+    q ∈ L ∨ Prod.swap q ∈ L := by
+  rw [zsmulList] at h
+  split_ifs at h with hn
+  · exact Or.inl (mem_nsmulList h)
+  · obtain ⟨r, hr, hq⟩ := List.mem_map.mp (mem_nsmulList h)
+    right
+    rw [← hq, Prod.swap_swap]
+    exact hr
+
+theorem dipoleDiv_flatten (LL : List (List (X × X))) :
+    dipoleDiv LL.flatten = (LL.map dipoleDiv).sum := by
+  induction LL with
+  | nil => rfl
+  | cons hd tl ih =>
+    rw [List.flatten_cons, dipoleDiv_append, ih, List.map_cons, List.sum_cons]
+
+/-! ### Chart-disk subdivision of a smooth path -/
+
+/-- **Chart-disk subdivision** (Lebesgue number of the cover along the path): finitely
+many parameter points whose consecutive path values lie pairwise in one cover disk. -/
+theorem exists_subdivision {P Q : X} {γ : ℝ → X} (h : IsSmoothPath P Q γ) :
+    ∃ (N : ℕ) (p : ℕ → X), p 0 = P ∧ p N = Q ∧
+      ∀ k, k < N → ∃ j : 𝔇.toFiniteCover.ι,
+        p k ∈ (𝔇.U j : Set X) ∧ p (k + 1) ∈ (𝔇.U j : Set X) := by
+  have hcov : Set.Icc (0 : ℝ) 1 ⊆ ⋃ j : 𝔇.toFiniteCover.ι, γ ⁻¹' (𝔇.U j : Set X) := by
+    intro t _
+    obtain ⟨j, hj⟩ := TopologicalSpace.Opens.mem_iSup.mp
+      (𝔇.toFiniteCover.covers ▸ Set.mem_univ (γ t) : γ t ∈ ⨆ i, 𝔇.toFiniteCover.U i)
+    exact Set.mem_iUnion.mpr ⟨j, hj⟩
+  obtain ⟨δ, hδ, hball⟩ := lebesgue_number_lemma_of_metric isCompact_Icc
+    (fun j => (𝔇.U j).isOpen.preimage h.cont) hcov
+  obtain ⟨N, hN⟩ := exists_nat_gt (1 / δ)
+  have hNpos : (0 : ℝ) < N := lt_trans (by positivity) hN
+  refine ⟨N, fun k => γ ((k : ℝ) / N), ?_, ?_, ?_⟩
+  · show γ (((0 : ℕ) : ℝ) / N) = P
+    rw [Nat.cast_zero, zero_div]
+    exact h.start
+  · show γ ((N : ℝ) / N) = Q
+    rw [div_self hNpos.ne']
+    exact h.finish
+  · intro k hk
+    have hmem : ((k : ℝ) / N) ∈ Set.Icc (0 : ℝ) 1 := by
+      constructor
+      · positivity
+      · rw [div_le_one hNpos]
+        exact_mod_cast hk.le
+    obtain ⟨j, hsub⟩ := hball _ hmem
+    refine ⟨j, hsub (Metric.mem_ball_self hδ), hsub ?_⟩
+    rw [Metric.mem_ball, Real.dist_eq]
+    have heq : ((k + 1 : ℕ) : ℝ) / N - (k : ℝ) / N = 1 / N := by
+      push_cast
+      ring
+    rw [heq, abs_of_pos (by positivity), div_lt_iff₀ hNpos, mul_comm]
+    exact (div_lt_iff₀ hδ).mp hN
+
+/-! ### The master fold over a dipole list -/
+
+/-- **The full chain fold over a dipole list** (the E3 induction): a list of
+(source, target) pairs, each pair inside one cover disk and with endpoints in the avoid
+set `S`, carries an arc weak solution for the sum of its boundary dipoles, supported in
+`S` and tame at every off-support point of `S`.  The head arc's tube solution
+(`exists_arcWeakSolution_avoiding`, avoiding all of `S`) multiplies onto the tail's fold
+(`ArcWeakSolution.exists_mul`); the avoid-set tameness supplies the fold hypotheses at
+the unshared support points, and the fold propagates the tameness invariant. -/
+theorem exists_arcWeakSolution_dipoleList (S : Finset X) (L : List (X × X))
+    (hdisk : ∀ q ∈ L, ∃ j : 𝔇.toFiniteCover.ι,
+      q.1 ∈ (𝔇.U j : Set X) ∧ q.2 ∈ (𝔇.U j : Set X))
+    (hS : ∀ q ∈ L, q.1 ∈ S ∧ q.2 ∈ S) :
+    ∃ W : ArcWeakSolution 𝔇 (dipoleDiv L),
+      (∀ x : X, dipoleDiv L x ≠ 0 → x ∈ S) ∧
+      ∀ q ∈ S, dipoleDiv L q = 0 → W.TameAt q := by
+  induction L with
+  | nil =>
+    rw [dipoleDiv_nil]
+    exact ⟨ArcWeakSolution.one 𝔇, fun x hx => (hx (by simp)).elim,
+      fun q _ _ => ArcWeakSolution.one_tameAt 𝔇 q⟩
+  | cons hd tl ih =>
+    obtain ⟨W₁, hsupp₁, htame₁⟩ := ih (fun q hq => hdisk q (List.mem_cons_of_mem _ hq))
+      (fun q hq => hS q (List.mem_cons_of_mem _ hq))
+    by_cases hab : hd.1 = hd.2
+    · -- degenerate dipole: the head contributes nothing
+      have h0 : dipole hd = 0 := by rw [dipole, hab, sub_self]
+      rw [dipoleDiv_cons, h0, zero_add]
+      exact ⟨W₁, hsupp₁, htame₁⟩
+    · obtain ⟨j, haU, hbU⟩ := hdisk hd List.mem_cons_self
+      obtain ⟨haS, hbS⟩ := hS hd List.mem_cons_self
+      obtain ⟨W₂, hW₂⟩ := exists_arcWeakSolution_avoiding 𝔇 j S haU hbU hab
+      have hW₂tame : ∀ q ∈ S, q ≠ hd.1 → W₂.TameAt q :=
+        fun q hq hqa => ⟨(hW₂ q hq hqa).1, (hW₂ q hq hqa).2⟩
+      have h₁ : ∀ x, dipoleDiv tl x ≠ 0 → dipole hd x = 0 → W₂.TameAt x :=
+        fun x hx hdx =>
+          hW₂tame x (hsupp₁ x hx) (ne_fst_of_dipole_apply_eq_zero hab hdx)
+      have h₂ : ∀ x, dipole hd x ≠ 0 → dipoleDiv tl x = 0 → W₁.TameAt x := by
+        intro x hx h0
+        have hxS : x ∈ S := by
+          rcases eq_fst_or_snd_of_dipole_ne_zero hx with rfl | rfl
+          exacts [haS, hbS]
+        exact htame₁ x hxS h0
+      obtain ⟨W, hWtame⟩ := ArcWeakSolution.exists_mul W₂ W₁ h₁ h₂
+      rw [dipoleDiv_cons]
+      refine ⟨W, ?_, ?_⟩
+      · intro x hx
+        by_cases hx1 : dipole hd x = 0
+        · refine hsupp₁ x fun h0 => hx ?_
+          rw [Finsupp.add_apply, hx1, h0, add_zero]
+        · rcases eq_fst_or_snd_of_dipole_ne_zero hx1 with rfl | rfl
+          exacts [haS, hbS]
+      · intro q hqS hq0
+        exact hWtame q hq0
+          (fun hd0 => hW₂tame q hqS (ne_fst_of_dipole_apply_eq_zero hab hd0))
+          (fun ht0 => htame₁ q hqS ht0)
+
+/-! ### E3 COMPLETE: the chain-level constructor and the E4-pinned engine -/
+
+/-- **E3, complete**: every smooth 1-chain admits an arc weak solution for its boundary
+divisor — the full Forster 20.5 weak-solution datum (weak solution `F`, global `(0,1)`
+datum `σ`, nonvanishing, chart differentiability, logarithmic `∂̄`-identity, analytic
+endpoint normal forms), with no hypothesis on the chain.  Subdivide each arc into
+chart-disk steps, expand the ℤ-coefficients, fold. -/
+theorem exists_arcWeakSolution_boundary (c : SmoothOneChain X) :
+    Nonempty (ArcWeakSolution 𝔇 c.boundary) := by
+  classical
+  choose N p hp0 hpN hpdisk using fun i : Fin c.n => exists_subdivision 𝔇 (c.smooth i)
+  set L : List (X × X) :=
+    (List.ofFn fun i => zsmulList (consecPairs (p i) (N i)) (c.coeff i)).flatten with hL
+  have hdiv : dipoleDiv L = c.boundary := by
+    rw [hL, dipoleDiv_flatten, List.map_ofFn, List.sum_ofFn, SmoothOneChain.boundary]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    show dipoleDiv (zsmulList (consecPairs (p i) (N i)) (c.coeff i)) = _
+    rw [dipoleDiv_zsmulList, dipoleDiv_consecPairs, hpN i, hp0 i]
+  have hdisk : ∀ q ∈ L, ∃ j : 𝔇.toFiniteCover.ι,
+      q.1 ∈ (𝔇.U j : Set X) ∧ q.2 ∈ (𝔇.U j : Set X) := by
+    intro q hq
+    rw [hL, List.mem_flatten] at hq
+    obtain ⟨l, hl, hql⟩ := hq
+    obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hl
+    rcases mem_zsmulList hql with hmem | hmem
+    · obtain ⟨k, hk, rfl⟩ := mem_consecPairs hmem
+      exact hpdisk i k hk
+    · obtain ⟨k, hk, hswap⟩ := mem_consecPairs hmem
+      obtain ⟨j, h1, h2⟩ := hpdisk i k hk
+      have hq' : q = (p i (k + 1), p i k) := by
+        have hss := congrArg Prod.swap hswap
+        rwa [Prod.swap_swap] at hss
+      rw [hq']
+      exact ⟨j, h2, h1⟩
+  set S : Finset X := (L.map Prod.fst ++ L.map Prod.snd).toFinset with hSdef
+  have hSmem : ∀ q ∈ L, q.1 ∈ S ∧ q.2 ∈ S := by
+    intro q hq
+    rw [hSdef]
+    constructor
+    · rw [List.mem_toFinset, List.mem_append]
+      exact Or.inl (List.mem_map_of_mem hq)
+    · rw [List.mem_toFinset, List.mem_append]
+      exact Or.inr (List.mem_map_of_mem hq)
+  obtain ⟨W, -, -⟩ := exists_arcWeakSolution_dipoleList 𝔇 S L hdisk hSmem
+  exact ⟨hdiv ▸ W⟩
+
+/-- **The §20 engine over E3 — E4 is the single remaining obligation.**  A chain with all
+periods zero whose (E3-provided) weak-solution datum satisfies the E4 pairing identity
+`∫_X σ∧α = 2πi·∫_c α` bounds a principal divisor.  Composition:
+`ArcWeakSolution.toRaw` (E2 constructor, conditional on the pairing) →
+`RawLogDbarDatum.toLogDbarDatum` (W1/W2 local analysis) →
+`exists_meromorphic_of_logDbarDatum` (E5 assembly over P6 `∂̄`-solvability).
+
+With `exists_arcWeakSolution_boundary` providing `W` unconditionally, discharging the
+`hpair` hypothesis for the constructed datum (rung E4, the planar Stokes/residue
+computation of Forster 20.3/20.5) makes the engine fully unconditional. -/
+theorem exists_meromorphic_of_zeroPeriodChain_of_pairing (c : SmoothOneChain X)
+    (W : ArcWeakSolution 𝔇 c.boundary)
+    (hpair : ∀ α : HolomorphicOneForms X,
+      FineResidue.pairOmega 𝔇 W.σ α = 2 * (Real.pi : ℂ) * Complex.I * c.period α)
+    (hper : ∀ α : HolomorphicOneForms X, c.period α = 0) :
+    ∃ f : MeromorphicFunction X, MeromorphicFunction.div X f = c.boundary :=
+  exists_meromorphic_of_logDbarDatum 𝔇 c ((W.toRaw c rfl hpair).toLogDbarDatum) hper
+
+end ChainAssembly
 
 end Jacobians.Dolbeault
 
