@@ -69,3 +69,5 @@ Residual stack for AX_PeriodCycleBasis (lattice side):
 — the analytic gap between the boundary-word engines and discreteness is
 closed; what remains is the construction datum (slit-sheet campaign, #203)
 and the homology-generation/topology input (#196/#198).
+
+PR: #214 (feat/trdisc-from-r2 → main). Full `lake build` green (8960 jobs).
