@@ -195,7 +195,10 @@ private theorem effective_deg_one_eq_of (D : Divisor X) (hD : Effective D)
     _ = FreeAbelianGroup.of q := by
       simp
 
-private theorem divisorOf_eq_pointSub_of_mem_point {F : MeroField X} (hF : F ≠ 0) {p : X}
+/-- A non-zero element of `L((p))` has principal divisor exactly `(q) - (p)`
+for some point `q`: the degree theorem forces one zero against the at-most-one
+simple pole. (Public: consumed by the genus-zero forward leg.) -/
+theorem divisorOf_eq_pointSub_of_mem_point {F : MeroField X} (hF : F ≠ 0) {p : X}
     (hFP : F ∈ riemannRochSpace (FreeAbelianGroup.of p : Divisor X)) :
     ∃ q : X, divisorOf hF = (FreeAbelianGroup.of q - FreeAbelianGroup.of p : Divisor X) := by
   classical

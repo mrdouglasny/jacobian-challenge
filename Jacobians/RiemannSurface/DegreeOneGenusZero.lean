@@ -425,6 +425,29 @@ private theorem inverse_contMDiff_of_bijective_order_one
     ContMDiff.of_isHolomorphic_and_continuous hholo_inv hcont_inv
 
 /-- A nonconstant meromorphic function with principal divisor `(Q₁) - (Q₂)`
+for `Q₁ ≠ Q₂` gives a biholomorphism to `ℙ¹`: the underlying equivalence,
+analytic in both directions. -/
+theorem degreeOne_equiv_projectiveLine {f : MeromorphicFunctionField X} {Q₁ Q₂ : X}
+    (hf : Nonconstant f) (hne : Q₁ ≠ Q₂)
+    (hdiv : divHom f =
+      Multiplicative.ofAdd
+        ((FreeAbelianGroup.of Q₁ - FreeAbelianGroup.of Q₂ : FreeAbelianGroup X))) :
+    ∃ e : X ≃ ProjectiveLine,
+      ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (e : X → ProjectiveLine) ∧
+        ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (e.symm : ProjectiveLine → X) := by
+  obtain ⟨finite_fiber, hsum⟩ := weightedFiberSum_one_toP1 hf hne hdiv
+  obtain ⟨hbij, horder⟩ := toP1_bijective_of_weightedFiberSum_one hf finite_fiber hsum
+  refine ⟨Equiv.ofBijective (toP1 f) hbij, ?_, ?_⟩
+  · simpa using (toP1_contMDiff f :
+      ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (toP1 f))
+  · simpa using
+      inverse_contMDiff_of_bijective_order_one
+        (F := toP1 f)
+        (toP1_contMDiff f :
+          ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (toP1 f))
+        hbij horder
+
+/-- A nonconstant meromorphic function with principal divisor `(Q₁) - (Q₂)`
 for `Q₁ ≠ Q₂` gives a biholomorphism to `ℙ¹`, hence the source has genus
 zero. -/
 theorem degreeOne_genus_zero {f : MeromorphicFunctionField X} {Q₁ Q₂ : X}
@@ -433,19 +456,7 @@ theorem degreeOne_genus_zero {f : MeromorphicFunctionField X} {Q₁ Q₂ : X}
       Multiplicative.ofAdd
         ((FreeAbelianGroup.of Q₁ - FreeAbelianGroup.of Q₂ : FreeAbelianGroup X))) :
     genus X = 0 := by
-  obtain ⟨finite_fiber, hsum⟩ := weightedFiberSum_one_toP1 hf hne hdiv
-  obtain ⟨hbij, horder⟩ := toP1_bijective_of_weightedFiberSum_one hf finite_fiber hsum
-  let e : X ≃ ProjectiveLine := Equiv.ofBijective (toP1 f) hbij
-  have he : ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (e : X → ProjectiveLine) := by
-    simpa [e] using (toP1_contMDiff f :
-      ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (toP1 f))
-  have he_symm : ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (e.symm : ProjectiveLine → X) := by
-    simpa [e] using
-      inverse_contMDiff_of_bijective_order_one
-        (F := toP1 f)
-        (toP1_contMDiff f :
-          ContMDiff 𝓘(ℂ) 𝓘(ℂ) (⊤ : WithTop ℕ∞) (toP1 f))
-        hbij horder
+  obtain ⟨e, he, he_symm⟩ := degreeOne_equiv_projectiveLine hf hne hdiv
   calc
     genus X = genus ProjectiveLine := genus_eq_of_biholo e he he_symm
     _ = 0 := ProjectiveCurve.genus_projectiveLine_eq_zero
