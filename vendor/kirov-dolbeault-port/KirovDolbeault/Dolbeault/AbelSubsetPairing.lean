@@ -791,12 +791,14 @@ theorem symm_mem_U_of_mem_ball {j : 𝔇.toFiniteCover.ι} {w : ℂ}
   rw [Set.mem_preimage, (extChartAt 𝓘(ℝ, ℂ) (𝔇.center j)).right_inv hwt]
   exact hw
 
-/-- **P5 nondegeneracy — every nonzero holomorphic 1-form pairs nontrivially against some
-smooth `(0,1)`-form.**  The witness is the one-chart bump form `σ = h·∂̄w` (with `h, w` chart
-lifts of `χ₂·conj f` and `χ₁·conj z`): its pairing against `α` collapses to the single planar
-integral `∫ χ₂·|f|² > 0` at a disk where the coefficient `f` of `α` does not vanish. -/
-theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
-    ∃ σ : ↥(OneFormsZeroOne X), pairOmega 𝔇 σ α ≠ 0 := by
+/-- **P5 nondegeneracy (positive-real form) — every nonzero holomorphic 1-form pairs to a
+positive real against some smooth `(0,1)`-form.**  The witness is the one-chart bump form
+`σ = h·∂̄w` (with `h, w` chart lifts of `χ₂·conj f` and `χ₁·conj z`): its pairing against `α`
+collapses to the single planar integral `∫ χ₂·|f|² > 0` at a disk where the coefficient `f` of
+`α` does not vanish.  The positive-real (not merely nonzero) value is what defeats arbitrary
+`ℝ`-linear annihilators in the Gram-surjectivity argument (`pairPeriodL_surjective`). -/
+theorem exists_pairOmega_pos (α : HolomorphicOneForms X) (hα : α ≠ 0) :
+    ∃ σ : ↥(OneFormsZeroOne X), ∃ r : ℝ, 0 < r ∧ pairOmega 𝔇 σ α = (r : ℂ) := by
   classical
   obtain ⟨j₀, a, haU, hf0⟩ := exists_omegaCoeff_ne_zero_of_ne_zero 𝔇 α hα
   set f : ℂ → ℂ := omegaCoeff 𝔇 α j₀ with hf
@@ -900,9 +902,6 @@ theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
     by_contra hy
     obtain ⟨w', hw', rfl⟩ := hsupp_gen y hy
     exact hyS ⟨w', Metric.ball_subset_closedBall hw', rfl⟩
-  refine ⟨⟨σ₀, hσ₀mem⟩, ?_⟩
-  rw [pairOmega_apply,
-    resIntegral_pairElem_of_support 𝔇 hσ₀mem (isOneZeroCoeff_omegaCoeff 𝔇 α) hScl hSU hsupp]
   -- pointwise: the single-chart integrand is `χ₂·|f|²`
   have hpt : ∀ z, pairCoeff 𝔇 σ₀ (omegaCoeff 𝔇 α) j₀ z
       = ((χ₂ z * normSq (f z) : ℝ) : ℂ) := by
@@ -968,7 +967,6 @@ theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
         exact hzc (this ▸ (hball_sub (hsub₄c hw')).1)
       rw [pairCoeff_apply, hcut0, zero_mul, hχ0]
       simp
-  rw [integral_congr_ae (Eventually.of_forall hpt), integral_complex_ofReal]
   -- positivity of the planar integral `∫ χ₂·|f|²`
   set G : ℂ → ℝ := fun z => χ₂ z * normSq (f z) with hG
   have hGnn : ∀ z, 0 ≤ G z := fun z => mul_nonneg χ₂.nonneg (normSq_nonneg _)
@@ -1000,6 +998,168 @@ theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
     (integral_pos_iff_support_of_nonneg_ae (Eventually.of_forall hGnn) hGint).mpr
       (lt_of_lt_of_le (Metric.measure_ball_pos volume za (by positivity))
         (measure_mono hsupport_sub))
-  exact_mod_cast Complex.ofReal_ne_zero.mpr (ne_of_gt hpos)
+  refine ⟨⟨σ₀, hσ₀mem⟩, ∫ z, G z, hpos, ?_⟩
+  rw [pairOmega_apply,
+    resIntegral_pairElem_of_support 𝔇 hσ₀mem (isOneZeroCoeff_omegaCoeff 𝔇 α) hScl hSU hsupp,
+    integral_congr_ae (Eventually.of_forall hpt), integral_complex_ofReal]
+
+/-- **P5 nondegeneracy — every nonzero holomorphic 1-form pairs nontrivially against some
+smooth `(0,1)`-form** (the `≠ 0` corollary of the positive-real form). -/
+theorem exists_pairOmega_ne_zero (α : HolomorphicOneForms X) (hα : α ≠ 0) :
+    ∃ σ : ↥(OneFormsZeroOne X), pairOmega 𝔇 σ α ≠ 0 := by
+  obtain ⟨σ, r, hr, hval⟩ := exists_pairOmega_pos 𝔇 α hα
+  exact ⟨σ, by rw [hval]; exact_mod_cast ne_of_gt hr⟩
+
+/-! ## P5d — slot linearity, the period functional, and Gram surjectivity -/
+
+/-- `coeffAt` is additive in the form (the `Montel.localRep` layer is). -/
+theorem coeffAt_add (α β : HolomorphicOneForms X) (a : X) (z : ℂ) :
+    coeffAt (α + β) a z = coeffAt α a z + coeffAt β a z :=
+  Jacobians.Montel.localRep_add α β a ((chartAt ℂ a).symm z)
+
+/-- `coeffAt` is `ℂ`-homogeneous in the form (the `Montel.localRep` layer is). -/
+theorem coeffAt_smul (c : ℂ) (α : HolomorphicOneForms X) (a : X) (z : ℂ) :
+    coeffAt (c • α) a z = c * coeffAt α a z :=
+  Jacobians.Montel.localRep_smul c α a ((chartAt ℂ a).symm z)
+
+/-- **Slot additivity**: `∫_X σ∧(α+β) = ∫_X σ∧α + ∫_X σ∧β`. -/
+theorem pairOmega_slot_add (σ : ↥(OneFormsZeroOne X)) (α β : HolomorphicOneForms X) :
+    pairOmega 𝔇 σ (α + β) = pairOmega 𝔇 σ α + pairOmega 𝔇 σ β := by
+  have helem : pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 (α + β))
+      = pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 α)
+        + pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 β) := by
+    apply Subtype.ext
+    show pairCoeff 𝔇 (σ : SmoothCOneForms X) (omegaCoeff 𝔇 (α + β))
+        = pairCoeff 𝔇 (σ : SmoothCOneForms X) (omegaCoeff 𝔇 α)
+          + pairCoeff 𝔇 (σ : SmoothCOneForms X) (omegaCoeff 𝔇 β)
+    funext j z
+    show 𝔇.cutoffPullback j σ z * coeffAt (α + β) (𝔇.center j) z
+        = 𝔇.cutoffPullback j σ z * coeffAt α (𝔇.center j) z
+          + 𝔇.cutoffPullback j σ z * coeffAt β (𝔇.center j) z
+    rw [coeffAt_add]
+    ring
+  rw [pairOmega_apply, pairOmega_apply, pairOmega_apply, helem, map_add]
+
+/-- **Slot `ℂ`-homogeneity**: `∫_X σ∧(c•α) = c·∫_X σ∧α`. -/
+theorem pairOmega_slot_smul (σ : ↥(OneFormsZeroOne X)) (c : ℂ) (α : HolomorphicOneForms X) :
+    pairOmega 𝔇 σ (c • α) = c * pairOmega 𝔇 σ α := by
+  have helem : pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 (c • α))
+      = c • pairElem 𝔇 σ.2 (isOneZeroCoeff_omegaCoeff 𝔇 α) := by
+    apply Subtype.ext
+    show pairCoeff 𝔇 (σ : SmoothCOneForms X) (omegaCoeff 𝔇 (c • α))
+        = c • pairCoeff 𝔇 (σ : SmoothCOneForms X) (omegaCoeff 𝔇 α)
+    funext j z
+    show 𝔇.cutoffPullback j σ z * coeffAt (c • α) (𝔇.center j) z
+        = c * (𝔇.cutoffPullback j σ z * coeffAt α (𝔇.center j) z)
+    rw [coeffAt_smul]
+    ring
+  rw [pairOmega_apply, pairOmega_apply, helem, map_smul, smul_eq_mul]
+
+/-- **P3′ — the pairing as a `ℂ`-linear functional in the holomorphic slot.** -/
+noncomputable def pairOmegaSlotL (σ : ↥(OneFormsZeroOne X)) :
+    HolomorphicOneForms X →ₗ[ℂ] ℂ where
+  toFun α := pairOmega 𝔇 σ α
+  map_add' := pairOmega_slot_add 𝔇 σ
+  map_smul' c α := by rw [pairOmega_slot_smul 𝔇 σ c α, RingHom.id_apply, smul_eq_mul]
+
+@[simp] theorem pairOmegaSlotL_apply (σ : ↥(OneFormsZeroOne X)) (α : HolomorphicOneForms X) :
+    pairOmegaSlotL 𝔇 σ α = pairOmega 𝔇 σ α := rfl
+
+/-- **P5 — the concrete period functional** `Λ = (σ ↦ ∫_X σ∧ωᵢ)ᵢ` against a finite family of
+holomorphic 1-forms: the `LinearMap.pi` bundle of `pairFormL` at the chart-coefficient
+families `omegaCoeff 𝔇 (b i)`. -/
+noncomputable def pairPeriodL {n : ℕ} (b : Fin n → HolomorphicOneForms X) :
+    ↥(OneFormsZeroOne X) →ₗ[ℝ] (Fin n → ℂ) :=
+  LinearMap.pi fun i => pairFormL 𝔇 (isOneZeroCoeff_omegaCoeff 𝔇 (b i))
+
+@[simp] theorem pairPeriodL_apply {n : ℕ} (b : Fin n → HolomorphicOneForms X)
+    (σ : ↥(OneFormsZeroOne X)) (i : Fin n) :
+    pairPeriodL 𝔇 b σ i = pairOmega 𝔇 σ (b i) := rfl
+
+/-- **P5 — Gram surjectivity of the period functional** at a basis of `H⁰(X, Ω¹)`.
+
+If `Λ = (pairOmega · (b i))ᵢ` missed a vector, a nonzero `ℝ`-linear functional `ℓ` would
+annihilate its range.  Reading `ℓ` as `v ↦ (∑ᵢ cᵢvᵢ).re` and folding the sum through slot
+linearity, `ℓ∘Λ = σ ↦ (pairOmega σ ω).re` with `α₀ = ∑ᵢ cᵢ•(b i) ≠ 0` — but the bump witness
+of `exists_pairOmega_pos` pairs against `α₀` to a **positive real**, contradiction. -/
+theorem pairPeriodL_surjective (b : Module.Basis (Fin (kirovGenus X)) ℂ (HolomorphicOneForms X)) :
+    Function.Surjective (pairPeriodL 𝔇 (⇑b)) := by
+  classical
+  rw [← LinearMap.range_eq_top]
+  by_contra hne
+  obtain ⟨ℓ, hℓne, hℓmap⟩ := Submodule.exists_dual_map_eq_bot_of_lt_top
+    (lt_top_iff_ne_top.mpr hne) inferInstance
+  -- `ℓ` annihilates every period vector
+  have hann : ∀ τ : ↥(OneFormsZeroOne X), ℓ (pairPeriodL 𝔇 (⇑b) τ) = 0 := by
+    intro τ
+    have hmem : ℓ (pairPeriodL 𝔇 (⇑b) τ)
+        ∈ (LinearMap.range (pairPeriodL 𝔇 (⇑b))).map ℓ :=
+      Submodule.mem_map_of_mem (LinearMap.mem_range_self _ τ)
+    rw [hℓmap] at hmem
+    exact (Submodule.mem_bot ℝ).mp hmem
+  -- read `ℓ` as `v ↦ (∑ᵢ cᵢvᵢ).re`
+  set c : Fin (kirovGenus X) → ℂ := fun i =>
+    ((ℓ (Pi.single i 1) : ℝ) : ℂ) - ((ℓ (Pi.single i Complex.I) : ℝ) : ℂ) * Complex.I with hc
+  have hsingle : ∀ (i : Fin (kirovGenus X)) (w : ℂ), ℓ (Pi.single i w) = (c i * w).re := by
+    intro i w
+    have hw : (Pi.single i w : Fin (kirovGenus X) → ℂ)
+        = w.re • (Pi.single i (1 : ℂ) : Fin (kirovGenus X) → ℂ)
+          + w.im • (Pi.single i Complex.I : Fin (kirovGenus X) → ℂ) := by
+      rw [← Pi.single_smul, ← Pi.single_smul, ← Pi.single_add]
+      congr 1
+      rw [Complex.real_smul, Complex.real_smul, mul_one]
+      exact (Complex.re_add_im w).symm
+    rw [hw, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
+    simp only [hc, Complex.mul_re, Complex.sub_re, Complex.ofReal_re, Complex.mul_im,
+      Complex.sub_im, Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    ring
+  have hdecomp : ∀ v : Fin (kirovGenus X) → ℂ, ℓ v = (∑ i, c i * v i).re := by
+    intro v
+    rw [Complex.re_sum]
+    conv_lhs => rw [← Finset.univ_sum_single v]
+    rw [map_sum]
+    exact Finset.sum_congr rfl fun i _ => hsingle i (v i)
+  -- the annihilating holomorphic form is nonzero …
+  set α₀ : HolomorphicOneForms X := ∑ i, c i • b i with hα₀
+  have hα₀ne : α₀ ≠ 0 := by
+    intro h0
+    have hc0 : ∀ i, c i = 0 :=
+      Fintype.linearIndependent_iff.mp b.linearIndependent c (hα₀.symm.trans h0)
+    apply hℓne
+    apply LinearMap.ext
+    intro v
+    rw [hdecomp v]
+    simp [hc0]
+  -- … so the positive-real bump witness contradicts the annihilation
+  obtain ⟨σ, r, hr, hval⟩ := exists_pairOmega_pos 𝔇 α₀ hα₀ne
+  have hfold : ∑ i, c i * pairPeriodL 𝔇 (⇑b) σ i = pairOmega 𝔇 σ α₀ := by
+    calc ∑ i, c i * pairPeriodL 𝔇 (⇑b) σ i
+        = ∑ i, pairOmegaSlotL 𝔇 σ (c i • b i) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [map_smul, smul_eq_mul]
+          rfl
+      _ = pairOmegaSlotL 𝔇 σ (∑ i, c i • b i) :=
+          (map_sum (pairOmegaSlotL 𝔇 σ) (fun i => c i • b i) Finset.univ).symm
+      _ = pairOmega 𝔇 σ α₀ := by rw [← hα₀, pairOmegaSlotL_apply]
+  have hcontr : ℓ (pairPeriodL 𝔇 (⇑b) σ) = r := by
+    rw [hdecomp, hfold, hval, Complex.ofReal_re]
+  rw [hann σ] at hcontr
+  exact absurd hcontr.symm (ne_of_gt hr)
+
+/-- **P6 — THE `∂̄`-SOLVABILITY THEOREM** (Forster 19.10): a smooth `(0,1)`-form whose period
+pairing `∫_X σ∧α` vanishes against **every** global holomorphic 1-form is `∂̄`-exact.
+
+Composition of the S-block's abstract dimension-count criterion
+(`mem_dbarImage_of_periodFunctional`, S4) with the Stokes kill (`pairOmega_dbarL`, P4) and
+Gram surjectivity (`pairPeriodL_surjective`, P5) at a finite basis of `H⁰(X, Ω¹)`
+(`Module.finBasis`, dimension `kirovGenus X` by definition). -/
+theorem dbar_solvable_of_pairOmega_eq_zero (σ : ↥(OneFormsZeroOne X))
+    (hσ : ∀ α : HolomorphicOneForms X, pairOmega 𝔇 σ α = 0) :
+    ∃ u : SmoothCFunctions X, dbarL u = (σ : SmoothCOneForms X) := by
+  let b : Module.Basis (Fin (kirovGenus X)) ℂ (HolomorphicOneForms X) :=
+    Module.finBasis ℂ (HolomorphicOneForms X)
+  exact mem_dbarImage_of_periodFunctional (pairPeriodL 𝔇 (⇑b))
+    (fun u => funext fun i => pairOmega_dbarL 𝔇 u (b i))
+    (pairPeriodL_surjective 𝔇 b) σ (funext fun i => hσ (b i))
 
 end Jacobians.Dolbeault.FineResidue
