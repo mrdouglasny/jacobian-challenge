@@ -36,5 +36,6 @@ import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral
 import Jacobians.Bridge.KirovDolbeaultPeriods
 import Jacobians.Bridge.KirovDolbeaultOpenPath
+import Jacobians.Bridge.AbelEngineAdapter
 import Jacobians.Bridge.KirovDolbeaultLattice
 import Jacobians.Bridge.SphereGenusZero

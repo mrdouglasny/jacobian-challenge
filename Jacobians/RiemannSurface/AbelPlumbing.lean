@@ -3,7 +3,8 @@ Copyright (c) 2026 Michael R Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import Jacobians.Axioms.AbelTheorem
+import Jacobians.Axioms.AbelJacobiDivDef
+import Jacobians.RiemannSurface.MeromorphicFunctionField
 
 /-!
 # Abel ⊆ root-side plumbing (A-block of `docs/planning/AB_ROUTE.md`)

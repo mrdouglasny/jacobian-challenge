@@ -35,6 +35,7 @@ import Jacobians.Axioms.H1FreeRank2g
 import Jacobians.Axioms.IntersectionForm
 import Jacobians.Axioms.PeriodCycleBasis
 import Jacobians.Axioms.AbelJacobiMap
+import Jacobians.Axioms.AbelJacobiDivDef
 import Jacobians.Axioms.Uniformization0
 import Jacobians.Axioms.RiemannRoch
 import Jacobians.Axioms.SerreDuality
