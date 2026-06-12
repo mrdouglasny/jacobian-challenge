@@ -52,6 +52,7 @@ import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.ChartSegmentArc
+import Jacobians.RiemannSurface.AbelPlumbing
 import Jacobians.RiemannSurface.GenusZeroBackward
 import Jacobians.RiemannSurface.GenusZeroForward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
