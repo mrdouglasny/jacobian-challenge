@@ -1,0 +1,73 @@
+# TD-lane progress log — TR-DISC from R2 positivity over ArcBoundaryWordData
+
+## Session 2026-06-12 (session start)
+
+Goal: prove TR-DISC — `DiscreteTopology (loopPeriodLattice x₀ b)` — from the
+boundary-word datum's R1/R2 (no AX_PeriodCycleBasis), the last lattice-side
+residual of the image route (#208).
+
+Plan (after reading BilinearRelations(BoundaryWord), PeriodDiscreteness,
+Layer3/Periods + the PeriodLattice/RiemannBilinear engine):
+
+* Honest split confirmed: the UNCONDITIONAL result over the datum is
+  discreteness of the 2g-FAMILY sublattice
+  `span ℤ (range fun k => loopPeriodVec x₀ cω (loops k))` — via the Siegel
+  engine: Gram PosDef ⇒ A-block invertible ⇒ τ = B·A⁻¹ with (R1 ⇒ symm,
+  R1+R2 ⇒ Im τ ≻ 0) ⇒ periodColumns τ ℝ-independent (engine) ⇒ transport by
+  the ℂ-automorphism w ↦ Aᵀ·w sends [I|τ]-columns to the loop period vectors
+  ⇒ ℝ-independent family of card 2g = finrank ⇒ ℤ-span of an ℝ-basis ⇒
+  discrete (ZSpan). NO B-3 spanning, NO generation hypothesis.
+* Full TR-DISC = sublattice version + PeriodGeneratingLoops (the topology
+  residual; hgen.lattice_eq collapses the full lattice onto the family span).
+* Residual stack for AX_PeriodCycleBasis after this lands:
+  {ArcBoundaryWordData datum} + {PeriodGeneratingLoops / homology generation}
+  — no analytic gap left on the lattice side.
+
+New file: Jacobians/RiemannSurface/PeriodDiscretenessFromR2.lean.
+
+## Session 2026-06-12 (result — LANDED in one pass)
+
+File: `Jacobians/RiemannSurface/PeriodDiscretenessFromR2.lean` (umbrella-wired),
+commit 64c2abe. `lake env lean` clean; all headliners kernel-verified
+**Standard-3** (propext, Classical.choice, Quot.sound) — NO AX_PeriodCycleBasis,
+NO AX_FiniteDimOneForms, NO B-3 nondegeneracy consumed.
+
+Proven (all in namespace Jacobians.RiemannSurface, over
+`{loops : Fin (2*genus X) → AnalyticLoop X x₀}`
+`{cω : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)}`):
+
+* UNCONDITIONAL over the datum (no topology input):
+  - `discreteTopology_familyPeriodLattice_of_arcBoundaryWordData
+      (D : ArcBoundaryWordData loops cω) :
+      DiscreteTopology (span ℤ (range fun k => loopPeriodVec x₀ cω (loops k)))`
+  - `span_real_familyPeriodVec_eq_top_of_arcBoundaryWordData` (B-3-free
+    second proof of ℝ-spanning) and
+    `isZLattice_familyPeriodLattice_of_arcBoundaryWordData` (full ℤ-lattice).
+* FULL TR-DISC (datum + topology residual):
+  - `discreteTopology_of_arcBoundaryWordData
+      (D : ArcBoundaryWordData loops cω)
+      (hgen : PeriodGeneratingLoops x₀ cω loops) :
+      DiscreteTopology (loopPeriodLattice x₀ cω)`
+* Matrix-hypothesis forms (`_of_periodMatrix`, taking hsymm : AᵀB = BᵀA and
+  hpos : (arcPeriodGram …).PosDef directly) of all of the above, plus the
+  reusable mid-layer: `arcAPeriodMatrix_isUnit` (A invertible from R2 alone),
+  `arcTauMatrix` (= B·A⁻¹), `arcTauMatrix_isSymm`, `arcTauMatrix_im_posDef`,
+  `arcPeriodVec_normalizedForm/Combo` (= engine `col τ` / `omegaCol τ`),
+  and the generic glue
+  `discreteTopology_span_int_of_linearIndependent_of_card_eq_finrank`.
+
+Math note (why the family route is unconditional): R2 alone makes A
+invertible; R1+R2 give Im(B·A⁻¹) ≻ 0; the engine's [I|τ]-column
+ℝ-independence transports along w ↦ Aᵀ*ᵥw onto the 2g loop period vectors,
+so they're an ℝ-basis of ℂ^g and their ℤ-span is ZSpan-discrete. The
+existing `PeriodGeneratingLoops.discreteTopology` (B-4) got the same family
+independence indirectly (B-3 spanning + card count) but only UNDER hgen;
+the new route needs neither hgen nor B-3 for the sublattice.
+
+Residual stack for AX_PeriodCycleBasis (lattice side):
+  {ArcBoundaryWordData loops cω} + {PeriodGeneratingLoops x₀ cω loops}
+— the analytic gap between the boundary-word engines and discreteness is
+closed; what remains is the construction datum (slit-sheet campaign, #203)
+and the homology-generation/topology input (#196/#198).
+
+PR: #214 (feat/trdisc-from-r2 → main). Full `lake build` green (8960 jobs).

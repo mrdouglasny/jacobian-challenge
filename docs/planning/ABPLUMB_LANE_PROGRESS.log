@@ -1,0 +1,42 @@
+# ABPLUMB lane — Abel A-block root-side plumbing
+# (HANDOVER_PARALLEL_ACCOUNT.md UPDATE 3, Package 6; AB_ROUTE.md A-block)
+
+Append-only progress log. Branch: `feat/abel-plumbing`, based on main @ 399a243.
+
+## 2026-06-12 session 1
+
+- New file `Jacobians/RiemannSurface/AbelPlumbing.lean` (engine-agnostic; does
+  NOT import vendor AbelSubset*, Bridge/KirovDolbeault*, BilinearRelations*).
+- A1 (kernel unfolding) DONE:
+  - `ulift_abelJacobiDiv_apply` — pointwise factorization of `abelJacobiDiv`
+    through the lattice quotient: under `AddEquiv.ulift`, the Abel-Jacobi image
+    of `D` is the class of `divisorPeriodVector D − (deg D) • (basepoint
+    constant)`. Proof by `FreeAbelianGroup.induction_on` with term-mode calc
+    steps (the `Divisor` abbrev's copied `AddCommGroup` instance breaks
+    rw/simp pattern matching at hom level — term-mode `(map_neg _ _).symm`
+    style sidesteps it; recorded as a gotcha).
+  - `divisorPeriodVector_mem_lattice_of_mem_ker` — kernel + deg-0 ⟹ ambient
+    period vector ∈ `periodLatticeInBasis`.
+  - `hasZeroPeriodLoopPresentation_of_mem_lattice` — lattice membership
+    expands over the pinned cycle basis (`pinnedCycleBasis x₀ :=
+    Classical.choice (AX_PeriodCycleBasis x₀)`, defeq to the witness inside
+    `loopIntegralToH1` by proof irrelevance) via `isBasis.sum_repr` +
+    `loops_to_basis`.
+  - Headline `hasZeroPeriodLoopPresentation_of_mem_ker` = A1 verbatim shape:
+    basepoint arcs − ℤ-combination of pinned loops, all `jacobianBasis`
+    periods zero (`HasZeroPeriodLoopPresentation`).
+- A2 (divisor bridge): fused into A1's output — the engine input
+  (`HasZeroPeriodLoopPresentation`) is stated fully root-side, so port↔root
+  divisor faithfulness is the engine's obligation when discharging the named
+  hypothesis; documented in the file header.
+- A3 (assembly) DONE: named hypothesis `ZeroPeriodChainSolvability X`
+  (degree-0 + zero-period presentation ⟹ principal; the E5/P6 engine shape) ⟹
+  `abel_subset_of_engine : (abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker ≤
+  PrincipalDivisors X` — the verbatim ⊆ statement of `AX_AbelTheorem`.
+- Kernel checks: `abel_subset_of_engine`,
+  `hasZeroPeriodLoopPresentation_of_mem_ker`, `ulift_abelJacobiDiv_apply` all
+  print exactly [propext, Classical.choice, Quot.sound,
+  Jacobians.Axioms.AX_PeriodCycleBasis] — the AX_PeriodCycleBasis pin is the
+  flagged A1 conditionality (loops_to_basis field); **no AX_AbelTheorem** in
+  any closure. No ledger change (axiom count untouched).
+- Umbrella: `Jacobians/RiemannSurface.lean` + AbelPlumbing.
