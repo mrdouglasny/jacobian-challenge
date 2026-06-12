@@ -70,3 +70,55 @@ docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
   main line P1 (zeroOneCoeff chart read of OneFormsZeroOne with the conj φ′
   law) → P2/P3 (pairing through FineResidue.resIntegral) → P4 Stokes kill →
   P5 Gram surjectivity → P6 assembled criterion; then the §20 engine E-block.
+
+== 2026-06-11 AB-P lane session start (feat/abel-pairing, base b1ff2c7) ==
+Goal: P-block of AB_ROUTE.md — concrete Λ via FineResidue.resIntegral; P4 Stokes kill,
+P5 surjectivity; compose with S4 (mem_dbarImage_of_periodFunctional) for the solvability
+theorem. New file vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/AbelSubsetPairing.lean.
+Design decisions after survey:
+* P1 (0,1)-read of σ := cutoffPullback 𝔇 j σ (already smooth/compact-support/ℝ-linear, proven);
+  its conj-φ′ overlap law derived from dbar_planarDiff_eq_zero + dbarDisk_comp_holo +
+  dbar_planarPrimitive (all public) — no private frame lemmas needed.
+* P2 pairCoeff σ g := cutoff·g ∈ oneOneCoeff via the law product (mul_conj), any
+  IsOneZeroCoeff slot g (omegaCoeff for the application).
+* P4 via the CoboundaryVanish internals: new per-chart Leibniz/Stokes step for a GLOBAL
+  smooth β:=u (mirror of integral_pouCoeff_glueCoeff_of_coboundary), then the PUBLIC
+  integral_overlapTerm_relocate + sum_integral_relocated_eq_zero (both take arbitrary β).
+  Bridge lemma P4a: cutoffPullback j (dbarL u) = planar ∂̄ of chart read on image of U_j.
+* P5 WITHOUT the intrinsic conj-section: range Λ is a ℂ-subspace (cSmulForm const-c
+  homogeneity); a proper ℂ-subspace lies in a hyperplane ⟨c,·⟩=0; slot-linearity turns the
+  annihilation into pair(σ, ω_c)=0 ∀σ for ω_c := Σcᵢbᵢ ≠ 0; contradict with a one-chart
+  bump witness σ := h·∂̄w (cSmulForm h (dbarL w)), h,w chart bump lifts, giving
+  pairForm = ∫ χ|f|² > 0 at a point where coeff f ≠ 0 (exists_localRep_self_ne_zero).
+  No Gram matrix needed.
+
+== 2026-06-12 AB-P lane session 4 (feat/abel-pairing) — P-BLOCK COMPLETE ==
+Recovered the stalled predecessor's P5c WIP from stash (coherent, ~280 lines);
+one linarith fix (χ₂.rOut projection opaque under `set` — explicit `show ε/8 ≤ χ₂.rOut`).
+Landed (all in KirovDolbeault/Dolbeault/AbelSubsetPairing.lean):
+* P5c exists_omegaCoeff_ne_zero_of_ne_zero — nonzero α has a cover chart j₀ + point with
+  omegaCoeff ≠ 0 (exists_localRep_self_ne_zero transferred through formOrderW_chart_invariant).
+* P5 exists_pairOmega_pos — STRENGTHENED to positive-real value: ∃ σ r, 0 < r ∧
+  pairOmega 𝔇 σ α = r (bump witness σ₀ = h·∂̄w collapses to ∫ χ₂·|f|² > 0).
+  exists_pairOmega_ne_zero kept as corollary. The positive-real form removed the need
+  for the planned cSmulForm ℂ-homogeneity rung entirely: an arbitrary ℝ-linear
+  annihilator ℓ(v) = (Σ cᵢvᵢ).re dies against a positive-real pairing value directly.
+* P5d slot linearity: coeffAt_add/_smul (Montel.localRep_add/_smul), pairOmega_slot_add/
+  _smul, pairOmegaSlotL : HolomorphicOneForms X →ₗ[ℂ] ℂ.
+* P5d pairPeriodL {n} (b : Fin n → HolomorphicOneForms X) : OneFormsZeroOne X →ₗ[ℝ] (Fin n → ℂ)
+  (LinearMap.pi of pairFormL); pairPeriodL_surjective at any ℂ-basis b of H⁰(Ω¹):
+  Submodule.exists_dual_map_eq_bot_of_lt_top → ℓ ≠ 0 annihilates range → read ℓ as
+  v ↦ (Σ cᵢvᵢ).re (Pi.single decomposition) → fold via slot linearity into
+  (pairOmega σ α₀).re, α₀ := Σ cᵢ•bᵢ ≠ 0 (basis independence; c ≠ 0 else ℓ = 0) →
+  exists_pairOmega_pos gives positive real → contradiction.
+* P6 THE SOLVABILITY THEOREM dbar_solvable_of_pairOmega_eq_zero (Forster 19.10):
+    (σ : ↥(OneFormsZeroOne X)) (hσ : ∀ α : HolomorphicOneForms X, pairOmega 𝔇 σ α = 0) :
+    ∃ u : SmoothCFunctions X, dbarL u = (σ : SmoothCOneForms X)
+  = mem_dbarImage_of_periodFunctional (S4) ∘ pairOmega_dbarL (P4) ∘ pairPeriodL_surjective
+  (P5) at Module.finBasis ℂ (HolomorphicOneForms X) (Fin (kirovGenus X) by rfl).
+Kernel closures (#print axioms): dbar_solvable_of_pairOmega_eq_zero,
+pairPeriodL_surjective, exists_pairOmega_pos, pairOmega_dbarL ALL = standard-3
+(propext, Classical.choice, Quot.sound). NO project axioms anywhere in the closure.
+Full port lake build: success (8798 jobs) post-merge of origin/main (399a243).
+Commits: daadb11 (P1-P3), bfef19d (P4), 47a0fa8 (P5a-b), b28c48b (P5c+nondegeneracy),
+2b6d678 (P5d+P6). Zero sorries, zero new axioms in the P-block.
