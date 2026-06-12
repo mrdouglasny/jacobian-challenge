@@ -107,3 +107,52 @@ named lemma with difficulty class, plus any cheap proven bricks. Work in
   the PR body so it's recognized as handover work.
 - If you find an error in merged work, open an issue referencing the pinned
   soundness log (issue #82) — do not push fixes to others' branches.
+
+---
+
+# UPDATE 2 (2026-06-11 late): next packages after #205/#206
+
+Package 1 delivered (#205 merged-or-merging: π₁(S²)=1 + T-FG engine) and the #206
+proposal accepted (the primary account's RP-lane is executing the image-lattice
+re-plumb — `PeriodDiscreteness.lean` stays primary-owned). Packages 1/2 above are
+CLOSED. New no-touch additions: `Jacobians/Bridge/KirovDolbeault*.lean`,
+`Jacobians/RiemannSurface/BilinearRelations*.lean`,
+`vendor/.../Dolbeault/AbelSubset*.lean` (active primary lanes).
+
+## Package 3 (PRIMARY): genus-0 FORWARD direction → the full
+## `AX_genus_eq_zero_iff_homeo` flip
+
+Your #205 made the backward leg unconditional
+(`genus_eq_zero_of_homeo_sphere_unconditional`). The forward direction
+(genus 0 ⟹ homeomorphic to S²) is now CHEAP because the keystone flip made
+its RR input free: **`exists_singleSimplePole_of_genus_zero_of_rr` is
+standard-3 on main** (port-side, `KirovDolbeault.RiemannRoch`). Inventory
+(from PR #199's body + #205's follow-up notes):
+(a) port→main-tree transport of the single-simple-pole existence at genus 0
+    (the ℓ(P)=2 pole-extraction analog — port-side proof exists; build the
+    main-tree statement against `Jacobians` types, NO new vendoring,
+    re-prove against the bridge identifications);
+(b) refactor `Jacobians/RiemannSurface/DegreeOneGenusZero.lean` (ownership
+    RELEASED to you for this package) so its internal `X ≃ ProjectiveLine`
+    becomes an output (`degreeOne_genus_zero` already constructs it with
+    `ContMDiff` both ways);
+(c) compose with `ProjectiveCurve/Line.lean`'s `onePointEquivSphereOfFinrankEq`
+    (ℙ¹ ≃ₜ S²) to land `genus X = 0 → Nonempty (X ≃ₜ Metric.sphere …)`;
+(d) THE FLIP: `AX_genus_eq_zero_iff_homeo` axiom → theorem in
+    `Jacobians/Axioms/Uniformization0.lean` (statement verbatim), ledger
+    16→15 (or current−1), critical−1 — full protocol: kernel re-verify,
+    `check_axiom_consistency.sh`, AXIOM_AUDIT + README + axiom-report
+    reconcile IN THE SAME PR, body documents closures.
+This would be the first challenge-critical axiom fully discharged by the
+parallel account.
+
+## Package 4 (SECONDARY/parallel): GC-1 — good-cover existence
+
+Your own `GOODCOVER_BLOCKER.md` GC-1: `SimplyConnectedGoodCover X` for compact
+Riemann surfaces (finite cover by simply connected charts with path-connected
+pairwise intersections — geodesic balls / chart-disk refinement argument).
+Lands `Group.FG (FundamentalGroup X x₀)` unconditionally via your
+`fundamentalGroup_fg_of_goodCover`, feeding #198's
+`moduleFinite_H1_of_fundamentalGroup_fg` → the discreteness chain.
+
+Same ground rules as above; tag PRs with this file.

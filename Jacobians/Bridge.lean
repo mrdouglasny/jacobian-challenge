@@ -22,6 +22,11 @@ Currently:
   chosen smooth path. Replaces them with four small structural path-
   selection axioms (`bridgePath` + endpoint/smoothness facts).
   Currently scaffolded; both bridge body and FTC theorem are `sorry`.
+
+* `Jacobians.Bridge.SphereGenusZero` — composes the G2-lane
+  `genus_eq_zero_of_homeo_sphere` with the S2-lane `π₁(S²) = 1`
+  (`Jacobians.Topology.simplyConnectedSpace_sphere`), closing the backward
+  leg of `AX_genus_eq_zero_iff_homeo` unconditionally.
 -/
 import Jacobians.Bridge.ContourDeformation
 import Jacobians.Bridge.BridgePathArc
@@ -31,3 +36,4 @@ import Jacobians.Bridge.KirovHolomorphicEquiv
 import Jacobians.Bridge.KirovLineIntegral
 import Jacobians.Bridge.KirovDolbeaultPeriods
 import Jacobians.Bridge.KirovDolbeaultLattice
+import Jacobians.Bridge.SphereGenusZero
