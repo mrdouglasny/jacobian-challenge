@@ -70,3 +70,24 @@ docs/planning/AB_ROUTE.md, reconcile rather than duplicate.
   main line P1 (zeroOneCoeff chart read of OneFormsZeroOne with the conj φ′
   law) → P2/P3 (pairing through FineResidue.resIntegral) → P4 Stokes kill →
   P5 Gram surjectivity → P6 assembled criterion; then the §20 engine E-block.
+
+== 2026-06-11 AB-P lane session start (feat/abel-pairing, base b1ff2c7) ==
+Goal: P-block of AB_ROUTE.md — concrete Λ via FineResidue.resIntegral; P4 Stokes kill,
+P5 surjectivity; compose with S4 (mem_dbarImage_of_periodFunctional) for the solvability
+theorem. New file vendor/kirov-dolbeault-port/KirovDolbeault/Dolbeault/AbelSubsetPairing.lean.
+Design decisions after survey:
+* P1 (0,1)-read of σ := cutoffPullback 𝔇 j σ (already smooth/compact-support/ℝ-linear, proven);
+  its conj-φ′ overlap law derived from dbar_planarDiff_eq_zero + dbarDisk_comp_holo +
+  dbar_planarPrimitive (all public) — no private frame lemmas needed.
+* P2 pairCoeff σ g := cutoff·g ∈ oneOneCoeff via the law product (mul_conj), any
+  IsOneZeroCoeff slot g (omegaCoeff for the application).
+* P4 via the CoboundaryVanish internals: new per-chart Leibniz/Stokes step for a GLOBAL
+  smooth β:=u (mirror of integral_pouCoeff_glueCoeff_of_coboundary), then the PUBLIC
+  integral_overlapTerm_relocate + sum_integral_relocated_eq_zero (both take arbitrary β).
+  Bridge lemma P4a: cutoffPullback j (dbarL u) = planar ∂̄ of chart read on image of U_j.
+* P5 WITHOUT the intrinsic conj-section: range Λ is a ℂ-subspace (cSmulForm const-c
+  homogeneity); a proper ℂ-subspace lies in a hyperplane ⟨c,·⟩=0; slot-linearity turns the
+  annihilation into pair(σ, ω_c)=0 ∀σ for ω_c := Σcᵢbᵢ ≠ 0; contradict with a one-chart
+  bump witness σ := h·∂̄w (cSmulForm h (dbarL w)), h,w chart bump lifts, giving
+  pairForm = ∫ χ|f|² > 0 at a point where coeff f ≠ 0 (exists_localRep_self_ne_zero).
+  No Gram matrix needed.
