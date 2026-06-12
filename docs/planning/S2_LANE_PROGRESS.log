@@ -1,0 +1,69 @@
+# S2 lane — S² topology campaign (HANDOVER_PARALLEL_ACCOUNT.md Package 1)
+
+Append-only progress log. Branch: `feat/s2-topology`, based on main @ d306ce4.
+
+## 2026-06-11 session 1
+
+- Read CLAUDE.md / AGENTS.md / HANDOVER_PARALLEL_ACCOUNT.md / SVK_ROUTE.md /
+  SVK_BLOCKER.md. Consumers confirmed:
+  - Goal A: `genus_eq_zero_of_homeo_sphere` (PR #199, `feat/genus0-backward`)
+    takes `hS : SimplyConnectedSpace (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1)`.
+  - Goal B: `moduleFinite_H1_of_fundamentalGroup_fg` (merged, #198) takes
+    `[Group.FG (FundamentalGroup X x₀)]`.
+- **FINDING (changes the Goal A plan).** The Kirov Dolbeault port already
+  contains a complete two-open van Kampen development:
+  `vendor/kirov-dolbeault-port/KirovDolbeault/SphereSimplyConnected.lean`
+  (charts/overlap side conditions for `OnePoint ℂ`, transport to S²) and
+  `KirovDolbeault/VanKampen.lean` (Lebesgue-subdivision + telescoping proof of
+  `TwoOpenVanKampen`, ending in the UNCONDITIONAL
+  `instance : SimplyConnectedSpace (Metric.sphere (0:EuclideanSpace ℝ (Fin 3)) 1)`
+  at line 426). Landed in the S2-integration commit aa2adbf (2026-06-10).
+  Text-level grep: no `sorry`, no `axiom` in either file. **Nothing imports
+  these modules**, so they have never been compiled (lakefile: only imported
+  port modules build) — CI has never checked them.
+- Plan: (1) compile `KirovDolbeault.VanKampen` + kernel-check the instance;
+  (2) Goal A = thin bridge file `Jacobians/Topology/SphereSimplyConnected.lean`
+  re-exporting the instance into the umbrella (repo-standard bridge pattern;
+  no new vendoring — the port is an existing in-tree dependency);
+  (3) Goal B = new `Jacobians/Topology/` development: finite simply-connected
+  good cover ⇒ `Group.FG (FundamentalGroup X x₀)` via a product-form telescope
+  (≤ N³ + 2N² + 1 generators, factor class depends only on the index triple);
+  good-cover EXISTENCE for compact surfaces re-isolated as the named gap.
+- `lake build KirovDolbeault.VanKampen` started (first compile of that chain).
+
+- Port build GREEN: `lake build KirovDolbeault.VanKampen` (2912 jobs, first
+  compile of the SphereSimplyConnected/VanKampen chain).
+- **Goal A kernel check PASSED**: both `s2probe : SimplyConnectedSpace
+  (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) := inferInstance` and
+  `Jacobians.RiemannSphere.VanKampen.twoOpenVanKampen_holds` print exactly
+  `[propext, Classical.choice, Quot.sound]` (standard-3).
+- Goal A bridge `Jacobians/Topology/SphereSimplyConnected.lean` compiles
+  (`lake env lean` green); wired into `Jacobians/Topology.lean` umbrella.
+- Goal B engine written: `Jacobians/Topology/FiniteGoodCover.lean` —
+  `SimplyConnectedGoodCover` structure, ι-indexed Lebesgue subdivision,
+  membership-form telescope, factor classification via anchor spokes
+  (generators `coverGen b e₁ e₂`, ≤ n·(n²+1)² of them), main theorem
+  `fundamentalGroup_fg_of_goodCover`. First compile iteration in progress.
+
+- Goal B engine COMPLETE: `FiniteGoodCover.lean` compiles green
+  (`lake env lean` + `lake build`), no sorry/axiom. Good-cover EXISTENCE
+  re-isolated as named gap GC-1 in `docs/planning/GOODCOVER_BLOCKER.md`.
+- Goal A consumer wired: `Jacobians/Bridge/SphereGenusZero.lean` —
+  `genus_eq_zero_of_homeo_sphere_unconditional` composes PR #199's reduction
+  with `simplyConnectedSpace_sphere`, closing the backward leg of
+  `AX_genus_eq_zero_iff_homeo` unconditionally.
+- Kernel checks (both standard-3, exactly [propext, Classical.choice, Quot.sound]):
+  - `Jacobians.Topology.SimplyConnectedGoodCover.fundamentalGroup_fg_of_goodCover`
+  - `Jacobians.RiemannSurface.genus_eq_zero_of_homeo_sphere_unconditional`
+
+- Stretch goal T-RANK: scoping doc delivered (`docs/planning/TRANK_SCOPING.md`).
+  Decomposition TR-0 (glue) + TR-DISC (named analytic core: period image
+  discrete in C^g) + TR-CNT (Mathlib ZLattice). GC-2 ANSWERED: no
+  Hodge-side shortcut — C-valued pairings are blind to torsion and to
+  Z-rank beyond R-independence; only route to TR-DISC at pin is a de Rham
+  comparison layer. Re-plumbing dividend identified: restating B-4 over the
+  image lattice drops Module.Free Z (H1) (TR-TORS) entirely. Circularity
+  flagged: span_range_loopIntegralToH1_eq_top routes through
+  AX_PeriodCycleBasis (loopIntegralToH1 is defined by Classical.choice of
+  it) — discharge-grade spanning must be restated over loopDevValH1Hom.
+- PR #205 opened (Goals A+B); CI green (build 21m14s).
