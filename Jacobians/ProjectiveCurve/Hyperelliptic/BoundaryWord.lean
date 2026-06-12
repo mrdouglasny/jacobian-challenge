@@ -143,6 +143,24 @@ theorem r1Word_iff_integrals
   simp only [Matrix.transpose_apply, S.arcAPeriodMatrix_branchCut cω,
     S.arcBPeriodMatrix_branchCut cω]
 
+/-- **The R2 wall has zero manifold content on its period side**:
+`R2GramWord` is equivalent to the entrywise family of identities between
+the explicit x-plane interval integrals and the polynomial box boundary
+forms. -/
+theorem r2GramWord_iff_integrals
+    (cω : Module.Basis (Fin (genus (HyperellipticOdd H h))) ℂ
+      (HolomorphicOneForm (HyperellipticOdd H h)))
+    (P : Fin (genus (HyperellipticOdd H h)) → Polynomial ℂ) :
+    S.R2GramWord cω P ↔ ∀ i j,
+      (∑ k, S.aPeriodIntegral cω k i * (starRingEnd ℂ) (S.bPeriodIntegral cω k j))
+          - ∑ k, S.bPeriodIntegral cω k i * (starRingEnd ℂ) (S.aPeriodIntegral cω k j)
+        = - Jacobians.boundaryForm (fun z => ((P j).derivative).eval z)
+            (fun z => (P i).eval z) := by
+  refine forall_congr' fun i => forall_congr' fun j => ?_
+  rw [Matrix.sub_apply, Matrix.mul_apply, Matrix.mul_apply]
+  simp only [Matrix.transpose_apply, Matrix.map_apply,
+    S.arcAPeriodMatrix_branchCut cω, S.arcBPeriodMatrix_branchCut cω]
+
 /-! ### The datum and its consumers -/
 
 /-- **The hyperelliptic boundary-word witness datum** (the per-genus
