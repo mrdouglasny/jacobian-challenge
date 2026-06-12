@@ -31,6 +31,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport
 import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
+import Jacobians.ProjectiveCurve.Hyperelliptic.Genus
 import Jacobians.ProjectiveCurve.PlaneCurve
 import Jacobians.ProjectiveCurve.PlaneCurve.AtlasCompat
 import Jacobians.ProjectiveCurve.PlaneCurve.CrossCompat
