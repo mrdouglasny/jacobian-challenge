@@ -271,4 +271,166 @@ theorem developingValue_eq_lineIntegral_of_isClosedSmoothLoop
     _ = ∫ t in (0 : ℝ)..1, f t := by rw [hA0, hAn]
     _ = Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form) γ := rfl
 
+/-! ## Anchored chart-ball subdivisions
+
+For the converse direction (a smooth representative of a continuous loop)
+we need subdivisions whose chart balls are *anchored*: the ball's center is
+the chart image of its base point, so that chart-affine hops through the
+base point stay inside the ball. The generic cover construction
+(`pathChartBallSet_cover`) already produces anchored balls. -/
+
+/-- A `PathChartBall` whose center is the chart image of its base point. -/
+def IsAnchoredBall (B : PathChartBall Y) : Prop :=
+  B.c = extChartAt 𝓘(ℂ) B.p B.p
+
+/-- Every continuous path admits a chart-ball subdivision with anchored
+balls (same Lebesgue-cover construction as
+`exists_pathChartBallSubdivision`, restricted to the anchored sub-family). -/
+theorem exists_anchored_pathChartBallSubdivision (γ : C(unitInterval, Y)) :
+    ∃ S : Jacobians.RiemannSurface.PathChartBallSubdivision γ,
+      ∀ i, IsAnchoredBall (S.cellBall i) := by
+  classical
+  have hopen : ∀ B : {B : PathChartBall Y // IsAnchoredBall B},
+      IsOpen (pathChartBallSet γ B.val) := fun B => isOpen_pathChartBallSet γ B.val
+  have hcover : Set.univ ⊆
+      ⋃ B : {B : PathChartBall Y // IsAnchoredBall B}, pathChartBallSet γ B.val := by
+    intro u _hu
+    let p : Y := γ u
+    let z : ℂ := (extChartAt 𝓘(ℂ) p) p
+    have hz_target : z ∈ (extChartAt 𝓘(ℂ) p).target := by
+      simp [z, p]
+    obtain ⟨r, hr_pos, hr_sub⟩ :=
+      (Metric.isOpen_iff.mp (isOpen_extChartAt_target (I := 𝓘(ℂ)) p)) z hz_target
+    let B : PathChartBall Y :=
+      { p := p, c := z, r := r, ball_subset_target := hr_sub }
+    refine Set.mem_iUnion.2 ⟨⟨B, rfl⟩, ?_, ?_⟩
+    · simp [B, p]
+    · exact (show (extChartAt 𝓘(ℂ) B.p) (γ u) ∈ Metric.ball B.c B.r by
+        simpa [B, p, z] using (Metric.mem_ball_self (x := z) hr_pos))
+  obtain ⟨t, ht_zero, ht_mono, ⟨k, ht_eventually_one⟩, ht_sub⟩ :=
+    exists_monotone_Icc_subset_open_cover_unitInterval
+      (c := fun B : {B : PathChartBall Y // IsAnchoredBall B} =>
+        pathChartBallSet γ B.val) hopen hcover
+  let N : ℕ := k + 1
+  let cb : Fin N → {B : PathChartBall Y // IsAnchoredBall B} :=
+    fun i => Classical.choose (ht_sub i.val)
+  refine ⟨⟨N, (fun i : Fin (N + 1) => t i.val), fun i => (cb i).val,
+    ?_, ?_, ?_, ?_⟩, fun i => (cb i).2⟩
+  · simpa using ht_zero
+  · have hlast : t N = 1 := ht_eventually_one N (Nat.le_succ k)
+    simpa [N, Fin.val_last] using hlast
+  · intro i j hij
+    exact ht_mono (Fin.val_le_of_le hij)
+  · intro i u hu
+    have hsub := Classical.choose_spec (ht_sub i.val)
+    have hu' : u ∈ Set.Icc (t i.val) (t (i.val + 1)) := by
+      constructor
+      · simpa [Fin.val_castSucc] using hu.1
+      · simpa [Fin.val_succ] using hu.2
+    exact hsub hu'
+
+/-! ## Chart-ball hops with computed line integrals -/
+
+private lemma mem_chartAt_target_of_extChartAt {p : Y} {z : ℂ}
+    (h : z ∈ (extChartAt 𝓘(ℂ) p).target) : z ∈ (chartAt ℂ p).target := by
+  simpa [extChartAt_target] using h
+
+private lemma extChartAt_apply_eq_chartAt (p x : Y) :
+    (extChartAt 𝓘(ℂ) p) x = (chartAt ℂ p) x := rfl
+
+/-- Membership of the affine segment from the (anchored) center to a ball
+point: convexity of the metric ball. -/
+private lemma affine_seg_mem_ball {c w : ℂ} {r : ℝ} (hw : w ∈ Metric.ball c r)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    (1 - (s : ℂ)) * c + (s : ℂ) * w ∈ Metric.ball c r := by
+  have hdist : dist ((1 - (s : ℂ)) * c + (s : ℂ) * w) c = s * dist w c := by
+    rw [dist_eq_norm, dist_eq_norm]
+    have : (1 - (s : ℂ)) * c + (s : ℂ) * w - c = (s : ℂ) * (w - c) := by ring
+    rw [this, norm_mul]
+    simp [abs_of_nonneg hs.1]
+  rw [Metric.mem_ball, hdist]
+  calc s * dist w c ≤ 1 * dist w c := by
+        have := dist_nonneg (x := w) (y := c)
+        nlinarith [hs.2]
+    _ = dist w c := one_mul _
+    _ < r := Metric.mem_ball.mp hw
+
+/-- A point of an anchored ball is a valid hop target from the ball's base
+point. -/
+private lemma hopValid_of_anchored {B : PathChartBall Y} (hB : IsAnchoredBall B)
+    {x : Y} (hx_src : x ∈ (chartAt ℂ B.p).source)
+    (hx_ball : (extChartAt 𝓘(ℂ) B.p) x ∈ Metric.ball B.c B.r) :
+    _root_.Jacobians.HopValid B.p x := by
+  refine ⟨hx_src, ?_⟩
+  intro s hs
+  have hcenter : (chartAt ℂ B.p) B.p = B.c := by
+    rw [← extChartAt_apply_eq_chartAt]
+    exact hB.symm
+  have hx_coord : (chartAt ℂ B.p) x ∈ Metric.ball B.c B.r := hx_ball
+  have hmem : (1 - (s : ℂ)) * B.c + (s : ℂ) * (chartAt ℂ B.p) x ∈
+      Metric.ball B.c B.r := affine_seg_mem_ball hx_coord hs
+  rw [hcenter]
+  exact mem_chartAt_target_of_extChartAt (B.ball_subset_target hmem)
+
+/-- **Hop FTC.** The line integral of a bridged form along the smoothstep
+chart-ball hop from the (anchored) base point to a ball point is the
+primitive increment from the center to the point's coordinates. -/
+private lemma lineIntegral_hop (form : HolomorphicOneForm Y)
+    {B : PathChartBall Y} (hB : IsAnchoredBall B)
+    {x : Y} (hx_src : x ∈ (chartAt ℂ B.p).source)
+    (hx_ball : (extChartAt 𝓘(ℂ) B.p) x ∈ Metric.ball B.c B.r) :
+    Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form)
+        (_root_.Jacobians.ChartBallPathSmooth B.p x) =
+      pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) x) -
+        pathChartBallPrimitive form B B.c := by
+  classical
+  set σ : ℝ → Y := _root_.Jacobians.ChartBallPathSmooth B.p x with hσ_def
+  have hop := hopValid_of_anchored hB hx_src hx_ball
+  have hsm : _root_.Jacobians.IsSmoothPath B.p x σ :=
+    _root_.Jacobians.OfCurveSkeleton.isSmoothPath_ChartBallPathSmooth B.p x hx_src hop.2
+  have hcenter : (chartAt ℂ B.p) B.p = B.c := by
+    rw [← extChartAt_apply_eq_chartAt]
+    exact hB.symm
+  -- The hop stays in the chart ball.
+  have hmem : ∀ t ∈ Set.Icc (0 : ℝ) 1, σ t ∈ (chartAt ℂ B.p).source ∧
+      (extChartAt 𝓘(ℂ) B.p) (σ t) ∈ Metric.ball B.c B.r := by
+    intro t _ht
+    set s : ℝ := _root_.Jacobians.smoothStep01 t with hs_def
+    have hs01 : s ∈ Set.Icc (0 : ℝ) 1 := _root_.Jacobians.smoothStep01_mem_unit t
+    have hw : (1 - (s : ℂ)) * (chartAt ℂ B.p) B.p + (s : ℂ) * (chartAt ℂ B.p) x ∈
+        Metric.ball B.c B.r := by
+      rw [hcenter]
+      exact affine_seg_mem_ball hx_ball hs01
+    have hw_target : (1 - (s : ℂ)) * (chartAt ℂ B.p) B.p + (s : ℂ) * (chartAt ℂ B.p) x ∈
+        (chartAt ℂ B.p).target :=
+      mem_chartAt_target_of_extChartAt (B.ball_subset_target hw)
+    have hσt : σ t = (chartAt ℂ B.p).symm
+        ((1 - (s : ℂ)) * (chartAt ℂ B.p) B.p + (s : ℂ) * (chartAt ℂ B.p) x) := rfl
+    constructor
+    · rw [hσt]
+      exact (chartAt ℂ B.p).map_target hw_target
+    · rw [hσt, extChartAt_apply_eq_chartAt, (chartAt ℂ B.p).right_inv hw_target]
+      exact hw
+  have hdiff : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      DifferentiableAt ℝ ((chartAt (H := ℂ) (σ t)).toFun ∘ σ) t := by
+    intro t ht
+    exact hsm.diff t (by rwa [Set.uIcc_of_le zero_le_one])
+  have hint : IntervalIntegrable
+      (fun t => (bridgeForm form).toFun (σ t) (Jacobians.Vendor.Kirov.pathSpeed σ t))
+      MeasureTheory.volume 0 1 :=
+    _root_.Jacobians.intervalIntegrable_form_pathSpeed_of_velContinuous
+      (bridgeKDFormEquiv form) σ hsm.velCont
+  have hFTC := lineIntegral_cell_eq_primitive_sub form B σ zero_le_one
+    hsm.cont hdiff hmem hint
+  have hσ0 : σ 0 = B.p := hsm.start
+  have hσ1 : σ 1 = x := hsm.finish
+  calc Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form) σ
+      = ∫ t in (0:ℝ)..1,
+          (bridgeForm form).toFun (σ t) (Jacobians.Vendor.Kirov.pathSpeed σ t) := rfl
+    _ = pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) (σ 1)) -
+          pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) (σ 0)) := hFTC
+    _ = pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) x) -
+          pathChartBallPrimitive form B B.c := by
+        rw [hσ0, hσ1, hB]
+
 end Jacobians.Bridge
