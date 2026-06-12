@@ -116,3 +116,16 @@ Append-only progress log. Branch: `feat/svk-generation`, based on main @ 399a243
   generation by the explicit circleInPunctured lassos; then the
   one-lasso-per-puncture normalClosure corollary (radius/spoke comparison
   inside a common punctured disk; needs puncturedDiskHomeo).
+- B1 HEADLINE LANDED (G5 / Layer B): Jacobians/Topology/LassoGeneration.lean
+  - closure_circleLassos_eq_top: pi1(C \ T, x0) is generated — PLAIN
+    Subgroup.closure, spokes absorb conjugation, no normal closure needed —
+    by the explicit spoked circle lassos p.trans((circleInPunctured s z
+    hcirc).trans p.symm), the same loop shape as exists_winding_dual_loops.
+  - Membership form fromPath_mem_of_circleLassos_mem for abstract-H
+    consumers.
+  - Circle-ization: per cell-spoke generator, G2 (fromPath_eq_cellLasso_zpow)
+    makes the loop a cell-lasso power; a tiny explicit circle in a ball
+    B(s,r) inside the cell has winding 1 around s; the Z-iso of the cell +
+    integer-unit algebra forces tiny circle = cell generator up to sign.
+  - Kernel standard-3 on all headline decls. B1 = issue #171 T1 upper-bound
+    half: DONE (with identified explicit generators, not just abstract FG).

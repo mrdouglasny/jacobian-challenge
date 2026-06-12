@@ -20,3 +20,4 @@ import Jacobians.Topology.HalfPlaneHomeo
 import Jacobians.Topology.PuncturedPlaneGeneration
 import Jacobians.Topology.SpokeAlgebra
 import Jacobians.Topology.CellGeneration
+import Jacobians.Topology.LassoGeneration
