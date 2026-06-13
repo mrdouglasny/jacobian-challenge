@@ -25,6 +25,7 @@ witness (formerly the content of `AX_Elliptic_H1_symplectic`):
 
 No axioms are used anywhere in this file.
 -/
+import Jacobians.RiemannSurface.H1Composite
 import Jacobians.RiemannSurface.QuotientCoveringPi1
 import Jacobians.RiemannSurface.BoundaryWordElliptic
 
@@ -207,6 +208,19 @@ theorem ellipticH1Basis_eq_loops (i : Fin (2 * genus (Elliptic ω₁ ω₂ h))) 
       rw [ellipticOrientedLatticeBasis_coe_one]
       unfold orientedPeriod
       rw [if_neg hpos]
+
+/-- **T-GEN witness, g = 1.** The analytic-loop classes ℤ-generate
+`H₁(Elliptic)`: the covering-space `H₁ ≃ Λ` basis is realized by the concrete
+oriented elliptic loops (`ellipticH1Basis_eq_loops`), so it spans via the
+necessity lemma `analyticLoopsGenerateH1_of_h1LoopBasis`. This shows the named
+residual `AnalyticLoopsGenerateH1` is satisfiable (non-vacuous) on a genuine
+positive-genus curve, unconditionally and axiom-free. -/
+theorem analyticLoopsGenerateH1_elliptic :
+    Jacobians.RiemannSurface.AnalyticLoopsGenerateH1 (X := Elliptic ω₁ ω₂ h)
+      (0 : Elliptic ω₁ ω₂ h) :=
+  Jacobians.RiemannSurface.analyticLoopsGenerateH1_of_h1LoopBasis
+    (ellipticLoops ω₁ ω₂ h) (ellipticH1Basis ω₁ ω₂ h)
+    (ellipticH1Basis_eq_loops ω₁ ω₂ h)
 
 /-! ### The unconditional g = 1 witness -/
 
