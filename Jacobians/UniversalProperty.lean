@@ -474,4 +474,92 @@ theorem ofCurve_isJacobian {X : Type u} [TopologicalSpace X] [T2Space X]
   intro ψ hψ
   exact (jacobianUniversal_phi_unique x₀ hg f φ ψ ⟨hφ_holo, hφ_fac⟩ hψ).symm
 
+/-! ## Categoricity: the universal property determines the Jacobian
+
+The universal property is not merely *satisfied* by the Jacobian; it
+*characterizes* it. The next theorem is the categoricity certificate: any two
+objects satisfying `IsJacobian` are biholomorphically, group-isomorphically the
+same, via a unique pair of mutually inverse holomorphic homomorphisms
+intertwining their Abel–Jacobi maps. This is the initial-object uniqueness
+(Yoneda) for the pointed category of holomorphic maps to complex tori.
+
+It uses **none of Buzzard's 24 challenge requirements** — only the three fields
+of `IsJacobian` (`aj_holo`, `aj_base`, `universal`) — and is **axiom-free**
+(`#print axioms isJacobian_unique` depends only on `propext`, `Classical.choice`,
+`Quot.sound`). The challenge requirements re-enter only in the corollary
+`isJacobian_iso_jacobian`, which names Buzzard's concrete `Jacobian X` as one of
+the two objects via `ofCurve_isJacobian` (and so inherits its torus axioms). -/
+
+universe u
+
+/-- **Categoricity of the Albanese / Jacobian universal property.**
+
+If `(J₁, aj₁)` and `(J₂, aj₂)` both satisfy `IsJacobian x₀`, there is a pair of
+mutually inverse holomorphic group homomorphisms `φ : J₁ →+ J₂`, `ψ : J₂ →+ J₁`
+— a biholomorphic group isomorphism `J₁ ≅ J₂` — intertwining the Abel–Jacobi
+maps (`aj₂ = φ ∘ aj₁` and `aj₁ = ψ ∘ aj₂`). The factorizing `φ` is moreover the
+unique holomorphic group hom with `φ ∘ aj₁ = aj₂` (the `∃!` in `universal`).
+
+The proof is pure initial-object algebra over the universal property and uses
+none of the challenge's 24 requirements; it is axiom-free. -/
+theorem isJacobian_unique
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] (x₀ : X) {g₁ g₂ : ℕ}
+    {J₁ : Type u} [TopologicalSpace J₁] [T2Space J₁] [CompactSpace J₁] [ConnectedSpace J₁]
+    [ChartedSpace (Fin g₁ → ℂ) J₁] [AddGroup J₁] [IsManifold 𝓘(ℂ, Fin g₁ → ℂ) ω J₁]
+    [LieAddGroup 𝓘(ℂ, Fin g₁ → ℂ) ω J₁]
+    {J₂ : Type u} [TopologicalSpace J₂] [T2Space J₂] [CompactSpace J₂] [ConnectedSpace J₂]
+    [ChartedSpace (Fin g₂ → ℂ) J₂] [AddGroup J₂] [IsManifold 𝓘(ℂ, Fin g₂ → ℂ) ω J₂]
+    [LieAddGroup 𝓘(ℂ, Fin g₂ → ℂ) ω J₂]
+    {aj₁ : X → J₁} {aj₂ : X → J₂}
+    (hJ₁ : IsJacobian.{u, u, u} (g := g₁) x₀ J₁ aj₁)
+    (hJ₂ : IsJacobian.{u, u, u} (g := g₂) x₀ J₂ aj₂) :
+    ∃ φ : J₁ →+ J₂, ∃ ψ : J₂ →+ J₁,
+      ContMDiff 𝓘(ℂ, Fin g₁ → ℂ) 𝓘(ℂ, Fin g₂ → ℂ) ω (φ : J₁ → J₂) ∧
+      ContMDiff 𝓘(ℂ, Fin g₂ → ℂ) 𝓘(ℂ, Fin g₁ → ℂ) ω (ψ : J₂ → J₁) ∧
+      ψ.comp φ = AddMonoidHom.id J₁ ∧ φ.comp ψ = AddMonoidHom.id J₂ ∧
+      (∀ x, aj₂ x = φ (aj₁ x)) ∧ (∀ x, aj₁ x = ψ (aj₂ x)) := by
+  obtain ⟨φ, ⟨hφ_holo, hφ_fac⟩, _⟩ := hJ₁.universal (A := J₂) (m := g₂) aj₂ hJ₂.aj_holo hJ₂.aj_base
+  obtain ⟨ψ, ⟨hψ_holo, hψ_fac⟩, _⟩ := hJ₂.universal (A := J₁) (m := g₁) aj₁ hJ₁.aj_holo hJ₁.aj_base
+  refine ⟨φ, ψ, hφ_holo, hψ_holo, ?_, ?_, hφ_fac, hψ_fac⟩
+  · obtain ⟨χ, _, huniq⟩ := hJ₁.universal (A := J₁) (m := g₁) aj₁ hJ₁.aj_holo hJ₁.aj_base
+    have e1 : ψ.comp φ = χ :=
+      huniq _ ⟨by rw [AddMonoidHom.coe_comp]; exact hψ_holo.comp hφ_holo,
+        fun x => by rw [AddMonoidHom.comp_apply, ← hφ_fac x]; exact hψ_fac x⟩
+    have e2 : AddMonoidHom.id J₁ = χ :=
+      huniq _ ⟨by rw [AddMonoidHom.coe_id]; exact contMDiff_id,
+        fun x => by rw [AddMonoidHom.id_apply]⟩
+    exact e1.trans e2.symm
+  · obtain ⟨χ, _, huniq⟩ := hJ₂.universal (A := J₂) (m := g₂) aj₂ hJ₂.aj_holo hJ₂.aj_base
+    have e1 : φ.comp ψ = χ :=
+      huniq _ ⟨by rw [AddMonoidHom.coe_comp]; exact hφ_holo.comp hψ_holo,
+        fun x => by rw [AddMonoidHom.comp_apply, ← hψ_fac x]; exact hφ_fac x⟩
+    have e2 : AddMonoidHom.id J₂ = χ :=
+      huniq _ ⟨by rw [AddMonoidHom.coe_id]; exact contMDiff_id,
+        fun x => by rw [AddMonoidHom.id_apply]⟩
+    exact e1.trans e2.symm
+
+/-- **The universal property determines Buzzard's concrete Jacobian.** For
+positive genus, every object satisfying `IsJacobian` is biholomorphically,
+group-isomorphically the same as `Jacobian X`, with the isomorphism intertwining
+the Abel–Jacobi maps. (This specializes `isJacobian_unique` to
+`ofCurve_isJacobian`, and so rests on the same torus axioms as the latter.) -/
+theorem isJacobian_iso_jacobian
+    {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] [Nonempty X] (x₀ : X) {g₁ : ℕ}
+    {J₁ : Type u} [TopologicalSpace J₁] [T2Space J₁] [CompactSpace J₁] [ConnectedSpace J₁]
+    [ChartedSpace (Fin g₁ → ℂ) J₁] [AddGroup J₁] [IsManifold 𝓘(ℂ, Fin g₁ → ℂ) ω J₁]
+    [LieAddGroup 𝓘(ℂ, Fin g₁ → ℂ) ω J₁] {aj₁ : X → J₁}
+    (hg : 0 < RiemannSurface.genus X)
+    (hJ : IsJacobian.{u, u, u} (g := g₁) x₀ J₁ aj₁) :
+    ∃ φ : J₁ →+ Jacobian X, ∃ ψ : Jacobian X →+ J₁,
+      ContMDiff 𝓘(ℂ, Fin g₁ → ℂ) 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) ω
+        (φ : J₁ → Jacobian X) ∧
+      ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin g₁ → ℂ) ω
+        (ψ : Jacobian X → J₁) ∧
+      ψ.comp φ = AddMonoidHom.id J₁ ∧ φ.comp ψ = AddMonoidHom.id (Jacobian X) ∧
+      (∀ x, Jacobian.ofCurve x₀ x = φ (aj₁ x)) ∧
+      (∀ x, aj₁ x = ψ (Jacobian.ofCurve x₀ x)) :=
+  isJacobian_unique x₀ hJ (ofCurve_isJacobian.{u, u} x₀ hg)
+
 end Jacobians
