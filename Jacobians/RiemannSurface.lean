@@ -44,6 +44,7 @@ import Jacobians.RiemannSurface.AnalyticArcMovingChart
 import Jacobians.RiemannSurface.SubintervalHomotopy
 import Jacobians.RiemannSurface.SmoothAnalyticLoop
 import Jacobians.RiemannSurface.TGenFinalReduction
+import Jacobians.RiemannSurface.PLApproxGeneration
 import Jacobians.RiemannSurface.LoopConjugation
 import Jacobians.RiemannSurface.HomotopyInvariance
 import Jacobians.RiemannSurface.DevelopingMap

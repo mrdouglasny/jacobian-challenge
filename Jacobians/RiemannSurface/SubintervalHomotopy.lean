@@ -28,7 +28,6 @@ namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology
 open unitInterval
-open Classical
 
 section SubintervalSupported
 
@@ -79,6 +78,7 @@ theorem innerH_eq_of_agree (f g : Path x₀ x₁) (e : PartialEquiv X E) {st : I
   simp only [AffineMap.coe_const, Function.const_apply]
   rw [← heq, e.left_inv hmem]
 
+open scoped Classical in
 /-- **Subinterval-supported chart-local straight-line homotopy.** Two paths
 `f g : Path x₀ x₁` that agree outside `(a, b)` and, on `[a, b]`, both lie in
 `e.source` with connecting segments inside `e.target`, are homotopic rel endpoints,
