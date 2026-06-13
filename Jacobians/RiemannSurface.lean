@@ -42,6 +42,7 @@ import Jacobians.RiemannSurface.CanonicalArcIntegral
 import Jacobians.RiemannSurface.ArcAlgebra
 import Jacobians.RiemannSurface.AnalyticArcMovingChart
 import Jacobians.RiemannSurface.SmoothAnalyticLoop
+import Jacobians.RiemannSurface.TGenFinalReduction
 import Jacobians.RiemannSurface.LoopConjugation
 import Jacobians.RiemannSurface.HomotopyInvariance
 import Jacobians.RiemannSurface.DevelopingMap
