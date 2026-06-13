@@ -29,7 +29,8 @@ variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
 theorem pathChartBallPrimitive_differentiableOn (form : HolomorphicOneForm X)
     (B : PathChartBall X) :
     DifferentiableOn ℂ (pathChartBallPrimitive form B) (Metric.ball B.c B.r) :=
-  fun z hz => (pathChartBallPrimitive_hasDerivAt form B z hz).differentiableAt.differentiableWithinAt
+  fun z hz =>
+    (pathChartBallPrimitive_hasDerivAt form B z hz).differentiableAt.differentiableWithinAt
 
 /-- The chart-ball primitive's derivative equals the coefficient on its ball. -/
 theorem pathChartBallPrimitive_deriv (form : HolomorphicOneForm X)
