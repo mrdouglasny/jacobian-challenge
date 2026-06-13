@@ -36,6 +36,7 @@ obstacle was identified (see below) and the instance is currently
 -/
 import Jacobians.AbelianVariety.ComplexTorus
 import Jacobians.Axioms.PeriodLattice
+import Jacobians.Axioms.PeriodLatticeTGen
 
 namespace Jacobians
 

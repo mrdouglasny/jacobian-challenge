@@ -2,6 +2,8 @@ import Mathlib -- compiles with Mathlib v4.30.0 (c5ea00351c28e24afc9f0f84379aa41
 import Jacobians.Jacobian
 import Jacobians.Axioms.OfCurveInjective
 import Jacobians.Axioms.Uniformization0
+import Jacobians.RiemannSurface.OfCurveInjOfTGen
+import Jacobians.RiemannSurface.ChartFlatHomotopyWallProof
 -- ^ Our bridge. Fills all 24 Buzzard sorries via the named theorem/axiom
 -- framework: `Jacobian` bridge through `ComplexTorus`, instances via
 -- ULift transfer, data defs (`ofCurve`,
@@ -137,8 +139,12 @@ lemma ofCurve_self (P : X) : ofCurve P P = 0 :=
   Jacobians.Axioms.AX_ofCurve_self P
 
 -- this is the lemma which stops the hack answer "J(X)=0 for all X"
+-- Routed through the `AX_PeriodCycleBasis`-free T-GEN injectivity engine
+-- (`ofCurveImpl_inj_of_tgen`) fed the unconditional `analyticLoopsGenerateH1`;
+-- `ofCurve P` is definitionally `ofCurveImpl X P`, so the statement is unchanged.
 lemma ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) :=
-  Jacobians.Axioms.AX_ofCurve_inj P h
+  Jacobians.RiemannSurface.ofCurveImpl_inj_of_tgen
+    (Jacobians.RiemannSurface.analyticLoopsGenerateH1 (Classical.arbitrary X)) P h
 
 variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y] [ConnectedSpace Y]
   [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
