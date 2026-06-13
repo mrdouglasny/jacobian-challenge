@@ -1,0 +1,31 @@
+Kirov Dolbeault Port (forward-ported derivative work)
+=====================================================
+
+This directory contains a forward-port of source code from:
+
+    Rado Kirov, "jacobian-claude"
+    https://github.com/rkirov/jacobian-claude
+    at commit 4437c2b (captured 2026-06-09)
+
+Copyright the original authors of rkirov/jacobian-claude, with modifications
+by the jacobian-challenge project (Michael R. Douglas et al.).
+
+Licensed under the Apache License, Version 2.0 (the "License"); see the
+accompanying LICENSE file for the full text. The upstream repository was
+relicensed from MIT to Apache 2.0 on 2026-04-25 and asserts Apache 2.0 via
+per-file headers; no separate LICENSE file was present at the upstream root
+at the time of capture, so the standard Apache 2.0 text is supplied here.
+
+MODIFICATIONS (per Apache 2.0 §4(b) — "carry prominent notices stating that
+You changed the files"):
+  - Forward-ported to Lean v4.30.0 / Mathlib c5ea003 (original built against
+    an earlier pin). The mechanical port changes are documented in the
+    introducing commit (37c0966) and PROVENANCE.md: chartedSpace rename,
+    ZLatticeQuotient instance, zero_le argument, VanKampen Icc rename,
+    SchwartzFiniteness import paths.
+  - Subsequent project work under Jacobians/* / KirovDolbeault/Dolbeault/*
+    builds on and extends this port; such additions are the jacobian-challenge
+    project's own contributions, also under Apache 2.0. Individual added files
+    carry their own copyright headers.
+
+See PROVENANCE.md for full capture and forward-port details.

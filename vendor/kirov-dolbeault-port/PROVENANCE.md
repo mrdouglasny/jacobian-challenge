@@ -19,7 +19,8 @@ Authors: Rado Kirov
 ```
 
 No separate `LICENSE` file was present at the root of the upstream repository
-at the time of capture. The per-file headers assert Apache License, Version 2.0.
+at the time of capture, so the standard Apache 2.0 text is supplied in this
+directory's `LICENSE` file alongside a `NOTICE` (added 2026-06-13). The per-file headers assert Apache License, Version 2.0.
 The upstream repository was relicensed from MIT to Apache 2.0 on 2026-04-25
 (commit `7ce9e2e`, "Relicense from MIT to Apache 2.0").
 

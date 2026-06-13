@@ -1,0 +1,22 @@
+Kirov Jacobian-Challenge — Dolbeault snapshot (verbatim reference copy)
+======================================================================
+
+This directory is an UNMODIFIED verbatim copy of source code from:
+
+    Rado Kirov, "jacobian-claude"
+    https://github.com/rkirov/jacobian-claude
+    at commit 4437c2b (captured 2026-06-09)
+
+Copyright the original authors of rkirov/jacobian-claude.
+
+Licensed under the Apache License, Version 2.0 (the "License"); see the
+accompanying LICENSE file for the full text. The upstream repository was
+relicensed from MIT to Apache 2.0 on 2026-04-25 and asserts Apache 2.0
+via per-file headers; no separate LICENSE file was present at the upstream
+root at the time of capture, so the standard Apache 2.0 text is supplied
+here for completeness. See PROVENANCE.md for full capture details.
+
+No modifications have been made to the source files in this directory; it
+exists as a fixed reference. Where upstream files carry copyright/attribution
+headers, those are retained verbatim; where upstream omitted them, none have
+been added (preserving the verbatim character of the snapshot).
