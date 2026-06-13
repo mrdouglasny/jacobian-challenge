@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
 import Jacobians.RiemannSurface.AbelPlumbing
+import Jacobians.RiemannSurface.H1Composite
 import Jacobians.RiemannSurface.LoopLattice
 import Jacobians.Bridge.KirovDolbeaultOpenPath
 import Jacobians.Layer3.LinearSystemBridge
@@ -474,6 +475,252 @@ theorem zeroPeriodChainSolvability_of_engine :
     (_root_.Jacobians.Dolbeault.chartDiskCover (X := X)) c hper_all
   exact mem_principalDivisors_of_port_div hD0 f (by rw [hf, hboundary, hE])
 
+/-! ## Basis-free variant: T-GEN in place of `AX_PeriodCycleBasis`
+
+The engine adapter above expands the divisor's zero-period homology class
+`h` over the **pinned cycle basis** `pinnedCycleBasis x₀`
+(`Classical.choice (AX_PeriodCycleBasis x₀)`), producing the cancelling
+1-chain's loop part as a `ℤ`-combination of the `2g` basis loops with
+coefficients `cb.isBasis.repr h`. That is the ONLY place the
+`AX_PeriodCycleBasis` axiom enters the ⊆ engine.
+
+Under **T-GEN** (`AnalyticLoopsGenerateH1 x₀`: analytic-loop classes
+`ℤ`-span `H1 X x₀`), the `#198` `AddSubgroup`-span trick
+(`AnalyticLoopsGenerateH1.exists_loop`) gives a **single** analytic loop
+`γ` with `loopToHomology γ = h` — no cycle basis, no linear-independence,
+no `repr`. The cancelling chain's loop part is then a SINGLE smooth loop
+representing `γ` with coefficient `-1`. The basis-free adapter consumes
+period-lattice membership directly (`divisorPeriodVector x₀ D ∈
+periodLatticeInBasis X x₀ (jacobianBasis X)`), which is the basis-free
+restatement of `HasZeroPeriodLoopPresentation` (the `jacobianBasis` here
+is a basis of *forms*, not cycles — unrelated to `AX_PeriodCycleBasis`).
+-/
+
+/-- **Basis-free engine hypothesis.** Every degree-0 divisor whose ambient
+period vector lies in the period lattice is principal. This is the
+basis-free restatement of `ZeroPeriodChainSolvability`: it consumes
+period-lattice membership directly instead of the
+`pinnedCycleBasis`-defined `HasZeroPeriodLoopPresentation`. -/
+def ZeroPeriodChainSolvabilityLattice (X : Type u) [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
+    [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] : Prop :=
+  ∀ D : Divisor X, D ∈ (Divisor.deg X).ker →
+    divisorPeriodVector (Classical.arbitrary X) D ∈
+      Jacobians.Axioms.periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X) →
+    D ∈ PrincipalDivisors X
+
+/-- **E6 (basis-free).** The basis-free engine hypothesis
+`ZeroPeriodChainSolvabilityLattice` holds, given **T-GEN**
+(`AnalyticLoopsGenerateH1 x₀`) for the engine basepoint `x₀ =
+Classical.arbitrary X`. Same Forster §20 engine as
+`zeroPeriodChainSolvability_of_engine`, but the cancelling 1-chain's loop
+part is a SINGLE analytic-loop generator (`hgen.exists_loop`) with
+coefficient `-1`, never a cycle-basis `repr`. No `AX_PeriodCycleBasis`. -/
+theorem zeroPeriodChainSolvabilityLattice_of_engine
+    (hgen : AnalyticLoopsGenerateH1 (Classical.arbitrary X)) :
+    ZeroPeriodChainSolvabilityLattice X := by
+  intro D hdeg hmem
+  by_cases hD0 : D = 0
+  · subst hD0
+    exact (PrincipalDivisors X).zero_mem
+  classical
+  set x₀ : X := Classical.arbitrary X with hx₀
+  set b := jacobianBasis X with hb
+  set E : X →₀ ℤ := FreeAbelianGroup.equivFinsupp X D with hE
+  have hE_toFinsupp : E = FreeAbelianGroup.toFinsupp D := rfl
+  set k : ℕ := E.support.card with hk
+  set eqv : ↥E.support ≃ Fin k := E.support.equivFin with heqv
+  set P : Fin k → X := fun a => ((eqv.symm a : ↥E.support) : X) with hP
+  -- reindexing: sums over `Fin k` of point-functions are support sums
+  have hreindexV : ∀ g : X → (Fin (genus X) → ℂ),
+      ∑ a : Fin k, g (P a) = ∑ Q ∈ E.support, g Q := by
+    intro g
+    rw [show (∑ a : Fin k, g (P a)) =
+        ∑ a : Fin k, (fun s : ↥E.support => g s) (eqv.symm a) from rfl,
+      Equiv.sum_comp eqv.symm (fun s : ↥E.support => g (s : X))]
+    exact Finset.sum_coe_sort E.support g
+  have hreindexZ : ∀ g : X → ℤ,
+      ∑ a : Fin k, g (P a) = ∑ Q ∈ E.support, g Q := by
+    intro g
+    rw [show (∑ a : Fin k, g (P a)) =
+        ∑ a : Fin k, (fun s : ↥E.support => g s) (eqv.symm a) from rfl,
+      Equiv.sum_comp eqv.symm (fun s : ↥E.support => g (s : X))]
+    exact Finset.sum_coe_sort E.support g
+  have hreindexF : ∀ g : X → (X →₀ ℤ),
+      ∑ a : Fin k, g (P a) = ∑ Q ∈ E.support, g Q := by
+    intro g
+    rw [show (∑ a : Fin k, g (P a)) =
+        ∑ a : Fin k, (fun s : ↥E.support => g s) (eqv.symm a) from rfl,
+      Equiv.sum_comp eqv.symm (fun s : ↥E.support => g (s : X))]
+    exact Finset.sum_coe_sort E.support g
+  -- the comparison loops and their lattice vectors
+  set lam : Fin k → Path x₀ x₀ := fun a =>
+    (bridgeArcPath x₀ (P a)).trans
+      (smoothPathToPath (_root_.Jacobians.smoothPath x₀ (P a))
+        (_root_.Jacobians.isSmoothPath_smoothPath x₀ (P a))).symm with hlam
+  set va : Fin k → (Fin (genus X) → ℂ) := fun a i =>
+    developingValue x₀ (b i) ((lam a : Path x₀ x₀) : C(unitInterval, X)) with hva
+  have hva_apply : ∀ a i, va a i =
+      developingValue x₀ (b i) ((lam a : Path x₀ x₀) : C(unitInterval, X)) :=
+    fun _ _ => rfl
+  have hva_mem : ∀ a, va a ∈ Jacobians.Axioms.periodLatticeInBasis X x₀ b := fun a =>
+    devVal_loop_mem_periodLatticeInBasis x₀ b (lam a)
+  -- the arc-period vector and its lattice membership
+  set A : Fin (genus X) → ℂ := fun i => ∑ a : Fin k,
+    (E (P a) : ℂ) * _root_.Jacobians.lineIntegral (bridgeKDFormEquiv (b i))
+      (_root_.Jacobians.smoothPath x₀ (P a)) with hA
+  have hA_apply : ∀ i, A i = ∑ a : Fin k,
+      (E (P a) : ℂ) * _root_.Jacobians.lineIntegral (bridgeKDFormEquiv (b i))
+        (_root_.Jacobians.smoothPath x₀ (P a)) := fun _ => rfl
+  have hdpv : divisorPeriodVector x₀ D =
+      ∑ a : Fin k, E (P a) • Jacobians.Axioms.ofCurveAmbient X x₀ (P a) := by
+    rw [hom_apply_eq_sum_support (X := X) (divisorPeriodVector x₀) D]
+    have hsum : ∑ Q ∈ (FreeAbelianGroup.toFinsupp D).support,
+        (FreeAbelianGroup.toFinsupp D) Q • divisorPeriodVector x₀ (FreeAbelianGroup.of Q) =
+        ∑ Q ∈ E.support, E Q • Jacobians.Axioms.ofCurveAmbient X x₀ Q := by
+      refine Finset.sum_congr (by rw [← hE_toFinsupp]) fun Q _ => ?_
+      rw [divisorPeriodVector_of, ← hE_toFinsupp]
+    rw [hsum]
+    exact (hreindexV (fun Q => E Q • Jacobians.Axioms.ofCurveAmbient X x₀ Q)).symm
+  have hA_eq : A = divisorPeriodVector x₀ D - ∑ a : Fin k, E (P a) • va a := by
+    funext i
+    rw [hA_apply i, Pi.sub_apply, hdpv, Finset.sum_apply, Finset.sum_apply,
+      ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    rw [Pi.smul_apply, Pi.smul_apply, zsmul_eq_mul, zsmul_eq_mul,
+      port_lineIntegral_smoothPath_eq x₀ (P a) i, hva_apply a i]
+    ring
+  have hA_mem : A ∈ Jacobians.Axioms.periodLatticeInBasis X x₀ b := by
+    rw [hA_eq]
+    refine sub_mem ?_ (Submodule.sum_mem _ fun a _ => Submodule.smul_mem _ _ (hva_mem a))
+    -- basis-FREE: lattice membership of the divisor period vector is the
+    -- engine hypothesis `hmem`, not a cycle-basis `repr` expansion.
+    exact hmem
+  -- BASIS-FREE EXPANSION: `A = periodMapInBasis (loopToHomology h)` for a
+  -- SINGLE analytic-loop generator `γ` (T-GEN), in place of a `2g`-term
+  -- cycle-basis combination.
+  obtain ⟨h, hh⟩ := hA_mem
+  obtain ⟨γ, hγ⟩ := hgen.exists_loop h
+  have hexpand : A = Jacobians.Axioms.periodMapInBasis X x₀ b
+      (Jacobians.Axioms.loopToHomology γ) := by
+    rw [← hh, hγ]
+  -- a smooth-loop representative of the single generator loop `γ`
+  obtain ⟨gam, hgam_loop, hgam0, hgam_val⟩ :=
+    exists_isClosedSmoothLoop_lineIntegral_eq_developingValue x₀
+      (Jacobians.Axioms.loopToPath γ)
+  -- the smooth 1-chain: `k` basepoint arcs + ONE cancelling loop (coeff −1)
+  set c : _root_.Jacobians.Dolbeault.SmoothOneChain X :=
+    { n := k + 1
+      coeff := Fin.append (fun a => E (P a)) (fun _ => (-1 : ℤ))
+      src := fun _ => x₀
+      tgt := Fin.append (fun a => P a) (fun _ => x₀)
+      path := Fin.append (fun a => _root_.Jacobians.smoothPath x₀ (P a)) (fun _ => gam)
+      smooth := by
+        intro i
+        refine Fin.addCases (motive := fun i =>
+            _root_.Jacobians.IsSmoothPath x₀
+              (Fin.append (fun a => P a) (fun _ => x₀) i)
+              (Fin.append (fun a => _root_.Jacobians.smoothPath x₀ (P a))
+                (fun _ => gam) i))
+          (fun a => ?_) (fun j => ?_) i
+        · simp only [Fin.append_left]
+          exact _root_.Jacobians.isSmoothPath_smoothPath x₀ (P a)
+        · simp only [Fin.append_right]
+          exact ⟨hgam0, (hgam_loop).closed ▸ hgam0, (hgam_loop).cont,
+            (hgam_loop).diff, (hgam_loop).velCont⟩ } with hc
+  have hc_coeff : c.coeff = Fin.append (fun a => E (P a)) (fun _ => (-1 : ℤ)) := rfl
+  have hc_src : c.src = fun _ => x₀ := rfl
+  have hc_tgt : c.tgt = Fin.append (fun a => P a) (fun _ => x₀) := rfl
+  have hc_path : c.path =
+      Fin.append (fun a => _root_.Jacobians.smoothPath x₀ (P a)) (fun _ => gam) := rfl
+  -- boundary = the translated divisor
+  have hboundary : c.boundary = E := by
+    have hbd : c.boundary = ∑ i : Fin (k + 1), c.coeff i •
+        (Finsupp.single (c.tgt i) (1 : ℤ) - Finsupp.single (c.src i) (1 : ℤ)) := rfl
+    rw [hbd, Fin.sum_univ_add]
+    have hloop_part : ∑ j : Fin 1, c.coeff (Fin.natAdd k j) •
+        (Finsupp.single (c.tgt (Fin.natAdd k j)) (1 : ℤ) -
+          Finsupp.single (c.src (Fin.natAdd k j)) (1 : ℤ)) = 0 := by
+      refine Finset.sum_eq_zero fun j _ => ?_
+      rw [hc_tgt, hc_src, Fin.append_right, sub_self, smul_zero]
+    have harc_part : ∑ a : Fin k, c.coeff (Fin.castAdd 1 a) •
+        (Finsupp.single (c.tgt (Fin.castAdd 1 a)) (1 : ℤ) -
+          Finsupp.single (c.src (Fin.castAdd 1 a)) (1 : ℤ)) =
+        ∑ a : Fin k, E (P a) •
+          (Finsupp.single (P a) (1 : ℤ) - Finsupp.single x₀ (1 : ℤ)) := by
+      refine Finset.sum_congr rfl fun a _ => ?_
+      rw [hc_tgt, hc_src, hc_coeff, Fin.append_left, Fin.append_left]
+    rw [hloop_part, harc_part, add_zero]
+    have hsplit : ∑ a : Fin k, E (P a) •
+        (Finsupp.single (P a) (1 : ℤ) - Finsupp.single x₀ (1 : ℤ)) =
+        (∑ a : Fin k, E (P a) • Finsupp.single (P a) (1 : ℤ)) -
+          (∑ a : Fin k, E (P a)) • Finsupp.single x₀ (1 : ℤ) := by
+      rw [Finset.sum_smul, ← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl fun a _ => smul_sub _ _ _
+    rw [hsplit]
+    have hT1 : ∑ a : Fin k, E (P a) • Finsupp.single (P a) (1 : ℤ) = E := by
+      rw [hreindexF (fun Q => E Q • Finsupp.single Q (1 : ℤ))]
+      conv_rhs => rw [← Finsupp.sum_single E]
+      rw [Finsupp.sum]
+      refine Finset.sum_congr rfl fun Q _ => ?_
+      rw [Finsupp.smul_single, smul_eq_mul, mul_one]
+    have hT2 : ∑ a : Fin k, E (P a) = 0 := by
+      rw [hreindexZ (fun Q => E Q)]
+      have hdeg' : Divisor.deg X D = 0 := hdeg
+      have hexp := hom_apply_eq_sum_support (X := X) (Divisor.deg X) D
+      rw [hdeg'] at hexp
+      have hsum : ∑ Q ∈ (FreeAbelianGroup.toFinsupp D).support,
+          (FreeAbelianGroup.toFinsupp D) Q • Divisor.deg X (FreeAbelianGroup.of Q) =
+          ∑ Q ∈ E.support, E Q := by
+        refine Finset.sum_congr (by rw [← hE_toFinsupp]) fun Q _ => ?_
+        rw [show Divisor.deg X (FreeAbelianGroup.of Q) = 1 from
+          FreeAbelianGroup.lift_apply_of _ _, smul_eq_mul, mul_one, ← hE_toFinsupp]
+      rw [hsum] at hexp
+      exact hexp.symm
+    rw [hT1, hT2, zero_smul, sub_zero]
+  -- periods of the bridged basis vanish
+  have hper_basis : ∀ i : Fin (genus X), c.period (bridgeKDFormEquiv (b i)) = 0 := by
+    intro i
+    have hpd : c.period (bridgeKDFormEquiv (b i)) = ∑ l : Fin (k + 1),
+        (c.coeff l : ℂ) * _root_.Jacobians.lineIntegral (bridgeKDFormEquiv (b i))
+          (c.path l) := rfl
+    rw [hpd, Fin.sum_univ_add]
+    have harc : ∑ a : Fin k, (c.coeff (Fin.castAdd 1 a) : ℂ) *
+        _root_.Jacobians.lineIntegral (bridgeKDFormEquiv (b i))
+          (c.path (Fin.castAdd 1 a)) = A i := by
+      rw [hA_apply i]
+      refine Finset.sum_congr rfl fun a _ => ?_
+      rw [hc_coeff, hc_path, Fin.append_left, Fin.append_left]
+    have hloop : ∑ j : Fin 1, (c.coeff (Fin.natAdd k j) : ℂ) *
+        _root_.Jacobians.lineIntegral (bridgeKDFormEquiv (b i))
+          (c.path (Fin.natAdd k j)) =
+        -(Jacobians.Axioms.periodMapInBasis X x₀ b
+            (Jacobians.Axioms.loopToHomology γ) i) := by
+      rw [Fin.sum_univ_one]
+      rw [hc_coeff, hc_path, Fin.append_right, Fin.append_right,
+        hgam_val (b i), ← periodMapInBasis_loopToHomology_apply x₀ γ i]
+      push_cast
+      ring
+    rw [harc, hloop]
+    rw [show A i = Jacobians.Axioms.periodMapInBasis X x₀ b
+        (Jacobians.Axioms.loopToHomology γ) i from by rw [hexpand]]
+    ring
+  -- spanning: the bridged basis spans the port form space
+  have hspan : Submodule.span ℂ
+      (Set.range (fun i : Fin (genus X) => bridgeKDFormEquiv (b i))) = ⊤ := by
+    have hrange : Set.range (fun i : Fin (genus X) => bridgeKDFormEquiv (b i)) =
+        ⇑(bridgeKDFormEquiv (X := X)).toLinearMap '' Set.range b := by
+      rw [← Set.range_comp]
+      rfl
+    rw [hrange, ← Submodule.map_span, b.span_eq, Submodule.map_top,
+      LinearMap.range_eq_top.mpr (bridgeKDFormEquiv (X := X)).surjective]
+  have hper_all : ∀ α : _root_.Jacobians.HolomorphicOneForms X, c.period α = 0 :=
+    fun α => c.period_eq_zero_of_spanning _ hspan hper_basis α
+  -- fire the engine and pull the divisor back
+  obtain ⟨f, hf⟩ := _root_.Jacobians.Dolbeault.exists_meromorphic_of_zeroPeriodChain'
+    (_root_.Jacobians.Dolbeault.chartDiskCover (X := X)) c hper_all
+  exact mem_principalDivisors_of_port_div hD0 f (by rw [hf, hboundary, hE])
+
 /-! ## The ⊆ direction of Abel's theorem, unconditional over the engine -/
 
 /-- **Abel ⊆, discharged.** The degree-0 Abel–Jacobi kernel is contained in
@@ -482,5 +729,19 @@ the principal divisors: `abel_subset_of_engine` over the discharged
 theorem abel_subset :
     (Jacobians.Axioms.abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker ≤ PrincipalDivisors X :=
   abel_subset_of_engine zeroPeriodChainSolvability_of_engine
+
+/-- **Abel ⊆, basis-free.** The degree-0 Abel–Jacobi kernel is contained in
+the principal divisors, routing through the basis-free engine
+`zeroPeriodChainSolvabilityLattice_of_engine` over **T-GEN**
+(`AnalyticLoopsGenerateH1`). The kernel-membership input is unfolded to
+period-lattice membership by `divisorPeriodVector_mem_lattice_of_mem_ker`
+(itself axiom-free), so the only conditionality is T-GEN — no
+`AX_PeriodCycleBasis`. -/
+theorem abel_subset_basis_free
+    (hgen : AnalyticLoopsGenerateH1 (Classical.arbitrary X)) :
+    (Jacobians.Axioms.abelJacobiDiv X).ker ⊓ (Divisor.deg X).ker ≤ PrincipalDivisors X :=
+  fun _D hD =>
+    zeroPeriodChainSolvabilityLattice_of_engine hgen _ hD.2
+      (divisorPeriodVector_mem_lattice_of_mem_ker hD.1 hD.2)
 
 end Jacobians.Bridge
