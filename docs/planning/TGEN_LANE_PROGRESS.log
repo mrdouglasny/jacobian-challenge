@@ -1,0 +1,29 @@
+# TGEN lane progress log
+
+Lane: TGEN — prove T-GEN (`AnalyticLoopsGenerateH1`) for general compact
+Riemann surfaces. Branch `feat/tgen-general`. Piece (2) of K-FULL closure
+(Discussion #235).
+
+## 2026-06-12
+
+- Scoped the route end-to-end (`docs/planning/TGEN_ROUTE.md`). Key finding:
+  `H1 = Additive (Abelianization π₁)` and `loopToHomology γ` is literally the
+  abelianized π₁ class of the loop's path, so T-GEN ⟺ property (P): "analytic
+  loops generate π₁(X, x₀) as a group". The #171 B1 ladder
+  (`LassoGeneration`/`CellGeneration`/`IsolatingLasso`) already proves the
+  punctured-plane generation that `SVK_BLOCKER` once flagged multi-week.
+
+- **K0 LANDED** (`Jacobians/RiemannSurface/AnalyticPi1Generation.lean`):
+  `analyticLoopsGenerateH1_of_pi1_closure` — the keystone bridge
+  (P) ⟹ T-GEN, plus the membership form
+  `exists_loop_of_mem_pi1AnalyticClasses`. Mathlib-only abelianization
+  algebra via `Subgroup.closure_induction` into `loopHomologyClasses`.
+  Both standard-3, no sorryAx, no project axioms. Wired into
+  `Jacobians/RiemannSurface.lean`.
+
+- This is the reusable reduction every downstream π₁-generation result feeds
+  into. Remaining: L1 (analytic lift of a lasso through the branched cover —
+  proven for hyperelliptic = `exists_sqrtArcData`) and **L2** (lifted lassos
+  + filled-puncture relations generate π₁(X)) — the named general topology
+  wall, a single covering-space lemma absent from Mathlib. See TGEN_ROUTE.md
+  gap ledger.
