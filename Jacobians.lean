@@ -1,5 +1,6 @@
 import Jacobians.Challenge
 import Jacobians.ChallengeConformance
+import Jacobians.ChallengeTGen
 import Jacobians.UniversalProperty
 import Jacobians.AbelianVariety
 import Jacobians.Axioms

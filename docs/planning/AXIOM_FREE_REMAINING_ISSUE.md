@@ -100,6 +100,36 @@ infrastructure Mathlib lacks (manifold-codomain smooth approximation; no
 real-analytic partition of unity — the identity theorem blocks the naive glue;
 real-analytic tubular neighborhoods). We estimate a multi-week build-out.
 
+### 3.5 Candidate escape (under active verification): *piecewise*-linear approximation
+
+**This may dissolve §3 entirely, and is the route we now consider most likely.**
+Our `AnalyticLoop`/`AnalyticArc` is **piecewise**-analytic: analyticity is required
+only on the open cells of a finite partition, with **corners allowed** at the
+partition points. We do *not* need globally-smooth or globally-analytic loops.
+
+Consequently a **piecewise-linear-in-charts** loop (each piece a straight segment
+in a chart's ℂ-coordinate) is already an `AnalyticLoop`: a segment is real-analytic
+(degree-1 polynomial), and stays real-analytic read through any other chart
+(holomorphic transitions); corners sit at partition points. And every *continuous*
+loop is homotopic rel endpoints to such a PL loop by an **elementary** argument —
+cover by chart balls, take a Lebesgue number, subdivide so each piece lies in one
+convex ball, replace each piece by the chart-segment — where each replacement is
+the *already-proved* chart-local straight-line homotopy (`Path.homotopic_of_extChartLocal`),
+chained (`Path.homotopic_of_chain`). This discharges T-GEN **avoiding both walls**:
+no Whitney (corners are fine, so no smoothing needed) and no Grauert (piecewise,
+so no global real-analytic structure / no partition of unity needed). The two §3
+theorems were artifacts of over-constraining the approximation target to
+corner-free smooth / corner-free global-analytic.
+
+**Status:** being prototyped now (branch `feat/tgen-pl-approx`). The one point to
+verify in our formalization is that a PL-in-charts arc genuinely satisfies our
+`IsAnalyticArcStrong` predicate (the moving-chart witness machinery) and that the
+Lebesgue/convex-ball bookkeeping formalizes cleanly. **Review question (high
+priority): is this PL route mathematically correct and does it genuinely avoid
+the Whitney/Grauert content, or is there a subtlety that forces smoothing after
+all?** If correct, options P1/P2/P3 below are mostly moot — the answer is "prove
+T-GEN, elementarily, via PL approximation."
+
 ## 4. The crux: is T-GEN actually necessary?
 
 Here is the tension, and the reason for this review.
@@ -206,3 +236,46 @@ without T-GEN.
 - Kirov reference construction: `../jacobian-claude` (`truePeriodLattice`,
   `PeriodLattice/PeriodLatticeNondegenerate.lean`,
   `PeriodLattice/PeriodLatticeDiscrete.lean`, `smoothPath`).
+
+## 8. Review verdict (deep-think, 2026-06-13)
+
+**The PL route (§3.5) is correct and is the definitive path. Pursue P1 executed
+via PL approximation. P2 and P3 are dropped.**
+
+- **PL is mathematically bulletproof.** Whitney/Grauert are needed in the
+  literature only to produce *corner-free* (globally smooth / globally analytic)
+  loops. `AnalyticLoop` is piecewise-analytic with corners allowed, so that
+  global regularity is never required. An affine segment is real-analytic, and
+  holomorphic transitions preserve it. The Lebesgue + convex-ball argument is the
+  standard textbook bridge from continuous topology to integration.
+- **T-GEN (A = B, index 1) is genuinely required (Q1 confirmed).** Form-side
+  non-degeneracy + `H₁ ≅ ℤ^{2g}` only give that `Λ_A` is a *finite-index*
+  subgroup of `Λ_B`. Finite index is insufficient for `ofCurve_inj`: a proper
+  quotient `J_A ↠ J_B` could fold distinct curve points separated by a fractional
+  period. Only homology-side surjectivity (T-GEN, index 1) rules this out. So we
+  cannot skip T-GEN — but PL *proves* it elementarily.
+- **P3 is an illusion (Q2 confirmed).** Evaluating `∮_γ ω` for an arbitrary
+  continuous loop forces breaking into chart pieces with local primitives `F_i`,
+  and the sum `Σ F_i(t_k) − F_i(t_{k-1})` depends only on the partition
+  endpoints — i.e. it equals the PL-in-charts integral. P3 just buries the PL
+  logic inside an integration lemma. Resolve it cleanly at the topological level
+  instead.
+- **P2 is the wrong trade (Q4).** Our continuous-`H₁` (Hurewicz) architecture is
+  mathematically stronger and more natural for functoriality than Kirov's
+  smooth-only lattice; reversing REFOUND to dodge an elementary lemma discards
+  that. Keep our architecture.
+
+### The one implementation fix (Q5) — shrunken-cover, for `IsAnalyticArcStrong`
+If `IsAnalyticArcStrong`'s witness needs the segment real-analytic on an OPEN
+interval extending slightly past `[t_i, t_{i+1}]`, the extended segment must not
+exit the chart. **Fix:** do NOT apply the Lebesgue-number lemma to the maximal
+chart domains. Take each chart biholomorphic to an open disk of radius 2 (`D₂`);
+let `V_j` be the preimage of the concentric `D₁` (radius 1); apply Lebesgue to
+the shrunken cover `{V_j}`. A segment inside `V_j` lies in the strictly convex
+`D₁`, and its slight analytic extension stays safely inside `D₂` (a valid chart
+domain). This is the standard topological fix and Mathlib handles the metric
+pieces (Lebesgue number, convex balls) cleanly.
+
+**Bottom line:** no Whitney, no Grauert, no re-architecture. Prove T-GEN
+elementarily via PL on branch `feat/tgen-pl-approx`, using the shrunken-cover
+trick for the witness extension; everything downstream is already wired.
