@@ -30,6 +30,7 @@ silently when `genus X` is 0):
 -/
 import Jacobians.Axioms.FiniteDimOneForms
 import Jacobians.Axioms.PeriodLattice
+import Jacobians.Axioms.PeriodLatticeTGen
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.H1FreeRank2g
 import Jacobians.Axioms.IntersectionForm

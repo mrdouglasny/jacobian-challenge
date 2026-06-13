@@ -69,6 +69,7 @@ import Jacobians.Extensions.HyperellipticEven
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.AbelTheorem
 import Jacobians.Axioms.PeriodLattice
+import Jacobians.Axioms.PeriodLatticeTGen
 import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.PeriodCycleBasis
 import Jacobians.RiemannSurface.Periods

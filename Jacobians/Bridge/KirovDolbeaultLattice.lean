@@ -7,6 +7,7 @@ import Jacobians.Bridge.KirovDolbeaultPeriods
 import Jacobians.RiemannSurface.Genus
 import Jacobians.Jacobian.Construction
 import Jacobians.Axioms.PeriodLattice
+import Jacobians.Axioms.PeriodLatticeTGen
 import KirovDolbeault.TracePullback
 import KirovDolbeault.Degree
 
