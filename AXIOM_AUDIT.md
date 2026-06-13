@@ -1,6 +1,31 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-12.*
+*Last updated 2026-06-13.*
+
+**T-GEN reduction (2026-06-13, all-night close — #240/#241/#242/#243/#244).**
+The lone challenge-critical axiom `AX_PeriodCycleBasis` reduces (its spanning
+half) to **T-GEN** (`AnalyticLoopsGenerateH1`, analytic loops generate H₁), and
+T-GEN is now itself **reduced — fully proven, sorry-free, standard-3 (no new
+axiom, no `sorryAx`)** — to exactly two classical real-analytic approximation
+theorems Mathlib lacks: **Whitney** (continuous ⇝ smooth loop, rel endpoints,
+`SmoothLoopApproxHyp`) ∘ **Grauert** (smooth ⇝ analytic loop,
+`SmoothLoopAnalyticApprox`), composed in `analyticLoopsGenerateH1_of_smoothApprox_analyticApprox`
+(`RiemannSurface/TGenFinalReduction.lean`); the `IsSmoothPath`↔`IsSmoothCurve`
+reconciliation is `Iff.rfl` (clean, no gap, no third hypothesis). Both
+hypotheses are externally soundness-vetted (Gemini 3 Pro: faithful, non-vacuous,
+satisfiable — an early "identity-theorem FATAL" objection dissolved once the
+*actual* piecewise-analytic-on-open-cells `AnalyticArc` definition replaced a too-
+strong paraphrase). The hyperelliptic family has an independent route via
+`PunctureFillData` (the π₁ Seifert–van Kampen surjection) plus a proven general
+index-2 Reidemeister–Schreier theorem (`closure_schreierSet_eq_ker`). Both walls
+are confirmed genuine multi-session/multi-week Mathlib-infrastructure gaps (no
+manifold-codomain smooth approximation; no real-analytic partition of unity; no
+π₁ van Kampen). Full chain + file:line per link:
+[`docs/planning/TGEN_FINAL_REDUCTION.md`](docs/planning/TGEN_FINAL_REDUCTION.md).
+This does **not** change the kernel axiom count (the two theorems are carried as
+hypotheses, not discharged); fully retiring `AX_PeriodCycleBasis` additionally
+needs period-injectivity (`exists_h1LoopBasis_of_periodInjective`, proven) + the
+headline rewiring.
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the
