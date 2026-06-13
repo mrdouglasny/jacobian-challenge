@@ -705,3 +705,128 @@ Both tasked and queued for future work.
   snapshot); `gemini-review.md`, `gemini-review-2.md`,
   `gemini-review-axioms.md`, `gemini-review-axioms-2.md`,
   `codex-review.md`, `claude-review.md` (adversarial-review trail).
+
+
+---
+
+# 2026-06 — discharge timeline & contribution metrics
+
+*(Topic summary; the day-by-day log above covers the first week. Live per-axiom status: [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md).)*
+
+## The shape of the campaign
+
+Closed all 24 Buzzard obligations on **day 5** (2026-04-23) over a small set of
+typed axiom stubs, then deliberately *expanded* structure (concrete curves, the
+universal-property layer, a Layer-3 cohomology scaffold) to a peak of ~**103**
+project axiom declarations on 2026-04-27. After a hiatus, a sustained **June
+discharge campaign** ran that total down to the current handful, with the
+challenge-critical subset falling `13 → 10 → 7 → 6 → … → 1`. One-line shape:
+**close fast → expand structure → discharge steadily.** The 24 challenge
+*statements* never drifted — they are Buzzard's, pinned in
+`challenge_spec_v0.4.lean` and CI-diffed.
+
+(Counting bases differ across the ledger — textual `axiom` declarations vs
+kernel-distinct vs topic-clusters — so historical figures are ±a few; the
+uniform-basis series is in `commentary/DEFN_QUALITY_AB/trajectory.md`.)
+
+## Discharge timeline (challenge-critical and structural)
+
+Reverse-chronological. "standard-3" = depends only on
+`[propext, Classical.choice, Quot.sound]`.
+
+### 2026-06-12 — Abel block + Albanese-torus axiom 1 + elliptic H₁
+- **ABEL SPLIT-FLIP / ⊇ FLIP** — `AX_AbelTheorem` → **theorem**. ⊆ (deg-0
+  Abel–Jacobi kernel ≤ principal divisors) via the unconditional Forster §20
+  weak-solution engine + the E6 adapter (`Bridge/AbelEngineAdapter.lean`); ⊇ via
+  the Liouville / Jacobi-pencil route (`AbelSupsetSections/Pencil/Liouville.lean`).
+  `ofCurve_inj` + whole Abel block now standard-3 + `AX_PeriodCycleBasis`.
+  Challenge-critical `2 → 1`.
+- **ELLIPTIC H₁ FLIP** — deleted `AX_Elliptic_H1_symplectic`; `π₁(ℂ/Λ) ≅ Λ` proved
+  by covering-space lifting (`QuotientCoveringPi1.lean`); `ellipticPeriodCycleBasis`
+  (g = 1 witness of the `AX_PeriodCycleBasis` content) now standard-3 — the first
+  unconditional positive-genus instantiation.
+- **LINE-BUNDLE STUB RETIREMENT** — `LineBundle` + `LineBundle.ofDivisor` →
+  real `def`s; `AX_RiemannRoch` / `AX_SerreDuality` now fully standard-3.
+- **TORUS-ALBANESE axiom 1** — `AX_torus_oneforms_dualCover` → `def`;
+  `ofCurve_isJacobian` now lists 3 torus axioms, not 4.
+
+### 2026-06-11 — genus-0 uniformization, functoriality, keystone, atlases
+- **GENUS-0 UNIFORMIZATION FLIP** (PR #209) — `AX_genus_eq_zero_iff_homeo` →
+  theorem, both directions (forward: RR pole extraction → degree-1 map → S²;
+  backward: π₁(S²)=1 + Liouville, #199+#205). Challenge-critical `3 → 2`.
+- **FUNCTORIALITY-CLUSTER COMPLETION** (#31, route credit daouid PR #191) —
+  `AX_pullbackAmbient_preserves_lattice` + `AX_pushforward_pullback` → theorems.
+- **#30** — `AX_pushforwardAmbient_preserves_lattice` → theorem (developing-value
+  naturality engine).
+- **KEYSTONE FLIP** — `h1coh_zero_finrank` + `serreDuality_equiv` → theorems,
+  `canonicalDivisor` de-opaqued; T-lane frame-trace wall (Miranda §VIII.3) proved
+  the port's ∃-cover Serre keystone; RR/Serre axiom-free over the port.
+- **PR #183 (@daouid)** — 7-axiom odd-atlas infinity-chart cluster discharged
+  (correct branch `y = z·x^(g+1)`); `Hyperelliptic.instChartedSpace`/`instIsManifold`
+  standard-3.
+- **PR #179 (@Deicyde)** — `AX_ofCurve_contMDiff` → theorem (chart-line descent).
+
+### 2026-06-10 — D1 merge, trace cluster, plane curve
+- **D1 MERGE** — fused `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2` into the
+  single `AX_PeriodCycleBasis`; dropped `intersectionForm` from headline closures.
+- **TRACE CLUSTER** (#26/#27/#28) — `pushforwardOneForm` + id/comp laws via the
+  Kirov-Dolbeault `traceFormTotal` bridge.
+- **#52** — `PlaneCurve.instIsManifold` → real instance (atop the #117 atlas).
+
+### Phases B / C / D — the Layer-3 tower
+- **Phase B** — RR + Serre over a 7-axiom cohomology scaffold, cross-model vetted
+  ([#126](https://github.com/mrdouglasny/jacobian-challenge/issues/126) /
+  [#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)).
+- **Phase C** — period/Hodge cluster discharged: `AX_RiemannBilinear`,
+  `AX_PeriodLattice`, `instPeriodLatticeDiscrete` → theorems over an axiom-free
+  period-lattice engine.
+- **Phase D** (#143/#144) — discharged 5 of 7 scaffold axioms (`H1coh` + 3
+  instances + `cohomologyLES`) by wiring the Kirov port's Čech `H¹` + skyscraper
+  LES into Layer-3.
+
+### Earlier
+- **PR #96** — Liouville L2/L3 (canonical-differentials theorem) discharged;
+  `genus_HyperellipticEven_eq` became a real theorem.
+- **PR #88** — `AX_pushforward_contMDiff` / `AX_pullback_contMDiff` → theorems.
+- **2026-06-09** (`37c0966`) — the Kirov Dolbeault port copied + forward-ported to
+  our Mathlib (`c5ea003`): a 6-edit / 5-file lift of ~86k LOC supplying the residue
+  theorem, Čech finiteness, and the RR/Serre machinery the tower builds on.
+
+### Soundness corrections (the false-scaffold tail)
+The axiom method's failure mode — content going green on an *unsound* axiom — fired
+~8 times, caught out-of-band (manual + Gemini audit), never by CI: e.g.
+`AX_FiniteDimOneForms` unsoundness (caught 2026-04-22); two unsound cocycle axioms;
+the false FTC axiom `AX_pathIntegral_local_antiderivative`; `AX_AbelTheorem`
+over-strong → restricted to deg-0; `IsAnalyticArcStrong` over-strengthening. See
+pinned issue #82.
+
+## Contribution metrics
+
+Git archaeology, 2026-06-12 (LOC = raw `.lean` lines added, not net). ~205k
+compiled Lean lines in the build; 142 merged PRs.
+
+| Contributor | PRs | Own Lean LOC (approx) | Notes |
+|---|---:|---:|---|
+| Michael R. Douglas (`@mrdouglasny`) | 121 | ~68k own + the Dolbeault forward-port | scaffold, axiom layer, curve theory, Abel engine |
+| `@daouid` | 8 | ~5.6k | functoriality cluster, lattice/period, odd-atlas ∞-chart (PR #183) |
+| `@sqrt-of-2` | 9 | ~2.3k | topology + discharge PRs |
+| Jack McCarthy (`@Deicyde`) | 4 | ~1.0k | axiom tracker #77, `AX_ofCurve_contMDiff` (PR #179) |
+
+Vendored / ported (external):
+
+| Source | Author | Lean LOC | License | Role |
+|---|---|---:|---|---|
+| `vendor/kirov-dolbeault-port/` | Rado Kirov (math) / MRD (port) | ~86k | Apache 2.0 | analytical engine — Čech cohomology, residue theorem, RR/Serre |
+| `Jacobians/Vendor/Kirov/` | Rado Kirov | 5,806 | Apache 2.0 | Montel finite-dim, chart transitions |
+| `Jacobians/Vendor/Wallace/` | Michal Wallace (tangentstorm) | 2,917 | MIT | holomorphic maps, branched covers, cotangent bundle |
+
+Two honest framings of proportion (the Dolbeault port is a *dependency*, fully
+attributed, not appropriation):
+- **By Lean-authorship**: MRD ~95%, community ~4%, Kirov+Wallace verbatim ~4%.
+- **By mathematical content**: Kirov ~65% (the Dolbeault/RR/Serre engine),
+  MRD ~33% (scaffold, axiom layer, curve theory, Abel engine, topology),
+  community ~4%, Wallace ~1%.
+
+Detailed methodology study (this project vs Kirov's and Wallace's:
+definition-quality A/B, backward-chaining analysis, axiom↔proof crosswalk) is in
+`commentary/DEFN_QUALITY_AB/`.
