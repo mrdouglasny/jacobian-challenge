@@ -30,6 +30,9 @@ transported to OUR forms across `bridgeKDFormEquiv`.
 import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.Bridge.KirovDolbeaultTrace
 import KirovDolbeault.Dolbeault.FormCoeff
+import KirovDolbeault.OfCurveAnalyticitySkeleton
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 
 noncomputable section
 
@@ -247,5 +250,242 @@ theorem exists_jacobiBasePoints_det_ne_zero
       (jacobiEvalMatrix b a).det ≠ 0 := by
   obtain ⟨a, hinj, ha⟩ := exists_jacobiBasePoints (X := X)
   exact ⟨a, hinj, jacobiEvalMatrix_det_ne_zero b ha⟩
+
+/-! ## K2 — Forster 21.4(a): the local Jacobi map and its open image
+
+Idea source: Kirov `906335f`, `Jacobians/JacobiLocalMap.lean` (Apache 2.0);
+restated over OUR forms: the chart coefficient/primitive are taken of the
+bridged form `bridgeKDFormEquiv (b i)`, and the evaluation matrix is K1's
+`jacobiEvalMatrix b a`. The two FTC atoms
+(`exists_analytic_primitive_on_ball`, `segmentIntegral_eq_primitive_diff`)
+are the Dolbeault port's, generic in the integrand. -/
+
+/-- The chart-coordinate coefficient of one of OUR holomorphic 1-forms in
+the canonical chart at `Q₀`: the local representative of the bridged form
+at `(chartAt ℂ Q₀).symm z`. [Idea: Kirov `SmoothPathCore.lean:433`.] -/
+def formChartCoeff (Q₀ : X) (α : HolomorphicOneForm X) (z : ℂ) : ℂ :=
+  Jacobians.Montel.localRep (Jacobians.Bridge.bridgeKDFormEquiv α) Q₀
+    ((chartAt (H := ℂ) Q₀).symm z)
+
+omit [Nonempty X] in
+/-- The chart coefficient is holomorphic on the chart target (the Montel
+analyticity bridge, applied to the bridged form). -/
+theorem formChartCoeff_differentiableOn (Q₀ : X) (α : HolomorphicOneForm X) :
+    DifferentiableOn ℂ (formChartCoeff Q₀ α) (chartAt (H := ℂ) Q₀).target :=
+  (Jacobians.Montel.localRep_analyticOn_chartTarget
+    (Jacobians.Bridge.bridgeKDFormEquiv α) Q₀).differentiableOn
+
+omit [Nonempty X] in
+/-- At the chart centre, the chart coefficient is the K1 evaluation
+functional. -/
+theorem formChartCoeff_center (Q₀ : X) (α : HolomorphicOneForm X) :
+    formChartCoeff Q₀ α ((chartAt (H := ℂ) Q₀) Q₀) = formEvalSelf Q₀ α := by
+  rw [formChartCoeff, (chartAt (H := ℂ) Q₀).left_inv (mem_chart_source ℂ Q₀)]
+  rfl
+
+/-- The chart-coordinate primitive `Φ̃_{Q₀}` of one of OUR forms, normalized
+to vanish at the chart centre: the straight-segment integral of the chart
+coefficient from `z₀ = chartAt Q₀ Q₀` to `z`.
+[Idea: Kirov `SmoothPathCore.lean:460`, with `constants = 0`.] -/
+def formChartPrimitive (Q₀ : X) (α : HolomorphicOneForm X) (z : ℂ) : ℂ :=
+  ∫ t in (0 : ℝ)..1,
+    formChartCoeff Q₀ α
+        ((chartAt (H := ℂ) Q₀) Q₀ + (t : ℂ) * (z - (chartAt (H := ℂ) Q₀) Q₀))
+      * (z - (chartAt (H := ℂ) Q₀) Q₀)
+
+omit [Nonempty X] in
+/-- The chart primitive vanishes at the chart centre (the segment
+degenerates). -/
+theorem formChartPrimitive_center (Q₀ : X) (α : HolomorphicOneForm X) :
+    formChartPrimitive Q₀ α ((chartAt (H := ℂ) Q₀) Q₀) = 0 := by
+  rw [formChartPrimitive]
+  simp [sub_self, mul_zero]
+
+omit [Nonempty X] in
+/-- **Strict differentiability of the chart primitive at the chart
+centre**, with derivative the K1 evaluation functional: on a chart ball
+the primitive reads `g z − g z₀` for an analytic primitive `g` of the
+chart coefficient (FTC on the segment), and the analytic model is
+strictly differentiable. [Idea: Kirov `JacobiLocalMap.lean:60,105`,
+collapsed into a single strict-derivative lemma.] -/
+theorem formChartPrimitive_hasStrictDerivAt_center (Q₀ : X)
+    (α : HolomorphicOneForm X) :
+    HasStrictDerivAt (formChartPrimitive Q₀ α) (formEvalSelf Q₀ α)
+      ((chartAt (H := ℂ) Q₀) Q₀) := by
+  classical
+  set z₀ : ℂ := (chartAt (H := ℂ) Q₀) Q₀ with hz₀_def
+  have h_mem : z₀ ∈ (chartAt (H := ℂ) Q₀).target :=
+    (chartAt (H := ℂ) Q₀).map_source (mem_chart_source ℂ Q₀)
+  obtain ⟨r, hr_pos, hr_subset⟩ :=
+    Metric.isOpen_iff.mp (chartAt (H := ℂ) Q₀).open_target _ h_mem
+  have hz₀_mem : z₀ ∈ Metric.ball z₀ r := Metric.mem_ball_self hr_pos
+  have hdiff : DifferentiableOn ℂ (formChartCoeff Q₀ α) (Metric.ball z₀ r) :=
+    (formChartCoeff_differentiableOn Q₀ α).mono hr_subset
+  obtain ⟨g, hg_deriv, _hg_ana⟩ :=
+    Jacobians.OfCurveSkeleton.exists_analytic_primitive_on_ball hdiff
+  -- on the ball, the chart primitive is `g z − g z₀`.
+  have h_eq : Set.EqOn (formChartPrimitive Q₀ α) (fun z => g z - g z₀)
+      (Metric.ball z₀ r) := by
+    intro z hz
+    have hseg : Set.Icc (0 : ℝ) 1
+        ⊆ {t | z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r} := by
+      intro t ht
+      show z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
+      have h_rewrite : z₀ + (t : ℂ) * (z - z₀) = z₀ + t • (z - z₀) := by
+        rw [Complex.real_smul]
+      rw [h_rewrite]
+      exact (convex_ball z₀ r).add_smul_sub_mem hz₀_mem hz ht
+    have hFTC := Jacobians.OfCurveSkeleton.segmentIntegral_eq_primitive_diff
+      (c := z₀) (r := r) (a := z₀) (b := z)
+      (f := formChartCoeff Q₀ α) (g := g)
+      hz₀_mem hz hseg hdiff.continuousOn hg_deriv
+    rw [formChartPrimitive, ← hz₀_def]
+    exact hFTC
+  -- the analytic model has the strict derivative at `z₀`.
+  have hgdiff : DifferentiableOn ℂ g (Metric.ball z₀ r) := fun w hw =>
+    (hg_deriv w hw).differentiableAt.differentiableWithinAt
+  have hga : AnalyticAt ℂ g z₀ :=
+    hgdiff.analyticAt (Metric.isOpen_ball.mem_nhds hz₀_mem)
+  have hg_strict : HasStrictDerivAt g (formChartCoeff Q₀ α z₀) z₀ := by
+    have h := hga.contDiffAt.hasStrictDerivAt (n := ω) (by simp)
+    rwa [(hg_deriv z₀ hz₀_mem).deriv] at h
+  have h_model : HasStrictDerivAt (fun z => g z - g z₀)
+      (formChartCoeff Q₀ α z₀) z₀ := hg_strict.sub_const (g z₀)
+  have h_strict : HasStrictDerivAt (formChartPrimitive Q₀ α)
+      (formChartCoeff Q₀ α z₀) z₀ := by
+    refine h_model.congr_of_eventuallyEq ?_
+    filter_upwards [Metric.isOpen_ball.mem_nhds hz₀_mem] with z hz
+    exact (h_eq hz).symm
+  rwa [hz₀_def, formChartCoeff_center] at h_strict
+
+/-! ### The local Jacobi map -/
+
+/-- **The local Jacobi map** at a base-point family `a : Fin g → X` for a
+basis `b` of OUR forms (Forster 21.4(a)): `G(z)ᵢ = ∑ⱼ Φ̃_{a j}(b i)(z j)`,
+each summand read in its own chart coordinate.
+[Idea: Kirov `JacobiLocalMap.lean:119`.] -/
+def jacobiMap (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) (z : Fin (genus X) → ℂ) : Fin (genus X) → ℂ :=
+  fun i => ∑ j, formChartPrimitive (a j) (b i) (z j)
+
+/-- The chart-coordinate centre of the local Jacobi map. -/
+def jacobiCenter (a : Fin (genus X) → X) : Fin (genus X) → ℂ :=
+  fun j => (chartAt (H := ℂ) (a j)) (a j)
+
+omit [Nonempty X] in
+/-- The local Jacobi map vanishes at the centre. -/
+theorem jacobiMap_center (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) :
+    jacobiMap b a (jacobiCenter a) = 0 := by
+  funext i
+  rw [jacobiMap]
+  exact Finset.sum_eq_zero fun j _ => formChartPrimitive_center (a j) (b i)
+
+/-- The Fréchet derivative of the local Jacobi map at the centre: the
+continuous linear map `v ↦ (jacobiEvalMatrix b a).mulVec v`, assembled as
+a `Pi` of summed coordinate projections.
+[Idea: Kirov `JacobiLocalMap.lean:138`.] -/
+def jacobiDeriv (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) :
+    (Fin (genus X) → ℂ) →L[ℂ] (Fin (genus X) → ℂ) :=
+  ContinuousLinearMap.pi fun i =>
+    ∑ j, jacobiEvalMatrix b a i j • ContinuousLinearMap.proj j
+
+omit [Nonempty X] in
+@[simp] theorem jacobiDeriv_apply
+    (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) (v : Fin (genus X) → ℂ) (i : Fin (genus X)) :
+    jacobiDeriv b a v i = ∑ j, jacobiEvalMatrix b a i j * v j := by
+  rw [jacobiDeriv, ContinuousLinearMap.pi_apply, ContinuousLinearMap.sum_apply]
+  exact Finset.sum_congr rfl fun j _ => rfl
+
+omit [Nonempty X] in
+/-- **Strict differentiability of the local Jacobi map at the centre**,
+with derivative the K1 evaluation matrix: per-summand strict derivatives
+composed with coordinate projections, summed, and assembled through `Pi`.
+[Idea: Kirov `JacobiLocalMap.lean:152`.] -/
+theorem jacobiMap_hasStrictFDerivAt
+    (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) :
+    HasStrictFDerivAt (jacobiMap b a) (jacobiDeriv b a) (jacobiCenter a) := by
+  rw [show jacobiDeriv b a = ContinuousLinearMap.pi fun i =>
+      ∑ j, jacobiEvalMatrix b a i j • ContinuousLinearMap.proj j from rfl]
+  apply hasStrictFDerivAt_pi''
+  intro i
+  rw [ContinuousLinearMap.proj_pi]
+  have hfun : (∑ j, fun z : Fin (genus X) → ℂ => formChartPrimitive (a j) (b i) (z j))
+      = fun z => jacobiMap b a z i := by
+    funext z
+    rw [Finset.sum_apply]
+    rfl
+  rw [← hfun]
+  refine HasStrictFDerivAt.sum fun j _ => ?_
+  -- the `(i,j)` summand: the chart primitive after the `j`-th projection.
+  have houter : HasStrictDerivAt (formChartPrimitive (a j) (b i))
+      (jacobiEvalMatrix b a i j) (jacobiCenter a j) :=
+    formChartPrimitive_hasStrictDerivAt_center (a j) (b i)
+  have hproj : HasStrictFDerivAt (fun z : Fin (genus X) → ℂ => z j)
+      (ContinuousLinearMap.proj j) (jacobiCenter a) :=
+    (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin (genus X) => ℂ)
+      j).hasStrictFDerivAt
+  show HasStrictFDerivAt
+    ((formChartPrimitive (a j) (b i)) ∘ (fun z : Fin (genus X) → ℂ => z j))
+    (jacobiEvalMatrix b a i j • ContinuousLinearMap.proj j) (jacobiCenter a)
+  exact houter.comp_hasStrictFDerivAt (jacobiCenter a) hproj
+
+/-! ### The inverse function theorem at a rank-`g` base-point family -/
+
+/-- At a base-point family with invertible evaluation matrix, `jacobiDeriv`
+is (the coercion of) a continuous linear equivalence.
+[Idea: Kirov `JacobiLocalMap.lean:186`.] -/
+def jacobiDerivEquiv (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) (ha : (jacobiEvalMatrix b a).det ≠ 0) :
+    (Fin (genus X) → ℂ) ≃L[ℂ] (Fin (genus X) → ℂ) :=
+  ((jacobiEvalMatrix b a).toLinearEquiv'
+    ((jacobiEvalMatrix b a).invertibleOfIsUnitDet
+      (isUnit_iff_ne_zero.mpr ha))).toContinuousLinearEquiv
+
+omit [Nonempty X] in
+theorem coe_jacobiDerivEquiv (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) (ha : (jacobiEvalMatrix b a).det ≠ 0) :
+    (jacobiDerivEquiv b a ha : (Fin (genus X) → ℂ) →L[ℂ] (Fin (genus X) → ℂ))
+      = jacobiDeriv b a := by
+  ext v i
+  show ((jacobiEvalMatrix b a).toLinearEquiv' _) v i = jacobiDeriv b a v i
+  rw [jacobiDeriv_apply]
+  show (jacobiEvalMatrix b a).mulVec v i = _
+  rw [Matrix.mulVec, dotProduct]
+
+omit [Nonempty X] in
+/-- **Forster 21.4(a), the open-image conclusion**: at a base-point family
+with `det A ≠ 0`, the local Jacobi map sends neighbourhoods of the centre
+to neighbourhoods of `0` (`HasStrictFDerivAt.map_nhds_eq_of_equiv`; no
+manifold IFT). [Idea: Kirov `JacobiLocalMap.lean:205`.] -/
+theorem jacobiMap_map_nhds (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X))
+    (a : Fin (genus X) → X) (ha : (jacobiEvalMatrix b a).det ≠ 0) :
+    Filter.map (jacobiMap b a) (nhds (jacobiCenter a)) = nhds 0 := by
+  have hstrict : HasStrictFDerivAt (jacobiMap b a)
+      (jacobiDerivEquiv b a ha : (Fin (genus X) → ℂ) →L[ℂ] (Fin (genus X) → ℂ))
+      (jacobiCenter a) := by
+    rw [coe_jacobiDerivEquiv]
+    exact jacobiMap_hasStrictFDerivAt b a
+  have h := hstrict.map_nhds_eq_of_equiv
+  rwa [jacobiMap_center b a] at h
+
+/-- **K2 packaged** (Forster 21.4(a)): a base-point family `a` (injective,
+invertible evaluation matrix) at which the local Jacobi map has
+`G(centre) = 0` and maps every neighbourhood of the centre onto a
+neighbourhood of `0 ∈ ℂ^g`. [Idea: Kirov `JacobiLocalMap.lean:219`.] -/
+theorem exists_jacobiMap_map_nhds
+    (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    ∃ a : Fin (genus X) → X, Function.Injective a ∧
+      (jacobiEvalMatrix b a).det ≠ 0 ∧
+      jacobiMap b a (jacobiCenter a) = 0 ∧
+      ∀ V ∈ nhds (jacobiCenter a),
+        jacobiMap b a '' V ∈ nhds (0 : Fin (genus X) → ℂ) := by
+  obtain ⟨a, hinj, hdet⟩ := exists_jacobiBasePoints_det_ne_zero b
+  refine ⟨a, hinj, hdet, jacobiMap_center b a, fun V hV => ?_⟩
+  rw [← jacobiMap_map_nhds b a hdet]
+  exact Filter.image_mem_map hV
 
 end Jacobians.RiemannSurface
