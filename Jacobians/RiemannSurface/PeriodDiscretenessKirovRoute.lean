@@ -34,6 +34,7 @@ import KirovDolbeault.Dolbeault.FormCoeff
 import KirovDolbeault.Dolbeault.AbelSubsetEngineArc
 import KirovDolbeault.Dolbeault.LerayCoverExists
 import KirovDolbeault.Dolbeault.SerreResidueRamifiedRealSlitGeometry
+import KirovDolbeault.Dolbeault.TailFrameWitness
 import KirovDolbeault.OfCurveAnalyticitySkeleton
 import KirovDolbeault.Abel
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
@@ -897,15 +898,20 @@ K3 leading coefficient `cvec j := H_{a j}(w₀)`), residues vanish at the
 `cvec ≠ 0` (leading coefficient at `a j₀` is nonzero) — contradicting
 `det A ≠ 0`. Hence `v = 0`.
 
-NOTE (K-LITE honest-partial wall): the chain-assembly + residue-read core
-(Kirov :229-557) is the single remaining `sorry`. Everything it consumes —
-K1 (`exists_jacobiBasePoints_det_ne_zero`), K2 (`exists_jacobiMap_map_nhds`),
-K3 (`meromorphicFunction_normalForm_of_div`), the K4 segment/loop pieces,
-the merged engine, and `residueTheorem_unconditional` — is in place and
-sorry-free above / in the port. The downstream K6 packaging
+K-LITE CLOSED (sorry-free). The chain-assembly + residue-read core
+(Kirov :229-557) is fully ported here: the chain is a port `SmoothOneChain`
+(segments coeff `1` ⊕ ℤ-loop combination coeff `−fl k`); periods over all
+port forms vanish by `period_eq_zero_of_spanning` against the bridged basis
+(`span_range_bridgeKD_basis`); the merged engine
+`exists_meromorphic_of_zeroPeriodChain'` returns `f₀` with `div f₀ = ∂c`;
+off-pole analyticity is honest via the junk-repair `f₀.repair`
+(`repair_read_analyticAt`, germ-equal so `div` is preserved), and the
+simple-pole leading coefficient is read off K3's centred normal form
+(`meromorphicFunction_normalForm_of_div`) through
+`resAt_analyticAt_mul_sub_inv`. The downstream K6 packaging
 (`discreteTopology_loopPeriodLattice` and the unconditional ZLattice
-corollaries) is fully proven FROM this statement, so filling this `sorry`
-discharges the whole route. -/
+corollaries) is fully proven FROM this statement; the whole Kirov
+dissection-free route is now sorry-free and `AX_PeriodCycleBasis`-free. -/
 theorem loopPeriodLattice_isolated_zero (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     ∃ U ∈ nhds (0 : Fin (genus X) → ℂ),
@@ -1099,7 +1105,173 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
     c.period_eq_zero_of_spanning
       (fun i => Jacobians.Bridge.bridgeKDFormEquiv (b i))
       (span_range_bridgeKD_basis b) hper_basis
-  sorry
+  -- THE ENGINE: a meromorphic `f₀` with `div f₀ = c.boundary = D`.
+  obtain ⟨f₀, hdiv⟩ :=
+    Jacobians.Dolbeault.exists_meromorphic_of_zeroPeriodChain'
+      Jacobians.Dolbeault.chartDiskCover c hper
+  rw [hbd] at hdiv
+  set D : _root_.Jacobians.Divisor X :=
+    ∑ j, (Finsupp.single (x j) (1 : ℤ) - Finsupp.single (a j) 1) with hD
+  -- pass to the honest junk-repair `f` (germ-equal; analytic off poles).
+  set f : _root_.Jacobians.MeromorphicFunction X := f₀.repair with hf
+  have hdivf : _root_.Jacobians.MeromorphicFunction.div X f = D := by
+    rw [← hdiv]
+    refine Finsupp.ext (fun y => ?_)
+    rw [meromorphicFunction_div_apply, meromorphicFunction_div_apply]
+    refine congrArg WithTop.untop₀ (meromorphicOrderAt_congr ?_)
+    exact f₀.holoRepr_read_eventuallyEq y
+  -- divisor coefficient bookkeeping (Kirov PeriodLatticeDiscrete:401-468).
+  have hD_apply : ∀ y : X, D y = ∑ j, ((if x j = y then (1 : ℤ) else 0)
+      - (if a j = y then 1 else 0)) := by
+    intro y
+    rw [hD, Finsupp.finsetSum_apply]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [Finsupp.sub_apply, Finsupp.single_apply, Finsupp.single_apply]
+  have hxO : ∀ j, x j ∈ O j := fun j => (hx_mem j).1
+  have hxa_ne : ∀ j k, j ≠ k → x j ≠ a k := by
+    intro j k hjk h; exact (hOdisj j k hjk).ne_of_mem (hxO j) (haO k) h
+  have hane : ∀ j k, j ≠ k → a j ≠ a k := fun j k hjk h => hjk (hainj h)
+  have hD_a : ∀ j, x j ≠ a j → D (a j) = -1 := by
+    intro j hxj
+    rw [hD_apply, Finset.sum_eq_single j]
+    · rw [if_neg hxj, if_pos rfl]; norm_num
+    · intro k _ hkj
+      rw [if_neg (fun h => hxa_ne k j hkj h), if_neg (fun h => hane k j hkj h)]; ring
+    · intro h; exact absurd (Finset.mem_univ j) h
+  -- the residue (leading-coefficient) vector.
+  set cvec : Fin (genus X) → ℂ := fun j =>
+    if hj : x j = a j then 0
+    else (meromorphicFunction_normalForm_of_div f (a j)
+      (n := -1) (by rw [hdivf]; exact hD_a j hj) (by norm_num)).choose
+        ((chartAt (H := ℂ) (a j)) (a j))
+    with hcvec
+  set poles : Finset X := Finset.univ.image a ∪ Finset.univ.image x with hpoles
+  -- `D` vanishes off the poles.
+  have hD_off : ∀ y : X, y ∉ poles → D y = 0 := by
+    intro y hy
+    rw [hD_apply]
+    refine Finset.sum_eq_zero fun j _ => ?_
+    have hyx : x j ≠ y := fun h => hy (by
+      rw [hpoles]; exact Finset.mem_union_right _ (Finset.mem_image.mpr ⟨j, Finset.mem_univ j, h⟩))
+    have hya : a j ≠ y := fun h => hy (by
+      rw [hpoles]; exact Finset.mem_union_left _ (Finset.mem_image.mpr ⟨j, Finset.mem_univ j, h⟩))
+    rw [if_neg hyx, if_neg hya]; ring
+  -- `orderAtPoint f₀ y = D y` for every `y` (`div f₀ = D`).
+  have horder : ∀ y : X, f₀.orderAtPoint y = D y := by
+    intro y
+    show (meromorphicOrderAt (f₀.toFun ∘ (chartAt (H := ℂ) y).symm)
+      ((chartAt (H := ℂ) y) y)).untop₀ = D y
+    rw [← meromorphicFunction_div_apply f₀ y]
+    exact congrFun (congrArg _ hdiv) y
+  -- analyticity of the repaired read wherever `D y ≥ 0` (`f.toFun = f₀.repair.toFun`).
+  have hgood' : ∀ y : X, 0 ≤ D y →
+      AnalyticAt ℂ (fun z => f.toFun ((chartAt (H := ℂ) y).symm z))
+        ((chartAt (H := ℂ) y) y) := by
+    intro y hDy
+    exact f₀.repair_read_analyticAt (by rw [horder y]; exact hDy)
+  have hgood : ∀ y : X, y ∉ poles →
+      AnalyticAt ℂ (fun z => f.toFun ((chartAt (H := ℂ) y).symm z))
+        ((chartAt (H := ℂ) y) y) :=
+    fun y hy => hgood' y (le_of_eq (hD_off y hy).symm)
+  -- THE RESIDUE THEOREM on each `(bridgeKD (b i))·f`.
+  have hres : ∀ i : Fin (genus X),
+      ∑ y ∈ poles, Jacobians.Dolbeault.formFnResidue
+        (Jacobians.Bridge.bridgeKDFormEquiv (b i)) f.toFun y = 0 := by
+    intro i
+    exact Jacobians.Dolbeault.SerreResidueTheorem.residueTheorem_unconditional
+      (Jacobians.Bridge.bridgeKDFormEquiv (b i)) f poles hgood
+  -- the residue at `a j` is `cvec j · A i j`.
+  have hres_a : ∀ (i j : Fin (genus X)),
+      Jacobians.Dolbeault.formFnResidue
+          (Jacobians.Bridge.bridgeKDFormEquiv (b i)) f.toFun (a j)
+        = cvec j * jacobiEvalMatrix b a i j := by
+    intro i j
+    by_cases hxj : x j = a j
+    · -- no pole: `D (a j) = 0`, analytic read, residue `0`.
+      have hDaj : D (a j) = 0 := by
+        rw [hD_apply, Finset.sum_eq_single j]
+        · rw [if_pos hxj, if_pos rfl]; norm_num
+        · intro k _ hkj
+          rw [if_neg (fun h => hxa_ne k j hkj h), if_neg (fun h => hane k j hkj h)]; ring
+        · intro h; exact absurd (Finset.mem_univ j) h
+      rw [show cvec j = 0 from by rw [hcvec]; exact dif_pos hxj, zero_mul]
+      exact Jacobians.Dolbeault.formFnResidue_eq_zero_of_analyticAt _ _ _
+        (hgood' (a j) (le_of_eq hDaj.symm))
+    · -- simple pole: residue `H(w₀)·coeffAt-centre = cvec j · A i j`.
+      have hDaj : D (a j) = -1 := hD_a j hxj
+      -- name the K3 normal-form witness so it matches `cvec`.
+      set spec := meromorphicFunction_normalForm_of_div f (a j) (n := -1)
+        (by rw [hdivf]; exact hDaj) (by norm_num) with hspec
+      set H : ℂ → ℂ := spec.choose with hHdef
+      obtain ⟨hH_ana, hH_ne, hH_ev⟩ := spec.choose_spec
+      rw [Jacobians.Dolbeault.formFnResidue]
+      -- the integrand is `Φ·(w−w₀)⁻¹` with `Φ = coeffAt·H` analytic.
+      have hint_germ : (fun w => Jacobians.Dolbeault.coeffAt
+              (Jacobians.Bridge.bridgeKDFormEquiv (b i)) (a j) w
+            * f.toFun ((chartAt ℂ (a j)).symm w))
+          =ᶠ[nhdsWithin ((chartAt (H := ℂ) (a j)) (a j))
+              {(chartAt (H := ℂ) (a j)) (a j)}ᶜ]
+          fun w => (Jacobians.Dolbeault.coeffAt
+              (Jacobians.Bridge.bridgeKDFormEquiv (b i)) (a j) w * H w)
+            * (w - (chartAt (H := ℂ) (a j)) (a j))⁻¹ := by
+        filter_upwards [hH_ev] with w hw
+        rw [hw, zpow_neg_one]; ring
+      have hΦ : AnalyticAt ℂ (fun w => Jacobians.Dolbeault.coeffAt
+            (Jacobians.Bridge.bridgeKDFormEquiv (b i)) (a j) w * H w)
+          ((chartAt (H := ℂ) (a j)) (a j)) :=
+        (Jacobians.Dolbeault.coeffAt_analyticAt (Jacobians.Bridge.bridgeKDFormEquiv (b i))
+          (a j) ((chartAt ℂ (a j)).map_source (mem_chart_source ℂ (a j)))).mul hH_ana
+      rw [Jacobians.Dolbeault.resAt_congr hint_germ, resAt_analyticAt_mul_sub_inv hΦ]
+      rw [Jacobians.Dolbeault.coeffAt_chartCenter]
+      rw [show cvec j = H ((chartAt (H := ℂ) (a j)) (a j)) from by
+        show (if hj : x j = a j then 0
+          else (meromorphicFunction_normalForm_of_div f (a j) (n := -1)
+            (by rw [hdivf]; exact hD_a j hj) (by norm_num)).choose
+              ((chartAt (H := ℂ) (a j)) (a j))) = H ((chartAt (H := ℂ) (a j)) (a j))
+        rw [dif_neg hxj]]
+      rw [jacobiEvalMatrix_apply, formEvalSelf_apply]
+      ring
+  -- residues vanish at the `x j` (those not equal to some `a k`).
+  have hres_x : ∀ (i : Fin (genus X)) (y : X), y ∈ poles →
+      y ∉ Finset.univ.image a →
+      Jacobians.Dolbeault.formFnResidue
+        (Jacobians.Bridge.bridgeKDFormEquiv (b i)) f.toFun y = 0 := by
+    intro i y hy hya
+    have hDy : 0 ≤ D y := by
+      rw [hD_apply]
+      refine Finset.sum_nonneg fun j _ => ?_
+      have hyaj : a j ≠ y :=
+        fun h => hya (Finset.mem_image.mpr ⟨j, Finset.mem_univ j, h⟩)
+      rw [if_neg hyaj]
+      by_cases h : x j = y <;> simp [h]
+    exact Jacobians.Dolbeault.formFnResidue_eq_zero_of_analyticAt _ _ _
+      (hgood' y hDy)
+  -- assemble: `A.mulVec cvec = 0`.
+  have hmul : ∀ i : Fin (genus X),
+      ∑ j, jacobiEvalMatrix b a i j * cvec j = 0 := by
+    intro i
+    have h := hres i
+    rw [hpoles, Finset.sum_union_eq_left
+      (fun y hy hyn => hres_x i y
+        (by rw [hpoles]; exact Finset.mem_union_right _ hy) hyn)] at h
+    rw [Finset.sum_image (fun j _ k _ h => hainj h)] at h
+    rw [← h]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [hres_a i j]; ring
+  -- `cvec ≠ 0`: at `j₀` (where `x j₀ ≠ a j₀`) the leading coefficient is nonzero.
+  have hcvec0 : cvec ≠ 0 := by
+    intro h
+    have hjval : cvec j₀ = 0 := by rw [h]; rfl
+    simp only [hcvec, dif_neg (hxa j₀ hj₀)] at hjval
+    exact (meromorphicFunction_normalForm_of_div f (a j₀) (n := -1)
+      (by rw [hdivf]; exact hD_a j₀ (hxa j₀ hj₀)) (by norm_num)).choose_spec.2.1 hjval
+  -- contradiction with `det A ≠ 0`.
+  refine hdet ?_
+  rw [← Matrix.exists_mulVec_eq_zero_iff]
+  refine ⟨cvec, hcvec0, ?_⟩
+  funext i
+  rw [Matrix.mulVec, dotProduct]
+  exact hmul i
 
 /-! ## K6 — `DiscreteTopology (loopPeriodLattice x₀ b)` and the unconditional
 packaging
