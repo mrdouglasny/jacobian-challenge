@@ -343,6 +343,22 @@ downstream of this crossing — `RingTheory/DedekindDomain/FiniteAdeleRing`,
 `RiemannRochAnchor.lean` is the adelic `H¹` model itself, three `sorry`s from
 done.
 
+> **Correction (scoping audit, [`docs/planning/ALGEBRAIC_SOLUTION_SCOPE.md`]).**
+> "Three `sorry`s from done" understates it. A read of the adelic layer found
+> those three (RR, finiteness, Serre) are **blocked on a crux that road (b)'s
+> own crossing does not supply**: the function-field crossing needs
+> transcendence-degree-1 / `[K(X):ℂ(f)] < ∞`, which requires a *removable-
+> singularity theorem across the branch locus* that is **Mathlib-absent**, and
+> Serre nondegeneracy needs an **algebraic trace map on differentials**, also
+> Mathlib-absent. So road (b) is genuinely the cheaper of the *two algebraic
+> roads* (it still dodges Chow/GAGA — §4½ stands), but it is **not** "nearly
+> done," and — the sharper point — it is **not cheaper than what this tree
+> already owns**: `riemannRochL3` / `serreDualityL3` are *already sorry-free
+> theorems on the critical path* (`Layer3/Cohomology.lean:181,195`). A self-
+> contained adelic replacement is strictly **more** work than the analytic
+> tower already built. Road (b) is a clean *design alternative* for anyone
+> starting fresh, not a discount on the existing result.
+
 **So the algebraic route should take road (b).** Road (a) is a tempting detour:
 its hardest-*looking* step (very ampleness) is actually easy here, which lures
 you in — but its real cost (Chow/GAGA) is hidden one step further and is
@@ -365,11 +381,17 @@ re-formalize to get there, and road (b) needs none of it.
 
 - **Both heavy choices were reasonable, not errors.** They reached sorry-free
   `theorem` status, and the analytic Riemann–Roch tower is independently valuable
-  formalization that the broader Lean ecosystem may want. But the *minimal* route
-  to this particular challenge is: the seed, plus adelic Riemann–Roch/Serre, plus
-  a lattice-direct Jacobian — which is, in retrospect, exactly the shape the
-  endgame (K-LITE, the Abel engine, the K-FULL refactor) converged on under its
-  own pressure.
+  formalization that the broader Lean ecosystem may want. The genuine,
+  confirmed saving is the **lattice-direct Jacobian** (it retires the cycle-basis
+  dependency from the construction — K-FULL). The *adelic* Riemann–Roch/Serre
+  packaging is a more equivocal "saving": the scoping audit
+  ([`docs/planning/ALGEBRAIC_SOLUTION_SCOPE.md`]) found the analytic RR/Serre is
+  already sorry-free in-tree, and a self-contained adelic replacement is **more**
+  work, not less, and carries its own Mathlib-absent crossings (a branch-locus
+  removable-singularity theorem for trdeg-1, an algebraic differentials trace map
+  for Serre). So the honest "minimal route" claim is: seed + lattice-direct
+  Jacobian are the real economies; adelic algebra is a *design alternative* for a
+  fresh build, not a discount on this one.
 
 - **There are exactly two irreducible inputs, and neither is the heavy tower.**
   - *One analytic seed*, forced by the problem's definition of its objects: a
@@ -386,13 +408,17 @@ re-formalize to get there, and road (b) needs none of it.
   the naïve framing.** One might expect the last hard piece of a Riemann-surface
   result to be analytic. It is not. The lattice-direct Jacobian gets its
   discreteness from the analytic *seed* (a short residue argument), and the
-  *only* thing left is T-GEN, whose general-case proof the endgame pinned to
-  **two Mathlib-absent but textbook-elementary facts**: (i) generation of an
-  index-2 subgroup over a `ℤ/2` monodromy, and (ii) the branched-cover
-  puncture-filling van Kampen surjection `π₁(X∖T) ↠ π₁(X)`. Neither is
-  research-grade; they are missing from Mathlib, not from mathematics. For the
-  explicit curve families they are concrete plane monodromy, and the challenge
-  closes axiom-free family-by-family as each is supplied.
+  *only* thing left is T-GEN, whose hyperelliptic proof the endgame pinned to
+  **two Mathlib-absent facts**: (i) generation of an index-2 subgroup over a
+  `ℤ/2` monodromy — now **proven** (`Topology/Index2KernelGeneration.lean`,
+  `closure_kernelGenSet_eq_ker`, a clean general lemma); and (ii) the branched-
+  cover puncture-filling van Kampen surjection `π₁(X∖T) ↠ π₁(X)`. Fact (ii) is
+  textbook *mathematics* but, against Mathlib's actual API, a **real multi-
+  session build-out, not a quick fill**: Mathlib's covering machinery handles
+  only a simply-connected total space, and the hyperelliptic curve is genus-`g`,
+  so the non-simply-connected branched bridge must be built from scratch. Honest
+  status: the elementary half is done; the van Kampen half is the live wall, and
+  the challenge closes axiom-free family-by-family as it is supplied.
 
 - **So the true cost profile of this challenge is lopsided.** A small analytic
   seed (mostly Mathlib's), a small topology residual (elementary, Mathlib-absent),
