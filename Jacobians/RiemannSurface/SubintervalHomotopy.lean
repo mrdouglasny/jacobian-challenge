@@ -179,7 +179,7 @@ noncomputable def Path.homotopyOfPartialEquivLocalOn (f g : Path x₀ x₁)
       · rw [ht]; simp
       · rw [Set.mem_singleton_iff] at ht; rw [ht]; simp
     simp only [Path.coe_toContinuousMap]
-    show Set.piecewise (homotopySupportCell a b) (innerH f g e) (fun st => f st.2) (s, t) = f t
+    change Set.piecewise (homotopySupportCell a b) (innerH f g e) (fun st => f st.2) (s, t) = f t
     by_cases htmem : (t : ℝ) ∈ Set.Icc a b
     · have : (s, t) ∈ homotopySupportCell a b := ⟨Set.mem_univ _, htmem.1, htmem.2⟩
       rw [Set.piecewise_eq_of_mem _ _ _ this]
