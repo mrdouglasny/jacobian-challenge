@@ -1159,7 +1159,7 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
   -- `orderAtPoint f₀ y = D y` for every `y` (`div f₀ = D`).
   have horder : ∀ y : X, f₀.orderAtPoint y = D y := by
     intro y
-    show (meromorphicOrderAt (f₀.toFun ∘ (chartAt (H := ℂ) y).symm)
+    change (meromorphicOrderAt (f₀.toFun ∘ (chartAt (H := ℂ) y).symm)
       ((chartAt (H := ℂ) y) y)).untop₀ = D y
     rw [← meromorphicFunction_div_apply f₀ y]
     exact congrFun (congrArg _ hdiv) y
@@ -1224,7 +1224,7 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
       rw [Jacobians.Dolbeault.resAt_congr hint_germ, resAt_analyticAt_mul_sub_inv hΦ]
       rw [Jacobians.Dolbeault.coeffAt_chartCenter]
       rw [show cvec j = H ((chartAt (H := ℂ) (a j)) (a j)) from by
-        show (if hj : x j = a j then 0
+        change (if hj : x j = a j then 0
           else (meromorphicFunction_normalForm_of_div f (a j) (n := -1)
             (by rw [hdivf]; exact hD_a j hj) (by norm_num)).choose
               ((chartAt (H := ℂ) (a j)) (a j))) = H ((chartAt (H := ℂ) (a j)) (a j))
