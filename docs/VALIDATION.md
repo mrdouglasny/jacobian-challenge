@@ -133,6 +133,15 @@ once `ofCurve_isJacobian` is established, anything satisfying `IsJacobian` **is*
 the Jacobian, with **zero "is this enough?" residual**. It is the strongest
 assurance per statement read in the entire development.
 
+This "unique up to unique isomorphism" is now a **machine-checked theorem**, not
+just Yoneda folklore: `Jacobians.isJacobian_unique` (`UniversalProperty.lean`)
+proves any two objects satisfying `IsJacobian x₀` are biholomorphically,
+group-isomorphically the same via mutually inverse holomorphic homs intertwining
+their Abel–Jacobi maps — and it is **axiom-free** (`#print axioms` →
+`propext, Classical.choice, Quot.sound`), using *none* of the 24. The corollary
+`isJacobian_iso_jacobian` specializes it to the concrete `Jacobian X` (via
+`ofCurve_isJacobian`, inheriting its four torus axioms).
+
 It is not sufficient *alone* — its proof is unreadable (so it does nothing for
 the *vacuity* worry; that is Part B's job), and the predicate itself needs a
 small audit (is 𝒞_X the right category? — yes: compact connected complex Lie
