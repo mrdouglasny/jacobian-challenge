@@ -1,0 +1,18 @@
+# H1Composite kernel-closure artifact (maintainer re-run over ALL 16 declarations, #230 review P2)
+AnalyticLoopsGenerateH1
+AnalyticLoopsGenerateH1.exists_loop
+devValPeriodVec_mem_loopPeriodLattice
+range_devValPeriodVec_eq_loopPeriodLattice
+devValPeriodVecToLattice
+coe_devValPeriodVecToLattice
+surjective_devValPeriodVecToLattice
+ker_devValPeriodVecToLattice
+exists_section_devValPeriodVecToLattice
+nonempty_ker_prod_lattice_equiv_h1
+h1PeriodInjective_of_finrank_le
+exists_h1LoopBasis_of_periodInjective
+exists_h1LoopBasis_of_topology
+analyticLoopsGenerateH1_of_h1LoopBasis
+finrank_h1_of_h1LoopBasis
+periodCycleBasis_nonempty_of_h1Fields_of_R1R2
+# verdict: checked 16, all exactly [propext, Classical.choice, Quot.sound], no sorryAx, no AX_PeriodCycleBasis

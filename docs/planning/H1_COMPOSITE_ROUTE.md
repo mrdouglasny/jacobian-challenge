@@ -4,7 +4,7 @@ Date: 2026-06-12. Lane: H1C (`feat/h1-composite`). Companion to
 `KIROV_214_STUDY.md` §3(a) (which this sharpens and corrects),
 `TRANK_SCOPING.md`, and the K-LITE lane (TR-DISC, running in parallel).
 
-Code: `Jacobians/RiemannSurface/H1Composite.lean` — **all 15 declarations
+Code: `Jacobians/RiemannSurface/H1Composite.lean` — **all 16 declarations
 kernel-verified standard-3** (`propext`, `Classical.choice`, `Quot.sound`);
 `AX_PeriodCycleBasis` appears in **no** closure.
 
@@ -168,7 +168,7 @@ Consequences for the flip:
 
 ## 5. Kernel closures
 
-`lake env lean` clean; `#print axioms` over all 15 declarations of
+`lake env lean` clean; `#print axioms` over all 16 declarations of
 `H1Composite.lean`: `[propext, Classical.choice, Quot.sound]` only.
 Named hypotheses appear as hypotheses/instances, never as axioms;
 `AX_PeriodCycleBasis` is in no closure (the `PeriodCycleBasis` *structure*

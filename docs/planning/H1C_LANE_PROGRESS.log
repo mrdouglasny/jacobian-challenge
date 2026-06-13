@@ -22,7 +22,7 @@
   loops/isBasis/loops_to_basis (exists_h1LoopBasis_of_periodInjective /
   _of_topology), necessity certificates, R1/R2 packaging lemma.
   All conditional on [DiscreteTopology (loopPeriodLattice x₀ b)] —
-  K-LITE's exact output shape. 15/15 declarations #print-axioms-verified
+  K-LITE's exact output shape. 15/16 declarations #print-axioms-verified
   standard-3; AX_PeriodCycleBasis in no closure. lake env lean clean.
 * R1/R2 finding: only consumption point Layer3/Periods.lean:141/:149
   (brief's :145/:153 drifted). Downstream: riemannBilinear_exists (:414,
