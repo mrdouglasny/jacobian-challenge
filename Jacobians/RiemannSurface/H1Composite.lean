@@ -202,6 +202,47 @@ theorem nonempty_ker_prod_lattice_equiv_h1
     (Submodule.injective_subtype (LinearMap.ker (devValPeriodVec x₀ b)))
     (by rw [Submodule.range_subtype, ker_devValPeriodVecToLattice]) hs⟩
 
+/-! ## The collapse certificate: KER-0 ⟹ the three H₁-module residuals
+
+`docs/planning/TOPOLOGY_FINISH_ROUTE.md` §3. Under T-GEN + K-LITE, KER-0
+(period-injectivity) makes `φ̄ : H1 ↠ Λ` *injective*, hence an iso `H1 ≃ Λ`.
+Since `Λ` is free, finitely generated, of `finrank = 2g` (K-LITE / ZLattice),
+all three transfer to `H1`. This certifies that the four named residuals
+{T-GEN, T-FG, Free, T-RANK≤} collapse to {T-GEN, KER-0}: the
+`_of_topology` triple and the `_of_periodInjective` KER-0 are inter-derivable
+given T-GEN + discreteness. -/
+
+/-- Under T-GEN + K-LITE, KER-0 (period-injectivity) gives the period
+surjection a two-sided inverse: `H1 X x₀ ≃ₗ[ℤ] loopPeriodLattice x₀ b`. -/
+noncomputable def h1EquivLattice_of_periodInjective
+    (hgen : AnalyticLoopsGenerateH1 x₀)
+    (hker : ∀ v : H1 X x₀, devValPeriodVec x₀ b v = 0 → v = 0) :
+    H1 X x₀ ≃ₗ[ℤ] loopPeriodLattice x₀ b :=
+  LinearEquiv.ofBijective (devValPeriodVecToLattice x₀ b hgen)
+    ⟨by
+        rw [← LinearMap.ker_eq_bot, ker_devValPeriodVecToLattice]
+        exact LinearMap.ker_eq_bot'.mpr hker,
+      surjective_devValPeriodVecToLattice x₀ b hgen⟩
+
+/-- **The collapse certificate.** Under T-GEN + K-LITE's discreteness, KER-0
+(period-injectivity) *outputs* all three H₁-module residuals — `H1 X x₀` is
+`Module.Free ℤ`, `Module.Finite ℤ`, and has `finrank ℤ = 2g`. Together with
+`h1PeriodInjective_of_finrank_le` (the converse), this shows the four named
+residuals collapse to `{T-GEN, KER-0}`. -/
+theorem h1Free_finite_rank_of_periodInjective
+    (hgen : AnalyticLoopsGenerateH1 x₀)
+    (hker : ∀ v : H1 X x₀, devValPeriodVec x₀ b v = 0 → v = 0) :
+    Module.Free ℤ (H1 X x₀) ∧ Module.Finite ℤ (H1 X x₀)
+      ∧ Module.finrank ℤ (H1 X x₀) = 2 * genus X := by
+  haveI := isZLattice_loopPeriodLattice x₀ b
+  haveI hfree : Module.Free ℤ (loopPeriodLattice x₀ b) :=
+    ZLattice.module_free ℝ (loopPeriodLattice x₀ b)
+  haveI hfin : Module.Finite ℤ (loopPeriodLattice x₀ b) :=
+    ZLattice.module_finite ℝ (loopPeriodLattice x₀ b)
+  set e := h1EquivLattice_of_periodInjective x₀ b hgen hker with he
+  refine ⟨Module.Free.of_equiv e.symm, Module.Finite.equiv e.symm, ?_⟩
+  rw [e.finrank_eq, finrank_loopPeriodLattice x₀ b]
+
 /-! ## KER-0 from the topology lane's residuals
 
 The splitting converts the Hodge-flavoured period-injectivity into pure
