@@ -43,36 +43,17 @@ theorem loopDevValH1Hom_loopToHomology_apply {ι : Type*}
       canonicalArcIntegral (loops i).arc form :=
   loopDevValH1Hom_loopToHomology x₀ form (loops i)
 
-/-- The homology-level developing-value functional agrees with the
-cycle-basis period pairing used to define `loopIntegralToH1`. -/
+/-- The homology-level developing-value functional agrees with the period
+pairing `loopIntegralToH1`. **Now definitional** (axiom-free): after the
+REFOUND re-founding `loopIntegralToH1 x₀ := developingPeriodMap x₀`, and
+`developingPeriodMap x₀ h form = loopDevValH1Hom x₀ form h` by `rfl`. The
+former proof extended `ℤ`-linearly over the chosen cycle basis. -/
 theorem loopDevValH1Hom_eq_loopIntegralToH1_apply {X : Type*}
     [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     (x₀ : X) (form : HolomorphicOneForm X) (h : H1 X x₀) :
-    loopDevValH1Hom x₀ form h = (loopIntegralToH1 x₀ h) form := by
-  classical
-  let cb := Classical.choice (Jacobians.Axioms.AX_PeriodCycleBasis x₀)
-  let F : H1 X x₀ →ₗ[ℤ] ℂ := (loopDevValH1Hom x₀ form).toIntLinearMap
-  let G : H1 X x₀ →ₗ[ℤ] ℂ :=
-    { toFun := fun h => (loopIntegralToH1 x₀ h) form
-      map_add' := by
-        intro h₁ h₂
-        simp
-      map_smul' := by
-        intro n h
-        simp }
-  have hFG : F = G := by
-    refine cb.isBasis.ext (fun i => ?_)
-    rw [show cb.isBasis i = Jacobians.Axioms.loopToHomology (cb.loops i) from
-      cb.loops_to_basis i]
-    change loopDevValH1Hom x₀ form (Jacobians.Axioms.loopToHomology (cb.loops i)) =
-      (loopIntegralToH1 x₀ (Jacobians.Axioms.loopToHomology (cb.loops i))) form
-    rw [loopDevValH1Hom_loopToHomology]
-    have hloop :=
-      congrArg (fun L : HolomorphicOneForm X →ₗ[ℂ] ℂ => L form)
-        (loopIntegralToH1_loop x₀ i)
-    simpa [cb, arcPeriodFunctional] using hloop.symm
-  exact LinearMap.congr_fun hFG h
+    loopDevValH1Hom x₀ form h = (loopIntegralToH1 x₀ h) form :=
+  rfl
 
 /-- The coordinate vector of the developing-value homology functional lies in
 the period lattice written in any holomorphic-one-form basis. -/
