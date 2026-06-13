@@ -236,10 +236,14 @@ comparator-verified); it is a map of where the weight genuinely *has* to go.
    meromorphic functions** — the analytic bridge of §0.
 
 ### Layer 1 — cross over to algebra *(small in code; conceptually the crux)*
-4. From step 3, assemble the meromorphic function field `K(X)` (transcendence
-   degree 1 over ℂ); its points become *places*, its order-of-vanishing maps
-   become *valuations*. This is the only step where analysis is essential; once
-   `∂̄`-solvability is in hand, the formalization of the field is modest.
+4. From step 3, assemble the meromorphic function field `K(X)` as an **algebraic
+   function field of one variable**: a single non-constant meromorphic function
+   `f` makes `X → ℙ¹` a branched cover and `K(X)` a finite extension of `ℂ(f)`
+   (so `K(X)` has transcendence degree 1 over ℂ); the points of `X` become the
+   *places* of `K(X)`, each a discrete valuation (order of vanishing) with
+   residue field ℂ. This is the only step where analysis is essential, and the
+   crucial point is **which** algebraic object you build — see §4½. Once
+   `∂̄`-solvability is in hand, this *function-field* crossing is modest.
 
 ### Layer 2 — Riemann–Roch and Serre, algebraically *(replaces the ~35k Čech tower)*
 5. Form the **adele ring** `A_K` and Weil repartitions; define `H¹(D) = A_K /
@@ -299,6 +303,56 @@ lattice-direct Jacobian.
 
 ---
 
+## 4½. The crossing has two roads — and you want the cheaper one
+
+Layer 1 above said "cross over to algebra." It is worth being precise about
+*what algebraic object you build*, because there are two targets of very
+different cost, and choosing the wrong one imports a heavy theorem you do not
+need.
+
+**Road (a): make `X` a projective scheme.** This is the picture most people
+have in mind for "the curve is algebraic": `X` sits in `ℙ^N` as the common zero
+locus of homogeneous polynomials. To reach it you:
+1. Use Riemann–Roch to populate `L(D)` for a divisor `D` of degree `≥ 2g+1`.
+2. Prove `|D|` is **very ample**: the sections separate points and tangent
+   vectors, so `φ_D : X → ℙ^N` is a closed embedding.
+3. Invoke **Chow's theorem / GAGA**: a closed *analytic* submanifold of `ℙ^N(ℂ)`
+   is cut out by polynomials, hence algebraic.
+
+Step 2 — **very ampleness — is provable, and not even hard**: it is a pure
+Riemann–Roch dimension count (`l(D−P) = l(D) − 1` and `l(D−2P) = l(D−P) − 1`,
+which Serre vanishing gives whenever the degree stays above `2g−2`), and both RR
+and Serre vanishing are already theorems in this tree. So one *could* formalize
+"`X` is biholomorphic to a closed analytic submanifold of `ℙ^N`" with moderate
+effort. **But that is exactly where it stops.** Very ampleness delivers the
+*analytic* embedding; it says nothing about polynomials. The analytic ⟹ algebraic
+step is **Chow/GAGA**, a substantial classical theorem **absent from both this
+tree and Mathlib**, and it is the real wall on road (a). Very ampleness is a
+genuine waypoint, but it leaves you one big theorem short of the destination.
+
+**Road (b): make `K(X)` an algebraic function field.** The Weil/Serre adelic
+development of Riemann–Roch does **not** need `X` to be a scheme at all. It needs
+only the *function field* `K(X)` as an abstract algebraic function field of one
+variable, together with its places (= points) and their valuations. As Layer 1
+describes, that crossing is light: one non-constant meromorphic function gives
+the branched cover `X → ℙ¹` and the finite extension `K(X)/ℂ(f)`; the
+order-of-vanishing maps give the valuations. **No projective embedding, no very
+ampleness, no Chow.** Mathlib already carries the backbone for everything
+downstream of this crossing — `RingTheory/DedekindDomain/FiniteAdeleRing`,
+`NumberTheory/FunctionField`, the Dedekind/valuation theory — and the in-tree
+`RiemannRochAnchor.lean` is the adelic `H¹` model itself, three `sorry`s from
+done.
+
+**So the algebraic route should take road (b).** Road (a) is a tempting detour:
+its hardest-*looking* step (very ampleness) is actually easy here, which lures
+you in — but its real cost (Chow/GAGA) is hidden one step further and is
+enormous. Road (b) pays a smaller, more honest crossing fee and reuses Mathlib's
+existing algebra. The two roads converge on the same Riemann–Roch and Serre
+duality; they differ only in how much classical analytic geometry you must
+re-formalize to get there, and road (b) needs none of it.
+
+---
+
 ## 5. The honest summary
 
 - **The expensive thing was never the seed.** The irreducible analytic core is
@@ -317,11 +371,35 @@ lattice-direct Jacobian.
   endgame (K-LITE, the Abel engine, the K-FULL refactor) converged on under its
   own pressure.
 
-- **The one irreducibly hard input is analytic and is forced by the problem's
-  definition of its objects.** A compact Riemann surface, presented as an
-  abstract complex manifold, must be *shown* to carry non-constant meromorphic
-  functions — equivalently, `∂̄u = f` must be shown solvable. Everything else is
-  algebra, linear algebra, or a choice of how to package them.
+- **There are exactly two irreducible inputs, and neither is the heavy tower.**
+  - *One analytic seed*, forced by the problem's definition of its objects: a
+    compact Riemann surface, presented as an abstract complex manifold, must be
+    *shown* to carry non-constant meromorphic functions — equivalently, `∂̄u = f`
+    must be solvable. That is the ~1k-line Cauchy–Pompeiu core, and it is
+    unavoidable.
+  - *One topology fact*, surfacing only once the Jacobian is built
+    lattice-direct: that the period lattice has the right rank, which (in the
+    abelianized-`π₁` presentation) reduces to **"analytic loops generate
+    `H₁`"** (T-GEN).
+
+- **The remaining wall is elementary topology, not analysis — a correction to
+  the naïve framing.** One might expect the last hard piece of a Riemann-surface
+  result to be analytic. It is not. The lattice-direct Jacobian gets its
+  discreteness from the analytic *seed* (a short residue argument), and the
+  *only* thing left is T-GEN, whose general-case proof the endgame pinned to
+  **two Mathlib-absent but textbook-elementary facts**: (i) generation of an
+  index-2 subgroup over a `ℤ/2` monodromy, and (ii) the branched-cover
+  puncture-filling van Kampen surjection `π₁(X∖T) ↠ π₁(X)`. Neither is
+  research-grade; they are missing from Mathlib, not from mathematics. For the
+  explicit curve families they are concrete plane monodromy, and the challenge
+  closes axiom-free family-by-family as each is supplied.
+
+- **So the true cost profile of this challenge is lopsided.** A small analytic
+  seed (mostly Mathlib's), a small topology residual (elementary, Mathlib-absent),
+  and — in between — a large *amount of formalization that was a choice of
+  packaging*: the analytic Riemann–Roch tower instead of adelic algebra, and the
+  abelianized-`π₁` Jacobian instead of the lattice-direct one. The minimal design
+  keeps the two irreducible ends and discards the middle.
 
 ---
 
