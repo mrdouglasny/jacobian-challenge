@@ -63,3 +63,16 @@ DISCIPLINE NOTES:
 - Third-residual watch: no downstream fact was found to need the basis's
   linear-INDEPENDENCE for the period MAP. The surviving uses need only
   (a) homology GENERATION (T-GEN) for the lattice properties and (b) Abel ⊆.
+
+### Cleanup — agreement lemma now `rfl`
+`loopDevValH1Hom_eq_loopIntegralToH1_apply` proved by `rfl` (was
+`cb.isBasis.ext`). Strips AX_PeriodCycleBasis from it and from
+`loopDevValH1Hom_mem_periodLatticeInBasis` (both standard-3). Headline report
+unchanged.
+
+### Status: Steps 0–2 + cleanup LANDED — PR #238 (base main, links Disc #235).
+Full `lake build` green (8996 jobs); 0 sorryAx in axiom-report.txt.
+Steps 3–4 (lattice-property + Abel-⊆ axiom removal) are T-GEN-gated and wait
+on #236 (K0/L2) + #237 (basis-free Abel adapter); once T-GEN lands, swapping
+`choiceLoops_periodGenerating` → `PeriodGeneratingLoops.of_homology_span`
+yields `ofCurve_inj` = standard-3 + T-GEN.
