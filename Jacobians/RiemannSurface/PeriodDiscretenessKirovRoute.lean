@@ -31,6 +31,7 @@ import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.Bridge.KirovDolbeaultTrace
 import KirovDolbeault.Dolbeault.FormCoeff
 import KirovDolbeault.OfCurveAnalyticitySkeleton
+import KirovDolbeault.Abel
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 
@@ -487,5 +488,63 @@ theorem exists_jacobiMap_map_nhds
   refine ⟨a, hinj, hdet, jacobiMap_center b a, fun V hV => ?_⟩
   rw [← jacobiMap_map_nhds b a hdet]
   exact Filter.image_mem_map hV
+
+/-! ## K3 — the engine's centred local normal form at divisor points
+
+The Abel engine (`exists_meromorphic_of_zeroPeriodChain'`) returns `f`
+with `div f = ∂c`. The residue read (K5) needs the centred Laurent
+normal form `f̂ = (w − w₀)^n · H`, `H(w₀) ≠ 0`, at each point of the
+divisor. Rather than replaying Kirov's `exp(−u)·G` construction
+(`AbelEngineMeromorphic.lean:83-110`), we DERIVE the normal form from
+the port's `orderW`/`orderAtPoint` chain and Mathlib's
+`meromorphicOrderAt_eq_int_iff` — the study's "orderW shortcut"
+(`docs/planning/KIROV_214_STUDY.md` §4, rung K3 option (ii)). -/
+
+/-- The divisor coefficient is the chart-pullback `untop₀` order
+(definitional unfold of `div`/`divViaOrder`/`orderAtPoint`). -/
+theorem meromorphicFunction_div_apply (f : _root_.Jacobians.MeromorphicFunction X)
+    (a : X) :
+    _root_.Jacobians.MeromorphicFunction.div X f a
+      = (meromorphicOrderAt (f.toFun ∘ (chartAt (H := ℂ) a).symm)
+          ((chartAt (H := ℂ) a) a)).untop₀ := by
+  rw [_root_.Jacobians.MeromorphicFunction.div,
+    _root_.Jacobians.MeromorphicFunction.divViaOrder,
+    Finsupp.ofSupportFinite_coe]
+  rfl
+
+/-- **K3 — centred local normal form at a divisor point.** If the divisor
+of a meromorphic `f` has nonzero coefficient `n` at `a`, then in the
+canonical chart at `a` the function factors on a punctured neighbourhood
+of the centre `w₀` as `f̂(w) = (w − w₀)^n · H(w)` with `H` analytic at
+`w₀` and `H(w₀) ≠ 0` — the Laurent data the K5 residue read consumes.
+Derived from Mathlib's `meromorphicOrderAt_eq_int_iff`; no replay of the
+engine's `exp(−u)·G` construction.
+[Idea: Kirov `AbelEngineMeromorphic.lean:72-110`, via the `orderW`
+shortcut instead of his explicit construction.] -/
+theorem meromorphicFunction_normalForm_of_div
+    (f : _root_.Jacobians.MeromorphicFunction X) (a : X) {n : ℤ}
+    (hdiv : _root_.Jacobians.MeromorphicFunction.div X f a = n) (hn : n ≠ 0) :
+    ∃ H : ℂ → ℂ, AnalyticAt ℂ H ((chartAt (H := ℂ) a) a) ∧
+      H ((chartAt (H := ℂ) a) a) ≠ 0 ∧
+      ∀ᶠ w in 𝓝[≠] ((chartAt (H := ℂ) a) a),
+        f.toFun ((chartAt (H := ℂ) a).symm w)
+          = (w - (chartAt (H := ℂ) a) a) ^ n * H w := by
+  classical
+  rw [meromorphicFunction_div_apply] at hdiv
+  -- the `WithTop ℤ` order is exactly `n` (`⊤` would have `untop₀ = 0 ≠ n`).
+  have horder : meromorphicOrderAt (f.toFun ∘ (chartAt (H := ℂ) a).symm)
+      ((chartAt (H := ℂ) a) a) = (n : WithTop ℤ) := by
+    cases ho : meromorphicOrderAt (f.toFun ∘ (chartAt (H := ℂ) a).symm)
+        ((chartAt (H := ℂ) a) a) with
+    | top => rw [ho] at hdiv; simp at hdiv; exact absurd hdiv.symm hn
+    | coe m =>
+      rw [ho] at hdiv
+      simp only [WithTop.untop₀_coe] at hdiv
+      exact congrArg _ hdiv
+  obtain ⟨H, hH_ana, hH_ne, hH_ev⟩ :=
+    (meromorphicOrderAt_eq_int_iff (f.meromorphic a)).mp horder
+  refine ⟨H, hH_ana, hH_ne, ?_⟩
+  filter_upwards [hH_ev] with w hw
+  simpa [smul_eq_mul] using hw
 
 end Jacobians.RiemannSurface
