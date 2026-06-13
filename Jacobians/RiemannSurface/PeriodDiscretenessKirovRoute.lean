@@ -29,6 +29,7 @@ transported to OUR forms across `bridgeKDFormEquiv`.
 -/
 import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.Bridge.KirovDolbeaultTrace
+import Jacobians.Bridge.KirovDolbeaultPeriods
 import KirovDolbeault.Dolbeault.FormCoeff
 import KirovDolbeault.OfCurveAnalyticitySkeleton
 import KirovDolbeault.Abel
@@ -546,5 +547,258 @@ theorem meromorphicFunction_normalForm_of_div
   refine ⟨H, hH_ana, hH_ne, ?_⟩
   filter_upwards [hH_ev] with w hw
   simpa [smul_eq_mul] using hw
+
+/-! ## K4 bricks — segments, loops, and the chain's raw material
+
+Idea source: Kirov `906335f`, `Jacobians/PeriodLatticeDiscrete.lean:87-394`
+(Apache 2.0). Over the port's `SmoothOneChain` instead of his `OneChain`:
+the segment pieces are the port's zero-velocity chart hops
+(`ChartBallPathSmooth`/`zeroVelHop`), valued by the public cell FTC
+(`Bridge.lineIntegral_cell_eq_primitive_sub`); the loop pieces are the
+smooth representatives of OUR analytic loops
+(`Bridge.exists_isClosedSmoothLoop_lineIntegral_eq_developingValue`, #216).
+-/
+
+omit [Nonempty X] in
+/-- Pairwise-disjoint open neighbourhoods of an injective finite family
+(T2 separation, intersected over the off-diagonal pairs).
+[Idea: Kirov `PeriodLatticeDiscrete.lean:87`.] -/
+theorem exists_pairwise_disjoint_opens {n : ℕ} {a : Fin n → X}
+    (ha : Function.Injective a) :
+    ∃ O : Fin n → Set X, (∀ j, IsOpen (O j)) ∧ (∀ j, a j ∈ O j) ∧
+      ∀ j k, j ≠ k → Disjoint (O j) (O k) := by
+  classical
+  have hpair : ∀ j k : Fin n, j ≠ k → ∃ uv : Set X × Set X,
+      IsOpen uv.1 ∧ IsOpen uv.2 ∧ a j ∈ uv.1 ∧ a k ∈ uv.2 ∧ Disjoint uv.1 uv.2 := by
+    intro j k hjk
+    obtain ⟨u, v, hu, hv, hau, hav, huv⟩ := t2_separation (fun h => hjk (ha h))
+    exact ⟨(u, v), hu, hv, hau, hav, huv⟩
+  choose! uv huv1 huv2 hauv havuv hdisj using hpair
+  refine ⟨fun j => ⋂ k ∈ Finset.univ.erase j, ((uv j k).1 ∩ (uv k j).2), ?_, ?_, ?_⟩
+  · intro j
+    refine isOpen_biInter_finset fun k hk => ?_
+    have hkj : k ≠ j := (Finset.mem_erase.mp hk).1
+    exact (huv1 j k (Ne.symm hkj)).inter (huv2 k j hkj)
+  · intro j
+    refine Set.mem_biInter fun k hk => ?_
+    have hkj : k ≠ j := (Finset.mem_erase.mp hk).1
+    exact ⟨hauv j k (Ne.symm hkj), havuv k j hkj⟩
+  · intro j k hjk
+    have hsub1 : (⋂ l ∈ Finset.univ.erase j, ((uv j l).1 ∩ (uv l j).2)) ⊆ (uv j k).1 :=
+      fun x hx => (Set.mem_iInter₂.mp hx k
+        (Finset.mem_erase.mpr ⟨Ne.symm hjk, Finset.mem_univ k⟩)).1
+    have hsub2 : (⋂ l ∈ Finset.univ.erase k, ((uv k l).1 ∩ (uv l k).2)) ⊆ (uv j k).2 :=
+      fun x hx => (Set.mem_iInter₂.mp hx j
+        (Finset.mem_erase.mpr ⟨hjk, Finset.mem_univ j⟩)).2
+    exact Set.disjoint_of_subset hsub1 hsub2 (hdisj j k hjk)
+
+/-- **The coefficient identity**: OUR cocycle coefficient of a form at a
+chart-target coordinate is the local representative of the bridged form at
+the underlying point. From the bridge round-trip
+`inverseForm (bridgeForm form) = form`, whose left side reads the section
+in chart coordinates (`sectionCoeff`). -/
+theorem coeff_eq_localRep_bridgeKD (α : HolomorphicOneForm X) (x : X) {z : ℂ}
+    (hz : z ∈ (chartAt ℂ x).target) :
+    α.coeff x z
+      = Jacobians.Montel.localRep (Jacobians.Bridge.bridgeKDFormEquiv α) x
+          ((chartAt ℂ x).symm z) := by
+  have hround := Jacobians.Bridge.BridgeFormEquiv.inverseForm_bridgeForm
+    (X := X) α
+  have hz' : z ∈ (extChartAt 𝓘(ℂ, ℂ) x).target := by
+    simpa [extChartAt] using hz
+  calc α.coeff x z
+      = (Jacobians.Bridge.BridgeFormEquiv.inverseForm
+          (Jacobians.Bridge.bridgeForm α)).coeff x z := by rw [hround]
+    _ = Jacobians.Bridge.BridgeFormEquiv.sectionCoeff
+          (Jacobians.Bridge.bridgeForm α) x z := rfl
+    _ = Jacobians.Vendor.Kirov.Montel.localRep (Jacobians.Bridge.bridgeForm α) x
+          ((extChartAt 𝓘(ℂ, ℂ) x).symm z) :=
+        Jacobians.Bridge.BridgeFormEquiv.sectionCoeff_apply_of_mem _ hz'
+    _ = Jacobians.Montel.localRep (Jacobians.Bridge.bridgeKDFormEquiv α) x
+          ((chartAt ℂ x).symm z) := by
+        rw [show (extChartAt 𝓘(ℂ, ℂ) x).symm z = (chartAt ℂ x).symm z by
+          simp [extChartAt]]
+        rfl
+
+omit [Nonempty X] in
+/-- The chart coefficient of K2 equals OUR cocycle coefficient on the chart
+target. -/
+theorem formChartCoeff_eq_coeff [Nonempty X] (Q₀ : X) (α : HolomorphicOneForm X) {z : ℂ}
+    (hz : z ∈ (chartAt ℂ Q₀).target) :
+    formChartCoeff Q₀ α z = α.coeff Q₀ z :=
+  (coeff_eq_localRep_bridgeKD α Q₀ hz).symm
+
+omit [Nonempty X] in
+/-- `formChartPrimitive` is the endpoint difference of ANY primitive of the
+chart coefficient on a chart ball at the centre (FTC on the straight
+segment; same mechanism as the K2 strict-derivative lemma). -/
+theorem formChartPrimitive_eq_primitive_sub (Q₀ : X) (α : HolomorphicOneForm X)
+    {r : ℝ} (hsub : Metric.ball ((chartAt (H := ℂ) Q₀) Q₀) r ⊆ (chartAt ℂ Q₀).target)
+    {P : ℂ → ℂ}
+    (hP : ∀ w ∈ Metric.ball ((chartAt (H := ℂ) Q₀) Q₀) r,
+      HasDerivAt P (formChartCoeff Q₀ α w) w)
+    {z : ℂ} (hz : z ∈ Metric.ball ((chartAt (H := ℂ) Q₀) Q₀) r) :
+    formChartPrimitive Q₀ α z = P z - P ((chartAt (H := ℂ) Q₀) Q₀) := by
+  classical
+  set z₀ : ℂ := (chartAt (H := ℂ) Q₀) Q₀ with hz₀_def
+  have hr_pos : 0 < r := Metric.nonempty_ball.mp ⟨z, hz⟩
+  have hz₀_mem : z₀ ∈ Metric.ball z₀ r := Metric.mem_ball_self hr_pos
+  have hdiff : DifferentiableOn ℂ (formChartCoeff Q₀ α) (Metric.ball z₀ r) :=
+    (formChartCoeff_differentiableOn Q₀ α).mono hsub
+  have hseg : Set.Icc (0 : ℝ) 1
+      ⊆ {t | z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r} := by
+    intro t ht
+    show z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
+    have h_rewrite : z₀ + (t : ℂ) * (z - z₀) = z₀ + t • (z - z₀) := by
+      rw [Complex.real_smul]
+    rw [h_rewrite]
+    exact (convex_ball z₀ r).add_smul_sub_mem hz₀_mem hz ht
+  have hFTC := Jacobians.OfCurveSkeleton.segmentIntegral_eq_primitive_diff
+    (c := z₀) (r := r) (a := z₀) (b := z)
+    (f := formChartCoeff Q₀ α) (g := P)
+    hz₀_mem hz hseg hdiff.continuousOn hP
+  rw [formChartPrimitive, ← hz₀_def]
+  exact hFTC
+
+/-- **The segment piece (K4).** For a chart ball at `Q₀` and a coordinate
+`z` in it, there is a port-smooth path from `Q₀` to `(chartAt Q₀).symm z`
+whose port line integral of every bridged form is the K2 chart primitive
+`formChartPrimitive Q₀ · z` — the local Jacobi map's summand. Built from
+the port's zero-velocity hop (`zeroVelHop`) and valued by the public cell
+FTC (`Bridge.lineIntegral_cell_eq_primitive_sub`). -/
+theorem exists_isSmoothPath_lineIntegral_eq_formChartPrimitive
+    (Q₀ : X) {r : ℝ}
+    (hsub : Metric.ball ((chartAt (H := ℂ) Q₀) Q₀) r ⊆ (chartAt ℂ Q₀).target)
+    {z : ℂ} (hz : z ∈ Metric.ball ((chartAt (H := ℂ) Q₀) Q₀) r) :
+    ∃ σ : ℝ → X,
+      _root_.Jacobians.IsSmoothPath Q₀ ((chartAt ℂ Q₀).symm z) σ ∧
+      ∀ α : HolomorphicOneForm X,
+        _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv α) σ
+          = formChartPrimitive Q₀ α z := by
+  classical
+  set z₀ : ℂ := (chartAt (H := ℂ) Q₀) Q₀ with hz₀_def
+  have hr_pos : 0 < r := Metric.nonempty_ball.mp ⟨z, hz⟩
+  have hz₀_mem : z₀ ∈ Metric.ball z₀ r := Metric.mem_ball_self hr_pos
+  -- the endpoint downstairs.
+  set Q : X := (chartAt ℂ Q₀).symm z with hQ_def
+  have hz_tgt : z ∈ (chartAt ℂ Q₀).target := hsub hz
+  have hQ_src : Q ∈ (chartAt ℂ Q₀).source := (chartAt ℂ Q₀).map_target hz_tgt
+  have hQ_coord : (chartAt ℂ Q₀) Q = z := (chartAt ℂ Q₀).right_inv hz_tgt
+  -- the affine segment in coordinates stays in the ball.
+  have haff : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 →
+      (1 - (s : ℂ)) * z₀ + (s : ℂ) * z ∈ Metric.ball z₀ r := by
+    intro s hs
+    have h_rewrite : (1 - (s : ℂ)) * z₀ + (s : ℂ) * z = z₀ + s • (z - z₀) := by
+      rw [Complex.real_smul]
+      ring
+    rw [h_rewrite]
+    exact (convex_ball z₀ r).add_smul_sub_mem hz₀_mem hz hs
+  -- the hop is valid, giving the zero-velocity smooth path.
+  have hhop : _root_.Jacobians.HopValid Q₀ Q := by
+    refine ⟨hQ_src, fun s hs => ?_⟩
+    rw [hQ_coord]
+    exact hsub (haff s hs)
+  obtain ⟨hσ_sm, _, _⟩ := _root_.Jacobians.zeroVelHop hhop
+  set σ : ℝ → X := _root_.Jacobians.ChartBallPathSmooth Q₀ Q with hσ_def
+  refine ⟨σ, hσ_sm, ?_⟩
+  intro α
+  -- the chart ball as a `PathChartBall`, with its primitive.
+  set B : PathChartBall X :=
+    { p := Q₀, c := z₀, r := r,
+      ball_subset_target := by
+        intro w hw
+        simpa [extChartAt] using hsub hw } with hB_def
+  -- the path stays in the cell.
+  have hmem : ∀ t ∈ Set.Icc (0 : ℝ) 1, σ t ∈ (chartAt ℂ B.p).source ∧
+      (extChartAt 𝓘(ℂ) B.p) (σ t) ∈ Metric.ball B.c B.r := by
+    intro t _ht
+    set s : ℝ := _root_.Jacobians.smoothStep01 t with hs_def
+    have hs01 : s ∈ Set.Icc (0 : ℝ) 1 := _root_.Jacobians.smoothStep01_mem_unit t
+    have hw : (1 - (s : ℂ)) * z₀ + (s : ℂ) * z ∈ Metric.ball z₀ r := haff s hs01
+    have hw_tgt : (1 - (s : ℂ)) * z₀ + (s : ℂ) * z ∈ (chartAt ℂ Q₀).target :=
+      hsub hw
+    have hσt : σ t = (chartAt ℂ Q₀).symm
+        ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z) := by
+      show _root_.Jacobians.ChartBallPath Q₀ Q₀ Q (_root_.Jacobians.smoothStep01 t)
+        = (chartAt ℂ Q₀).symm ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z)
+      rw [_root_.Jacobians.ChartBallPath, ← hs_def, hQ_coord, ← hz₀_def]
+    constructor
+    · rw [hσt]
+      exact (chartAt ℂ Q₀).map_target hw_tgt
+    · rw [hσt]
+      show (extChartAt 𝓘(ℂ) Q₀) ((chartAt ℂ Q₀).symm
+        ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z)) ∈ Metric.ball z₀ r
+      rw [show (extChartAt 𝓘(ℂ) Q₀) ((chartAt ℂ Q₀).symm
+          ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z))
+          = (chartAt ℂ Q₀) ((chartAt ℂ Q₀).symm
+            ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z)) by simp [extChartAt],
+        (chartAt ℂ Q₀).right_inv hw_tgt]
+      exact hw
+  have hdiff : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      DifferentiableAt ℝ ((chartAt (H := ℂ) (σ t)).toFun ∘ σ) t := by
+    intro t ht
+    exact hσ_sm.diff t (by rwa [Set.uIcc_of_le zero_le_one])
+  have hint : IntervalIntegrable
+      (fun t => (Jacobians.Bridge.bridgeForm α).toFun (σ t)
+        (Jacobians.Vendor.Kirov.pathSpeed σ t))
+      MeasureTheory.volume 0 1 :=
+    _root_.Jacobians.intervalIntegrable_form_pathSpeed_of_velContinuous
+      (Jacobians.Bridge.bridgeKDFormEquiv α) σ hσ_sm.velCont
+  have hFTC := Jacobians.Bridge.lineIntegral_cell_eq_primitive_sub
+    α B σ zero_le_one hσ_sm.cont hdiff hmem hint
+  -- read off the endpoints.
+  have hσ0 : σ 0 = Q₀ := hσ_sm.start
+  have hσ1 : σ 1 = Q := hσ_sm.finish
+  have hcoord0 : (extChartAt 𝓘(ℂ) B.p) (σ 0) = z₀ := by
+    rw [hσ0]
+    show (extChartAt 𝓘(ℂ) Q₀) Q₀ = z₀
+    simp [hz₀_def, extChartAt]
+  have hcoord1 : (extChartAt 𝓘(ℂ) B.p) (σ 1) = z := by
+    rw [hσ1]
+    show (extChartAt 𝓘(ℂ) Q₀) Q = z
+    rw [show (extChartAt 𝓘(ℂ) Q₀) Q = (chartAt ℂ Q₀) Q by simp [extChartAt]]
+    exact hQ_coord
+  -- the chart-ball primitive is a primitive of the K2 coefficient.
+  have hP : ∀ w ∈ Metric.ball z₀ r,
+      HasDerivAt (pathChartBallPrimitive α B) (formChartCoeff Q₀ α w) w := by
+    intro w hw
+    have h := pathChartBallPrimitive_hasDerivAt α B w hw
+    rwa [show α.coeff B.p w = formChartCoeff Q₀ α w from
+      (formChartCoeff_eq_coeff Q₀ α (hsub hw)).symm] at h
+  have hprim := formChartPrimitive_eq_primitive_sub Q₀ α hsub hP hz
+  calc _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv α) σ
+      = ∫ t in (0 : ℝ)..1, (Jacobians.Bridge.bridgeForm α).toFun (σ t)
+          (Jacobians.Vendor.Kirov.pathSpeed σ t) := rfl
+    _ = pathChartBallPrimitive α B ((extChartAt 𝓘(ℂ) B.p) (σ 1)) -
+          pathChartBallPrimitive α B ((extChartAt 𝓘(ℂ) B.p) (σ 0)) := hFTC
+    _ = pathChartBallPrimitive α B z - pathChartBallPrimitive α B z₀ := by
+          rw [hcoord0, hcoord1]
+    _ = formChartPrimitive Q₀ α z := hprim.symm
+
+/-- **The loop piece (K4).** Every analytic loop at `x₀` has a port-smooth
+closed-loop representative whose port line integral of every bridged form
+is OUR canonical arc integral — the entry of `loopPeriodVec`. Composition
+of the smooth-representative brick (#216) with the HI-0 developing-value
+bridge. -/
+theorem exists_isClosedSmoothLoop_lineIntegral_eq_canonicalArcIntegral
+    (x₀ : X) (γ : AnalyticLoop X x₀) :
+    ∃ lp : ℝ → X, _root_.Jacobians.IsClosedSmoothLoop lp ∧
+      ∀ α : HolomorphicOneForm X,
+        _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv α) lp
+          = canonicalArcIntegral γ.arc α := by
+  classical
+  -- the loop as a Mathlib `Path x₀ x₀`.
+  set δ : Path x₀ x₀ :=
+    { toContinuousMap := analyticArcToContinuousMap γ.arc
+      source' := γ.start_eq
+      target' := γ.end_eq } with hδ_def
+  obtain ⟨lp, hlp, _, hval⟩ :=
+    Jacobians.Bridge.exists_isClosedSmoothLoop_lineIntegral_eq_developingValue
+      x₀ δ
+  refine ⟨lp, hlp, fun α => ?_⟩
+  rw [hval α]
+  have hcoe : (δ : C(unitInterval, X)) = analyticArcToContinuousMap γ.arc := rfl
+  rw [hcoe]
+  exact developingValue_eq_canonicalArcIntegral x₀ α γ.arc
 
 end Jacobians.RiemannSurface
