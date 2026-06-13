@@ -91,7 +91,7 @@ So **KER-0 ⟺ T-FG + Free + T-RANK≤** under K-LITE + T-GEN — the collapse i
 
 | # | Residual | Status | Closest source |
 |---|----------|--------|----------------|
-| T-GEN | analytic loops generate H₁ | **NAMED — punctured-plane done, compact-surface gap** | §2 below |
+| T-GEN | analytic loops generate H₁ | **NAMED — g=1 PROVEN (`analyticLoopsGenerateH1_elliptic`); general compact-surface gap** | §2 below |
 | T-FG | `Module.Finite ℤ H1` | **RESEARCH-GRADE (GC-1)** — good-cover existence on compact X, blocked at Mathlib pin | `GOODCOVER_BLOCKER.md` |
 | Free | `Module.Free ℤ H1` (torsion-free) | **RESEARCH-GRADE** — surface-classification / Hodge; folded into KER-0 | §3 below |
 | T-RANK≤ | `finrank ℤ H1 ≤ 2g` | **RESEARCH-GRADE (TR-DISC route (a))** — de Rham comparison layer | `TRANK_SCOPING.md` §2 |
@@ -149,6 +149,15 @@ a short composition of existing results.
 compact-surface lift is a genuine open sub-campaign (slit-sheet π₁), not a
 one-application corollary. It is NOT surface-classification-grade (the lasso
 generators are explicit and analytic), but it is more than glue.
+
+**Satisfiability (PROVEN this lane).** T-GEN is non-vacuous on a genuine
+positive-genus curve: `analyticLoopsGenerateH1_elliptic`
+(`Elliptic/H1Basis.lean`) proves `AnalyticLoopsGenerateH1 (0 : Elliptic ω₁ ω₂ h)`
+unconditionally and axiom-free, via the covering-space `H₁ ≃ Λ` basis realized
+by concrete oriented elliptic loops (`ellipticH1Basis_eq_loops` +
+`analyticLoopsGenerateH1_of_h1LoopBasis`). This is the g = 1 instance of the
+general residual; the general (g ≥ 1, arbitrary compact X) case is the
+slit-sheet gap above. `#print axioms` = standard-3.
 
 ## 3. The collapse certificate — PROVEN this lane
 
