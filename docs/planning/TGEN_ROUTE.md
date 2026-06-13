@@ -110,6 +110,7 @@ basis), and it is the right T-GEN target: T-GEN only asks for spanning.
 | L1 | path-lifting of a lasso through `π : X∖T → ℙ¹∖B` is analytic | named (hyperell: = `exists_sqrtArcData`, proven) |
 | L2 | lifted lassos + filled-puncture relations generate π₁(X) | **named + reduced** (`CoveringGeneration.lean`): general predicate `CoveringGeneratesPi1` ⟹ T-GEN proven; hyperelliptic instance reduced to one hypothesis `BranchCutGeneratesPi1` over the `2g` branch-cut loops, fed through K0 (axiom-free, standard-3) |
 | G | analytic-genus gate `genus X = (topological count)` | named (`AX_Hyperelliptic_genus` territory) |
+| **AAW** | general-X analytic-approximation: (AAW) ⟹ (P) ⟹ T-GEN (`AnalyticApproxGeneration.lean`) | **named + reduced** (alternative to D1/L1/L2): single wall `ContinuousLoopHasAnalyticRep`, glue **PROVEN** this lane (axiom-free, standard-3), valid for ALL X |
 
 All three K0 forms live in `Jacobians/RiemannSurface/AnalyticPi1Generation.lean`,
 standard-3 / sorry-free / no `AX_PeriodCycleBasis`. Any of the three is a
@@ -119,6 +120,62 @@ T-GEN for general X = **K0 ∘ L2 ∘ L1 ∘ D1**. K0 and D1 are proven; L1 is
 proven for the hyperelliptic witness; **L2 is the genuine remaining
 topology** — the covering-space lift of a generating set across a finite
 branched cover.
+
+## Alternative general-X route: analytic approximation (AAW), bypasses L1/L2/D1
+
+`Jacobians/RiemannSurface/AnalyticApproxGeneration.lean` (TGEN general-route
+lane) gives an **independent** discharge of (P) for *every* compact connected
+Riemann surface, with **no covering-space machinery** at all. It trades the
+branched-cover stack (D1 + L1 + L2 + the analytic-genus gate G) for a single
+topological wall:
+
+> **(AAW)** every continuous loop `p : Path x₀ x₀` is `Path.Homotopic` to the
+> underlying path `loopToPath γ` of some piecewise-real-analytic
+> `γ : AnalyticLoop X x₀`.
+
+This is the 1-dimensional **Whitney analytic approximation** theorem (Whitney
+1936 for smooth; Grauert 1958 for the smooth → real-analytic upgrade),
+specialised to loops on the real-analytic manifold underlying `X`.
+
+The glue **(AAW) ⟹ (P) ⟹ T-GEN** is fully proven this lane (axiom-free,
+standard-3, sorry-free):
+
+| Lemma | Statement |
+|---|---|
+| `loopToPi1_eq_fromPath_of_homotopic` | `loopToPath γ ~ p ⟹ loopToPi1 γ = fromPath ⟦p⟧` |
+| `loopToPi1_surjective_of_analyticRep` | (AAW) ⟹ `loopToPi1` surjective |
+| `pi1AnalyticClasses_eq_top_of_analyticRep` | (AAW) ⟹ (P) (`pi1AnalyticClasses = ⊤`) |
+| `analyticLoopsGenerateH1_of_analyticRep` | (AAW) ⟹ **T-GEN** (via K0) |
+
+The named residual is `ContinuousLoopHasAnalyticRep x₀`. `#print axioms` on all
+four results = `[propext, Classical.choice, Quot.sound]`; the Mathlib-absent
+fact is threaded **only** as the explicit hypothesis, never as an `axiom`.
+
+**Why this is the cleaner wall, and why it is still a wall.** (AAW) is one
+statement, valid for *all* X (not just hyperelliptic), and avoids the entire
+combinatorial-kernel + puncture-filling block of L2. But it is genuinely
+Mathlib-absent: Mathlib (mid-2026) has only
+`Continuous.exists_contMDiff_approx_and_eqOn` — uniform `C^n` approximation of
+a continuous map **into a normed space** (not a manifold target), with `EqOn`
+on a closed set and **no homotopy conclusion**. None of the three ingredients
+needed to assemble (AAW) is present:
+
+1. smooth approximation with a **manifold** target,
+2. the smooth → real-analytic homotopy (Grauert),
+3. "`C⁰`-close maps into a manifold are homotopic rel endpoints" (no
+   tubular-neighbourhood / exp-map-short-homotopy API).
+
+The alternative routes to (AAW) each need an even larger absent block: Radó
+triangulation (massive), uniformization (`ℂ/ℍ/ℙ¹` universal cover — absent),
+or Whitney embedding + tubular retraction (tubular nbhd absent). So (AAW) is
+the **honest single named wall** for the general-X route — the
+differential-topology analogue of L2's covering-space wall. Discharging either
+one closes T-GEN, and hence the whole challenge axiom, in full generality.
+
+**Go/no-go.** Closing (AAW) from Mathlib primitives is a multi-session
+differential-topology build-out (the three ingredients above), not a
+single-session glue job. The deliverable here is the **precise, minimal,
+fully-proven reduction** of the general-X T-GEN to that one named fact.
 
 ## The named final wall (L2), precisely
 

@@ -66,3 +66,43 @@ Riemann surfaces. Branch `feat/tgen-general`. Piece (2) of K-FULL closure
   fill). Plane curve / general X: `CoveringGeneratesPi1` is the clean named
   residual feeding K0 (plane curves lack lift infrastructure, so no concrete
   instance to discharge yet). Elliptic (g=1): already unconditional (#234).
+
+## 2026-06-12 — general-route lane (AAW, analytic approximation)
+
+- **New independent route to (P) for GENERAL X**, bypassing the whole
+  branched-cover stack (D1/L1/L2 + analytic-genus gate): the 1-dimensional
+  Whitney analytic approximation theorem. New file
+  `Jacobians/RiemannSurface/AnalyticApproxGeneration.lean`.
+
+- Named the single wall `ContinuousLoopHasAnalyticRep x₀`: *every continuous
+  `Path x₀ x₀` is `Path.Homotopic` to the underlying path of some
+  piecewise-real-analytic `AnalyticLoop`* (= (AAW)). Threaded as an explicit
+  hypothesis everywhere — NO axiom, NO sorry.
+
+- **Glue PROVEN this lane** (all `#print axioms` = standard-3, no sorryAx, no
+  `AX_PeriodCycleBasis`):
+  - `loopToPi1_eq_fromPath_of_homotopic` — homotopic path ⟹ same π₁ class
+    (via `Path.Homotopic.Quotient.eq`);
+  - `loopToPi1_surjective_of_analyticRep` — (AAW) ⟹ `loopToPi1` surjective
+    (via `FundamentalGroup.{to,from}Path` defeq-inverse + `mk_surjective`);
+  - `pi1AnalyticClasses_eq_top_of_analyticRep` — (AAW) ⟹ (P);
+  - `analyticLoopsGenerateH1_of_analyticRep` — (AAW) ⟹ T-GEN (via K0).
+
+- **Mathlib audit for (AAW).** Present: `Continuous.exists_contMDiff_approx_and_eqOn`
+  (uniform C^n approx of a continuous map into a NORMED SPACE, EqOn on a closed
+  set, NO homotopy, NOT a manifold target). Absent (the three ingredients of
+  AAW): (i) manifold-target smooth approximation; (ii) smooth→real-analytic
+  homotopy (Grauert); (iii) "C⁰-close maps into a manifold are homotopic rel
+  endpoints" (no tubular-nbhd / exp-map API). Alternative routes (Radó
+  triangulation, uniformization, Whitney-embed+tubular-retract) each need an
+  even larger absent block. Gemini (gemini-3-pro) confirmed the claim is TRUE
+  and standard, no shorter Lean-feasible route, and naming one hypothesis is
+  the honest call.
+
+- **Go/no-go:** closing (AAW) from Mathlib primitives is a multi-session
+  differential-topology build-out, NOT a single-session glue job. Deliverable:
+  the minimal fully-proven reduction of general-X T-GEN to one named wall —
+  the differential-topology twin of L2's covering-space wall. Either wall,
+  discharged, closes the whole challenge axiom in full generality.
+
+- Branch `feat/tgen-analytic-approx`; wired into the build root `Jacobians.lean`.

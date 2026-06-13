@@ -7,6 +7,7 @@ import Jacobians.Jacobian
 import Jacobians.Layer3
 import Jacobians.ProjectiveCurve
 import Jacobians.RiemannSurface
+import Jacobians.RiemannSurface.AnalyticApproxGeneration
 import Jacobians.RiemannSurface.CoveringGeneration
 import Jacobians.Vendor
 import Jacobians.Bridge
