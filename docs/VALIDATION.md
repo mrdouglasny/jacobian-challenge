@@ -31,12 +31,47 @@ axiom-clean build does **not** catch:
 mathematician must read-and-trust so that, granting the kernel checked the
 proofs, both failure modes are closed.**
 
-A corollary worth internalizing: **the full 24-item list is the right thing to
-*deliver*, but not the efficient thing to *convince with*.** A checklist
-convinces by *accumulation* (rule out degeneracies one at a time) and leaves the
-reader to decide whether the list is *complete enough* — and, as established
-separately, the 24 do **not** categorically pin the Jacobian, so that residual
-doubt never fully closes. Efficiency comes from *categoricity*, not length.
+A corollary worth internalizing: **a long checklist is not the efficient thing to
+*convince with*.** A checklist convinces by *accumulation* (rule out degeneracies
+one at a time) and leaves the reader to decide whether the list is *complete
+enough* — and, as established separately, the 24 do **not** categorically pin the
+Jacobian, so that residual doubt never fully closes. Efficiency comes from
+*categoricity*, not length.
+
+**But the convincing-set and the *delivery-set* are not the same thing, and they
+pull in opposite directions on length.** You convince with the *fewest*
+statements that close the spec gap; you deliver the *most* statements that are
+independently useful or independently validating. A finished formalization should
+exceed the convincing-minimal — not because any *particular* list is canonical
+(it isn't; *24*, and *those* 24, is Buzzard's authorship, and some members like
+`genus_eq_zero_iff_homeo` are curve facts, not Jacobian API) — but for three
+reasons that generalize past this challenge:
+
+1. **Validation ≠ library.** The minimal categorical artifact *certifies*
+   correctness; it does not make the object *usable*. The universal property is
+   hard to apply directly — a downstream user would re-derive functoriality, the
+   AJ map's properties, the genus relations each time. The "redundant" theorems
+   are the worked-out **API surface** people actually cite. Redundancy that is
+   wasteful for convincing is what is valuable for using.
+2. **Concrete breadth cross-validates the *primitives*.** The universal property
+   is faithful only *relative to its own statement being right* — it presupposes
+   `genus`, the differentials, `ContMDiff`, the group law are formalized
+   correctly. A single abstract statement can be perfectly correct while sitting
+   atop a mis-formalized primitive that happens not to bite for *that* statement.
+   Abstraction *hides* primitive-level errors; a spread of concrete consequences,
+   each touching the primitives from a different angle, is what *exposes* them.
+   This is redundancy-as-error-detection: the more independent concrete theorems,
+   the more the definitions are pinned by triangulation.
+3. **It is nearly free.** Proving the universal property *requires* Abel's
+   theorem, the lattice rank, period functoriality — the content of most of the
+   list is the scaffolding of the capstone proof anyway. Not exposing those
+   proven lemmas as named API discards work already done.
+
+So the general principle is **characterization (certificate) + a usable API +
+enough concrete cross-checks to triangulate the primitives** — the first minimal
+and categorical, the second and third deliberately broad and redundant. The 24
+are one reasonable, non-canonical instantiation of "API + cross-checks." This
+document is about the *convincing* set; the delivery set is properly larger.
 
 ---
 
