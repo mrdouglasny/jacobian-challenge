@@ -125,6 +125,32 @@ theorem analyticLoopsGenerateH1_of_pi1_closure {x₀ : X}
     have hg : g ∈ pi1AnalyticClasses x₀ := hP ▸ Subgroup.mem_top g
     exact exists_loop_of_mem_pi1AnalyticClasses hg
 
+/-- **K0, family form.** If a finite family `γ : Fin n → AnalyticLoop X x₀`
+of analytic loops has π₁ classes generating `FundamentalGroup X x₀`, then
+T-GEN holds. This is the shape a branched-cover / lasso-lift argument
+delivers its output in (a finite generating set of explicit analytic loops).
+-/
+theorem analyticLoopsGenerateH1_of_finite_pi1_generators {x₀ : X} {n : ℕ}
+    (γ : Fin n → AnalyticLoop X x₀)
+    (hgen : Subgroup.closure (Set.range fun i => loopToPi1 (γ i)) = ⊤) :
+    AnalyticLoopsGenerateH1 x₀ := by
+  refine analyticLoopsGenerateH1_of_pi1_closure ?_
+  -- The finite family's classes are a subset of all analytic-loop classes,
+  -- so their closure (already ⊤) is ≤ `pi1AnalyticClasses`.
+  refine top_le_iff.mp ?_
+  rw [← hgen]
+  exact Subgroup.closure_mono
+    (Set.range_subset_iff.mpr fun i => ⟨γ i, rfl⟩)
+
+/-- **K0, surjection form.** If *every* π₁ class is the class of some analytic
+loop (the map `loopToPi1` is surjective onto `FundamentalGroup X x₀`), then
+T-GEN holds. The strongest, easiest-to-supply form. -/
+theorem analyticLoopsGenerateH1_of_loopToPi1_surjective {x₀ : X}
+    (hsurj : Function.Surjective (loopToPi1 : AnalyticLoop X x₀ → FundamentalGroup X x₀)) :
+    AnalyticLoopsGenerateH1 x₀ := by
+  refine analyticLoopsGenerateH1_of_pi1_closure ?_
+  rw [pi1AnalyticClasses, hsurj.range_eq, Subgroup.closure_univ]
+
 end
 
 end Jacobians.RiemannSurface
