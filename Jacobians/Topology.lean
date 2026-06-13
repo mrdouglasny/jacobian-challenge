@@ -22,3 +22,4 @@ import Jacobians.Topology.SpokeAlgebra
 import Jacobians.Topology.CellGeneration
 import Jacobians.Topology.LassoGeneration
 import Jacobians.Topology.IsolatingLasso
+import Jacobians.Topology.Index2KernelGeneration

@@ -66,3 +66,35 @@ Riemann surfaces. Branch `feat/tgen-general`. Piece (2) of K-FULL closure
   fill). Plane curve / general X: `CoveringGeneratesPi1` is the clean named
   residual feeding K0 (plane curves lack lift infrastructure, so no concrete
   instance to discharge yet). Elliptic (g=1): already unconditional (#234).
+
+## BRANCHCUT lane (feat/branchcut-pi1) — 2026-06-12
+
+- **L2 fact (1) LANDED**: `Jacobians/Topology/Index2KernelGeneration.lean`,
+  sorry-free, standard-3 axioms only (`#print axioms` verified on
+  `closure_kernelGenSet_eq_ker`, `ker_le_closure`, `t_normalizes`). The
+  elementary index-2 kernel-generation lemma, fully general (group `G`,
+  order-2 parity quotient `φ : G →* Q`, distinguished odd transversal `t`,
+  odd generator family `g : ι → G`):
+
+    `closure ({t*t} ∪ {t*g i} ∪ {g i*t⁻¹}) = ker φ`
+
+  given `closure (insert t (range g)) = ⊤`, `φ t ≠ 1`, `∀ i, φ(g i) ≠ 1`, and
+  the single order-2 hypothesis `hodd2 : ∀ a b, a≠1 → b≠1 → a*b = 1` (product
+  of two odds is even; implies involution by `a=b`; holds for ℤ/2). No
+  Reidemeister–Schreier. Proof = coset-tracking predicate
+  `P x := (φ x = 1 → x ∈ K) ∧ (φ x ≠ 1 → t*x ∈ K)` threaded through
+  `Subgroup.closure_induction`; `mul`/`inv` cases discharged via the helper
+  `t_normalizes` (`t` conjugates `K` into `K`, proved by closure_induction
+  over the generating set). Strategy validated with Gemini (4 parity cases
+  EE/OE/EO/OO + inv worked out, normalizer-helper fix confirmed).
+
+- **Residual = L2 fact (2) only** (branched puncture-filling van Kampen):
+  `π₁(X∖T) ↠ π₁(X)` with kernel = meridian normal closure; `z↦z²` local model
+  sends each meridian to `t²`, killing the `gᵢ²` and leaving the `2g`
+  branch-cut cycles. This needs the covering-space scaffold (monodromy parity
+  `φ`, identification of `loopToPi1 (S.loop i)` with the upstairs branch-cut
+  cycles, the puncture-fill surjection) that does NOT yet exist in the repo.
+  `BranchCutGeneratesPi1 S` is therefore NOT yet discharged — fact (1) is the
+  reusable group-theory core it will consume, but the topological bridge from
+  the hyperelliptic monodromy to `Index2KernelGeneration`'s hypotheses is the
+  named remaining wall.
