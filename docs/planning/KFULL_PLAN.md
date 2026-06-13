@@ -156,8 +156,47 @@ axiom-free**, replacing the `loopIntegralToH1` route.
   decl still shows a non-standard axiom, NAME it (it'd be a genuinely
   H1-basis-needing fact K-FULL can't bypass) and report.
 
-### What K-FULL genuinely cannot bypass (to watch for)
-Anything that needs an actual ℤ-BASIS of `H₁(X,ℤ)` (not just the lattice in
-`ℂ^g`) — e.g. if `AX_AbelTheorem` or the contMDiff proofs reach into the
-chosen cycle basis. The image-route design (#206/#208) suggests they don't,
-but this is the precise thing to confirm at S4.
+### What K-FULL genuinely cannot bypass (CONFIRMED — the verdict)
+
+**The Abel ⊆ engine needs an actual ℤ-BASIS of `H₁(X,ℤ)`, not just the
+lattice in `ℂ^g`.** Traced precisely:
+
+`ofCurve_inj` → `AX_AbelTheorem` (Abel ⊆, `abel_subset`) →
+`abel_subset_of_engine` → `zeroPeriodChainSolvability_of_engine`
+(AbelEngineAdapter.lean) → builds an explicit boundary **smooth 1-chain**
+`c` (lines ~358-363) whose loop part is the `m'`-weighted combination of the
+**pinned cycle-basis loops** `cb.loops j`, where
+`cb = pinnedCycleBasis = Classical.choice (AX_PeriodCycleBasis x₀)`
+(AbelPlumbing.lean:73). The coefficients `m'` come from
+`cb.isBasis.repr h` (AbelEngineAdapter.lean:332) — i.e. the H₁ cycle-basis
+coordinates. This is the **irreducible** axiom use: the §20 Weierstrass
+engine cancels a degree-0 divisor by a 1-chain assembled from the 2g basis
+loops, and you cannot name those loops without an actual H₁ basis. The
+lattice in `ℂ^g` does not provide them.
+
+**Bridge asymmetry (decisive).** `loopPeriodLattice ⊆ periodLatticeInBasis`
+is AXIOM-FREE (PeriodLatticeDiscrete.lean:133-136, via
+`loopToHomology`); the reverse `⊇` needs the axiom (the chosen loops span
+the range). So the Abel engine's INPUT plumbing
+(`divisorPeriodVector ∈ loopPeriodLattice` → `∈ periodLatticeInBasis`) is
+bridgeable axiom-free, but the engine's CORE
+(`hasZeroPeriodLoopPresentation_of_mem_lattice` → `cb.isBasis.repr`) is not.
+
+### Revised win/partial split
+- **CAN go axiom-free via the lattice swap (no Abel engine):**
+  `Jacobians.Jacobian` (the TYPE), `ofCurve`, `ofCurve_self`,
+  `ofCurve_contMDiff` — these touch only `ofCurveImpl` (the lattice
+  quotient) + `AX_Period_Triangle` (re-pointed to `loopPeriodLattice` via
+  `subset_span`, axiom-free). **`Jacobians.Jacobian` confirmed standard-3
+  after S1.**
+- **CANNOT go axiom-free by the lattice swap alone:** `ofCurve_inj`,
+  `pushforward`/`pullback` (if they route through Abel) — blocked on the
+  Abel ⊆ cycle-basis engine. Closing these requires a **basis-free Abel ⊆**
+  (construct the cancelling 1-chain without naming a cycle basis — a
+  separate, larger workstream, NOT a lattice re-point).
+
+**Conclusion:** K-FULL (lattice re-point) is necessary but NOT sufficient to
+close `ofCurve_inj`. The last critical axiom survives in the Abel ⊆ engine,
+not the period lattice. The headline closure needs a basis-free §20
+construction (or a homology-generation result feeding the 1-chain without
+`Classical.choice (AX_PeriodCycleBasis)`).
