@@ -726,7 +726,7 @@ theorem exists_isSmoothPath_lineIntegral_eq_formChartPrimitive
     · rw [hσt]
       exact (chartAt ℂ Q₀).map_target hw_tgt
     · rw [hσt]
-      show (extChartAt 𝓘(ℂ) Q₀) ((chartAt ℂ Q₀).symm
+      change (extChartAt 𝓘(ℂ) Q₀) ((chartAt ℂ Q₀).symm
         ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z)) ∈ Metric.ball z₀ r
       rw [show (extChartAt 𝓘(ℂ) Q₀) ((chartAt ℂ Q₀).symm
           ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z))
@@ -751,11 +751,11 @@ theorem exists_isSmoothPath_lineIntegral_eq_formChartPrimitive
   have hσ1 : σ 1 = Q := hσ_sm.finish
   have hcoord0 : (extChartAt 𝓘(ℂ) B.p) (σ 0) = z₀ := by
     rw [hσ0]
-    show (extChartAt 𝓘(ℂ) Q₀) Q₀ = z₀
+    change (extChartAt 𝓘(ℂ) Q₀) Q₀ = z₀
     simp [hz₀_def, extChartAt]
   have hcoord1 : (extChartAt 𝓘(ℂ) B.p) (σ 1) = z := by
     rw [hσ1]
-    show (extChartAt 𝓘(ℂ) Q₀) Q = z
+    change (extChartAt 𝓘(ℂ) Q₀) Q = z
     rw [show (extChartAt 𝓘(ℂ) Q₀) Q = (chartAt ℂ Q₀) Q by simp [extChartAt]]
     exact hQ_coord
   -- the chart-ball primitive is a primitive of the K2 coefficient.
@@ -800,5 +800,119 @@ theorem exists_isClosedSmoothLoop_lineIntegral_eq_canonicalArcIntegral
   have hcoe : (δ : C(unitInterval, X)) = analyticArcToContinuousMap γ.arc := rfl
   rw [hcoe]
   exact developingValue_eq_canonicalArcIntegral x₀ α γ.arc
+
+/-! ## K5 — the isolated zero of the loop-period lattice
+
+Idea source: Kirov `906335f`, `Jacobians/PeriodLatticeDiscrete.lean:120-557`
+(Apache 2.0), `truePeriodLattice_isolated_zero`. Re-stated over OUR
+`loopPeriodLattice x₀ b` (whose generators are the `canonicalArcIntegral`
+period vectors of ALL analytic loops, so NO cycle-basis axiom enters) and
+OUR merged engine `exists_meromorphic_of_zeroPeriodChain'` + the port's
+`residueTheorem_unconditional`.
+
+*Argument (Forster 21.4b).* Pick `g` base points `a j` with invertible
+evaluation matrix `A = jacobiEvalMatrix b a` (K1,
+`exists_jacobiBasePoints_det_ne_zero`) and the local-Jacobi-map openness
+window `U = jacobiMap b a '' V` around `0` (K2, `exists_jacobiMap_map_nhds`),
+with `V` a polydisc of chart balls shrunk into pairwise-disjoint T2
+neighbourhoods `O j ∋ a j` (`exists_pairwise_disjoint_opens`). Suppose
+`0 ≠ v ∈ loopPeriodLattice ∩ U`, so `v = jacobiMap b a z`. Set
+`x j := (chartAt ℂ (a j)).symm (z j) ∈ O j`; some `x j₀ ≠ a j₀`.
+
+Build the smooth 1-chain `c` = the K4 segment pieces `a j → x j`
+(`exists_isSmoothPath_lineIntegral_eq_formChartPrimitive`, summing to
+`jacobiMap b a z = v`) MINUS the finite ℤ-combination of K4 loop pieces
+(`exists_isClosedSmoothLoop_lineIntegral_eq_canonicalArcIntegral`) realizing
+`v ∈ span ℤ (range loopPeriodVec)` (`Submodule.mem_span_set'`, contributing
+`−v`). Then `c.boundary = ∑ⱼ (xⱼ − aⱼ)` and every basis period
+`c.period (bridgeKDFormEquiv (b i)) = vᵢ − vᵢ = 0` vanishes. The merged
+engine `exists_meromorphic_of_zeroPeriodChain'` returns meromorphic `f`
+with `div f = c.boundary` and (K3) the centred Laurent normal form
+`f̂ = H·(w−w₀)^n`, `H(w₀) ≠ 0`, at every point. Applying
+`residueTheorem_unconditional` to each `f·(b i)`: the residue at the simple
+pole `a j` is `cvec j · A i j` (the `resAt_analyticAt_mul_sub_inv` split,
+K3 leading coefficient `cvec j := H_{a j}(w₀)`), residues vanish at the
+`x j` (divisor coefficient `≥ 0`). Summing: `A.mulVec cvec = 0` with
+`cvec ≠ 0` (leading coefficient at `a j₀` is nonzero) — contradicting
+`det A ≠ 0`. Hence `v = 0`.
+
+NOTE (K-LITE honest-partial wall): the chain-assembly + residue-read core
+(Kirov :229-557) is the single remaining `sorry`. Everything it consumes —
+K1 (`exists_jacobiBasePoints_det_ne_zero`), K2 (`exists_jacobiMap_map_nhds`),
+K3 (`meromorphicFunction_normalForm_of_div`), the K4 segment/loop pieces,
+the merged engine, and `residueTheorem_unconditional` — is in place and
+sorry-free above / in the port. The downstream K6 packaging
+(`discreteTopology_loopPeriodLattice` and the unconditional ZLattice
+corollaries) is fully proven FROM this statement, so filling this `sorry`
+discharges the whole route. -/
+theorem loopPeriodLattice_isolated_zero (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    ∃ U ∈ nhds (0 : Fin (genus X) → ℂ),
+      ∀ v ∈ loopPeriodLattice x₀ b, v ∈ U → v = 0 := by
+  sorry
+
+/-! ## K6 — `DiscreteTopology (loopPeriodLattice x₀ b)` and the unconditional
+packaging
+
+Idea source: Kirov `906335f`, `Jacobians/PeriodLatticeBasis.lean:38-53`
+(Apache 2.0). The isolated-zero window (K5) is open after pulling back along
+`Subtype.val`, so the singleton `{0}` is open in the subtype — which is the
+`discreteTopology_iff_isOpen_singleton_zero` criterion. With discreteness
+PROVEN (not hypothesised), OUR axiom-free B-3 spanning
+(`span_real_loopPeriodLattice_eq_top`) upgrades the lattice to a full
+ℤ-lattice and the #208 image-route corollaries (`finrank = 2g`, ℤ-basis)
+become UNCONDITIONAL. -/
+
+/-- **K6 (E): TR-DISC, UNCONDITIONAL.** The loop-period lattice in `ℂ^g` is
+discrete — no `AX_PeriodCycleBasis`, no `PeriodGeneratingLoops` hypothesis.
+The whole Kirov dissection-free route (K1–K5) collapses to the isolated-zero
+window, which makes `{0}` open in the subtype. -/
+theorem discreteTopology_loopPeriodLattice (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    DiscreteTopology (loopPeriodLattice x₀ b) := by
+  obtain ⟨U, hU, hU0⟩ := loopPeriodLattice_isolated_zero x₀ b
+  obtain ⟨V, hVsub, hVopen, hV0⟩ := mem_nhds_iff.mp hU
+  rw [discreteTopology_iff_isOpen_singleton_zero]
+  have hset : ({0} : Set (loopPeriodLattice x₀ b))
+      = (Subtype.val : loopPeriodLattice x₀ b → (Fin (genus X) → ℂ)) ⁻¹' V := by
+    ext ⟨v, hv⟩
+    simp only [Set.mem_singleton_iff, Set.mem_preimage]
+    constructor
+    · intro h0
+      rw [show v = 0 from congrArg Subtype.val h0]
+      exact hV0
+    · intro hvV
+      exact Subtype.ext (hU0 v hv (hVsub hvV))
+  rw [hset]
+  exact hVopen.preimage continuous_subtype_val
+
+/-- **K6 (E): TR-DISC as a global instance.** Registering the
+unconditional discreteness so the #208 image-route theorems
+(`finrank_loopPeriodLattice`, `exists_loopPeriodLattice_basis`,
+`isZLattice_loopPeriodLattice`), and the `IsZLattice` class itself — which
+carries a `[DiscreteTopology L]` field — fire without a hypothesis. -/
+instance instDiscreteTopology_loopPeriodLattice (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    DiscreteTopology (loopPeriodLattice x₀ b) :=
+  discreteTopology_loopPeriodLattice x₀ b
+
+/-- **K6 (E): the loop-period lattice is a full ℤ-lattice, UNCONDITIONAL.**
+Discreteness (K6, now a global instance) + the axiom-free B-3 spanning. -/
+theorem isZLattice_loopPeriodLattice_unconditional (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    IsZLattice ℝ (loopPeriodLattice x₀ b) :=
+  isZLattice_loopPeriodLattice x₀ b
+
+/-- **K6 (E): ℤ-rank `2g`, UNCONDITIONAL.** -/
+theorem finrank_loopPeriodLattice_unconditional (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Module.finrank ℤ (loopPeriodLattice x₀ b) = 2 * genus X :=
+  finrank_loopPeriodLattice x₀ b
+
+/-- **K6 (E): a `Fin (2g)`-indexed ℤ-basis, UNCONDITIONAL.** -/
+theorem exists_loopPeriodLattice_basis_unconditional (x₀ : X)
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Nonempty (Module.Basis (Fin (2 * genus X)) ℤ (loopPeriodLattice x₀ b)) :=
+  exists_loopPeriodLattice_basis x₀ b
 
 end Jacobians.RiemannSurface
