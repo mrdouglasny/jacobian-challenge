@@ -1,0 +1,36 @@
+# H1C lane log — H1-fields composite for the AX_PeriodCycleBasis flip
+
+2026-06-12 (session 1, branch feat/h1-composite off 89c24d7)
+
+* Targeted reads: KIROV_214_STUDY.md Q3, Axioms/PeriodCycleBasis.lean,
+  HomologyGeneration.lean (#198), PeriodDiscreteness.lean (#206/#208 image
+  route), Layer3/PeriodLatticeDiscrete.lean (devValPeriodVec),
+  TRANK_SCOPING.md, Layer3/Periods.lean (R1/R2 consumers),
+  Axioms/RiemannBilinear.lean.
+* FINDING (sharpening): the study 3(a) splitting silently assumed
+  range(devValPeriodVec) = loopPeriodLattice. False unconditionally —
+  devValPeriodVec is defined on continuous loop classes, the lattice on
+  analytic ones. Named the gap T-GEN (AnalyticLoopsGenerateH1, span of
+  analytic-loop classes = ⊤), proved it NECESSARY for the H1 fields, and
+  noted it is NOT implied by Group.FG-form T-FG (toy model 2ℤ×ℤ ⊂ ℤ²).
+  #227's lasso generators are concrete analytic loops, so the topology
+  lane should deliver T-GEN, not bare Group.FG.
+* Landed Jacobians/RiemannSurface/H1Composite.lean (dea8c47):
+  surjection + splitting (section via ZLattice freeness + projectivity;
+  H1 ≅ ker ⊕ Λ via lequivProdOfRightSplitExact), KER-0 from
+  T-FG+Free+T-RANK(≤) by rank bookkeeping, extraction of
+  loops/isBasis/loops_to_basis (exists_h1LoopBasis_of_periodInjective /
+  _of_topology), necessity certificates, R1/R2 packaging lemma.
+  All conditional on [DiscreteTopology (loopPeriodLattice x₀ b)] —
+  K-LITE's exact output shape. 15/15 declarations #print-axioms-verified
+  standard-3; AX_PeriodCycleBasis in no closure. lake env lean clean.
+* R1/R2 finding: only consumption point Layer3/Periods.lean:141/:149
+  (brief's :145/:153 drifted). Downstream: riemannBilinear_exists (:414,
+  genuinely R2-bound, discharges AX_RiemannBilinear) and the two Phase-C
+  lattice instances (:580/:596, which HAVE R2-free _of_loopSpan twins).
+  General flip with R1/R2 fields kept ⇒ extracted loops are abstract, so
+  R1/R2 must come from ArcBoundaryWordData-equipped constructed loops
+  (4g-gon wall returns); K-MID drop ⇒ composite is the whole H1 bill,
+  bilinear relations remain a separate obligation for the
+  Riemann-bilinear headline only.
+* Route doc: docs/planning/H1_COMPOSITE_ROUTE.md (bill of materials).
