@@ -1004,6 +1004,101 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
     rw [hlpval (b i)]
     rw [show canonicalArcIntegral γ.arc (b i) = loopPeriodVec x₀ b γ i from rfl, hγ]
   choose lp hlpc hlpval using hloop
+  -- each loop, viewed as a smooth path from its basepoint to itself.
+  have hlpsp : ∀ k, _root_.Jacobians.IsSmoothPath (lp k 0) (lp k 0) (lp k) :=
+    fun k =>
+      { start := rfl
+        finish := ((hlpc k).closed).symm
+        cont := (hlpc k).cont
+        diff := (hlpc k).diff
+        velCont := (hlpc k).velCont }
+  -- THE CHAIN: segments `a j → x j` (coeff 1) ⊕ loops (coeff `−fl k`).
+  set c : Jacobians.Dolbeault.SmoothOneChain X :=
+    { n := genus X + nl
+      coeff := Fin.addCases (fun _ => (1 : ℤ)) (fun k => -(fl k))
+      src := Fin.addCases a (fun k => lp k 0)
+      tgt := Fin.addCases x (fun k => lp k 0)
+      path := Fin.addCases seg lp
+      smooth := by
+        intro i
+        refine Fin.addCases ?_ ?_ i
+        · intro j; rw [Fin.addCases_left, Fin.addCases_left, Fin.addCases_left]
+          exact hsegsp j
+        · intro k; rw [Fin.addCases_right, Fin.addCases_right, Fin.addCases_right]
+          exact hlpsp k } with hc
+  -- the boundary is `∑ⱼ (xⱼ − aⱼ)` (loops contribute 0).
+  have hbd : c.boundary
+      = ∑ j, (Finsupp.single (x j) (1 : ℤ) - Finsupp.single (a j) 1) := by
+    rw [hc, Jacobians.Dolbeault.SmoothOneChain.boundary]
+    show (∑ m : Fin (genus X + nl), _) = _
+    rw [Fin.sum_univ_add]
+    have hL : ∀ j : Fin (genus X),
+        (Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))
+            (Fin.castAdd nl j)) •
+          (Finsupp.single ((Fin.addCases (motive := fun _ => X) x (fun k => lp k 0)
+              (Fin.castAdd nl j))) (1 : ℤ)
+            - Finsupp.single ((Fin.addCases (motive := fun _ => X) a (fun k => lp k 0)
+              (Fin.castAdd nl j))) 1)
+        = Finsupp.single (x j) (1 : ℤ) - Finsupp.single (a j) 1 := by
+      intro j
+      rw [Fin.addCases_left, Fin.addCases_left, Fin.addCases_left, one_smul]
+    have hR : ∀ k : Fin nl,
+        (Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))
+            (Fin.natAdd (genus X) k)) •
+          (Finsupp.single ((Fin.addCases (motive := fun _ => X) x (fun k => lp k 0)
+              (Fin.natAdd (genus X) k))) (1 : ℤ)
+            - Finsupp.single ((Fin.addCases (motive := fun _ => X) a (fun k => lp k 0)
+              (Fin.natAdd (genus X) k))) 1)
+        = 0 := by
+      intro k
+      rw [Fin.addCases_right, Fin.addCases_right, Fin.addCases_right, sub_self,
+        smul_zero]
+    rw [Finset.sum_congr rfl fun j _ => hL j, Finset.sum_congr rfl fun k _ => hR k,
+      Finset.sum_const_zero, add_zero]
+  -- the chain has vanishing basis periods: `vᵢ − vᵢ = 0`.
+  have hper_basis : ∀ i : Fin (genus X),
+      c.period (Jacobians.Bridge.bridgeKDFormEquiv (b i)) = 0 := by
+    intro i
+    rw [hc, Jacobians.Dolbeault.SmoothOneChain.period]
+    show (∑ m : Fin (genus X + nl), _) = 0
+    rw [Fin.sum_univ_add]
+    have hL : ∀ j : Fin (genus X),
+        ((Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))
+            (Fin.castAdd nl j) : ℤ) : ℂ) *
+          _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv (b i))
+            (Fin.addCases (motive := fun _ => ℝ → X) seg lp (Fin.castAdd nl j))
+        = formChartPrimitive (a j) (b i) (z j) := by
+      intro j
+      rw [Fin.addCases_left, Fin.addCases_left, Int.cast_one, one_mul]
+      exact hsegval j (b i)
+    have hR : ∀ k : Fin nl,
+        ((Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))
+            (Fin.natAdd (genus X) k) : ℤ) : ℂ) *
+          _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv (b i))
+            (Fin.addCases (motive := fun _ => ℝ → X) seg lp (Fin.natAdd (genus X) k))
+        = -(fl k : ℂ) * (gl k : Fin (genus X) → ℂ) i := by
+      intro k
+      rw [Fin.addCases_right, Fin.addCases_right, hlpval k i]
+      push_cast; ring
+    rw [Finset.sum_congr rfl fun j _ => hL j, Finset.sum_congr rfl fun k _ => hR k]
+    -- `∑ⱼ Φ̃ⱼ(z j) = jacobiMap b a z i = t i`; the loop part is `−t i`.
+    have hjac : (∑ j, formChartPrimitive (a j) (b i) (z j)) = t i := by
+      rw [show (∑ j, formChartPrimitive (a j) (b i) (z j)) = jacobiMap b a z i from rfl,
+        hzt]
+    have hloopsum : (∑ k, (fl k : ℂ) * (gl k : Fin (genus X) → ℂ) i) = t i := by
+      have hc2 : (∑ k, fl k • (gl k : Fin (genus X) → ℂ)) i = t i := congrFun hsum i
+      simp only [Finset.sum_apply, zsmul_eq_mul] at hc2
+      exact hc2
+    rw [hjac]
+    rw [show (∑ k, -(fl k : ℂ) * (gl k : Fin (genus X) → ℂ) i)
+        = -∑ k, (fl k : ℂ) * (gl k : Fin (genus X) → ℂ) i from by
+      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun k _ => by ring]
+    rw [hloopsum]; ring
+  -- extend to ALL port forms via the spanning bridged basis (engine E1).
+  have hper : ∀ α : Jacobians.HolomorphicOneForms X, c.period α = 0 :=
+    c.period_eq_zero_of_spanning
+      (fun i => Jacobians.Bridge.bridgeKDFormEquiv (b i))
+      (span_range_bridgeKD_basis b) hper_basis
   sorry
 
 /-! ## K6 — `DiscreteTopology (loopPeriodLattice x₀ b)` and the unconditional
