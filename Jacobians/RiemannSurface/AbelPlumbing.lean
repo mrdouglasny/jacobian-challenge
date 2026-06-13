@@ -61,6 +61,11 @@ namespace Jacobians.RiemannSurface
 
 open Jacobians.Axioms
 
+-- The T-GEN period-lattice route pulls the Kirov port (namespace `Jacobians`,
+-- defining `Jacobians.Divisor` as a Finsupp) into this file's closure; re-export
+-- our `Jacobians.Axioms.Divisor` so the bare name resolves to ours.
+export Jacobians.Axioms (Divisor Divisor.deg)
+
 universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]

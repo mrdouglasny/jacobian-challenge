@@ -32,6 +32,13 @@ open Jacobians.Vendor.Wallace.HolomorphicForms
 
 namespace Jacobians.RiemannSurface
 
+-- The T-GEN period-lattice route pulls the Kirov port (namespace `Jacobians`,
+-- which defines `Jacobians.Divisor` as a Finsupp) into this file's closure.
+-- Re-export our `Jacobians.Axioms.Divisor` *inside* `Jacobians.RiemannSurface` so
+-- the bare name `Divisor` resolves here (and in sub-namespaces) to ours
+-- (FreeAbelianGroup), beating the parent-namespace `Jacobians.Divisor`.
+export Jacobians.Axioms (Divisor Divisor.deg)
+
 namespace MeromorphicFunctionField
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]

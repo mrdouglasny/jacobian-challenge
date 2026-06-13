@@ -28,6 +28,13 @@ the intersection form is no longer in this cone).
 -/
 import Jacobians.Axioms.PeriodLatticeBase
 import Jacobians.Layer3.Periods
+-- T-GEN route: the two global period-lattice instances are reproved from the
+-- now-unconditional T-GEN theorem (`analyticLoopsGenerateH1`), dropping
+-- `AX_PeriodCycleBasis` from their bodies (and hence from every headline whose
+-- only axiom dependency was these instances). The earlier import cycle is broken
+-- by `LoopIntegralHom` importing `PeriodLatticeBase`.
+import Jacobians.RiemannSurface.Path2Prototype
+import Jacobians.RiemannSurface.ChartFlatHomotopyWallProof
 
 namespace Jacobians.Axioms
 
@@ -45,7 +52,8 @@ theorem instPeriodLatticeDiscrete (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     DiscreteTopology (periodLatticeInBasis X x₀ b) :=
-  Jacobians.Layer3.periodLatticeInBasis_discrete x₀ b
+  Jacobians.RiemannSurface.periodLatticeInBasis_discreteTopology_of_tgen x₀ b
+    (Jacobians.RiemannSurface.analyticLoopsGenerateH1 x₀)
 
 attribute [instance] instPeriodLatticeDiscrete
 
@@ -59,7 +67,8 @@ theorem AX_PeriodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     IsZLattice ℝ (periodLatticeInBasis X x₀ b) :=
-  Jacobians.Layer3.periodLatticeInBasis_isZLattice x₀ b
+  Jacobians.RiemannSurface.periodLatticeInBasis_isZLattice_of_tgen x₀ b
+    (Jacobians.RiemannSurface.analyticLoopsGenerateH1 x₀)
 
 attribute [instance] AX_PeriodLattice
 
