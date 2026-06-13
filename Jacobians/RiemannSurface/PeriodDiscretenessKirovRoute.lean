@@ -31,6 +31,9 @@ import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.Bridge.KirovDolbeaultTrace
 import Jacobians.Bridge.KirovDolbeaultPeriods
 import KirovDolbeault.Dolbeault.FormCoeff
+import KirovDolbeault.Dolbeault.AbelSubsetEngineArc
+import KirovDolbeault.Dolbeault.LerayCoverExists
+import KirovDolbeault.Dolbeault.SerreResidueRamifiedRealSlitGeometry
 import KirovDolbeault.OfCurveAnalyticitySkeleton
 import KirovDolbeault.Abel
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
@@ -801,6 +804,64 @@ theorem exists_isClosedSmoothLoop_lineIntegral_eq_canonicalArcIntegral
   rw [hcoe]
   exact developingValue_eq_canonicalArcIntegral x₀ α γ.arc
 
+/-! ## K5 helpers — the simple-pole residue read and port-form spanning -/
+
+omit [Nonempty X] in
+/-- **The simple-pole residue read** `Res_c (Φ·(z−c)⁻¹) = Φ(c)` for `Φ`
+analytic at `c` (split off the constant term via `dslope`). Port of Kirov's
+`PeriodLatticeDiscrete.lean:45` over the port's `resAt`. -/
+theorem resAt_analyticAt_mul_sub_inv {Φ : ℂ → ℂ} {c : ℂ}
+    (hΦ : AnalyticAt ℂ Φ c) :
+    Jacobians.Dolbeault.resAt (fun w => Φ w * (w - c)⁻¹) c = Φ c := by
+  obtain ⟨pser, hpser⟩ := hΦ
+  have hd : AnalyticAt ℂ (dslope Φ c) c :=
+    ⟨_, hpser.has_fpower_series_dslope_fslope⟩
+  -- the split `Φ·(w−c)⁻¹ = Φ(c)·(w−c)⁻¹ + dslope Φ c` off `c`.
+  have hgerm : (fun w => Φ w * (w - c)⁻¹) =ᶠ[nhdsWithin c {c}ᶜ]
+      (fun w => Φ c * (w - c)⁻¹) + dslope Φ c := by
+    filter_upwards [self_mem_nhdsWithin] with w hw
+    have hwc : w - c ≠ 0 := sub_ne_zero.mpr hw
+    have hds : (w - c) * dslope Φ c w = Φ w - Φ c := by
+      have h := sub_smul_dslope Φ c w
+      simpa [smul_eq_mul] using h
+    show Φ w * (w - c)⁻¹ = Φ c * (w - c)⁻¹ + dslope Φ c w
+    rw [show dslope Φ c w = (Φ w - Φ c) * (w - c)⁻¹ from by
+      rw [eq_mul_inv_iff_mul_eq₀ hwc, mul_comm]; exact hds]
+    ring
+  rw [Jacobians.Dolbeault.resAt_congr hgerm]
+  -- additivity + the two atomic residues.
+  have h1 : Jacobians.Dolbeault.HoloPunctured (fun w => Φ c * (w - c)⁻¹) c := by
+    refine ⟨1, one_pos, fun z hz => ?_⟩
+    exact (differentiableAt_const _).mul
+      ((differentiableAt_id.sub_const c).inv (sub_ne_zero.mpr hz.2))
+  obtain ⟨ρd, hρd, hball⟩ :=
+    Metric.isOpen_iff.mp (isOpen_analyticAt ℂ (dslope Φ c)) c
+      hd.eventually_analyticAt.self_of_nhds
+  have h2 : Jacobians.Dolbeault.HoloPunctured (dslope Φ c) c := by
+    refine ⟨ρd, hρd, fun z hz => ?_⟩
+    exact (hball hz.1).differentiableAt
+  rw [Jacobians.Dolbeault.resAt_add h1 h2,
+    Jacobians.Dolbeault.resAt_const_mul_sub_inv,
+    Jacobians.Dolbeault.resAt_eq_zero_of_differentiableOn_ball hρd
+      (fun z hz => (hball hz).differentiableAt), add_zero]
+
+omit [Nonempty X] in
+/-- **The bridged basis spans the port forms.** `bridgeKDFormEquiv` is a
+linear equivalence `HolomorphicOneForm X ≃ₗ Jacobians.HolomorphicOneForms X`,
+so the image of OUR basis `b` is a spanning family of the port's forms. The
+spanning input the engine's E1 rung (`period_eq_zero_of_spanning`) consumes. -/
+theorem span_range_bridgeKD_basis
+    (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
+    Submodule.span ℂ
+        (Set.range fun i => Jacobians.Bridge.bridgeKDFormEquiv (b i)) = ⊤ := by
+  have hrange : (Set.range fun i => Jacobians.Bridge.bridgeKDFormEquiv (b i))
+      = Jacobians.Bridge.bridgeKDFormEquiv.toLinearMap '' Set.range b := by
+    rw [← Set.range_comp]; rfl
+  rw [hrange, ← LinearMap.map_span,
+    show Submodule.span ℂ (Set.range b) = ⊤ from b.span_eq,
+    Submodule.map_top, LinearMap.range_eq_top.mpr
+      (Jacobians.Bridge.bridgeKDFormEquiv).surjective]
+
 /-! ## K5 — the isolated zero of the loop-period lattice
 
 Idea source: Kirov `906335f`, `Jacobians/PeriodLatticeDiscrete.lean:120-557`
@@ -849,6 +910,100 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     ∃ U ∈ nhds (0 : Fin (genus X) → ℂ),
       ∀ v ∈ loopPeriodLattice x₀ b, v ∈ U → v = 0 := by
+  classical
+  obtain ⟨a, hainj, hdet, hG0, hmap⟩ := exists_jacobiMap_map_nhds (X := X) b
+  -- pairwise-disjoint opens at the base points.
+  obtain ⟨O, hOopen, haO, hOdisj⟩ := exists_pairwise_disjoint_opens hainj
+  -- chart-ball radii whose `symm`-images stay in `O j`.
+  have hrad : ∀ j, ∃ r : ℝ, 0 < r ∧
+      Metric.ball ((chartAt (H := ℂ) (a j)) (a j)) r
+        ⊆ (chartAt (H := ℂ) (a j)) '' (O j ∩ (chartAt (H := ℂ) (a j)).source) := by
+    intro j
+    have hopen : IsOpen ((chartAt (H := ℂ) (a j)) ''
+        (O j ∩ (chartAt (H := ℂ) (a j)).source)) :=
+      (chartAt (H := ℂ) (a j)).isOpen_image_of_subset_source
+        ((hOopen j).inter (chartAt (H := ℂ) (a j)).open_source) Set.inter_subset_right
+    have hmem : (chartAt (H := ℂ) (a j)) (a j) ∈ (chartAt (H := ℂ) (a j)) ''
+        (O j ∩ (chartAt (H := ℂ) (a j)).source) :=
+      Set.mem_image_of_mem _ ⟨haO j, mem_chart_source ℂ (a j)⟩
+    obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp hopen _ hmem
+    exact ⟨r, hr, hsub⟩
+  choose r hrpos hrsub using hrad
+  -- the polydisc window and its Jacobi image.
+  set V : Set (Fin (genus X) → ℂ) :=
+    Set.univ.pi (fun j => Metric.ball ((chartAt (H := ℂ) (a j)) (a j)) (r j)) with hV
+  have hVnhds : V ∈ nhds (jacobiCenter a) := by
+    refine set_pi_mem_nhds Set.finite_univ fun j _ => ?_
+    exact Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self (hrpos j))
+  refine ⟨jacobiMap b a '' V, hmap V hVnhds, ?_⟩
+  -- the discreteness claim.
+  intro t htΓ htW
+  by_contra ht0
+  obtain ⟨z, hzV, hzt⟩ := htW
+  have hz_ball : ∀ j, z j ∈ Metric.ball ((chartAt (H := ℂ) (a j)) (a j)) (r j) :=
+    fun j => hzV j (Set.mem_univ j)
+  -- the ball is inside the chart target.
+  have hball_tgt : ∀ j, Metric.ball ((chartAt (H := ℂ) (a j)) (a j)) (r j)
+      ⊆ (chartAt (H := ℂ) (a j)).target := by
+    intro j w hw
+    obtain ⟨y, hy, hyz⟩ := hrsub j hw
+    rw [← hyz]
+    exact (chartAt (H := ℂ) (a j)).map_source hy.2
+  -- the endpoints `x j` and their geometry.
+  set x : Fin (genus X) → X := fun j => (chartAt (H := ℂ) (a j)).symm (z j) with hx
+  have hx_mem : ∀ j, x j ∈ O j ∩ (chartAt (H := ℂ) (a j)).source := by
+    intro j
+    obtain ⟨y, hy, hyz⟩ := hrsub j (hz_ball j)
+    have hxy : x j = y := by
+      rw [hx]
+      show (chartAt (H := ℂ) (a j)).symm (z j) = y
+      rw [← hyz, (chartAt (H := ℂ) (a j)).left_inv hy.2]
+    rw [hxy]; exact hy
+  have hchart_x : ∀ j, (chartAt (H := ℂ) (a j)) (x j) = z j :=
+    fun j => (chartAt (H := ℂ) (a j)).right_inv (hball_tgt j (hz_ball j))
+  have hsymm_c : ∀ j,
+      (chartAt (H := ℂ) (a j)).symm ((chartAt (H := ℂ) (a j)) (a j)) = a j :=
+    fun j => (chartAt (H := ℂ) (a j)).left_inv (mem_chart_source ℂ (a j))
+  -- nondegeneracy: some coordinate moved.
+  have hzc : z ≠ jacobiCenter a := by
+    intro h; rw [h, hG0] at hzt; exact ht0 hzt.symm
+  obtain ⟨j₀, hj₀⟩ := Function.ne_iff.mp hzc
+  have hxa : ∀ j, z j ≠ jacobiCenter a j → x j ≠ a j := by
+    intro j hzj h; refine hzj ?_; rw [← hchart_x j, h]; rfl
+  -- the segment paths `a j → x j` (K4 brick).
+  have hseg : ∀ j, ∃ σ : ℝ → X,
+      _root_.Jacobians.IsSmoothPath (a j) (x j) σ ∧
+      ∀ α : HolomorphicOneForm X,
+        _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv α) σ
+          = formChartPrimitive (a j) α (z j) := by
+    intro j
+    have hsub : Metric.ball ((chartAt (H := ℂ) (a j)) (a j)) (r j)
+        ⊆ (chartAt ℂ (a j)).target := hball_tgt j
+    obtain ⟨σ, hσsp, hσval⟩ :=
+      exists_isSmoothPath_lineIntegral_eq_formChartPrimitive (a j) hsub (hz_ball j)
+    refine ⟨σ, ?_, hσval⟩
+    -- the brick's endpoint is `(chartAt ℂ (a j)).symm (z j) = x j`.
+    have : (chartAt ℂ (a j)).symm (z j) = x j := rfl
+    rwa [this] at hσsp
+  choose seg hsegsp hsegval using hseg
+  -- the lattice combination realizing `t`.
+  rw [loopPeriodLattice, Submodule.mem_span_set'] at htΓ
+  obtain ⟨nl, fl, gl, hsum⟩ := htΓ
+  -- each generator is a loop's period vector; get K4 loop reps whose period
+  -- of every basis form is the `i`-th coordinate of the generator.
+  have hloop : ∀ k : Fin nl, ∃ lp : ℝ → X,
+      _root_.Jacobians.IsClosedSmoothLoop lp ∧
+      ∀ i : Fin (genus X),
+        _root_.Jacobians.lineIntegral (Jacobians.Bridge.bridgeKDFormEquiv (b i)) lp
+          = (gl k : Fin (genus X) → ℂ) i := by
+    intro k
+    obtain ⟨γ, hγ⟩ := (gl k).2
+    obtain ⟨lp, hlpc, hlpval⟩ :=
+      exists_isClosedSmoothLoop_lineIntegral_eq_canonicalArcIntegral x₀ γ
+    refine ⟨lp, hlpc, fun i => ?_⟩
+    rw [hlpval (b i)]
+    rw [show canonicalArcIntegral γ.arc (b i) = loopPeriodVec x₀ b γ i from rfl, hγ]
+  choose lp hlpc hlpval using hloop
   sorry
 
 /-! ## K6 — `DiscreteTopology (loopPeriodLattice x₀ b)` and the unconditional
