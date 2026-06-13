@@ -8,8 +8,25 @@ to **two classical real-analytic approximation theorems that Mathlib lacks**:
 2. **Grauert / Whitney–Bruhat** (smooth ⇝ real-analytic loop, rel endpoints).
 
 This document records the complete proven reduction chain, the composition
-theorem that ties it together, the exact statements of the two irreducible
-walls, why each is genuinely Mathlib-absent, and the hyperelliptic alternative.
+theorem that ties it together, the exact statements of the two
+walls, why each is Mathlib-absent, and the hyperelliptic alternative.
+
+> **Important correction (2026-06-13, after studying Kirov's submission).**
+> Whitney and Grauert are walls *only for the **constructive** route taken here*
+> — the route that insists on **exhibiting an explicit integral homology basis**
+> (analytic loops generate H₁ ⟹ smooth/analytic loop approximation). They are
+> **not intrinsic to the challenge.** Kirov's submission (`../jacobian-claude`)
+> proves Buzzard's 24 sorry-free **and axiom-free** by a **non-constructive**
+> route that never exhibits cycles: it spans *all* closed loops, proves (a)
+> lattice **discreteness** (isolated-zero/residue — what our K-LITE already
+> proves) and (b) **period-pairing non-degeneracy**
+> (`span_real_truePeriodLattice_eq_top`, a maximum-principle argument), and lets
+> Mathlib's `ZLattice` theory produce a rank-2g basis *by existence*. No T-GEN,
+> no Whitney, no Grauert, no R1/R2. The genuine remaining content for **us** is
+> therefore **not** these approximation theorems but the single non-degeneracy
+> lemma — see [`NONCONSTRUCTIVE_DISCHARGE_PLAN.md`](NONCONSTRUCTIVE_DISCHARGE_PLAN.md).
+> The reductions below remain valid Lean; they are just no longer the shortest
+> path to closing the axiom.
 
 Companion: `TGEN_ROUTE.md` (the route map + gap ledger), Discussion #235
 (K-FULL endgame).
