@@ -1,5 +1,15 @@
 # T-GEN final reduction — the last challenge axiom reduces to {Whitney, Grauert}
 
+> **✅ RESOLVED (2026-06-13, PR #248).** This document is now *historical*. T-GEN
+> (`AnalyticLoopsGenerateH1`) was **discharged unconditionally** — it does **not**
+> rest on Whitney/Grauert. The §3.5 piecewise-linear route succeeded: because
+> `AnalyticLoop` is piecewise-analytic (corners allowed), PL-in-charts loops
+> already qualify and the approximation is elementary (proved in
+> `ChartFlatHomotopyWallProof.lean`, standard-3). The {Whitney, Grauert} framing
+> below is the *constructive-route-with-corner-free-loops* analysis that the PL
+> route obsoleted. Remaining: rewire the 24 headlines onto the unconditional
+> T-GEN (`feat/tgen-headline-rewire`).
+
 **Headline.** The entire Buzzard-challenge endgame's last topological axiom,
 `AX_PeriodCycleBasis`, reduces — *fully formalized, sorry-free, no new axiom* —
 to **two classical real-analytic approximation theorems that Mathlib lacks**:

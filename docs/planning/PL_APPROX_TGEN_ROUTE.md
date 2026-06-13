@@ -1,5 +1,11 @@
 # PL-approximation route to T-GEN (`feat/tgen-pl-approx`)
 
+> **✅ COMPLETE (PR #248).** `ChartFlatHomotopyWall` is now **proved**
+> (`ChartFlatHomotopyWallProof.lean`, via dyadic `hcomp` induction + one
+> reparametrisation), so `AnalyticLoopsGenerateH1` (T-GEN) is **unconditional and
+> standard-3** — no remaining lemma. The "remaining step" framing below is
+> historical.
+
 **Status (2026-06-13):** keystone primitive + analytic packaging + reduction
 landed, sorry-free, standard-3. T-GEN now reduces to **one elementary
 chart-local-homotopy lemma** (`ChartFlatHomotopyWall`), strictly weaker than the
