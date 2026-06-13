@@ -128,7 +128,7 @@ route (which consumes RR+Serre); the **Mumford theta** route keeps them out
 ## Concrete-curve witnesses (a fourth, separate category)
 
 The remaining ~21 axioms (Hyperelliptic atlas cluster, `PlaneCurve` instances,
-`AX_Hyperelliptic_genus`, `AX_Elliptic_H1_symplectic`, `AX_H1_ProjectiveLine_trivial`,
+`AX_Hyperelliptic_genus`, `AX_Elliptic_H1_symplectic` *(DISCHARGED 2026-06-12, PR #228 — now the proven `ellipticPeriodCycleBasis`)*, `AX_H1_ProjectiveLine_trivial`,
 `AX_PlaneCurveAffine_*`, the IFT lemma) are **not** in any abstract obligation
 closure — the obligations are universally quantified over an arbitrary `X`. But
 they are the **anti-vacuity witnesses**: evidence that real curves (ℙ¹, elliptic,
