@@ -119,4 +119,18 @@ theorem continuousLoopHasAnalyticRep_of_chartFlatHomotopyWall {x₀ : X}
   rw [loopToPath_flatAnalyticLoopOfSubdivision]
   exact hS
 
+/-- **T-GEN reduces to the chart-flat homotopy wall (general `X`).** Composing the
+PL discharge with the K0 keystone bridge: under `ChartFlatHomotopyWall x₀`, the
+homology classes of piecewise-analytic loops ℤ-span `H1 X x₀`
+(`AnalyticLoopsGenerateH1 x₀` = T-GEN). The *only* remaining input is the single
+elementary chart-local-homotopy statement — strictly weaker than the
+`{Whitney, Grauert}` pair of `TGenFinalReduction.lean` (no smoothing, no global
+real-analyticity; just a straight-line homotopy in charts). Sorry-free,
+standard-3, independent of `AX_PeriodCycleBasis`. -/
+theorem analyticLoopsGenerateH1_of_chartFlatHomotopyWall {x₀ : X}
+    (hwall : ChartFlatHomotopyWall x₀) :
+    AnalyticLoopsGenerateH1 x₀ :=
+  analyticLoopsGenerateH1_of_analyticRep
+    (continuousLoopHasAnalyticRep_of_chartFlatHomotopyWall hwall)
+
 end Jacobians.RiemannSurface
