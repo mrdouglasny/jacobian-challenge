@@ -10,7 +10,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 11** — all **11** in our own modules (the
+**Active project axioms: 10** — all **10** in our own modules (the
 **ELLIPTIC H₁ FLIP**, 2026-06-12 (EP lane, `feat/elliptic-pi1`):
 **`AX_Elliptic_H1_symplectic` is now DELETED — its statement is a proven
 theorem.** The covering-space engine `π₁(V ⧸ Λ) ≅ Λ` / `H₁(V ⧸ Λ) ≅ Λ`
@@ -268,6 +268,19 @@ witness does not depend on this axiom.
 
 Then → **66** with the universal-property UP-0/UP-1 banked in
 `Axioms/TorusAlbanese.lean` (2026-06-05): `AX_torus_oneforms_dualCover`,
+
+
+> **Faithfulness note (AX_torus_oneforms_dualCover discharge, #232).** This was an
+> HONEST −1 but a *definitional* one, not a formalized Mathlib fact. `TorusHolomorphicOneForm m A`
+> is an `abbrev` that **ignores `A`** and unfolds to `Module.Dual ℂ (Fin m → ℂ)`, so the
+> "dual cover" axiom was a self-equivalence and `refl` discharges it with no analytic content
+> erased (there was none). The torus one-form layer is therefore **thinner than it reads**:
+> torus holomorphic 1-forms are *modeled* as a fixed dual space independent of the torus.
+> The genuine universal-property content of `ofCurve_isJacobian` rests entirely on the
+> remaining three torus axioms (`AX_torus_self_albanese`, `AX_period_functoriality`,
+> `AX_curve_generates_jacobian`), all research-grade (abstract-torus uniformization,
+> Jacobi inversion). This discharge does not strengthen the analytic faithfulness of the
+> torus model.
 `AX_torus_self_albanese`, `AX_period_functoriality`, and the conditional lift-form
 fallback `AX_torus_descent_holo` used for E6. The pre-existing
 `AX_curve_generates_jacobian` was moved into the new file, so it is not a net-new
@@ -448,7 +461,7 @@ primitives that are statement-vetted but not yet discharged.
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 8 | classical theorems, citable | high (`AX_AbelSupset` **DISCHARGED 2026-06-12**, SUP lane; `AX_genus_eq_zero_iff_homeo` **DISCHARGED 2026-06-11**, PR #209) |
+| 1 — textbook-standard | 7 | classical theorems, citable | high (`AX_torus_oneforms_dualCover` **DISCHARGED 2026-06-12**, TORUS lane; `AX_AbelSupset` **DISCHARGED 2026-06-12**, SUP lane; `AX_genus_eq_zero_iff_homeo` **DISCHARGED 2026-06-11**, PR #209) |
 | 2a — data-existence | 1 | "this function/object exists with spec S"; the 2 `LineBundle` type stubs **DISCHARGED 2026-06-12 (stub retirement)** (now real `def`s) | spec needs review |
 | 2b — definition-asserting | 0 | both functoriality entries **DISCHARGED 2026-06-11 (#31)** (now theorems) | — |
 | 2c — atlas / structure | 2 | curve-specific chart constructions | real but unverified |
@@ -471,7 +484,7 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean:237` | H₁ cycle basis + arc-level Riemann bilinear relations (standard: Griffiths–Harris Ch. 2 §2, Forster §§20–21). **D1 merge of `AX_AnalyticCycleBasis` + `AX_RBR1` + `AX_RBR2` (2026-06-10), DT-vetted: SATISFIABLE/FAITHFUL** — strictly implied by the three 2026-06-09-vetted predecessors (instantiate RBR1/2 at the chosen symplectic basis; weaker-or-equal, never stronger), so satisfiability is inherited; `loops_to_basis` Hurewicz tie remains the anti-vacuity pin; **index-split alignment guard (DT finding 5)**: `arcPeriodVec` is defined through `αEmbed`/`βEmbed` so component 1 = A-periods, component 2 = B-periods, exactly `Q`'s layout, pinned by the `@[simp]` lemmas `arcPeriodVec_fst`/`arcPeriodVec_snd` + a docstring layout contract; g=0 empty-basis witness re-proved (`projectiveLineCycleBasis`, R1 empty sum / R2 vacuous) |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
-| `AX_torus_oneforms_dualCover` | `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_oneforms_dualCover` | ✅ **DISCHARGED 2026-06-12** (TORUS lane) — now a `noncomputable def`, statement verbatim at `Axioms/TorusAlbanese.lean`; body `LinearEquiv.refl ℂ _`. The Birkenhake–Lange analytic content (invariant 1-form ⇒ constant cover-linear functional via Liouville) is captured in the *definition* `TorusHolomorphicOneForm m A := Module.Dual ℂ (Fin m → ℂ)`; relative to that model the equivalence is the identity. `ofCurve_isJacobian` `#print axioms` no longer lists it (kernel-verified, no `sorryAx`). See `docs/planning/TORUS_ALBANESE_ROUTE.md` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
 | `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
@@ -562,7 +575,7 @@ future work.
 | Axiom | Status | Reference |
 |-------|--------|-----------|
 | `AX_curve_generates_jacobian` | **stated** — `Axioms/TorusAlbanese.lean:168` | Mumford; Milne *AV* §I |
-| `AX_torus_oneforms_dualCover` | **stated** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
 | `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
@@ -644,7 +657,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 11 — the vendored Kirov subtree is now axiom-free, so 11 is the total (after the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
+#   prints 10 — the vendored Kirov subtree is now axiom-free, so 10 is the total (after the 2026-06-12 TORUS-lane axiom-1 flip, net −1: AX_torus_oneforms_dualCover → noncomputable def LinearEquiv.refl, off the Buzzard critical path; before that the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -661,7 +674,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 11
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 10
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

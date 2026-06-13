@@ -219,20 +219,26 @@ noncomputable def torusPullbackOneForm {X : Type u} [TopologicalSpace X] [T2Spac
   (Jacobians.Bridge.bridgeFormEquiv (X := X)).symm.toLinearMap.comp
     (torusPullbackKirovOneForm f hf)
 
-/-- **Axiom.** Invariant holomorphic one-forms on a complex torus are the
-dual of its universal cover.
+/-- **Definition** (formerly axiom `AX_torus_oneforms_dualCover`). Invariant
+holomorphic one-forms on a complex torus are the dual of its universal cover.
 
 Reference: Birkenhake-Lange, *Complex Abelian Varieties*, Ch. 1.
-Strategy: lift a holomorphic one-form to the cover `ℂ^m`, use translation
-invariance/Liouville to make its coefficient constant, then descend constant
-linear functionals exactly to invariant forms.
 
-Vetted: Gemini + Codex 2026-06-02. -/
-axiom AX_torus_oneforms_dualCover {m : ℕ} {A : Type*} [TopologicalSpace A]
+The analytic content of the Birkenhake-Lange statement — that a translation-
+invariant holomorphic one-form on `A = ℂ^m/Λ` has constant coefficients, so is
+exactly a constant ℂ-linear functional on the universal cover `ℂ^m` (lift to
+the cover, translation-invariance + Liouville force the coefficient to be a
+constant, then descend) — is captured in the *definition* of
+`TorusHolomorphicOneForm m A`, which is by construction the space of constant
+cover-linear functionals `Module.Dual ℂ (Fin m → ℂ)`. Relative to that
+modelling choice the asserted equivalence is the identity, so it holds with no
+remaining input. Discharged 2026-06-12 (TORUS lane). -/
+noncomputable def AX_torus_oneforms_dualCover {m : ℕ} {A : Type*} [TopologicalSpace A]
     [T2Space A] [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A]
     [AddGroup A] [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A]
     [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :
-    TorusHolomorphicOneForm m A ≃ₗ[ℂ] Module.Dual ℂ (Fin m → ℂ)
+    TorusHolomorphicOneForm m A ≃ₗ[ℂ] Module.Dual ℂ (Fin m → ℂ) :=
+  LinearEquiv.refl ℂ _
 
 /-- Convert a linear integration functional on invariant torus forms into the
 corresponding universal-cover coordinate. -/

@@ -47,7 +47,7 @@ closes the def-degeneracy gap categorically. **It is PROVED below as
 `f : X → A` to a complex torus factors uniquely through `ofCurve` by a
 holomorphic group hom (genuine `∃!`). The `ConnectedSpace (Jacobian X)`
 prerequisite is supplied (a torus is connected); the proof rests on the vetted
-torus axioms `AX_torus_oneforms_dualCover` / `AX_torus_self_albanese` /
+torus axioms (`AX_torus_oneforms_dualCover` discharged #232) / `AX_torus_self_albanese` /
 `AX_period_functoriality` + `AX_curve_generates_jacobian` (the descent
 smoothness `AX_torus_descent_holo` was itself discharged to a theorem
 2026-06-06), and is `#print axioms`-clean (no `sorryAx`). The original proof
