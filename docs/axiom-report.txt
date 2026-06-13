@@ -1,12 +1,12 @@
 'genus' depends on axioms: [propext, Classical.choice, Quot.sound]
-'Jacobians.Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
-'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
-'Jacobian.ofCurve' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+'Jacobians.Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobian.ofCurve' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobian.pushforward' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.pullback' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'ContMDiff.degree' depends on axioms: [propext, Classical.choice, Quot.sound]
 'genus_eq_zero_iff_homeo' depends on axioms: [propext, Classical.choice, Quot.sound]
-'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+'Jacobian.ofCurve_self' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Jacobian.ofCurve_inj' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.ofCurve_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
 'Jacobian.pushforward_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
@@ -25,14 +25,8 @@
  Classical.choice,
  Quot.sound]
 'Jacobians.RiemannSurface.h0_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
-'_private.scripts.axiom_report.0.jacInst_AddCommGroup' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_PeriodCycleBasis]
-'_private.scripts.axiom_report.0.jacInst_TopologicalSpace' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_PeriodCycleBasis]
+'_private.scripts.axiom_report.0.jacInst_AddCommGroup' depends on axioms: [propext, Classical.choice, Quot.sound]
+'_private.scripts.axiom_report.0.jacInst_TopologicalSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
 '_private.scripts.axiom_report.0.jacInst_T2Space' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
@@ -41,10 +35,7 @@
  Classical.choice,
  Quot.sound,
  Axioms.AX_PeriodCycleBasis]
-'_private.scripts.axiom_report.0.jacInst_ConnectedSpace' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- Axioms.AX_PeriodCycleBasis]
+'_private.scripts.axiom_report.0.jacInst_ConnectedSpace' depends on axioms: [propext, Classical.choice, Quot.sound]
 '_private.scripts.axiom_report.0.jacInst_ChartedSpace' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,

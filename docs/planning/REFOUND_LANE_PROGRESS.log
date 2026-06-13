@@ -1,0 +1,65 @@
+# REFOUND lane — period-map re-founding on the Hurewicz tower (Discussion #235)
+
+Goal: re-found `loopIntegralToH1`/`periodMap` on the axiom-free
+developing-value invariant (`loopDevValH1Hom`, built from
+`Abelianization.lift` — no cycle basis) so `AX_PeriodCycleBasis` leaves the
+period map, `abelJacobiDiv`, and the Jacobian layer.
+
+## 2026-06-12 — Steps 0–2 LANDED (period map re-founded, axiom-free)
+
+### Step 0 — form-linearity infrastructure (commit on feat/refound-periodmap)
+New `Jacobians/RiemannSurface/DevelopingValueForm.lean`:
+- `pathChartBallPrimitive_add` / `_smul` — chart-local primitive is additive /
+  homogeneous in the one-form on its ball (primitive uniqueness via
+  `IsOpen.eqOn_of_deriv_eq`, agreement at `B.c` where both vanish).
+- lifted to `developingIncrement_add/_smul`, `developingValueOfSubdivision_*`,
+  and `developingValue_add/_smul/_zero` (chosen subdivision is form-independent).
+Kernel: standard-3.
+
+### Step 1 — axiom-free form-linear period map
+New `Jacobians/RiemannSurface/DevelopingPeriodMap.lean` (upstream of
+`LoopIntegral`): moved `loopDevValQuotient`/`loopDevValHom`/`loopDevValH1Hom`
+here, proved `loopDevValH1Hom_add_form`/`_smul_form` (two `H1 →+ ℂ` agree on
+generators ⇒ everywhere), and built
+`developingPeriodMap : H1 X x₀ →+ (HolomorphicOneForm X →ₗ[ℂ] ℂ)`.
+`#print axioms developingPeriodMap = [propext, Classical.choice, Quot.sound]`.
+
+### Step 2 — spine re-founding
+`LoopIntegral.lean`: `loopIntegralToH1 x₀ := developingPeriodMap x₀`.
+`loopIntegralToH1_loop` PRESERVED VERBATIM, re-proved axiom-free via new
+`loopIntegralToH1_loopToHomology_apply`. Duplicated developing-value defs
+removed from `LoopIntegralHom.lean` (now sourced upstream).
+
+### Kernel verdict (full `lake build` green, 8996 jobs)
+- `loopIntegralToH1`     : standard-3  ✓ (AX_PeriodCycleBasis GONE)
+- `periodMap`            : standard-3  ✓ (GONE)
+- `periodMapInBasis`     : standard-3  ✓ (GONE)
+- `periodLatticeInBasis` : standard-3  ✓ (the lattice Submodule itself, GONE)
+- `abelJacobiDiv`        : standard-3  ✓ (GONE — the Abel-Jacobi map is clean)
+
+### Remaining `AX_PeriodCycleBasis` in `AX_ofCurve_inj` (Steps 3–4, NOT done)
+`AX_ofCurve_inj` still = standard-3 + AX_PeriodCycleBasis. The axiom now
+enters ONLY through:
+1. `AX_PeriodLattice` / `instPeriodLatticeDiscrete` — the discreteness and
+   full-`ℤ`-lattice PROPERTY of `periodLatticeInBasis` (instances the
+   `ComplexTorus` needs). The lattice object is axiom-free; only its
+   geometric properties still use the chosen witness (R1/R2 Phase-C route, or
+   the R2-free `_of_loopSpan` route via `choiceLoops_periodGenerating`).
+2. The Abel theorem ⊆ direction (`AX_AbelTheorem`).
+
+Both remaining uses are reducible to **T-GEN** (the hypothesis that 2g loops
+generate `H1`) — the R2-free lattice route is `PeriodGeneratingLoops`-gated
+(`PeriodLatticeDiscrete.lean`), and the Abel ⊆ adapter (#237) is T-GEN-gated.
+Threading T-GEN (replacing the `Classical.choice` witness's loops with the
+hypothesized generators) is the #236/#237 in-flight work; once landed,
+`ofCurve_inj` = standard-3 + T-GEN, and AX_PeriodCycleBasis is dischargeable.
+
+DISCIPLINE NOTES:
+- Did NOT use the axiom-laden `loopPeriodLattice_eq_periodLatticeInBasis`.
+- No new axioms introduced.
+- All Buzzard-facing statements (Jacobian, ofCurve, ofCurve_inj,
+  loopIntegralToH1_loop) preserved verbatim — only underlying defs/proofs
+  changed.
+- Third-residual watch: no downstream fact was found to need the basis's
+  linear-INDEPENDENCE for the period MAP. The surviving uses need only
+  (a) homology GENERATION (T-GEN) for the lattice properties and (b) Abel ⊆.
