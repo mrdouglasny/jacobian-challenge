@@ -1,0 +1,24 @@
+'Jacobian.ofCurve_inj' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobian.ofCurve_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobian.pushforward_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobian.pullback_contMDiff' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobian.pushforward_pullback' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobian.ofCurve_inj_of_tgen' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.RiemannSurface.ofCurveImpl_inj_of_tgen' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Bridge.abel_subset_basis_free' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Jacobians.Bridge.zeroPeriodChainSolvabilityLattice_of_engine' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.Axioms.instPeriodLatticeDiscrete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ AX_PeriodCycleBasis]
+'Jacobians.Axioms.AX_PeriodLattice' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
+'Jacobians.RiemannSurface.periodLatticeInBasis_discreteTopology_of_tgen' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Jacobians.RiemannSurface.periodLatticeInBasis_isZLattice_of_tgen' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+docs/planning/path2-evidence/tgen_wiring_axioms.lean:48:0: warning: Definition `jacIsManifold_term` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
+'jacIsManifold_term' depends on axioms: [propext, Classical.choice, Quot.sound, AX_PeriodCycleBasis]
