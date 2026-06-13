@@ -38,28 +38,24 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]
 
 private lemma chart0_coe_apply (w : ℂ) :
-    chart0 ((w : ℂ) : ProjectiveLine) = w := by
-  simpa [chart0] using
-    (Topology.IsOpenEmbedding.toOpenPartialHomeomorph_left_inv
-      (f := ((↑) : ℂ → OnePoint ℂ)) (h := OnePoint.isOpenEmbedding_coe (X := ℂ)) (x := w))
+    chart0 ((w : ℂ) : ProjectiveLine) = w :=
+  Jacobians.RiemannSphere.chartCoe_apply_coe w
 
-private lemma chart1_coe_apply (w : ℂ) :
-    chart1 ((w : ℂ) : ProjectiveLine) = w⁻¹ := by
-  simp [chart1, OnePoint.elim_some]
+private lemma chart1_coe_apply {w : ℂ} (hw : w ≠ 0) :
+    chart1 ((w : ℂ) : ProjectiveLine) = w⁻¹ :=
+  Jacobians.RiemannSphere.chartInfty_apply_coe hw
 
 private lemma chart1_infty_apply :
-    chart1 (∞ : ProjectiveLine) = 0 := by
-  simp [chart1]
+    chart1 (∞ : ProjectiveLine) = 0 :=
+  Jacobians.RiemannSphere.chartInfty_apply_infty
 
 private lemma chartAt_coe_eq_chart0 (w : ℂ) :
-    chartAt ℂ ((w : ℂ) : ProjectiveLine) = chart0 := by
-  change ProjectiveLine.chartAt ((w : ℂ) : ProjectiveLine) = chart0
-  rw [ProjectiveLine.chartAt, if_neg (OnePoint.coe_ne_infty w)]
+    chartAt ℂ ((w : ℂ) : ProjectiveLine) = chart0 :=
+  Jacobians.RiemannSphere.chartAtRS_coe w
 
 private lemma chartAt_infty_eq_chart1 :
-    chartAt ℂ (∞ : ProjectiveLine) = chart1 := by
-  change ProjectiveLine.chartAt (∞ : ProjectiveLine) = chart1
-  rw [ProjectiveLine.chartAt, if_pos rfl]
+    chartAt ℂ (∞ : ProjectiveLine) = chart1 :=
+  Jacobians.RiemannSphere.chartAtRS_infty
 
 /-- In a chart, a representative has a finite punctured-neighborhood limit at
 every non-pole. -/
@@ -438,7 +434,7 @@ private theorem toP1Rep_chartLocal_pole (f : Rep X) (p : X)
       have hGmer_ne : Gmer z ≠ 0 := by
         simp [Gmer, zpow_ne_zero n hbase, hgz_ne]
       constructor
-      · rw [htoP1_z, chart1_coe_apply]
+      · rw [htoP1_z, chart1_coe_apply hGmer_ne]
         have hpow_eq : (((z - z₀) ^ n)⁻¹ : ℂ) = (z - z₀) ^ k := by
           calc
             (((z - z₀) ^ n)⁻¹ : ℂ) = (z - z₀) ^ (-n) := by

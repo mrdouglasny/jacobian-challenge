@@ -43,22 +43,20 @@ namespace ProjectiveLine
 the `ChartedSpace` / `IsManifold` proofs in `Line.lean`). -/
 
 /-- `chart0` (the affine chart) is the identity on the finite part. -/
-lemma chart0_coe (w : ℂ) : chart0 ((w : ℂ) : ProjectiveLine) = w := by
-  simpa [chart0] using
-    (Topology.IsOpenEmbedding.toOpenPartialHomeomorph_left_inv
-      (f := ((↑) : ℂ → OnePoint ℂ)) (h := OnePoint.isOpenEmbedding_coe (X := ℂ)) (x := w))
+lemma chart0_coe (w : ℂ) : chart0 ((w : ℂ) : ProjectiveLine) = w :=
+  RiemannSphere.chartCoe_apply_coe w
 
-/-- `chart1` (the infinity chart `w = 1/z`) sends `↑z` to `z⁻¹`. -/
-lemma chart1_coe (z : ℂ) : chart1 ((z : ℂ) : ProjectiveLine) = z⁻¹ := by
-  simp [chart1, OnePoint.elim_some]
+/-- `chart1` (the infinity chart `w = 1/z`) sends `↑z` to `z⁻¹` (for `z ≠ 0`). -/
+lemma chart1_coe {z : ℂ} (hz : z ≠ 0) : chart1 ((z : ℂ) : ProjectiveLine) = z⁻¹ :=
+  RiemannSphere.chartInfty_apply_coe hz
 
 /-- `chart1` sends `∞` to `0`. -/
-lemma chart1_infty : chart1 (OnePoint.infty : ProjectiveLine) = 0 := by simp [chart1]
+lemma chart1_infty : chart1 (OnePoint.infty : ProjectiveLine) = 0 :=
+  RiemannSphere.chartInfty_apply_infty
 
 /-- The inverse of the affine chart is the coercion `ℂ → ℙ¹`. -/
-lemma chart0_symm (w : ℂ) : chart0.symm w = ((w : ℂ) : ProjectiveLine) := by
-  simp only [chart0, OpenPartialHomeomorph.symm_symm]
-  rw [Topology.IsOpenEmbedding.toOpenPartialHomeomorph_apply]
+lemma chart0_symm (w : ℂ) : chart0.symm w = ((w : ℂ) : ProjectiveLine) :=
+  RiemannSphere.chartCoe_symm_apply w
 
 /-! ### `extChartAt` reductions for `ProjectiveLine` (self model `𝓘(ℂ)`). -/
 
@@ -69,13 +67,11 @@ lemma extChartAt_eq (p : ProjectiveLine) :
   simp only [extChartAt, modelWithCornersSelf_partialEquiv, OpenPartialHomeomorph.extend,
     PartialEquiv.trans_refl]
 
-lemma chartAt_coe (a : ℂ) : _root_.chartAt ℂ ((a : ProjectiveLine)) = chart0 := by
-  show ProjectiveLine.chartAt _ = _
-  rw [ProjectiveLine.chartAt, if_neg (OnePoint.coe_ne_infty a)]
+lemma chartAt_coe (a : ℂ) : _root_.chartAt ℂ ((a : ProjectiveLine)) = chart0 :=
+  RiemannSphere.chartAtRS_coe a
 
-lemma chartAt_infty : _root_.chartAt ℂ (OnePoint.infty : ProjectiveLine) = chart1 := by
-  show ProjectiveLine.chartAt _ = _
-  rw [ProjectiveLine.chartAt, if_pos rfl]
+lemma chartAt_infty : _root_.chartAt ℂ (OnePoint.infty : ProjectiveLine) = chart1 :=
+  RiemannSphere.chartAtRS_infty
 
 -- Finite chart `↑a`: apply / symm / target / source.
 lemma eca_coe_apply (a w : ℂ) :
@@ -85,26 +81,30 @@ lemma eca_coe_symm (a w : ℂ) :
     (extChartAt 𝓘(ℂ) ((a : ProjectiveLine))).symm w = ((w : ℂ) : ProjectiveLine) := by
   rw [extChartAt_eq, chartAt_coe]; exact chart0_symm w
 lemma eca_coe_target (a : ℂ) : (extChartAt 𝓘(ℂ) ((a : ProjectiveLine))).target = univ := by
-  rw [extChartAt_eq, chartAt_coe]; rfl
+  rw [extChartAt_eq, chartAt_coe]; exact RiemannSphere.chartCoe_target
 lemma coe_mem_eca_coe_source (a z : ℂ) :
     ((z : ℂ) : ProjectiveLine) ∈ (extChartAt 𝓘(ℂ) ((a : ProjectiveLine))).source := by
   rw [extChartAt_eq, chartAt_coe]
-  change ((z : ℂ) : ProjectiveLine) ∈ chart0.source
-  rw [show chart0.source = range ((↑) : ℂ → ProjectiveLine) from by
-    simp only [chart0, OpenPartialHomeomorph.symm_source,
-      Topology.IsOpenEmbedding.toOpenPartialHomeomorph_target]]
-  exact ⟨z, rfl⟩
+  change ((z : ℂ) : ProjectiveLine) ∈ RiemannSphere.chartCoe.source
+  rw [RiemannSphere.chartCoe_source]
+  simp [OnePoint.coe_ne_infty]
 
--- Infinity chart `∞`: apply (on `↑z`) / symm / target / source.
-lemma eca_infty_coe (z : ℂ) :
+-- Infinity chart `∞`: apply (on `↑z`, `z ≠ 0`) / target / source.
+lemma eca_infty_coe {z : ℂ} (hz : z ≠ 0) :
     (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)) ((z : ℂ) : ProjectiveLine) = z⁻¹ := by
-  rw [extChartAt_eq, chartAt_infty]; exact chart1_coe z
+  rw [extChartAt_eq, chartAt_infty]; exact chart1_coe hz
 lemma eca_infty_target : (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)).target = univ := by
-  rw [extChartAt_eq, chartAt_infty]; rfl
+  rw [extChartAt_eq, chartAt_infty]
+  change RiemannSphere.chartInfty.target = univ
+  rw [RiemannSphere.chartInfty, OpenPartialHomeomorph.trans_target]
+  simp [RiemannSphere.chartCoe_target]
 lemma eca_infty_source :
     (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)).source
       = {p : ProjectiveLine | p ≠ ((0 : ℂ) : ProjectiveLine)} := by
-  rw [extChartAt_eq, chartAt_infty]; rfl
+  rw [extChartAt_eq, chartAt_infty]
+  change RiemannSphere.chartInfty.source = _
+  rw [RiemannSphere.chartInfty_source]
+  ext p; simp
 
 end ProjectiveLine
 
@@ -172,19 +172,23 @@ theorem HolomorphicOneForm_projectiveLine_eq_zero
       simp only [mem_setOf_eq, ne_eq, OnePoint.coe_eq_coe]; exact hz
     have h := hcocy ((0 : ℂ) : ProjectiveLine) (OnePoint.infty : ProjectiveLine) z
       (by rw [eca_coe_target]; trivial) hsrc
-    -- transition `(extChartAt ∞) ∘ (extChartAt ↑0).symm = (·⁻¹)` everywhere
-    have htrans : (⇑(extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)) ∘
-        ⇑(extChartAt 𝓘(ℂ) ((0 : ℂ) : ProjectiveLine)).symm) = fun w => w⁻¹ := by
-      funext w
-      change (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine))
-          ((extChartAt 𝓘(ℂ) ((0 : ℂ) : ProjectiveLine)).symm w) = w⁻¹
-      rw [eca_coe_symm, eca_infty_coe]
     rw [show (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine))
           ((extChartAt 𝓘(ℂ) ((0:ℂ):ProjectiveLine)).symm z) = z⁻¹ by
-        rw [eca_coe_symm, eca_infty_coe]] at h
-    rw [htrans] at h
-    have hderiv : fderiv ℂ (fun w : ℂ => w⁻¹) z 1 = -(z ^ 2)⁻¹ := deriv_inv
-    rw [hderiv] at h
+        rw [eca_coe_symm, eca_infty_coe hz]] at h
+    -- The transition `(extChartAt ∞) ∘ (extChartAt ↑0).symm` agrees with `(·⁻¹)` on a
+    -- neighbourhood of `z` (where `z ≠ 0`); the port's `∞`-chart differs from `(·⁻¹)`
+    -- only at the junk point `0`, so we evaluate the derivative via eventual equality.
+    have hfd : fderiv ℂ (⇑(extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)) ∘
+        ⇑(extChartAt 𝓘(ℂ) ((0 : ℂ) : ProjectiveLine)).symm) z 1 = -(z ^ 2)⁻¹ := by
+      have heq : (⇑(extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine)) ∘
+          ⇑(extChartAt 𝓘(ℂ) ((0 : ℂ) : ProjectiveLine)).symm) =ᶠ[𝓝 z] (fun w => w⁻¹) := by
+        filter_upwards [isOpen_ne.mem_nhds hz] with w hw
+        change (extChartAt 𝓘(ℂ) (OnePoint.infty : ProjectiveLine))
+            ((extChartAt 𝓘(ℂ) ((0 : ℂ) : ProjectiveLine)).symm w) = w⁻¹
+        rw [eca_coe_symm, eca_infty_coe hw]
+      rw [heq.fderiv_eq]
+      exact deriv_inv
+    rw [hfd] at h
     exact h
   -- (3) `A → 0` at infinity, hence `A ≡ 0` by Liouville.
   have hA_tendsto : Tendsto A (Filter.cocompact ℂ) (𝓝 0) := by
