@@ -67,6 +67,7 @@ import Jacobians.RiemannSurface.GenusZeroForward
 import Jacobians.RiemannSurface.PeriodNondegeneracy
 import Jacobians.RiemannSurface.PeriodDiscreteness
 import Jacobians.RiemannSurface.PeriodDiscretenessFromR2
+import Jacobians.RiemannSurface.PeriodDiscretenessKirovRoute
 import Jacobians.RiemannSurface.HomologyGeneration
 import Jacobians.RiemannSurface.H1Composite
 import Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
