@@ -72,6 +72,7 @@ import Jacobians.RiemannSurface.PeriodDiscretenessFromR2
 import Jacobians.RiemannSurface.PeriodDiscretenessKirovRoute
 import Jacobians.RiemannSurface.HomologyGeneration
 import Jacobians.RiemannSurface.H1Composite
+import Jacobians.RiemannSurface.PeriodCycleBasisOfTGen
 import Jacobians.RiemannSurface.AnalyticPi1Generation
 import Jacobians.RiemannSurface.Cohomology.SheafCohomologySpec
 import Jacobians.RiemannSurface.Periods
