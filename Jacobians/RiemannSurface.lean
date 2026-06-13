@@ -52,6 +52,7 @@ import Jacobians.RiemannSurface.LoopIntegral
 import Jacobians.RiemannSurface.BilinearRelations
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWord
 import Jacobians.RiemannSurface.BilinearRelationsBoundaryWordInterior
+import Jacobians.RiemannSurface.QuotientCoveringPi1
 import Jacobians.RiemannSurface.BoundaryWordElliptic
 import Jacobians.RiemannSurface.BoundaryWordPolynomial
 import Jacobians.RiemannSurface.BoundaryWordEllipticPoly

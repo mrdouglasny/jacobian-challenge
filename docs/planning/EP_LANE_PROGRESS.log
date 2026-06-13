@@ -1,0 +1,42 @@
+# EP lane — elliptic π₁ / H₁ flip (feat/elliptic-pi1)
+
+## Session 2026-06-12 (open → close in one session)
+
+Goal: discharge AX_Elliptic_H1_symplectic by proving π₁(ℂ/Λ) ≅ Λ and
+feeding the #225 conditional corollary ellipticPeriodCycleBasisOfH1.
+
+- 7615746 feat: QuotientCoveringPi1.lean — general engine, axiom-free.
+  pathLiftEnd/loopLiftEnd (Mathlib IsCoveringMap.liftPath + homotopy
+  lifting), pi1ToLattice MonoidHom (liftPath_trans + deck-translation
+  equivariance), injective (SimplyConnectedSpace V: project nullhomotopy
+  of the lift), surjective (straight-line loops, Module ℝ V),
+  pi1EquivLattice : π₁(V⧸Λ,0) ≃* Multiplicative Λ,
+  h1EquivLattice : H1 (V⧸Λ) 0 ≃+ Λ + Hurewicz computation rule.
+- 2nd commit feat: Elliptic/H1Basis.lean — g=1 specialization.
+  ellipticH1Equiv; loop classes by explicit lifts (aLoop ↦ ω₁,
+  bLoop ↦ ω₂, bLoopRev ↦ −ω₂); oriented lattice ℤ-basis {ω₁, ±ω₂}
+  (restrictScalars + unitsSMul); ellipticH1Basis +
+  ellipticH1Basis_eq_loops; ellipticPeriodCycleBasis :=
+  ellipticPeriodCycleBasisOfH1 …;  nonempty_periodCycleBasis_elliptic.
+  KERNEL: #print axioms ellipticPeriodCycleBasis =
+  [propext, Classical.choice, Quot.sound]  (standard-3; no
+  AX_PeriodCycleBasis, no AX_Elliptic_H1_symplectic).
+- 3rd commit flip: axiom AX_Elliptic_H1_symplectic DELETED from
+  Witnesses.lean; ellipticCycleBasis re-homed to H1Basis.lean as the
+  proven witness; ledger reconciled 12 → 11 (AXIOM_AUDIT header +
+  2c table + breakdown + verification block, README at-a-glance +
+  Part-2 prose, planning doc discharge note); axiom-report.txt
+  regenerated (no diff — witness was untracked);
+  check_axiom_consistency.sh ✓ kernel = 11.
+- Full lake build green before push.
+
+Notes for reuse: h1EquivLattice is stated for any AddSubgroup Λ of a
+topological abelian group V with [DiscreteTopology Λ]
+[SimplyConnectedSpace V] [Module ℝ V] [ContinuousSMul ℝ V] — the
+Jacobian torus (Fin g → ℂ) ⧸ periodLatticeInBasis qualifies verbatim
+(route to a g>1 H₁ basis once a lattice ℤ-basis is available).
+Landmines hit: (1) Path-coe vs ContinuousMap-coe blocks rw — use
+term-style (DFunLike.congr_fun … ).trans (Path.target _) and bundle
+f : C(V, V⧸Λ) before Path.Homotopic.map so rewrites match;
+(2) loopToPath at the quotient spelling loses ChartedSpace instance
+search — pin (X := Elliptic ω₁ ω₂ h).

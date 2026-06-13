@@ -343,8 +343,8 @@ theorem elliptic_word_R2_lhs :
 for the elliptic curve, over the oriented loops and the `dz` basis, with
 constant cut pullback `h := c` and linear primitive `F := c·z` for the
 orientation constant `c = √|Im (ω₂ · conj ω₁)|`. All fields are explicit;
-no axiom enters (in particular neither `AX_PeriodCycleBasis` nor
-`AX_Elliptic_H1_symplectic`). -/
+no axiom enters (in particular not `AX_PeriodCycleBasis`; the former
+`AX_Elliptic_H1_symplectic` was discharged and deleted 2026-06-12). -/
 noncomputable def ellipticArcBoundaryWordData :
     ArcBoundaryWordDataInterior (ellipticLoops ω₁ ω₂ h)
       (ellipticFormBasis ω₁ ω₂ h) where
@@ -405,9 +405,11 @@ theorem elliptic_periodGram_posDef :
   (ellipticArcBoundaryWordData ω₁ ω₂ h).periodGram_posDef
 
 /-- **Conditional g = 1 `PeriodCycleBasis`**: given the H₁ topology fields
-for the oriented elliptic loops (the sole remaining content of
-`AX_Elliptic_H1_symplectic`), the boundary-word datum completes a full
-`PeriodCycleBasis` witness with both Hodge fields PROVEN. -/
+for the oriented elliptic loops, the boundary-word datum completes a full
+`PeriodCycleBasis` witness with both Hodge fields PROVEN. The H₁ fields are
+now themselves proven — `Elliptic/H1Basis.lean` instantiates this corollary
+unconditionally (`ellipticPeriodCycleBasis`), which is what discharged the
+former `AX_Elliptic_H1_symplectic` (deleted 2026-06-12). -/
 noncomputable def ellipticPeriodCycleBasisOfH1
     (isBasis : Module.Basis (Fin (2 * genus (Elliptic ω₁ ω₂ h))) ℤ
       (H1 (Elliptic ω₁ ω₂ h) 0))

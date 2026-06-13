@@ -257,7 +257,7 @@ Follows from Riemann–Hurwitz or the adjunction formula; neither in Mathlib cur
 
 | Group | Axioms |
 |---|---|
-| Elliptic | `AX_Elliptic_H1_symplectic` |
+| Elliptic | `AX_Elliptic_H1_symplectic` *(DISCHARGED 2026-06-12, PR #228 — now the proven `ellipticPeriodCycleBasis`)* |
 | Hyperelliptic | `AX_Hyperelliptic_genus` (the 7-axiom odd-atlas ∞-chart cluster — `infinityChart`, `infinityInverseMap`, `mem_source`, 4 compats — **discharged PR #183**, 2026-06-11, correct analytic branch; `Hyperelliptic.instChartedSpace`/`instIsManifold` now standard-3) |
 | Plane curve | `AX_PlaneCurveAffine_connected` (`PlaneCurve.instIsManifold` **discharged #52**, 2026-06-10) |
 
