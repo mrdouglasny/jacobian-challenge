@@ -73,6 +73,16 @@ genus-`g` Jacobian for all `g`.
   (the Albanese / universal property).
 * Arbarello–Cornalba–Griffiths–Harris, *Geometry of Algebraic Curves I*,
   Ch. I (the Jacobian of a curve and Abel–Jacobi).
+
+## Provenance
+
+The universal-property characterization was proposed on the Lean Zulip
+(`#Autoformalization > Jacobian challenge`, 2026-04-19) by **Michael Stoll** —
+including the formulation over *complex tori* used here — as the way to rule out
+hack solutions, and implemented in an algebraic-geometry variant
+(`exists_unique_ofCurve_comp`) by **Christian Merten** (2026-04-20). This
+complex-analytic formalization (`IsJacobian` / `ofCurve_isJacobian` /
+`isJacobian_unique`) was developed independently.
 -/
 
 open scoped Manifold ContDiff Topology
