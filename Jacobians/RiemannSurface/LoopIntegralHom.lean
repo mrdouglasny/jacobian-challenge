@@ -2,7 +2,11 @@ import Jacobians.RiemannSurface.HomotopyInvarianceDevelop
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.LoopIntegral
-import Jacobians.Axioms.PeriodLattice
+-- Imports `PeriodLatticeBase` (the `periodLatticeInBasis` def), NOT the instances
+-- file `PeriodLattice`, to keep this low-level file out of the period-lattice
+-- *instance* import cone — this enables the T-GEN instance swap upstream without a
+-- build cycle. See docs/planning/HEADLINE_REWIRE_PLAN.md.
+import Jacobians.Axioms.PeriodLatticeBase
 import Jacobians.Axioms.PeriodCycleBasis
 
 /-!

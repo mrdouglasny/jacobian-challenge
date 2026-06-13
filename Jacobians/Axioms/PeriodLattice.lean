@@ -28,6 +28,8 @@ the intersection form is no longer in this cone).
 -/
 import Jacobians.Axioms.PeriodLatticeBase
 import Jacobians.Layer3.Periods
+import Jacobians.RiemannSurface.Path2Prototype
+import Jacobians.RiemannSurface.ChartFlatHomotopyWallProof
 
 namespace Jacobians.Axioms
 
@@ -45,7 +47,10 @@ theorem instPeriodLatticeDiscrete (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     DiscreteTopology (periodLatticeInBasis X x₀ b) :=
-  Jacobians.Layer3.periodLatticeInBasis_discrete x₀ b
+  -- AXIOM-FREE (T-GEN discharged via PL approximation): routes through the
+  -- unconditional `analyticLoopsGenerateH1`, not `AX_PeriodCycleBasis`.
+  Jacobians.RiemannSurface.periodLatticeInBasis_discreteTopology_of_tgen x₀ b
+    (Jacobians.RiemannSurface.analyticLoopsGenerateH1 x₀)
 
 attribute [instance] instPeriodLatticeDiscrete
 
@@ -59,7 +64,10 @@ theorem AX_PeriodLattice (X : Type*) [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X)
     (b : Module.Basis (Fin (genus X)) ℂ (HolomorphicOneForm X)) :
     IsZLattice ℝ (periodLatticeInBasis X x₀ b) :=
-  Jacobians.Layer3.periodLatticeInBasis_isZLattice x₀ b
+  -- AXIOM-FREE (T-GEN discharged): full-rank lattice via the unconditional
+  -- `analyticLoopsGenerateH1`, not `AX_PeriodCycleBasis`.
+  Jacobians.RiemannSurface.periodLatticeInBasis_isZLattice_of_tgen x₀ b
+    (Jacobians.RiemannSurface.analyticLoopsGenerateH1 x₀)
 
 attribute [instance] AX_PeriodLattice
 
