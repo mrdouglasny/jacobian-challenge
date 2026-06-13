@@ -268,6 +268,19 @@ witness does not depend on this axiom.
 
 Then → **66** with the universal-property UP-0/UP-1 banked in
 `Axioms/TorusAlbanese.lean` (2026-06-05): `AX_torus_oneforms_dualCover`,
+
+
+> **Faithfulness note (AX_torus_oneforms_dualCover discharge, #232).** This was an
+> HONEST −1 but a *definitional* one, not a formalized Mathlib fact. `TorusHolomorphicOneForm m A`
+> is an `abbrev` that **ignores `A`** and unfolds to `Module.Dual ℂ (Fin m → ℂ)`, so the
+> "dual cover" axiom was a self-equivalence and `refl` discharges it with no analytic content
+> erased (there was none). The torus one-form layer is therefore **thinner than it reads**:
+> torus holomorphic 1-forms are *modeled* as a fixed dual space independent of the torus.
+> The genuine universal-property content of `ofCurve_isJacobian` rests entirely on the
+> remaining three torus axioms (`AX_torus_self_albanese`, `AX_period_functoriality`,
+> `AX_curve_generates_jacobian`), all research-grade (abstract-torus uniformization,
+> Jacobi inversion). This discharge does not strengthen the analytic faithfulness of the
+> torus model.
 `AX_torus_self_albanese`, `AX_period_functoriality`, and the conditional lift-form
 fallback `AX_torus_descent_holo` used for E6. The pre-existing
 `AX_curve_generates_jacobian` was moved into the new file, so it is not a net-new
@@ -562,7 +575,7 @@ future work.
 | Axiom | Status | Reference |
 |-------|--------|-----------|
 | `AX_curve_generates_jacobian` | **stated** — `Axioms/TorusAlbanese.lean:168` | Mumford; Milne *AV* §I |
-| `AX_torus_oneforms_dualCover` | **stated** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
 | `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
 | `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
 | `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
