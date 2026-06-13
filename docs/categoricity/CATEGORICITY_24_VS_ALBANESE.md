@@ -1,8 +1,21 @@
 # Do Buzzard's 24 requirements categorically determine the Jacobian?
 
-*Local commentary — not pushed. Drafted 2026-06-13. Companion to
-`docs/VALIDATION.md`, which already asserts non-categoricity (lines 37–39);
-this doc gives the argument in full and records the Gemini deep-think vet.*
+*Drafted 2026-06-13. Companion to `docs/VALIDATION.md`, which asserts
+non-categoricity (lines 37–39); this doc gives the argument in full and records
+the Gemini deep-think vet.*
+
+> **Prior art & credit — this is not a gotcha against the challenge.** Buzzard
+> anticipated the gap in the challenge thread, distinguishing a curve's *actual
+> genus* from the *AI genus* a solver supplies and noting that the sorries force
+> "an injective holomorphic map … **whether it's the Jacobian or not**; in fact I
+> suspect that the Jacobian is the easiest example" (Zulip, 2026-04-19) — he did
+> not claim the 24 are categorical. The universal-property repair was first raised
+> in that same thread by **Michael Stoll** (2026-04-19, "to make sure no hacks are
+> possible", including the complex-tori formulation), and built into an
+> algebraic-geometry variant (`exists_unique_ofCurve_comp`) by **Christian Merten**
+> (2026-04-20). What this document adds is to make the gap precise (a
+> machine-checked counterexample) and to formalize the repair independently in the
+> complex-analytic setting (`IsJacobian` / `isJacobian_unique`).
 
 ## Question
 
