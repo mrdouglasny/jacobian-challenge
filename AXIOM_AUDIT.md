@@ -2,6 +2,17 @@
 
 *Last updated 2026-06-13.*
 
+**T-GEN DISCHARGED (2026-06-13, PR #248).** `Jacobians.RiemannSurface.analyticLoopsGenerateH1`
+is now an **UNCONDITIONAL standard-3 theorem** (`#print axioms` =
+`[propext, Classical.choice, Quot.sound]`, no `sorryAx`, no new axiom) — proved via
+**piecewise-linear-in-charts approximation** (`ChartFlatHomotopyWallProof.lean`),
+**not** resting on the Whitney/Grauert hypotheses. The reduction-to-{Whitney,Grauert}
+recorded below is **superseded**: those were walls only for the corner-free route; since
+`AnalyticLoop` is piecewise-analytic (corners allowed), PL loops already qualify and the
+approximation is elementary. The remaining step to retire `AX_PeriodCycleBasis` from the
+24 headlines is the **headline rewiring** onto this unconditional T-GEN (branch
+`feat/tgen-headline-rewire`), in progress. Historical reduction detail:
+
 **T-GEN reduction (2026-06-13, all-night close — #240/#241/#242/#243/#244).**
 The lone challenge-critical axiom `AX_PeriodCycleBasis` reduces (its spanning
 half) to **T-GEN** (`AnalyticLoopsGenerateH1`, analytic loops generate H₁), and
