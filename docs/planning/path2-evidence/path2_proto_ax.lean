@@ -1,0 +1,9 @@
+import Jacobians.RiemannSurface.Path2Prototype
+
+open Jacobians.RiemannSurface
+
+#print axioms periodMapInBasis_eq_devValPeriodVec
+#print axioms periodLatticeInBasis_eq_loopPeriodLattice_of_tgen
+#print axioms periodLatticeInBasis_discreteTopology_of_tgen
+#print axioms periodLatticeInBasis_isZLattice_of_tgen
+#print axioms exists_periodLatticeInBasis_basis_of_tgen

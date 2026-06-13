@@ -1,0 +1,52 @@
+Path-2 prototype spike — captured `#print axioms` output
+=========================================================
+Repo: jacobian-challenge   Branch: feat/path2-prototype
+Built against full Jacobians tree (8840 modules), Mathlib v4.30.0.
+standard-3 = {propext, Classical.choice, Quot.sound}.
+
+--- (A) The headline, AS IT STANDS TODAY ---------------------------------
+'Jacobian.ofCurve_inj' depends on axioms:
+    [propext, Classical.choice, Quot.sound, Jacobians.Axioms.AX_PeriodCycleBasis]
+'Jacobians.Axioms.AX_ofCurve_inj' depends on axioms:
+    [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+
+--- (B) The analytic-loop lattice K-LITE machinery: ALREADY standard-3 ----
+    (the isolated-zero / max-principle / residue argument does NOT use the axiom)
+'discreteTopology_loopPeriodLattice'              : [propext, Classical.choice, Quot.sound]
+'isZLattice_loopPeriodLattice_unconditional'      : [propext, Classical.choice, Quot.sound]
+'loopPeriodLattice_isolated_zero'                 : [propext, Classical.choice, Quot.sound]
+
+--- (C) The bridge to the HEADLINE lattice carries the axiom --------------
+'Layer3.loopPeriodLattice_eq_periodLatticeInBasis'       : [..3.., AX_PeriodCycleBasis]
+'Layer3.periodLatticeInBasis_discreteTopology_of_loopSpan': [..3.., AX_PeriodCycleBasis]
+
+--- (D) The Abel chain consumers of the axiom ----------------------------
+'Bridge.abel_subset'                            : [..3.., AX_PeriodCycleBasis]
+'Bridge.zeroPeriodChainSolvability_of_engine'   : [..3.., AX_PeriodCycleBasis]
+'MeromorphicFunctionField.fiberAJ_eq'           : [..3.., AX_PeriodCycleBasis]
+
+--- (E) The T-GEN-conditional replacements: ALL standard-3 ----------------
+'Bridge.abel_subset_basis_free'                       (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'Bridge.zeroPeriodChainSolvabilityLattice_of_engine'  (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'range_devValPeriodVec_eq_loopPeriodLattice'          (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'analyticLoopsGenerateH1_of_analyticRep'              (takes AAW)   : [propext, Classical.choice, Quot.sound]
+
+--- (F) THIS SPIKE's new prototype (Path2Prototype.lean): ALL standard-3 --
+'periodMapInBasis_eq_devValPeriodVec'                              : [propext, Classical.choice, Quot.sound]
+'periodLatticeInBasis_eq_loopPeriodLattice_of_tgen'  (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'periodLatticeInBasis_discreteTopology_of_tgen'      (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'periodLatticeInBasis_isZLattice_of_tgen'            (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+'exists_periodLatticeInBasis_basis_of_tgen'          (takes T-GEN) : [propext, Classical.choice, Quot.sound]
+
+VERDICT
+-------
+Variant A (cheap direct discreteness on the headline lattice, no
+re-architecture) is the right route AND is essentially already in place:
+the discreteness/non-degeneracy argument never needed analyticity of the
+loops — it is the chart-local Forster 21.4b residue argument on the
+*forms*, already standard-3 on loopPeriodLattice. The sole residual that
+keeps AX_PeriodCycleBasis in ofCurve_inj's closure is the
+continuous-H1 ↔ analytic-loop bridge, which IS T-GEN
+(AnalyticLoopsGenerateH1 = "analytic loops generate H1"), provably
+{Whitney, Grauert} per TGenFinalReduction.lean. Path 2 = T-GEN; there is
+no cheaper variant.
