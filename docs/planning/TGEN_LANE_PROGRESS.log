@@ -27,3 +27,42 @@ Riemann surfaces. Branch `feat/tgen-general`. Piece (2) of K-FULL closure
   + filled-puncture relations generate π₁(X)) — the named general topology
   wall, a single covering-space lemma absent from Mathlib. See TGEN_ROUTE.md
   gap ledger.
+
+## 2026-06-12 (L2 lane, branch `feat/tgen-L2`)
+
+- **L2 LANDED as named-residual + witness reduction**
+  (`Jacobians/RiemannSurface/CoveringGeneration.lean`). Two headline
+  theorems, both kernel-verified **standard-3 only** (no sorryAx, no
+  `AX_PeriodCycleBasis`, no project axioms):
+  - `analyticLoopsGenerateH1_of_coveringGeneratesPi1` — general L2 predicate
+    `CoveringGeneratesPi1 x₀` (:= property (P)) ⟹ T-GEN, via K0.
+  - `analyticLoopsGenerateH1_hyperelliptic_of_branchCutGenerate` — the
+    hyperelliptic witness: *if* the `2g` branch-cut analytic loops of a
+    `BranchCutSystem` generate π₁ (`BranchCutGeneratesPi1`), *then* T-GEN for
+    `HyperellipticOdd H h`. Discharged through K0's finite-family bridge
+    (`analyticLoopsGenerateH1_of_finite_pi1_generators`). This reduces
+    hyperelliptic T-GEN to **one concrete group-generation hypothesis** over
+    explicit loops — no covering scaffolding in the kernel.
+
+- **Mathlib audit (correcting the route doc).** Mathlib *does* have the
+  covering side: `IsCoveringMap.injective_path_homotopic_map` (π_* injective,
+  Hatcher 1.31), `monodromy_bijective`, lifting criterion
+  `existsUnique_continuousMap_lifts_of_range_le` (Hatcher 1.33). Gemini
+  hallucinated a `fundamentalGroup_injective` name; the real one is
+  `injective_path_homotopic_map`. So the residual narrows to **two**
+  Mathlib-absent facts: (1) elementary index-2 kernel generation (even-word
+  lemma over the parity monodromy ℤ/2; explicit gen set
+  `{g₁²} ∪ {g₁gᵢ, gᵢg₁⁻¹}`), (2) branched puncture-filling van Kampen
+  (`π₁(X∖T) ↠ π₁(X)`, kernel = meridian normal closure; `z↦z²` sends meridian
+  to `g₁²`, filling kills `gᵢ²`, leaving the `2g` cycles).
+
+- Prototyped (1) `ker_le_closure_parity` (scratch only, not landed): the
+  `closure_induction` `mul`-case needs `Q=ℤ/2` pinned + the "two cosets" fact;
+  ~2–4h of Mathlib group theory. Per the 90-min/sub-step discipline, NOT
+  landed as a half-proof — no sorries introduced.
+
+- **Per-family T-GEN status.** Hyperelliptic: T-GEN reduced to
+  `BranchCutGeneratesPi1` (one hypothesis, the index-2 monodromy + puncture
+  fill). Plane curve / general X: `CoveringGeneratesPi1` is the clean named
+  residual feeding K0 (plane curves lack lift infrastructure, so no concrete
+  instance to discharge yet). Elliptic (g=1): already unconditional (#234).
