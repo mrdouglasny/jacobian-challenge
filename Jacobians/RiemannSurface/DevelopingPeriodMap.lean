@@ -115,7 +115,7 @@ theorem loopDevValH1Hom_add_form (x₀ : X) (form₁ form₂ : HolomorphicOneFor
     loopDevValH1Hom x₀ (form₁ + form₂) =
       loopDevValH1Hom x₀ form₁ + loopDevValH1Hom x₀ form₂ := by
   ext γ
-  show loopDevValH1Hom x₀ (form₁ + form₂) (Additive.ofMul (Abelianization.of γ)) =
+  change loopDevValH1Hom x₀ (form₁ + form₂) (Additive.ofMul (Abelianization.of γ)) =
     loopDevValH1Hom x₀ form₁ (Additive.ofMul (Abelianization.of γ)) +
       loopDevValH1Hom x₀ form₂ (Additive.ofMul (Abelianization.of γ))
   simp only [loopDevValH1Hom_of_apply]
@@ -128,7 +128,7 @@ theorem loopDevValH1Hom_add_form (x₀ : X) (form₁ form₂ : HolomorphicOneFor
 theorem loopDevValH1Hom_smul_form (x₀ : X) (a : ℂ) (form : HolomorphicOneForm X) :
     loopDevValH1Hom x₀ (a • form) = a • loopDevValH1Hom x₀ form := by
   ext γ
-  show loopDevValH1Hom x₀ (a • form) (Additive.ofMul (Abelianization.of γ)) =
+  change loopDevValH1Hom x₀ (a • form) (Additive.ofMul (Abelianization.of γ)) =
     (a • loopDevValH1Hom x₀ form) (Additive.ofMul (Abelianization.of γ))
   simp only [AddMonoidHom.smul_apply, smul_eq_mul, loopDevValH1Hom_of_apply]
   induction γ using Path.Homotopic.Quotient.ind with
