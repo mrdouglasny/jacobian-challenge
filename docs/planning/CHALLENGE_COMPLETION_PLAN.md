@@ -323,3 +323,24 @@ The plan above remains the map; state advances and question answers:
 - Maintainer loop: merges, reviews, kernel verification, ledger, flips.
 
 Bottlenecks unchanged: A3 (slit-sheet/dissection) and E3-E6; both active.
+
+---
+
+# SCOPE CORRECTION (2026-06-12 night): family witnesses are NOT all cheap
+
+The HW lane (#231) established by honest determination + Gemini cross-check:
+the **hyperelliptic** boundary-word walls (R1Word/R2GramWord) are research-grade,
+NOT a quick family win. `BranchCutSystem` carries no symplectic/intersection
+data, so R1Word is *algebraically false* for arbitrary loops; an honest
+discharge needs concrete `x^k dx/y` period computation over branch cuts (Route K
+or via AX_Hyperelliptic_genus). The g=1 elliptic witness (#225/#228, DONE) closed
+only because the 1×1 period product commutes — it does not generalize cheaply.
+
+**Consequence for the endgame**: the CRITICAL PATH does **not** route through
+family witnesses. It is:
+  K-LITE (dissection-free DiscreteTopology, Kirov 21.4 route) → #230's H1
+  composite consumes {T-GEN, T-FG, Module.Free ℤ H1, T-RANK(≤)} → the general
+  AX_PeriodCycleBasis flip (with the R1/R2 fields handled by either keeping them
+  as the general boundary-word obligation, or the K-MID drop, Discussion #229).
+The hyperelliptic family witness is a SEPARATE demonstration program, not a
+flip prerequisite. The Cholesky + polarization rungs (#231) are banked for it.
