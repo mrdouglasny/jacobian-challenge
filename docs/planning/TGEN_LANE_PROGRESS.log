@@ -66,3 +66,45 @@ Riemann surfaces. Branch `feat/tgen-general`. Piece (2) of K-FULL closure
   fill). Plane curve / general X: `CoveringGeneratesPi1` is the clean named
   residual feeding K0 (plane curves lack lift infrastructure, so no concrete
   instance to discharge yet). Elliptic (g=1): already unconditional (#234).
+
+## 2026-06-12 (T-GEN ANALYTIC lane, branch `feat/tgen-analytic-step`)
+
+The "(AAW) smooth ⇝ analytic" factor — the deepest piece of the
+continuous ⇝ smooth ⇝ analytic reduction underlying T-GEN — landed as
+`Jacobians/RiemannSurface/SmoothAnalyticLoop.lean` (all headlines
+kernel-verified **standard-3 only**, no sorryAx, no project axioms):
+
+- **Key finding (cheapest-sufficient formulation).** The predicate an
+  `AnalyticLoop` must satisfy is the moving-chart, pointwise condition
+  `hmov : ∀ r, AnalyticAt ℝ (fun u => extChartAt 𝓘(ℂ) (γ r) (γ u)) r`. This is
+  *literally* "the chart readout is `C^ω` at every parameter": packaged as
+  `IsAnalyticCurve` and proven equal to `hmov` (`isAnalyticCurve_iff_movingChart`,
+  via `ContDiffAt.analyticAt` / `AnalyticAt.contDiffAt`). So a genuinely
+  real-analytic loop needs **no approximation at all**:
+  `AnalyticLoop.ofAnalyticCurve` packages any continuous, closed,
+  `IsAnalyticCurve` loop as an `AnalyticLoop` **unconditionally**.
+
+- **Honest Grauert gap.** Turning a merely *smooth* (`C^∞`) loop into an
+  analytic one rel endpoints is genuinely Grauert/Whitney and Mathlib-absent.
+  Gemini chat confirmed the obstruction is global: a loop leaves any single
+  chart, and gluing `C^ω` chart-approximations fails (no non-constant analytic
+  partition of unity); the standard proof needs a real-analytic embedding
+  `X ↪ ℝ^N` + analytic tubular retraction, neither in Mathlib. Even *stating*
+  `ContMDiff … ω` for a curve into `X` is blocked: the `IsManifold 𝓘(ℝ, ℂ) ω X`
+  instance (complex-analytic ⇒ real-analytic manifold) is absent
+  (`inferInstance` fails), which is *why* `IsAnalyticCurve` is phrased via the
+  chart readout rather than `ContMDiff`.
+
+- **Named residual + conditional target.** `SmoothLoopAnalyticApprox x₀` is the
+  single named Grauert hypothesis (a `Prop`, not a global `axiom` — consumers
+  see it explicitly); `analyticLoop_homotopic_of_smooth` proves the target
+  (smooth loop ⇒ homotopic-rel-endpoints `AnalyticLoop`) conditional on it.
+  `Path.Homotopic` (auto rel-endpoints for paths) is the homotopy relation;
+  `curveToPath` packages a raw curve as the `Path x₀ x₀` to compare against
+  `loopToPath δ`.
+
+- **Go/no-go on closing smooth ⇝ analytic this session: NO-GO via Fourier.**
+  The periodic/Fourier route does *not* avoid Grauert on a general X — it only
+  works inside a single chart, and the global gluing is the real wall. The
+  win is structural: the moving-chart definition makes the *analytic* case
+  free, isolating the residual to exactly one classical theorem.
