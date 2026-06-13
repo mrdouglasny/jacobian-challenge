@@ -16,28 +16,21 @@ These are piecewise-real-analytic (in fact linear) in `r`. Their
 homology classes form a ℤ-basis of `H_1(Elliptic, ℤ)` symplectic with
 respect to the intersection form: `⟨A, A⟩ = ⟨B, B⟩ = 0`, `⟨A, B⟩ = 1`.
 
-## What this module axiomatizes
+## Status: every former axiom of this module is now a THEOREM
 
-Three Elliptic-specific axioms wrap the detailed classical facts that
-would require substantial covering-space / fundamental-group
-infrastructure to prove:
+The module originally axiomatized three Elliptic-specific facts; all are
+discharged:
 
-* `AX_Elliptic_aLoop_analytic`: the A-cycle is `IsAnalyticArcStrong`.
-* `AX_Elliptic_bLoop_analytic`: the B-cycle is `IsAnalyticArcStrong`.
-* `AX_Elliptic_H1_symplectic`: their classes form a symplectic
-  `Module.Basis (Fin 2) ℤ (H_1 (Elliptic _) _)` with the desired
-  α/β pairing.
-
-Each axiom retires when (a) analyticity is verified against
-ComplexTorus's chart atlas (chart transitions are translations, fderiv
-is 1), and (b) the deck-transformation / covering-space description of
-`π₁(ℂ/Λ) = Λ ≃ ℤ²` is available.
-
-## The witness
-
-`ellipticCycleBasis` assembles the three axioms into a concrete
-`PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0` term. Non-vacuous and
-traceable — axiom dependencies auditable via `lean_verify`.
+* `AX_Elliptic_aLoop_analytic` (PR #86) and `AX_Elliptic_bLoop_analytic`
+  (2026-06-07): proved via `extChartAt_quotient_mk_line_analyticAt`
+  (kept under their historical `AX_`-prefixed names as theorems).
+* `AX_Elliptic_H1_symplectic`: **deleted 2026-06-12 (EP lane)** — the
+  covering-space computation `π₁(ℂ/Λ) ≅ Λ`
+  (`RiemannSurface/QuotientCoveringPi1.lean`) supplies the `H₁` ℤ-basis
+  on the A/B classes, and the g = 1 boundary-word datum
+  (`RiemannSurface/BoundaryWordElliptic.lean`) the Hodge fields. The
+  proven witness `ellipticCycleBasis : PeriodCycleBasis (Elliptic _) 0`
+  now lives in `Elliptic/H1Basis.lean` (standard-3, axiom-free).
 
 See `docs/completion-plan.md` workstream C2.
 -/
@@ -488,37 +481,11 @@ noncomputable def bLoop : AnalyticLoop (Elliptic ω₁ ω₂ h) 0 where
     unfold ellipticLattice
     exact Submodule.subset_span ⟨1, by simp [ellipticRealBasis]⟩
 
-/-- **Axiom.** `H_1` cycle basis of the elliptic curve from A- and B-cycles.
-Provides the `Module.Basis (Fin 2) ℤ (H_1 _ _)` structure together with a
-specialization to `Fin (2 * genus (Elliptic _)) = Fin 2` (after the
-`genus_Elliptic_eq_one` rewrite) and the arc-level Riemann bilinear
-relations R1/R2.
-
-**Re-typed 2026-06-10 (D1)** from the retired `AnalyticCycleBasis` (whose
-opaque-intersection-form `symplectic` field made every concrete witness
-unprovable by design) to `PeriodCycleBasis`. Satisfiability of the new
-fields at g = 1: R1 because the form space is 1-dimensional (`η = c·dz`,
-so `Q(P(η), P(ζ)) = c·c'·(AB − BA) = 0`), R2 because
-`i·Q(P(η), conj P(η)) = |c|²·2·Im(ω̄₁ω₂)·(±1) > 0` after choosing the loop
-order/orientation matching the sign of `Im(ω₂/ω₁)` — the axiom does not pin
-which loop is `α`, so a correctly oriented witness always exists.
-
-**Remaining discharge debt** (`docs/planning/AX_Elliptic_H1_symplectic.md`):
-the `isBasis` + `loops_to_basis` fields still need
-`H_1(torus) ≅ ℤ²` with the A/B classes as generators — covering-space
-theory (`π₁(ℂ/Λ) ≅ Λ`) not yet in the repo. R1/R2 are now *provable* for
-the concrete `aLoop`/`bLoop` (their `dz`-periods are `ω₁`/`ω₂` by the
-lift FTC in `Elliptic/OfCurveInj.lean`), so the D1 re-type strictly
-shrinks this axiom's real content to the H₁-basis half. -/
-axiom AX_Elliptic_H1_symplectic :
-    PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0
-
-/-- **Concrete witness** for `AX_PeriodCycleBasis` on `Elliptic`.
-Axiom-wrapped at this level — genuine non-vacuity would come from
-discharging `AX_Elliptic_H1_symplectic` via covering-space theory +
-concrete A/B cycle constructions (see the axiom's docstring for what
-remains after the D1 re-type). -/
-noncomputable def ellipticCycleBasis : PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0 :=
-  AX_Elliptic_H1_symplectic ω₁ ω₂ h
+-- `AX_Elliptic_H1_symplectic` (formerly here) was **DISCHARGED 2026-06-12**
+-- (EP lane): the covering-space computation `π₁(ℂ/Λ) ≅ Λ` of
+-- `RiemannSurface/QuotientCoveringPi1.lean` yields the `H₁` ℤ-basis on the
+-- A/B classes, and the boundary-word datum supplies the Hodge fields R1/R2 —
+-- see the proven witness `ellipticCycleBasis` in `Elliptic/H1Basis.lean`
+-- (standard-3, axiom-free).
 
 end Jacobians.ProjectiveCurve

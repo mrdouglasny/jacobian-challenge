@@ -1,5 +1,21 @@
 # `AX_Elliptic_H1_symplectic` — discharge recipe
 
+> **✅ DISCHARGED 2026-06-12 (EP lane, `feat/elliptic-pi1`).** The axiom is
+> **deleted**; its statement is now the proven witness
+> `ellipticPeriodCycleBasis` / `ellipticCycleBasis : PeriodCycleBasis
+> (Elliptic ω₁ ω₂ h) 0` in `Jacobians/ProjectiveCurve/Elliptic/H1Basis.lean`,
+> kernel-verified **standard-3** (no `AX_PeriodCycleBasis` either). Route as
+> planned here (Phase 1 covering-space H₁) but with NO helper axiom: the D1
+> re-type to `PeriodCycleBasis` removed the opaque `intersectionForm` field,
+> and the Hodge fields R1/R2 came from the proven boundary-word datum
+> (`ellipticPeriodCycleBasisOfH1`, #225). The general engine
+> `π₁(V ⧸ Λ) ≅ Λ` / `h1EquivLattice : H1 (V ⧸ Λ) 0 ≃+ Λ` lives in
+> `Jacobians/RiemannSurface/QuotientCoveringPi1.lean` (reusable for the
+> Jacobian torus at g > 1). Actual effort: ~1 session, ~560 LOC — the
+> Mathlib homotopy-lifting API (`IsCoveringMap.liftPath`,
+> `liftPath_apply_one_eq_of_homotopicRel`, `liftPath_trans`) covered what
+> this plan budgeted 3–6 weeks of infrastructure for.
+
 **Location:** `Jacobians/ProjectiveCurve/Elliptic/Witnesses.lean:166`
 **Route:** needs-infra, provable-from-other-axioms &nbsp;&nbsp; **Effort:** 7 &nbsp;&nbsp; **Est:** ~3–6 focused weeks for covering space / fundamental group infra, ~300 LOC
 **Blocked by:** `AX_IntersectionForm_alternating`, `AX_IntersectionForm_perfect`, `intersectionForm`, `AX_AnalyticCycleBasis` (the structure target itself); transitively the project's homology layer (`H1`, `Path.toHomologyClass`, the covering-space description of `π₁(ℂ/Λ)`)

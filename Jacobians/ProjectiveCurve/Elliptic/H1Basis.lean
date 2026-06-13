@@ -224,4 +224,10 @@ theorem nonempty_periodCycleBasis_elliptic :
     Nonempty (PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0) :=
   ⟨ellipticPeriodCycleBasis ω₁ ω₂ h⟩
 
+/-- **Concrete witness** for `AX_PeriodCycleBasis` on `Elliptic` — the
+historical name from `Elliptic/Witnesses.lean`, now PROVEN: formerly
+`:= AX_Elliptic_H1_symplectic …` (axiom deleted 2026-06-12, EP lane). -/
+noncomputable def ellipticCycleBasis : PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0 :=
+  ellipticPeriodCycleBasis ω₁ ω₂ h
+
 end Jacobians.ProjectiveCurve
