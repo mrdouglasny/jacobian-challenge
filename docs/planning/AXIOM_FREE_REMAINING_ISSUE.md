@@ -100,6 +100,36 @@ infrastructure Mathlib lacks (manifold-codomain smooth approximation; no
 real-analytic partition of unity — the identity theorem blocks the naive glue;
 real-analytic tubular neighborhoods). We estimate a multi-week build-out.
 
+### 3.5 Candidate escape (under active verification): *piecewise*-linear approximation
+
+**This may dissolve §3 entirely, and is the route we now consider most likely.**
+Our `AnalyticLoop`/`AnalyticArc` is **piecewise**-analytic: analyticity is required
+only on the open cells of a finite partition, with **corners allowed** at the
+partition points. We do *not* need globally-smooth or globally-analytic loops.
+
+Consequently a **piecewise-linear-in-charts** loop (each piece a straight segment
+in a chart's ℂ-coordinate) is already an `AnalyticLoop`: a segment is real-analytic
+(degree-1 polynomial), and stays real-analytic read through any other chart
+(holomorphic transitions); corners sit at partition points. And every *continuous*
+loop is homotopic rel endpoints to such a PL loop by an **elementary** argument —
+cover by chart balls, take a Lebesgue number, subdivide so each piece lies in one
+convex ball, replace each piece by the chart-segment — where each replacement is
+the *already-proved* chart-local straight-line homotopy (`Path.homotopic_of_extChartLocal`),
+chained (`Path.homotopic_of_chain`). This discharges T-GEN **avoiding both walls**:
+no Whitney (corners are fine, so no smoothing needed) and no Grauert (piecewise,
+so no global real-analytic structure / no partition of unity needed). The two §3
+theorems were artifacts of over-constraining the approximation target to
+corner-free smooth / corner-free global-analytic.
+
+**Status:** being prototyped now (branch `feat/tgen-pl-approx`). The one point to
+verify in our formalization is that a PL-in-charts arc genuinely satisfies our
+`IsAnalyticArcStrong` predicate (the moving-chart witness machinery) and that the
+Lebesgue/convex-ball bookkeeping formalizes cleanly. **Review question (high
+priority): is this PL route mathematically correct and does it genuinely avoid
+the Whitney/Grauert content, or is there a subtlety that forces smoothing after
+all?** If correct, options P1/P2/P3 below are mostly moot — the answer is "prove
+T-GEN, elementarily, via PL approximation."
+
 ## 4. The crux: is T-GEN actually necessary?
 
 Here is the tension, and the reason for this review.
