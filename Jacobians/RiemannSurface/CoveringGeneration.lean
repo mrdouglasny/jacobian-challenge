@@ -135,7 +135,37 @@ double-cover monodromy of `y² = f(x)`: D1's lassos around the branch points
 (`normalClosure_isolatingLassos_eq_top`) lift through the √-cover
 (`sqMap_covering`, L1) to the system's loops, and these lifts generate π₁
 upstairs (the finite-cover stabilizer-generation fact of the general L2
-wall, here for an explicit 2-sheeted cover). -/
+wall, here for an explicit 2-sheeted cover).
+
+**Status of the two L2 facts (BRANCHCUT lane).**
+
+* **Fact (1) — index-2 kernel generation — PROVEN**
+  (`Jacobians.Topology.Index2KernelGeneration.closure_kernelGenSet_eq_ker`,
+  sorry-free, standard-3). For an order-2 parity quotient `φ : G →* Q` with
+  odd transversal `t` and odd generator family `g`,
+  `closure({t²} ∪ {t·gᵢ, gᵢ·t⁻¹}) = ker φ`. This is the reusable
+  group-theory core that the hyperelliptic instance consumes: the `t·gᵢ` are
+  the branch-cut cycles, `t²` the ramification meridian.
+
+* **Fact (2) — branched puncture-filling van Kampen — RESIDUAL.** What
+  remains is the *topological bridge* feeding fact (1)'s hypotheses for the
+  hyperelliptic cover. Precisely, an instance of:
+  - the degree-2 monodromy parity homomorphism
+    `φ : FundamentalGroup (ℙ¹∖B) ⋆ → Multiplicative (ZMod 2)` of the
+    √-cover, with each branch lasso odd (`φ (lasso i) ≠ 1`);
+  - the puncture-fill surjection `π₁(X∖T) ↠ π₁(X)` (filling the
+    ramification fiber `T`), whose kernel is the meridian normal closure and
+    whose `z ↦ z²` local model sends each meridian to `t²`, so it quotients
+    fact (1)'s `ker φ`-generators by `gᵢ² = 1`;
+  - the identification of the surviving `t·gᵢ` images with
+    `loopToPi1 (S.loop i)`.
+  Composing these with `closure_kernelGenSet_eq_ker` discharges
+  `BranchCutGeneratesPi1`. Mathlib supplies the covering side
+  (`IsCoveringMap.injective_path_homotopic_map`,
+  `existsUnique_continuousMap_lifts_of_range_le`,
+  `Mathlib.Topology.Homotopy.Lifting`); the repo's `CoveringPi1` only covers
+  the *simply-connected total space* (genus-1 deck) case, so the
+  non-simply-connected branched bridge above is the named remaining wall. -/
 def BranchCutGeneratesPi1 (S : BranchCutSystem H h) : Prop :=
   Subgroup.closure
       (Set.range fun i : Fin (2 * genus (HyperellipticOdd H h)) =>

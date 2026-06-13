@@ -153,13 +153,24 @@ in `CoveringGeneration.lean`) are:
    to `g₁²`, so filling kills exactly the `gᵢ²`, leaving the `2g` branch-cut
    cycles = `π₁`-generators of the hyperelliptic curve.
 
-A prototype of (1) (the index-2 `ker_le_closure_parity` even-word lemma) was
-attempted; the `closure_induction` coset case needs `Q = ℤ/2` pinned and the
-"two cosets" fact, ~2–4h of Mathlib group theory — left as the residual, no
-half-proof landed (no sorries). For the **witness families** L2 is concrete
-plane topology and is the recommended next implementation target; for general
-X (and the plane-curve family, which lacks lift infrastructure) the predicate
-`CoveringGeneratesPi1` is the clean named residual feeding K0.
+Fact (1) is now **PROVEN** (BRANCHCUT lane,
+`Jacobians/Topology/Index2KernelGeneration.lean`, sorry-free, standard-3):
+`closure_kernelGenSet_eq_ker` gives `closure({t²} ∪ {t·gᵢ, gᵢ·t⁻¹}) = ker φ`
+for an order-2 parity quotient with odd transversal `t` and odd generator
+family. The coset-tracking predicate `P x := (φ x = 1 → x ∈ K) ∧ (φ x ≠ 1 →
+t·x ∈ K)` threaded through `Subgroup.closure_induction` (with a `t`-normalizer
+helper for the `mul`/`inv` cases) replaces the never-needed Reidemeister–
+Schreier machinery.
+
+The **sole remaining wall is fact (2)** — the branched puncture-filling van
+Kampen + the monodromy/lift bridge that feeds fact (1)'s hypotheses for the
+hyperelliptic cover (degree-2 parity hom, puncture-fill surjection with
+meridian kernel, identification of the surviving `t·gᵢ` with
+`loopToPi1 (S.loop i)`). The repo's `CoveringPi1` only handles the
+simply-connected total space (genus-1 deck) case, so this non-simply-connected
+branched bridge is not yet built. For general X (and the plane-curve family,
+which lacks lift infrastructure) the predicate `CoveringGeneratesPi1` is the
+clean named residual feeding K0.
 
 ## Decision
 
