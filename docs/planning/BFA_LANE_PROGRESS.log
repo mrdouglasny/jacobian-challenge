@@ -1,0 +1,48 @@
+2026-06-12 [BFA] session start: basis-free Abel-⊆ engine adapter (K-FULL piece (1), Disc #235).
+  Worktree feat/basis-free-abel @ origin/main (872286d). Goal: rebuild
+  `zeroPeriodChainSolvability_of_engine` to build its cancelling 1-chain from
+  analytic-loop GENERATORS (T-GEN, `AnalyticLoopsGenerateH1`) instead of
+  `pinnedCycleBasis` (`AX_PeriodCycleBasis`).
+
+2026-06-12 [BFA] LANDED (additive, c425886): `zeroPeriodChainSolvabilityLattice_of_engine`
+  (hgen : AnalyticLoopsGenerateH1 (Classical.arbitrary X)) +
+  `abel_subset_basis_free (hgen)` in AbelEngineAdapter.lean. Compiles clean
+  (`lake build Jacobians.Bridge.AbelEngineAdapter`, 8860 jobs, 15s). Originals
+  preserved verbatim.
+  REWRITE: the adapter's basis dependency was the `h`-expansion at lines 331-345,
+  `m' = cb.isBasis.repr h`, `h = ∑ m' j • loopToHomology (cb.loops j)`. Replaced
+  by `hgen.exists_loop h ⟹ ⟨γ, loopToHomology γ = h⟩` (single analytic loop, the
+  #198 AddSubgroup-span trick). Cancelling chain loop part collapses from `2g`
+  terms (coeffs `-m' j`) to ONE smooth loop (coeff −1). Engine input restated
+  over period-lattice membership directly (basis-free restatement of
+  `HasZeroPeriodLoopPresentation`); `m`/`hm` from the old `hpres` deleted (it was
+  only used to prove `divisorPeriodVector ∈ lattice`, now supplied by hyp).
+
+2026-06-12 [BFA] SECOND RESIDUAL (named): `#print axioms abel_subset_basis_free` and
+  `#print axioms zeroPeriodChainSolvabilityLattice_of_engine` BOTH still show
+  `AX_PeriodCycleBasis`. NOT from anything the adapter does — the adapter's direct
+  pinnedCycleBasis/repr use is GONE. The axiom is inherited from the DEFINITION of
+  the period map:
+    loopIntegralToH1 (LoopIntegral.lean:74) := `cb.isBasis.constr ℤ (...)`,
+      cb = Classical.choice (AX_PeriodCycleBasis x₀)
+    ⟹ periodMap ⟹ periodMapInBasis ⟹ periodLatticeInBasis ⟹ abelJacobiDiv.
+  Verified standalone: periodMap, loopIntegralToH1, periodMapInBasis, abelJacobiDiv,
+  divisorPeriodVector_mem_lattice_of_mem_ker, periodMapInBasis_loopToHomology_apply
+  ALL `#print axioms` → AX_PeriodCycleBasis. By contrast the AXIOM-FREE H₁-period
+  tower exists: loopDevValH1Hom (LoopIntegralHom.lean:79, Abelianization.lift —
+  Hurewicz, no basis), devValPeriodVec (PeriodLatticeDiscrete.lean:45),
+  loopPeriodLattice (PeriodDiscreteness.lean:142), devValPeriodVec_mem_loopPeriodLattice
+  — ALL std-3, verified. They AGREE with periodMapInBasis on loop classes.
+  PRECISE SECOND RESIDUAL: re-found `loopIntegralToH1`/`periodMap` on the axiom-free
+  `loopDevValH1Hom` (replace `cb.isBasis.constr` with the developing-value hom).
+  This is well-definedness the cycle basis currently supplies for free via
+  `Module.Basis.constr`; the axiom-free analog needs the developing value to be a
+  homology invariant (it already is: `loopDevValH1Hom` IS that invariant). But it
+  ripples through periodMap/periodMapInBasis/periodLatticeInBasis/abelJacobiDiv and
+  every proof phrased over them — a FOUNDATIONAL re-foundation (a "core definition
+  rewrite" per CLAUDE.md ⟹ needs a Discussion), NOT adapter-piece (1). T-GEN is
+  necessary at the surjectivity/spanning step but is NOT sufficient to remove the
+  axiom while the period map is defined via the basis.
+  Acceptance check `#print axioms` = std-3-only is therefore BLOCKED on the
+  foundational lane, not on the adapter. The adapter is now basis-free MODULO the
+  period-map definition.
