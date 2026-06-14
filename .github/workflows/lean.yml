@@ -43,8 +43,15 @@ jobs:
           path: |
             .lake/packages
             .lake/build
-          key: lake-${{ hashFiles('lake-manifest.json', 'lakefile.toml', 'lean-toolchain') }}
+          # Rolling key: unique per commit (`github.sha`) so every run SAVES its
+          # `.lake/build`, and `restore-keys` warm-starts from the most recent prior
+          # cache. The previous manifest-only key never refreshed (a key-hit doesn't
+          # re-save), so the cached oleans were frozen and every run rebuilt the whole
+          # foundational cone (~26 min). With this, incremental builds reuse recent
+          # oleans and only changed modules + their downstream recompile.
+          key: lake-${{ hashFiles('lake-manifest.json', 'lakefile.toml', 'lean-toolchain') }}-${{ github.sha }}
           restore-keys: |
+            lake-${{ hashFiles('lake-manifest.json', 'lakefile.toml', 'lean-toolchain') }}-
             lake-
 
       - name: lake update
