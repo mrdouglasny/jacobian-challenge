@@ -1,122 +1,396 @@
 # Jacobians of Compact Riemann Surfaces
 
-A Lean 4 formalization addressing [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9) (v0.4, May 2026). All **24 `sorry`s** in Buzzard's `Challenge.lean` are closed with real `def`s and `instance`s; the remaining classical mathematics is captured as a **classified, audited axiom layer**; and a set of **real theorems** is proved on top — including the two anti-degeneracy properties Buzzard designed the challenge around (correct genus, injective Abel–Jacobi) plus the Albanese universal property.
+*Blow-by-blow discharge history lives in [`docs/history.md`](docs/history.md);
+this file keeps the current state and the ideas.*
 
-> **What this is, honestly.** A scaffold that *closes Buzzard's interface* and proves real theorems on it, with the deep classical inputs isolated as a classified, discharge-planned axiom layer — **not** a from-first-principles proof of Jacobian theory. The axioms are LLM-authored and **have not had independent human-mathematician review**. See [Caveats](#caveats--read-before-relying-on-this) before relying on any result.
+A Lean 4 formalization of [Kevin Buzzard's **Jacobian Challenge**](https://gist.github.com/kbuzzard/778bc714030b3e974ab5f4038783d1a9)
+(spec v0.4, May 2026). Three headline results:
+
+- **The challenge is closed.** All 24 `sorry`s in `Challenge.lean` are filled
+  with real `def`s and `instance`s, and the anti-degeneracy theorems Buzzard
+  built it around (correct genus, injective Abel–Jacobi) are proved — together
+  with the Albanese **universal property** and **Riemann–Roch / Serre duality**.
+- **The 24 are axiom-free.** Every Buzzard headline now `#print axioms`-checks to
+  the three standard Lean axioms — `AX_PeriodCycleBasis`, the last
+  challenge-critical axiom, was discharged from every headline closure by reproving
+  the period lattice from a now-unconditional topology theorem (T-GEN) plus a ℙ¹
+  unification (PRs #248/#250/#251). It survives only as *declared*, non-headline
+  scaffolding for Riemann's bilinear relations.
+- **The 24 do not pin the Jacobian** — as Buzzard himself anticipated in the
+  challenge thread — we make the gap precise with a machine-checked counterexample
+  and formalize the universal property (proposed there by Stoll and Merten) as the
+  repair.
+
+> **What this is, honestly.** A scaffold that *closes Buzzard's interface* and
+> proves real theorems on it. The 24 headlines are now **axiom-free** (depend only
+> on the three core Lean axioms), but they rest on a large vendored analytical
+> engine (the Kirov Dolbeault port) and the surrounding Lean is AI-authored and
+> **has not had independent human-mathematician review** — read this as a
+> machine-checked *reduction*, **not** a from-first-principles textbook proof of
+> Jacobian theory. See [Caveats](#caveats) before relying on any result.
 
 ## At a glance
 
 | | |
 |---|---|
-| **Build** | `lake build Jacobians` green; Kirov Dolbeault port compiled as a `require` dependency |
-| **Toolchain** | Lean `v4.30.0`; Mathlib pinned in `lake-manifest.json` (rev `c5ea003`) |
-| **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s |
-| **Axioms** | 10 active, of which **0 are challenge-critical in the headline closure** — all 24 Buzzard headlines are `#print axioms` standard-3 as of **PR #251** (the global period-lattice instances reproved from the unconditional T-GEN theorem `analyticLoopsGenerateH1` + `ofCurve_inj` rerouted through the basis-free engine, enabled by the ℙ¹-instance unification PR #250; machine-checked: [`docs/axiom-report.txt`](docs/axiom-report.txt) has 0 `AX_PeriodCycleBasis` mentions). `AX_PeriodCycleBasis` remains *declared* (kernel count 10) only as non-headline Layer-3 R1/R2 scaffolding — deleting it from the repo needs Riemann's bilinear relations in general. Historical reduction (kernel-verified per-headline: [`docs/CHALLENGE_AXIOM_CLOSURE.md`](docs/CHALLENGE_AXIOM_CLOSURE.md); the **TORUS-ALBANESE axiom-1 flip** (2026-06-12, TORUS lane) discharged **`AX_torus_oneforms_dualCover`** to a `noncomputable def` (`LinearEquiv.refl` — invariant torus 1-forms are constant cover-linear functionals by the *definition* `TorusHolomorphicOneForm := Module.Dual ℂ (ℂ^m)`), the first of the 4 complex-torus axioms gating the Albanese universal property `ofCurve_isJacobian` (net −1, 11 → 10, challenge-critical unchanged at 1; off the Buzzard critical path — `ofCurve_isJacobian` `#print axioms` now lists **3** torus axioms, not 4; see [`docs/planning/TORUS_ALBANESE_ROUTE.md`](docs/planning/TORUS_ALBANESE_ROUTE.md)); before that the **ELLIPTIC H₁ FLIP** (2026-06-12, EP lane) **deleted `AX_Elliptic_H1_symplectic`** — `π₁(ℂ/Λ) ≅ Λ` is now proven by covering-space lifting (`QuotientCoveringPi1.lean`), and the g = 1 witness `ellipticPeriodCycleBasis : PeriodCycleBasis (Elliptic ω₁ ω₂ h) 0` is **kernel-verified standard-3** (`Elliptic/H1Basis.lean`) — the FIRST fully unconditional positive-genus instantiation of the `AX_PeriodCycleBasis` content (net −1, 12 → 11, challenge-critical unchanged at 1); before that the **ABEL ⊇ FLIP** (2026-06-12, SUP lane) discharged **`AX_AbelSupset`** to a **theorem** on the planned Liouville / symmetric-product route — the Jacobi pencil map `Φ(y) = AJ(f⁻¹(y))` is smooth at regular values (local holomorphic sections, `AbelSupsetSections.lean`), continuous + `MDifferentiable` across branch values (cluster decomposition + manifold-valued removable singularity, `AbelSupsetPencil.lean`), and constant by the lattice-covering lift over the simply connected `ℙ¹` + Liouville (`AbelSupsetLiouville.lean`) — so **`AX_AbelTheorem`, `ofCurve_inj` and the whole Abel block are now standard-3 + `AX_PeriodCycleBasis` only** (net −1, 13 → 12, challenge-critical 2 → 1); earlier the same day the **ABEL SPLIT-FLIP** made `AX_AbelTheorem` a **theorem** — ⊆ (deg-0 AJ kernel ≤ principal) PROVEN via the unconditional Forster §20 weak-solution engine + the E6 adapter (`Bridge/AbelEngineAdapter.lean`; `abel_subset` is standard-3 + `AX_PeriodCycleBasis`), ⊇-degree half proven from `deg_divisor_eq_zero`; the ⊇ Abel–Jacobi half remains as the strictly-smaller remainder axiom **`AX_AbelSupset`** (Liouville route), so the split itself was net 0 (the SUP flip above then closed the remainder); the **line-bundle stub retirement** (2026-06-12) de-opaqued the last two opaque type stubs `LineBundle` + `LineBundle.ofDivisor` to real `def`s (the divisor-indexed tag structure; the only exposed interface was always `H⁰ = riemannRochSpace D` / `H¹ = Layer3.H1coh D`, both real; consumers elaborate unchanged), so **`AX_RiemannRoch`/`AX_SerreDuality` are now fully standard-3, statements included** (net −2, 15 → 13); the **genus-0 uniformization flip** (PR #209, parallel-account delivery, 2026-06-11) discharged the challenge-critical `AX_genus_eq_zero_iff_homeo` to a theorem — **both directions**: forward via the keystone-backed Riemann–Roch pole extraction (`h⁰((p)) = 2` at `g = 0` ⇒ degree-one function ⇒ biholomorphism to `ℙ¹` via `degreeOne_equiv_projectiveLine` ⇒ stereographic `S²`, `RiemannSurface/GenusZeroForward.lean`), backward via the S2-lane `π₁(S²) = 1` + Liouville developing map (`genus_eq_zero_of_homeo_sphere_unconditional`, #199+#205), so genus-0 uniformization is now a **theorem** and the challenge headline `genus_eq_zero_iff_homeo` is **standard-3** (net −1, 16 → 15, challenge-critical 3 → 2); the **functoriality-cluster completion** (#31, 2026-06-11) discharged `AX_pullbackAmbient_preserves_lattice` + `AX_pushforward_pullback` to theorems (net −2, 18 → 16) — route per daouid's closed PR #191 (credit) with the two lattice-comparison inclusions PROVEN (`Bridge/KirovDolbeaultPeriods.lean`: developing value = the port's moving-chart line integral, both directions, via chart-ball cell FTC + polygonal smooth representatives) and `push∘pull = deg·id` from the port's `PreimageCycle` conservation-of-number, so the whole Abel–Jacobi functoriality block is now theorems; the **KEYSTONE FLIP** (2026-06-11) discharged the final 2 Layer-3 cohomology axioms `h1coh_zero_finrank` + `serreDuality_equiv` to theorems and de-opaqued `canonicalDivisor` (net −3, 21 → 18): the T-lane frame-trace wall closed the port's keystone sorry, so **Riemann-Roch / Serre duality are now axiom-free over the port** — `riemannRochL3`, `serreDualityL3`, `h0_canonical_L3` all standard-3 (`AX_RiemannRoch`/`AX_SerreDuality`: standard-3 + only the two opaque `LineBundle` type stubs in their statements), independent even of `AX_PeriodCycleBasis`; #30 (2026-06-11) discharged `AX_pushforwardAmbient_preserves_lattice` — the period naturality `∫_{f_*γ}ω = ∫_γ f^*ω` is now a **theorem** via the developing-value naturality engine (`DevelopingNaturality.lean` axiom-free; `LoopLattice.lean` standard-3 + `AX_PeriodCycleBasis`), so all four `pushforward` headlines are standard-3 + `AX_PeriodCycleBasis` only; PR #183 (@daouid, 2026-06-11) discharged the **7-axiom odd-atlas infinity-chart cluster** with the correct analytic branch (`y = z·x^(g+1)`, the #178-review route) — `Hyperelliptic.instChartedSpace`/`instIsManifold` are now standard-3, net −7, none challenge-critical; the D1 merge 2026-06-10 fused `AX_AnalyticCycleBasis`+`AX_RBR1`+`AX_RBR2` into the single `AX_PeriodCycleBasis` and dropped `intersectionForm` from every headline closure; PR #179 (@Deicyde, 2026-06-11) discharged `AX_ofCurve_contMDiff` — Abel–Jacobi smoothness is now a **theorem**, standard-3 + `AX_PeriodCycleBasis` only, with the DT-flagged HI/lattice-completeness condition transferred into `AX_PeriodCycleBasis`'s discharge obligation); RR + Serre and the period cluster are **theorems** over the Layer-3 scaffold; the trace cluster (`pushforwardOneForm` + its id/comp laws) is **discharged** via the port's fibre-sum trace (`Bridge/KirovDolbeaultTrace.lean`, #26/#27/#28); Phase D discharged `H1coh`+3 instances and `cohomologyLES` to the real Čech cohomology + skyscraper LES of the vendored Kirov Dolbeault port, and the keystone flip finished the job — Riemann-Roch now rests on **no project axiom at all**; `PlaneCurve` now carries a fully proved manifold structure (`instChartedSpace` #117 + `instIsManifold` #52). All classified + kernel-verified — [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
-| **T-GEN reduction** *(2026-06-13, all-night close)* | The challenge-critical `AX_PeriodCycleBasis` reduces (its spanning half) to **T-GEN** (`AnalyticLoopsGenerateH1` — analytic loops generate H₁), which is now itself **reduced, fully proven, sorry-free, standard-3** to two classical real-analytic approximation theorems Mathlib lacks: **Whitney** (continuous ⇝ smooth loop, rel endpoints) ∘ **Grauert** (smooth ⇝ analytic loop), carried as the named hypotheses `SmoothLoopApproxHyp` / `SmoothLoopAnalyticApprox`. Composition `analyticLoopsGenerateH1_of_smoothApprox_analyticApprox` (`TGenFinalReduction.lean`); full chain + why each wall is genuinely Mathlib-absent (no manifold-codomain smooth approx; no real-analytic partition of unity) + the hyperelliptic Seifert–van Kampen alternative: [`docs/planning/TGEN_FINAL_REDUCTION.md`](docs/planning/TGEN_FINAL_REDUCTION.md). External soundness-vet (Gemini 3 Pro): both hypotheses faithful, non-vacuous, satisfiable. **Correction (2026-06-13):** Whitney/Grauert are walls only for this *constructive* (exhibit-a-cycle-basis) route; they are **not intrinsic** — Kirov's submission proves the 24 sorry-free + axiom-free *non-constructively* (lattice discreteness + period-pairing non-degeneracy ⟹ `ZLattice`, no cycle basis, no R1/R2). The shorter path for us is to port the single non-degeneracy lemma, not these approximation theorems — see [`docs/planning/NONCONSTRUCTIVE_DISCHARGE_PLAN.md`](docs/planning/NONCONSTRUCTIVE_DISCHARGE_PLAN.md). |
-| **`sorry`s** | 0 in the core; 11 in out-of-scope extensions; 3 in an optional adelic `H¹` construction (kept around, not on the critical path) |
-| **Provenance** | ~50k LOC our own Lean (135 files) + Kirov Dolbeault port (~86k LOC, compiled via `require`) + vendored Kirov/Wallace modules (Apache 2.0 / MIT) |
+| **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s; machine-checked against the pinned v0.4 spec |
+| **Challenge-critical axioms** | **0** — all 24 headlines are `#print axioms` standard-3 (`AX_PeriodCycleBasis` discharged from every headline closure, PRs #248/#250/#251; machine-checked: 0 mentions in [`docs/axiom-report.txt`](docs/axiom-report.txt)) |
+| **Axioms** | 10 active, **none on the Buzzard headline path** — Albanese-torus (3), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Beyond the challenge** | Riemann–Roch + Serre duality proved as theorems; Albanese categoricity proved; explicit positive-genus curve instances |
+| **`sorry`s** | 0 in the core / challenge path; a handful in out-of-scope extensions and an optional adelic `H¹` construction |
+| **Build** | `lake build` green; Lean `v4.30.0`, Mathlib pinned in `lake-manifest.json` |
+| **Provenance** | our own Lean (~50k LOC) + the Kirov Dolbeault port (~86k LOC, a forward-port vendored in-tree under `vendor/` and built as a local Lake package) + vendored Kirov/Wallace modules (Apache 2.0 / MIT) |
+
+Every headline is `#print axioms`-checked (golden trace in
+[`docs/axiom-report.txt`](docs/axiom-report.txt), CI-diffed): it depends only on
+the axioms it names plus the three Lean-core axioms, never `sorryAx`.
 
 ## The challenge
 
-Buzzard's `Challenge.lean` defines an API for the Jacobian of a compact Riemann surface, the Abel–Jacobi map, and pushforward/pullback functoriality — with 24 `sorry`s to fill. The design is **adversarial**: the API cannot be satisfied by a hack definition (e.g. `Jacobian := 0`), because `genus_eq_zero_iff_homeo` forces `genus` to be correct and `ofCurve_inj` forces Abel–Jacobi to be genuinely injective in positive genus. The underlying mathematics is classical (Abel 1829, Jacobi 1851); the task is to formalize it on top of current Mathlib.
+Buzzard's `Challenge.lean` defines an API for the Jacobian of a compact Riemann
+surface, the Abel–Jacobi map, and pushforward/pullback functoriality — with 24
+`sorry`s to fill (6 definitions, 7 typeclass instances, 11 theorems). The design
+is **adversarial**: the API cannot be satisfied by a hack such as `Jacobian := 0`,
+because `genus_eq_zero_iff_homeo` forces `genus` to be correct at 0 and
+`ofCurve_inj` forces the Abel–Jacobi map to be genuinely injective in positive
+genus. The underlying mathematics is classical (Abel 1829, Jacobi 1851); the task
+is to formalize it on current Mathlib.
 
-The deeper point is about **validation, not just compilation**: the Lean kernel checks *proofs*, never that a `def` *means* what it should, so a degenerate definition can still compile. Buzzard defends against this by attaching independent obligations to each definition. This repo pushes the same idea further — adding the Albanese **universal property** as an extra target the construction must satisfy, pinning it harder against degeneracy.
+The deeper point is **validation, not just compilation**: the Lean kernel checks
+*proofs*, never that a `def` *means* what it should, so a degenerate definition
+can still compile. Buzzard defends against this by attaching independent
+obligations to each definition. This repo pushes the same idea further — see the
+next section.
+
+## Do the 24 requirements pin the Jacobian?
+
+**Not on their own — a subtlety the challenge thread already flagged, which we
+make precise.** Buzzard anticipated it, distinguishing a curve's *actual genus*
+from the *AI genus* a solver fills in, and noting the sorries only force "an
+injective holomorphic map … **whether it's the Jacobian or not**; in fact I
+suspect that the Jacobian is the easiest example" (Zulip, 2026-04-19) — he did not
+claim the 24 are categorical. Our contribution is to pin the gap down with a
+machine-checked counterexample and to formalize the repair — the universal
+property, which **Michael Stoll** and **Christian Merten** proposed in that same
+thread.
+
+Buzzard's instance bundle forces `Jacobian X` to be a compact connected complex
+Lie group of dimension `genus X` — i.e. a complex torus `ℂ^g/Λ` — and the
+injective, holomorphic, functorial Abel–Jacobi structure kills the cheap hacks.
+But the 24 leave a gap: **`genus` is pinned only at zero.**
+`genus_eq_zero_iff_homeo` constrains only where `genus` *vanishes*; nothing equates
+`genus X` with the true genus for `genus ≥ 1`. Since `n ↦ 2n` preserves "= 0",
+the **genus-doubling object**
+
+> `genus₂ X := 2·genus X`,  `Jacobian₂ X := Jacobian X × Jacobian X`,
+> `ofCurve₂ :=` diagonal,  `pushforward₂ / pullback₂ :=` componentwise,
+> `degree₂ := degree`
+
+satisfies **every one of Buzzard's 24** yet is a `2g`-dimensional torus, not
+isomorphic to the genuine `g`-dimensional Jacobian when `g > 0`. This is
+machine-checked in
+[`docs/categoricity/GenusDoublingCounterexample.lean`](docs/categoricity/GenusDoublingCounterexample.lean)
+(`lake env lean`, exit 0): all seven instances, `genus₂_eq_zero_iff_homeo`, the
+Abel–Jacobi lemmas, the four functoriality laws, `pushforward₂_pullback`, and the
+capstone `genus₂_ne_genus`. So the literal 24, on their own, do not pin the
+Jacobian up to isomorphism.
+
+**Two ways to close the gap; we formalize one of them.** Full argument with the
+Gemini deep-think vet in
+[`docs/categoricity/CATEGORICITY_24_VS_ALBANESE.md`](docs/categoricity/CATEGORICITY_24_VS_ALBANESE.md),
+both repairs formalized in
+[`docs/categoricity/Condition25.lean`](docs/categoricity/Condition25.lean):
+
+- **Condition 25 — pin `genus`** to the analytic genus
+  `finrank ℂ (HolomorphicOneForm X)` (`GenusEquality`). This is exactly what the
+  counterexample violates (`genusDoubling_violates_condition25`), and **our own
+  construction satisfies it definitionally** (`repo_satisfies_condition25 := rfl`,
+  since we *define* `genus := finrank H⁰(Ω¹)`) — so our Jacobian is the genuine
+  one, not the doubling object. With Condition 25 the 24 *are* categorical
+  *conjecturally* — `T(X) ≅ J(X)` for all `X` would follow from a
+  Chow-motive + Brill–Noether rigidity result (the load-bearing input is
+  `ofCurve_inj`, vindicating Buzzard's design). That result is non-elementary and
+  unproved here; `Condition25.lean` records it as `RigidityClaim` — an unproven
+  proposition threaded as an explicit hypothesis, deliberately **not** an `axiom`
+  (an unproven claim must never silently extend the kernel).
+- **Albanese universality** — require `(Jacobian X, ofCurve x₀)` to be the
+  **initial** pointed holomorphic map from `X` to complex tori. By Yoneda an
+  initial object is unique up to unique isomorphism, so this pins the Jacobian as
+  a pointed torus, repairs the genus gap in one stroke, and turns the degree
+  identity `f_* ∘ f^* = deg·id` into a *consequence* rather than a separate axiom.
+  It is the clean, *constructively formalizable* certificate of the same
+  categoricity — which is why we build it rather than the motivic rigidity proof.
+
+This repo encodes the second. `IsJacobian`
+([`Jacobians/UniversalProperty.lean`](Jacobians/UniversalProperty.lean)) is the
+Albanese property quantified over complex tori of any dimension. **Categoricity
+itself is axiom-free**: `isJacobian_unique` proves any two objects satisfying the
+property are uniquely biholomorphically isomorphic (standard-3, using none of
+Buzzard's 24 — PR #246). Our concrete construction satisfies the property via
+`ofCurve_isJacobian`, which now carries only three Albanese-torus axioms
+(`AX_PeriodCycleBasis` was discharged from it too, PR #251); discharging those
+three is the validation endgame.
+
+Credit for the universal-property repair belongs to the challenge thread:
+**Michael Stoll** raised it first (2026-04-19, "to make sure no hacks are
+possible", including the **complex-tori** formulation we use), and **Christian
+Merten** built it into an algebraic-geometry variant (`exists_unique_ofCurve_comp`,
+2026-04-20). We reached the complex-analytic formalization (`IsJacobian`)
+independently, but they proposed the idea first.
 
 ## What this repo proves
 
-These are the genuine theorems — what a reader can trust the formalization to have established (modulo the axioms each one names; `#print axioms`-checked, no `sorryAx`).
+Genuine theorems — what a reader can trust the formalization to have established
+(modulo the axioms each names; `#print axioms`-checked, no `sorryAx`):
 
 | Result | Status |
 |--------|--------|
 | `genus ProjectiveLine = 0` | **axiom-free** (chart-cocycle + Liouville: 1-forms on ℙ¹ are a subsingleton) |
 | `genus (Elliptic ω₁ ω₂) = 1` | **axiom-free** (intrinsic Liouville on `ellipticDz`) |
-| `genus (HyperellipticEvenProj H) = H.f.natDegree / 2 − 1` | real proof — Liouville L2/L3 **discharged** (PR #96) |
-| Abel–Jacobi **injective** for genus > 0 | **theorem** `AX_ofCurve_inj` (`Axioms/OfCurveInjective.lean`) — was an axiom, now derived from the proved period-triangle theorem + Abel's theorem + a proven genus obstruction |
-| Albanese **categoricity** `ofCurve_isJacobian` | **theorem** — the concrete `Jacobian`/`ofCurve` satisfy the universal property (`∃!` factorization through holomorphic group homs), pinning the Jacobian up to unique isomorphism |
-| Functoriality identities (`pushforward`/`pullback` id + comp) | derived **theorems**, not axioms |
-| `FiniteDimensional ℂ (HolomorphicOneForm X)` | derived from Kirov's real ~3,400-LOC Montel proof via an injective bridge |
+| `genus (HyperellipticEven H) = deg(f)/2 − 1` | **axiom-free** (Liouville L2/L3 discharged) |
+| Abel–Jacobi **injective** for genus > 0 | **theorem** — `ofCurve_inj`, **standard-3** (axiom-free; via the proved T-GEN + basis-free Abel engine, PR #251) |
+| Abel's theorem (`AX_AbelTheorem`) | **theorem** — Forster §20 ∂̄-engine (⊆) + Liouville/Jacobi pencil (⊇) |
+| `genus_eq_zero_iff_homeo` | **axiom-free** (RR pole extraction → degree-1 map → S²; backward via π₁(S²)=1 + Liouville) |
+| Riemann–Roch + Serre duality | **theorems** over the Layer-3 cohomology tower (standard-3) |
+| Albanese **categoricity** `isJacobian_unique` | **axiom-free** (standard-3) — any two objects satisfying the universal property are uniquely biholomorphically isomorphic; uses none of Buzzard's 24 (PR #246) |
+| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + 3 torus axioms (`AX_PeriodCycleBasis` discharged, PR #251) |
+| Functoriality identities (push/pull id + comp, degree) | derived **theorems** |
 
-The elliptic Abel-injectivity witness `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` as a real computation through the period lattice — the strongest single piece of evidence that the construction is non-degenerate.
+### Explicit curves — concrete, axiom-clean validation
+
+Abstract definitions can be degenerate and still compile; concrete instances catch
+that. We instantiate the whole pipeline (chart-local 1-forms → genus → Jacobian →
+functoriality) on real curve families and check the headlines are
+`#print axioms`-clean:
+
+- **`ProjectiveLine`** — `genus = 0`, axiom-free.
+- **`Elliptic ω₁ ω₂`** — `genus = 1`, axiom-free; the Abel-injectivity witness
+  `elliptic_ofCurve_injective` is proved directly on `ℂ/Λ` through the period
+  lattice; and **`ellipticPeriodCycleBasis`** is a fully unconditional
+  (standard-3) witness of the `AX_PeriodCycleBasis` *content* at `g = 1` — the
+  first positive-genus instantiation of the (now headline-discharged) axiom's
+  content.
+- **`HyperellipticEven` / `HyperellipticOdd`** — the genus-`g` family `y² = f(x)`
+  for squarefree `f`, the repo's **deepest end-to-end test**, built from the ground
+  up:
+  - a real type carrying Buzzard's full **complex-manifold structure** — the
+    two-sheeted affine atlas glued to a chart at infinity (`EvenAtlas` / `OddAtlas`,
+    the latter's infinity chart discharged in PR #183) — reducing to **standard-3**;
+  - the **canonical holomorphic 1-form basis** `{x^k dx/y : k < g}`
+    (`hyperellipticEvenBasisDifferential`), the classical differentials of the
+    first kind, constructed and proved holomorphic;
+  - the **genus formula** `genus = deg(f)/2 − 1` as a proved, **axiom-free**
+    theorem over the *whole* even-degree family (`genus_HyperellipticEven_eq`).
+
+  As a cross-check, **"genus 1" comes out identically from three independent
+  constructions** — `Elliptic`, `HyperellipticOdd` at `deg 3`, and
+  `HyperellipticEvenProj` at `deg 4` — all axiom-free. The example drives the entire
+  pipeline (chart-local 1-forms → cocycle → finite-dimensionality → genus) on a
+  nontrivial positive-genus family, forcing the *general* `genus` definition to
+  compute the right number, not just typecheck. The odd-degree track mirrors the
+  even one decl-for-decl (lower bound proved, upper bound in progress).
+- **`PlaneCurve`** — smooth plane curves with a fully proved manifold structure.
+
+Each curve's headline is `#print axioms`-clean — concrete, positive-genus
+evidence that the general definitions are non-vacuous, independent of the axiom
+layer.
 
 ## How the work divides — three separable parts
 
-The repository is **three clearly separable parts**, and only the first is "the challenge". A map before the details:
+| Part | What it is | Required for the challenge? |
+|------|-----------|:---:|
+| **1. Buzzard's challenge** — `Challenge.lean` + the construction | the interface Buzzard posed | — *(it **is** the challenge)* |
+| **2. The RR/Serre tower** — `Layer3/`, `RiemannSurface/Cohomology/` | prove the deep axioms instead of assuming them | no — the challenge *rests on* the axioms; this *discharges* them |
+| **3. Explicit-curve projects** — `ProjectiveCurve/`, `Extensions/` | exercise the formalization on real curves | no — validation |
 
-| Part | What it is | Required for the challenge? | `sorry` status |
-|------|-----------|:---:|---|
-| **1. Buzzard's challenge** — `Challenge.lean` + the construction | the interface Buzzard posed | — *(it **is** the challenge)* | **core `sorry`-free**; rests on the 10-axiom layer |
-| **2. RR/Serre/sheaf subchallenge** — `RiemannSurface/Cohomology/` | discharge the deep axioms via the Layer-3 tower | **no** — the challenge *rests on* the axioms; this *proves* them | RR/Serre and the period cluster now **theorems** (Layer-3 tower); + an **optional** adelic `H¹` construction kept around (3 `sorry`s) |
-| **3. Hyperelliptic extension projects** — `Extensions/`, `ProjectiveCurve/Hyperelliptic/` | exercise the formalization on real curves | **no** — real-example vetting | **even completed** (PR #96); **odd** = 6-`sorry` stretch |
+**Part 1 is closed and axiom-free**: all 24 `sorry`s filled, the anti-degeneracy
+headlines proved, and every headline `#print axioms`-checks to the three standard
+Lean axioms (the last challenge-critical axiom, `AX_PeriodCycleBasis`, was
+discharged from every headline closure — PRs #248/#250/#251). In Buzzard's terms
+("sorry-free ⇒ done"), Part 1 is met.
 
-**Part 1 — Buzzard's challenge (the interface). *Closed.*** All 24 `sorry`s in `Challenge.lean` are filled with real `def`s/`instance`s, and the anti-degeneracy headlines (correct genus, injective Abel–Jacobi, Albanese universal property) are proved — **resting on** the axiom layer. The core is `sorry`-free; every headline is `#print axioms`-checked to depend only on the axioms it names plus the three Lean-core axioms, never `sorryAx`. In Buzzard's own terms ("sorry-free ⇒ done"), Part 1 is **met modulo a declared, audited axiom layer**.
+**Part 2** reduces the challenge toward a single classical spine. Riemann–Roch and
+Serre duality are **theorems** (`riemannRochL3`, `serreDualityL3`, standard-3) over
+a thin cohomology scaffold — the **Layer-3 tower** — built on the Kirov Dolbeault
+port's Čech `H¹` and skyscraper long exact sequence. Everything the 24 obligations
+rest on has now been discharged from the headline closures; the discharge
+timeline is in [`docs/history.md`](docs/history.md).
 
-**Part 2 — the RR/Serre/sheaf subchallenge: prove the axioms.** The axiom layer (10 axioms) is itself the open research program, and discharging it is *not* required for Part 1. It is the deeper goal of reducing the whole challenge to **a single classical spine: Riemann–Roch + Serre duality** (the sheaf-cohomology anchor under `RiemannSurface/Cohomology/`). The reduction target is *"Buzzard challenge = axiom table + RR/Serre"*: once RR/Serre are in hand, the rest of the table follows. **RR and Serre are now themselves theorems, not axioms.** The **Layer-3 tower** ([`Jacobians/Layer3/`](Jacobians/Layer3/), [#126](https://github.com/mrdouglasny/jacobian-challenge/issues/126) / [#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)) proves both — `AX_RiemannRoch` and `AX_SerreDuality` are now `theorem`s — over a small cohomology scaffold: the 6-term sheaf-cohomology long exact sequence `0 → L(D) → L(D+P) → ℂ_P → H¹(D) → H¹(D+P) → 0`, finiteness of `H¹`, `h¹(𝒪) = g`, and the Serre-duality isomorphism `H¹(D) ≃ L(K−D)*` (7 axioms in the original scaffold), via an axiom-free Euler-characteristic engine. So the trust floor descended one notch — from *"RR + Serre asserted"* to *"the standard cohomology LES + `h¹(𝒪) = g` + Serre-duality iso asserted,"* each a step closer to Mathlib. **Phase D** then discharged 5 of those 7 scaffold axioms — `H1coh` + 3 instances + `cohomologyLES` — to real constructions via the Kirov Dolbeault port (the Čech `H¹` model and the skyscraper LES); and the **keystone flip** (2026-06-11) discharged the final 2 (`h1coh_zero_finrank` and `serreDuality_equiv`) — the T-lane frame-trace wall (Miranda §VIII.3 trace route) proved the port's ∃-cover Serre-duality keystone, so the Layer-3 RR/Serre closure is now **axiom-free over the port** (standard-3). **How the same research debt appears from two routes** — the 🔴 research-grade debt appears in *two* places in the axiom table below that are really **the same content seen from two routes**:
-
-- the **Period / Hodge / homology axioms** (originally 7; now **4 remain** as axioms: `intersectionForm` + its alternating/perfect laws + `AX_PeriodCycleBasis` (the D1 merge of `AX_AnalyticCycleBasis` with the RBR primitives) — *postulated directly*, the Griffiths–Harris / Hodge route) — `AX_RiemannBilinear`, `AX_PeriodLattice`, and `instPeriodLatticeDiscrete` are now **theorems** (Phase C, over the R1/R2 fields of the cycle-basis bundle), and `AX_H1FreeRank2g` is a **theorem** (derived from the cycle basis); and
-- the **axiom-based anchor `sorry`s** — faithful, cross-model-vetted *statements* of Riemann–Roch (§16) and Serre duality (§17) in `Cohomology/RiemannRochAPI` / `Cohomology/SerreDualityAPI`, originally **proof-deferred** (the Forster cohomological route) and **now fully closed**: `#113` proved the `riemannRoch` identity and `h⁰(K) = g`; the `L(D)`-finiteness fact they rest on — formerly the axiom `riemannRochSpace_finiteDimensional` — is **itself now discharged**, proved elementarily ([#116](https://github.com/mrdouglasny/jacobian-challenge/issues/116)); **Serre vanishing is proved** ([#120](https://github.com/mrdouglasny/jacobian-challenge/issues/120)) — `deg(div f) = 0` (the degree theorem, axiom-free over the standard three) closes `h0_of_deg_gt`/`h1_eq_zero_of_deg_gt`; and the last two corollaries `riemannRoch_consistent_with_AX` and `h0_point_eq_one_of_genus_pos` (the latter axiom-free) are now closed too. Separately, an **optional** adelic route (`Cohomology/RiemannRochAnchor`, Weil repartitions, **3** `sorry`s) builds a concrete `H¹` (`adeleH1`) — a candidate *deeper* discharge of the Layer-3 cohomology axioms — that we keep around but do **not** need for RR/Serre (which are theorems via the tower).
-
-These routes are **not independent mathematical content**, but their Lean status is now different. The historical Forster route (Forster, *Lectures on Riemann Surfaces*, GTM 81, §§14–21 — see [`refs/`](refs/)) explains why a completed cohomological build would also retire the remaining period/Hodge/homology axioms downstream: Serre §17.10 gives `dim H⁰(Ω¹) = g` (an alternative proof that `AX_PeriodLattice` is already a theorem via Phase C's matrix engine), Abel §20 + harmonic-period nondegeneracy §19 give the lattice, and `H₁ ≅ ℤ^{2g}` falls out as a §21.5 byproduct (⇒ the cycle-basis content of `AX_PeriodCycleBasis`, still an axiom). The `L(D)`-finiteness half (which feeds `H¹` finiteness via Serre) is **now proved elementarily** — `riemannRochSpace_finiteDimensional`, the `ℓ(D) ≤ 1 + deg D⁺` upper bound, **Montel-free** ([#116](https://github.com/mrdouglasny/jacobian-challenge/issues/116)) — while the separate adelic route remains a candidate deeper construction of `H¹`, not the active RR/Serre path.
-
-So the period cluster and the cohomology route are **two views of the same roof**, not two unrelated proof obligations. Route comparison: [`refs/JACOBIAN_ROUTE_COMPARISON.md`](refs/JACOBIAN_ROUTE_COMPARISON.md).
-
-**The current method — the Layer-3 tower.** Part 2 is being executed by a *tower of reductions* ([`Jacobians/Layer3/`](Jacobians/Layer3/)): rather than continue through the separate adelic construction, the active route **axiomatizes a thin layer of standard cohomology / differential-geometry infrastructure and proves the axiom-table entries as theorems over it**, pushing the trust floor toward Mathlib one stratum at a time. Three strata so far — **Phase B** put RR + Serre over the 7-axiom cohomology scaffold (`H¹` + the divisor-addition LES + `h¹(𝒪)=g` + Serre iso; cross-model-vetted satisfiable/faithful, [#126](https://github.com/mrdouglasny/jacobian-challenge/issues/126)/[#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)); **Phase C** (landed) **discharged the period/Hodge cluster** — `AX_RiemannBilinear`, `AX_PeriodLattice`, `instPeriodLatticeDiscrete` are now `theorem`s over the Riemann bilinear relations through an axiom-free period-lattice engine (net −1 axiom; since the **D1 merge**, 2026-06-10, the two relations are the arc-level `R1`/`R2` fields of the single `AX_PeriodCycleBasis` bundle — formerly the separate `AX_RBR1`/`AX_RBR2` + `AX_AnalyticCycleBasis`, net −2 more); and **Phase D** (landed, #143/#144) **discharged 5 of the 7 Layer-3 cohomology scaffold axioms** — `H1coh` + 3 instances + `cohomologyLES` — by integrating the Kirov Dolbeault port as a `require` dependency and wiring its real Čech `H¹` model and skyscraper LES directly into the Layer-3 scaffold, reducing the trust floor from "cohomology LES asserted" to "Forster §14–§16 Čech machinery proved." **The keystone flip** (landed 2026-06-11) then **discharged the remaining 2 Layer-3 cohomology axioms** (`h1coh_zero_finrank` and `serreDuality_equiv`) and de-opaqued `canonicalDivisor`: the T-lane frame-trace wall (`exists_canonicalData_residueAtom`, sorry-free) fed the genus-split + capstone packaging, replacing the port's keystone sorry with the proven ∃-cover keystone `exists_serreDualityData_cover`. This is **still Part 2** — *discharge the axiom layer* — not a fourth part: the tower is the *how*, complementary to (and now the primary execution of) the Forster/cohomology perspective above.
-
-**Part 3 — the hyperelliptic extension projects: vetting on real curves.** Orthogonal to Parts 1–2: concrete curve families that exercise the whole formalization end-to-end (cocycle 1-forms → finite-dim bridge → genus → Jacobian → functoriality) on a non-trivial example, forcing the API to *compute correctly*, not merely type-check. They neither close the challenge nor sit on any axiom's critical path. Two parities, structured symmetrically (core atlas in `ProjectiveCurve/Hyperelliptic/{Even,Odd}Atlas/` + an extension file in `Extensions/Hyperelliptic{Even,Odd}.lean`):
-
-- the **even-degree** track is **completed** — `genus_HyperellipticEven_eq` is a real proved theorem (Liouville L2/L3 discharged, PR #96), the strongest evidence that genus computes correctly on a whole family;
-- the **odd-degree** track (`Extensions/HyperellipticOdd.lean`, 6 `sorry`s) is a deliberate parallel **stretch project** mirroring the even one decl-for-decl — its lower genus bound is proved, the upper bound and warm-ups remain `sorry`. It is **not required for Buzzard's challenge**; it exists to mirror the completed even case on the single-∞ parity and to host the hyperelliptic-involution / Weierstrass-point material.
-
-## What it assumes — the axiom layer
-
-Every axiom is a staging point with a citation and a discharge plan, classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). They group into eight topics (counts sum to the **11** kernel-verified axioms; topic boundaries are soft — a few axioms could reasonably sit in an adjacent row); difficulty is the *discharge* difficulty (🟢 mechanical / available in Mathlib, 🟡 substantial but standard, 🔴 research-grade — a genuine textbook theorem with no existing Lean proof):
-
-| Topic | Count | Difficulty |
-|-------|:-----:|:----------:|
-| Period / Hodge / homology core (intersection form + laws — D2: kept, no longer in any headline closure; `AX_PeriodCycleBasis` = H₁ cycle basis + arc-level R1/R2, the D1 merge; **Riemann bilinear + period lattice now theorems**, Phase C) | 4 | 🔴🟡 |
-| Abel–Jacobi — **0 left: `AX_AbelSupset` DISCHARGED 2026-06-12 (SUP lane, Liouville route)**; `AX_AbelTheorem`, `ofCurve_inj` and `ofCurve` smoothness are all theorems (standard-3 + `AX_PeriodCycleBasis`) | 0 | ✅ **discharged** |
-| Sheaf cohomology stubs / Plücker / uniformization (**`LineBundle`/`ofDivisor` type stubs DISCHARGED 2026-06-12 (stub retirement)** — real `def`s, so **RR + Serre are now fully standard-3, statements included**; `canonicalDivisor` **de-opaqued by the keystone flip 2026-06-11** (now the chosen Serre divisor, a real `def`); `AX_PluckerFormula`; **`AX_genus_eq_zero_iff_homeo` DISCHARGED 2026-06-11 (PR #209, genus-0 uniformization flip — now a theorem, standard-3)**; `H0` = `riemannRochSpace`, `H1` = `Layer3.H1coh`) | 1 | 🔴 |
-| Layer-3 scaffold: cohomology — **0 left: the keystone flip (2026-06-11) discharged `h1coh_zero_finrank` + `serreDuality_equiv`** (statements verbatim, via the T-lane frame-trace wall through the port's proven ∃-cover keystone; **Phase D** had discharged `H1coh`+3 instances+`cohomologyLES` to the Kirov Čech model; [#126](https://github.com/mrdouglasny/jacobian-challenge/issues/126)/[#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)/#143/#144). The 2 period primitives `RBR1`/`RBR2` were **merged into `AX_PeriodCycleBasis`** (D1, 2026-06-10) as its arc-level R1/R2 fields | 0 | ✅ **discharged** |
-| Functoriality (pushforward / pullback naturality + lattice preservation; **the trace cluster — `pushforwardOneForm` + id/comp — discharged 2026-06-10** via the Kirov-Dolbeault `traceFormTotal` bridge, #26/#27/#28; **`AX_pushforwardAmbient_preserves_lattice` discharged 2026-06-11**, #30, via the developing-value naturality engine; **`AX_pullbackAmbient_preserves_lattice` + `AX_pushforward_pullback` discharged 2026-06-11**, #31/#34, via the proven lattice bridge) | 1 | 🟡 |
-| Torus / Albanese universal property | 3 | 🟡 |
-| Concrete curves (elliptic `H₁`-symplectic witness; hyperelliptic genus formula — the **7-axiom odd-atlas ∞-chart cluster discharged PR #183** (2026-06-11, correct analytic branch; `Hyperelliptic.instChartedSpace`/`instIsManifold` now standard-3); plane-curve affine-connected — `instIsManifold` **discharged #52**, the plane-curve manifold structure is now fully proved; **ℙ¹ is axiom-free**) | 3 | 🟢🟡 |
-| Liouville hierarchy L2 / L3 (the canonical-differentials theorem) | 0 | ✅ **discharged** (PR #96) |
-| **Total** | **11** | |
-
-**Anchor APIs for the deepest axioms.** For the 🔴 research-grade cluster, the real risk is *formulation, not proof* — a degenerate or vacuous statement compiles just as happily as a faithful one. So before attempting those proofs we pin **faithful, cross-model-vetted statements first** (real `def`s + `sorry`-ed theorems, checked against the textbook form), and do the hard proofs last against a known-correct surface. Landed so far: `riemannRochSpace` (the real `L(D)`, a ℂ-submodule of the **meromorphic germ quotient** `MeroField = MeroFunctions ⧸ GermZero` — corrected from an earlier raw-`X→ℂ` version that was *degenerate*: it admitted germ-zero "spike" functions, so was infinite-dimensional with `finrank ≡ 0`; the compiled `germZero_ne_bot` witnesses that bug; this de-opaqued `H0`), and three statement APIs gated by the `SheafCohomologySpec` faithfulness suite. **`PluckerAPI` is complete** — its statements are fully proved (the low-degree corollaries reduce by arithmetic to the `AX_PluckerFormula` axiom), so the remaining Plücker work is the formula axiom and the plane-curve atlas, not the API. **`h⁰(0) = 1` is now proved axiom-free** over the corrected space — `L(0)` = holomorphic functions = constants (via the normal-form honest representative + Liouville → `LinearEquiv (ℂ ≃ L(0))` → `finrank = 1`), the concrete confirmation that the faithfulness fix gives the *right* dimension (it was `finrank ≡ 0` over the old degenerate space). **`#113` landed the core:** `riemannRoch` (the RR identity) and `h⁰(K) = g` are now **proved** from the `AX_RiemannRoch`/`AX_SerreDuality` anchor (themselves now `theorem`s over the Layer-3 cohomology scaffold, [#131](https://github.com/mrdouglasny/jacobian-challenge/issues/131)) + the now-discharged `riemannRochSpace_finiteDimensional` finiteness theorem (was an axiom; proved elementarily, #116). `RiemannRochAPI` and `SerreDualityAPI` now carry **0** deferred `sorry`s — fully closed. `canonicalDivisor_deg` = `deg K = 2g − 2` is **proved** from `riemannRoch`; **Serre vanishing** `h0_of_deg_gt` + `h1_eq_zero_of_deg_gt` is **proved** via the degree theorem `deg_divisor_eq_zero` (`deg(div f) = 0`, over only the three Lean-core axioms, [#120](https://github.com/mrdouglasny/jacobian-challenge/issues/120)); and the last two corollaries are closed — `riemannRoch_consistent_with_AX` (subsumed by `riemannRoch`) and `h0_point_eq_one_of_genus_pos` (**axiom-free**: a single-simple-pole function would be a degree-1 cover ⇒ `genus 0`, contradiction). The only remaining anchor `sorry`s are the **3** in the **optional** adelic Weil-repartition route (`Cohomology/RiemannRochAnchor`: `riemannRoch_anchor`, `adeleH1_finiteDim`, `serre_anchor`) — a concrete `H¹` construction kept around as a candidate deeper discharge of the Layer-3 cohomology axioms, not on the critical path. Methodology: [`docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md`](docs/planning/DEEP_AXIOM_ANCHORS_PLAN.md). Every axiom additionally has a per-axiom discharge plan under [`docs/planning/`](docs/planning/) (one file each, Gemini-vetted).
-
-## Caveats — read before relying on this
-
-- **The axioms are LLM-authored and not human-reviewed.** Each was written or curated in-session and cross-vetted by a second model (typically Gemini deep-think + Codex), but none has had independent human-mathematician review. **If you are evaluating this work, read [`Jacobians/Axioms/`](Jacobians/Axioms/) and [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) first.**
-- **This is a reduction, not a closed proof.** A theorem whose only non-Lean-proven content is a textbook-classical axiom should be read as *"reduced to that classical input"*, not *"proved from Mathlib"*.
-- **Zero human-written Lean.** The Lean was written by Claude (Opus) with Codex rescue passes and Gemini axiom audits, directed by a mathematician on scope, the axiom-vs-proof boundary, and review of every landing.
-- **`sorry`s, in two honest categories** (the *core* — challenge API, Jacobian construction, curve witnesses, S1–S7 1-form framework — is `sorry`-free):
-  - **11 gap-layer** — out-of-scope extension/bridge files (`Extensions/HyperellipticOdd.lean` 6 — the odd-degree extension project, deliberately mirroring the *completed* `Extensions/HyperellipticEven.lean`; `Extensions/AbelJacobi.lean` 4; `Hyperelliptic/AntiInvariance.lean` 1).
-  - **3 optional-adelic** — the axiom-based RR/Serre anchors (`Cohomology/RiemannRochAPI`, `Cohomology/SerreDualityAPI`) are **fully closed** (`PluckerAPI` proved; `h⁰(0)=1` axiom-free; `#113` proved `riemannRoch`/`h⁰(K)=g`; `#120` proved Serre vanishing; and `riemannRoch_consistent_with_AX` + `h0_point_eq_one_of_genus_pos` closed here). The remaining **3** are an **optional** adelic Weil-repartition construction (`Cohomology/RiemannRochAnchor`: `riemannRoch_anchor`, `adeleH1_finiteDim`, `serre_anchor`) — a concrete `H¹` kept around as a candidate deeper discharge, **not** on the critical path.
+**Part 3** is orthogonal validation — the explicit curves above.
 
 ## How it's built
 
-The construction takes the **period-lattice route** — `Jac X = (HolomorphicOneForm X)* / H₁` — rather than the symmetric product `Xᵍ/Sᵍ` (whose coincident-point local analysis Buzzard flags as hard). It is basis-free at the type level.
+The construction takes the **period-lattice route** —
+`Jac X = (HolomorphicOneForm X)* / H₁` — rather than the symmetric product
+`Xᵍ/Sᵍ` (whose coincident-point analysis Buzzard flags as hard). It is basis-free
+at the type level.
 
-- **`AbelianVariety/`** — `ComplexTorus V L := V ⧸ L` for a ℤ-lattice `L`, supplying all 7 typeclass instances Buzzard requires on `Jacobian X` directly from a translation atlas + lattice discreteness. **Axiom-free.** This is the concrete answer to Buzzard's "quotient a manifold by a discrete group" gap for the shape the Jacobian needs.
-- **`RiemannSurface/` + `Jacobian/`** — the abstract track: from Buzzard's typeclasses → holomorphic 1-forms → period lattice → `Jacobian X`. The Abel–Jacobi map is a real `∫` (multi-chart line integral over an analytic cycle basis), addressing Buzzard's "integrating differentials around loops" gap from underneath via the Kirov bridge.
-- **`ProjectiveCurve/`** — the concrete track: real curve `def`s satisfying Buzzard's typeclasses by construction — `ProjectiveLine`, `Elliptic`, `HyperellipticOdd`/`HyperellipticEven`, and `PlaneCurve` (atlas complete via Euler + IFT, #117; `instIsManifold` still an axiom).
-- **`Extensions/`** — test theorems exercising the formalization end-to-end (the regression catch where `Module.finrank` silently returns 0).
+- **`AbelianVariety/`** — `ComplexTorus V L := V ⧸ L` for a ℤ-lattice `L`,
+  supplying all 7 typeclass instances Buzzard requires on `Jacobian X` from a
+  translation atlas + lattice discreteness. **Axiom-free.**
+- **`RiemannSurface/` + `Jacobian/`** — Buzzard's typeclasses → holomorphic
+  1-forms → period lattice → `Jacobian X`. The Abel–Jacobi map is a real `∫`, a
+  multi-chart line integral over an analytic cycle basis.
+- **`ProjectiveCurve/`** — real curve `def`s satisfying Buzzard's typeclasses by
+  construction (the explicit curves above).
+- **`Layer3/` + `RiemannSurface/Cohomology/`** — the RR/Serre tower (Part 2).
+- **`Extensions/`** — end-to-end test theorems on the curve families.
 
-## Repository map
+## `AX_PeriodCycleBasis` — discharged from the headlines
 
-| Path | Contents |
-|------|----------|
-| [`Jacobians/Challenge.lean`](Jacobians/Challenge.lean) | Buzzard's v0.4 statements verbatim, all 24 `sorry`s closed downstream |
-| [`challenge_spec_v0.4.lean`](challenge_spec_v0.4.lean) | Buzzard's v0.4 spec pinned byte-identical (gist rev `cdc146c3`; uncompiled reference) |
-| [`Jacobians/ChallengeConformance.lean`](Jacobians/ChallengeConformance.lean) | machine-check: each v0.4 signature restated as an `example`, discharged by our decls |
-| [`Jacobians/AbelianVariety/`](Jacobians/AbelianVariety/) | `ComplexTorus` (axiom-free) |
-| [`Jacobians/RiemannSurface/`](Jacobians/RiemannSurface/) | period lattice, line integrals, `riemannRochSpace`, the RR/Serre/Plücker anchor APIs |
-| [`Jacobians/ProjectiveCurve/`](Jacobians/ProjectiveCurve/) | concrete curves + the hyperelliptic 1-form framework |
-| [`Jacobians/Axioms/`](Jacobians/Axioms/) | the cross-cutting classified axioms (Riemann–Roch, Serre, Abel, Liouville hierarchy, …) |
-| [`Jacobians/UniversalProperty.lean`](Jacobians/UniversalProperty.lean) | `IsJacobian` + the categoricity theorem |
-| [`Jacobians/Vendor/`](Jacobians/Vendor/) | ported Kirov + Wallace modules (see [Provenance](#vendored-sources--attribution)) |
-| [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) | **canonical axiom audit** — start here to review the debt |
-| [`docs/`](docs/) | status snapshots, discharge plans, dependency trace, construction plans |
+`AX_PeriodCycleBasis` (in [`Jacobians/Axioms/PeriodCycleBasis.lean`](Jacobians/Axioms/PeriodCycleBasis.lean))
+was the last challenge-critical axiom: every compact connected Riemann surface of
+genus `g` admits `2g` piecewise-analytic loops whose periods generate a
+**discrete, non-degenerate lattice** in `ℂ^g` (plus Riemann's bilinear relations
+as `R1`/`R2` fields). The Buzzard-critical content is only the lattice's
+discreteness and non-degeneracy. Classical: Forster §§19–21.
+
+**It is no longer in any headline's closure** (PRs #248/#250/#251). The two global
+period-lattice instances were reproved from the **unconditional T-GEN theorem**
+`analyticLoopsGenerateH1` — *analytic loops generate H₁*, proved standard-3 via
+piecewise-linear-in-charts approximation (#248) — and the `ofCurve_inj` headline
+was rerouted through the basis-free Abel engine; a ℙ¹-instance unification (#250)
+removed the chart diamond that blocked the rewiring. The `g = 1` content was
+already a fully unconditional witness (`ellipticPeriodCycleBasis`, standard-3).
+
+The axiom **remains declared** (so the kernel axiom count is still 10) only as
+scaffolding for the non-headline R1/R2 (Riemann bilinear relations) story and the
+cycle-basis witnesses — *deleting* it from the repository would additionally need
+R1/R2 in full generality (genuine unformalized Hodge content, proved so far only
+for `g ≤ 1` / elliptic / hyperelliptic). Every active axiom is off the Buzzard
+headline path; all are classified in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) with
+per-axiom discharge plans under [`docs/planning/`](docs/planning/).
+
+## Follow-up directions
+
+None of these are required for the challenge; they are natural next steps the
+scaffolding already sets up.
+
+- **Finish the Albanese proof (the validation endgame).** Categoricity of the
+  universal property — `isJacobian_unique`, that *any* two objects satisfying it
+  are uniquely isomorphic — is already axiom-free. What still rests on axioms is
+  that *our* construction satisfies the property (`ofCurve_isJacobian`, on three
+  complex-torus axioms: `AX_torus_self_albanese`, `AX_period_functoriality`,
+  `AX_curve_generates_jacobian`). Discharging those makes the full certificate —
+  "our Jacobian is *the* Jacobian, up to unique isomorphism" — axiom-free, the
+  strongest validation the construction can carry.
+- **Explicit hyperelliptic Jacobians.** The Jacobian of a hyperelliptic curve is
+  already constructed (the general construction applies, and the extension files
+  force `genus`/`Jacobian`/`ofCurve`/`pushforward`/`pullback` to fire on the
+  concrete type). The **odd** parity goes further: it carries explicit period
+  machinery — branch-cut cycle loops and their period vectors
+  (`Hyperelliptic/{CycleLoops,BoundaryWord,CycleBasisWitness}.lean`) — assembled
+  into a `PeriodCycleBasis` witness that is currently *conditional* on a branch-cut
+  datum. Finishing it unconditionally, and reading off the explicit **period
+  matrix** `∫_{cycle} x^k dx/y`, would give a concrete, computed Jacobian for the
+  whole odd family — the higher-genus analogue of `ellipticPeriodCycleBasis`
+  (already unconditional at `g = 1`, `ℂ/Λ` with explicit generators). Note the
+  even/odd split: the **even** parity leads on the *genus* formula (proved,
+  axiom-free) but its period side is the follow-up twin
+  (`periodLattice_rank_HyperellipticEven_eq`, currently a `sorry` scaffold) — the
+  odd model's single point at infinity gives the cleaner branch-cut homology, so
+  the explicit period work landed there.
+- **The principal polarization and Torelli.** The universal property pins the
+  Jacobian as a *pointed torus*, not yet as a principally polarized abelian
+  variety. The polarization is canonically derivable — push the curve's
+  intersection form on `H₁` forward along the forced `aj_*` isomorphism — which
+  gives the theta divisor and, in principle, Torelli (the curve is recoverable from
+  its ppav). A natural deepening beyond the challenge's notion of "Jacobian".
+- **Independence — our own RR/Serre.** The analytical engine is currently the
+  vendored Kirov Dolbeault port. Reproving Riemann–Roch and Serre duality in our
+  own formulation (ideas from the port, implementation ours) would make the
+  Layer-3 tower independent of that dependency.
+- **Loose ends** — the odd-degree genus upper bound (the twin of the proved even
+  formula), and explicit periods for the plane-curve family.
+
+## Contributors & acknowledgments
+
+An agent-assisted community project: collaborators' AI agents do most of the work
+under light human steering, coordinated through GitHub PRs. Contributions span
+code, vendored proofs, and the issue/triage layer.
+
+- **[Michael R. Douglas](https://github.com/mrdouglasny)** — project lead;
+  scaffold, axiom layer, curve theory, and the Abel engine.
+- **[daouid](https://github.com/daouid)** — the Abel–Jacobi functoriality cluster
+  and period-lattice comparison, the period bilinear-relations route, and the
+  odd-atlas infinity-chart cluster (PR #183).
+- **[sqrt-of-2](https://github.com/sqrt-of-2)** — topology and discharge PRs.
+- **Jack McCarthy ([@Deicyde](https://github.com/Deicyde))** — the axiom-discharge
+  issue tracker ([#77](https://github.com/mrdouglasny/jacobian-challenge/issues/77))
+  that structures the open-problem surface, and the Abel–Jacobi smoothness
+  discharge (PR #179).
+- **Rado Kirov ([@rkirov](https://github.com/rkirov))** — produced the first
+  **complete, sorry-free, axiom-free** formalization of the challenge (his repo is
+  verified sorry-free with zero custom axioms, commit `cd16360`, 2026-06-13), and
+  generously released it under **Apache 2.0** so others could build on it directly.
+  We did. **His Dolbeault library is a load-bearing dependency here:** the ~86k-LOC
+  port ([`vendor/kirov-dolbeault-port/`](vendor/kirov-dolbeault-port/),
+  forward-ported to our Mathlib in a 6-edit lift) supplies the analytical engine —
+  Čech cohomology, the residue theorem, Riemann–Roch and Serre duality — on which
+  our Layer-3 RR/Serre tower and Abel ∂̄-engine rest. His finished proof is the
+  benchmark for this problem and the **first** existence proof that it is fully
+  formalizable in current Lean; our contribution is complementary (explicit curves, the
+  categoricity analysis, a different construction), not a competitor. We also owe
+  him a key idea for our endgame: discharging the period-lattice axiom
+  **non-constructively** — span all closed loops and prove the lattice is discrete
+  and non-degenerate, so Mathlib's `ZLattice` theory yields its full rank `2g` *by
+  existence*, with no explicit basis of 1-cycles (which would have required
+  real-analytic approximation theorems Mathlib lacks). Smaller verbatim modules are
+  vendored under `Jacobians/Vendor/Kirov/`.
+- **Michal Wallace ([@tangentstorm](https://github.com/tangentstorm))** — six
+  self-contained analytic modules (holomorphic maps, meromorphic order, branched
+  covers, cotangent bundle), each **sorry-free and axiom-free** and cleanly
+  reusable — released under **MIT**, vendored under `Jacobians/Vendor/Wallace/`,
+  and used in the genus-obstruction proof behind Abel injectivity. An independent
+  Challenge attempt whose decoupled analytic layer we were glad to build on.
+- **Kevin Buzzard** — the challenge.
+
+External AI reviewers — **Gemini** (deep-think axiom vetting: type, strength,
+non-vacuity, satisfiability for every project axiom) and **Codex / GPT-5.4**
+(rescue passes and proof-strategy review).
+
+> GitHub's *Contributors* graph counts commits only; issue, review, and
+> vendored-code contributions are credited here. A numerical contribution
+> breakdown (LOC + PRs by author and source) is in
+> [`docs/history.md`](docs/history.md).
+
+## Vendored sources & attribution
+
+Real Lean from two sibling Challenge attempts, each vendored under its upstream
+license with per-file attribution headers, the upstream `LICENSE`, and a
+`PROVENANCE.md`. Full record: [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md).
+
+- **[rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)** (Apache 2.0)
+  — see [Contributors](#contributors--acknowledgments). In-build subtree
+  `Jacobians/Vendor/Kirov/`, plus the larger `vendor/kirov-dolbeault-port/` — a
+  forward-port committed in our tree and built as a local Lake package (a
+  path-based `require`, not a remote dependency).
+- **[tangentstorm/JacobianChallenge](https://github.com/tangentstorm/JacobianChallenge)** (MIT)
+  — `Jacobians/Vendor/Wallace/`.
+
+The in-build vendored subtrees are **axiom-free**; their headline theorems
+`#print axioms`-verify to the three standard Lean axioms only.
+
+## Caveats
+
+- **The axioms are AI-authored and not human-reviewed.** Each was written or
+  curated in-session and cross-vetted by a second model (Gemini deep-think +
+  Codex), but none has had independent human-mathematician review. If you are
+  evaluating this work, read [`Jacobians/Axioms/`](Jacobians/Axioms/) and
+  [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) first.
+- **Axiom-free headlines still rest on the vendored engine.** The 24 headlines are
+  `#print axioms` standard-3, but a large share of the proof weight lives in the
+  vendored Kirov Dolbeault port (residue theorem, Čech `H¹`, Serre duality) — real
+  Lean, but not *our* from-first-principles development. Read "axiom-free" as
+  *"reduced to the core Lean axioms over a trusted vendored analytical engine"*,
+  not *"reproved from Mathlib alone"*. (And the broader repo still declares 10
+  axioms off the headline path — see `AXIOM_AUDIT.md`.)
+- **Zero human-written Lean.** The Lean was written by AI agents (primarily
+  Claude, with Codex rescue passes and Gemini audits), directed by a mathematician
+  on scope, the axiom-vs-proof boundary, and review of every landing.
+- **Remaining `sorry`s** are all off the challenge path: a handful in the
+  out-of-scope `Extensions/` stretch projects and an optional adelic `H¹`
+  construction kept around as a candidate deeper discharge.
 
 ## Building
 
@@ -124,37 +398,56 @@ The construction takes the **period-lattice route** — `Jac X = (HolomorphicOne
 lake build
 ```
 
-Lean `v4.30.0`; Mathlib at the revision pinned in `lake-manifest.json`. CI runs `lake build` end-to-end, a `ChallengeConformance.lean` machine-check (`lake env lean ChallengeConformance.lean`, exit 0) verifying every v0.4 signature exactly, a golden `#print axioms` check, and a guard keeping the core `sorry`-free.
+Lean `v4.30.0`; Mathlib at the revision pinned in `lake-manifest.json`. CI runs
+the full build, a `ChallengeConformance.lean` machine-check (every v0.4 signature
+restated as an `example` and discharged by our decls), a golden `#print axioms`
+diff, and a guard keeping the core `sorry`-free.
 
-## Vendored sources & attribution
+## Comparator verification
 
-We build on real Lean from two sibling Jacobian-Challenge attempts, each vendored under its **upstream** license with per-file attribution headers, the upstream `LICENSE`, and a `PROVENANCE.md`. Full adoption record: [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md).
+The [Lean FRO comparator](https://github.com/leanprover/comparator) is a
+trustworthy external judge: it compiles the challenge and solution files in
+sandboxes, replays the solution through the Lean kernel, and confirms the proved
+theorems prove the *same statements* as the challenge while using **only a
+whitelisted axiom set**. Unlike our own CI, it is an independent tool — the
+strongest external certificate of the kernel-and-axiom story.
 
-- **[rkirov/jacobian-claude](https://github.com/rkirov/jacobian-claude)** (Apache 2.0) — Montel finite-dimensionality of holomorphic 1-forms, line integrals, the ℤ-lattice/complex-torus quotient infrastructure. Used to retire `AX_FiniteDimOneForms` and `pullbackOneForm` and to back the Abel–Jacobi integral. Ported under `Jacobians/Vendor/Kirov/`. **A second, larger snapshot** of the same repo (commit `4437c2b`, 2026-06-09) is preserved as a standalone forward-ported build under [`vendor/kirov-dolbeault-port/`](vendor/kirov-dolbeault-port/) — this snapshot contains the first sorry-free Lean proof of the 1-form residue theorem `∑ Res = 0` (`residueTheorem_unconditional`, `#print axioms`-clean at standard-3) together with the Čech `H¹` finiteness (Forster §14), the skyscraper χ-step (§16), and the §17.6 easy half of Serre duality. It compiles under our exact toolchain (Mathlib `c5ea003`) and is **integrated into the main build** as a Lake `require` dependency (`vendor/kirov-dolbeault-port/`, S2 strategy) — Phase D wired its Čech `H¹` model and skyscraper LES into our Layer-3 scaffold, retiring 5 axioms. See [`docs/planning/PHASE_D_BRIDGE_PLAN.md`](docs/planning/PHASE_D_BRIDGE_PLAN.md).
-- **[tangentstorm/JacobianChallenge](https://github.com/tangentstorm/JacobianChallenge)** (MIT) — self-contained, sorry-free analytic modules (holomorphic maps, meromorphic order, branched covers). Ported under `Jacobians/Vendor/Wallace/`; used in the genus-obstruction proof behind Abel injectivity.
+- **Verified now:** `Jacobians.Layer3.riemannRochL3` at commit `67af290`, whitelist
+  `propext` / `Quot.sound` / `Classical.choice` (comparator output: "Your solution
+  is okay!").
+- **Now unblocked:** a full **24-obligation run** — `Challenge.lean` /
+  `Solution.lean` / `config-buzzard.json` in the sibling
+  `jacobian-challenge-comparator-run/` — that certifies every Buzzard headline
+  depends only on the standard three Lean axioms. With `AX_PeriodCycleBasis`
+  discharged from every headline closure (PR #251), it now runs against `main`.
 
-The in-build vendored subtrees (`Jacobians/Vendor/Kirov/` and `Jacobians/Vendor/Wallace/`) are **axiom-free**; their headline theorems `#print axioms`-verify to the three standard Lean axioms only.
+This complements the in-repo CI gate: CI catches axiom/`sorry` drift on every
+push; the comparator gives an independent, kernel-level certificate at a pinned
+commit.
 
-## Contributors & acknowledgments
+## Repository map
 
-An agent-assisted community project. Contributions span code, vendored proofs, and the issue/triage layer that maps the open problems.
-
-- **[Michael R. Douglas](https://github.com/mrdouglasny)** — project lead.
-- **Jack McCarthy ([@Deicyde](https://github.com/Deicyde))** — the axiom-discharge issue tracker ([#77](https://github.com/mrdouglasny/jacobian-challenge/issues/77)) and the per-axiom tracking issues that structure the project's open-problem surface.
-- **Rado Kirov ([@rkirov](https://github.com/rkirov))** and **[@tangentstorm](https://github.com/tangentstorm)** — vendored Lean proofs (see [Vendored sources](#vendored-sources--attribution)).
-
-> GitHub's *Contributors* graph counts commits only; issue, review, and vendored-code contributions are credited here.
+| Path | Contents |
+|------|----------|
+| [`Jacobians/Challenge.lean`](Jacobians/Challenge.lean) | Buzzard's v0.4 statements, all 24 `sorry`s closed downstream |
+| [`Jacobians/ChallengeConformance.lean`](Jacobians/ChallengeConformance.lean) | machine-check against the pinned spec |
+| [`Jacobians/AbelianVariety/`](Jacobians/AbelianVariety/) | `ComplexTorus` (axiom-free) |
+| [`Jacobians/RiemannSurface/`](Jacobians/RiemannSurface/) | period lattice, line integrals, cohomology anchors |
+| [`Jacobians/Layer3/`](Jacobians/Layer3/) | the RR/Serre cohomology tower |
+| [`Jacobians/ProjectiveCurve/`](Jacobians/ProjectiveCurve/) | the explicit curves |
+| [`Jacobians/UniversalProperty.lean`](Jacobians/UniversalProperty.lean) | `IsJacobian` + the Albanese categoricity theorem |
+| [`Jacobians/Axioms/`](Jacobians/Axioms/) | the classified axiom layer |
+| [`Jacobians/Vendor/`](Jacobians/Vendor/) | ported Kirov + Wallace modules |
+| [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) | **canonical axiom audit** — start here to review the debt |
+| [`docs/history.md`](docs/history.md) | the axiom-discharge timeline + contribution breakdown |
+| [`docs/categoricity/`](docs/categoricity/) | the categoricity analysis, genus-doubling counterexample, and Condition 25 |
 
 ## Further reading
 
-- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — canonical, kernel-verified axiom audit (per-axiom file:line, ratings, discharged table).
-- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) (already listed above) is the authoritative live record; for a point-in-time snapshot see [`docs/status-2026-06-06.md`](docs/status-2026-06-06.md) (pre-Phase-D baseline) or the current `AXIOM_AUDIT.md` header.
-- [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace of every headline (regenerate via [`scripts/axiom_report.lean`](scripts/axiom_report.lean)); confirms no `sorryAx` under any closed declaration.
-- [`docs/challenge-annotated.md`](docs/challenge-annotated.md) — F/T classification of Buzzard's 24 `sorry`s.
-- [`docs/dependency-trace.md`](docs/dependency-trace.md) — transitive axiom audit per foundation definition.
-- [`docs/planning/`](docs/planning/) — per-axiom discharge plans (Gemini-vetted) + the dependency DAG.
-- [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md) — what we took from the sibling repos, considered, and rejected.
-
----
-
-**Comparator-verified.** `Jacobians.Layer3.riemannRochL3` at commit `67af290` passes the [Lean FRO comparator](https://github.com/leanprover/comparator) (kernel replay via `lean4export` v4.30.0; axiom whitelist `propext`, `Quot.sound`, `Classical.choice`): "Your solution is okay!".
+- [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — kernel-verified per-axiom audit.
+- [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace.
+- [`docs/history.md`](docs/history.md) — discharge timeline + contributor metrics.
+- [`docs/planning/`](docs/planning/) — per-axiom discharge plans.
+- [`docs/cross-repo-adoption.md`](docs/cross-repo-adoption.md) — what we took from
+  the sibling repos.
+- [`formalization.yaml`](formalization.yaml) — the mathlib-initiative self-report.
