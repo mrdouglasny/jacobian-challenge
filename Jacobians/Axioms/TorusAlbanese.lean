@@ -251,10 +251,19 @@ noncomputable def torusAlbaneseCoordinateOfFunctional {m : ℕ} {A : Type v}
     (((AX_torus_oneforms_dualCover (A := A)).symm.toLinearMap).dualMap I)
 
 /-- A torus presentation equipped with the textbook self-Albanese identity:
-integrating invariant one-forms from `0` to `a`, modulo periods, recovers `a`.
+integrating the invariant one-forms from `0` to `a` recovers the lift coordinate
+of `a` **modulo the period lattice**.
 
-The second path/function pair records the period ambiguity of the chosen
-zero-to-zero path; subtracting it leaves the same point in the quotient. -/
+(Corrected 2026-06-14.) The previous formulation
+`liftCoord a = coord(∫_γ) − coord(∫_{γ₀})` over an *arbitrary* zero-to-zero loop
+`γ₀` was **unsatisfiable** — quantifying `γ₀` universally forces all loop periods
+equal (counterexample on `ℂ/Λ`: `liftCoord 0 = 0` vs `= −1`), so the structure was
+uninhabited and `AX_torus_self_albanese` was a *false axiom*. The correct,
+satisfiable statement is the **congruence mod `lattice`**: the path-dependence of
+the integral (and the loop period `coord(∫_{γ₀})`) is absorbed by the lattice, so
+`liftCoord a − (coord(∫_γ) − coord(∫_{γ₀})) ∈ lattice`. (Both `liftCoord a −
+coord(∫_γ)` and the loop period `coord(∫_{γ₀})` lie in `lattice`, so this holds;
+the old `=` form forced them to vanish, which is false.) -/
 structure TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
     [T2Space A] [CompactSpace A] [ConnectedSpace A]
     [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
@@ -266,9 +275,8 @@ structure TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace 
       γ 0 = 0 → γ 1 = a → γ₀ 0 = 0 → γ₀ 1 = 0 →
       (∀ ell, I ell = torusLineIntegral ell γ) →
       (∀ ell, I₀ ell = torusLineIntegral ell γ₀) →
-      liftCoord a =
-        torusAlbaneseCoordinateOfFunctional (A := A) I -
-          torusAlbaneseCoordinateOfFunctional (A := A) I₀
+      liftCoord a - (torusAlbaneseCoordinateOfFunctional (A := A) I -
+        torusAlbaneseCoordinateOfFunctional (A := A) I₀) ∈ lattice
 
 /-- **Axiom.** A complex torus is canonically recovered from its own
 Abel-Jacobi map.

@@ -364,8 +364,9 @@ theorem jacobianUniversal_phi_factorizes_of_coordinate_eq {X : Type u}
       [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
       (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f),
       (∀ x,
-        torusAmbientLinear f hf (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀) =
-          (AX_torus_self_albanese (m := m) (A := A)).liftCoord (f x)) →
+        (AX_torus_self_albanese (m := m) (A := A)).liftCoord (f x) -
+            torusAmbientLinear f hf (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀) ∈
+          (AX_torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice) →
       ∀ x, f x = jacobianUniversalPhi f hf (Jacobian.ofCurve x₀ x) := by
   intro m A _ _ _ _ _ _ _ _ f hf hcoord x
   classical
@@ -393,11 +394,13 @@ theorem jacobianUniversal_phi_factorizes_of_coordinate_eq {X : Type u}
   change QuotientAddGroup.mk' P.lattice.toAddSubgroup (P.liftCoord (f x)) =
     qφ (QuotientAddGroup.mk' ΛX.toAddSubgroup
       (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀))
-  have hLift :
-      P.liftCoord (f x) = L (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀) := by
-    simpa [S, P, L] using (hcoord x).symm
-  rw [hLift]
-  rfl
+  have hq : qφ (QuotientAddGroup.mk' ΛX.toAddSubgroup
+        (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀)) =
+      QuotientAddGroup.mk' P.lattice.toAddSubgroup
+        (L (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀)) := rfl
+  rw [hq, ← sub_eq_zero, ← map_sub, QuotientAddGroup.mk'_apply,
+    QuotientAddGroup.eq_zero_iff]
+  simpa [S, P, L] using (hcoord x)
 
 /-- F1-F3: the homomorphism produced by UP-1 factors the pointed holomorphic
 map `f` through the Abel-Jacobi map. -/
@@ -415,29 +418,21 @@ theorem jacobianUniversal_phi_factorizes {X : Type u}
   let S : TorusSelfAlbanesePresentation m A := AX_torus_self_albanese (A := A)
   let γ : ℝ → A := f ∘ Jacobians.Bridge.bridgePath (X := X) x₀ x
   let γ₀ : ℝ → A := f ∘ Jacobians.Bridge.bridgePath (X := X) x₀ x₀
-  calc
-    torusAmbientLinear f hf (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀)
-        =
-          torusAlbaneseCoordinateOfFunctional (A := A)
-            ((torusPullbackOneForm f hf).dualMap
-              (Axioms.pathIntegralBasepointFunctional X x₀ x)) -
-          torusAlbaneseCoordinateOfFunctional (A := A)
-            ((torusPullbackOneForm f hf).dualMap
-              (Axioms.pathIntegralBasepointFunctional X x₀ x₀)) :=
-      torusAmbientLinear_ofCurveAmbient_sub f hf x₀ x
-    _ = S.liftCoord (f x) := by
-      symm
-      exact S.liftCoord_eq_albanese γ γ₀ (f x)
-        (by simp [γ, Jacobians.Bridge.bridgePath_at_zero, hbase])
-        (by simp [γ, Jacobians.Bridge.bridgePath_at_one])
-        (by simp [γ₀, Jacobians.Bridge.bridgePath_at_zero, hbase])
-        (by simp [γ₀, Jacobians.Bridge.bridgePath_at_one, hbase])
-        (by
-          intro ell
-          simpa [γ] using torusPullback_pathIntegral_naturality f hf x₀ x ell)
-        (by
-          intro ell
-          simpa [γ₀] using torusPullback_pathIntegral_naturality f hf x₀ x₀ ell)
+  -- goal: `S.liftCoord (f x) − torusAmbientLinear f hf (diff) ∈ lattice`.
+  -- Rewrite the dual pullback as a difference of path-integral coordinates, then
+  -- the (mod-Λ) self-Albanese identity of `S` gives the membership directly.
+  rw [torusAmbientLinear_ofCurveAmbient_sub f hf x₀ x]
+  exact S.liftCoord_eq_albanese γ γ₀ (f x)
+    (by simp [γ, Jacobians.Bridge.bridgePath_at_zero, hbase])
+    (by simp [γ, Jacobians.Bridge.bridgePath_at_one])
+    (by simp [γ₀, Jacobians.Bridge.bridgePath_at_zero, hbase])
+    (by simp [γ₀, Jacobians.Bridge.bridgePath_at_one, hbase])
+    (by
+      intro ell
+      simpa [γ] using torusPullback_pathIntegral_naturality f hf x₀ x ell)
+    (by
+      intro ell
+      simpa [γ₀] using torusPullback_pathIntegral_naturality f hf x₀ x₀ ell)
 
 /-! ## UP-3: uniqueness of the descended homomorphism -/
 
