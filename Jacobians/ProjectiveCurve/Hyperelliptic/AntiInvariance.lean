@@ -19,6 +19,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.GeneralResults.OddPartDslope
 import Mathlib.Analysis.Calculus.FDeriv.Analytic
+import Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
 namespace Jacobians.ProjectiveCurve
 
@@ -248,7 +249,55 @@ compose, and multiply by the analytic `fderiv` factor. All on a neighborhood of
 theorem omegaDx_analyticAt (form : HolomorphicOneForm (HyperellipticEvenProj H))
     {a : HyperellipticAffine H} (hpY : a ∈ HyperellipticAffine.smoothLocusY H) :
     AnalyticAt ℂ (omegaDx form a) a.val.1 := by
-  sorry
+  unfold omegaDx
+  set q := evenMk a
+  let c1 : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ :=
+    HyperellipticEvenProj.affineLiftChart H Fact.out a
+  let c2 : OpenPartialHomeomorph (HyperellipticEvenProj H) ℂ :=
+    chartAt ℂ q
+  have hc1_mem : c1 ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) :=
+    HyperellipticEvenProj.affineLiftChart_mem_maximalAtlas a
+  have hc2_mem : c2 ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticEvenProj H) :=
+    IsManifold.chart_mem_maximalAtlas q
+  have h_prop1 : q ∈ c1.source := by
+    dsimp [q, c1]
+    change q ∈ (HyperellipticEvenProj.affineLiftChart H Fact.out a).source
+    rw [HyperellipticEvenProj.affineLiftChart]
+    rw [OpenPartialHomeomorph.lift_openEmbedding_source]
+    refine Set.mem_image_of_mem _ ?_
+    exact mem_chart_source ℂ a
+  have h_prop2 : q ∈ c2.source := by
+    dsimp [c2]
+    exact mem_chart_source ℂ q
+  have h_trans := Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder.analyticAt_transition_of_mem_maximalAtlas hc1_mem hc2_mem h_prop1 h_prop2
+  have h_eq : extChartAt 𝓘(ℂ, ℂ) q = c2.toPartialEquiv := by
+    unfold c2
+    simp [extChartAt]
+  have hc1_q : c1 q = a.val.1 := by
+    dsimp [c1, q]
+    change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding (HyperellipticEvenProj.isOpenEmbedding_proj_inl H Fact.out)) ((HyperellipticEvenProj.proj H ∘ Sum.inl) a) = a.val.1
+    rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+    rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
+    rfl
+  have h_coeff_an := form.2.1 q
+  rw [h_eq] at h_coeff_an
+  have hc2_target : c2 q ∈ c2.target := c2.map_source h_prop2
+  have h_nhds : c2.target ∈ 𝓝 (c2 q) := c2.open_target.mem_nhds hc2_target
+  have h_an_coeff : AnalyticAt ℂ (form.coeff q) (c2 q) := AnalyticOn.analyticAt h_nhds h_coeff_an
+  have h_val_eq : (c2 ∘ c1.symm) a.val.1 = c2 q := by
+    dsimp
+    rw [← hc1_q]
+    rw [c1.left_inv h_prop1]
+  have h_an_coeff' : AnalyticAt ℂ (form.coeff q) ((c2 ∘ c1.symm) a.val.1) := by
+    rw [h_val_eq]
+    exact h_an_coeff
+  have h_trans' : AnalyticAt ℂ (c2 ∘ c1.symm) a.val.1 := by
+    rw [← hc1_q]
+    exact h_trans
+  have h_comp : AnalyticAt ℂ ((form.coeff q) ∘ (c2 ∘ c1.symm)) a.val.1 := AnalyticAt.comp h_an_coeff' h_trans'
+  have h_deriv_an : AnalyticAt ℂ (deriv (c2 ∘ c1.symm)) a.val.1 := AnalyticAt.deriv h_trans'
+  rw [h_eq]
+  exact AnalyticAt.mul h_comp h_deriv_an
 
 -- Chart independence across overlapping same-sheet affine charts (the
 -- same-sheet projX transition has derivative `1`) belongs to the P3 assembly of

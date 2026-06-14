@@ -271,33 +271,59 @@ noncomputable instance Hyperelliptic.instNonempty (H : HyperellipticData) :
   unfold Hyperelliptic
   exact Hyperelliptic.nonemptyOf H (Nat.instDecidablePredOdd H.f.natDegree)
 
-/-- **Axiom.** The genus of `y² = f(x)` matches the combinatorial
-formula `⌊(deg f - 1) / 2⌋`. -/
-axiom AX_Hyperelliptic_genus (H : HyperellipticData) :
-    Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus
+/-! ### Genus dispatch helper -/
 
-/-- The genus of the unified hyperelliptic curve matches the combinatorial
-formula `⌊(deg f - 1) / 2⌋`. -/
-theorem genus_Hyperelliptic_eq (H : HyperellipticData) :
+/-- Private helper: genus of the Decidable-parameterized carrier equals
+`H.genus`, given proofs for each parity branch. Follows the
+`connectedSpaceOf`/`nonemptyOf` pattern. -/
+@[reducible] private noncomputable def Hyperelliptic.genusOf
+    (H : HyperellipticData) (d : Decidable (Odd H.f.natDegree))
+    (h_odd : ∀ (h : Odd H.f.natDegree),
+      Jacobians.RiemannSurface.genus (HyperellipticOdd H h) =
+        (H.f.natDegree - 1) / 2)
+    (h_even : ∀ [Fact (¬ Odd H.f.natDegree)],
+      Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) =
+        H.f.natDegree / 2 - 1) :
+    letI := Hyperelliptic.topologicalSpaceOf H d
+    letI := Hyperelliptic.chartedSpaceOf H d
+    letI := Hyperelliptic.isManifoldOf H d
+    letI := Hyperelliptic.t2SpaceOf H d
+    letI := Hyperelliptic.compactSpaceOf H d
+    letI := Hyperelliptic.connectedSpaceOf H d
+    Jacobians.RiemannSurface.genus (Hyperelliptic.carrierOf H d) = H.genus :=
+  @Decidable.casesOn (Odd H.f.natDegree)
+    (motive := fun d =>
+      letI := Hyperelliptic.topologicalSpaceOf H d
+      letI := Hyperelliptic.chartedSpaceOf H d
+      letI := Hyperelliptic.isManifoldOf H d
+      letI := Hyperelliptic.t2SpaceOf H d
+      letI := Hyperelliptic.compactSpaceOf H d
+      letI := Hyperelliptic.connectedSpaceOf H d
+      Jacobians.RiemannSurface.genus (Hyperelliptic.carrierOf H d) = H.genus) d
+    (fun hn => by
+      -- Even branch
+      letI : Fact (¬ Odd H.f.natDegree) := ⟨hn⟩
+      change Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) = H.genus
+      rw [h_even]
+      unfold HyperellipticData.genus
+      obtain ⟨k, hk⟩ := Nat.not_odd_iff_even.mp hn
+      rw [hk]; omega)
+    (fun h => by
+      -- Odd branch
+      change Jacobians.RiemannSurface.genus (HyperellipticOdd H h) = H.genus
+      exact (h_odd h).trans rfl)
+
+/-- The genus of `y² = f(x)` matches the combinatorial formula `⌊(deg f - 1) / 2⌋`,
+given external proofs of the odd- and even-branch genus formulas. -/
+theorem Hyperelliptic.genus_eq
+    (H : HyperellipticData)
+    (h_odd : ∀ (h : Odd H.f.natDegree),
+      Jacobians.RiemannSurface.genus (HyperellipticOdd H h) =
+        (H.f.natDegree - 1) / 2)
+    (h_even : ∀ [Fact (¬ Odd H.f.natDegree)],
+      Jacobians.RiemannSurface.genus (HyperellipticEvenProj H) =
+        H.f.natDegree / 2 - 1) :
     Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.genus :=
-  AX_Hyperelliptic_genus H
-
-/-- Even-degree specialization of the hyperelliptic genus formula. For
-`deg f = 2g + 2`, the genus is `g = deg(f) / 2 - 1`. -/
-theorem genus_Hyperelliptic_eq_of_even
-    (H : HyperellipticData) (h : ¬ Odd H.f.natDegree) :
-    Jacobians.RiemannSurface.genus (Hyperelliptic H) = H.f.natDegree / 2 - 1 := by
-  rw [genus_Hyperelliptic_eq, HyperellipticData.genus]
-  obtain ⟨k, hk⟩ := Nat.not_odd_iff_even.mp h
-  rw [hk]
-  omega
-
-/-- Concrete even-degree form of the hyperelliptic genus formula:
-if `deg f = 2g + 2`, then the genus is `g`. -/
-theorem genus_Hyperelliptic_eq_of_even_degree
-    (H : HyperellipticData) (g : ℕ) (hdeg : H.f.natDegree = 2 * g + 2) :
-    Jacobians.RiemannSurface.genus (Hyperelliptic H) = g := by
-  rw [genus_Hyperelliptic_eq, HyperellipticData.genus, hdeg]
-  omega
+  Hyperelliptic.genusOf H (Nat.instDecidablePredOdd H.f.natDegree) h_odd h_even
 
 end Jacobians.ProjectiveCurve

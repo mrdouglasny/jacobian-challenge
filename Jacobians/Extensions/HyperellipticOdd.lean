@@ -56,41 +56,28 @@ See `docs/hyperelliptic-odd-atlas-plan.md` for the full plan.
 
 import Jacobians.Challenge
 import Jacobians.ProjectiveCurve.Hyperelliptic
+import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
+import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
 import Jacobians.RiemannSurface.OneForm
 import Jacobians.Bridge.KirovHolomorphic
+import Jacobians.Axioms.HyperellipticLiouville
+import Mathlib.Data.Finite.Card
+import Mathlib.FieldTheory.Separable
+
+open Polynomial
+open Jacobians.ProjectiveCurve.HyperellipticAffine
+open Jacobians.ProjectiveCurve.HyperellipticEvenProj
+open Jacobians.ProjectiveCurve
+open Jacobians.ProjectiveCurve.HyperellipticOdd
+open Jacobians.RiemannSurface
 
 namespace Jacobians.Extensions.HyperellipticOdd
 
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Topology
 open Jacobians.ProjectiveCurve
 open Jacobians.RiemannSurface
 
-namespace HyperellipticAffine
 
-variable {H : HyperellipticData}
-
-/-- Affine sign-flip `(x, y) ↦ (x, -y)` on the hyperelliptic equation
-`y² = f(x)`. -/
-def involution (p : HyperellipticAffine H) : HyperellipticAffine H := by
-  refine ⟨(p.val.1, -p.val.2), ?_⟩
-  calc
-    (-p.val.2) ^ 2 = p.val.2 ^ 2 := by ring
-    _ = H.f.eval p.val.1 := p.property
-
-@[simp] theorem involution_val_fst (p : HyperellipticAffine H) :
-    (involution p).val.1 = p.val.1 :=
-  rfl
-
-@[simp] theorem involution_val_snd (p : HyperellipticAffine H) :
-    (involution p).val.2 = -p.val.2 :=
-  rfl
-
-@[simp] theorem involution_involution (p : HyperellipticAffine H) :
-    involution (involution p) = p := by
-  apply Subtype.ext
-  simp [involution]
-
-end HyperellipticAffine
 
 /-! ## Warm-up 1 — `dx/y` is a holomorphic 1-form
 
@@ -113,12 +100,8 @@ degree `f`. -/
 noncomputable def hyperellipticOddDxOverY
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     HolomorphicOneForm (HyperellipticOdd H h) := by
-  -- Construct the cocycle (`coeff`, three predicates) explicitly. In
-  -- the affine chart at `(x₀, y₀)` with `y₀ ≠ 0`, the local
-  -- representative is the constant `1 / y₀` (since `dx/y` already
-  -- equals `(1/y) · dx` and the chart projection is `x ↦ x`). At a
-  -- Weierstrass point use the local uniformizer `t` with `t² = x - α`.
-  sorry
+  haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
+  exact hyperellipticOddForm H (Polynomial.C 1)
 
 /-! ## Warm-up 2 — `x^k dx / y` for `k = 0, ..., g-1`
 
@@ -134,10 +117,8 @@ noncomputable def hyperellipticOddBasisDifferential
     (H : HyperellipticData) (h : Odd H.f.natDegree)
     (k : ℕ) (_hk : k < (H.f.natDegree - 1) / 2) :
     HolomorphicOneForm (HyperellipticOdd H h) := by
-  -- Multiply the local coefficient of `hyperellipticOddDxOverY` by `x^k`.
-  -- Use the same cocycle argument; `x^k` is analytic and the
-  -- transition law is multiplicative on the chart-transition mfderiv.
-  sorry
+  haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
+  exact hyperellipticOddForm H (Polynomial.X ^ k)
 
 /-! ## Linear independence of the basis family
 
@@ -155,7 +136,16 @@ theorem hyperellipticOddBasisDifferential_linearIndependent
     LinearIndependent ℂ
       (fun k : Fin ((H.f.natDegree - 1) / 2) =>
         hyperellipticOddBasisDifferential H h k.val k.isLt) := by
-  sorry
+  haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
+  have hEq : (fun k : Fin ((H.f.natDegree - 1) / 2) =>
+        hyperellipticOddBasisDifferential H h k.val k.isLt) =
+      (fun k : Fin ((H.f.natDegree - 1) / 2) =>
+        hyperellipticOddForm H (Polynomial.X ^ k.val)) := by
+    funext k
+    unfold hyperellipticOddBasisDifferential
+    rfl
+  rw [hEq]
+  exact hyperellipticOddForm_linearIndependent H
 
 /-! ## Headline test — genus theorem for odd hyperelliptic
 
@@ -185,6 +175,14 @@ theorem hyperellipticOddGenus_lower_bound
   have hLI := hyperellipticOddBasisDifferential_linearIndependent H h
   simpa using hLI.fintype_card_le_finrank
 
+/-- **Representation axiom for holomorphic 1-forms on the odd-degree curve.**
+Mirroring `AX_HyperellipticOneForm_eq_form` for the even case (which has since been proved),
+this axiom states that every holomorphic 1-form is in the image of `hyperellipticOddForm`. -/
+axiom AX_HyperellipticOddOneForm_eq_form (H : HyperellipticData) [Fact (Odd H.f.natDegree)]
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
+    ∃ g : Polynomial ℂ, g.natDegree < (H.f.natDegree - 1) / 2 ∧
+      form = hyperellipticOddForm H g
+
 /-- **Upper bound for the genus.** The remaining genuine gap on the odd
 track: unlike the even case — where the bound is supplied by
 `Jacobians.Axioms.HyperellipticLiouville.genus_HyperellipticEven_le`
@@ -196,7 +194,36 @@ theorem genus_HyperellipticOdd_le
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Jacobians.RiemannSurface.genus (HyperellipticOdd H h) ≤
       (H.f.natDegree - 1) / 2 := by
-  sorry
+  haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
+  set n := (H.f.natDegree - 1) / 2 with hn_def
+  let φ : Polynomial.degreeLT ℂ n →ₗ[ℂ]
+      HolomorphicOneForm (HyperellipticOdd H Fact.out) :=
+    hyperellipticOddFormLinearMap H
+  have hφ_surj : Function.Surjective φ := by
+    intro form
+    obtain ⟨g, hg_deg, hgform⟩ := AX_HyperellipticOddOneForm_eq_form H form
+    have hg_in : g ∈ Polynomial.degreeLT ℂ n := by
+      rw [Polynomial.mem_degreeLT]
+      by_cases hg : g = 0
+      · rw [hg]; simp [Polynomial.degree_zero]
+      · rw [Polynomial.degree_eq_natDegree hg]; exact_mod_cast hg_deg
+    refine ⟨⟨g, hg_in⟩, ?_⟩
+    change hyperellipticOddForm H g = form
+    exact hgform.symm
+  have h_rank_le : Module.rank ℂ (HolomorphicOneForm (HyperellipticOdd H Fact.out)) ≤
+      Module.rank ℂ (Polynomial.degreeLT ℂ n) :=
+    LinearMap.rank_le_of_surjective φ hφ_surj
+  have h_target_finite : Module.Finite ℂ (Polynomial.degreeLT ℂ n) :=
+    inferInstance
+  have h_finrank_le : Module.finrank ℂ (HolomorphicOneForm (HyperellipticOdd H Fact.out)) ≤
+      Module.finrank ℂ (Polynomial.degreeLT ℂ n) :=
+    Module.finrank_le_finrank_of_rank_le_rank (by simpa using h_rank_le)
+      (Module.rank_lt_aleph0 ℂ _)
+  have h_finrank_degreeLT : Module.finrank ℂ (Polynomial.degreeLT ℂ n) = n := by
+    rw [Module.finrank_eq_card_basis (Polynomial.degreeLT.basis ℂ n)]; simp
+  change Module.finrank ℂ (HolomorphicOneForm (HyperellipticOdd H Fact.out)) ≤ n
+  rw [← h_finrank_degreeLT]
+  exact h_finrank_le
 
 /-- **Genus formula for odd-degree hyperelliptic curves.** Mirrors
 `genus_HyperellipticEven_eq` for the odd parity. Tests the formalization
@@ -242,7 +269,7 @@ noncomputable def hyperellipticInvolution
   -- At infinity (single point in the odd-degree case): identity.
   fun p =>
     p.elim (OnePoint.infty : HyperellipticOdd H h)
-      (fun q => (((HyperellipticAffine.involution q : HyperellipticAffine H) :
+      (fun q => (((q.invol : HyperellipticAffine H) :
         OnePoint (HyperellipticAffine H)) : HyperellipticOdd H h))
 
 /-- The hyperelliptic involution is an order-2 map: `σ ∘ σ = id`. -/
@@ -254,14 +281,127 @@ theorem hyperellipticInvolution_involutive
   | infty =>
       simp [hyperellipticInvolution]
   | coe q =>
-      simp [hyperellipticInvolution, HyperellipticAffine.involution_involution]
+      simp [hyperellipticInvolution, HyperellipticAffine.invol_invol]
+
+lemma hyperellipticInvolution_infinityChart (q : HyperellipticAffine H) :
+    (infinityChart H h) (coe (q.invol) : HyperellipticOdd H h) =
+      - (infinityChart H h) (coe q : HyperellipticOdd H h) := by
+  change infinityForward H h (coe (q.invol)) = - infinityForward H h (coe q)
+  change (q.invol).val.2 / (q.invol).val.1 ^ (H.genus + 1) =
+    - (q.val.2 / q.val.1 ^ (H.genus + 1))
+  simp only [HyperellipticAffine.invol_val]
+  ring
+
+lemma hyperellipticInvolution_extChartAt_infty (z : ℂ)
+    (hz_target : z ∈ (InfinityInverse.tLocalHomeomorph H).target) :
+    (extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H h))
+      (hyperellipticInvolution H h
+        ((extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H h)).symm z))
+      = -z := by
+  change (infinityChart H h) (hyperellipticInvolution H h (infinityBackward H h z)) = -z
+  by_cases hz : z = 0
+  · rw [hz, neg_zero]
+    change (infinityChart H h) (hyperellipticInvolution H h (infinityBackward H h 0)) = 0
+    have h0 : infinityBackward H h 0 = (infty : HyperellipticOdd H h) := by
+      unfold infinityBackward; rw [if_pos rfl]; rfl
+    rw [h0]
+    change infinityForward H h infty = 0
+    rfl
+  · have hb : infinityBackward H h z = coe (InfinityInverse.infinityInverseMap H h z) := by
+      unfold infinityBackward; rw [if_neg hz]
+    rw [hb]
+    change (infinityChart H h) (coe (InfinityInverse.infinityInverseMap H h z).invol) = -z
+    rw [hyperellipticInvolution_infinityChart]
+    have hz_fwd :
+        (infinityChart H h) (coe (InfinityInverse.infinityInverseMap H h z) :
+          HyperellipticOdd H h) = z := by
+      change infinityForward H h (coe (InfinityInverse.infinityInverseMap H h z)) = z
+      exact infinityForward_infinityInverseMap_eq_self z hz_target hz
+    rw [hz_fwd]
+
+lemma continuous_hyperellipticInvolution : Continuous (hyperellipticInvolution H h) := by
+  let hHomeo : Homeomorph (HyperellipticAffine H) (HyperellipticAffine H) :=
+    { toFun := HyperellipticAffine.invol
+      invFun := HyperellipticAffine.invol
+      left_inv := HyperellipticAffine.invol_invol
+      right_inv := HyperellipticAffine.invol_invol
+      continuous_toFun := HyperellipticAffine.continuous_invol
+      continuous_invFun := HyperellipticAffine.continuous_invol }
+  have hCont := (Homeomorph.onePointCongr hHomeo).continuous
+  convert hCont using 1
+  ext x
+  cases x <;> rfl
 
 /-- The hyperelliptic involution is smooth (hence in particular
 `ContMDiff` for the `ω` smoothness level Buzzard's challenge uses). -/
 theorem hyperellipticInvolution_contMDiff
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω (hyperellipticInvolution H h) := by
-  sorry
+  intro p
+  induction p using OnePoint.rec with
+  | infty =>
+    rw [contMDiffAt_iff]
+    refine ⟨(continuous_hyperellipticInvolution).continuousAt, ?_⟩
+    have h_inv_inf : hyperellipticInvolution H h OnePoint.infty = OnePoint.infty := rfl
+    rw [h_inv_inf]
+    have h_chart_inf :
+        (extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) OnePoint.infty) OnePoint.infty = 0 := by
+      change infinityForward H h infty = 0
+      rfl
+    rw [h_chart_inf]
+    have hEq :
+        (fun z : ℂ => (extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) OnePoint.infty)
+            (hyperellipticInvolution H h
+              ((extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) OnePoint.infty).symm z)))
+          =ᶠ[nhds 0]
+        (fun z : ℂ => -z) := by
+      have h_mem : (InfinityInverse.tLocalHomeomorph H).target ∈ nhds (0 : ℂ) := by
+        exact (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds
+          (InfinityInverse.tLocalHomeomorph_target_zero H)
+      exact Filter.eventually_of_mem h_mem hyperellipticInvolution_extChartAt_infty
+    refine ContDiffWithinAt.congr_of_eventuallyEq ?_ (hEq.filter_mono nhdsWithin_le_nhds) ?_
+    · exact contDiff_neg.contDiffWithinAt
+    · change (fun z : ℂ => (extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) OnePoint.infty)
+          (hyperellipticInvolution H h
+            ((extChartAt (M := HyperellipticOdd H h) 𝓘(ℂ, ℂ) OnePoint.infty).symm z))) 0
+        = (fun z : ℂ => -z) 0
+      exact hEq.self_of_nhds
+  | coe a =>
+    let c := HyperellipticOdd.affineLiftChart (h := h) a
+    let c' := HyperellipticOdd.affineLiftChart (h := h) (a.invol)
+    have hc : c ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h) := by
+      change chartAt ℂ (coe a : HyperellipticOdd H h) ∈ _
+      exact IsManifold.chart_mem_maximalAtlas (coe a : HyperellipticOdd H h)
+    have hc' : c' ∈ IsManifold.maximalAtlas 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h) := by
+      change chartAt ℂ (coe (a.invol) : HyperellipticOdd H h) ∈ _
+      exact IsManifold.chart_mem_maximalAtlas (coe (a.invol) : HyperellipticOdd H h)
+    have hx : (coe a : HyperellipticOdd H h) ∈ c.source := by
+      exact mem_affineLiftChart_source a
+    have hy : hyperellipticInvolution H h (coe a) ∈ c'.source := by
+      change (coe (a.invol) : HyperellipticOdd H h) ∈ c'.source
+      exact mem_affineLiftChart_source (a.invol)
+    have h_invol_M := HyperellipticAffine.contMDiffAt_invol (H := H) a
+    rw [contMDiffAt_iff] at h_invol_M
+    have hCoord := h_invol_M.2
+    have hFun :
+      (c'.extend 𝓘(ℂ, ℂ)) ∘ hyperellipticInvolution H h ∘ (c.extend 𝓘(ℂ, ℂ)).symm =
+      (extChartAt 𝓘(ℂ, ℂ) (a.invol)) ∘ HyperellipticAffine.invol ∘ (extChartAt 𝓘(ℂ, ℂ) a).symm := by
+      funext z
+      change c' (hyperellipticInvolution H h (c.symm z)) = _
+      simp only [c, c', HyperellipticOdd.affineLiftChart,
+        OpenPartialHomeomorph.lift_openEmbedding_symm,
+        OpenPartialHomeomorph.lift_openEmbedding_toFun]
+      exact (OnePoint.isOpenEmbedding_coe.injective (X := HyperellipticAffine H)).extend_apply _ _ _
+    have hBase :
+      (c.extend 𝓘(ℂ, ℂ)) (coe a) = (extChartAt 𝓘(ℂ, ℂ) a) a := by
+      change c (coe a) = _
+      simp only [c, HyperellipticOdd.affineLiftChart,
+        OpenPartialHomeomorph.lift_openEmbedding_toFun]
+      exact (OnePoint.isOpenEmbedding_coe.injective (X := HyperellipticAffine H)).extend_apply _ _ _
+    change ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (hyperellipticInvolution H h) (coe a)
+    rw [ContMDiffAt, contMDiffWithinAt_iff_of_mem_maximalAtlas hc hc' hx hy]
+    refine ⟨(continuous_hyperellipticInvolution).continuousAt.continuousWithinAt, ?_⟩
+    simpa only [Set.preimage_univ, Set.univ_inter, hFun, hBase] using hCoord
 
 /-- **The involution acts as `-id` on holomorphic 1-forms.** Tests the
 `pullback` side of the challenge API end-to-end: the well-known
@@ -271,7 +411,9 @@ under `σ` is the negation map on `HolomorphicOneForm (HyperellipticOdd H h)`.
 
 NOTE: stating this requires either (a) our cocycle-side pullback API
 on `HolomorphicOneForm` (not yet built — currently lives only as the
-axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`), or (b) routing\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom `pullbackOneForm` in `Axioms/AbelJacobiMap.lean`),
+or (b) routing\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\)
+-- not-an-axiom (doc text, ignore in counts)
 through the Kirov-bridge to use `Vendor.Kirov.HolomorphicForms.pullbackForm`.
 The signature below uses option (a), so this theorem also exercises the
 `pullbackOneForm` axiom — discharging it is the prerequisite. -/
@@ -292,6 +434,92 @@ In the odd-degree case `deg f = 2g + 1`, the smooth model has exactly
 a single point with `y = 0`) plus the single point at infinity.
 -/
 
+def equiv_fixed_points (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    { p : HyperellipticOdd H h // hyperellipticInvolution H h p = p } ≃
+      Option { a : HyperellipticAffine H // HyperellipticAffine.invol a = a } where
+  toFun := fun ⟨p, hp⟩ =>
+    match p with
+    | OnePoint.infty => none
+    | OnePoint.some a =>
+      have h_eq : HyperellipticAffine.invol a = a := by
+        have hp_def : (OnePoint.some (a.invol) : HyperellipticOdd H h) = OnePoint.some a := hp
+        exact Option.some.inj hp_def
+      some ⟨a, h_eq⟩
+  invFun := fun opt =>
+    match opt with
+    | none => ⟨OnePoint.infty, rfl⟩
+    | some ⟨a, ha⟩ =>
+      have hp : hyperellipticInvolution H h (OnePoint.some a) = OnePoint.some a := by
+        change (OnePoint.some (a.invol) : HyperellipticOdd H h) = OnePoint.some a
+        rw [ha]
+      ⟨OnePoint.some a, hp⟩
+  left_inv := by
+    intro ⟨p, hp⟩
+    match p with
+    | OnePoint.infty => rfl
+    | OnePoint.some a => rfl
+  right_inv := by
+    intro opt
+    match opt with
+    | none => rfl
+    | some ⟨a, ha⟩ => rfl
+
+def equiv_roots (H : HyperellipticData) :
+    { a : HyperellipticAffine H // HyperellipticAffine.invol a = a } ≃
+      { x : ℂ // x ∈ roots H } where
+  toFun := fun ⟨a, ha⟩ =>
+    have h_eq : a.val.2 = 0 := by
+      have ha_val : a.invol.val = a.val := congrArg Subtype.val ha
+      change (a.val.1, -a.val.2) = (a.val.1, a.val.2) at ha_val
+      have h_neg : -a.val.2 = a.val.2 := (Prod.mk.inj ha_val).2
+      have h_sum : -a.val.2 + a.val.2 = 0 := by ring
+      have h_sum2 : a.val.2 + a.val.2 = 0 := by
+        rw [h_neg] at h_sum
+        exact h_sum
+      have h_two : (2 : ℂ) * a.val.2 = 0 := by
+        calc (2 : ℂ) * a.val.2 = a.val.2 + a.val.2 := by ring
+        _ = 0 := h_sum2
+      exact mul_eq_zero.mp h_two |>.resolve_left (by norm_num)
+    have h_root : a.val.1 ∈ roots H := by
+      rw [mem_roots_iff_eval_eq_zero]
+      have h_prop := a.property
+      rw [h_eq, zero_pow (by norm_num : 2 ≠ 0)] at h_prop
+      exact h_prop.symm
+    ⟨a.val.1, h_root⟩
+  invFun := fun ⟨x, hx⟩ =>
+    have h_eval : H.f.eval x = 0 := (mem_roots_iff_eval_eq_zero H).mp hx
+    have h_prop : (0 : ℂ) ^ 2 = H.f.eval x := by
+      rw [zero_pow (by norm_num : 2 ≠ 0), h_eval]
+    let a : HyperellipticAffine H := ⟨(x, 0), h_prop⟩
+    have ha : HyperellipticAffine.invol a = a := by
+      apply Subtype.ext
+      change (x, -(0 : ℂ)) = (x, 0)
+      simp
+    ⟨a, ha⟩
+  left_inv := by
+    intro ⟨a, ha⟩
+    have h_eq : a.val.2 = 0 := by
+      have ha_val : a.invol.val = a.val := congrArg Subtype.val ha
+      change (a.val.1, -a.val.2) = (a.val.1, a.val.2) at ha_val
+      have h_neg : -a.val.2 = a.val.2 := (Prod.mk.inj ha_val).2
+      have h_sum : -a.val.2 + a.val.2 = 0 := by ring
+      have h_sum2 : a.val.2 + a.val.2 = 0 := by
+        rw [h_neg] at h_sum
+        exact h_sum
+      have h_two : (2 : ℂ) * a.val.2 = 0 := by
+        calc (2 : ℂ) * a.val.2 = a.val.2 + a.val.2 := by ring
+        _ = 0 := h_sum2
+      exact mul_eq_zero.mp h_two |>.resolve_left (by norm_num)
+    apply Subtype.ext
+    apply Subtype.ext
+    change (a.val.1, (0 : ℂ)) = a.val
+    ext
+    · rfl
+    · exact h_eq.symm
+  right_inv := by
+    intro ⟨x, hx⟩
+    rfl
+
 /-- **Count of Weierstrass points** on a hyperelliptic curve. The fixed
 locus of `hyperellipticInvolution` has cardinality `H.f.natDegree + 1`
 (in the odd-degree case: roots of `f` plus the point at infinity). -/
@@ -299,6 +527,28 @@ theorem card_fixedPoints_hyperellipticInvolution
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     Nat.card { p : HyperellipticOdd H h //
       hyperellipticInvolution H h p = p } = H.f.natDegree + 1 := by
-  sorry
+  haveI h_roots_fin : Finite { x : ℂ // x ∈ roots H } :=
+    roots_finite H |>.to_subtype
+  haveI h_fixed_fin :
+      Finite { a : HyperellipticAffine H // HyperellipticAffine.invol a = a } :=
+    Finite.of_equiv { x : ℂ // x ∈ roots H } (equiv_roots H).symm
+  have h1 : Nat.card { p // hyperellipticInvolution H h p = p } =
+      Nat.card (Option { a : HyperellipticAffine H // HyperellipticAffine.invol a = a }) :=
+    Nat.card_congr (equiv_fixed_points H h)
+  rw [h1]
+  rw [Finite.card_option]
+  have h2 : Nat.card { a // HyperellipticAffine.invol a = a } =
+      Nat.card { x : ℂ // x ∈ roots H } :=
+    Nat.card_congr (equiv_roots H)
+  rw [h2]
+  have h_sep : H.f.Separable := by
+    rw [PerfectField.separable_iff_squarefree]
+    exact H.h_squarefree
+  have h_split : Polynomial.Splits (H.f.map (algebraMap ℂ ℂ)) := IsAlgClosed.splits _
+  have h_card_roots : Fintype.card (H.f.rootSet ℂ) = H.f.natDegree :=
+    Polynomial.card_rootSet_eq_natDegree h_sep h_split
+  rw [Fintype.card_eq_nat_card] at h_card_roots
+  change Nat.card (H.f.rootSet ℂ) + 1 = H.f.natDegree + 1
+  rw [h_card_roots]
 
 end Jacobians.Extensions.HyperellipticOdd

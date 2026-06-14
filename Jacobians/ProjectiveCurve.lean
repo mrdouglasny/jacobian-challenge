@@ -24,6 +24,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic
 import Jacobians.ProjectiveCurve.Hyperelliptic.Even
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddAtlas
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
+import Jacobians.ProjectiveCurve.Hyperelliptic.Genus
 import Jacobians.ProjectiveCurve.Hyperelliptic.CycleLoops
 import Jacobians.ProjectiveCurve.Hyperelliptic.CycleBasisWitness
 import Jacobians.ProjectiveCurve.Hyperelliptic.BoundaryWord
@@ -33,6 +34,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.AffineForm
 import Jacobians.ProjectiveCurve.Hyperelliptic.Form
 import Jacobians.ProjectiveCurve.Hyperelliptic.LiouvilleSupport
 import Jacobians.ProjectiveCurve.Hyperelliptic.Involution
+import Jacobians.ProjectiveCurve.Hyperelliptic.Genus
 import Jacobians.ProjectiveCurve.PlaneCurve
 import Jacobians.ProjectiveCurve.PlaneCurve.AtlasCompat
 import Jacobians.ProjectiveCurve.PlaneCurve.CrossCompat

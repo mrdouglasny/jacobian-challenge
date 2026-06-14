@@ -56,8 +56,32 @@ lemma S_analyticAt (H : HyperellipticData) : AnalyticAt ℂ (S H) 0 := by
     h_pow.const_smul (c := Complex.sqrt H.f.leadingCoeff)
   exact h_S
 
+/-- `S(z)² = f.reverse.eval z`.
+The Puiseux series `S` satisfies `S(z)² = P(z) = f_reverse(z)`,
+which follows from `sqrt(lc)² = lc` and `(x^(2⁻¹))² = x`. -/
+lemma S_sq (H : HyperellipticData) (z : ℂ) :
+    S H z ^ 2 = H.f.reverse.eval z := by
+  unfold S
+  rw [smul_eq_mul, mul_pow]
+  -- sqrt(lc)^2 = lc
+  have h_lc : Complex.sqrt H.f.leadingCoeff ^ 2 =
+      H.f.leadingCoeff := by
+    simp [Complex.sqrt]
+  rw [h_lc]
+  -- (lc⁻¹ • f_rev(z))^(2⁻¹) ^ 2 = lc⁻¹ • f_rev(z)
+  rw [smul_eq_mul, Complex.cpow_ofNat_inv_pow]
+  -- lc * (lc⁻¹ * f_rev(z)) = f_rev(z)
+  have h_lc_ne := leadingCoeff_ne_zero H
+  field_simp [h_lc_ne]
+
 noncomputable def t (H : HyperellipticData) (w : ℂ) : ℂ :=
   w * S H (w ^ 2)
+
+/-- `t(w)² = w² · f.reverse.eval(w²)`. -/
+lemma t_sq (H : HyperellipticData) (w : ℂ) :
+    t H w ^ 2 = w ^ 2 * H.f.reverse.eval (w ^ 2) := by
+  unfold t
+  rw [mul_pow, S_sq]
 
 lemma t_analyticAt (H : HyperellipticData) : AnalyticAt ℂ (t H) 0 := by
   have h_id : AnalyticAt ℂ (fun w : ℂ => w) 0 :=
@@ -101,7 +125,9 @@ lemma t_deriv_ne_zero (H : HyperellipticData) : deriv (t H) 0 ≠ 0 := by
   exact S_eval_zero_ne_zero H
 
 noncomputable def tLocalHomeomorph_hd (H : HyperellipticData) :
-    HasStrictFDerivAt (t H) (ContinuousLinearEquiv.unitsEquivAut ℂ (Units.mk0 (deriv (t H) 0) (t_deriv_ne_zero H)) : ℂ →L[ℂ] ℂ) 0 :=
+    HasStrictFDerivAt (t H)
+      (ContinuousLinearEquiv.unitsEquivAut ℂ
+        (Units.mk0 (deriv (t H) 0) (t_deriv_ne_zero H)) : ℂ →L[ℂ] ℂ) 0 :=
   ((t_analyticAt H).hasStrictDerivAt).hasStrictFDerivAt
 
 def slitPlane : Set ℂ := {z : ℂ | 0 < z.re ∨ z.im ≠ 0}
@@ -121,8 +147,10 @@ lemma isOpen_U_S (H : HyperellipticData) : IsOpen (U_S H) := by
   exact IsOpen.preimage h_cont isOpen_slitPlane
 
 lemma mem_U_S_zero (H : HyperellipticData) : (0 : ℂ) ∈ U_S H := by
-  simp [U_S, P_eval_zero]
   have h_lc_ne := leadingCoeff_ne_zero H
+  have h_zero : (0 : ℂ) ^ 2 = 0 := by ring
+  change H.f.leadingCoeff⁻¹ * H.f.reverse.eval ((0 : ℂ) ^ 2) ∈ slitPlane
+  rw [h_zero, P_eval_zero H]
   rw [inv_mul_cancel₀ h_lc_ne]
   left
   norm_num
@@ -160,14 +188,19 @@ lemma t_contDiffOn_U_S (H : HyperellipticData) :
 
 noncomputable def tLocalHomeomorph (H : HyperellipticData) : OpenPartialHomeomorph ℂ ℂ :=
   let e := HasStrictFDerivAt.toOpenPartialHomeomorph (t H) (tLocalHomeomorph_hd H)
-  e.restrOpen (U_S H) (isOpen_U_S H)
+  let s_symm := e.source ∩ (fun x => -x) ⁻¹' e.source
+  have hs_symm : IsOpen s_symm := by
+    refine IsOpen.inter e.open_source ?_
+    exact e.open_source.preimage continuous_neg
+  let e_symm := e.restrOpen s_symm hs_symm
+  e_symm.restrOpen (U_S H) (isOpen_U_S H)
 
 noncomputable def w (H : HyperellipticData) (z : ℂ) : ℂ :=
   (tLocalHomeomorph H).symm z
 
 lemma tLocalHomeomorph_coe (H : HyperellipticData) :
     (↑(tLocalHomeomorph H) : ℂ → ℂ) = t H := by
-  rw [tLocalHomeomorph, OpenPartialHomeomorph.coe_restrOpen]
+  rw [tLocalHomeomorph, OpenPartialHomeomorph.coe_restrOpen, OpenPartialHomeomorph.coe_restrOpen]
   exact HasStrictFDerivAt.toOpenPartialHomeomorph_coe (tLocalHomeomorph_hd H)
 
 lemma tLocalHomeomorph_source (H : HyperellipticData) :
@@ -175,7 +208,10 @@ lemma tLocalHomeomorph_source (H : HyperellipticData) :
   have h_hd := tLocalHomeomorph_hd H
   have h_e_source : (0 : ℂ) ∈ (HasStrictFDerivAt.toOpenPartialHomeomorph (t H) h_hd).source :=
     HasStrictFDerivAt.mem_toOpenPartialHomeomorph_source h_hd
-  exact ⟨h_e_source, mem_U_S_zero H⟩
+  refine ⟨⟨h_e_source, ⟨h_e_source, ?_⟩⟩, mem_U_S_zero H⟩
+  change - (0 : ℂ) ∈ (HasStrictFDerivAt.toOpenPartialHomeomorph (t H) h_hd).source
+  rw [neg_zero]
+  exact h_e_source
 
 lemma tLocalHomeomorph_apply_zero (H : HyperellipticData) :
     tLocalHomeomorph H 0 = 0 := by
@@ -191,16 +227,20 @@ lemma tLocalHomeomorph_target_zero (H : HyperellipticData) :
   rw [tLocalHomeomorph_apply_zero] at h
   exact h
 
-lemma tLocalHomeomorph_right_inv (H : HyperellipticData) {z : ℂ} (hz : z ∈ (tLocalHomeomorph H).target) :
+lemma tLocalHomeomorph_right_inv (H : HyperellipticData) {z : ℂ}
+    (hz : z ∈ (tLocalHomeomorph H).target) :
     t H ((tLocalHomeomorph H).symm z) = z := by
   have h := (tLocalHomeomorph H).right_inv hz
   have h_coe := tLocalHomeomorph_coe H
-  have h_app : (tLocalHomeomorph H) ((tLocalHomeomorph H).symm z) = (↑(tLocalHomeomorph H) : ℂ → ℂ) ((tLocalHomeomorph H).symm z) := rfl
+  have h_app : (tLocalHomeomorph H) ((tLocalHomeomorph H).symm z) =
+    (↑(tLocalHomeomorph H) : ℂ → ℂ) ((tLocalHomeomorph H).symm z) := rfl
   rw [h_app, h_coe] at h
   exact h
 
-lemma y_sq_eq_eval_x (h_odd : Odd H.f.natDegree) (z : ℂ) (hz : z ∈ (tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
-    (z * (((tLocalHomeomorph H).symm z)⁻¹ ^ 2) ^ (H.genus + 1)) ^ 2 = H.f.eval (((tLocalHomeomorph H).symm z)⁻¹ ^ 2) := by
+lemma y_sq_eq_eval_x (h_odd : Odd H.f.natDegree) (z : ℂ)
+    (hz : z ∈ (tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
+    (z * (((tLocalHomeomorph H).symm z)⁻¹ ^ 2) ^ (H.genus + 1)) ^ 2 =
+      H.f.eval (((tLocalHomeomorph H).symm z)⁻¹ ^ 2) := by
   set W := (tLocalHomeomorph H).symm z
   have hw : W ≠ 0 := by
     intro hW0
@@ -225,13 +265,15 @@ lemma y_sq_eq_eval_x (h_odd : Odd H.f.natDegree) (z : ℂ) (hz : z ∈ (tLocalHo
   have h_w_inv : W * W⁻¹ = 1 := mul_inv_cancel₀ hw
   rw [show 2 * H.genus + 2 = (2 * H.genus + 1) + 1 by ring]
   rw [pow_add, pow_one]
-  have hpow2 : W * S H (W ^ 2) * (W⁻¹ ^ (2 * H.genus + 1) * W⁻¹) = S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1) := by
+  have hpow2 : W * S H (W ^ 2) * (W⁻¹ ^ (2 * H.genus + 1) * W⁻¹) =
+      S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1) := by
     calc W * S H (W ^ 2) * (W⁻¹ ^ (2 * H.genus + 1) * W⁻¹)
       _ = S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1) * (W * W⁻¹) := by ring
       _ = S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1) * 1 := by rw [h_w_inv]
       _ = S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1) := by ring
   rw [hpow2]
-  have hpow3 : (S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1)) ^ 2 = (S H (W ^ 2)) ^ 2 * W⁻¹ ^ (4 * H.genus + 2) := by
+  have hpow3 : (S H (W ^ 2) * W⁻¹ ^ (2 * H.genus + 1)) ^ 2 =
+      (S H (W ^ 2)) ^ 2 * W⁻¹ ^ (4 * H.genus + 2) := by
     rw [mul_pow, ← pow_mul]
     congr 2
     ring
@@ -243,8 +285,10 @@ lemma y_sq_eq_eval_x (h_odd : Odd H.f.natDegree) (z : ℂ) (hz : z ∈ (tLocalHo
     have h_sqrt_sq := Complex.cpow_nat_inv_pow (H.f.leadingCoeff) (n := 2) (by decide)
     change ((Complex.sqrt H.f.leadingCoeff) ^ 2) = H.f.leadingCoeff at h_sqrt_sq
     rw [h_sqrt_sq]
-    have h_pow2 := Complex.cpow_nat_inv_pow (H.f.leadingCoeff⁻¹ * H.f.reverse.eval (W ^ 2)) (n := 2) (by decide)
-    change ((H.f.leadingCoeff⁻¹ * eval (W ^ 2) H.f.reverse) ^ (2⁻¹ : ℂ)) ^ 2 = H.f.leadingCoeff⁻¹ * eval (W ^ 2) H.f.reverse at h_pow2
+    have h_pow2 := Complex.cpow_nat_inv_pow
+      (H.f.leadingCoeff⁻¹ * H.f.reverse.eval (W ^ 2)) (n := 2) (by decide)
+    change ((H.f.leadingCoeff⁻¹ * eval (W ^ 2) H.f.reverse) ^ (2⁻¹ : ℂ)) ^ 2 =
+      H.f.leadingCoeff⁻¹ * eval (W ^ 2) H.f.reverse at h_pow2
     rw [h_pow2]
     rw [← mul_assoc, mul_inv_cancel₀ (leadingCoeff_ne_zero H), one_mul]
   rw [hS_sq]
@@ -284,8 +328,10 @@ lemma S_sq_eq_eval_rev (H : HyperellipticData) (u : ℂ) : (S H u) ^ 2 = (H.f.re
   have h_sqrt_sq := Complex.cpow_nat_inv_pow (H.f.leadingCoeff) (n := 2) (by decide)
   change ((Complex.sqrt H.f.leadingCoeff) ^ 2) = H.f.leadingCoeff at h_sqrt_sq
   rw [h_sqrt_sq]
-  have h_pow2 := Complex.cpow_nat_inv_pow (H.f.leadingCoeff⁻¹ * H.f.reverse.eval u) (n := 2) (by decide)
-  change ((H.f.leadingCoeff⁻¹ * eval u H.f.reverse) ^ (2⁻¹ : ℂ)) ^ 2 = H.f.leadingCoeff⁻¹ * eval u H.f.reverse at h_pow2
+  have h_pow2 := Complex.cpow_nat_inv_pow
+    (H.f.leadingCoeff⁻¹ * H.f.reverse.eval u) (n := 2) (by decide)
+  change ((H.f.leadingCoeff⁻¹ * eval u H.f.reverse) ^ (2⁻¹ : ℂ)) ^ 2 =
+    H.f.leadingCoeff⁻¹ * eval u H.f.reverse at h_pow2
   rw [h_pow2]
   rw [← mul_assoc]
   have h_lc_ne := leadingCoeff_ne_zero H
@@ -322,11 +368,15 @@ lemma w_q_sq_eq_inv (h : Odd H.f.natDegree) (q : HyperellipticAffine H)
       congr 1
       rw [← pow_mul]
       ring
-    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) * ((H.f.reverse).eval q.val.1⁻¹)⁻¹ := by rw [h_S_sq]
-    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) * (H.f.eval q.val.1 * q.val.1⁻¹ ^ H.f.natDegree)⁻¹ := by rw [h_rev]
-    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) * ((H.f.eval q.val.1)⁻¹ * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by
+    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) *
+      ((H.f.reverse).eval q.val.1⁻¹)⁻¹ := by rw [h_S_sq]
+    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) *
+      (H.f.eval q.val.1 * q.val.1⁻¹ ^ H.f.natDegree)⁻¹ := by rw [h_rev]
+    _ = H.f.eval q.val.1 * q.val.1⁻¹ ^ (2 * H.genus + 2) *
+      ((H.f.eval q.val.1)⁻¹ * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by
       rw [h_deg, mul_inv]
-    _ = (H.f.eval q.val.1 * (H.f.eval q.val.1)⁻¹) * (q.val.1⁻¹ ^ (2 * H.genus + 2) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by ring
+    _ = (H.f.eval q.val.1 * (H.f.eval q.val.1)⁻¹) *
+      (q.val.1⁻¹ ^ (2 * H.genus + 2) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by ring
     _ = 1 * (q.val.1⁻¹ ^ (2 * H.genus + 2) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by
       rw [mul_inv_cancel₀ h_f_eval_nz]
     _ = q.val.1⁻¹ ^ (2 * H.genus + 2) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹ := by rw [one_mul]
@@ -335,8 +385,10 @@ lemma w_q_sq_eq_inv (h : Odd H.f.natDegree) (q : HyperellipticAffine H)
         rw [show 2 * H.genus + 2 = (2 * H.genus + 1) + 1 by ring, pow_succ]
       have h_pow_nz : q.val.1⁻¹ ^ (2 * H.genus + 1) ≠ 0 := pow_ne_zero _ (inv_ne_zero hq1)
       calc q.val.1⁻¹ ^ (2 * H.genus + 2) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹
-        _ = (q.val.1⁻¹ ^ (2 * H.genus + 1) * q.val.1⁻¹) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹ := by rw [h1]
-        _ = q.val.1⁻¹ * (q.val.1⁻¹ ^ (2 * H.genus + 1) * (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by ring
+        _ = (q.val.1⁻¹ ^ (2 * H.genus + 1) * q.val.1⁻¹) *
+          (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹ := by rw [h1]
+        _ = q.val.1⁻¹ * (q.val.1⁻¹ ^ (2 * H.genus + 1) *
+          (q.val.1⁻¹ ^ (2 * H.genus + 1))⁻¹) := by ring
         _ = q.val.1⁻¹ * 1 := by rw [mul_inv_cancel₀ h_pow_nz]
         _ = q.val.1⁻¹ := mul_one _
 

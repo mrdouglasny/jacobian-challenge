@@ -47,7 +47,8 @@ open OnePoint Polynomial Complex Filter Set
 variable {H : HyperellipticData} {h : Odd H.f.natDegree}
 
 lemma continuousOn_S_sq (H : HyperellipticData) :
-    ContinuousOn (fun w => InfinityInverse.S H (w ^ 2)) (InfinityInverse.tLocalHomeomorph H).source := by
+    ContinuousOn (fun w => InfinityInverse.S H (w ^ 2))
+      (InfinityInverse.tLocalHomeomorph H).source := by
   intro w hw
   by_cases hw0 : w = 0
   · rw [hw0]
@@ -60,10 +61,12 @@ lemma continuousOn_S_sq (H : HyperellipticData) :
     have h_comp : ContinuousAt (InfinityInverse.S H ∘ (fun w : ℂ => w ^ 2)) 0 :=
       ContinuousAt.comp h_S_cont' h_sq_cont
     exact h_comp.continuousWithinAt
-  · have h_t_cont : ContinuousWithinAt (InfinityInverse.t H) (InfinityInverse.tLocalHomeomorph H).source w := by
+  · have h_t_cont : ContinuousWithinAt (InfinityInverse.t H)
+        (InfinityInverse.tLocalHomeomorph H).source w := by
       have h_chart_cont := (InfinityInverse.tLocalHomeomorph H).continuousOn w hw
       have h_coe := InfinityInverse.tLocalHomeomorph_coe H
-      have h_app : (↑(InfinityInverse.tLocalHomeomorph H) : ℂ → ℂ) = (InfinityInverse.tLocalHomeomorph H) := rfl
+      have h_app : (↑(InfinityInverse.tLocalHomeomorph H) : ℂ → ℂ) =
+        (InfinityInverse.tLocalHomeomorph H) := rfl
       rw [h_app] at h_coe
       rw [h_coe] at h_chart_cont
       exact h_chart_cont
@@ -74,8 +77,11 @@ lemma continuousOn_S_sq (H : HyperellipticData) :
       apply Filter.inter_mem
       · exact (InfinityInverse.tLocalHomeomorph H).open_source.mem_nhds hw
       · exact isOpen_ne.mem_nhds hw0
-    have h_eq : InfinityInverse.t H / (fun w => w) =ᶠ[(𝓝[ (InfinityInverse.tLocalHomeomorph H).source ] w)] (fun w => InfinityInverse.S H (w ^ 2)) := by
-      refine Filter.eventually_of_mem (U := (InfinityInverse.tLocalHomeomorph H).source ∩ {0}ᶜ) ?_ ?_
+    have h_eq : InfinityInverse.t H / (fun w => w) =ᶠ[(𝓝[
+        (InfinityInverse.tLocalHomeomorph H).source ] w)]
+          (fun w => InfinityInverse.S H (w ^ 2)) := by
+      refine Filter.eventually_of_mem
+        (U := (InfinityInverse.tLocalHomeomorph H).source ∩ {0}ᶜ) ?_ ?_
       · exact mem_nhdsWithin_of_mem_nhds h_inter
       · intro x hx
         simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_singleton_iff] at hx
@@ -88,7 +94,8 @@ lemma continuousOn_S_sq (H : HyperellipticData) :
 
 def V (H : HyperellipticData) : Set (HyperellipticAffine H) :=
   { q : HyperellipticAffine H | q.val.1 ≠ 0 ∧ q.val.2 ≠ 0 ∧
-    (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source }
+    (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈
+      (InfinityInverse.tLocalHomeomorph H).source }
 
 -- Topological axioms to bridge the analytic gaps
 
@@ -131,7 +138,8 @@ lemma S_ne_zero_of_mem_D_S (H : HyperellipticData) {z : ℂ} (hz : z ∈ D_S H) 
   change 0 < (0 : ℂ).re ∨ (0 : ℂ).im ≠ 0 at hz'
   simp at hz'
 
-lemma isOpen_Ω (H : HyperellipticData) : IsOpen { q : HyperellipticAffine H | q.val.1 ≠ 0 ∧ q.val.1⁻¹ ∈ D_S H } := by
+lemma isOpen_Ω (H : HyperellipticData) :
+    IsOpen { q : HyperellipticAffine H | q.val.1 ≠ 0 ∧ q.val.1⁻¹ ∈ D_S H } := by
   have h_open1 : IsOpen { q : HyperellipticAffine H | q.val.1 ≠ 0 } :=
     isOpen_ne_fun continuous_subtype_val.fst continuous_const
   have h_cont : ContinuousOn (fun q : HyperellipticAffine H => q.val.1⁻¹) { q | q.val.1 ≠ 0 } := by
@@ -141,7 +149,8 @@ lemma isOpen_Ω (H : HyperellipticData) : IsOpen { q : HyperellipticAffine H | q
   have h_open2 : IsOpen (D_S H) := isOpen_D_S H
   exact h_cont.isOpen_inter_preimage h_open1 h_open2
 
-lemma isBounded_image_val_of_bounded_components (H : HyperellipticData) {s : Set (HyperellipticAffine H)}
+lemma isBounded_image_val_of_bounded_components (H : HyperellipticData)
+    {s : Set (HyperellipticAffine H)}
     (h1 : ∃ R1 : ℝ, ∀ q ∈ s, ‖q.val.1‖ ≤ R1)
     (h2 : ∃ R2 : ℝ, ∀ q ∈ s, ‖q.val.2‖ ≤ R2) :
     Bornology.IsBounded (Subtype.val '' s) := by
@@ -157,7 +166,8 @@ lemma isBounded_image_val_of_bounded_components (H : HyperellipticData) {s : Set
   have hq2_le : ‖q.val.2‖ ≤ R2 := hR2 q hq_mem
   exact max_le_max hq1_le hq2_le
 
-lemma isCompact_of_isClosed_bounded_fst (H : HyperellipticData) {s : Set (HyperellipticAffine H)} (hs : IsClosed s)
+lemma isCompact_of_isClosed_bounded_fst (H : HyperellipticData)
+    {s : Set (HyperellipticAffine H)} (hs : IsClosed s)
     (h_bound : ∃ R : ℝ, ∀ q ∈ s, ‖q.val.1‖ ≤ R) :
     IsCompact s := by
   change @IsCompact { p : ℂ × ℂ // p.2 ^ 2 = H.f.eval p.1 } instTopologicalSpaceSubtype s
@@ -174,7 +184,8 @@ lemma isCompact_of_isClosed_bounded_fst (H : HyperellipticData) {s : Set (Hypere
     continuous_norm.comp (Polynomial.continuous H.f)
   have h_comp_img : IsCompact ((fun x : ℂ => ‖H.f.eval x‖) '' Metric.closedBall (0 : ℂ) R1) :=
     IsCompact.image h_comp_ball h_cont_f
-  have h_bounded_img : Bornology.IsBounded ((fun x : ℂ => ‖H.f.eval x‖) '' Metric.closedBall (0 : ℂ) R1) :=
+  have h_bounded_img : Bornology.IsBounded
+    ((fun x : ℂ => ‖H.f.eval x‖) '' Metric.closedBall (0 : ℂ) R1) :=
     h_comp_img.isBounded
   rw [Metric.isBounded_iff_subset_closedBall (0 : ℝ)] at h_bounded_img
   rcases h_bounded_img with ⟨R2, hR2⟩
@@ -183,10 +194,12 @@ lemma isCompact_of_isClosed_bounded_fst (H : HyperellipticData) {s : Set (Hypere
     have hq1_in : q.val.1 ∈ Metric.closedBall (0 : ℂ) R1 := by
       rw [Metric.mem_closedBall, dist_zero_right]
       exact hR1 q hq
-    have h_eval_in : ‖H.f.eval q.val.1‖ ∈ (fun x : ℂ => ‖H.f.eval x‖) '' Metric.closedBall (0 : ℂ) R1 :=
+    have h_eval_in : ‖H.f.eval q.val.1‖ ∈
+      (fun x : ℂ => ‖H.f.eval x‖) '' Metric.closedBall (0 : ℂ) R1 :=
       ⟨q.val.1, hq1_in, rfl⟩
     have h_le := hR2 h_eval_in
-    rw [Metric.mem_closedBall, dist_zero_right, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] at h_le
+    rw [Metric.mem_closedBall, dist_zero_right, Real.norm_eq_abs,
+      abs_of_nonneg (norm_nonneg _)] at h_le
     have h_y_sq : q.val.2 ^ 2 = H.f.eval q.val.1 := q.property
     have h_abs_sq : ‖q.val.2 ^ 2‖ = ‖H.f.eval q.val.1‖ := by
       rw [h_y_sq]
@@ -199,14 +212,13 @@ lemma isCompact_of_isClosed_bounded_fst (H : HyperellipticData) {s : Set (Hypere
   exact isBounded_image_val_of_bounded_components H ⟨R1, hR1⟩ ⟨Real.sqrt R2, h_bound_y⟩
 
 lemma mem_source_imp_sq_mem_D_S {w : ℂ} (hw : w ∈ (InfinityInverse.tLocalHomeomorph H).source) :
-    w ^ 2 ∈ D_S H := by
-  have h_source : (InfinityInverse.tLocalHomeomorph H).source =
-    (HasStrictFDerivAt.toOpenPartialHomeomorph (InfinityInverse.t H) (InfinityInverse.tLocalHomeomorph_hd H)).source ∩ InfinityInverse.U_S H := rfl
-  rw [h_source] at hw
-  exact hw.2
+    w ^ 2 ∈ D_S H :=
+  hw.2
 
-lemma w_q_mem_source_imp_x_inv_mem_D_S (h : Odd H.f.natDegree) (q : HyperellipticAffine H) (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0)
-    (hw : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source) :
+lemma w_q_mem_source_imp_x_inv_mem_D_S (h : Odd H.f.natDegree) (q : HyperellipticAffine H)
+    (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0)
+    (hw : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈
+      (InfinityInverse.tLocalHomeomorph H).source) :
     q.val.1⁻¹ ∈ D_S H := by
   have h_sq := mem_source_imp_sq_mem_D_S hw
   have h_eq := InfinityInverse.w_q_sq_eq_inv h q hq1 hq2
@@ -255,11 +267,14 @@ lemma continuousOn_f_w (H : HyperellipticData) :
     continuous_subtype_val.snd.continuousOn.mono (Set.subset_univ _)
   have h_x_inv : ContinuousOn (fun q : HyperellipticAffine H => q.val.1⁻¹) (Ω H) :=
     continuousOn_x_inv H
-  have h_x_inv_pow : ContinuousOn (fun q : HyperellipticAffine H => q.val.1⁻¹ ^ (H.genus + 1)) (Ω H) :=
+  have h_x_inv_pow : ContinuousOn
+    (fun q : HyperellipticAffine H => q.val.1⁻¹ ^ (H.genus + 1)) (Ω H) :=
     h_x_inv.pow (H.genus + 1)
-  have h_y_mul_pow : ContinuousOn (fun q : HyperellipticAffine H => q.val.2 * q.val.1⁻¹ ^ (H.genus + 1)) (Ω H) :=
+  have h_y_mul_pow : ContinuousOn
+    (fun q : HyperellipticAffine H => q.val.2 * q.val.1⁻¹ ^ (H.genus + 1)) (Ω H) :=
     h_y.mul h_x_inv_pow
-  have h_S_inv : ContinuousOn (fun q : HyperellipticAffine H => (InfinityInverse.S H q.val.1⁻¹)⁻¹) (Ω H) :=
+  have h_S_inv : ContinuousOn
+    (fun q : HyperellipticAffine H => (InfinityInverse.S H q.val.1⁻¹)⁻¹) (Ω H) :=
     continuousOn_S_inv_x_inv H
   exact h_y_mul_pow.mul h_S_inv
 
@@ -348,7 +363,8 @@ lemma ball_subset_source (H : HyperellipticData) :
   rcases h_open 0 h_zero with ⟨ε, hε, h_sub⟩
   exact ⟨ε, hε, h_sub⟩
 
-lemma norm_x_le_of_w_not_mem_source (h : Odd H.f.natDegree) (q : HyperellipticAffine H) (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0)
+lemma norm_x_le_of_w_not_mem_source (h : Odd H.f.natDegree) (q : HyperellipticAffine H)
+    (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0)
     {ε : ℝ} (hε : ε > 0) (h_sub : Metric.ball 0 ε ⊆ (InfinityInverse.tLocalHomeomorph H).source)
     (hw : f_w H q ∉ (InfinityInverse.tLocalHomeomorph H).source) :
     ‖q.val.1‖ ≤ ε⁻¹ ^ 2 := by
@@ -400,13 +416,16 @@ noncomputable def infinityInverseMap (H : HyperellipticData) (h : Odd H.f.natDeg
     ℂ → HyperellipticAffine H :=
   InfinityInverse.infinityInverseMap H h
 
-noncomputable def infinityForward (H : HyperellipticData) (h : Odd H.f.natDegree) (p : HyperellipticOdd H h) : ℂ :=
+noncomputable def infinityForward (H : HyperellipticData) (h : Odd H.f.natDegree)
+    (p : HyperellipticOdd H h) : ℂ :=
   p.elim 0 (fun q => q.val.2 / q.val.1 ^ (H.genus + 1))
 
-noncomputable def infinityBackward (H : HyperellipticData) (h : Odd H.f.natDegree) (t : ℂ) : HyperellipticOdd H h :=
+noncomputable def infinityBackward (H : HyperellipticData) (h : Odd H.f.natDegree)
+    (t : ℂ) : HyperellipticOdd H h :=
   if t = 0 then ∞ else coe (InfinityInverse.infinityInverseMap H h t)
 
-lemma infinityInverseMap_val_of_ne_zero (z : ℂ) (hz : z ∈ (InfinityInverse.tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
+lemma infinityInverseMap_val_of_ne_zero (z : ℂ)
+    (hz : z ∈ (InfinityInverse.tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
     InfinityInverse.infinityInverseMap H h z =
       let W := (InfinityInverse.tLocalHomeomorph H).symm z
       let x := W⁻¹ ^ 2
@@ -416,7 +435,8 @@ lemma infinityInverseMap_val_of_ne_zero (z : ℂ) (hz : z ∈ (InfinityInverse.t
   have hz_cond : z ∈ (InfinityInverse.tLocalHomeomorph H).target ∧ z ≠ 0 := ⟨hz, hz0⟩
   rw [dif_pos hz_cond]
 
-lemma infinityForward_infinityInverseMap_eq_self (z : ℂ) (hz : z ∈ (InfinityInverse.tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
+lemma infinityForward_infinityInverseMap_eq_self (z : ℂ)
+    (hz : z ∈ (InfinityInverse.tLocalHomeomorph H).target) (hz0 : z ≠ 0) :
     infinityForward H h (coe (InfinityInverse.infinityInverseMap H h z)) = z := by
   rw [infinityInverseMap_val_of_ne_zero z hz hz0]
   dsimp [infinityForward]
@@ -429,14 +449,18 @@ lemma infinityForward_infinityInverseMap_eq_self (z : ℂ) (hz : z ∈ (Infinity
       simp
     rw [h_zero] at h_tz
     exact hz0 h_tz.symm
-  have hx : ((InfinityInverse.tLocalHomeomorph H).symm z)⁻¹ ^ 2 ≠ 0 := pow_ne_zero 2 (inv_ne_zero hw)
-  have hpow : (((InfinityInverse.tLocalHomeomorph H).symm z)⁻¹ ^ 2) ^ (H.genus + 1) ≠ 0 := pow_ne_zero _ hx
+  have hx : ((InfinityInverse.tLocalHomeomorph H).symm z)⁻¹ ^ 2 ≠ 0 :=
+    pow_ne_zero 2 (inv_ne_zero hw)
+  have hpow : (((InfinityInverse.tLocalHomeomorph H).symm z)⁻¹ ^ 2) ^ (H.genus + 1) ≠ 0 :=
+    pow_ne_zero _ hx
   exact mul_div_cancel_right₀ z hpow
 
-lemma w_infinityInverseMap (t : ℂ) (ht : t ∈ (InfinityInverse.tLocalHomeomorph H).target) (ht0 : t ≠ 0) :
+lemma w_infinityInverseMap (t : ℂ) (ht : t ∈ (InfinityInverse.tLocalHomeomorph H).target)
+    (ht0 : t ≠ 0) :
     let q := InfinityInverse.infinityInverseMap H h t
     q.val.1 ≠ 0 ∧ q.val.2 ≠ 0 ∧
-    q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ = (InfinityInverse.tLocalHomeomorph H).symm t := by
+    q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ =
+      (InfinityInverse.tLocalHomeomorph H).symm t := by
   intro q
   have hq_eq : q = InfinityInverse.infinityInverseMap H h t := rfl
   rw [infinityInverseMap_val_of_ne_zero t ht ht0] at hq_eq
@@ -451,11 +475,13 @@ lemma w_infinityInverseMap (t : ℂ) (ht : t ∈ (InfinityInverse.tLocalHomeomor
       simp
     rw [h_zero] at h_tz
     exact ht0 h_tz.symm
-  have hx_nz : ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2 ≠ 0 := pow_ne_zero 2 (inv_ne_zero hw_nz)
+  have hx_nz : ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2 ≠ 0 :=
+    pow_ne_zero 2 (inv_ne_zero hw_nz)
   have hy_nz : t * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) ≠ 0 := by
     refine mul_ne_zero ht0 (pow_ne_zero _ hx_nz)
   refine ⟨hx_nz, hy_nz, ?_⟩
-  have h_x_inv : (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2)⁻¹ = ((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2 := by
+  have h_x_inv : (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2)⁻¹ =
+    ((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2 := by
     rw [inv_pow, inv_inv]
   rw [h_x_inv]
   have h_tz := InfinityInverse.tLocalHomeomorph_right_inv H ht
@@ -463,24 +489,42 @@ lemma w_infinityInverseMap (t : ℂ) (ht : t ∈ (InfinityInverse.tLocalHomeomor
   unfold InfinityInverse.t
   have h_S_nz : InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ≠ 0 := by
     intro hc
-    have ht_eq : t = ((InfinityInverse.tLocalHomeomorph H).symm t) * InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) := h_tz.symm
+    have ht_eq : t = ((InfinityInverse.tLocalHomeomorph H).symm t) *
+      InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) := h_tz.symm
     have ht0' : t = 0 := by
       rw [ht_eq, hc, mul_zero]
     exact ht0 ht0'
-  have h_S_inv : InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ = 1 := mul_inv_cancel₀ h_S_nz
-  have h_W_pow : (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) * (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1) = 1 := by
+  have h_S_inv : InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) *
+    (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ = 1 :=
+      mul_inv_cancel₀ h_S_nz
+  have h_W_pow : (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) *
+    (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1) = 1 := by
     rw [← mul_pow]
-    have : ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2 * ((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2 = 1 := by
+    have : ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2 *
+      ((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2 = 1 := by
       rw [← mul_pow, inv_mul_cancel₀ hw_nz, one_pow]
     rw [this, one_pow]
-  calc ((InfinityInverse.tLocalHomeomorph H).symm t) * InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) * (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1) * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹
-    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) * InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * ((((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) * (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1)) * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ := by ring
-    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) * InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * 1 * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ := by rw [h_W_pow]
-    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹) := by ring
+  calc ((InfinityInverse.tLocalHomeomorph H).symm t) *
+      InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) *
+      (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) *
+      (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1) *
+      (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹
+    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) *
+      InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) *
+      ((((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) *
+      (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) ^ (H.genus + 1)) *
+      (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ := by ring
+    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) *
+      InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) * 1 *
+      (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹ := by rw [h_W_pow]
+    _ = ((InfinityInverse.tLocalHomeomorph H).symm t) *
+      (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2) *
+      (InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm t) ^ 2))⁻¹) := by ring
     _ = ((InfinityInverse.tLocalHomeomorph H).symm t) * 1 := by rw [h_S_inv]
     _ = ((InfinityInverse.tLocalHomeomorph H).symm t) := mul_one _
 
-lemma t_w_q (h : Odd H.f.natDegree) (q : HyperellipticAffine H) (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0) :
+lemma t_w_q (h : Odd H.f.natDegree) (q : HyperellipticAffine H)
+    (hq1 : q.val.1 ≠ 0) (hq2 : q.val.2 ≠ 0) :
     let w_q := q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹
     InfinityInverse.t H w_q = q.val.2 / q.val.1 ^ (H.genus + 1) := by
   intro w_q
@@ -502,11 +546,15 @@ lemma t_w_q (h : Odd H.f.natDegree) (q : HyperellipticAffine H) (hq1 : q.val.1 �
     exact h_rev_nz hc2
   have hw_sq := InfinityInverse.w_q_sq_eq_inv h q hq1 hq2
   rw [hw_sq]
-  have h_S_cancel : InfinityInverse.S H q.val.1⁻¹ * (InfinityInverse.S H q.val.1⁻¹)⁻¹ = 1 := mul_inv_cancel₀ h_S_nz
+  have h_S_cancel : InfinityInverse.S H q.val.1⁻¹ * (InfinityInverse.S H q.val.1⁻¹)⁻¹ = 1 :=
+    mul_inv_cancel₀ h_S_nz
   calc w_q * InfinityInverse.S H q.val.1⁻¹
-    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹ := rfl
-    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * ((InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹) := by ring
-    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * 1 := by rw [mul_comm (InfinityInverse.S H q.val.1⁻¹)⁻¹, h_S_cancel]
+    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ *
+      InfinityInverse.S H q.val.1⁻¹ := rfl
+    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) *
+      ((InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹) := by ring
+    _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * 1 := by
+      rw [mul_comm (InfinityInverse.S H q.val.1⁻¹)⁻¹, h_S_cancel]
     _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) := mul_one _
     _ = q.val.2 / q.val.1 ^ (H.genus + 1) := by rw [div_eq_mul_inv, inv_pow]
 
@@ -539,23 +587,28 @@ lemma tendsto_symm_nhdsWithin {H : HyperellipticData} :
     Tendsto (InfinityInverse.tLocalHomeomorph H).symm (𝓝[≠] 0) (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h_cont : ContinuousAt (InfinityInverse.tLocalHomeomorph H).symm 0 :=
-      (InfinityInverse.tLocalHomeomorph H).continuousAt_symm (InfinityInverse.tLocalHomeomorph_target_zero H)
+      (InfinityInverse.tLocalHomeomorph H).continuousAt_symm
+        (InfinityInverse.tLocalHomeomorph_target_zero H)
     have h_zero : (InfinityInverse.tLocalHomeomorph H).symm 0 = 0 := by
-      have h_linv := (InfinityInverse.tLocalHomeomorph H).left_inv (InfinityInverse.tLocalHomeomorph_source H)
-      have h_app : (InfinityInverse.tLocalHomeomorph H) 0 = 0 := InfinityInverse.tLocalHomeomorph_apply_zero H
+      have h_linv := (InfinityInverse.tLocalHomeomorph H).left_inv
+        (InfinityInverse.tLocalHomeomorph_source H)
+      have h_app : (InfinityInverse.tLocalHomeomorph H) 0 = 0 :=
+        InfinityInverse.tLocalHomeomorph_apply_zero H
       rwa [h_app] at h_linv
     have h_tend : Tendsto (InfinityInverse.tLocalHomeomorph H).symm (𝓝 0) (𝓝 0) := by
       have h_tend_eq := h_cont.tendsto
       rwa [h_zero] at h_tend_eq
     exact h_tend.mono_left nhdsWithin_le_nhds
   · have h_target : (InfinityInverse.tLocalHomeomorph H).target ∈ 𝓝 (0 : ℂ) :=
-      (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds (InfinityInverse.tLocalHomeomorph_target_zero H)
+      (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds
+        (InfinityInverse.tLocalHomeomorph_target_zero H)
     have h_ev_target : ∀ᶠ w in 𝓝[≠] (0 : ℂ), w ∈ (InfinityInverse.tLocalHomeomorph H).target :=
       nhdsWithin_le_nhds h_target
     have h_ev_ne : ∀ᶠ w : ℂ in 𝓝[≠] 0, w ≠ 0 := self_mem_nhdsWithin
     filter_upwards [h_ev_target, h_ev_ne]
     intro w hw_target hw_ne hc
-    have h_eq : w = InfinityInverse.tLocalHomeomorph H ((InfinityInverse.tLocalHomeomorph H).symm w) :=
+    have h_eq : w = InfinityInverse.tLocalHomeomorph H
+      ((InfinityInverse.tLocalHomeomorph H).symm w) :=
       ((InfinityInverse.tLocalHomeomorph H).right_inv hw_target).symm
     rw [hc, InfinityInverse.tLocalHomeomorph_apply_zero] at h_eq
     exact hw_ne h_eq
@@ -573,7 +626,8 @@ lemma tendsto_cocompact_of_tendsto_norm_atTop {α : Type*} {l : Filter α} {f : 
   rw [Metric.mem_closedBall, dist_zero_right] at h_ball
   exact not_lt.mpr h_ball hx
 
-lemma tendsto_cocompact_of_fst {H : HyperellipticData} {α : Type*} {l : Filter α} (g : α → HyperellipticAffine H)
+lemma tendsto_cocompact_of_fst {H : HyperellipticData} {α : Type*} {l : Filter α}
+    (g : α → HyperellipticAffine H)
     (hg : Tendsto (fun t => (g t).val.1) l (cocompact ℂ)) :
     Tendsto g l (cocompact (HyperellipticAffine H)) := by
   rw [hasBasis_cocompact.tendsto_right_iff]
@@ -586,19 +640,24 @@ lemma tendsto_cocompact_of_fst {H : HyperellipticData} {α : Type*} {l : Filter 
   exact hx ⟨g x, h_in, rfl⟩
 
 theorem tendsto_infinityBackward_zero (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    Tendsto (fun t => @coe H h (InfinityInverse.infinityInverseMap H h t)) (𝓝[≠] 0) (𝓝 (∞ : HyperellipticOdd H h)) := by
+    Tendsto (fun t => @coe H h (InfinityInverse.infinityInverseMap H h t)) (𝓝[≠] 0)
+      (𝓝 (∞ : HyperellipticOdd H h)) := by
   have h_coe := OnePoint.tendsto_coe_infty (X := HyperellipticAffine H)
   rw [coclosedCompact_eq_cocompact] at h_coe
   refine Tendsto.comp h_coe ?_
   refine tendsto_cocompact_of_fst _ ?_
-  have h_comp_comp : Tendsto ((fun w : ℂ => ‖w⁻¹ ^ 2‖) ∘ (InfinityInverse.tLocalHomeomorph H).symm) (𝓝[≠] 0) atTop :=
-    Tendsto.comp tendsto_inv_sq_norm_zero_eq (tendsto_symm_nhdsWithin (H := H))
-  have h_comp : Tendsto (fun t => ‖((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2‖) (𝓝[≠] 0) atTop := h_comp_comp
-  have h_comp_cocompact := tendsto_cocompact_of_tendsto_norm_atTop (f := fun t => ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) h_comp
+  have h_comp_comp : Tendsto ((fun w : ℂ => ‖w⁻¹ ^ 2‖) ∘
+    (InfinityInverse.tLocalHomeomorph H).symm) (𝓝[≠] 0) atTop :=
+      Tendsto.comp tendsto_inv_sq_norm_zero_eq (tendsto_symm_nhdsWithin (H := H))
+  have h_comp : Tendsto (fun t => ‖((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2‖)
+    (𝓝[≠] 0) atTop := h_comp_comp
+  have h_comp_cocompact := tendsto_cocompact_of_tendsto_norm_atTop
+    (f := fun t => ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) h_comp
   have h_eq : (fun t => (InfinityInverse.infinityInverseMap H h t).val.1) =ᶠ[𝓝[≠] 0]
       (fun t => ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) := by
     have h_target : (InfinityInverse.tLocalHomeomorph H).target ∈ 𝓝 (0 : ℂ) :=
-      (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds (InfinityInverse.tLocalHomeomorph_target_zero H)
+      (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds
+        (InfinityInverse.tLocalHomeomorph_target_zero H)
     refine eventually_nhdsWithin_iff.mpr (eventually_of_mem h_target ?_)
     intro t ht ht0
     dsimp
@@ -625,7 +684,9 @@ lemma tendsto_pow_div_pow_cocompact (i : ℕ) (n : ℕ) (h_lt : i < n) :
 
 lemma tendsto_eval_div_pow_cocompact (p : Polynomial ℂ) (n : ℕ) (hn : p.natDegree < n) :
     Tendsto (fun x : ℂ => p.eval x / x ^ n) (cocompact ℂ) (𝓝 0) := by
-  have h_eq : (fun x : ℂ => p.eval x / x ^ n) = (fun x => (Finset.range (p.natDegree + 1)).sum (fun i => p.coeff i * (x ^ i / x ^ n))) := by
+  have h_eq : (fun x : ℂ => p.eval x / x ^ n) =
+    (fun x => (Finset.range (p.natDegree + 1)).sum
+      (fun i => p.coeff i * (x ^ i / x ^ n))) := by
     ext x
     rw [Polynomial.eval_eq_sum_range, Finset.sum_div]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -669,7 +730,8 @@ lemma eventually_ne_zero_cocompact (H : HyperellipticData) :
   exact hq
 
 lemma tendsto_fst_cocompact (H : HyperellipticData) :
-    Tendsto (fun q : HyperellipticAffine H => q.val.1) (cocompact (HyperellipticAffine H)) (cocompact ℂ) := by
+    Tendsto (fun q : HyperellipticAffine H => q.val.1)
+      (cocompact (HyperellipticAffine H)) (cocompact ℂ) := by
   rw [hasBasis_cocompact.tendsto_iff hasBasis_cocompact]
   intro K hK
   use (fun q => q.val.1) ⁻¹' K
@@ -686,7 +748,8 @@ lemma tendsto_fst_cocompact (H : HyperellipticData) :
     exact h_ball
   exact isCompact_of_isClosed_bounded_fst H h_closed h_bound
 
-lemma sq_norm_div_eq_eval_div (H : HyperellipticData) (q : HyperellipticAffine H) (_hq : q.val.1 ≠ 0) :
+lemma sq_norm_div_eq_eval_div (H : HyperellipticData) (q : HyperellipticAffine H)
+    (_hq : q.val.1 ≠ 0) :
     ‖q.val.2 / q.val.1 ^ (H.genus + 1)‖ ^ 2 = ‖H.f.eval q.val.1 / q.val.1 ^ (2 * H.genus + 2)‖ := by
   rw [← norm_pow]
   congr 1
@@ -695,11 +758,13 @@ lemma sq_norm_div_eq_eval_div (H : HyperellipticData) (q : HyperellipticAffine H
   rw [show 2 * H.genus + 2 = (H.genus + 1) * 2 by ring, pow_mul]
 
 theorem tendsto_infinityForward_infty (H : HyperellipticData) (h : Odd H.f.natDegree) :
-    Tendsto (fun q : HyperellipticAffine H => q.val.2 / q.val.1 ^ (H.genus + 1)) (coclosedCompact (HyperellipticAffine H)) (𝓝 0) := by
+    Tendsto (fun q : HyperellipticAffine H => q.val.2 / q.val.1 ^ (H.genus + 1))
+      (coclosedCompact (HyperellipticAffine H)) (𝓝 0) := by
   rw [coclosedCompact_eq_cocompact]
   refine tendsto_zero_of_tendsto_sq_zero ?_
   have h_ev_ne := eventually_ne_zero_cocompact H
-  have h_eq : (fun q : HyperellipticAffine H => ‖q.val.2 / q.val.1 ^ (H.genus + 1)‖ ^ 2) =ᶠ[cocompact (HyperellipticAffine H)]
+  have h_eq : (fun q : HyperellipticAffine H => ‖q.val.2 / q.val.1 ^ (H.genus + 1)‖ ^ 2)
+    =ᶠ[cocompact (HyperellipticAffine H)]
       (fun q => ‖H.f.eval q.val.1 / q.val.1 ^ (2 * H.genus + 2)‖) := by
     filter_upwards [h_ev_ne]
     intro q hq
@@ -751,16 +816,19 @@ theorem continuousAt_infinityInverseMap (H : HyperellipticData) (h : Odd H.f.nat
     h_symm_cont.inv₀ h_symm_ne
   have h_x_cont : ContinuousAt (fun w => ((InfinityInverse.tLocalHomeomorph H).symm w)⁻¹ ^ 2) t :=
     h_inv_cont.pow 2
-  have h_y_cont : ContinuousAt (fun w => w * (((InfinityInverse.tLocalHomeomorph H).symm w)⁻¹ ^ 2) ^ (H.genus + 1)) t := by
+  have h_y_cont : ContinuousAt (fun w => w *
+    (((InfinityInverse.tLocalHomeomorph H).symm w)⁻¹ ^ 2) ^ (H.genus + 1)) t := by
     have h1 : ContinuousAt (fun w => w) t := continuousAt_id
-    have h2 : ContinuousAt (fun w => (((InfinityInverse.tLocalHomeomorph H).symm w)⁻¹ ^ 2) ^ (H.genus + 1)) t :=
+    have h2 : ContinuousAt (fun w =>
+      (((InfinityInverse.tLocalHomeomorph H).symm w)⁻¹ ^ 2) ^ (H.genus + 1)) t :=
       h_x_cont.pow (H.genus + 1)
     exact h1.mul h2
   exact h_x_cont.prodMk h_y_cont
 
 lemma open_source : IsOpen ({ (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H) := by
   change IsOpen ({ (∞ : OnePoint (HyperellipticAffine H)) } ∪ OnePoint.some '' V H)
-  have h_eq : ({ (∞ : OnePoint (HyperellipticAffine H)) } ∪ OnePoint.some '' V H) = (OnePoint.some '' (V H)ᶜ)ᶜ := by
+  have h_eq : ({ (∞ : OnePoint (HyperellipticAffine H)) } ∪ OnePoint.some '' V H) =
+    (OnePoint.some '' (V H)ᶜ)ᶜ := by
     ext x
     induction x using OnePoint.rec with
     | infty =>
@@ -812,7 +880,8 @@ lemma continuousOn_infinityForward :
 lemma continuousAt_infinityBackward_of_ne_zero (t : ℂ)
     (ht : t ∈ (InfinityInverse.tLocalHomeomorph H).target) (ht0 : t ≠ 0) :
     ContinuousAt (infinityBackward H h) t := by
-  have h_eq : infinityBackward H h =ᶠ[𝓝 t] (fun w => @coe H h (InfinityInverse.infinityInverseMap H h w)) := by
+  have h_eq : infinityBackward H h =ᶠ[𝓝 t]
+    (fun w => @coe H h (InfinityInverse.infinityInverseMap H h w)) := by
     have h_ne : {0}ᶜ ∈ 𝓝 t := isOpen_ne.mem_nhds ht0
     refine Filter.eventually_of_mem h_ne ?_
     intro w hw
@@ -829,7 +898,8 @@ lemma continuousWithinAt_infinityBackward_zero :
     ContinuousWithinAt (infinityBackward H h) (InfinityInverse.tLocalHomeomorph H).target 0 := by
   rw [ContinuousWithinAt]
   have h_target : (InfinityInverse.tLocalHomeomorph H).target ∈ 𝓝 (0 : ℂ) :=
-    (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds (InfinityInverse.tLocalHomeomorph_target_zero H)
+    (InfinityInverse.tLocalHomeomorph H).open_target.mem_nhds
+      (InfinityInverse.tLocalHomeomorph_target_zero H)
   rw [nhdsWithin_eq_nhds.mpr h_target]
   have h_nhds : 𝓝 (0 : ℂ) = 𝓝[≠] (0 : ℂ) ⊔ pure 0 := (nhdsNE_sup_pure 0).symm
   have h_zero : infinityBackward H h 0 = (∞ : HyperellipticOdd H h) := by
@@ -837,7 +907,8 @@ lemma continuousWithinAt_infinityBackward_zero :
     rw [if_pos rfl]
   rw [h_nhds, tendsto_sup]
   constructor
-  · have h_eq : (infinityBackward H h) =ᶠ[𝓝[≠] 0] (fun t => @coe H h (InfinityInverse.infinityInverseMap H h t)) := by
+  · have h_eq : (infinityBackward H h) =ᶠ[𝓝[≠] 0]
+      (fun t => @coe H h (InfinityInverse.infinityInverseMap H h t)) := by
       refine Filter.eventually_of_mem (self_mem_nhdsWithin) ?_
       intro t ht
       change t ≠ 0 at ht
@@ -871,8 +942,11 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
       exact InfinityInverse.tLocalHomeomorph_target_zero H
     · rcases hp with ⟨q, ⟨hq1, hq2, hq_w⟩, rfl⟩
       change q.val.2 / q.val.1 ^ (H.genus + 1) ∈ (InfinityInverse.tLocalHomeomorph H).target
-      have hw_in_source : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source := hq_w
-      have hz_eq : q.val.2 / q.val.1 ^ (H.genus + 1) = InfinityInverse.tLocalHomeomorph H (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
+      have hw_in_source : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) *
+        (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source := hq_w
+      have hz_eq : q.val.2 / q.val.1 ^ (H.genus + 1) =
+        InfinityInverse.tLocalHomeomorph H (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) *
+          (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
         rw [InfinityInverse.tLocalHomeomorph_coe]
         exact (t_w_q h q hq1 hq2).symm
       rw [hz_eq]
@@ -881,8 +955,7 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
     intro t ht
     by_cases ht0 : t = 0
     · rw [ht0]
-      unfold infinityBackward
-      simp
+      rw [infinityBackward, if_pos rfl]
       left
       exact Set.mem_singleton _
     · right
@@ -910,8 +983,10 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
           exact div_eq_zero_iff.mp this |>.resolve_right (pow_ne_zero _ hq1)
         exact hq2 this
       have hz_in_target : z ∈ (InfinityInverse.tLocalHomeomorph H).target := by
-        have hw_in_source : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source := hq_w
-        have hz_eq' : z = InfinityInverse.tLocalHomeomorph H (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
+        have hw_in_source : (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) *
+          (InfinityInverse.S H q.val.1⁻¹)⁻¹) ∈ (InfinityInverse.tLocalHomeomorph H).source := hq_w
+        have hz_eq' : z = InfinityInverse.tLocalHomeomorph H
+          (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
           rw [InfinityInverse.tLocalHomeomorph_coe]
           exact (t_w_q h q hq1 hq2).symm
         rw [hz_eq']
@@ -923,8 +998,10 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
       rw [infinityInverseMap_val_of_ne_zero z hz_in_target hz0]
       apply Subtype.ext
       dsimp
-      have h_symm : (InfinityInverse.tLocalHomeomorph H).symm z = (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
-        have hz_eq' : z = InfinityInverse.tLocalHomeomorph H (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
+      have h_symm : (InfinityInverse.tLocalHomeomorph H).symm z =
+        (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
+        have hz_eq' : z = InfinityInverse.tLocalHomeomorph H
+          (q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹) := by
           rw [InfinityInverse.tLocalHomeomorph_coe]
           exact (t_w_q h q hq1 hq2).symm
         rw [hz_eq']
@@ -939,7 +1016,8 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
       rw [h_x]
       have hz_val : z = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) := by
         have h_tz := InfinityInverse.tLocalHomeomorph_right_inv H hz_in_target
-        have hz_eq'' : z = (InfinityInverse.tLocalHomeomorph H).symm z * InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm z) ^ 2) := h_tz.symm
+        have hz_eq'' : z = (InfinityInverse.tLocalHomeomorph H).symm z *
+          InfinityInverse.S H (((InfinityInverse.tLocalHomeomorph H).symm z) ^ 2) := h_tz.symm
         rw [h_symm] at hz_eq''
         rw [hz_eq'']
         have hw_sq := InfinityInverse.w_q_sq_eq_inv h q hq1 hq2
@@ -956,9 +1034,22 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
             intro hc3
             have hc4 : q.val.2 ^ 2 = 0 := by rw [h_y_sq, hc3]
             exact hq2 (sq_eq_zero_iff.mp hc4)
+          have h_source : (InfinityInverse.tLocalHomeomorph H).source =
+            ((HasStrictFDerivAt.toOpenPartialHomeomorph (InfinityInverse.t H)
+              (InfinityInverse.tLocalHomeomorph_hd H)).source ∩
+                (fun x => -x) ⁻¹' (HasStrictFDerivAt.toOpenPartialHomeomorph (InfinityInverse.t H)
+                  (InfinityInverse.tLocalHomeomorph_hd H)).source) ∩
+            InfinityInverse.U_S H := by
+              dsimp [InfinityInverse.tLocalHomeomorph]
+              ext x
+              simp only [Set.mem_inter_iff]
+              tauto
+          rw [h_source] at hq_w
           exact (mul_ne_zero h_f_eval_nz (pow_ne_zero _ (inv_ne_zero hq1))) hc2
-        calc q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹
-          _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * ((InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹) := by ring
+        calc q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * (InfinityInverse.S H q.val.1⁻¹)⁻¹ *
+            InfinityInverse.S H q.val.1⁻¹
+          _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) *
+            ((InfinityInverse.S H q.val.1⁻¹)⁻¹ * InfinityInverse.S H q.val.1⁻¹) := by ring
           _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) * 1 := by rw [inv_mul_cancel₀ h_S_nz]
           _ = q.val.2 * q.val.1⁻¹ ^ (H.genus + 1) := mul_one _
       calc z * q.val.1 ^ (H.genus + 1)
@@ -972,7 +1063,7 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
     by_cases ht0 : t = 0
     · rw [ht0]
       simp [infinityBackward, infinityForward]
-    · simp [infinityBackward, ht0]
+    · rw [infinityBackward, if_neg ht0]
       exact infinityForward_infinityInverseMap_eq_self t ht ht0
   open_source := open_source
   open_target := (InfinityInverse.tLocalHomeomorph H).open_target
@@ -986,32 +1077,38 @@ theorem infinityChart_mem_source (H : HyperellipticData) (h : Odd H.f.natDegree)
   rfl
 
 theorem tLocalHomeomorph_symm_contDiffOn (H : HyperellipticData) :
-    ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm (InfinityInverse.tLocalHomeomorph H).target := by
+    ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm
+      (InfinityInverse.tLocalHomeomorph H).target := by
   intro y hy
-  let e := HasStrictFDerivAt.toOpenPartialHomeomorph (InfinityInverse.t H) (InfinityInverse.tLocalHomeomorph_hd H)
-  have h_eq : ∀ z ∈ (InfinityInverse.tLocalHomeomorph H).target, (InfinityInverse.tLocalHomeomorph H).symm z = e.symm z := by
+  let e := HasStrictFDerivAt.toOpenPartialHomeomorph (InfinityInverse.t H)
+    (InfinityInverse.tLocalHomeomorph_hd H)
+  have h_eq : ∀ z ∈ (InfinityInverse.tLocalHomeomorph H).target,
+      (InfinityInverse.tLocalHomeomorph H).symm z = e.symm z := by
     intro z hz
     rfl
   refine ContDiffWithinAt.congr ?_ h_eq (h_eq y hy)
   have hy_e : y ∈ e.target := by
-    exact hy.1
+    exact hy.1.1
   have h_sub : (InfinityInverse.tLocalHomeomorph H).target ⊆ e.target := by
     intro z hz
-    exact hz.1
+    exact hz.1.1
   refine ContDiffWithinAt.mono ?_ h_sub
   have h_mem_source : e.symm y ∈ (InfinityInverse.U_S H) := by
     exact hy.2
   have h_mem_nhds : InfinityInverse.U_S H ∈ 𝓝 (e.symm y) :=
     (InfinityInverse.isOpen_U_S H).mem_nhds h_mem_source
-  let df_equiv_u := (ContinuousLinearEquiv.unitsEquivAut ℂ (Units.mk0 (deriv (InfinityInverse.t H) 0) (InfinityInverse.t_deriv_ne_zero H)) : ℂ ≃L[ℂ] ℂ)
+  let df_equiv_u := (ContinuousLinearEquiv.unitsEquivAut ℂ
+    (Units.mk0 (deriv (InfinityInverse.t H) 0) (InfinityInverse.t_deriv_ne_zero H)) : ℂ ≃L[ℂ] ℂ)
   let df_inv := (df_equiv_u.symm : ℂ →L[ℂ] ℂ)
-  have h_approx : ApproximatesLinearOn (InfinityInverse.t H) (df_equiv_u : ℂ →L[ℂ] ℂ) e.source (‖df_inv‖₊⁻¹ / 2) := by
+  have h_approx : ApproximatesLinearOn (InfinityInverse.t H) (df_equiv_u : ℂ →L[ℂ] ℂ)
+    e.source (‖df_inv‖₊⁻¹ / 2) := by
     have h_hd := InfinityInverse.tLocalHomeomorph_hd H
     exact (Classical.choose_spec h_hd.approximates_deriv_on_open_nhds).2.2
   have h_cd_x : ContDiffAt ℂ ω (InfinityInverse.t H) (e.symm y) := by
     have h_ana := InfinityInverse.t_analyticAt_of_mem H h_mem_source
     exact h_ana.contDiffAt
-  have h_deriv_x : HasFDerivAt (InfinityInverse.t H) (fderiv ℂ (InfinityInverse.t H) (e.symm y)) (e.symm y) :=
+  have h_deriv_x : HasFDerivAt (InfinityInverse.t H)
+    (fderiv ℂ (InfinityInverse.t H) (e.symm y)) (e.symm y) :=
     h_cd_x.differentiableAt (by simp) |>.hasFDerivAt
   have h_pos : 0 < ‖df_inv‖₊ := by
     cases df_equiv_u.subsingleton_or_nnnorm_symm_pos with
@@ -1039,7 +1136,8 @@ lemma affineLiftProjX_trans_infinityChart_apply
     (((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
           (infinityChart H h)) x =
-      (HyperellipticAffine.squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval x) / x ^ (H.genus + 1) := by
+      (HyperellipticAffine.squareLocalHomeomorph (H := H) p hpY).symm (H.f.eval x) /
+        x ^ (H.genus + 1) := by
   have h_trans : (((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
       (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
       (infinityChart H h)) x =
@@ -1049,7 +1147,8 @@ lemma affineLiftProjX_trans_infinityChart_apply
   rw [h_trans]
   have h_symm : ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
       (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm x =
-      (coe ((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x) : HyperellipticOdd H h) := by
+      (coe ((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x) :
+        HyperellipticOdd H h) := by
     rfl
   rw [h_symm]
   dsimp [infinityForward, OnePoint.elim]
@@ -1058,8 +1157,10 @@ lemma affineLiftProjX_trans_infinityChart_apply
     exact hx_lift
   have h_fst := HyperellipticAffine.affineChartProjX_symm_apply_fst (H := H) p hpY hx0
   have h_snd := HyperellipticAffine.affineChartProjX_symm_apply_snd (H := H) p hpY hx0
-  change (((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x : HyperellipticAffine H).val.2) /
-    (((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x : HyperellipticAffine H).val.1) ^ (H.genus + 1) = _
+  change (((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x :
+    HyperellipticAffine H).val.2) /
+    (((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x :
+      HyperellipticAffine H).val.1) ^ (H.genus + 1) = _
   rw [h_fst, h_snd]
 
 lemma affineLiftProjY_trans_infinityChart_apply
@@ -1071,7 +1172,8 @@ lemma affineLiftProjY_trans_infinityChart_apply
     (((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
           (infinityChart H h)) y =
-      y / ((HyperellipticAffine.polynomialLocalHomeomorph (H := H) p hpX).symm (y ^ 2)) ^ (H.genus + 1) := by
+      y / ((HyperellipticAffine.polynomialLocalHomeomorph (H := H) p hpX).symm (y ^ 2)) ^
+        (H.genus + 1) := by
   have h_trans : (((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
       (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm.trans
       (infinityChart H h)) y =
@@ -1081,7 +1183,8 @@ lemma affineLiftProjY_trans_infinityChart_apply
   rw [h_trans]
   have h_symm : ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
       (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm y =
-      (coe ((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y) : HyperellipticOdd H h) := by
+      (coe ((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y) :
+        HyperellipticOdd H h) := by
     rfl
   rw [h_symm]
   dsimp [infinityForward, OnePoint.elim]
@@ -1090,8 +1193,10 @@ lemma affineLiftProjY_trans_infinityChart_apply
     exact hy_lift
   have h_fst := HyperellipticAffine.affineChartProjY_symm_apply_fst (H := H) p hpX hy0
   have h_snd := HyperellipticAffine.affineChartProjY_symm_apply_snd (H := H) p hpX hy0
-  change (((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y : HyperellipticAffine H).val.2) /
-    (((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y : HyperellipticAffine H).val.1) ^ (H.genus + 1) = _
+  change (((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y :
+    HyperellipticAffine H).val.2) /
+    (((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y :
+      HyperellipticAffine H).val.1) ^ (H.genus + 1) = _
   rw [h_fst, h_snd]
 
 lemma infinityChart_trans_affineLiftProjX_apply
@@ -1114,7 +1219,8 @@ lemma infinityChart_trans_affineLiftProjX_apply
   have h_mem := hx.2
   have h_ne_infty : infinityBackward H h x ≠ (∞ : HyperellipticOdd H h) := by
     intro hc
-    have h_mem' : (∞ : HyperellipticOdd H h) ∈ ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+    have h_mem' : (∞ : HyperellipticOdd H h) ∈
+      ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
         (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).source := by
       rwa [← hc]
     rcases h_mem' with ⟨q, hq, h_eq⟩
@@ -1131,7 +1237,8 @@ lemma infinityChart_trans_affineLiftProjX_apply
     rw [if_neg hx0]
   rw [h_eq_coe]
   have h_lift : ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
-      (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))) (coe (InfinityInverse.infinityInverseMap H h x) : HyperellipticOdd H h) =
+      (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))
+      (coe (InfinityInverse.infinityInverseMap H h x) : HyperellipticOdd H h) =
       (InfinityInverse.infinityInverseMap H h x).val.1 := by
     erw [OpenPartialHomeomorph.lift_openEmbedding_apply]
     rfl
@@ -1161,7 +1268,8 @@ lemma infinityChart_trans_affineLiftProjY_apply
   have h_mem := hx.2
   have h_ne_infty : infinityBackward H h x ≠ (∞ : HyperellipticOdd H h) := by
     intro hc
-    have h_mem' : (∞ : HyperellipticOdd H h) ∈ ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+    have h_mem' : (∞ : HyperellipticOdd H h) ∈
+      ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
         (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).source := by
       rwa [← hc]
     rcases h_mem' with ⟨q, hq, h_eq⟩
@@ -1178,7 +1286,8 @@ lemma infinityChart_trans_affineLiftProjY_apply
     rw [if_neg hx0]
   rw [h_eq_coe]
   have h_lift : ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
-      (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))) (coe (InfinityInverse.infinityInverseMap H h x) : HyperellipticOdd H h) =
+      (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))
+      (coe (InfinityInverse.infinityInverseMap H h x) : HyperellipticOdd H h) =
       (InfinityInverse.infinityInverseMap H h x).val.2 := by
     erw [OpenPartialHomeomorph.lift_openEmbedding_apply]
     rfl
@@ -1199,11 +1308,13 @@ theorem infinityChart_compat_affineLiftProjX
       ((infinityChart H h).symm.trans
         ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source := by
-  have h_symm_smooth : ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm (InfinityInverse.tLocalHomeomorph H).target :=
+  have h_symm_smooth : ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm
+      (InfinityInverse.tLocalHomeomorph H).target :=
     tLocalHomeomorph_symm_contDiffOn H
   have h_sub : (((infinityChart H h).symm.trans
       ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
-        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) ⊆ (InfinityInverse.tLocalHomeomorph H).target := by
+        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) ⊆
+      (InfinityInverse.tLocalHomeomorph H).target := by
     intro x hx
     exact hx.1
   have h_symm_sub := h_symm_smooth.mono h_sub
@@ -1217,7 +1328,8 @@ theorem infinityChart_compat_affineLiftProjX
       intro hc
       have h_ne_infty : infinityBackward H h x ≠ (∞ : HyperellipticOdd H h) := by
         intro hc'
-        have h_mem' : (∞ : HyperellipticOdd H h) ∈ ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
+        have h_mem' : (∞ : HyperellipticOdd H h) ∈
+      ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
             (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).source := by
           rwa [← hc']
         rcases h_mem' with ⟨q, hq, h_eq⟩
@@ -1270,7 +1382,8 @@ theorem affineLiftProjX_compat_infinityChart
           (infinityChart H h))).source e.target := by
     intro x hx
     have hx_lift := hx.1
-    simp only [OpenPartialHomeomorph.symm_symm, OpenPartialHomeomorph.lift_openEmbedding_target] at hx_lift
+    simp only [OpenPartialHomeomorph.symm_symm,
+      OpenPartialHomeomorph.lift_openEmbedding_target] at hx_lift
     exact hx_lift
   have h_num : ContDiffOn ℂ ω (fun x => e.symm (H.f.eval x))
       ((((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
@@ -1288,22 +1401,27 @@ theorem affineLiftProjX_compat_infinityChart
     intro x hx
     have h_symm : ((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
         (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm x =
-        (coe ((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x) : HyperellipticOdd H h) := by
+        (coe ((HyperellipticAffine.affineChartProjX (H := H) p hpY).symm x) :
+        HyperellipticOdd H h) := by
       rfl
     have h_img : (((HyperellipticAffine.affineChartProjX (H := H) p hpY).lift_openEmbedding
-        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm) x ∈ (infinityChart H h).source := hx.2
+        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm) x ∈
+          (infinityChart H h).source := hx.2
     rw [h_symm] at h_img
-    have h_mem_source : ((HyperellipticAffine.affineChartProjX p hpY).symm x : HyperellipticAffine H).val.1 ≠ 0 := by
+    have h_mem_source :
+      ((HyperellipticAffine.affineChartProjX p hpY).symm x : HyperellipticAffine H).val.1 ≠ 0 := by
       rcases h_img with h_inf | ⟨q, hq, h_eq_coe⟩
       · exfalso
-        exact OnePoint.infty_notMem_range_coe ⟨((HyperellipticAffine.affineChartProjX p hpY).symm x : HyperellipticAffine H), h_inf⟩
+        exact OnePoint.infty_notMem_range_coe
+          ⟨((HyperellipticAffine.affineChartProjX p hpY).symm x : HyperellipticAffine H), h_inf⟩
       · have hq_eq : q = (HyperellipticAffine.affineChartProjX p hpY).symm x := by
           exact coe_injective h_eq_coe
         rw [← hq_eq]
         exact hq.1
     have hx0 : x ∈ (HyperellipticAffine.affineChartProjX p hpY).target := by
       have hx_lift := hx.1
-      simp only [OpenPartialHomeomorph.symm_symm, OpenPartialHomeomorph.lift_openEmbedding_target] at hx_lift
+      simp only [OpenPartialHomeomorph.symm_symm,
+      OpenPartialHomeomorph.lift_openEmbedding_target] at hx_lift
       exact hx_lift
     have h_fst := HyperellipticAffine.affineChartProjX_symm_apply_fst (H := H) p hpY hx0
     rw [h_fst] at h_mem_source
@@ -1328,11 +1446,13 @@ theorem infinityChart_compat_affineLiftProjY
       ((infinityChart H h).symm.trans
         ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source := by
-  have h_symm_smooth : ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm (InfinityInverse.tLocalHomeomorph H).target :=
+  have h_symm_smooth : ContDiffOn ℂ ω (InfinityInverse.tLocalHomeomorph H).symm
+      (InfinityInverse.tLocalHomeomorph H).target :=
     tLocalHomeomorph_symm_contDiffOn H
   have h_sub : (((infinityChart H h).symm.trans
       ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
-        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) ⊆ (InfinityInverse.tLocalHomeomorph H).target := by
+        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) ⊆
+      (InfinityInverse.tLocalHomeomorph H).target := by
     intro x hx
     exact hx.1
   have h_symm_sub := h_symm_smooth.mono h_sub
@@ -1346,7 +1466,8 @@ theorem infinityChart_compat_affineLiftProjY
       intro hc
       have h_ne_infty : infinityBackward H h x ≠ (∞ : HyperellipticOdd H h) := by
         intro hc'
-        have h_mem' : (∞ : HyperellipticOdd H h) ∈ ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
+        have h_mem' : (∞ : HyperellipticOdd H h) ∈
+      ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
             (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).source := by
           rwa [← hc']
         rcases h_mem' with ⟨q, hq, h_eq⟩
@@ -1369,7 +1490,8 @@ theorem infinityChart_compat_affineLiftProjY
         ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) :=
     h_symm_sub.inv h_nz
-  have h_pow : ContDiffOn ℂ ω (fun x => (((InfinityInverse.tLocalHomeomorph H).symm x)⁻¹ ^ 2) ^ (H.genus + 1))
+  have h_pow : ContDiffOn ℂ ω
+    (fun x => (((InfinityInverse.tLocalHomeomorph H).symm x)⁻¹ ^ 2) ^ (H.genus + 1))
       (((infinityChart H h).symm.trans
         ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
           (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))).source) :=
@@ -1409,7 +1531,8 @@ theorem affineLiftProjY_compat_infinityChart
           (infinityChart H h))).source e.target := by
     intro y hy
     have hy_lift := hy.1
-    simp only [OpenPartialHomeomorph.symm_symm, OpenPartialHomeomorph.lift_openEmbedding_target] at hy_lift
+    simp only [OpenPartialHomeomorph.symm_symm,
+      OpenPartialHomeomorph.lift_openEmbedding_target] at hy_lift
     exact hy_lift
   have h_den_inner : ContDiffOn ℂ ω (fun y => e.symm (y ^ 2))
       ((((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
@@ -1432,22 +1555,27 @@ theorem affineLiftProjY_compat_infinityChart
     intro y hy
     have h_symm : ((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
         (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm y =
-        (coe ((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y) : HyperellipticOdd H h) := by
+        (coe ((HyperellipticAffine.affineChartProjY (H := H) p hpX).symm y) :
+        HyperellipticOdd H h) := by
       rfl
     have h_img : (((HyperellipticAffine.affineChartProjY (H := H) p hpX).lift_openEmbedding
-        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm) y ∈ (infinityChart H h).source := hy.2
+        (OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H))).symm) y ∈
+          (infinityChart H h).source := hy.2
     rw [h_symm] at h_img
-    have h_mem_source : ((HyperellipticAffine.affineChartProjY p hpX).symm y : HyperellipticAffine H).val.1 ≠ 0 := by
+    have h_mem_source :
+      ((HyperellipticAffine.affineChartProjY p hpX).symm y : HyperellipticAffine H).val.1 ≠ 0 := by
       rcases h_img with h_inf | ⟨q, hq, h_eq_coe⟩
       · exfalso
-        exact OnePoint.infty_notMem_range_coe ⟨((HyperellipticAffine.affineChartProjY p hpX).symm y : HyperellipticAffine H), h_inf⟩
+        exact OnePoint.infty_notMem_range_coe
+          ⟨((HyperellipticAffine.affineChartProjY p hpX).symm y : HyperellipticAffine H), h_inf⟩
       · have hq_eq : q = (HyperellipticAffine.affineChartProjY p hpX).symm y := by
           exact coe_injective h_eq_coe
         rw [← hq_eq]
         exact hq.1
     have hy0 : y ∈ (HyperellipticAffine.affineChartProjY p hpX).target := by
       have hy_lift := hy.1
-      simp only [OpenPartialHomeomorph.symm_symm, OpenPartialHomeomorph.lift_openEmbedding_target] at hy_lift
+      simp only [OpenPartialHomeomorph.symm_symm,
+      OpenPartialHomeomorph.lift_openEmbedding_target] at hy_lift
       exact hy_lift
     have h_fst := HyperellipticAffine.affineChartProjY_symm_apply_fst (H := H) p hpX hy0
     rw [h_fst] at h_mem_source

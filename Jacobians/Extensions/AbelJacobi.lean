@@ -66,6 +66,7 @@ References:
 import Jacobians.Challenge
 import Jacobians.Extensions.HyperellipticOdd
 import Jacobians.Extensions.HyperellipticEven
+import Jacobians.Extensions.InvolutionPullback
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Axioms.AbelTheorem
 import Jacobians.Axioms.PeriodLattice
@@ -73,12 +74,18 @@ import Jacobians.Axioms.RiemannBilinear
 import Jacobians.Axioms.PeriodCycleBasis
 import Jacobians.RiemannSurface.Periods
 import Jacobians.AbelianVariety.Siegel
+import Mathlib.Algebra.Group.Basic
+import Jacobians.RiemannSurface.DevelopingValueAlgebra
+import Jacobians.RiemannSurface.DevelopingNaturality
+import Jacobians.Bridge.AbelEngineAdapter
+import Jacobians.RiemannSurface.LoopLattice
+import Jacobians.RiemannSurface.DevelopingValueForm
 
 namespace Jacobians.Extensions.AbelJacobi
 
 open scoped Manifold ContDiff Topology
 open Jacobians Jacobians.ProjectiveCurve Jacobians.RiemannSurface
-  Jacobians.Axioms Jacobians.AbelianVariety
+  Jacobians.Axioms Jacobians.AbelianVariety Jacobians.Bridge
 open Jacobians.Extensions.HyperellipticOdd
 
 /-! ## Test 1 — Period-lattice rank
@@ -104,11 +111,15 @@ theorem periodLattice_rank_HyperellipticOdd_eq
         (periodLatticeInBasis (HyperellipticOdd H h)
           (Classical.arbitrary _) (jacobianBasis _)) =
       2 * ((H.f.natDegree - 1) / 2) := by
-  -- Combine `AX_H1FreeRank2g` (rank `2g` source) with injectivity of
-  -- `periodMapInBasis` (from `AX_PeriodLattice`'s discreteness +
-  -- full-rank conclusion) and the genus theorem
-  -- `genus_HyperellipticOdd_eq`.
-  sorry
+  have hg : RiemannSurface.genus (HyperellipticOdd H h) = (H.f.natDegree - 1) / 2 :=
+    genus_HyperellipticOdd_eq H h
+  have hgen := analyticLoopsGenerateH1 (Classical.arbitrary (HyperellipticOdd H h))
+  obtain ⟨basis_Z⟩ := exists_periodLatticeInBasis_basis_of_tgen
+    (Classical.arbitrary (HyperellipticOdd H h)) (jacobianBasis _) hgen
+  rw [Module.finrank_eq_card_basis basis_Z]
+  simp only [Fintype.card_fin]
+  rw [hg]
+
 
 /-- **The Jacobian of an odd-degree hyperelliptic curve is a compact
 complex torus.** Combining `periodLattice_rank_HyperellipticOdd_eq` with
@@ -149,6 +160,25 @@ theorem hyperellipticInvolution_fixes_infty
       (OnePoint.infty : HyperellipticOdd H h) := by
   simp [hyperellipticInvolution]
 
+-- Let's use our proven theorem
+theorem AX_pullback_hyperellipticInvolution_eq_neg
+    (H : HyperellipticData) (h : Odd H.f.natDegree) :
+    pullbackOneForm (hyperellipticInvolution H h)
+        (hyperellipticInvolution_contMDiff H h)
+      = (-LinearMap.id : HolomorphicOneForm (HyperellipticOdd H h) →ₗ[ℂ]
+          HolomorphicOneForm (HyperellipticOdd H h)) := by
+  haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
+  exact pullback_hyperellipticInvolution_eq_neg_proof H
+
+theorem developingValue_neg {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (form : HolomorphicOneForm X)
+    (γ : C(unitInterval, X)) :
+    developingValue x₀ (-form) γ = - developingValue x₀ form γ := by
+  have h := developingValue_smul x₀ (-1 : ℂ) form γ
+  rw [neg_one_smul ℂ form] at h
+  rw [neg_one_smul ℂ (developingValue x₀ form γ)] at h
+  exact h
+
 /-- **σ-equivariance of the Abel-Jacobi map** at a Weierstrass
 basepoint. With `P₀ = ∞` (a Weierstrass point in the odd case), the
 hyperelliptic involution acts as `−id` on the Jacobian:
@@ -163,18 +193,109 @@ theorem abelJacobi_hyperellipticInvolution
     ofCurveImpl (HyperellipticOdd H h) (OnePoint.infty)
         (hyperellipticInvolution H h P) =
       - ofCurveImpl (HyperellipticOdd H h) (OnePoint.infty) P := by
-  -- Strategy: combine the form-level identity
-  -- `pullback_hyperellipticInvolution_eq_neg` (HyperellipticOdd.lean,
-  -- currently a `True` placeholder) with naturality of the path-integral
-  -- functional under pullback (a derived form of
-  -- `AX_pathIntegral_local_antiderivative`). Quantitatively:
-  --   A(σ P) i = ∫_∞^{σ P} (jacobianBasis i)
-  --           = ∫_∞^P σ^* (jacobianBasis i)         (substitution)
-  --           = -∫_∞^P (jacobianBasis i)            (σ^*ω = -ω)
-  --           = -A(P) i
-  -- The `(mod Λ)` is automatic since `ofCurve` lands in
-  -- `ℂ^g/Λ`.
-  sorry
+  let X := HyperellipticOdd H h
+  let infty : X := OnePoint.infty
+  let σ := hyperellipticInvolution H h
+  let hσ := hyperellipticInvolution_contMDiff H h
+  let b := jacobianBasis X
+  let Λ := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
+  
+  -- Let's define the paths and loops
+  let γ : Path infty P := bridgeArcPath infty P
+  let γ_σ : Path infty (σ P) := γ.map continuous_hyperellipticInvolution
+  let loop₁ : Path infty infty := (bridgeArcPath infty (σ P)).trans γ_σ.symm
+  let loop₂ : Path infty infty :=
+    (bridgeArcPath infty infty).symm.trans (bridgeArcPath infty infty).symm
+  
+  -- The loop developing values lie in the period lattice
+  have hloop₁ : (fun i => developingValue infty (b i)
+    ((loop₁ : Path infty infty) : C(unitInterval, X))) ∈ Λ :=
+      Jacobians.RiemannSurface.devVal_loop_mem_periodLatticeInBasis_any
+        (Classical.arbitrary X) b loop₁
+  
+  have hloop₂ : (fun i => developingValue infty (b i)
+    ((loop₂ : Path infty infty) : C(unitInterval, X))) ∈ Λ :=
+      Jacobians.RiemannSurface.devVal_loop_mem_periodLatticeInBasis_any
+        (Classical.arbitrary X) b loop₂
+  
+  -- Unfold the loop algebra
+  have h_loop₁_val (i : Fin (RiemannSurface.genus X)) :
+      developingValue infty (b i) ((loop₁ : Path infty infty) : C(unitInterval, X)) =
+        developingValue infty (b i)
+          ((bridgeArcPath infty (σ P) : Path infty (σ P)) : C(unitInterval, X)) -
+          developingValue infty (b i) ((γ_σ : Path infty (σ P)) : C(unitInterval, X)) := by
+    rw [devVal_trans, devVal_symm]
+    ring
+    
+  have h_loop₂_val (i : Fin (RiemannSurface.genus X)) :
+      developingValue infty (b i) ((loop₂ : Path infty infty) : C(unitInterval, X)) =
+        - developingValue infty (b i)
+          ((bridgeArcPath infty infty : Path infty infty) : C(unitInterval, X)) -
+            developingValue infty (b i)
+              ((bridgeArcPath infty infty : Path infty infty) : C(unitInterval, X)) := by
+    rw [devVal_trans, devVal_symm]
+    ring
+  -- Developing value naturality on γ_σ
+  have h_nat (i : Fin (RiemannSurface.genus X)) :
+      developingValue infty (b i) ((γ_σ : Path infty (σ P)) : C(unitInterval, X)) =
+        developingValue infty (pullbackOneForm σ hσ (b i))
+          ((γ : Path infty P) : C(unitInterval, X)) := by
+    have hrel := pullbackOneForm_isPullbackCoeffRel σ hσ (b i)
+    exact (developingValue_comp_of_isPullbackCoeffRel hσ hrel infty infty
+      ((γ : Path infty P) : C(unitInterval, X))).symm
+    
+  -- Involution action on forms
+  have h_neg_form (i : Fin (RiemannSurface.genus X)) :
+      pullbackOneForm σ hσ (b i) = - b i := by
+    rw [AX_pullback_hyperellipticInvolution_eq_neg H h]
+    rfl
+    
+  have h_nat_neg (i : Fin (RiemannSurface.genus X)) :
+      developingValue infty (b i) ((γ_σ : Path infty (σ P)) : C(unitInterval, X)) =
+        - developingValue infty (b i) ((γ : Path infty P) : C(unitInterval, X)) := by
+    rw [h_nat i, h_neg_form i, developingValue_neg]
+  -- Now let's calculate the coordinates modulo Λ
+  have h_diff_eq :
+      (fun i => ofCurveAmbient X infty (σ P) i - ofCurveAmbient X infty infty i) -
+        (fun i => - (ofCurveAmbient X infty P i - ofCurveAmbient X infty infty i)) =
+      (fun i => developingValue infty (b i) ((loop₁ : Path infty infty) : C(unitInterval, X))) +
+        (fun i => developingValue infty (b i)
+          ((loop₂ : Path infty infty) : C(unitInterval, X))) := by
+    ext i
+    dsimp
+    rw [← devVal_bridgeArcPath infty (σ P) i]
+    rw [← devVal_bridgeArcPath infty infty i]
+    rw [← devVal_bridgeArcPath infty P i]
+    rw [h_loop₁_val i, h_loop₂_val i, h_nat_neg i]
+    ring
+  have h_mem :
+      (fun i => ofCurveAmbient X infty (σ P) i - ofCurveAmbient X infty infty i) -
+        (fun i => - (ofCurveAmbient X infty P i - ofCurveAmbient X infty infty i)) ∈ Λ := by
+    rw [h_diff_eq]
+    exact Submodule.add_mem Λ hloop₁ hloop₂
+  -- Now let's unfold ofCurveImpl
+  unfold ofCurveImpl
+  ext : 1
+  change
+    QuotientAddGroup.mk' Λ.toAddSubgroup
+        (ofCurveAmbient X infty (σ P) - ofCurveAmbient X infty infty) =
+      - QuotientAddGroup.mk' Λ.toAddSubgroup
+        (ofCurveAmbient X infty P - ofCurveAmbient X infty infty)
+  rw [← map_neg (QuotientAddGroup.mk' Λ.toAddSubgroup)]
+  rw [QuotientAddGroup.mk'_eq_mk']
+  use - (ofCurveAmbient X infty P - ofCurveAmbient X infty infty) -
+    (ofCurveAmbient X infty (σ P) - ofCurveAmbient X infty infty)
+  constructor
+  · have h_neg : - (ofCurveAmbient X infty P - ofCurveAmbient X infty infty) -
+        (ofCurveAmbient X infty (σ P) - ofCurveAmbient X infty infty) =
+          - ((ofCurveAmbient X infty (σ P) - ofCurveAmbient X infty infty) -
+            - (ofCurveAmbient X infty P - ofCurveAmbient X infty infty)) := by
+      ext i
+      simp
+    rw [h_neg]
+    exact Submodule.neg_mem Λ h_mem
+  · ext i
+    simp
 
 /-! ## Test 3 — Abel's theorem on a principal divisor
 
@@ -226,19 +347,20 @@ theorem abelJacobi_fiber_sum_eq_zero
         (((fiberPoint H x₀ y₀ hxy : HyperellipticAffine H) :
           OnePoint (HyperellipticAffine H)) : HyperellipticOdd H h) +
       ofCurveImpl (HyperellipticOdd H h) (OnePoint.infty)
-        (((HyperellipticAffine.involution (fiberPoint H x₀ y₀ hxy) :
+        (((HyperellipticAffine.invol (fiberPoint H x₀ y₀ hxy) :
             HyperellipticAffine H) : OnePoint (HyperellipticAffine H))
           : HyperellipticOdd H h) =
         0 := by
-  -- Two routes:
-  -- (a) (Direct.) `(P₁ + P₂ - 2∞) ∈ PrincipalDivisors X` is
-  --     `div(x - x₀)`. Then `AX_AbelTheorem` + extension property of
-  --     `abelJacobiDiv` collapses to the displayed sum.
-  -- (b) Since `(σ (fiberPoint x₀ y₀)) = fiberPoint x₀ (-y₀)`, this
-  --     follows from `abelJacobi_hyperellipticInvolution` applied to
-  --     `P = fiberPoint x₀ y₀`, the AddMonoidHom property of
-  --     `Jacobian.ofCurve` at the basepoint, and `add_neg_self`.
-  sorry
+  set X := HyperellipticOdd H h
+  let P₁ : X := (((fiberPoint H x₀ y₀ hxy : HyperellipticAffine H) :
+    OnePoint (HyperellipticAffine H)) : X)
+  have hσ : hyperellipticInvolution H h P₁ =
+      (((HyperellipticAffine.invol (fiberPoint H x₀ y₀ hxy) : HyperellipticAffine H) :
+        OnePoint (HyperellipticAffine H)) : X) := by
+    rfl
+  rw [← hσ]
+  rw [abelJacobi_hyperellipticInvolution H h P₁]
+  exact add_neg_cancel _
 
 /-! ## Test 4 — Riemann's bilinear relations on the hyperelliptic
 period matrix
@@ -313,7 +435,15 @@ theorem periodLattice_rank_HyperellipticEven_eq
         (periodLatticeInBasis (HyperellipticEvenProj H)
           (Classical.arbitrary _) (jacobianBasis _)) =
       2 * (H.f.natDegree / 2 - 1) := by
-  sorry
+  have hg : RiemannSurface.genus (HyperellipticEvenProj H) = H.f.natDegree / 2 - 1 :=
+    genus_HyperellipticEven_eq H
+  have hgen := analyticLoopsGenerateH1 (Classical.arbitrary (HyperellipticEvenProj H))
+  obtain ⟨basis_Z⟩ := exists_periodLatticeInBasis_basis_of_tgen
+    (Classical.arbitrary (HyperellipticEvenProj H)) (jacobianBasis _) hgen
+  rw [Module.finrank_eq_card_basis basis_Z]
+  simp only [Fintype.card_fin]
+  rw [hg]
+
 
 /-- **Riemann bilinear relations, even case.** Specialization of
 `AX_RiemannBilinear` to `HyperellipticEvenProj`; the test forces the
