@@ -73,4 +73,46 @@ theorem curve_generates_jacobian {X : Type*} [TopologicalSpace X] [T2Space X]
     hclopen.eq_univ ⟨0, H.zero_mem⟩
   exact AddSubgroup.coe_eq_univ.mp huniv
 
+/-! ## G3 — `period_functoriality` (from A1 + proven naturality)
+
+Restricted to A1's **self-Albanese** presentation (the old ∀-arbitrary-`P` form is
+unsound — Gemini-confirmed). The containment reduces to a single per-class bridge:
+the dual pullback of a source period vector is a target period vector, hence in the
+target lattice. That bridge (`torusAmbientLinear_periodMapInBasis_mem`) is the
+naturality + self-Albanese step (`torusPullback_pathIntegral_naturality` carries a
+loop's period to `f∘loop`'s period; the self-Albanese identity of A1 puts a torus
+loop period in `Λ_A`); it remains the analytic residual. -/
+
+open Jacobians.Axioms in
+/-- The analytic bridge for G3 (residual): the dual pullback of a source period
+class lands in the target lattice. By `torusPullback_pathIntegral_naturality`
+(`∮_{f∘γ}ω = ∮_γ f*ω`) the image is the period of a loop `f∘γ` in `A`, and A1's
+self-Albanese identity places a torus loop period in `Λ_A`. -/
+theorem torusAmbientLinear_periodMapInBasis_mem {X : Type*} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
+    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) (h : H1 X (Classical.arbitrary X)) :
+    torusAmbientLinear f hf
+        (periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) h) ∈
+      (torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice := by
+  sorry
+
+open Jacobians.Axioms in
+/-- **G3, theorem** (modulo the analytic bridge `torusAmbientLinear_periodMapInBasis_mem`).
+The source period lattice maps into A1's self-Albanese target lattice under the dual
+pullback. No new axiom beyond A1 (and the residual bridge). -/
+theorem period_functoriality {X : Type*} [TopologicalSpace X] [T2Space X]
+    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
+    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
+    (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup ≤
+      (torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice.toAddSubgroup.comap
+        (torusAmbientLinear f hf).toAddMonoidHom := by
+  rintro v ⟨h, rfl⟩
+  exact torusAmbientLinear_periodMapInBasis_mem f hf h
+
 end Jacobians.RiemannSurface
