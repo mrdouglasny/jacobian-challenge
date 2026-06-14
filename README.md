@@ -458,8 +458,9 @@ on the standard three Lean axioms.
 ## Further reading
 
 - [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — kernel-verified per-axiom audit.
-- [`docs/VERIFICATION.md`](docs/VERIFICATION.md) — informal↔formal map of every
-  object + the axiom certificate (*"did we build it right"*).
+- [`docs/FAITHFULNESS.md`](docs/FAITHFULNESS.md) — the informal↔formal
+  correspondence for every object (*"do the statements mean the mathematics"* —
+  the faithfulness layer of validation).
 - [`docs/VALIDATION.md`](docs/VALIDATION.md) — the acceptance argument: definition
   + anti-vacuity subset + universal property (*"did we build the right thing"*).
 - [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace.
