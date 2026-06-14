@@ -156,29 +156,31 @@ variety). But as the capstone over A + B it is what makes the validation
 **The validation artifact is complete and load-bearing exactly when
 `ofCurve_isJacobian` is sorry-free AND axiom-clean (standard-3 only).**
 
-Current status (`#print axioms Jacobians.ofCurve_isJacobian`, 2026-06-12):
+> **G1 DONE (PR #251).** `AX_PeriodCycleBasis` is discharged from every headline
+> closure — **all 24 Buzzard headlines are now standard-3**, and Parts A+B of the
+> artifact are fully axiom-clean. The capstone `ofCurve_isJacobian` no longer
+> carries `AX_PeriodCycleBasis` either; it is down to the **three torus axioms**.
+
+Current status (`#print axioms Jacobians.ofCurve_isJacobian`, 2026-06-14):
 
 ```
 [propext, Classical.choice, Quot.sound,
- AX_PeriodCycleBasis,
  AX_curve_generates_jacobian,
  AX_period_functoriality,
  AX_torus_self_albanese]
 ```
 
-So the capstone currently rests on **four project axioms** — and is, today, the
-*most* axiom-laden statement in the tree (Part A and Part B are nearly
-axiom-clean: their only non-standard dependency is `AX_PeriodCycleBasis`). This
-is the precise, bounded goal:
+So the capstone now rests on **three project axioms**, all torus-side (Parts A+B
+and every Buzzard headline are axiom-clean). The remaining bounded goal:
 
-| Goal | Axiom to discharge | Reduces to |
-|---|---|---|
-| **G1** | `AX_PeriodCycleBasis` | **T-GEN** (`AnalyticLoopsGenerateH1`) — the live endgame |
-| **G2** | `AX_curve_generates_jacobian` | the Abel–Jacobi image generates the torus (Part C "generates" clause) |
-| **G3** | `AX_period_functoriality` | naturality of the period map under holomorphic `X → Y` |
-| **G4** | `AX_torus_self_albanese` | a complex torus is its own Albanese (the base case of universality) |
+| Goal | Axiom to discharge | Reduces to | Status |
+|---|---|---|---|
+| ~~**G1**~~ | ~~`AX_PeriodCycleBasis`~~ | **T-GEN** (`AnalyticLoopsGenerateH1`) | ✅ **done** — T-GEN proved unconditionally (#248), headlines rewired (#250/#251) |
+| **G2** | `AX_curve_generates_jacobian` | the Abel–Jacobi image generates the torus (Part C "generates" clause) | open |
+| **G3** | `AX_period_functoriality` | naturality of the period map under holomorphic `X → Y` | open |
+| **G4** | `AX_torus_self_albanese` | a complex torus is its own Albanese (the base case of universality) | open |
 
-**When G1–G4 are discharged, the three-part artifact (definition + anti-vacuity
+**When G2–G4 are discharged, the three-part artifact (definition + anti-vacuity
 subset + axiom-free universal property) is the complete, minimal, categorical
 proof that we have correctly formalized a construction of the Jacobian** — and it
 is far shorter to audit than the 24.
@@ -191,16 +193,18 @@ failure mode outright. Making it axiom-free is therefore the highest-leverage
 validation work: it upgrades the artifact from "necessary-condition evidence"
 (Parts A+B alone) to "categorical certificate."
 
-G1 (T-GEN) is already the active endgame for the challenge itself, so it is
-shared work. G2–G4 are the torus-side axioms specific to this capstone; see
-`AXIOM_AUDIT.md` for their statements and vetting status.
+With G1 done, the **Buzzard challenge itself is axiom-free**; the remaining
+G2–G4 are the torus-side axioms specific to this Albanese capstone (the
+"validation endgame", beyond the 24). See `AXIOM_AUDIT.md` for their statements
+and vetting status, and [`VERIFICATION.md`](VERIFICATION.md) for the
+informal↔formal map + axiom certificate.
 
 ---
 
 ## 3. One-paragraph version (for a referee)
 
 *The Jacobian is defined as `H⁰(X,Ω¹)*` modulo its period lattice (recognizably
-the standard construction). Three machine-checked, near-axiom-free lemmas certify
+the standard construction). Three machine-checked, **axiom-free** lemmas certify
 the construction is non-degenerate: the lattice has full rank `2g` (so the
 quotient is a `g`-dimensional torus), and the Abel–Jacobi map is holomorphic,
 basepoint-preserving, and injective for positive genus. The single theorem
@@ -209,6 +213,8 @@ universal property — it is the initial object among pointed holomorphic maps f
 `X` to complex tori — which, by Yoneda, characterizes it up to unique isomorphism.
 That theorem is the whole validation: granting Lean's kernel, a mathematician
 need read only the definition, the three non-vacuity lemmas, and the statement of
-the universal property to be convinced the right object was built. The remaining
-formal work is to discharge the four axioms `ofCurve_isJacobian` currently rests
-on (chiefly T-GEN), after which the certificate is unconditional.*
+the universal property to be convinced the right object was built. As of PR #251
+the definition and all three non-vacuity lemmas — and indeed every Buzzard
+headline — are axiom-free; the remaining formal work is to discharge the three
+torus-side axioms `ofCurve_isJacobian` still rests on, after which the categorical
+certificate itself is unconditional.*

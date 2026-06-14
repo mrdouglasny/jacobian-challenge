@@ -445,6 +445,10 @@ commit.
 ## Further reading
 
 - [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — kernel-verified per-axiom audit.
+- [`docs/VERIFICATION.md`](docs/VERIFICATION.md) — informal↔formal map of every
+  object + the axiom certificate (*"did we build it right"*).
+- [`docs/VALIDATION.md`](docs/VALIDATION.md) — the acceptance argument: definition
+  + anti-vacuity subset + universal property (*"did we build the right thing"*).
 - [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace.
 - [`docs/history.md`](docs/history.md) — discharge timeline + contributor metrics.
 - [`docs/planning/`](docs/planning/) — per-axiom discharge plans.
