@@ -1,0 +1,41 @@
+/-
+# Bridge tree
+
+Bridge files connecting our axiomatized API in `Jacobians/Axioms/` to
+the real proofs vendored under `Jacobians/Vendor/`. Each bridge
+**retires** an existing axiom by deriving the same fact through the
+vendored content.
+
+Currently:
+
+* `Jacobians.Bridge.KirovHolomorphic` — derives
+  `FiniteDimensional ℂ (HolomorphicOneForm X)` from Kirov's
+  Montel-built `Vendor.Kirov.HolomorphicOneForms` finite-dim instance,
+  retiring `AX_FiniteDimOneForms`.
+
+* `Jacobians.Bridge.KirovHolomorphicEquiv` — upgrades `bridgeForm` to a
+  linear isomorphism by constructing the section-to-cocycle inverse.
+
+* `Jacobians.Bridge.KirovLineIntegral` — replaces
+  `pathIntegralBasepointFunctional` and `AX_pathIntegral_local_antiderivative`
+  by composing `bridgeForm` with `Vendor.Kirov.lineIntegral` along a
+  chosen smooth path. Replaces them with four small structural path-
+  selection axioms (`bridgePath` + endpoint/smoothness facts).
+  Currently scaffolded; both bridge body and FTC theorem are `sorry`.
+
+* `Jacobians.Bridge.SphereGenusZero` — composes the G2-lane
+  `genus_eq_zero_of_homeo_sphere` with the S2-lane `π₁(S²) = 1`
+  (`Jacobians.Topology.simplyConnectedSpace_sphere`), closing the backward
+  leg of `AX_genus_eq_zero_iff_homeo` unconditionally.
+-/
+import Submission.Jacobians.Bridge.ContourDeformation
+import Submission.Jacobians.Bridge.BridgePathArc
+import Submission.Jacobians.Bridge.KirovCanonicalEq
+import Submission.Jacobians.Bridge.KirovHolomorphic
+import Submission.Jacobians.Bridge.KirovHolomorphicEquiv
+import Submission.Jacobians.Bridge.KirovLineIntegral
+import Submission.Jacobians.Bridge.KirovDolbeaultPeriods
+import Submission.Jacobians.Bridge.KirovDolbeaultOpenPath
+import Submission.Jacobians.Bridge.AbelEngineAdapter
+import Submission.Jacobians.Bridge.KirovDolbeaultLattice
+import Submission.Jacobians.Bridge.SphereGenusZero

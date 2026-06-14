@@ -1,0 +1,9 @@
+import Submission.Jacobians.Layer3.SymplecticBasis
+import Submission.Jacobians.Layer3.EulerChar
+import Submission.Jacobians.Layer3.Cohomology
+import Submission.Jacobians.Layer3.FlipPrep
+import Submission.Jacobians.Layer3.PeriodLattice
+import Submission.Jacobians.Layer3.RiemannBilinear
+import Submission.Jacobians.Layer3.Periods
+import Submission.Jacobians.Layer3.PeriodSpan
+import Submission.Jacobians.Layer3.PeriodLatticeDiscrete
