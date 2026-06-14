@@ -1,6 +1,19 @@
 # Axiom audit — jacobian-challenge
 
-*Last updated 2026-06-13.*
+*Last updated 2026-06-14.*
+
+**★ ALL 24 HEADLINES AXIOM-FREE (2026-06-14, PR #251).** Every Buzzard headline now
+`#print axioms` = `[propext, Classical.choice, Quot.sound]` (standard-3); `AX_PeriodCycleBasis`
+appears in **no headline closure** (machine-checked: `docs/axiom-report.txt`, 0 mentions).
+The headline rewiring is **complete**: the two global period-lattice instances
+(`instPeriodLatticeDiscrete`/`AX_PeriodLattice`) are reproved from the unconditional T-GEN
+theorem `analyticLoopsGenerateH1`, and `ofCurve_inj` routes through the basis-free
+`ofCurveImpl_inj_of_tgen` (enabled by the ℙ¹-instance unification, PR #250). **Scope:**
+`AX_PeriodCycleBasis` remains a *declared* axiom (kernel count unchanged at 10) — it still
+backs the Layer-3 R1/R2 (Riemann bilinear relations, unproven in general: only
+g ≤ 1 / ell / hyperell) scaffolding and the cycle-basis witnesses, which are **not** headlines.
+The axiom is out of the headline closure, not out of the repository; deleting it outright
+needs general R1/R2 (unformalized Hodge content).
 
 **T-GEN DISCHARGED (2026-06-13, PR #248).** `Jacobians.RiemannSurface.analyticLoopsGenerateH1`
 is now an **UNCONDITIONAL standard-3 theorem** (`#print axioms` =
@@ -9,9 +22,9 @@ is now an **UNCONDITIONAL standard-3 theorem** (`#print axioms` =
 **not** resting on the Whitney/Grauert hypotheses. The reduction-to-{Whitney,Grauert}
 recorded below is **superseded**: those were walls only for the corner-free route; since
 `AnalyticLoop` is piecewise-analytic (corners allowed), PL loops already qualify and the
-approximation is elementary. The remaining step to retire `AX_PeriodCycleBasis` from the
-24 headlines is the **headline rewiring** onto this unconditional T-GEN (branch
-`feat/tgen-headline-rewire`), in progress. Historical reduction detail:
+approximation is elementary. The headline rewiring onto this unconditional T-GEN is now
+**complete (PR #251)** — see the banner above; all 24 headlines are standard-3. Historical
+reduction detail:
 
 **T-GEN reduction (2026-06-13, all-night close — #240/#241/#242/#243/#244).**
 The lone challenge-critical axiom `AX_PeriodCycleBasis` reduces (its spanning
@@ -34,9 +47,10 @@ manifold-codomain smooth approximation; no real-analytic partition of unity; no
 π₁ van Kampen). Full chain + file:line per link:
 [`docs/planning/TGEN_FINAL_REDUCTION.md`](docs/planning/TGEN_FINAL_REDUCTION.md).
 This does **not** change the kernel axiom count (the two theorems are carried as
-hypotheses, not discharged); fully retiring `AX_PeriodCycleBasis` additionally
-needs period-injectivity (`exists_h1LoopBasis_of_periodInjective`, proven) + the
-headline rewiring.
+hypotheses, not discharged). The **headline rewiring is done (PR #251)** and
+period-injectivity (`exists_h1LoopBasis_of_periodInjective`) is proven, so the 24
+headlines no longer depend on `AX_PeriodCycleBasis`; fully *deleting* the axiom from
+the repo additionally needs R1/R2 (Riemann's bilinear relations) in general.
 
 In this project an **axiom** is a staging point: a statement we use before
 its Lean proof is assembled, with the trust boundary kept explicit and the

@@ -1,5 +1,16 @@
 # Axioms needed to close Buzzard's challenge
 
+> **★ CHALLENGE-CRITICAL COUNT NOW 0 (2026-06-14, PR #251).** Every Buzzard headline is
+> `#print axioms` = standard-3; `AX_PeriodCycleBasis` — the last challenge-critical axiom —
+> appears in **no headline closure** (`docs/axiom-report.txt`: 0 mentions). It was discharged
+> from the headlines by reproving the global period-lattice instances from the unconditional
+> T-GEN theorem (`analyticLoopsGenerateH1`, PR #248) and routing `ofCurve_inj` through the
+> basis-free engine, enabled by the ℙ¹-instance unification (PR #250). `AX_PeriodCycleBasis`
+> remains a *declared* axiom (kernel count 10) backing the non-headline Layer-3 R1/R2
+> scaffolding and cycle-basis witnesses; deleting it from the repo needs R1/R2 (Riemann
+> bilinear relations) in general. The narrative below — which counts down to "the remaining
+> challenge-critical axiom" — is historical up to this banner.
+
 *Authoritative source: `docs/axiom-report.txt` (kernel-verified `#print axioms` for the
 challenge property theorems and the concrete-curve headlines). The Jacobian typeclass
 instances are now also covered: `scripts/axiom_report.lean` includes wrapper theorems

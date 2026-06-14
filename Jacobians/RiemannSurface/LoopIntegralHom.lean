@@ -2,7 +2,12 @@ import Jacobians.RiemannSurface.HomotopyInvarianceDevelop
 import Jacobians.RiemannSurface.Homology
 import Jacobians.RiemannSurface.DevelopingBridge
 import Jacobians.RiemannSurface.LoopIntegral
-import Jacobians.Axioms.PeriodLattice
+-- Import the period-lattice *definitions* (`periodLatticeInBasis`/`periodMapInBasis`)
+-- from `PeriodLatticeBase`, NOT the full `PeriodLattice`: this breaks the import
+-- cycle `PeriodLattice → … → LoopIntegralHom → PeriodLattice`, letting
+-- `PeriodLattice`'s global instances be reproved from T-GEN. This file uses only
+-- the defs, never the `instPeriodLatticeDiscrete`/`AX_PeriodLattice` instances.
+import Jacobians.Axioms.PeriodLatticeBase
 import Jacobians.Axioms.PeriodCycleBasis
 
 /-!
