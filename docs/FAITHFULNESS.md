@@ -163,12 +163,19 @@ theorem isJacobian_unique (x₀ : X)
 `#print axioms isJacobian_unique` ⇒ std-3 (**axiom-free**); uses none of the 24. The concrete
 corollary `isJacobian_iso_jacobian` (`J₁ ≅ Jacobian X`, `:990`) is std-3 + AK. ✓
 
-*Completeness.* The Jacobian is **already pinned up to unique isomorphism, axiom-free** — that is
-exactly `isJacobian_unique`. To make the pinning of Buzzard's *concrete* `Jacobian X` completely
-axiom-free, the only remaining items are: **discharge AK** (`AX_curve_image_subgroup_isOpen`, a
-~25-decl Kirov local-Jacobi port) and **supply the concrete `Jacobian X` presentation instance**
-(axiom-free; drops the hypothesis on `isJacobian_iso_jacobian`). Abstract-torus generality
-(`AX_torus_exp`) is an *optional* strengthening, not needed to pin the Jacobian. Full status:
+*Completeness — two levels (honest tradeoff).* `isJacobian_unique` carries a *presentation
+hypothesis on the compared objects* (`[TorusSelfAlbanesePresentation g₁ J₁] [… g₂ J₂]`) — not
+intrinsic to uniqueness, but the price of the escape hatch: the universal property only accepts
+*presented* targets, so to compare `J₁`,`J₂` each must be presentable. Hence:
+**Level 1 (presented tori — axiom-free now).** With "complex torus" = `ℂ^g/Λ` in the standard sense,
+`isJacobian_unique` pins the Jacobian up to unique iso **axiom-free**; making Buzzard's concrete
+`Jacobian X` pinning fully axiom-free + unconditional needs only **discharge AK**
+(`AX_curve_image_subgroup_isOpen`, ~25-decl Kirov port) + the concrete `Jacobian X` presentation
+instance (axiom-free).
+**Level 2 (abstract tori — no presentation assumed).** The strictly stronger, presentation-free
+categoricity **requires** the uniformization input `A1`/`AX_torus_exp` — to use an abstract
+competitor as a target you must *derive* its presentation. Not optional for this level; it is exactly
+what removes the presentation hypothesis. Full status:
 [`planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md).
 
 ---
