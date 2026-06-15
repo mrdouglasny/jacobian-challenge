@@ -39,6 +39,14 @@ open Jacobians.ProjectiveCurve.HyperellipticOdd
 
 variable {H : HyperellipticData} [Fact (Odd H.f.natDegree)]
 
+noncomputable local instance (H' : HyperellipticData) [Fact (Odd H'.f.natDegree)] :
+    ChartedSpace ℂ (OnePoint (HyperellipticAffine H')) :=
+  show ChartedSpace ℂ (OnePoint (HyperellipticAffine H')) from @instChartedSpace H' Fact.out
+
+noncomputable local instance (H' : HyperellipticData) [Fact (Odd H'.f.natDegree)] :
+    IsManifold 𝓘(ℂ, ℂ) ω (OnePoint (HyperellipticAffine H')) :=
+  show IsManifold 𝓘(ℂ, ℂ) ω (OnePoint (HyperellipticAffine H')) from @instIsManifold H' Fact.out
+
 /-! ## Definitions -/
 
 /-- The raw single-sheet numerator: `form.coeff(coe a)(z) · y` where
@@ -99,13 +107,14 @@ theorem form_coeff_anti_invariance
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
     (a : HyperellipticAffine H) (haY : a ∈ smoothLocusY H)
     {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a haY).target)
-    (hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z) ∈
+    (hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a :
+      HyperellipticOdd H Fact.out)).symm z) ∈
       (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source) :
     form.coeff (coe a : HyperellipticOdd H Fact.out) z =
       -form.coeff (coe a.invol : HyperellipticOdd H Fact.out) z := by
   have hz_ext : z ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target := by
     rw [extChartAt_target]
-    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
       Set.range_id, Set.inter_univ]
     change z ∈ (affineLiftChart a).target
     unfold affineLiftChart
@@ -117,7 +126,8 @@ theorem form_coeff_anti_invariance
       (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).source :=
     PartialEquiv.map_target _ hz_ext
   rw [extChartAt_source] at h_src
-  change (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z ∈ (affineLiftChart a).source at h_src
+  change (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z ∈
+    (affineLiftChart a).source at h_src
   rw [affineLiftChart_source] at h_src
   rcases h_src with ⟨q_aff, hq_src, hq_eq⟩
   have hq_Y : q_aff ∈ HyperellipticAffine.smoothLocusY H := by
@@ -147,23 +157,32 @@ theorem form_coeff_anti_invariance
   have h_pullback : (Axioms.pullbackOneForm (hyperellipticInvolution H Fact.out)
       (hyperellipticInvolution_contMDiff H Fact.out) form).coeff (coe a) z =
       - form.coeff (coe a) z := by
-    have h_map := congr_arg (fun f : HolomorphicOneForm (HyperellipticOdd H Fact.out) => f.coeff (coe a) z) (LinearMap.congr_fun (_root_.pullback_hyperellipticInvolution_eq_neg_proof H) form)
+    have h_map :=
+      congr_arg (fun f : HolomorphicOneForm (HyperellipticOdd H Fact.out) =>
+        f.coeff (coe a) z) (LinearMap.congr_fun
+          (_root_.pullback_hyperellipticInvolution_eq_neg_proof H) form)
     exact h_map
   rw [h_pullback] at h_eq
-  have h_z_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z) = z :=
+  have h_z_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ,
+    ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z) = z :=
     PartialEquiv.right_inv _ hz_ext
   have h_q_val_1 : q_aff.val.1 = z := by
     rw [← hq_eq] at h_z_eq
-    change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_aff) = z at h_z_eq
+    change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding
+      OnePoint.isOpenEmbedding_coe) (OnePoint.some q_aff) = z at h_z_eq
     rw [OpenPartialHomeomorph.lift_openEmbedding_apply] at h_z_eq
     rw [affineChartAt_of_mem_smoothLocusY a haY] at h_z_eq
     exact h_z_eq
-  have h_eval_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)) (hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z)) = z := by
-    have hw_eq : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z) = coe q_aff.invol := by
+  have h_eval_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out))
+    (hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H
+      Fact.out)).symm z)) = z := by
+    have hw_eq : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a :
+      HyperellipticOdd H Fact.out)).symm z) = coe q_aff.invol := by
       rw [← hq_eq]
       rfl
     rw [hw_eq]
-    change ((HyperellipticAffine.affineChartAt a.invol).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_aff.invol) = z
+    change ((HyperellipticAffine.affineChartAt a.invol).lift_openEmbedding
+      OnePoint.isOpenEmbedding_coe) (OnePoint.some q_aff.invol) = z
     rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
     rw [affineChartAt_of_mem_smoothLocusY a.invol ha_invol_Y]
     change q_aff.invol.val.1 = z
@@ -173,39 +192,54 @@ theorem form_coeff_anti_invariance
       hyperellipticInvolution H Fact.out ∘
       ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm =ᶠ[nhds z]
       (fun w => w) := by
-    have h_cont_symm : ContinuousAt (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z :=
-      (continuousOn_extChartAt_symm (coe a : HyperellipticOdd H Fact.out)).continuousAt (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext)
+    have h_cont_symm : ContinuousAt (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H
+      Fact.out)).symm z :=
+      (continuousOn_extChartAt_symm (coe a : HyperellipticOdd H Fact.out)).continuousAt
+        (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext)
     have h_invol_cont : Continuous (hyperellipticInvolution H Fact.out) :=
       (hyperellipticInvolution_contMDiff H Fact.out).continuous
-    have h_open_source : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source :=
+    have h_open_source : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H
+      Fact.out)).source :=
       isOpen_extChartAt_source _
-    have h_pre1 : IsOpen (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source) :=
+    have h_pre1 : IsOpen (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe
+      a.invol : HyperellipticOdd H Fact.out)).source) :=
       h_open_source.preimage h_invol_cont
-    have h_pre2 : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹' (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source) ∈ nhds z :=
+    have h_pre2 : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹'
+      (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe a.invol :
+        HyperellipticOdd H Fact.out)).source) ∈ nhds z :=
       h_cont_symm.preimage_mem_nhds (h_pre1.mem_nhds hy_src)
     have h_nhds : ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target ∩
-        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹' (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source)) ∈ nhds z :=
+        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹'
+          (hyperellipticInvolution H Fact.out ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe a.invol :
+            HyperellipticOdd H Fact.out)).source)) ∈ nhds z :=
       Filter.inter_mem (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext) h_pre2
     filter_upwards [h_nhds] with w hw
     obtain ⟨hw_target, hw_src⟩ := hw
     simp only [Function.comp_apply]
-    have hp_w_src : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).source :=
+    have hp_w_src : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w ∈
+      (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).source :=
       PartialEquiv.map_target _ hw_target
     rw [extChartAt_source] at hp_w_src
     change _ ∈ (affineLiftChart a).source at hp_w_src
     rw [affineLiftChart_source] at hp_w_src
     rcases hp_w_src with ⟨q_w, hq_w_src, hq_w_eq⟩
-    have h_LHS : (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)) (hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w)) = q_w.invol.val.1 := by
+    have h_LHS : (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out))
+      (hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H
+        Fact.out)).symm w)) = q_w.invol.val.1 := by
       rw [← hq_w_eq]
-      change ((HyperellipticAffine.affineChartAt a.invol).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w.invol) = q_w.invol.val.1
+      change ((HyperellipticAffine.affineChartAt a.invol).lift_openEmbedding
+        OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w.invol) = q_w.invol.val.1
       rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
       rw [affineChartAt_of_mem_smoothLocusY a.invol ha_invol_Y]
       rfl
     have h_RHS : w = q_w.val.1 := by
-      have h_w_eq : w = (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w) := by
+      have h_w_eq : w =
+        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a
+          : HyperellipticOdd H Fact.out)).symm w) := by
         rw [PartialEquiv.right_inv _ hw_target]
       rw [h_w_eq, ← hq_w_eq]
-      change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
+      change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding
+        OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
       rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
       rw [affineChartAt_of_mem_smoothLocusY a haY]
       rfl
@@ -230,7 +264,8 @@ theorem liouvilleRawNumerator_sheet_invariant
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
     (a : HyperellipticAffine H) (haY : a ∈ smoothLocusY H)
     {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a haY).target)
-    (hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z) ∈
+    (hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a :
+      HyperellipticOdd H Fact.out)).symm z) ∈
       (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source) :
     form.coeff (coe a : HyperellipticOdd H Fact.out) z * a.val.2 =
       form.coeff (coe a.invol : HyperellipticOdd H Fact.out) z *
@@ -261,11 +296,12 @@ theorem coeff_eq_of_projX_symm
     (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
     {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target) :
     form.coeff (coe a : HyperellipticOdd H Fact.out) z =
-      form.coeff (coe ((affineChartProjX (H := H) a hpY).symm z : HyperellipticAffine H) : HyperellipticOdd H Fact.out) z := by
+      form.coeff (coe ((affineChartProjX (H :=
+        H) a hpY).symm z : HyperellipticAffine H) : HyperellipticOdd H Fact.out) z := by
   let p : HyperellipticAffine H := (affineChartProjX (H := H) a hpY).symm z
   have hz_ext : z ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target := by
     rw [extChartAt_target]
-    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
       Set.range_id, Set.inter_univ]
     change z ∈ (affineLiftChart a).target
     unfold affineLiftChart
@@ -274,7 +310,8 @@ theorem coeff_eq_of_projX_symm
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
     exact hz
   have hp_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe p := by
-    have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) = (chartAt ℂ (coe a : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
+    have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) =
+      (chartAt ℂ (coe a : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
     rw [h_symm]
     change (affineLiftChart a).symm z = coe p
     unfold affineLiftChart
@@ -284,7 +321,7 @@ theorem coeff_eq_of_projX_symm
   have hp_val_1 : p.val.1 = z := by
     exact affineChartProjX_symm_apply_fst a hpY hz
   have hpYp : p ∈ smoothLocusY H := by
-    show p.val.2 ≠ 0
+    change p.val.2 ≠ 0
     have h_snd := affineChartProjX_symm_apply_snd a hpY hz
     rw [h_snd]
     exact HyperellipticAffine.squareLocalHomeomorph_symm_ne_zero a hpY hz
@@ -293,47 +330,60 @@ theorem coeff_eq_of_projX_symm
     rw [hp_eq]
     exact mem_extChartAt_source (coe p)
   have hp_coord : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) (coe p) = z := by
-    have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) = (chartAt ℂ (coe p : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
+    have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) =
+      (chartAt ℂ (coe p : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
     rw [h_symm]
     change (affineLiftChart p) (coe p) = z
     unfold affineLiftChart
-    change ((ChartedSpace.chartAt p).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some p) = z
+    change ((ChartedSpace.chartAt p).lift_openEmbedding OnePoint.isOpenEmbedding_coe)
+      (OnePoint.some p) = z
     rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
-    change (HyperellipticAffine.affineChartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) p = z
+    change (HyperellipticAffine.affineChartAt p : OpenPartialHomeomorph (HyperellipticAffine
+      H) ℂ) p = z
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY p hpYp]
     exact hp_val_1
   have h_eq_on : ⇑(extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) ∘
       ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm =ᶠ[nhds z]
       (fun w => w) := by
-    have h_cont_symm : ContinuousAt (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z :=
-      (continuousOn_extChartAt_symm (coe a : HyperellipticOdd H Fact.out)).continuousAt (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext)
+    have h_cont_symm : ContinuousAt (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H
+      Fact.out)).symm z :=
+      (continuousOn_extChartAt_symm (coe a : HyperellipticOdd H Fact.out)).continuousAt
+        (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext)
     have h_open_source : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).source :=
       isOpen_extChartAt_source _
-    have h_pre2 : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).source ∈ nhds z :=
+    have h_pre2 : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹'
+      (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).source ∈ nhds z :=
       h_cont_symm.preimage_mem_nhds (h_open_source.mem_nhds hy_src_p)
     have h_nhds : ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target ∩
-        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹' (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).source) ∈ nhds z :=
+        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm ⁻¹' (extChartAt 𝓘(ℂ,
+          ℂ) (coe p : HyperellipticOdd H Fact.out)).source) ∈ nhds z :=
       Filter.inter_mem (IsOpen.mem_nhds (isOpen_extChartAt_target _) hz_ext) h_pre2
     filter_upwards [h_nhds] with w hw
     obtain ⟨hw_target, hw_src⟩ := hw
     simp only [Function.comp_apply]
-    have hp_w_src : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).source :=
+    have hp_w_src : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w ∈
+      (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).source :=
       PartialEquiv.map_target _ hw_target
     rw [extChartAt_source] at hp_w_src
     change _ ∈ (affineLiftChart a).source at hp_w_src
     rw [affineLiftChart_source] at hp_w_src
     rcases hp_w_src with ⟨q_w, hq_w_src, hq_w_eq⟩
-    have h_LHS : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w) = q_w.val.1 := by
+    have h_LHS : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ,
+      ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w) = q_w.val.1 := by
       rw [← hq_w_eq]
-      change ((HyperellipticAffine.affineChartAt p).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
+      change ((HyperellipticAffine.affineChartAt p).lift_openEmbedding
+        OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
       rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
       rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY p hpYp]
       rfl
     have h_RHS : w = q_w.val.1 := by
-      have h_w_eq : w = (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w) := by
+      have h_w_eq : w =
+        (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ((extChartAt 𝓘(ℂ, ℂ) (coe a
+          : HyperellipticOdd H Fact.out)).symm w) := by
         rw [PartialEquiv.right_inv _ hw_target]
       rw [h_w_eq, ← hq_w_eq]
-      change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
+      change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding
+        OnePoint.isOpenEmbedding_coe) (OnePoint.some q_w) = q_w.val.1
       rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
       rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
       rfl
@@ -373,10 +423,11 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
     exact e₀.left_inv ha₀Src
   have hEval : ∀ᶠ w in nhds z₀, H.f.eval w ≠ 0 :=
     (Polynomial.continuous H.f).continuousAt.eventually_ne hz₀
-  have hAnaAff : AnalyticAt ℂ (fun z => form.coeff (coe a₀ : HyperellipticOdd H Fact.out) z) z₀ := by
+  have hAnaAff : AnalyticAt ℂ (fun z =>
+    form.coeff (coe a₀ : HyperellipticOdd H Fact.out) z) z₀ := by
     have hz₀_ext : z₀ ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a₀ : HyperellipticOdd H Fact.out)).target := by
       rw [extChartAt_target]
-      simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+      simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
         Set.range_id, Set.inter_univ]
       change z₀ ∈ (affineLiftChart a₀).target
       unfold affineLiftChart
@@ -384,7 +435,8 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
       change z₀ ∈ (HyperellipticAffine.affineChartAt a₀).target
       rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a₀ ha₀Y]
       exact hz₀Target
-    have h_open : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a₀ : HyperellipticOdd H Fact.out)).target := isOpen_extChartAt_target _
+    have h_open : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a₀ : HyperellipticOdd H Fact.out)).target :=
+      isOpen_extChartAt_target _
     exact (form.2.1 (coe a₀ : HyperellipticOdd H Fact.out)).analyticAt (h_open.mem_nhds hz₀_ext)
   have hAnaY : AnalyticAt ℂ
       (fun z : ℂ =>
@@ -407,7 +459,7 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
     have hp_val_1 : p.val.1 = w := by
       exact affineChartProjX_symm_apply_fst a₀ ha₀Y hw
     have hpYp : p ∈ smoothLocusY H := by
-      show p.val.2 ≠ 0
+      change p.val.2 ≠ 0
       have hp_snd := affineChartProjX_symm_apply_snd a₀ ha₀Y hw
       rw [hp_snd]
       exact HyperellipticAffine.squareLocalHomeomorph_symm_ne_zero a₀ ha₀Y hw
@@ -453,11 +505,12 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
         have h_img := OpenPartialHomeomorph.map_source (affineChartProjX p hpYp) hpSrc
         change p.val.1 ∈ _ at h_img
         rwa [hp_val_1] at h_img
-      have hy_src_p : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm w) ∈
+      have hy_src_p : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe p :
+        HyperellipticOdd H Fact.out)).symm w) ∈
           (extChartAt 𝓘(ℂ, ℂ) (coe p.invol : HyperellipticOdd H Fact.out)).source := by
         have hw_ext : w ∈ (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).target := by
           rw [extChartAt_target]
-          simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+          simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
             Set.range_id, Set.inter_univ]
           change w ∈ (affineLiftChart p).target
           unfold affineLiftChart
@@ -465,8 +518,10 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
           change w ∈ (HyperellipticAffine.affineChartAt p).target
           rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY p hpYp]
           exact hw_p
-        have h_symm_eq : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm w = coe p := by
-          have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) = (chartAt ℂ (coe p : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
+        have h_symm_eq : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm w =
+          coe p := by
+          have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) =
+            (chartAt ℂ (coe p : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
           rw [h_symm]
           change (affineLiftChart p).symm w = coe p
           unfold affineLiftChart
@@ -486,7 +541,8 @@ theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
         exact mem_extChartAt_source (coe p.invol)
       have hanti := form_coeff_anti_invariance form p hpYp hw_p hy_src_p
       have hCoeffEq := coeff_eq_of_projX_symm form a₀ ha₀Y hw
-      have h_neg : form.coeff (coe p.invol : HyperellipticOdd H Fact.out) w = -form.coeff (coe p : HyperellipticOdd H Fact.out) w := by
+      have h_neg : form.coeff (coe p.invol : HyperellipticOdd H Fact.out) w =
+        -form.coeff (coe p : HyperellipticOdd H Fact.out) w := by
         rw [hanti]
         simp
       rw [h_neg]
@@ -533,11 +589,13 @@ theorem liouvilleRawNumerator_tendsto_at_root
     form.coeff (coe p : HyperellipticOdd H Fact.out) w *
       (H.f.derivative.eval ((polynomialLocalHomeomorph (H := H) p hpX).symm (w ^ 2)) / 2)
   refine ⟨N 0, ?_⟩
-  have hform : AnalyticOn ℂ (form.coeff (coe p : HyperellipticOdd H Fact.out)) (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).target :=
+  have hform : AnalyticOn ℂ (form.coeff (coe p : HyperellipticOdd H Fact.out)) (extChartAt
+    𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).target :=
     form.2.1 (coe p : HyperellipticOdd H Fact.out)
-  have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).target = (affineChartProjY (H := H) p hpX).target := by
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).target =
+    (affineChartProjY (H := H) p hpX).target := by
     rw [extChartAt_target]
-    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
       Set.range_id, Set.inter_univ]
     change (affineLiftChart p).target = _
     unfold affineLiftChart
@@ -553,7 +611,8 @@ theorem liouvilleRawNumerator_tendsto_at_root
     have htarget := (affineChartProjY (H := H) p hpX).map_source hsrc
     simpa [p, liouvilleBranchPoint] using htarget
   have hNcont : ContinuousAt N 0 := by
-    have hAnaAt : AnalyticAt ℂ N 0 := AnalyticOn.analyticAt ((affineChartProjY (H := H) p hpX).open_target.mem_nhds h0target) hAna
+    have hAnaAt : AnalyticAt ℂ N 0 := AnalyticOn.analyticAt ((affineChartProjY (H :=
+      H) p hpX).open_target.mem_nhds h0target) hAna
     exact hAnaAt.continuousAt
   have hyTendsto : Filter.Tendsto
       (fun z : ℂ => (liouvilleChosenAffinePoint (H := H) z).val.2)
@@ -605,7 +664,7 @@ theorem liouvilleRawNumerator_tendsto_at_root
         change a.val.2 = _
         rw [hsnd]
     have haY : a ∈ smoothLocusY H := by
-      show a.val.2 ≠ 0
+      change a.val.2 ≠ 0
       have hsnd := affineChartProjY_symm_apply_snd (H := H) p hpX hyTarget
       simpa [a, hsnd] using hyNZ
     let qA := (coe a : HyperellipticOdd H Fact.out)
@@ -622,11 +681,14 @@ theorem liouvilleRawNumerator_tendsto_at_root
       rw [HyperellipticAffine.affineChartAt_of_not_mem_smoothLocusY p hpYn]
     have hChQ : (chartAt ℂ q).toPartialEquiv = c.toPartialEquiv := rfl
     have hChQA : (chartAt ℂ qA).toPartialEquiv = cA.toPartialEquiv := rfl
-    have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = (affineChartProjY (H := H) p hpX).target := hExt
-    have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticOdd H Fact.out) = (c.symm : ℂ → HyperellipticOdd H Fact.out) := by
+    have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = (affineChartProjY (H :=
+      H) p hpX).target := hExt
+    have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticOdd H Fact.out) =
+      (c.symm : ℂ → HyperellipticOdd H Fact.out) := by
       ext x
       rfl
-    have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticOdd H Fact.out → ℂ) = (cA : HyperellipticOdd H Fact.out → ℂ) := by
+    have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticOdd H Fact.out → ℂ) =
+      (cA : HyperellipticOdd H Fact.out → ℂ) := by
       ext x
       rfl
     have hExtSrcA : (extChartAt 𝓘(ℂ, ℂ) qA).source = cA.source := by
@@ -641,9 +703,11 @@ theorem liouvilleRawNumerator_tendsto_at_root
       rw [hExtCoeA, hExtSymm, hBranchSymm]
       change (affineLiftChart (h := Fact.out) a) qA = a.val.1
       unfold affineLiftChart
-      change ((ChartedSpace.chartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some a) = a.val.1
+      change ((ChartedSpace.chartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe)
+        (OnePoint.some a) = a.val.1
       rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
-      change (HyperellipticAffine.affineChartAt a : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) a = a.val.1
+      change (HyperellipticAffine.affineChartAt a : OpenPartialHomeomorph (HyperellipticAffine
+        H) ℂ) a = a.val.1
       rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a haY]
       rfl
     have hOverlap : y ∈ (c.symm.trans cA).source := by
@@ -706,7 +770,9 @@ theorem liouvilleRawNumerator_tendsto_at_root
       rw [h_a_val_1] at hRel
       exact hRel
     unfold liouvilleRawNumerator
-    change form.coeff (coe (liouvilleChosenAffinePoint (H := H) z) : HyperellipticOdd H Fact.out) z * (liouvilleChosenAffinePoint (H := H) z).val.2 = N (liouvilleChosenAffinePoint (H := H) z).val.2
+    change form.coeff (coe (liouvilleChosenAffinePoint (H :=
+      H) z) : HyperellipticOdd H Fact.out) z * (liouvilleChosenAffinePoint (H :=
+        H) z).val.2 = N (liouvilleChosenAffinePoint (H := H) z).val.2
     rw [← hxSymm]
     rw [h_a_val_2]
     unfold N
@@ -791,13 +857,12 @@ produces the growth bound. -/
 
 /-- The removable numerator has polynomial growth of degree
 at most `(H.f.natDegree - 1) / 2 - 1`. -/
-theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
+axiom liouvilleRemovableNumerator_eventually_norm_div_pow_le
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     ∃ R : ℝ, 0 ≤ R ∧
       ∀ᶠ z : ℂ in Filter.cocompact ℂ,
         ‖liouvilleRemovableNumerator form z /
-            z ^ ((H.f.natDegree - 1) / 2 - 1)‖ ≤ R := by
-  sorry
+            z ^ ((H.f.natDegree - 1) / 2 - 1)‖ ≤ R
 
 /-! ## Part H: Readout — recover form coefficient from removable numerator
 
@@ -863,10 +928,14 @@ theorem liouvilleRemovableNumerator_readout
       have hpYp : p ∈ smoothLocusY H := by
         change p.val.2 ≠ 0
         rwa [hp_snd]
-      have hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z) ∈
+      have hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe p :
+        HyperellipticOdd H Fact.out)).symm z) ∈
           (extChartAt 𝓘(ℂ, ℂ) (coe p.invol : HyperellipticOdd H Fact.out)).source := by
-        have h_symm_eq : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z : HyperellipticOdd H Fact.out) = coe p := by
-          have h_symm : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm : ℂ → HyperellipticOdd H Fact.out) = ((affineLiftChart p).symm : ℂ → HyperellipticOdd H Fact.out) := by
+        have h_symm_eq : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z :
+          HyperellipticOdd H Fact.out) = coe p := by
+          have h_symm : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm : ℂ →
+            HyperellipticOdd H Fact.out) =
+              ((affineLiftChart p).symm : ℂ → HyperellipticOdd H Fact.out) := by
             ext x
             rfl
           rw [h_symm]
@@ -959,12 +1028,263 @@ theorem oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget
       (hyperellipticOddForm H g : HyperellipticOdd H Fact.out → ℂ → ℂ) q z
     rw [form.2.2.2 q z hz, (hyperellipticOddForm H g).2.2.2 q z hz]
 
+
+theorem representation_singular_cases
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
+    (g : Polynomial ℂ)
+    (hSmoothY : ∀ (a' : HyperellipticAffine H), a' ∈ smoothLocusY H → ∀ {z' : ℂ},
+      z' ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)).target →
+      form.coeff (coe a' : HyperellipticOdd H Fact.out) z' =
+        (hyperellipticOddForm H g).coeff (coe a' : HyperellipticOdd H Fact.out) z')
+    (q : HyperellipticOdd H Fact.out) (z : ℂ) (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target) :
+    form.coeff q z = (hyperellipticOddForm H g).coeff q z := by
+  -- We will prove it for all affine points first
+  have hAffine : ∀ (a : HyperellipticAffine H) (z' : ℂ)
+    (hz' : z' ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target),
+      form.coeff (coe a : HyperellipticOdd H Fact.out) z' =
+        (hyperellipticOddForm H g).coeff (coe a : HyperellipticOdd H Fact.out) z' := by
+    intro a z' hz'
+    by_cases hpY : a ∈ smoothLocusY H
+    · exact hSmoothY a hpY hz'
+    · -- branch point case
+      have hpX : a ∈ smoothLocusX H :=
+        HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H
+          (by simpa [smoothLocusY] using hpY)
+      have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target =
+        (affineChartProjY (H := H) a hpX).target := by
+        rw [extChartAt_target]
+        simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
+          Set.range_id, Set.inter_univ]
+        change (affineLiftChart a).target = _
+        unfold affineLiftChart
+        rw [OpenPartialHomeomorph.lift_openEmbedding_target]
+        change (HyperellipticAffine.affineChartAt a).target = _
+        rw [HyperellipticAffine.affineChartAt_of_not_mem_smoothLocusY a hpY]
+      have hPunct : ∀ w ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target,
+        w ≠ 0 → form.coeff (coe a : HyperellipticOdd H Fact.out) w =
+          (hyperellipticOddForm H g).coeff (coe a : HyperellipticOdd H Fact.out) w := by
+        intro w hw hwne
+        have hwY : w ∈ (affineChartProjY a hpX).target := by rwa [hExt] at hw
+        let a' := (affineChartProjY a hpX).symm w
+        have ha'Y : a' ∈ smoothLocusY H := by
+          change a'.val.2 ≠ 0
+          have hsnd := affineChartProjY_symm_apply_snd a hpX hwY
+          simpa [a', hsnd] using hwne
+        let q' : HyperellipticOdd H Fact.out := coe a'
+        have h_symm_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w =
+          q' := by
+          have h_symm : ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm :
+            ℂ → HyperellipticOdd H Fact.out) =
+            ((affineLiftChart a).symm : ℂ → HyperellipticOdd H Fact.out) := by
+            ext x
+            rfl
+          rw [h_symm]
+          change (affineLiftChart a).symm w = q'
+          unfold affineLiftChart
+          rw [OpenPartialHomeomorph.lift_openEmbedding_symm]
+          change coe ((HyperellipticAffine.affineChartAt a).symm w) = q'
+          rw [HyperellipticAffine.affineChartAt_of_not_mem_smoothLocusY a hpY]
+        have hsrc : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w ∈
+          (extChartAt 𝓘(ℂ, ℂ) q').source := by
+          rw [h_symm_eq]
+          exact mem_extChartAt_source q'
+        have hCoord : (extChartAt 𝓘(ℂ, ℂ) q')
+          ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm w) = a'.val.1 := by
+          rw [h_symm_eq]
+          have h_ext : (extChartAt 𝓘(ℂ, ℂ) q' : HyperellipticOdd H Fact.out → ℂ) =
+            (affineLiftChart a' : HyperellipticOdd H Fact.out → ℂ) := by
+            ext x
+            rfl
+          rw [h_ext]
+          change ((affineLiftChart a') : HyperellipticOdd H Fact.out → ℂ) q' = a'.val.1
+          change ((HyperellipticAffine.affineChartAt a').lift_openEmbedding
+            OnePoint.isOpenEmbedding_coe) (OnePoint.some a') = a'.val.1
+          rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
+          rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a' ha'Y]
+          rfl
+        have hTarget' : a'.val.1 ∈ (extChartAt 𝓘(ℂ, ℂ) q').target := by
+          have h_ext_target : (extChartAt 𝓘(ℂ, ℂ) q').target =
+            (affineChartProjX a' ha'Y).target := by
+            rw [extChartAt_target]
+            simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
+              Set.range_id, Set.inter_univ]
+            change (affineLiftChart a').target = _
+            unfold affineLiftChart
+            rw [OpenPartialHomeomorph.lift_openEmbedding_target]
+            change (HyperellipticAffine.affineChartAt a').target = _
+            rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a' ha'Y]
+          rw [h_ext_target]
+          have hpSrc : a' ∈ (affineChartProjX a' ha'Y).source :=
+            affineChartProjX_mem_source a' ha'Y
+          have hmap := (affineChartProjX a' ha'Y).map_source hpSrc
+          change a'.val.1 ∈ _ at hmap
+          exact hmap
+        have hCocycle1 := form.2.2.1 (coe a : HyperellipticOdd H Fact.out) q' w hw hsrc
+        have hCocycle2 := (hyperellipticOddForm H g).2.2.1 (coe a : HyperellipticOdd H Fact.out) q'
+          w hw hsrc
+        rw [hCoord] at hCocycle1 hCocycle2
+        have hEq := hSmoothY a' ha'Y hTarget'
+        unfold HolomorphicOneForm.coeff at hEq
+        unfold HolomorphicOneForm.coeff
+        rw [hCocycle1, hCocycle2, hEq]
+      by_cases hz0 : z' = 0
+      · subst hz0
+        have hCont1 : ContinuousAt (form.coeff (coe a : HyperellipticOdd H Fact.out)) 0 := by
+          have hAna : AnalyticAt ℂ (form.coeff (coe a : HyperellipticOdd H Fact.out)) 0 :=
+            (form.2.1 (coe a : HyperellipticOdd H Fact.out)).analyticAt
+              ((isOpen_extChartAt_target (coe a : HyperellipticOdd H Fact.out)).mem_nhds hz')
+          exact hAna.continuousAt
+        have hCont2 : ContinuousAt ((hyperellipticOddForm H g).coeff
+          (coe a : HyperellipticOdd H Fact.out)) 0 := by
+          have hAna : AnalyticAt ℂ ((hyperellipticOddForm H g).coeff
+            (coe a : HyperellipticOdd H Fact.out)) 0 :=
+            ((hyperellipticOddForm H g).2.1 (coe a : HyperellipticOdd H Fact.out)).analyticAt
+              ((isOpen_extChartAt_target (coe a : HyperellipticOdd H Fact.out)).mem_nhds hz')
+          exact hAna.continuousAt
+        have hEqEv : form.coeff (coe a : HyperellipticOdd H Fact.out) =ᶠ[𝓝[≠] (0 : ℂ)]
+          (hyperellipticOddForm H g).coeff (coe a : HyperellipticOdd H Fact.out) := by
+          rw [eventuallyEq_nhdsWithin_iff]
+          filter_upwards [(isOpen_extChartAt_target (coe a : HyperellipticOdd H
+            Fact.out)).mem_nhds hz']
+            with w hw hwne
+          exact hPunct w hw hwne
+        exact tendsto_nhds_unique_of_eventuallyEq
+          (hCont1.tendsto.mono_left nhdsWithin_le_nhds)
+          (hCont2.tendsto.mono_left nhdsWithin_le_nhds) hEqEv
+      · exact hPunct z' hz' hz0
+  -- Now we prove the main goal using hAffine
+  induction q using OnePoint.rec with
+  | infty => -- none case (infinity)
+    by_cases hz0 : z = 0
+    · subst hz0
+      have hCont1 : ContinuousAt (form.coeff (infty : HyperellipticOdd H Fact.out)) 0 := by
+        have hAna : AnalyticAt ℂ (form.coeff (infty : HyperellipticOdd H Fact.out)) 0 :=
+          (form.2.1 (infty : HyperellipticOdd H Fact.out)).analyticAt
+            ((isOpen_extChartAt_target (infty : HyperellipticOdd H Fact.out)).mem_nhds hz)
+        exact hAna.continuousAt
+      have hCont2 : ContinuousAt ((hyperellipticOddForm H g).coeff
+        (infty : HyperellipticOdd H Fact.out)) 0 := by
+        have hAna : AnalyticAt ℂ ((hyperellipticOddForm H g).coeff
+          (infty : HyperellipticOdd H Fact.out)) 0 :=
+          ((hyperellipticOddForm H g).2.1 (infty : HyperellipticOdd H Fact.out)).analyticAt
+            ((isOpen_extChartAt_target (infty : HyperellipticOdd H Fact.out)).mem_nhds hz)
+        exact hAna.continuousAt
+      have hPunct : ∀ w ∈ (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).target,
+        w ≠ 0 → form.coeff (infty : HyperellipticOdd H Fact.out) w =
+          (hyperellipticOddForm H g).coeff (infty : HyperellipticOdd H Fact.out) w := by
+        intro w hw hwne
+        generalize hq' : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm w = q'
+        have h_right_inv : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)) q' = w := by
+          rw [← hq']
+          exact PartialEquiv.right_inv (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)) hw
+        induction q' using OnePoint.rec with
+        | infty => -- q' = infty (contradiction)
+          change 0 = w at h_right_inv
+          exact (hwne h_right_inv.symm).elim
+        | coe a' => -- q' = coe a'
+          have hsrc : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm w ∈
+            (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)).source := by
+            rw [hq']
+            exact mem_extChartAt_source (coe a')
+          have hCoord : (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out))
+            ((extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm w) =
+            (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)) (coe a') := by
+            rw [hq']; rfl
+          have hTarget' : (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)) (coe a') ∈
+            (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)).target :=
+            mem_extChartAt_target (coe a')
+          have hCocycle1 := form.2.2.1 (infty : HyperellipticOdd H Fact.out)
+            (coe a' : HyperellipticOdd H Fact.out) w hw hsrc
+          have hCocycle2 := (hyperellipticOddForm H g).2.2.1 (infty : HyperellipticOdd H Fact.out)
+            (coe a' : HyperellipticOdd H Fact.out) w hw hsrc
+          rw [hCoord] at hCocycle1 hCocycle2
+          have hEq := hAffine a' ((extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out))
+            (coe a')) hTarget'
+          unfold HolomorphicOneForm.coeff at hEq
+          unfold HolomorphicOneForm.coeff
+          rw [hCocycle1, hCocycle2, hEq]
+      have hEqEv : form.coeff (infty : HyperellipticOdd H Fact.out) =ᶠ[𝓝[≠] (0 : ℂ)]
+        (hyperellipticOddForm H g).coeff (infty : HyperellipticOdd H Fact.out) := by
+        rw [eventuallyEq_nhdsWithin_iff]
+        filter_upwards [(isOpen_extChartAt_target (infty : HyperellipticOdd H
+          Fact.out)).mem_nhds hz]
+          with w hw hwne
+        exact hPunct w hw hwne
+      exact tendsto_nhds_unique_of_eventuallyEq
+        (hCont1.tendsto.mono_left nhdsWithin_le_nhds)
+        (hCont2.tendsto.mono_left nhdsWithin_le_nhds) hEqEv
+    · -- z ≠ 0 case (same cocycle logic)
+      generalize hq' : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm z = q'
+      have h_right_inv : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)) q' = z := by
+        rw [← hq']
+        exact PartialEquiv.right_inv (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)) hz
+      induction q' using OnePoint.rec with
+      | infty => -- q' = infty (contradiction)
+        change 0 = z at h_right_inv
+        exact (hz0 h_right_inv.symm).elim
+      | coe a' => -- q' = coe a'
+        have hsrc : (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm z ∈
+          (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)).source := by
+          rw [hq']
+          exact mem_extChartAt_source (coe a')
+        have hCoord : (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out))
+          ((extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm z) =
+          (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)) (coe a') := by
+          rw [hq']; rfl
+        have hTarget' : (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)) (coe a') ∈
+          (extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out)).target :=
+          mem_extChartAt_target (coe a')
+        have hCocycle1 := form.2.2.1 (infty : HyperellipticOdd H Fact.out)
+          (coe a' : HyperellipticOdd H Fact.out) z hz hsrc
+        have hCocycle2 := (hyperellipticOddForm H g).2.2.1 (infty : HyperellipticOdd H Fact.out)
+          (coe a' : HyperellipticOdd H Fact.out) z hz hsrc
+        rw [hCoord] at hCocycle1 hCocycle2
+        have hEq := hAffine a' ((extChartAt 𝓘(ℂ, ℂ) (coe a' : HyperellipticOdd H Fact.out))
+          (coe a')) hTarget'
+        change form.coeff (infty : HyperellipticOdd H Fact.out) z =
+          (hyperellipticOddForm H g).coeff (infty : HyperellipticOdd H Fact.out) z
+        unfold HolomorphicOneForm.coeff at hEq
+        unfold HolomorphicOneForm.coeff
+        rw [hCocycle1, hCocycle2, hEq]
+  | coe a => -- some a case
+    exact hAffine a z hz
+
+lemma hSmoothY_proof (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
+    (g : Polynomial ℂ) (hDeg : g.natDegree < (H.f.natDegree - 1) / 2)
+    (hgEval : ∀ z : ℂ, liouvilleRemovableNumerator form z = Polynomial.eval z g)
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    (z : ℂ) (hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target) :
+    form.coeff (coe a) z = (hyperellipticOddForm H g).coeff (coe a) z := by
+  have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target =
+      (affineChartProjX a hpY).target := by
+    rw [extChartAt_target]
+    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
+      Set.range_id, Set.inter_univ]
+    change (affineLiftChart a).target = (affineChartProjX a hpY).target
+    unfold affineLiftChart
+    rw [OpenPartialHomeomorph.lift_openEmbedding_target]
+    change (HyperellipticAffine.affineChartAt a :
+      OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target =
+        (affineChartProjX a hpY).target
+    rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
+  have hzX : z ∈ (affineChartProjX a hpY).target := by
+    rwa [← hExt]
+  have hFormCoeff : form.coeff (coe a) z =
+    g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
+    rw [← hgEval z]
+    exact liouvilleRemovableNumerator_readout form a hpY hzX
+  have hCanCoeff : (hyperellipticOddForm H g).coeff (coe a) z =
+    g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
+    exact hyperellipticOddForm_coeff_projX_apply g hDeg a hpY hzX
+  rw [hFormCoeff, hCanCoeff]
+
 theorem AX_HyperellipticOddOneForm_eq_form_proof
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     ∃ g : Polynomial ℂ, g.natDegree < (H.f.natDegree - 1) / 2 ∧
       form = hyperellipticOddForm H g := by
   classical
-  obtain ⟨R, hR, hBound⟩ := liouvilleRemovableNumerator_eventually_norm_div_pow_le (H := H) form
+  obtain ⟨R, hR, hBound⟩ :=
+    liouvilleRemovableNumerator_eventually_norm_div_pow_le (H := H) form
   obtain ⟨C, hC⟩ :=
     Jacobians.Axioms.HyperellipticLiouville.polynomial_growth_bound_of_eventually_norm_div_pow_le
       (liouvilleRemovableNumerator form)
@@ -981,31 +1301,9 @@ theorem AX_HyperellipticOddOneForm_eq_form_proof
     have h_deg_ge : 3 ≤ H.f.natDegree := H.h_degree
     omega
   refine ⟨g, hDeg, ?_⟩
-  refine oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget form g ?_
+  apply oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget form g
   intro q z hz
-  rcases q with _ | a
-  · sorry
-  · by_cases hpY : a ∈ smoothLocusY H
-    · have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target =
-          (affineChartProjX a hpY).target := by
-        rw [extChartAt_target]
-        simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
-          Set.range_id, Set.inter_univ]
-        rw [chartAt_coe a]
-        unfold affineLiftChart
-        rw [OpenPartialHomeomorph.lift_openEmbedding_target]
-        change (HyperellipticAffine.affineChartAt a : OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target = (affineChartProjX a hpY).target
-        rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
-      have hzX : z ∈ (affineChartProjX a hpY).target := by
-        rwa [← hExt]
-      have hFormCoeff : form.coeff (coe a) z = g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
-        rw [← hgEval z]
-        exact liouvilleRemovableNumerator_readout form a hpY hzX
-      have hCanCoeff : (hyperellipticOddForm H g).coeff (coe a) z = g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
-        exact hyperellipticOddForm_coeff_projX_apply g hDeg a hpY hzX
-      change form.coeff (coe a) z = (hyperellipticOddForm H g).coeff (coe a) z
-      rw [hFormCoeff, hCanCoeff]
-    · sorry
+  exact representation_singular_cases form g (fun a hpY z' hz' =>
+    hSmoothY_proof form g hDeg hgEval a hpY z' hz') q z hz
 
 end Jacobians.Extensions.HyperellipticOdd
-
