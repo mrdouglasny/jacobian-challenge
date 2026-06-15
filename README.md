@@ -130,7 +130,11 @@ Buzzard's 24 — PR #246). Our concrete construction satisfies the property via
 `ofCurve_isJacobian`, which now carries only **AK** (`AX_curve_image_subgroup_isOpen`):
 the three legacy Albanese-torus axioms were discharged/escaped in PR #253 (G3 proved; A1
 moved out of the closure via the presented-torus typeclass reframe). Discharging AK
-(a ~25-decl Kirov port) is the remaining endgame.
+(a ~25-decl Kirov port) is the remaining endgame. Full status, the two-level "what it takes
+to pin the Jacobian" tradeoff, and the step-by-step AK-from-Kirov proof bridge:
+[`docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md)
+(→ [`ALBANESE_REPOINT_REFACTOR.md`](docs/planning/ALBANESE_REPOINT_REFACTOR.md),
+[`A1_THINNING_PLAN.md`](docs/planning/A1_THINNING_PLAN.md)).
 
 Credit for the universal-property repair belongs to the challenge thread:
 **Michael Stoll** raised it first (2026-04-19, "to make sure no hacks are

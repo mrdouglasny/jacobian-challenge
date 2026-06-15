@@ -183,6 +183,32 @@ the independence policy ([[no-more-vendoring]], MRD 2026-06-11) this is small en
 Sequence: land the **A1+AK repoint refactor first** (above); then the AK discharge in the
 same relocated interface block → `ofCurve_isJacobian` on **A1 alone**.
 
+### Discharging AK from Kirov — the proof bridge (how the import actually proves AK)
+
+AK is `∃ U : Set (Jacobian X), IsOpen U ∧ U.Nonempty ∧ U ⊆ closure (range (ofCurve x₀))`. From the
+ported Kirov API the proof is four steps; only step 3 is real work, the rest is IFT + topology.
+
+1. **Base point with invertible period-Jacobian.** `exists_jacobiBasePoints_det_ne_zero` gives a
+   rank-`g` base-point family with `jacobiEvalMatrix_det_ne_zero`; package it as
+   `jacobiDerivEquiv a : (Fin g → ℂ) ≃L[ℂ] (Fin g → ℂ)` (the derivative is a linear iso).
+2. **Local diffeo ⇒ open image (inverse function theorem).** `jacobiMap a : (Fin g → ℂ) → Jacobian X`
+   satisfies `jacobiMap_hasStrictFDerivAt a` with derivative `jacobiDerivEquiv a` (invertible). By the
+   IFT — `HasStrictFDerivAt.image_mem_nhds` / `…toPartialHomeomorph` (or, manifold-side, invertible
+   `mfderiv` ⇒ `IsLocalDiffeomorphAt` ⇒ open map) — the image of a small ball around `jacobiCenter`
+   is an **open**, nonempty `U ∋ jacobiMap a jacobiCenter`.
+3. **Image ⊆ the Abel–Jacobi subgroup (the one real bridge).** Identify Kirov's local Jacobi map with
+   our `g`-fold Abel–Jacobi sum: `jacobiMap a z = ∑ᵢ ofCurve x₀ (localLiftChart aᵢ zᵢ)`. Both sides
+   are "integrate the `ωᵢ` from `x₀`", connected through `bridgeFormEquiv` / `chartFormCoeff` /
+   `periodBasisForm`. Hence every value of `jacobiMap a` is a finite sum of `ofCurve` points and so
+   lies in `AddSubgroup.closure (range (ofCurve x₀))`; therefore `U ⊆ closure (range (ofCurve x₀))`.
+4. **Conclude AK** = `⟨U, isOpen, nonempty, subset⟩` from steps 2 + 3.
+
+Only step 3 is non-plumbing (chart bookkeeping between Kirov's coordinates and ours — the same
+`bridgeFormEquiv` already used by `torusPullbackOneForm`). G4 (`curve_generates_jacobian`, "the
+subgroup is `⊤`") is then the **already-proven** topology layered on AK: open subgroup of a connected
+group ⇒ clopen ⇒ `⊤` (`UniversalProperty.lean`, the `AddSubgroup.isClosed_of_isOpen` /
+`IsClopen.eq_univ` argument).
+
 ---
 
 ## Risks
