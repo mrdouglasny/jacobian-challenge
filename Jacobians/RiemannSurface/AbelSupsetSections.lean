@@ -71,7 +71,7 @@ theorem IsHolomorphicAt.localInverse_apply_self
       (f' := deriv (chartLocalAt F p) (chartAt ℂ p p))
       (a := chartAt ℂ p p) (hf := hF.hasStrictDerivAt)
       (hf' := hderiv)).self_of_nhds
-  show (chartAt ℂ p).symm (r (chartAt ℂ (F p) (F p))) = p
+  change (chartAt ℂ p).symm (r (chartAt ℂ (F p) (F p))) = p
   rw [hleft_r]
   exact (chartAt ℂ p).left_inv (mem_chart_source ℂ p)
 
@@ -166,7 +166,7 @@ theorem exists_section_at (f : MeromorphicFunctionField X)
   have htendsto : Tendsto (hF.localInverse hderiv) (𝓝 (toP1 f p)) (𝓝 p) :=
     IsHolomorphicAt.localInverse_tendsto hF hderiv
   have hcont : ContinuousAt (hF.localInverse hderiv) (toP1 f p) := by
-    show Tendsto (hF.localInverse hderiv) (𝓝 (toP1 f p))
+    change Tendsto (hF.localInverse hderiv) (𝓝 (toP1 f p))
       (𝓝 (hF.localInverse hderiv (toP1 f p)))
     rw [happ]
     exact htendsto
@@ -361,7 +361,7 @@ theorem contMDiffAt_fiberAJ (f : MeromorphicFunctionField X)
       fun y => ∑ p ∈ (toP1_fiber_finite hf y₀).toFinset,
         ofCurveImpl X (Classical.arbitrary X) (s p y) := by
     filter_upwards [hdiv] with y hy
-    show abelJacobiDiv X (fiberDivisor f hf y) = _
+    change abelJacobiDiv X (fiberDivisor f hf y) = _
     rw [hy, map_sum]
     exact Finset.sum_congr rfl fun p hp =>
       FreeAbelianGroup.lift_apply_of _ _

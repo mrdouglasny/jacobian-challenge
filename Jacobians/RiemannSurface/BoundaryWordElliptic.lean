@@ -35,19 +35,19 @@ theorem rectBoundary_linear_mul_const (c : ℂ) :
   exact (differentiable_id.const_mul c |>.mul_const c).differentiableOn
 
 /-- `∫₀¹ (t : ℂ) dt = 1/2`. -/
-theorem integral_coe_id : (∫ t in (0:ℝ)..1, (t : ℂ)) = 1 / 2 := by
-  have h : (∫ t in (0:ℝ)..1, (t : ℝ)) = 1 / 2 := by
+theorem integral_coe_id : (∫ t in (0 : ℝ)..1, (t : ℂ)) = 1 / 2 := by
+  have h : (∫ t in (0 : ℝ)..1, (t : ℝ)) = 1 / 2 := by
     rw [integral_id]
     norm_num
-  rw [show (∫ t in (0:ℝ)..1, (t : ℂ))
-      = ((∫ t in (0:ℝ)..1, (t : ℝ) : ℝ) : ℂ) from
+  rw [show (∫ t in (0 : ℝ)..1, (t : ℂ))
+      = ((∫ t in (0 : ℝ)..1, (t : ℝ) : ℝ) : ℂ) from
     intervalIntegral.integral_ofReal, h]
   norm_num
 
 /-- The conjugate of an affine path integrates to the conjugate affine
 midpoint value: `∫₀¹ conj (p + t·q) dt = conj p + conj q / 2`. -/
 theorem integral_conj_affine (p q : ℂ) :
-    (∫ t in (0:ℝ)..1, (starRingEnd ℂ) (p + (t : ℂ) * q))
+    (∫ t in (0 : ℝ)..1, (starRingEnd ℂ) (p + (t : ℂ) * q))
       = (starRingEnd ℂ) p + (starRingEnd ℂ) q / 2 := by
   have hfun : ∀ t : ℝ, (starRingEnd ℂ) (p + (t : ℂ) * q)
       = (starRingEnd ℂ) p + (t : ℂ) * (starRingEnd ℂ) q := by
@@ -83,12 +83,12 @@ theorem boundaryForm_const_linear (c : ℂ) :
   have hw : ∀ x y : ℝ, (Jacobians.wCLM (x, y) : ℂ)
       = (x : ℂ) + (y : ℂ) * Complex.I := by
     intro x y
-    show Complex.equivRealProdCLM.symm (x, y) = _
+    change Complex.equivRealProdCLM.symm (x, y) = _
     apply Complex.ext <;>
       simp [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im]
   unfold Jacobians.boundaryForm
   -- rewrite each of the four edges into the affine form and integrate
-  have e₁ : (∫ x in (0:ℝ)..1,
+  have e₁ : (∫ x in (0 : ℝ)..1,
       (starRingEnd ℂ) ((fun z => c * z) (Jacobians.wCLM (x, 0))) *
         (fun _ => c) (Jacobians.wCLM (x, 0)))
       = (Complex.normSq c : ℂ) * (1 / 2) := by
@@ -103,7 +103,7 @@ theorem boundaryForm_const_linear (c : ℂ) :
       intervalIntegral.integral_const_mul, integral_conj_affine]
     congr 1
     norm_num
-  have e₂ : (∫ y in (0:ℝ)..1,
+  have e₂ : (∫ y in (0 : ℝ)..1,
       (starRingEnd ℂ) ((fun z => c * z) (Jacobians.wCLM (1, y))) *
         (fun _ => c) (Jacobians.wCLM (1, y)))
       = (Complex.normSq c : ℂ) * (1 - Complex.I / 2) := by
@@ -120,7 +120,7 @@ theorem boundaryForm_const_linear (c : ℂ) :
     congr 1
     simp [Complex.conj_I]
     ring
-  have e₃ : (∫ x in (0:ℝ)..1,
+  have e₃ : (∫ x in (0 : ℝ)..1,
       (starRingEnd ℂ) ((fun z => c * z) (Jacobians.wCLM (x, 1))) *
         (fun _ => c) (Jacobians.wCLM (x, 1)))
       = (Complex.normSq c : ℂ) * (1 / 2 - Complex.I) := by
@@ -137,7 +137,7 @@ theorem boundaryForm_const_linear (c : ℂ) :
     congr 1
     simp [Complex.conj_I]
     ring
-  have e₄ : (∫ y in (0:ℝ)..1,
+  have e₄ : (∫ y in (0 : ℝ)..1,
       (starRingEnd ℂ) ((fun z => c * z) (Jacobians.wCLM (0, y))) *
         (fun _ => c) (Jacobians.wCLM (0, y)))
       = (Complex.normSq c : ℂ) * (-Complex.I / 2) := by

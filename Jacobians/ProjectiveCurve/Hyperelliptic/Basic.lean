@@ -85,7 +85,6 @@ lemma reverse_eval_inv_eq {H : HyperellipticData}
     rw [mul_assoc, ← mul_pow, inv_mul_cancel₀ hx, one_pow, mul_one]
   rw [← mul_right_cancel₀ hx_pow (key.trans h2.symm)]
 
-
 /-- **Affine hyperelliptic curve**: the subtype `{(x, y) | y² = f(x)}`
 of `ℂ × ℂ`. Closed in `ℂ × ℂ`, so it inherits topology, T2, and local
 compactness. -/
@@ -479,7 +478,6 @@ end HyperellipticAffine
 
 def HyperellipticOdd (H : HyperellipticData) (_h : Odd H.f.natDegree) : Type :=
   OnePoint (HyperellipticAffine H)
-
 
 namespace HyperellipticOdd
 

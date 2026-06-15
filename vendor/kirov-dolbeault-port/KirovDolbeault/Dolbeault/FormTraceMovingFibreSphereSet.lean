@@ -125,7 +125,7 @@ noncomputable def MovingCoherenceDatum.ofSphereSheetSystemSet
   MovingCoherenceDatum.ofSheetSectionsSet
     (FibreRegularData.ofSphereSheetSystem (g := g) S hderiv hmero)
     (fun i => S.holoReprSheet i)
-    (fun i => rfl)
+    (fun _i => rfl)
     (fun i => S.holoReprSheet_contMDiffAt i)
     (fun i => S.holoReprSheet_section i)
     hcanon

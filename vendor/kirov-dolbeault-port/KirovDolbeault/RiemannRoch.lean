@@ -141,7 +141,7 @@ theorem exists_singleSimplePole_of_genus_zero_of_rr (hg : kirovGenus X = 0) :
     rw [htop, finrank_top, hfr] at h1
     exact absurd h1 (by norm_num)
   obtain ⟨v, hv⟩ : ∃ v, v ∉ Submodule.span ℂ {c1} := by
-    by_contra hall; push_neg at hall; exact hspan_ne (Submodule.eq_top_iff'.mpr hall)
+    by_contra hall; push Not at hall; exact hspan_ne (Submodule.eq_top_iff'.mpr hall)
   obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ v
   -- `f` is not germ-constant (else its class would lie in `span {[1]}`).
   have hnc : ¬ ∃ c, ∀ x, ∀ᶠ z in 𝓝[≠] x, (f : MeromorphicFunction X).toFun z = c := by
@@ -158,7 +158,7 @@ theorem exists_singleSimplePole_of_genus_zero_of_rr (hg : kirovGenus X = 0) :
     rw [hfc]; exact Submodule.smul_mem _ c (Submodule.mem_span_singleton_self _)
   -- hence `f` has a pole, located at `P` with order exactly `-1`.
   have hpole : ∃ x₀, (f : MeromorphicFunction X).orderW x₀ < 0 := by
-    by_contra hno; push_neg at hno
+    by_contra hno; push Not at hno
     exact hnc (germ_eq_const_of_mem_linearSystem_zero (f : MeromorphicFunction X) (fun x => hno x))
   obtain ⟨x₀, hx₀⟩ := hpole
   have hx₀P : x₀ = P := by

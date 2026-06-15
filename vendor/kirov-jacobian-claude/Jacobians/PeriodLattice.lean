@@ -657,7 +657,7 @@ theorem periodVec_pushforward
             ∑ i ∈ s, v i * (periodBasisForm X i).toFun (γ t) (pathSpeed γ t)
         rfl
     simp_rw [h_pw]
-    rw [intervalIntegral.integral_finset_sum (s := Finset.univ)
+    rw [intervalIntegral.integral_finsetSum (s := Finset.univ)
       (f := fun i t => v i * (periodBasisForm X i).toFun (γ t) (pathSpeed γ t))
       (fun i _ => (hint_X i).const_mul (v i))]
     refine Finset.sum_congr rfl (fun i _ => ?_)

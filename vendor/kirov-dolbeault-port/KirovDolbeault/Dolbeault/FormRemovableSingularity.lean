@@ -429,7 +429,7 @@ theorem formCoeff_repairedSection_eventuallyEq (α : MeromorphicOneForm X) (x₀
   -- Transport the junk-free crux from `𝓝[≠] x₀` to `𝓝[≠] c₀` via `(chart x₀).symm`.
   have htsymm : Tendsto (chartAt ℂ x₀).symm (𝓝[≠] c₀) (𝓝[≠] x₀) := by
     have := (chartAt ℂ x₀).symm.tendsto_nhdsNE (x := c₀)
-      (by simpa [hc₀] using (chartAt ℂ x₀).map_source (mem_chart_source ℂ x₀))
+      (by simp [hc₀, (chartAt ℂ x₀).map_source (mem_chart_source ℂ x₀)])
     simpa [hc₀, (chartAt ℂ x₀).left_inv (mem_chart_source ℂ x₀)] using this
   have hcrux : ∀ᶠ z in 𝓝[≠] c₀,
       repVal α ((chartAt ℂ x₀).symm z) = rawLocalRep α.toFun ((chartAt ℂ x₀).symm z)

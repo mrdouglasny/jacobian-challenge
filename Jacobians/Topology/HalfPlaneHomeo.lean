@@ -25,18 +25,18 @@ noncomputable def halfPlaneHomeo (c : ℝ) : {z : ℂ // z.re < c} ≃ₜ ℂ wh
   toFun z := Complex.mk (-Real.log (c - (z : ℂ).re)) (z : ℂ).im
   invFun w := ⟨Complex.mk (c - Real.exp (-w.re)) w.im, by
     have hexp : (0 : ℝ) < Real.exp (-w.re) := Real.exp_pos _
-    show c - Real.exp (-w.re) < c
+    change c - Real.exp (-w.re) < c
     linarith⟩
   left_inv z := by
     apply Subtype.ext
     apply Complex.ext
-    · show c - Real.exp (-(-Real.log (c - (z : ℂ).re))) = (z : ℂ).re
+    · change c - Real.exp (-(-Real.log (c - (z : ℂ).re))) = (z : ℂ).re
       rw [neg_neg, Real.exp_log (by linarith [z.2])]
       ring
     · rfl
   right_inv w := by
     apply Complex.ext
-    · show -Real.log (c - (c - Real.exp (-w.re))) = w.re
+    · change -Real.log (c - (c - Real.exp (-w.re))) = w.re
       rw [show c - (c - Real.exp (-w.re)) = Real.exp (-w.re) by ring,
         Real.log_exp, neg_neg]
     · rfl
@@ -105,7 +105,7 @@ noncomputable def puncturedBallHomeo (c : ℂ) (R : ℝ) (hR : 0 < R) :
     rcases mul_eq_zero.mp h0 with h | h
     · exact hz h
     · rw [Complex.ofReal_eq_zero] at h
-      exact (ne_of_gt (by positivity : (0:ℝ) < (R - ‖z.1 - c‖)⁻¹)) h⟩
+      exact (ne_of_gt (by positivity : (0 : ℝ) < (R - ‖z.1 - c‖)⁻¹)) h⟩
   invFun w := ⟨c + (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ), by
     have hw : w.1 - c ≠ 0 := sub_ne_zero.mpr w.2
     have hnorm0 : (0 : ℝ) < ‖w.1 - c‖ := norm_pos_iff.mpr hw
@@ -140,11 +140,11 @@ noncomputable def puncturedBallHomeo (c : ℂ) (R : ℝ) (hR : 0 < R) :
     have hRρ : (0 : ℝ) < R - ‖z.1 - c‖ := by linarith
     have hsub : c + (z.1 - c) * (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ) - c
         = (z.1 - c) * (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ) := by ring
-    show c + (c + (z.1 - c) * (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ) - c)
-        * (((R * (1 + ‖c + (z.1 - c) * (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ) - c‖)⁻¹
+    change c + (c + (z.1 - c) * (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ) - c)
+        * (((R * (1 + ‖c + (z.1 - c) * (((R -‖z.1 - c‖)⁻¹ : ℝ) : ℂ) - c‖)⁻¹
             : ℝ)) : ℂ) = z.1
     rw [hsub, norm_mul, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_pos (by positivity : (0:ℝ) < (R - ‖z.1 - c‖)⁻¹)]
+      abs_of_pos (by positivity : (0 : ℝ) < (R - ‖z.1 - c‖)⁻¹)]
     have hcancel : (((R - ‖z.1 - c‖)⁻¹ : ℝ) : ℂ)
         * (((R * (1 + ‖z.1 - c‖ * (R - ‖z.1 - c‖)⁻¹)⁻¹ : ℝ)) : ℂ) = 1 := by
       rw [← Complex.ofReal_mul]
@@ -166,8 +166,8 @@ noncomputable def puncturedBallHomeo (c : ℂ) (R : ℝ) (hR : 0 < R) :
     have hfac : (0 : ℝ) < R * (1 + ‖w.1 - c‖)⁻¹ := by positivity
     have hsub : c + (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) - c
         = (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) := by ring
-    show c + (c + (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) - c)
-        * (((R - ‖c + (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) - c‖)⁻¹
+    change c + (c + (w.1 - c) * (((R * (1 + ‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) - c)
+        * (((R - ‖c + (w.1 - c) * (((R * (1 +‖w.1 - c‖)⁻¹ : ℝ)) : ℂ) - c‖)⁻¹
             : ℝ) : ℂ) = w.1
     rw [hsub, norm_mul, Complex.norm_real, Real.norm_eq_abs,
       abs_of_pos hfac]

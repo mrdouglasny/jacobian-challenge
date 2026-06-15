@@ -95,7 +95,7 @@ private theorem pathChartBallSubdivision_n_pos {γ : C(unitInterval, X)}
       _ = 1 := S.one_eq
   have hreal : (0 : ℝ) = 1 := by
     have h := congrArg (fun t : unitInterval => (t : ℝ)) h01
-    simpa using h
+    simp at h
   norm_num at hreal
 
 private def transSubdivisionT {a b c : X} (γ₁ : Path a b) (γ₂ : Path b c)
@@ -126,15 +126,15 @@ private theorem transSubdivisionT_mono {a b c : X}
   unfold transSubdivisionT
   by_cases hi : i.val ≤ S₁.n
   · by_cases hj : j.val ≤ S₁.n
-    · simp [hi, hj]
+    · simp only [dif_pos hi, dif_pos hj]
       exact scaleL_mono
         (S₁.monotone_t (Fin.mk_le_mk.mpr (Fin.val_le_of_le hij)))
-    · simp [hi, hj]
+    · simp only [dif_pos hi, dif_neg hj]
       exact (scaleL_le_half _).trans (half_le_scaleR _)
   · by_cases hj : j.val ≤ S₁.n
     · have hij_val : i.val ≤ j.val := Fin.val_le_of_le hij
       omega
-    · simp [hi, hj]
+    · simp only [dif_neg hi, dif_neg hj]
       have hij_val : i.val ≤ j.val := Fin.val_le_of_le hij
       have hsub : i.val - S₁.n ≤ j.val - S₁.n := by
         omega
@@ -262,6 +262,7 @@ private noncomputable def S_trans {a b c : X}
   monotone_t := transSubdivisionT_mono γ₁ γ₂ S₁ S₂
   cell_subset := transSubdivision_cell_subset γ₁ γ₂ S₁ S₂
 
+omit [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 private theorem trans_apply_scaleL {a b c : X}
     (γ₁ : Path a b) (γ₂ : Path b c) (u : unitInterval) :
     (γ₁.trans γ₂ : Path a c) (scaleL u) = γ₁ u := by
@@ -275,6 +276,7 @@ private theorem trans_apply_scaleL {a b c : X}
   rw [Path.extend_apply _ (scaleL u).2] at h
   simpa [hscale] using h
 
+omit [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 private theorem trans_apply_scaleR {a b c : X}
     (γ₁ : Path a b) (γ₂ : Path b c) (u : unitInterval) :
     (γ₁.trans γ₂ : Path a c) (scaleR u) = γ₂ u := by
@@ -418,7 +420,7 @@ private theorem devInc_castAdd {a b c : X}
   have hleft : (Fin.castAdd S₂.n i).castSucc.val ≤ S₁.n := by
     exact Nat.le_of_lt i.isLt
   have hright : (Fin.castAdd S₂.n i).succ.val ≤ S₁.n := by
-    simpa [Fin.val_succ] using Nat.succ_le_of_lt i.isLt
+    simp [Fin.val_succ, Nat.succ_le_of_lt i.isLt]
   have hidx_left_fin :
       (⟨(Fin.castAdd S₂.n i).castSucc.val, by omega⟩ : Fin (S₁.n + 1)) =
         i.castSucc := by

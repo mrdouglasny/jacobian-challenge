@@ -46,4 +46,3 @@ noncomputable def Divisor.deg (X : Type*) [TopologicalSpace X] [T2Space X]
   FreeAbelianGroup.lift (fun _ : X => (1 : ℤ))
 
 end Jacobians.Axioms
-

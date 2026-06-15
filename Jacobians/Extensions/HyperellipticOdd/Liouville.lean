@@ -31,7 +31,6 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Jacobians.Axioms.AbelJacobiMap
 import Jacobians.Extensions.InvolutionPullback
 
-
 namespace Jacobians.Extensions.HyperellipticOdd
 
 open scoped Manifold ContDiff Topology
@@ -209,7 +208,7 @@ theorem coeff_eq_of_projX_symm
     rw [h_LHS, h_RHS]
   have h_fderiv : fderiv ℂ
       (⇑(extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) ∘
-       ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
+        ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
       fderiv ℂ (fun w => w) z :=
     h_eq_on.fderiv_eq
   have h_fderiv_id : (fderiv ℂ (fun w : ℂ => w) z) 1 = 1 := by
@@ -916,8 +915,8 @@ theorem pullback_coeff_eq_invol
     rw [HyperellipticAffine.invol_val]
   have h_fderiv : fderiv ℂ
       (⇑(extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)) ∘
-       hyperellipticInvolution H Fact.out ∘
-       ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
+        hyperellipticInvolution H Fact.out ∘
+        ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
       fderiv ℂ (fun w => w) z :=
     h_eq_on.fderiv_eq
   have h_fderiv_id : (fderiv ℂ (fun w : ℂ => w) z) 1 = 1 := by
@@ -944,7 +943,6 @@ theorem pullback_involutive :
     exact h_invol x
   rw [← AX_pullbackOneForm_id]
   congr 1
-
 
 lemma tendsto_eval_div_pow_self (Q : Polynomial ℂ) :
     Filter.Tendsto (fun z : ℂ => Q.eval z / z ^ Q.natDegree) (Filter.cocompact ℂ)
@@ -1079,7 +1077,6 @@ theorem liouvilleTwoSheetSumRemovable_differentiable
     (fun z hz => @liouvilleTwoSheetSum_analyticAt_off_roots H _ form z hz)
     (fun z hz => @liouvilleTwoSheetSum_branch_tendsto H _ form z hz)
 
-
 lemma tendsto_fw_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegree)] :
     Filter.Tendsto (fun z : ℂ => f_w H (liouvilleChosenAffinePoint (H := H) z))
       (Filter.cocompact ℂ) (𝓝 0) := by
@@ -1134,7 +1131,6 @@ lemma eventually_mem_V_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegre
     exact h_sq.symm
   exact hz_eval h_eval_zero
 
-
 theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     ∃ R : ℝ, 0 ≤ R ∧
@@ -1176,7 +1172,7 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         rfl
       rwa [h_eq]
     filter_upwards [h_lim h_mem] with z hz
-    have hdist : dist ‖form.coeff (infty : HyperellipticOdd H Fact.out)
+    have hdist : dist ‖ form.coeff (infty : HyperellipticOdd H Fact.out)
       ((liouvilleChosenAffinePoint (H := H) z).val.2 /
         (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))‖
       ‖form.coeff infty 0‖ ≤ 1 := by
@@ -1718,7 +1714,6 @@ theorem liouvilleTwoSheetSumRemovable_eq_zero
   rw [h_const_eval z, hc_zero]
   rfl
 
-
 /-- Anti-invariance: the chart coefficient negates when switching sheets.
 For `a ∈ smoothLocusY H`, `form.coeff (coe a) z = −form.coeff (coe a.invol) z`. -/
 theorem form_coeff_anti_invariance
@@ -1821,9 +1816,6 @@ theorem form_coeff_anti_invariance
   rw [h_coeff_a, h_coeff_a_invol]
   exact add_eq_zero_iff_eq_neg.mp h_sum_p
 
-
-
-
 /-- Consequence: the raw numerator is sheet-invariant. -/
 theorem liouvilleRawNumerator_sheet_invariant
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
@@ -1855,7 +1847,6 @@ noncomputable def liouvilleModelNumerator
     (squareLocalHomeomorph (H := H) a₀ ha₀Y).symm (H.f.eval z)
 
 -- (coeff_eq_of_projX_symm has been moved up to before liouvilleTwoSheetSum_of_eval_ne_zero)
-
 /-- The raw numerator is analytic at every `z₀` where `f(z₀) ≠ 0`. -/
 theorem liouvilleRawNumerator_analyticAt_of_eval_ne_zero
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
@@ -2309,9 +2300,7 @@ with two infinity sheets), which simplifies this argument.
 Jacobian factor that, combined with the `y`-factor in the numerator,
 produces the growth bound. -/
 
-
 variable {H : HyperellipticData} [Fact (Odd H.f.natDegree)]
-
 
 /-! ## Part H: Readout — recover form coefficient from removable numerator
 
@@ -2476,7 +2465,6 @@ theorem oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget
   · change (form : HyperellipticOdd H Fact.out → ℂ → ℂ) q z =
       (hyperellipticOddForm H g : HyperellipticOdd H Fact.out → ℂ → ℂ) q z
     rw [form.2.2.2 q z hz, (hyperellipticOddForm H g).2.2.2 q z hz]
-
 
 theorem representation_singular_cases
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
@@ -2926,6 +2914,5 @@ theorem _root_.pullback_hyperellipticInvolution_eq_neg_proof
     exact hu_zero
   simp only [LinearMap.neg_apply, LinearMap.id_apply]
   exact h_neg
-
 
 end Jacobians.Extensions.HyperellipticOdd

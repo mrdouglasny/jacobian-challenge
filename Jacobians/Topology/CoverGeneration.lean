@@ -59,11 +59,11 @@ theorem fromPath_mem_of_loops_mem {ι : Type*} {U : ι → Set X}
     fun k => γ.subpath (t k.castSucc) (t k.succ) with hF
   have hrangeF : ∀ k : Fin N, range (F k) ⊆ U (ch k) := by
     intro k
-    show range (γ.subpath (t k.castSucc) (t k.succ)) ⊆ U (ch k)
+    change range (γ.subpath (t k.castSucc) (t k.succ)) ⊆ U (ch k)
     rw [Path.range_subpath]
     exact hch k
-  have h0 : q 0 = x₀ := by rw [hq]; show γ (t 0) = x₀; rw [ht0]; exact γ.source
-  have hl : q (last N) = x₀ := by rw [hq]; show γ (t (last N)) = x₀; rw [htl]; exact γ.target
+  have h0 : q 0 = x₀ := by rw [hq]; change γ (t 0) = x₀; rw [ht0]; exact γ.source
+  have hl : q (last N) = x₀ := by rw [hq]; change γ (t (last N)) = x₀; rw [htl]; exact γ.target
   -- spokes: paths from the basepoint to the junctions, inside both adjacent
   -- cover sets; the two end junctions get constant spokes.
   have hjunc : ∀ j : Fin (N + 1),
@@ -76,7 +76,7 @@ theorem fromPath_mem_of_loops_mem {ι : Type*} {U : ι → Set X}
     · subst hj0
       refine ⟨(Path.refl x₀).cast rfl h0, ?_, ?_, fun _ s => rfl⟩
       · intro k _ s
-        show x₀ ∈ U (ch k)
+        change x₀ ∈ U (ch k)
         exact hx₀ (ch k)
       · intro k hk
         exact absurd hk.symm (Fin.succ_ne_zero k)
@@ -86,7 +86,7 @@ theorem fromPath_mem_of_loops_mem {ι : Type*} {U : ι → Set X}
       · intro k hk
         exact absurd hk.symm (Fin.castSucc_lt_last k).ne
       · intro k _ s
-        show x₀ ∈ U (ch k)
+        change x₀ ∈ U (ch k)
         exact hx₀ (ch k)
     -- interior junction: it lies in both adjacent cover sets, and so does the
     -- basepoint; route the spoke through their (path-connected) intersection.
@@ -161,7 +161,7 @@ theorem fromPath_mem_of_loops_mem {ι : Type*} {U : ι → Set X}
   -- assemble: the conjugated concatenation is homotopic to `γ` itself
   have hsubγ : γ.subpath (t 0) (t (last N)) = γ.cast h0 hl := by
     ext s
-    show (⇑γ ∘ Icc.convexComb (t 0) (t (last N))) s = γ s
+    change (⇑γ ∘ Icc.convexComb (t 0) (t (last N))) s = γ s
     rw [Function.comp_apply, ht0, htl, Icc.convexComb_zero_one]
   have hcs : (Path.concat q F).Homotopic (γ.subpath (t 0) (t (last N))) :=
     Path.Homotopic.concat_subpath γ t

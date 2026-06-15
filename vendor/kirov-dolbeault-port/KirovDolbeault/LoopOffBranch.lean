@@ -1362,7 +1362,7 @@ lemma uniformGlue_pathSpeed_eqOn_piece (g : ℕ → ℝ → X) (hchain : ∀ j, 
       have hs0 : s = 0 := by simpa using hesL.symm
       subst hs0
       rw [pathSpeed_congr_nhds _ _ 0 (uniformGlue_eventuallyEq_zero g n hn)]
-      rw [piece_pathSpeed_eq g n hn hpiece 0 hk 0 (by simpa using harg_mem)]
+      rw [piece_pathSpeed_eq g n hn hpiece 0 hk 0 (by simp)]
       simp [hv0 0 hk]
     · have hseam := uniformGlue_seam g hchain n hn hpiece hv0 hv1 k hkpos (by omega) s hns
       show fderiv ℝ ((chartAt (H := ℂ) (uniformGlue g n s)).toFun ∘ uniformGlue g n) s (1:ℝ) = 0

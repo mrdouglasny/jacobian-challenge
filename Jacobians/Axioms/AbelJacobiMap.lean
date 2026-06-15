@@ -28,7 +28,8 @@ previously top-level axioms.
 
 Still axiomatic (smaller-grained than before; 2026-04-23 round-2
 refactor responded to Gemini review by adding the local-antiderivative
-axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom and structured form primitives):\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\
+  counts\) -- not-an-axiom (doc text, ignore in counts)
 - `pathIntegralBasepointFunctional` — the functional
   `X → X → (HolomorphicOneForm X →ₗ[ℂ] ℂ)`, "integrate from `P₀` to
   `P`". De-opaqued to `canonicalArcIntegral (Bridge.bridgePathArc P₀ P)`;
@@ -630,6 +631,7 @@ open MeasureTheory Filter
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- Continuity of `chartLine` at a parameter whose affine image lies in the
 chart target. (Transcribed from the private companion in
 `Bridge.KirovLineIntegral`.) -/
@@ -660,6 +662,7 @@ private lemma aux_chartLine_continuousAt (P : X) (z : ℂ) {t : ℝ}
 
 /- Real-differentiability of the current-chart pullback of `chartLine`.
 (Transcribed from the private companion in `Bridge.KirovLineIntegral`.) -/
+omit [Nonempty X] in
 omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 private lemma aux_chartLine_chartDiff (P : X) (z : ℂ) {t : ℝ}
     (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
@@ -699,6 +702,7 @@ private lemma aux_chartLine_chartDiff (P : X) (z : ℂ) {t : ℝ}
   simpa [chartLine, y, w, extChartAt_coe, modelWithCornersSelf_coe,
     Function.comp_def] using hcomp
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- The fixed-chart derivative of `chartLine` equals the constant velocity
 `z - (extChartAt P) P`. (Transcribed from `Bridge.KirovLineIntegral`.) -/
 private lemma aux_pathSpeed_chartLine (P : X) (z : ℂ) {t : ℝ}
@@ -736,6 +740,7 @@ private lemma aux_pathSpeed_chartLine (P : X) (z : ℂ) {t : ℝ}
   simpa [a] using
     (congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq.fderiv_eq).trans hder
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 /-- The manifold derivative of the fixed chart applied to the chart-line
 speed equals the constant velocity. (Transcribed from
 `Bridge.KirovLineIntegral`.) -/
@@ -830,6 +835,7 @@ private lemma aux_canonicalIntegrand_chartLine
         rw [hmf]; rfl]
   exact hbr
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- Global continuity of the clamped chart-line `extend` used to build an
 `AnalyticArc`. -/
 private lemma aux_chartLineDescent_continuous (P : X) (z : ℂ)
@@ -845,6 +851,7 @@ private lemma aux_chartLineDescent_continuous (P : X) (z : ℂ)
   exact ContinuousAt.comp (g := chartLine (X := X) P z) (f := fun s : ℝ => max 0 (min s 1))
     (aux_chartLine_continuousAt (X := X) P z (hseg _ hcl_mem)) hcl_cont
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 /-- Strong piecewise analyticity of the clamped chart-line `extend`. -/
 private lemma aux_chartLineDescent_analytic (P : X) (z : ℂ)
     (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
@@ -885,7 +892,7 @@ private lemma aux_chartLineDescent_analytic (P : X) (z : ℂ)
       have hr' : r ∈ Set.Icc (0:ℝ) 1 := hr.2
       have hcl : max 0 (min r 1) = r := by
         rw [min_eq_left hr'.2, max_eq_right hr'.1]
-      show chartLine (X := X) P z (max 0 (min r 1)) ∈ (extChartAt 𝓘(ℂ, ℂ) P).source
+      change chartLine (X := X) P z (max 0 (min r 1)) ∈ (extChartAt 𝓘(ℂ, ℂ) P).source
       rw [hcl]
       have := (extChartAt 𝓘(ℂ, ℂ) P).map_target (hseg r hr')
       simpa [chartLine] using this
@@ -893,7 +900,7 @@ private lemma aux_chartLineDescent_analytic (P : X) (z : ℂ)
       have hr' : r ∈ Set.Icc (0:ℝ) 1 := hr.2
       have hcl : max 0 (min r 1) = r := by
         rw [min_eq_left hr'.2, max_eq_right hr'.1]
-      show (extChartAt 𝓘(ℂ, ℂ) P) (chartLine (X := X) P z (max 0 (min r 1)))
+      change (extChartAt 𝓘(ℂ, ℂ) P) (chartLine (X := X) P z (max 0 (min r 1)))
         = (1 - r) • (extChartAt 𝓘(ℂ, ℂ) P) P + r • z
       rw [hcl]
       exact extChartAt_chartLine (X := X) P z (hseg r hr')
@@ -917,6 +924,7 @@ noncomputable def chartLineDescentArc (P : X) (z : ℂ)
   one_mem := by simp
   is_analytic_strong := aux_chartLineDescent_analytic P z hseg
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 @[simp] private lemma chartLineDescentArc_extend (P : X) (z : ℂ)
     (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
@@ -993,7 +1001,7 @@ private lemma aux_ofCurveAmbient_chartLine_mem
     (by simp [Jacobians.Bridge.bridgePathArc])
     (by simp [chartLineDescentArc])
     (by
-      show chartLine (X := X) Qstar ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) (max 0 (min 1 1)) = Q
+      change chartLine (X := X) Qstar ((extChartAt 𝓘(ℂ, ℂ) Qstar) Q) (max 0 (min 1 1)) = Q
       simp only [min_self, max_eq_right (zero_le_one), chartLine_at_one]
       exact (extChartAt 𝓘(ℂ, ℂ) Qstar).left_inv hQ_src)
     (by simp [Jacobians.Bridge.bridgePathArc])
@@ -1028,6 +1036,7 @@ private lemma aux_ofCurveAmbient_chartLine_mem
   rw [hfun]
   exact htri
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 /-- **Parametric analyticity of the chart-line vector.**  The chart-line
 integral is `ContDiffAt ℂ ω` (analytic) in the endpoint at the chart
 centre. -/
@@ -1169,8 +1178,7 @@ theorem AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
   intro Qstar
   -- Step 2: Factor  ofCurveImpl X P = ULift.up ∘ φ  and peel off ULift.up.
   -- φ Q := QuotientAddGroup.mk' Λ.toAddSubgroup (ofCurveAmbient X P Q − ofCurveAmbient X P P)
-  show ContMDiffAt 𝓘(ℂ, ℂ) IY ω (ofCurveImpl X P) Qstar
-
+  change ContMDiffAt 𝓘(ℂ, ℂ) IY ω (ofCurveImpl X P) Qstar
   set Λ := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X) with hΛ
   -- `φ Q := mk' Λ (ofCurveAmbient X P Q − ofCurveAmbient X P P)`, bound with an
   -- explicit `JacobianAmbient X` (= `ComplexTorus`) codomain so every
@@ -1341,7 +1349,7 @@ theorem AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
             psiMap ((extChartAt 𝓘(ℂ,ℂ) Qstar).symm z) =
               (extChartAt IY target_q).symm (localModel z + c₀) := by
           rw [hsymm_y, hpsiMap_def]
-          show (QuotientAddGroup.mk' Λ.toAddSubgroup
+          change (QuotientAddGroup.mk' Λ.toAddSubgroup
               (localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) ((extChartAt 𝓘(ℂ,ℂ) Qstar).symm z)) + c₀)
               : JacobianAmbient X)
             = QuotientAddGroup.mk' Λ.toAddSubgroup (localModel z + c₀)
@@ -1380,7 +1388,7 @@ theorem AX_ofCurve_contMDiff {X : Type u} [TopologicalSpace X] [T2Space X]
         simpa using hball
       have hmem := aux_ofCurveAmbient_chartLine_mem (X := X) P Qstar Q hQ_src hseg
       -- Convert the lattice membership into the quotient equality.
-      show (QuotientAddGroup.mk' Λ.toAddSubgroup
+      change (QuotientAddGroup.mk' Λ.toAddSubgroup
           (localModel ((extChartAt 𝓘(ℂ,ℂ) Qstar) Q) + c₀) : JacobianAmbient X)
         = QuotientAddGroup.mk' Λ.toAddSubgroup
             (ofCurveAmbient X P Q - ofCurveAmbient X P P)
@@ -1542,7 +1550,7 @@ theorem AX_pushforwardAmbient_preserves_lattice {X : Type u}
           loopIntegralToH1 (Classical.arbitrary X) γh := rfl
       rw [hPM, ← loopDevValH1Hom_eq_loopIntegralToH1_apply, ← hg,
         loopDevValH1Hom_of]
-      show loopDevValQuotient (Classical.arbitrary X)
+      change loopDevValQuotient (Classical.arbitrary X)
           (pullbackOneForm f hf (jacobianBasis Y j))
           (FundamentalGroup.toPath g) = _
       rw [← hγp]
@@ -1821,9 +1829,7 @@ theorem jacobianHomOfAmbient_id_apply (X : Type u) [TopologicalSpace X]
     [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] (P : Jacobian X) :
     jacobianHomOfAmbient X X (LinearMap.id : (Fin (genus X) → ℂ) →ₗ[ℂ] (Fin (genus X) → ℂ))
-      (by
-        intro v hv
-        simpa using hv) P = P := by
+      (fun _ h => h) P = P := by
   rcases P with ⟨P⟩
   apply ULift.ext
   refine Quotient.inductionOn P ?_
@@ -1833,22 +1839,12 @@ theorem jacobianHomOfAmbient_id_apply (X : Type u) [TopologicalSpace X]
         (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
         (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
         LinearMap.id.toAddMonoidHom
-        (by
-          intro w hw
-          simpa using hw))
+        (fun _ h => h))
         (QuotientAddGroup.mk'
           (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v) =
     QuotientAddGroup.mk'
       (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v
-  simpa using
-    (QuotientAddGroup.map_mk'
-      (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
-      (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup
-      LinearMap.id.toAddMonoidHom
-      (by
-        intro w hw
-        simpa using hw)
-      v)
+  simp
 
 theorem jacobianHomOfAmbient_comp_apply
     (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
@@ -1895,7 +1891,7 @@ theorem jacobianHomOfAmbient_comp_apply
         LXY.toAddMonoidHom hXY)
         (QuotientAddGroup.mk'
           (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup v))
-  simp [QuotientAddGroup.map_mk']
+  rfl
 
 theorem jacobianHomOfAmbient_congr_apply
     (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X]
@@ -1944,7 +1940,7 @@ theorem pushforwardAmbientLinear_comp
       (pushforwardAmbientLinear g hg).comp (pushforwardAmbientLinear f hf) := by
   apply LinearMap.ext
   intro v
-  show ((jacobianBasis Z).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
+  change ((jacobianBasis Z).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
       ((pullbackOneForm (g ∘ f) (hg.comp hf)).dualMap
         (((jacobianBasis X).dualBasis.equivFun).symm v)) = _
   rw [AX_pullbackOneForm_comp f hf g hg,
@@ -1965,7 +1961,7 @@ theorem pullbackAmbientLinear_comp
       (pullbackAmbientLinear f hf).comp (pullbackAmbientLinear g hg) := by
   apply LinearMap.ext
   intro v
-  show ((jacobianBasis X).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
+  change ((jacobianBasis X).dualBasis.equivFun : _ ≃ₗ[ℂ] _)
       ((pushforwardOneForm (g ∘ f) (hg.comp hf)).dualMap
         (((jacobianBasis Z).dualBasis.equivFun).symm v)) = _
   rw [AX_pushforwardOneForm_comp f hf g hg,

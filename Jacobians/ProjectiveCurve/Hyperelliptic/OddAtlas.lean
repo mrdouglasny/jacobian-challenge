@@ -71,11 +71,7 @@ theorem affineLiftChart_compat (p q : HyperellipticAffine H) :
       (affineLiftChart (H := H) (h := h) p).symm.trans (affineLiftChart (H := H) (h := h) q) =
         (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ).symm.trans
           (ChartedSpace.chartAt q : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) := by
-    simpa [affineLiftChart] using
-      (OpenPartialHomeomorph.lift_openEmbedding_trans
-        (e := (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ))
-        (e' := (ChartedSpace.chartAt q : OpenPartialHomeomorph (HyperellipticAffine H) ℂ))
-        (hf := OnePoint.isOpenEmbedding_coe (X := HyperellipticAffine H)))
+    simp [affineLiftChart]
   rw [hEq]
   exact HyperellipticAffine.affineChartAt_compat (H := H) p q
 
@@ -94,13 +90,14 @@ theorem infinityChart_compat_affineLift (p : HyperellipticAffine H) :
     rw [affineLiftChart, hchart]
     exact infinityChart_compat_affineLiftProjX (H := H) (h := h) p hpY
   · have hpX : p ∈ HyperellipticAffine.smoothLocusX H :=
-      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa [HyperellipticAffine.smoothLocusY] using hpY)
+      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa
+        [HyperellipticAffine.smoothLocusY] using hpY)
     have hchart :
         (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
           HyperellipticAffine.affineChartProjY (H := H) p hpX := by
         change HyperellipticAffine.affineChartAt (H := H) p =
           HyperellipticAffine.affineChartProjY (H := H) p hpX
-        simp [HyperellipticAffine.affineChartAt, hpY, hpX]
+        simp [HyperellipticAffine.affineChartAt, hpY]
     rw [affineLiftChart, hchart]
     exact infinityChart_compat_affineLiftProjY (H := H) (h := h) p hpX
 
@@ -119,13 +116,14 @@ theorem affineLift_compat_infinityChart (p : HyperellipticAffine H) :
     rw [affineLiftChart, hchart]
     exact affineLiftProjX_compat_infinityChart (H := H) (h := h) p hpY
   · have hpX : p ∈ HyperellipticAffine.smoothLocusX H :=
-      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa [HyperellipticAffine.smoothLocusY] using hpY)
+      HyperellipticAffine.mem_smoothLocusX_of_y_eq_zero H (by simpa
+        [HyperellipticAffine.smoothLocusY] using hpY)
     have hchart :
         (ChartedSpace.chartAt p : OpenPartialHomeomorph (HyperellipticAffine H) ℂ) =
           HyperellipticAffine.affineChartProjY (H := H) p hpX := by
         change HyperellipticAffine.affineChartAt (H := H) p =
           HyperellipticAffine.affineChartProjY (H := H) p hpX
-        simp [HyperellipticAffine.affineChartAt, hpY, hpX]
+        simp [HyperellipticAffine.affineChartAt, hpY]
     rw [affineLiftChart, hchart]
     exact affineLiftProjY_compat_infinityChart (H := H) (h := h) p hpX
 
@@ -157,8 +155,7 @@ pairwise chart transitions are analytic (`ContDiffOn ω`):
 * `affine × infinity` (Phase OA2 compat lemma) — analytic via
   `t ↦ x(t) = 1 / (lc(f) · t²) (1 + O(t))`. -/
 noncomputable instance instIsManifold (H : HyperellipticData) {h : Odd H.f.natDegree} :
-    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h)
-    := by
+    IsManifold 𝓘(ℂ, ℂ) ω (HyperellipticOdd H h) := by
   apply isManifold_of_contDiffOn
   intro e e' he he'
   rcases he with ⟨x, rfl⟩

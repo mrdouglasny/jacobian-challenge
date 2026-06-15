@@ -94,13 +94,13 @@ noncomputable def liouvilleInfinityPointNeg (H : HyperellipticData) :
 lemma liouvilleInfinityPointPos_mem_smoothLocusY :
     liouvilleInfinityPointPos H ∈
       smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) := by
-  show (liouvilleInfinityPointPos H).val.2 ≠ 0
+  change (liouvilleInfinityPointPos H).val.2 ≠ 0
   exact liouvilleInfinitySqrt_ne_zero (H := H)
 
 lemma liouvilleInfinityPointNeg_mem_smoothLocusY :
     liouvilleInfinityPointNeg H ∈
       smoothLocusY (HyperellipticAffineInfinity.reverseData H hf.out) := by
-  show (liouvilleInfinityPointNeg H).val.2 ≠ 0
+  change (liouvilleInfinityPointNeg H).val.2 ≠ 0
   exact neg_ne_zero.mpr (liouvilleInfinitySqrt_ne_zero (H := H))
 
 lemma quotient_out_eq_inr_of_infinity_fst_eq_zero
@@ -858,7 +858,7 @@ theorem affCoeff_eq_of_projX_symm
   let q' : HyperellipticEvenProj H :=
     Quotient.mk (hyperellipticEvenSetoid H) (Sum.inl p)
   have hpYp : p ∈ smoothLocusY H := by
-    show p.val.2 ≠ 0
+    change p.val.2 ≠ 0
     have hne := squareLocalHomeomorph_symm_ne_zero (H := H) a hpY hz
     simpa [p, affineChartProjX_symm_apply_snd (H := H) a hpY hz] using hne
   have hpSrc : p ∈ (affineChartProjX (H := H) p hpYp).source :=
@@ -2053,7 +2053,7 @@ theorem affCoeff_eq_liouvilleProjYNumerator_div_of_branch_inl
   let c := affineLiftChart H hf.out p
   let cA := affineLiftChart H hf.out a
   have haY : a ∈ smoothLocusY H := by
-    show a.val.2 ≠ 0
+    change a.val.2 ≠ 0
     have hsnd := affineChartProjY_symm_apply_snd (H := H) p hpX hw
     simpa [a, hsnd] using hwne
   have haSrc : a ∈ (affineChartProjX (H := H) a haY).source :=
@@ -2218,7 +2218,7 @@ theorem affCoeff_eq_liouvilleProjYNumerator_div_of_branch_inr
   let c := affineLiftChart H hf.out p
   let cB := infinityLiftChart H hf.out b
   have haY : a ∈ smoothLocusY H := by
-    show a.val.2 ≠ 0
+    change a.val.2 ≠ 0
     have hsnd := affineChartProjY_symm_apply_snd (H := H) p hpX hw
     simpa [a, hsnd] using hwne
   obtain ⟨hxNZ, hb, hbY⟩ :=
@@ -3249,7 +3249,7 @@ theorem liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inr
         have hsnd := affineChartProjY_symm_apply_snd (H := H) p hpX hnegTarget
         simpa [a, y, HyperellipticAffine.invol] using hsnd
     have hvSq : v ^ 2 = (Polynomial.reverse H.f).eval z⁻¹ := by
-      show (y * z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = _
+      change (y * z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = _
       rw [mul_pow, hySq]
       have hpow_eq : (z⁻¹ ^ (H.f.natDegree / 2)) ^ 2 = z⁻¹ ^ H.f.natDegree := by
         rw [← pow_mul]
@@ -3264,7 +3264,7 @@ theorem liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inr
       rw [hvSq]
       have hmap : (eInf : ℂ → ℂ) z⁻¹ ∈ eInf.target := eInf.map_source hzInvSrc
       have hact : (eInf : ℂ → ℂ) z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹ := by
-        show Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
+        change Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
         rfl
       simpa [hact] using hmap
     have hnegvTarget : -v ∈ (affineChartProjY (H := Hrev) b hbX).target := by
@@ -3275,7 +3275,7 @@ theorem liouvilleTwoSheetSum_branch_tendsto_of_branch_out_inr
     have hu_eq : eInf.symm (v ^ 2) = z⁻¹ := by
       have hleft := eInf.left_inv hzInvSrc
       have hact : (eInf : ℂ → ℂ) z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹ := by
-        show Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
+        change Hrev.f.eval z⁻¹ = (Polynomial.reverse H.f).eval z⁻¹
         rfl
       rw [hact] at hleft
       simpa [hvSq] using hleft
@@ -3725,10 +3725,10 @@ theorem liouvilleChosenAffinePoint_infinity_sources_eventually_cocompact :
         Quotient.mk (hyperellipticEvenSetoid H)
             (Sum.inl ((liouvilleChosenAffinePoint (H := H) z).invol)) ∈
           (infinityLiftChart H hf.out (liouvilleInfinityPointNeg H)).source) ∨
-       (Quotient.mk (hyperellipticEvenSetoid H)
+        (Quotient.mk (hyperellipticEvenSetoid H)
             (Sum.inl (liouvilleChosenAffinePoint (H := H) z)) ∈
           (infinityLiftChart H hf.out (liouvilleInfinityPointNeg H)).source ∧
-        Quotient.mk (hyperellipticEvenSetoid H)
+          Quotient.mk (hyperellipticEvenSetoid H)
             (Sum.inl ((liouvilleChosenAffinePoint (H := H) z).invol)) ∈
           (infinityLiftChart H hf.out (liouvilleInfinityPointPos H)).source)) := by
   classical
@@ -4440,7 +4440,7 @@ theorem liouvilleNumeratorGRaw_analyticAt_of_eval_ne_zero
     have hp₀σ_eq : p₀σ = p₀.invol := by
       simpa [p₀, p₀σ] using hPair
     have hp₀Y : p₀ ∈ smoothLocusY H := by
-      show p₀.val.2 ≠ 0
+      change p₀.val.2 ≠ 0
       have hne := squareLocalHomeomorph_symm_ne_zero (H := H) a₀ ha₀Y hzT
       simpa [p₀, e₀, affineChartProjX_symm_apply_snd (H := H) a₀ ha₀Y hzT]
         using hne

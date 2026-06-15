@@ -393,7 +393,7 @@ theorem range_loopPeriodVec_eq
     by_cases h : (k : ℕ) < genus X
     · have hkeq : αEmbed (X := X) ⟨(k : ℕ), h⟩ = k := Fin.ext rfl
       refine ⟨Sum.inl ⟨(k : ℕ), h⟩, ?_⟩
-      show (arcAPeriodMatrix loops fun m => cω m)ᵀ
+      change (arcAPeriodMatrix loops fun m => cω m)ᵀ
           *ᵥ periodColumns (arcTauMatrix loops cω) (Sum.inl ⟨(k : ℕ), h⟩)
         = loopPeriodVec x₀ cω (loops k)
       rw [mulVecT_periodColumns_inl, hkeq]

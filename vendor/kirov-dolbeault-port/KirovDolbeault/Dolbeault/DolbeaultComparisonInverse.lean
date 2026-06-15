@@ -270,7 +270,7 @@ theorem dbarRho_eq_zero_of_notMem (𝔇 : ChartDiskCover X) (k : 𝔇.toFiniteCo
 theorem nhdsNE_neBot_of_chart (x : X) : (𝓝[≠] x).NeBot := by
   have hsrc : x ∈ (chartAt (H := ℂ) x).source := mem_chart_source ℂ x
   exact ((chartAt (H := ℂ) x).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) x) x)
-    (by simpa using (chartAt (H := ℂ) x).map_source hsrc)).neBot.mono
+    (by simp [(chartAt (H := ℂ) x).map_source hsrc])).neBot.mono
     (by simp only [(chartAt (H := ℂ) x).left_inv hsrc]; exact le_rfl)
 
 /-- `Gext` is additive (extension by `0`). -/
@@ -638,7 +638,7 @@ theorem cechToDolbeaultForm_val (𝔇 : ChartDiskCover X)
   show ((∑ p : 𝔇.toFiniteCover.ι × 𝔇.toFiniteCover.ι,
       (⟨cechTerm 𝔇 f p.1 p.2, cechTerm_mem_zeroOne 𝔇 f p.1 p.2⟩ : ↥(OneFormsZeroOne X)) :
       ↥(OneFormsZeroOne X)) : SmoothCOneForms X) = _
-  rw [AddSubmonoidClass.coe_finset_sum]
+  rw [AddSubmonoidClass.coe_finsetSum]
 
 /-- Section-eval commutes with finite sums of `(0,1)`-forms (generic; applied by unification, so it
 never whnfs the heavy `cechTerm` body — avoiding the transparency-option `isDefEq` blowup). -/

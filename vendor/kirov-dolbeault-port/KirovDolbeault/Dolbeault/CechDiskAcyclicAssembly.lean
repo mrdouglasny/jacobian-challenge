@@ -88,7 +88,7 @@ theorem omegaD_zero_of_chart_analyticAt {U : Opens X} {H : X → ℂ}
     have hana : AnalyticAt ℂ (Gext (H ∘ (Subtype.val : U → X)) ∘ (chartAt (H := ℂ) u.1).symm)
         ((chartAt (H := ℂ) u.1) u.1) :=
       ((hH u.1 u.2).congr (Filter.EventuallyEq.symm (hGext_eq u.1 u.2)))
-    simp only [Finsupp.coe_zero, Pi.zero_apply, neg_zero]
+    simp only [Finsupp.coe_zero, Pi.zero_apply]
     exact hana.meromorphicOrderAt_nonneg
 
 /-! ### STEP D — the function → germ descent
@@ -109,7 +109,7 @@ of `s_{ij}`; `toGerm_holoFn` gives `holoFn (s_{ij})` as such a representative, a
 supplies the `𝓝[≠]`-agreement (pulled back to the overlap submanifold).  Reuses `holoFn` /
 `toGerm_holoFn` from `CechDiskAcyclicProof`. -/
 theorem functionDiskAcyclic_of_holoCorrectors (𝔙 : FiniteFamily X)
-    (η : Π i, 𝔙.U i → ℂ) (hη : ∀ i, η i ∈ OmegaD (0 : Divisor X) (𝔙.U i))
+    (η : Π i, 𝔙.U i → ℂ) (_hη : ∀ i, η i ∈ OmegaD (0 : Divisor X) (𝔙.U i))
     (s : ↥(𝔙.cocycles1 (0 : Divisor X)))
     (hsplit : ∀ i j, ∀ x : X, x ∈ (𝔙.U i ⊓ 𝔙.U j : Opens X) →
       (fun z => Gext (η j) z - Gext (η i) z)

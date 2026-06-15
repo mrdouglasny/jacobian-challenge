@@ -59,7 +59,7 @@ theorem exists_openBox_eval_ne_zero {q : Polynomial ℂ} (hq : q ≠ 0) :
   apply Polynomial.eq_zero_of_infinite_isRoot
   have hbox : (Set.Ioo (0 : ℝ) 1 ×ˢ Set.Ioo (0 : ℝ) 1).Infinite :=
     Set.infinite_prod.mpr
-      (Or.inl ⟨Set.Ioo_infinite (by norm_num : (0:ℝ) < 1), ⟨1 / 2, by norm_num⟩⟩)
+      (Or.inl ⟨Set.Ioo_infinite (by norm_num : (0 : ℝ) < 1), ⟨1 / 2, by norm_num⟩⟩)
   refine Set.Infinite.mono ?_ (hbox.image wCLM_injective.injOn)
   rintro z ⟨p, hp, rfl⟩
   exact hall p hp
@@ -93,7 +93,7 @@ noncomputable def polyArcBoundaryWordData
             * (arcBPeriodMatrix loops fun m => cω m).map (starRingEnd ℂ)
           - (arcBPeriodMatrix loops fun m => cω m)ᵀ
             * (arcAPeriodMatrix loops fun m => cω m).map (starRingEnd ℂ)) i j
-        = - Jacobians.boundaryForm (fun z => ((P j).derivative).eval z)
+        = -Jacobians.boundaryForm (fun z => ((P j).derivative).eval z)
             (fun z => (P i).eval z)) :
     ArcBoundaryWordDataInterior loops cω where
   h := fun j z => ((P j).derivative).eval z

@@ -70,9 +70,12 @@ the 2026-04-23 refactor. The carrier history:
   agree as functions.
 
 See also:
-  - `Jacobians/Axioms/FiniteDimOneForms.lean` — finite-dim axiom (classical theorem, still load-bearing).
-  - `Jacobians/ProjectiveCurve/Line/OneForm.lean` — derived fact that `HolomorphicOneForm ProjectiveLine` is a subsingleton (genus-0 collapse).
-  - `Jacobians/ProjectiveCurve/Elliptic/OneForm.lean` — explicit `ellipticDz` witness (invariant 1-form `dz`).
+  - `Jacobians/Axioms/FiniteDimOneForms.lean` — finite-dim axiom (classical theorem, still
+    load-bearing).
+  - `Jacobians/ProjectiveCurve/Line/OneForm.lean` — derived fact that `HolomorphicOneForm
+    ProjectiveLine` is a subsingleton (genus-0 collapse).
+  - `Jacobians/ProjectiveCurve/Elliptic/OneForm.lean` — explicit `ellipticDz` witness
+    (invariant 1-form `dz`).
 
 `docs/formalization-plan.md` §4.1 and `docs/gemini-review-axioms.md`
 have further context.

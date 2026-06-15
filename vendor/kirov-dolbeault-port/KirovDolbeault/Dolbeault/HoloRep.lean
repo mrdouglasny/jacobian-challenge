@@ -38,7 +38,7 @@ variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
 theorem nhdsNE_neBot (x : X) : (𝓝[≠] x).NeBot := by
   have hsrc : x ∈ (chartAt (H := ℂ) x).source := mem_chart_source ℂ x
   exact ((chartAt (H := ℂ) x).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) x) x)
-    (by simpa using (chartAt (H := ℂ) x).map_source hsrc)).neBot.mono
+    (by simp [(chartAt (H := ℂ) x).map_source hsrc])).neBot.mono
     (by simp only [(chartAt (H := ℂ) x).left_inv hsrc]; exact le_rfl)
 
 /-- A holomorphic representative function of an `OmegaDGerm 0`-class (chosen). -/
@@ -150,7 +150,7 @@ theorem proj01_restrictScalars_eq_zero (L : ℂ →L[ℂ] ℂ) : proj01 (L.restr
         simpa using congrArg (fun w => Complex.I * w) (L.map_smulₛₗ Complex.I v)
       _ = -L v := by
         have hi : (Complex.I : ℂ) * Complex.I = -1 := by
-          simpa [pow_two] using Complex.I_sq
+          exact Complex.I_mul_I
         calc
           Complex.I * (Complex.I * L v) = ((Complex.I : ℂ) * Complex.I) * L v := by
             rw [mul_assoc]

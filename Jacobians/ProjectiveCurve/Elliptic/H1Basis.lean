@@ -68,12 +68,17 @@ theorem ellipticH1Equiv_loopToHomology (loop : AnalyticLoop (Elliptic ω₁ ω�
     (hlift : ∀ t, QuotientAddGroup.mk' (ellipticAddLattice ω₁ ω₂ h) (Γ t)
       = loopToPath (X := Elliptic ω₁ ω₂ h) loop t) :
     ellipticH1Equiv ω₁ ω₂ h (loopToHomology loop) = ⟨z, hz⟩ := by
-  have hend : pathLiftEnd (ellipticAddLattice ω₁ ω₂ h) (loopToPath (X := Elliptic ω₁ ω₂ h) loop) = z := by
-    rw [pathLiftEnd_eq (ellipticAddLattice ω₁ ω₂ h) (loopToPath (X := Elliptic ω₁ ω₂ h) loop) Γ hΓ hΓ0 hlift,
+  have hend : pathLiftEnd (ellipticAddLattice ω₁ ω₂ h) (loopToPath (X := Elliptic ω₁ ω₂ h)
+    loop) = z := by
+    rw [pathLiftEnd_eq (ellipticAddLattice ω₁ ω₂ h) (loopToPath (X := 
+        Elliptic ω₁ ω₂ h) loop) Γ hΓ hΓ0 hlift,
       hΓ1]
-  have hcls := h1EquivLattice_loopClass (ellipticAddLattice ω₁ ω₂ h) (loopToPath (X := Elliptic ω₁ ω₂ h) loop)
-  show h1EquivLattice (ellipticAddLattice ω₁ ω₂ h) (Additive.ofMul (Abelianization.of
-    (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk (loopToPath (X := Elliptic ω₁ ω₂ h) loop))))) = ⟨z, hz⟩
+  have hcls := 
+    h1EquivLattice_loopClass (ellipticAddLattice ω₁ ω₂ h)
+      (loopToPath (X := Elliptic ω₁ ω₂ h) loop)
+  change h1EquivLattice (ellipticAddLattice ω₁ ω₂ h) (Additive.ofMul (Abelianization.of
+    (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk (loopToPath (X := 
+        Elliptic ω₁ ω₂ h) loop))))) = ⟨z, hz⟩
   rw [hcls]
   exact Subtype.ext hend
 
@@ -109,7 +114,7 @@ theorem ellipticH1Equiv_bLoopRev :
   have hω₂0 : QuotientAddGroup.mk' (ellipticAddLattice ω₁ ω₂ h) ω₂ = 0 := by
     rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff]
     exact omega₂_mem_ellipticLattice ω₁ ω₂ h
-  show QuotientAddGroup.mk' (ellipticAddLattice ω₁ ω₂ h)
+  change QuotientAddGroup.mk' (ellipticAddLattice ω₁ ω₂ h)
       (((1 - (t : ℝ) : ℝ) : ℂ) * ω₂ - ω₂) = loopToPath (bLoopRev ω₁ ω₂ h) t
   rw [map_sub, hω₂0, sub_zero]
   rfl
@@ -180,7 +185,7 @@ theorem ellipticH1Basis_eq_loops (i : Fin (2 * genus (Elliptic ω₁ ω₂ h))) 
         = ⟨ω₁, omega₁_mem_ellipticLattice ω₁ ω₂ h⟩ :=
       Subtype.ext (ellipticOrientedLatticeBasis_coe_zero ω₁ ω₂ h)
     rw [hb]
-    show (ellipticH1Equiv ω₁ ω₂ h).symm _ = _
+    change (ellipticH1Equiv ω₁ ω₂ h).symm _ = _
     rw [← ellipticH1Equiv_aLoop ω₁ ω₂ h, AddEquiv.symm_apply_apply]
   · -- B-slot
     have hj : (finCongr (by rw [genus_Elliptic_eq_one ω₁ ω₂ h] :
@@ -195,7 +200,7 @@ theorem ellipticH1Basis_eq_loops (i : Fin (2 * genus (Elliptic ω₁ ω₂ h))) 
         = (if 0 < (ω₂ * (starRingEnd ℂ) ω₁).im then bLoop ω₁ ω₂ h
             else bLoopRev ω₁ ω₂ h) by
       simp [ellipticLoops, hi]]
-    show (ellipticH1Equiv ω₁ ω₂ h).symm (ellipticOrientedLatticeBasis ω₁ ω₂ h 1) = _
+    change (ellipticH1Equiv ω₁ ω₂ h).symm (ellipticOrientedLatticeBasis ω₁ ω₂ h 1) = _
     rw [AddEquiv.symm_apply_eq]
     split_ifs with hpos
     · rw [ellipticH1Equiv_bLoop ω₁ ω₂ h]

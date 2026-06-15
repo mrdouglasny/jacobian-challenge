@@ -67,9 +67,9 @@ lemma edgeBF_combo (γ : ℝ → ℂ) (v : Fin g → ℂ) (h F : Fin g → ℂ �
       ∑ i, ∑ j, ((starRingEnd ℂ) (v i) * v j) * ((starRingEnd ℂ) (F i (γ t)) * h j (γ t)))
       (fun t _ => ?_)]
   · -- ∫ of the double sum = double sum of (const · ∫)
-    rw [intervalIntegral.integral_finset_sum]
+    rw [intervalIntegral.integral_finsetSum]
     · refine Finset.sum_congr rfl (fun i _ => ?_)
-      rw [intervalIntegral.integral_finset_sum]
+      rw [intervalIntegral.integral_finsetSum]
       · exact Finset.sum_congr rfl (fun j _ => intervalIntegral.integral_const_mul _ _)
       · exact fun j _ => (hint i j).const_mul _
     · intro i _

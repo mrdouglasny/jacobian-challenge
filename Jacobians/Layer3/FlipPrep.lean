@@ -252,8 +252,8 @@ theorem layer3Flip_composition
     (∃ 𝔘 : FiniteCover X, 𝔘.IsLeray ∧ 𝔘.LocallyRealizable ∧
       Nonempty (SerreDualityData 𝔘)) :=
   ⟨h1coh_zero_finrank_of_frameTrace h0,
-   serreDuality_equiv_exists_of_frameTrace h0,
-   exists_serreDualityData_cover_of_frameTrace h0⟩
+    serreDuality_equiv_exists_of_frameTrace h0,
+    exists_serreDualityData_cover_of_frameTrace h0⟩
 
 /-- Single-datum form of the full composition (the shape the T-lane hands over: the
 canonical `ω₀ = df` datum satisfying its trace hypothesis). -/

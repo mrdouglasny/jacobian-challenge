@@ -168,7 +168,7 @@ theorem meromorphicOrderAt_add_of_lt {F G : ℂ → ℂ} {c : ℂ} {n : ℤ}
   -- nonzero coefficient pins the order to `≤ n`
   have hle : meromorphicOrderAt (F + G) c ≤ (n : WithTop ℤ) := by
     by_contra hgt
-    push_neg at hgt
+    push Not at hgt
     exact hcsum ((laurentCoeff_eq_zero_iff hsum hge).mpr hgt)
   exact le_antisymm hle hge
 
@@ -259,7 +259,7 @@ lowest-order coefficient by a scaled `ExactOrderWitness` section, strictly raisi
 of the residual. -/
 private theorem window_cancel_step (hwit : ExactOrderWitness 𝔇)
     {j : 𝔇.toFiniteCover.ι} (hb : b ∈ (𝔇.U j : Set X)) (E : Divisor X) {m n : ℤ}
-    (hEm : E b ≤ m) {t : ℂ → ℂ} (ht : MeromorphicAt t (βpt b))
+    (_hEm : E b ≤ m) {t : ℂ → ℂ} (ht : MeromorphicAt t (βpt b))
     (hn : meromorphicOrderAt t (βpt b) = (n : WithTop ℤ))
     (hge : -m - 1 ≤ n) (hlt : n < -E b) :
     ∃ c₀ : ↥(𝔇.U j) → ℂ,
@@ -350,7 +350,7 @@ private theorem exists_window_matching_aux (hwit : ExactOrderWitness 𝔇)
     by_cases hcase : ((-(E b) : ℤ) : WithTop ℤ) ≤ meromorphicOrderAt t (βpt b)
     · exact ⟨0, window_zero_case hcase⟩
     · -- exactly one window slot: cancel the leading coefficient with the scaled witness
-      push_neg at hcase
+      push Not at hcase
       have hm : m = E b := by omega
       obtain ⟨n, hn, hge, hlt⟩ : ∃ n : ℤ, meromorphicOrderAt t (βpt b) = (n : WithTop ℤ) ∧
           -m - 1 ≤ n ∧ n < -E b := by
@@ -378,7 +378,7 @@ private theorem exists_window_matching_aux (hwit : ExactOrderWitness 𝔇)
     intro m hEm hN t ht hord
     by_cases hcase : ((-(E b) : ℤ) : WithTop ℤ) ≤ meromorphicOrderAt t (βpt b)
     · exact ⟨0, window_zero_case hcase⟩
-    · push_neg at hcase
+    · push Not at hcase
       obtain ⟨n, hn, hge, hlt⟩ : ∃ n : ℤ, meromorphicOrderAt t (βpt b) = (n : WithTop ℤ) ∧
           -m - 1 ≤ n ∧ n < -E b := by
         have hne : meromorphicOrderAt t (βpt b) ≠ ⊤ := fun hc => by
@@ -403,7 +403,7 @@ private theorem exists_window_matching_aux (hwit : ExactOrderWitness 𝔇)
         rw [hread, meromorphicOrderAt_const_smul (by norm_num : (-1 : ℂ) ≠ 0)]
         exact hcase₁
       · -- recurse on the strictly shorter window `[n+1, −E b)`
-        push_neg at hcase₁
+        push Not at hcase₁
         have hn1 : n + 1 < -E b := by
           rcases lt_or_ge (n + 1) (-E b) with h | h
           · exact h
@@ -781,7 +781,7 @@ theorem read_eventuallyEq_of_eventuallyEq_nhdsNE {F G : X → ℂ} (h : F =ᶠ[�
   have hbsrc : b ∈ (chartAt (H := ℂ) b).source := mem_chart_source ℂ b
   have hzt := (chartAt (H := ℂ) b).map_source hbsrc
   have hsymtend : Tendsto (chartAt (H := ℂ) b).symm (𝓝[≠] (βpt b)) (𝓝[≠] b) := by
-    have h2 := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := βpt b) (by simpa using hzt)
+    have h2 := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := βpt b) (by simp [hzt])
     rwa [(chartAt (H := ℂ) b).left_inv hbsrc] at h2
   filter_upwards [hsymtend.eventually h] with ζ hζ
   exact hζ
@@ -922,7 +922,7 @@ theorem vanishFn_eventuallyEq_Gext_cupRep {f : MeromorphicFunction X}
     have hxb' : x ≠ b := by simpa using hxb
     refine ⟨hx1, mem_offPos_iff.mpr ?_⟩
     by_contra hpos
-    push_neg at hpos
+    push Not at hpos
     exact hx2 (Finset.mem_erase.mpr ⟨hxb', mem_posSupp_iff.mpr hpos⟩)
   -- ambient-chart meromorphy and exact order of the honest representative
   have hcmer : MeromorphicAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
@@ -940,7 +940,7 @@ theorem vanishFn_eventuallyEq_Gext_cupRep {f : MeromorphicFunction X}
   have hψtend : Tendsto (chartAt (H := ℂ) b).symm
       (𝓝[≠] ((chartAt (H := ℂ) b) b)) (𝓝[≠] b) := by
     have h := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) b) b)
-      (by simpa using (chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b))
+      (by simp [(chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b)])
     simpa [(chartAt (H := ℂ) b).left_inv (mem_chart_source ℂ b)] using h
   have hreadeq : (Gext F ∘ (chartAt (H := ℂ) b).symm)
       =ᶠ[𝓝[≠] ((chartAt (H := ℂ) b) b)] (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm) :=

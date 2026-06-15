@@ -136,18 +136,18 @@ theorem loopToPath_trans (γ δ : AnalyticLoop X x₀) :
   rw [Path.trans_apply]
   by_cases h : (t : ℝ) ≤ 1 / 2
   · rw [dif_pos h]
-    show (if (t : ℝ) ≤ (1 / 2 : ℝ) then γ.arc.extend (2 * (t : ℝ))
+    change (if (t : ℝ) ≤ (1 / 2 : ℝ) then γ.arc.extend (2 * (t : ℝ))
         else δ.arc.extend (2 * (t : ℝ) - 1)) = γ.arc.extend _
     rw [if_pos h]
   · rw [dif_neg h]
-    show (if (t : ℝ) ≤ (1 / 2 : ℝ) then γ.arc.extend (2 * (t : ℝ))
+    change (if (t : ℝ) ≤ (1 / 2 : ℝ) then γ.arc.extend (2 * (t : ℝ))
         else δ.arc.extend (2 * (t : ℝ) - 1)) = δ.arc.extend _
     rw [if_neg h]
 
 theorem loopToPath_reverse (γ : AnalyticLoop X x₀) :
     loopToPath γ.reverse = (loopToPath γ).symm := by
   ext t
-  show γ.arc.extend (1 - (t : ℝ)) = (loopToPath γ) (unitInterval.symm t)
+  change γ.arc.extend (1 - (t : ℝ)) = (loopToPath γ) (unitInterval.symm t)
   rfl
 
 /-! ## Hurewicz-side homomorphism lemmas -/
@@ -298,7 +298,7 @@ theorem exists_finite_generating_loops (x₀ : X)
     ext v
     constructor
     · rintro ⟨i, rfl⟩
-      show loopToHomology (f (S.equivFin.symm i)) ∈ (S : Set (H1 X x₀))
+      change loopToHomology (f (S.equivFin.symm i)) ∈ (S : Set (H1 X x₀))
       rw [hf]
       exact (S.equivFin.symm i).2
     · intro hv

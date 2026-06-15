@@ -169,7 +169,7 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
   set E : FundamentalGroup (A : Set _) yA ≃* Multiplicative ℤ :=
     e.trans isoA.symm with hEdef
   have hEg₀ : E g₀ = Multiplicative.ofAdd 1 := by
-    show isoA.symm (e (e.symm _)) = _
+    change isoA.symm (e (e.symm _)) = _
     rw [MulEquiv.apply_symm_apply, ← pi1PuncturedPlaneIntAt_ofAdd_one,
       MulEquiv.symm_apply_apply]
   have hEsymm_one : E.symm (Multiplicative.ofAdd 1) = g₀ := by
@@ -194,7 +194,7 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
       (FundamentalGroup.mapOfEq ιs rfl) with hwAdef
   -- the winding of the spoked tiny circle is `1`
   have hwsc : wA scA = Multiplicative.ofAdd 1 := by
-    show (pi1PuncturedPlaneIntAt s (ιs yA)).symm
+    change (pi1PuncturedPlaneIntAt s (ιs yA)).symm
         (FundamentalGroup.mapOfEq ιs rfl (spokedClass ρ cA)) = _
     rw [mapOfEq_spokedClass]
     have hcmap : cA.map ιs.continuous = circleAround s (ιs zcA) := by
@@ -226,7 +226,7 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
   have hcell_eq : cellLasso φA hyA
       = (spokedClass (ρ.map (inclusionCM A).continuous)
           (cA.map (inclusionCM A).continuous)) ^ m := by
-    show FundamentalGroup.mapOfEq (inclusionCM A) rfl g₀ = _
+    change FundamentalGroup.mapOfEq (inclusionCM A) rfl g₀ = _
     rw [hg₀_eq, map_zpow, mapOfEq_spokedClass]
   -- identify the pushed circle with the explicit lasso circle
   have hcX : cA.map (inclusionCM A).continuous
@@ -261,7 +261,7 @@ private theorem cellSpokes_subset_of_circleLassos_mem (T : Finset ℂ)
   have hisoX : Metric.ball s (2 * ‖(zcX : ℂ) - s‖) ∩ (T : Set ℂ) ⊆ {s} := by
     intro w hw
     have h2r : 2 * ‖(zcX : ℂ) - s‖ = r := by
-      show 2 * ‖zc - s‖ = r
+      change 2 * ‖zc - s‖ = r
       rw [hzcnorm]
       ring
     rw [h2r] at hw

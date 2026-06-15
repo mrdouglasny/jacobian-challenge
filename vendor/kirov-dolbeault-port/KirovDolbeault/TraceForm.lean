@@ -2377,7 +2377,7 @@ theorem traceForm_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpac
               (traceSummand f α x).comp ((mfderiv 𝓘(ℂ) 𝓘(ℂ) g y).inverse))
             = (β.toFun y).comp ((mfderiv 𝓘(ℂ) 𝓘(ℂ) g y).inverse)
         rw [← htf, finsum_mem_eq_finite_toFinset_sum _ (hffib_fin y hy)]
-        exact (ContinuousLinearMap.finset_sum_comp _ _).symm
+        exact (ContinuousLinearMap.finsetSum_comp _ _).symm
       show (∑ᶠ (x : X) (_ : x ∈ (g ∘ f) ⁻¹' {z}), traceSummand (g ∘ f) α x)
           = ∑ᶠ (y : Y) (_ : y ∈ g ⁻¹' {z}), traceSummand g β y
       have hLHS : (∑ᶠ (x : X) (_ : x ∈ (g ∘ f) ⁻¹' {z}), traceSummand (g ∘ f) α x)

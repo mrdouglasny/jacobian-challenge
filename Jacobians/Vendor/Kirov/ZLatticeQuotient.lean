@@ -291,7 +291,7 @@ theorem contDiffOn_symm_mk
     rw [OpenPartialHomeomorph.trans_source, Set.mem_inter_iff,
         OpenPartialHomeomorph.symm_source]
     refine ⟨hy₀_P₀, ?_⟩
-    show P₀ y₀ ∈ P.target
+    change P₀ y₀ ∈ P.target
     rw [hP₀]; exact hy₀
   -- Transition is ContDiffOn
   have htrans : ContDiffOn 𝕜 n (P₀ ≫ₕ P.symm : E → E) (P₀ ≫ₕ P.symm).source :=
@@ -377,7 +377,7 @@ theorem contMDiff_neg :
   -- (-x_c) ∈ mk ⁻¹ Q.target
   have hmem_neg : (-x_c) ∈
       (QuotientAddGroup.mk : E → E ⧸ Λ.toAddSubgroup) ⁻¹' Q.target := by
-    show QuotientAddGroup.mk (-x_c) ∈ Q.target
+    change QuotientAddGroup.mk (-x_c) ∈ Q.target
     rw [hmx]
     have hQy : Q y_c = QuotientAddGroup.mk y_c := by rw [← hQ]
     rw [← hQy]
@@ -409,9 +409,9 @@ theorem contMDiff_neg :
   -- Pullback(y) = Q.symm (neg (P.symm.symm y)) = Q.symm (neg (P y)) = Q.symm (neg (mk y))
   --            = Q.symm (mk (-y)) on P.source
   have hpoint : extChartAt 𝓘(𝕜, E) q₀ q₀ = x_c := by
-    show (chartAt E q₀) q₀ = x_c
+    change (chartAt E q₀) q₀ = x_c
     -- chartAt q₀ = P.symm, (P.symm) q₀ = x_c since P x_c = mk x_c = q₀ and x_c ∈ P.source
-    show P.symm q₀ = x_c
+    change P.symm q₀ = x_c
     have : P x_c = q₀ := by rw [hP]; exact hqc
     rw [← this]
     exact P.left_inv hxc_mem
@@ -477,7 +477,7 @@ theorem contMDiff_add :
   rw [hrange, contDiffWithinAt_univ]
   have hmem_sum : (x₁ + x₂) ∈
       (QuotientAddGroup.mk : E → E ⧸ Λ.toAddSubgroup) ⁻¹' R.target := by
-    show QuotientAddGroup.mk (x₁ + x₂) ∈ R.target
+    change QuotientAddGroup.mk (x₁ + x₂) ∈ R.target
     have hmksum : (QuotientAddGroup.mk (x₁ + x₂) : E ⧸ Λ.toAddSubgroup) =
         QuotientAddGroup.mk x₃ := by
       rw [QuotientAddGroup.mk_add, hq₁, hq₂, hq₃]
@@ -509,7 +509,7 @@ theorem contMDiff_add :
       (x₁, x₂) :=
     hcomp_on.contDiffAt (hopen_prod.mem_nhds hmem_prod)
   have hpoint : extChartAt (𝓘(𝕜, E).prod 𝓘(𝕜, E)) (q₁, q₂) (q₁, q₂) = (x₁, x₂) := by
-    show (P₁.symm q₁, P₂.symm q₂) = (x₁, x₂)
+    change (P₁.symm q₁, P₂.symm q₂) = (x₁, x₂)
     ext
     · have hpq : P₁ x₁ = q₁ := by rw [hP₁]; exact hq₁
       rw [← hpq]; exact P₁.left_inv hx₁_mem
@@ -601,7 +601,7 @@ theorem pushforward_pullback_of_ambient
     pushforward ΛX ΛY Φ hΦ (pullback ΛX ΛY Ψ hΨ P) = d • P := by
   induction P using QuotientAddGroup.induction_on with
   | H y =>
-    show (QuotientAddGroup.mk (Φ (Ψ y)) : _) = d • (QuotientAddGroup.mk y : _)
+    change (QuotientAddGroup.mk (Φ (Ψ y)) : _) = d • (QuotientAddGroup.mk y : _)
     rw [hΦΨ y]
     simp
 
@@ -615,7 +615,7 @@ theorem pushforward_id_of_ambient
     pushforward Λ Λ Φ hΦΛ P = P := by
   induction P using QuotientAddGroup.induction_on with
   | H x =>
-    show (QuotientAddGroup.mk (Φ x) : _) = _
+    change (QuotientAddGroup.mk (Φ x) : _) = _
     rw [hΦid]
 
 /-- Functoriality: ambient composition descends to quotient composition. -/
@@ -683,7 +683,7 @@ theorem pushforward_contMDiff_of_ambient {gX gY : ℕ}
   have hmem_img : Φ x_c ∈
       (QuotientAddGroup.mk : (Fin gY → ℂ) → (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) ⁻¹'
         R.target := by
-    show QuotientAddGroup.mk (Φ x_c) ∈ R.target
+    change QuotientAddGroup.mk (Φ x_c) ∈ R.target
     have hmk : (QuotientAddGroup.mk (Φ x_c) :
         (Fin gY → ℂ) ⧸ ΛY.toAddSubgroup) = target_q := by
       rw [htgt_def, ← hqc]
@@ -715,7 +715,7 @@ theorem pushforward_contMDiff_of_ambient {gX gY : ℕ}
   simp only [modelWithCornersSelf_coe, Set.range_id]
   rw [contDiffWithinAt_univ]
   have hpoint : extChartAt 𝓘(ℂ, Fin gX → ℂ) qX qX = x_c := by
-    show P.symm qX = x_c
+    change P.symm qX = x_c
     have : P x_c = qX := by rw [hP]; exact hqc
     rw [← this]
     exact P.left_inv hxc_mem

@@ -483,7 +483,7 @@ set_option maxHeartbeats 1000000 in
 forward cocycle of `g` via the partition of unity returns `[g]` (the global primitive `h = ∑ρ_k·wₖ`
 has `∂̄h = ω + g`, so `cech_to_dolbeault` — carrying the boundary sign — sends `[ω]` to `[g]`). -/
 theorem cech_to_dolbeault_comp_dolbeault_to_cech (𝔇 : ChartDiskCover X)
-    (hL : 𝔇.toFiniteCover.IsLeray) :
+    (_hL : 𝔇.toFiniteCover.IsLeray) :
     (cech_to_dolbeault 𝔇) ∘ₗ (dolbeault_to_cech 𝔇) = LinearMap.id := by
   refine LinearMap.ext fun cls => ?_
   obtain ⟨⟨g, hg⟩, rfl⟩ := Submodule.Quotient.mk_surjective (dbarImageInZeroOne X) cls
@@ -615,7 +615,7 @@ theorem cechDelta0_holCochain_eq (𝔇 : ChartDiskCover X)
 
 set_option maxHeartbeats 1000000 in
 theorem dolbeault_to_cech_comp_cech_to_dolbeault (𝔇 : ChartDiskCover X)
-    (hL : 𝔇.toFiniteCover.IsLeray) :
+    (_hL : 𝔇.toFiniteCover.IsLeray) :
     (dolbeault_to_cech 𝔇) ∘ₗ (cech_to_dolbeault 𝔇) = LinearMap.id := by
   refine LinearMap.ext fun cls => ?_
   obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ cls
@@ -638,7 +638,7 @@ theorem dolbeault_to_cech_comp_cech_to_dolbeault (𝔇 : ChartDiskCover X)
       + Submodule.Quotient.mk f = (0 : 𝔇.toFiniteCover.cechH1 0) := by
     rw [← Submodule.Quotient.mk_add, Submodule.Quotient.mk_eq_zero]
     simp only [Submodule.submoduleOf, Submodule.mem_comap, Submodule.subtype_apply,
-      AddSubmonoid.coe_add, Submodule.coe_toAddSubmonoid, Submodule.coe_add]
+      Submodule.coe_add]
     exact hcob
   exact neg_eq_of_add_eq_zero_right hzero
 

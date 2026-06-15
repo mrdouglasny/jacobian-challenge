@@ -58,7 +58,7 @@ theorem windingHom_fromPath {s : ℂ} (hs : s ∈ S) (x₀ : {z : ℂ // z ∉ S
     (hΓ : ∀ t, (expAround s (Γ t) : ℂ) = L t) :
     windingHom hs x₀ (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk L))
       = Multiplicative.ofAdd n := by
-  show (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
+  change (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
       (FundamentalGroup.mapOfEq (puncturedInclusion hs) rfl
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk L)))
     = Multiplicative.ofAdd n
@@ -85,11 +85,11 @@ theorem windingHom_eq_one_of_convex {s : ℂ} (hs : s ∈ S) (x₀ : {z : ℂ //
       continuous_toFun := by fun_prop
       source' := by
         apply Subtype.ext
-        show (L 0 : ℂ) = (x₀ : ℂ)
+        change (L 0 : ℂ) = (x₀ : ℂ)
         exact congrArg Subtype.val L.source
       target' := by
         apply Subtype.ext
-        show (L 1 : ℂ) = (x₀ : ℂ)
+        change (L 1 : ℂ) = (x₀ : ℂ)
         exact congrArg Subtype.val L.target } with hL'
   -- the inclusion `K → ℂ ∖ {s}`
   set ιK : C(K, {z : ℂ // z ≠ s}) :=
@@ -97,7 +97,7 @@ theorem windingHom_eq_one_of_convex {s : ℂ} (hs : s ∈ S) (x₀ : {z : ℂ //
       continuous_subtype_val.subtype_mk _⟩ with hιK
   haveI : Subsingleton (FundamentalGroup K pt) :=
     inferInstanceAs (Subsingleton (Path.Homotopic.Quotient pt pt))
-  show (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
+  change (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
       (FundamentalGroup.mapOfEq (puncturedInclusion hs) rfl
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk L))) = 1
   rw [FundamentalGroup.mapOfEq_apply]

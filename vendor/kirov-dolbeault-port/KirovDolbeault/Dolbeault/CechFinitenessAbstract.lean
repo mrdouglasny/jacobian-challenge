@@ -59,7 +59,7 @@ theorem isCompactOperator_pi {ι : Type*} [Fintype ι] [DecidableEq ι] {E F : �
       = ∑ i : ι, (single ℂ F i).comp ((K i).comp (proj i)) := by
     ext x j
     simp [ContinuousLinearMap.pi_apply, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.single_apply, Pi.single_apply, Finset.sum_apply, Finset.sum_ite_eq]
+      ContinuousLinearMap.single_apply, Finset.sum_apply]
   rw [hsum, ContinuousLinearMap.coe_sum']
   refine Finset.sum_induction _ IsCompactOperator (fun _ _ ha hb => ha.add hb)
     isCompactOperator_zero (fun i _ => ?_)
@@ -81,7 +81,7 @@ theorem isCompactOperator_of_subtypeL_comp {E F : Type*}
   have hrange : IsClosed (Set.range (Subtype.val : p → F)) := by
     rw [Subtype.range_coe_subtype]; exact hp
   have key : (⇑(p.subtypeL.comp g)) '' V = Subtype.val '' (g '' V) := by
-    simp only [ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL', Submodule.coe_subtype,
+    simp only [ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL, Submodule.coe_subtype,
       Set.image_comp]
   have hcpt' : IsCompact ((Subtype.val : p → F) ⁻¹' closure (Subtype.val '' (g '' V))) := by
     rw [← key]; exact hind.isCompact_preimage hrange hcpt

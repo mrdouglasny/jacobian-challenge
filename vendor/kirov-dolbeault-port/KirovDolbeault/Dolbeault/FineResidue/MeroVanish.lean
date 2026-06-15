@@ -957,7 +957,7 @@ theorem smoothOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
   unfold polePart
   by_cases hj : j = j₀
   · subst hj
-    simp only [if_pos rfl]
+    simp only []
     have hxj : x ∈ (𝔇.U j : Set X) := hx
     have hchart : ContMDiffAt 𝓘(ℝ, ℂ) 𝓘(ℝ, ℂ) (⊤ : ℕ∞) (chartMap 𝔇 j) x :=
       contMDiffAt_extChartAt' (I := 𝓘(ℝ, ℂ)) (mem_chartSource_of_mem_U 𝔇 hxj)
@@ -981,7 +981,7 @@ theorem holomorphicOnSetsOff_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
   unfold polePart
   by_cases hj : j = j₀
   · subst hj
-    simp only [if_pos rfl]
+    simp only []
     have hzt : chartMap 𝔇 j x ∈ (chartAt ℂ (𝔇.center j)).target :=
       (chartAt ℂ (𝔇.center j)).map_source (mem_chartSource_of_mem_U 𝔇 hx)
     have hev : (fun z => P₀ (chartMap 𝔇 j ((chartAt ℂ (𝔇.center j)).symm z)))
@@ -1010,7 +1010,7 @@ theorem slotProductExtendsAt_neg_polePart (hiso : MLIsolated 𝔇 j₀ a)
     eventually_nhdsWithin_of_eventually_nhds
       ((chartAt ℂ (𝔇.center j₀)).open_target.mem_nhds hzt)
   filter_upwards [hev, hpg] with ζ hζ hpgζ
-  simp only [polePart, eq_self_iff_true, if_true, neg_mul]
+  simp only [polePart, if_true, neg_mul]
   rw [show chartMap 𝔇 j₀ ((chartAt ℂ (𝔇.center j₀)).symm ζ) = ζ from
     (chartAt ℂ (𝔇.center j₀)).right_inv hζ, hpgζ]
 

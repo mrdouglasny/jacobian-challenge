@@ -81,12 +81,12 @@ theorem cellAffine_mem_cell (n : ℕ) (s : unitInterval) :
     (S.cellAffine n s : unitInterval) ∈ Set.Icc (S.t n) (S.t (n + 1)) := by
   constructor
   · apply Subtype.coe_le_coe.mp
-    show (S.t n : ℝ) ≤ (S.t n : ℝ) + (s : ℝ) * ((S.t (n + 1) : ℝ) - (S.t n : ℝ))
+    change (S.t n : ℝ) ≤ (S.t n : ℝ) + (s : ℝ) * ((S.t (n + 1) : ℝ) - (S.t n : ℝ))
     have hmono : (S.t n : ℝ) ≤ (S.t (n + 1) : ℝ) :=
       Subtype.coe_le_coe.mpr (S.monotone_t (Nat.le_succ n))
     nlinarith [mul_nonneg s.2.1 (sub_nonneg.mpr hmono)]
   · apply Subtype.coe_le_coe.mp
-    show (S.t n : ℝ) + (s : ℝ) * ((S.t (n + 1) : ℝ) - (S.t n : ℝ)) ≤ (S.t (n + 1) : ℝ)
+    change (S.t n : ℝ) + (s : ℝ) * ((S.t (n + 1) : ℝ) - (S.t n : ℝ)) ≤ (S.t (n + 1) : ℝ)
     have hmono : (S.t n : ℝ) ≤ (S.t (n + 1) : ℝ) :=
       Subtype.coe_le_coe.mpr (S.monotone_t (Nat.le_succ n))
     nlinarith [mul_nonneg (sub_nonneg.mpr s.2.2) (sub_nonneg.mpr hmono)]
@@ -138,18 +138,19 @@ theorem chart_chartFlatPath_mem_ball (n : ℕ) (s : unitInterval) :
             (chartTargetBallRadius (S.chart n)) :=
       segment_subset_ball (S.left_endpoint_mem_chart_ball n) (S.right_endpoint_mem_chart_ball n)
     exact hseg (flatSegment_mem_segment s.2)
-  -- chartFlatPath n s = chart.symm (flatSegment ...), so chart (chartFlatPath n s) = flatSegment ...
+  -- chartFlatPath n s = chart.symm (flatSegment ...), so chart (chartFlatPath n s) =
+  -- flatSegment ...
   have hrw : (chartAt ℂ (S.chart n)) (S.chartFlatPath n s) =
       flatSegment ((chartAt ℂ (S.chart n)) (γ (S.t n)))
         ((chartAt ℂ (S.chart n)) (γ (S.t (n + 1)))) (s : ℝ) := by
-    show (chartAt ℂ (S.chart n)) ((chartAt ℂ (S.chart n)).symm _) = _
+    change (chartAt ℂ (S.chart n)) ((chartAt ℂ (S.chart n)).symm _) = _
     exact (chartAt ℂ (S.chart n)).right_inv hmem
   rw [hrw]; exact hball
 
 /-- A flat-segment point lies in the assigned chart source. -/
 theorem chartFlatPath_mem_chart_source (n : ℕ) (s : unitInterval) :
     S.chartFlatPath n s ∈ (chartAt ℂ (S.chart n)).source := by
-  show (chartAt ℂ (S.chart n)).symm _ ∈ (chartAt ℂ (S.chart n)).source
+  change (chartAt ℂ (S.chart n)).symm _ ∈ (chartAt ℂ (S.chart n)).source
   exact (chartAt ℂ (S.chart n)).map_target (S.flatSegment_mem_chart_target n s.2)
 
 /-- **Per-cell chart-local homotopy.** On the `n`th cell, the chart-straight-line
@@ -314,6 +315,7 @@ theorem chartFlatHomotopyWall (x₀ : X) : ChartFlatHomotopyWall x₀ := by
   obtain ⟨S⟩ := Jacobians.Bridge.exists_pathChartBallSubdivision p
   exact ⟨S, S.concatChartFlatPath_homotopic_self⟩
 
+omit [T2Space X] [ConnectedSpace X] in
 /-- **T-GEN, unconditional.** Every continuous loop has a piecewise-analytic
 representative, so the homology classes of piecewise-analytic loops ℤ-span
 `H1 X x₀` (`AnalyticLoopsGenerateH1 x₀`). Discharged via the unconditional

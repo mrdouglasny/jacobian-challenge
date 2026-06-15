@@ -203,7 +203,7 @@ theorem tendsto_zero_fibreSum {ι : Type*} [Fintype ι] {s coeff : ι → ℂ �
       (𝓝[≠] b₀) (𝓝 0)) :
     Tendsto (fun z => (z - b₀) * ∑ i, coeff i (s i z) * deriv (s i) z) (𝓝[≠] b₀) (𝓝 0) := by
   have hsum : Tendsto (fun z => ∑ i, (z - b₀) * (coeff i (s i z) * deriv (s i) z))
-      (𝓝[≠] b₀) (𝓝 (∑ _i : ι, (0 : ℂ))) := tendsto_finset_sum _ (fun i _ => hterm i)
+      (𝓝[≠] b₀) (𝓝 (∑ _i : ι, (0 : ℂ))) := tendsto_finsetSum _ (fun i _ => hterm i)
   rw [Finset.sum_const, smul_zero] at hsum
   refine hsum.congr (fun z => ?_)
   rw [Finset.mul_sum]

@@ -78,7 +78,7 @@ theorem coeffGermLin_ne_zero_of_ordU_eq {W : Opens X} {D : Divisor X} {P : X} (h
 is a section of `𝒪_{D+P}(W)` of order *exactly* `−(D P)−1` at `P`, then `coeffGermLin` is surjective at
 `W` (the local Mittag–Leffler condition).  The product witness supplies such a section on a chart-disk. -/
 theorem coeffGermLin_surjective_of_exists_witness {W : Opens X} {D : Divisor X} {P : X} (hP : P ∈ W)
-    (hwit : ∃ g : W → ℂ, ∃ hg : g ∈ OmegaD (D + Finsupp.single P 1) W,
+    (hwit : ∃ g : W → ℂ, ∃ _hg : g ∈ OmegaD (D + Finsupp.single P 1) W,
       ordU g ⟨P, hP⟩ = ((-(D P) - 1 : ℤ) : WithTop ℤ)) :
     Function.Surjective (coeffGermLin hP (D := D)) := by
   obtain ⟨g, hg, hord⟩ := hwit

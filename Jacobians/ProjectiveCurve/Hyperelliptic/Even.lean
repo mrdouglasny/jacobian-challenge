@@ -230,7 +230,9 @@ compile-clean.
   via the two connected chart images with nonempty overlap.
 
 Once those land, flip `HyperellipticEven` in `Hyperelliptic.lean` from
-axiom stub to a real `def := HyperellipticEvenProj` and retire the 5\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom stub to a real `def := 
+    HyperellipticEvenProj` and retire the 5\ \-\-\ not\-an\-axiom\
+    \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
 typeclass-instance axioms on `HyperellipticEven`.
 -/
 
@@ -635,7 +637,7 @@ lemma hyperellipticEvenGlue_target_unique (H : HyperellipticData)
     {p q r : HyperellipticEvenPre H}
     (hpq : HyperellipticEvenGlue H p q) (hpr : HyperellipticEvenGlue H p r) :
     q = r := by
-  cases p <;> cases q <;> cases r <;> simp [HyperellipticEvenGlue] at hpq hpr ⊢
+  cases p <;> cases q <;> cases r <;> simp only [HyperellipticEvenGlue] at hpq hpr ⊢
   rcases hpq with ⟨_, hq1, hq2⟩
   rcases hpr with ⟨_, hr1, hr2⟩
   congr
@@ -646,7 +648,7 @@ lemma hyperellipticEvenGlue_source_unique (H : HyperellipticData)
     {p q r : HyperellipticEvenPre H}
     (hpq : HyperellipticEvenGlue H p q) (hrq : HyperellipticEvenGlue H r q) :
     p = r := by
-  cases p <;> cases q <;> cases r <;> simp [HyperellipticEvenGlue] at hpq hrq ⊢
+  cases p <;> cases q <;> cases r <;> simp only [HyperellipticEvenGlue] at hpq hrq ⊢
   rename_i a b c
   rcases hpq with ⟨hp0, hp1, hp2⟩
   rcases hrq with ⟨_, hr1, hr2⟩

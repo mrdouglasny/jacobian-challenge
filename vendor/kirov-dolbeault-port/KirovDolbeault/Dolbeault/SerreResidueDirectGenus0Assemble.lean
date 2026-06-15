@@ -170,7 +170,7 @@ theorem residueTheorem_ofAdaptedSimpleInfty_genus0
     (inftyFibreDataNF_full g f hsimpleInf hmeroInf)
     (inftyFibreEnum_injective f)
     (fun k => inftyFibreEnum_mem f k)
-    (fun a _ha hfa => inftyFibreEnum_surj f hfa)
+    (fun _a _ha hfa => inftyFibreEnum_surj f hfa)
     hnonpole_inf_an hreg hbnd hcont_int hcoh_full
 
 /-! ## The canonical-selection capstone (residual-#5 group dropped)

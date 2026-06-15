@@ -221,8 +221,8 @@ lemma extChartAt_ulift_comp_down {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
     (p : Jacobian X) (q : JacobianAmbient X) :
     ((extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) q) ∘
-     (ULift.down : Jacobian X → JacobianAmbient X) ∘
-     (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p).symm) =
+      (ULift.down : Jacobian X → JacobianAmbient X) ∘
+      (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p).symm) =
     ((extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) q) ∘
      (extChartAt (𝓘(ℂ, Fin (genus X) → ℂ)) p.down).symm) := by
   funext w
@@ -247,7 +247,8 @@ theorem extChartAt_target_iff {X : Type u} [TopologicalSpace X] [T2Space X]
           (by simpa using hs)
     have hz' :
         extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down
-          (ULift.down ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z)) = z := by
+          (ULift.down ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).symm z)) = z
+            := by
       simpa [extChartAt, chartedSpaceULift, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm]
         using (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p).right_inv hz
     exact hz' ▸
@@ -263,7 +264,8 @@ theorem extChartAt_target_iff {X : Type u} [TopologicalSpace X] [T2Space X]
         ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z)).2 hs
     have hz' :
         extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p
-          (ULift.up ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z)) = z := by
+          (ULift.up ((extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).symm z))
+            = z := by
       simpa [extChartAt, chartedSpaceULift, modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm]
         using (extChartAt (modelWithCornersSelf ℂ (Fin (genus X) → ℂ)) p.down).right_inv hz
     exact hz' ▸

@@ -81,7 +81,7 @@ theorem isCompactOperator_of_subtypeL_comp {E F : Type*}
   have hrange : IsClosed (Set.range (Subtype.val : p → F)) := by
     rw [Subtype.range_coe_subtype]; exact hp
   have key : (⇑(p.subtypeL.comp g)) '' V = Subtype.val '' (g '' V) := by
-    simp only [ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL', Submodule.coe_subtype,
+    simp only [ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL, Submodule.coe_subtype,
       Set.image_comp]
   have hcpt' : IsCompact ((Subtype.val : p → F) ⁻¹' closure (Subtype.val '' (g '' V))) := by
     rw [← key]; exact hind.isCompact_preimage hrange hcpt

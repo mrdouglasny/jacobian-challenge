@@ -263,7 +263,7 @@ private lemma sSup_innerShrunk_norm_sub_le_dist_bcf
       exact ⟨‖localRep (α - β) x₀ y‖, y, hy, rfl⟩
     · rintro _ ⟨y, hy, rfl⟩
       -- ‖localRep (α - β) x₀ y‖ = ‖bcf_α ⟨y, hy⟩ - bcf_β ⟨y, hy⟩‖ ≤ D.
-      show ‖localRep (α - β) x₀ y‖ ≤ D
+      change ‖localRep (α - β) x₀ y‖ ≤ D
       have h_sub : localRep (α - β) x₀ y = localRep α x₀ y - localRep β x₀ y := by
         have hsub : α - β = α + (-β) := by rw [sub_eq_add_neg]
         rw [hsub, localRep_add, localRep_neg]; ring
@@ -362,7 +362,7 @@ theorem cauchy_supNormK_of_bcf_tendsto
     le_trans h_bound (mul_le_mul_of_nonneg_left h_sup'_le hMnn)
   have h_step2 : M * δ < ε := by
     have h_sum : M * δ + δ = ε := by
-      show M * (ε / (M + 1)) + ε / (M + 1) = ε
+      change M * (ε / (M + 1)) + ε / (M + 1) = ε
       field_simp
     linarith
   exact lt_of_le_of_lt h_step1 h_step2

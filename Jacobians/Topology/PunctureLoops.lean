@@ -50,11 +50,11 @@ theorem mk_eq_refl_of_mem_isSimplyConnected {X : Type*} [TopologicalSpace X]
       continuous_toFun := by fun_prop
       source' := by
         apply Subtype.ext
-        show (L 0 : X) = x
+        change (L 0 : X) = x
         exact L.source
       target' := by
         apply Subtype.ext
-        show (L 1 : X) = x
+        change (L 1 : X) = x
         exact L.target } with hL'
   have h1 : Path.Homotopic.Quotient.mk L' = Path.Homotopic.Quotient.mk (Path.refl pt) :=
     Subsingleton.elim _ _
@@ -93,7 +93,7 @@ theorem pi1PuncturedPlaneIntAt_ofAdd_one (s : ℂ) (z : {w : ℂ // w ≠ s}) :
     ⟨⟨fun t ↦ twoPiI * (t : ℝ) + Complex.log (z.1 - s), by fun_prop⟩,
       by simp, by simp⟩ fun t ↦ ?_
   apply Subtype.ext
-  show (expAround s (twoPiI * (t : ℝ) + Complex.log (z.1 - s)) : ℂ)
+  change (expAround s (twoPiI * (t : ℝ) + Complex.log (z.1 - s)) : ℂ)
     = s + (z.1 - s) * Complex.exp (twoPiI * (t : ℝ))
   rw [expAround_coe, Complex.exp_add, hlog]
   ring
@@ -107,7 +107,7 @@ theorem fundamentalGroupMulEquivOfPath_fromPath {X : Type*} [TopologicalSpace X]
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ))
       = FundamentalGroup.fromPath
           (Path.Homotopic.Quotient.mk (α.symm.trans (γ.trans α))) := by
-  show ((Groupoid.isoEquivHom _ _).symm
+  change ((Groupoid.isoEquivHom _ _).symm
       (Path.Homotopic.Quotient.mk α : FundamentalGroupoid.mk x ⟶ FundamentalGroupoid.mk y)).conj
       (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ)) = _
   rw [Iso.conj_apply]
@@ -158,19 +158,19 @@ theorem fundamentalGroupMulEquivOfPath_pi1PuncturedPlaneIntAt (s : ℂ)
       intro u
       apply Subtype.ext
       rw [circleAround_coe]
-      show (expAround s (twoPiI * (u : ℝ) + Γ₁ 1) : ℂ)
+      change (expAround s (twoPiI * (u : ℝ) + Γ₁ 1) : ℂ)
         = s + ((z : ℂ) - s) * Complex.exp (twoPiI * (u : ℝ))
       rw [expAround_coe, Complex.exp_add, hexpend]
       ring
     have hthird : ∀ u : unitInterval, expAround s (Γ₃p u) = α u := by
       intro u
-      show expAround s (twoPiI + Γ₁ (unitInterval.symm u)) = α u
+      change expAround s (twoPiI + Γ₁ (unitInterval.symm u)) = α u
       rw [expAround_add_twoPiI, hΓ₁lifts]
       show α.symm (unitInterval.symm u) = α u
       simp [Path.symm_apply]
     refine pi1PuncturedPlaneIntOn_eq_fromPath s e₀' z' hze' 1 _
       ((Γ₁p.trans (Γ₂p.trans Γ₃p)).cast rfl (by rw [one_smul])) (fun t ↦ ?_)
-    show expAround s ((Γ₁p.trans (Γ₂p.trans Γ₃p)) t)
+    change expAround s ((Γ₁p.trans (Γ₂p.trans Γ₃p)) t)
       = (α.symm.trans ((circleAround s z).trans α)) t
     simp only [Path.trans_apply]
     split_ifs
@@ -202,7 +202,7 @@ theorem fromPath_conj_eq_one {X : Type*} [TopologicalSpace X] {x c : X}
   have h5 : Path.Homotopic.Quotient.mk (P.trans P.symm)
       = Path.Homotopic.Quotient.mk (Path.refl x) :=
     Quotient.sound ⟨(Path.Homotopy.reflTransSymm P).symm⟩
-  show FundamentalGroup.fromPath
+  change FundamentalGroup.fromPath
     (Path.Homotopic.Quotient.mk (P.trans (C.trans P.symm))) = 1
   rw [h1, hC, ← Path.Homotopic.Quotient.mk_trans, h3, ← Path.Homotopic.Quotient.mk_trans, h5]
   rfl
@@ -229,7 +229,7 @@ theorem windingHom_lasso_self {s : ℂ} (hs : s ∈ S)
     windingHom hs x₀ (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
         (P.trans ((circleInPunctured s z hcirc).trans P.symm))))
       = Multiplicative.ofAdd 1 := by
-  show (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
+  change (pi1PuncturedPlaneIntAt s (puncturedInclusion hs x₀)).symm
       (FundamentalGroup.mapOfEq (puncturedInclusion hs) rfl
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
           (P.trans ((circleInPunctured s z hcirc).trans P.symm)))))
@@ -297,7 +297,7 @@ theorem windingHom_lasso_ne {s s' : ℂ} (hs' : s' ∈ S)
       ext t
       rfl
     rwa [e1, e2] at h2
-  show (pi1PuncturedPlaneIntAt s' (puncturedInclusion hs' x₀)).symm
+  change (pi1PuncturedPlaneIntAt s' (puncturedInclusion hs' x₀)).symm
       (FundamentalGroup.mapOfEq (puncturedInclusion hs') rfl
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk
           (P.trans ((circleInPunctured s z hcirc).trans P.symm))))) = 1

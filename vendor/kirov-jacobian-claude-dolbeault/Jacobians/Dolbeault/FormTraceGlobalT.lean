@@ -305,7 +305,7 @@ theorem analyticOnNhd_remainder_of_junkFree {T : ℂ → ℂ} {m : ℕ} {cs : Fi
     have hmero : MeromorphicAt (T - L.R) (cs j) := hR_an.meromorphicAt.congr hR_eq.symm
     exact hmero.analyticAt (hcont j)
   · -- off the centres: `T` analytic minus `L.R` analytic.
-    push_neg at hzc
+    push Not at hzc
     exact (hT_off z hzc).sub (hLR_off z hzc)
 
 /-! ### The `hrecip` field: the remainder is holomorphic across `∞`

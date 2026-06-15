@@ -227,7 +227,7 @@ structure TestCocycleData (𝔇 : ChartDiskCover X) (E : Divisor X) (j₀ : 𝔇
 
 /-- The exact-order witness inhabits the test datum at every admissible level (`E b ≤ m`). -/
 theorem TestCocycleData.exists_of_witness (hwit : ExactOrderWitness 𝔇) {E : Divisor X}
-    {j₀ : 𝔇.toFiniteCover.ι} {b : X} (hb : b ∈ (𝔇.U j₀ : Set X)) {m : ℤ} (hmE : E b ≤ m) :
+    {j₀ : 𝔇.toFiniteCover.ι} {b : X} (hb : b ∈ (𝔇.U j₀ : Set X)) {m : ℤ} (_hmE : E b ≤ m) :
     Nonempty (TestCocycleData 𝔇 E j₀ b hb m) := by
   obtain ⟨γ, hmem, hord⟩ := hwit (E + Finsupp.single b (m - E b)) j₀ b hb
   refine ⟨⟨γ, hmem, ?_⟩⟩
@@ -649,7 +649,7 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
     have hxb' : x ≠ b := by simpa using hxb
     refine ⟨hx1, mem_offPos_iff.mpr ?_⟩
     by_contra hpos
-    push_neg at hpos
+    push Not at hpos
     exact hx2 (Finset.mem_erase.mpr ⟨hxb', mem_posSupp_iff.mpr hpos⟩)
   -- the ambient-chart meromorphy and EXACT order `−K b − 1` of the honest representative
   have hcmer : MeromorphicAt (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm)
@@ -667,7 +667,7 @@ theorem exists_slotProductSimplePoleAt (td : TestCocycleData 𝔇 E j₀ b hb m)
     rfl
   have hψtend : Tendsto (chartAt (H := ℂ) b).symm (𝓝[≠] ((chartAt (H := ℂ) b) b)) (𝓝[≠] b) := by
     have h := (chartAt (H := ℂ) b).symm.tendsto_nhdsNE (x := (chartAt (H := ℂ) b) b)
-      (by simpa using (chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b))
+      (by simp [(chartAt (H := ℂ) b).map_source (mem_chart_source ℂ b)])
     simpa [(chartAt (H := ℂ) b).left_inv (mem_chart_source ℂ b)] using h
   have hreadeq : (Gext F ∘ (chartAt (H := ℂ) b).symm)
       =ᶠ[𝓝[≠] ((chartAt (H := ℂ) b) b)] (Gext (td.cupRep f) ∘ (chartAt (H := ℂ) b).symm) :=

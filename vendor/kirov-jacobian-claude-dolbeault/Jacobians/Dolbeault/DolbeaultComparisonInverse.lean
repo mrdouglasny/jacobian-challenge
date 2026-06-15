@@ -638,7 +638,7 @@ theorem cechToDolbeaultForm_val (𝔇 : ChartDiskCover X)
   show ((∑ p : 𝔇.toFiniteCover.ι × 𝔇.toFiniteCover.ι,
       (⟨cechTerm 𝔇 f p.1 p.2, cechTerm_mem_zeroOne 𝔇 f p.1 p.2⟩ : ↥(OneFormsZeroOne X)) :
       ↥(OneFormsZeroOne X)) : SmoothCOneForms X) = _
-  rw [AddSubmonoidClass.coe_finset_sum]
+  rw [AddSubmonoidClass.coe_finsetSum]
 
 /-- Section-eval commutes with finite sums of `(0,1)`-forms (generic; applied by unification, so it
 never whnfs the heavy `cechTerm` body — avoiding the transparency-option `isDefEq` blowup). -/

@@ -145,15 +145,15 @@ theorem cechDelta1_comp_cechDelta0 : (𝔘.cechDelta1) ∘ₗ (𝔘.cechDelta0) 
 def sections0 : Submodule ℂ 𝔘.Cochain0 where
   carrier := {f | ∀ i, f i ∈ OmegaDGerm D (𝔘.U i)}
   add_mem' hf hg i := add_mem (hf i) (hg i)
-  zero_mem' i := Submodule.zero_mem _
-  smul_mem' c f hf i := Submodule.smul_mem _ c (hf i)
+  zero_mem' _i := Submodule.zero_mem _
+  smul_mem' c _f hf i := Submodule.smul_mem _ c (hf i)
 
 /-- 1-cochains that are `𝒪_D`-sections on each pairwise intersection. -/
 def sections1 : Submodule ℂ 𝔘.Cochain1 where
   carrier := {g | ∀ p, g p ∈ OmegaDGerm D (𝔘.U p.1 ⊓ 𝔘.U p.2)}
   add_mem' hf hg p := add_mem (hf p) (hg p)
-  zero_mem' p := Submodule.zero_mem _
-  smul_mem' c g hg p := Submodule.smul_mem _ c (hg p)
+  zero_mem' _p := Submodule.zero_mem _
+  smul_mem' c _g hg p := Submodule.smul_mem _ c (hg p)
 
 /-- The `𝒪_D` 1-cocycles: `ker δ¹` intersected with the `𝒪_D` sections. -/
 noncomputable def cocycles1 : Submodule ℂ 𝔘.Cochain1 :=

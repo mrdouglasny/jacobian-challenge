@@ -1,4 +1,4 @@
-/- 
+/-
 # Hyperelliptic curves
 
 Public wrapper for the hyperelliptic curve models.

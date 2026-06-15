@@ -323,9 +323,9 @@ theorem residueSum_eq_zero_ofBundleBranchCoherence (hac : AdaptedCover ω₀ g f
           ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (hΦinjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦinjReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (Φ b').xs)
-    (hΦrangeReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦrangeReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Set.range (Φ b').xs = f.toRiemannSphere ⁻¹' {(((b' : ℂ) : RiemannSphere))})
     (hsheetInjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (fun i => (Sreg z hz).sheet i (((b' : ℂ) : RiemannSphere))))
@@ -449,9 +449,9 @@ theorem hevBr_of_regularData (ω₀ : HolomorphicOneForms X) (g : X → ℂ) (f 
           ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (hΦinjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦinjReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (Φ b').xs)
-    (hΦrangeReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦrangeReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Set.range (Φ b').xs = f.toRiemannSphere ⁻¹' {(((b' : ℂ) : RiemannSphere))})
     (hsheetInjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (fun i => (Sreg z hz).sheet i (((b' : ℂ) : RiemannSphere))))
@@ -534,9 +534,9 @@ theorem residueSum_eq_zero_ofBundleBranchAgree (hac : AdaptedCover ω₀ g f pol
           ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (hΦinjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦinjReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (Φ b').xs)
-    (hΦrangeReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦrangeReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Set.range (Φ b').xs = f.toRiemannSphere ⁻¹' {(((b' : ℂ) : RiemannSphere))})
     (hsheetInjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (fun i => (Sreg z hz).sheet i (((b' : ℂ) : RiemannSphere))))

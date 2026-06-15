@@ -347,7 +347,7 @@ theorem developingValue_comp_of_isPullbackCoeffRel
   have hkey :=
     pathChartBallPrimitive_pullback_endpoint_sub_eq_on_path_segment
       hf hrel γ κ hκ (P i).1 (P i).2 huv hseg₁ hseg₂
-  show pathChartBallPrimitive formX (P i).1
+  change pathChartBallPrimitive formX (P i).1
         ((extChartAt 𝓘(ℂ) (P i).1.p) (γ (S.t i.succ))) -
       pathChartBallPrimitive formX (P i).1
         ((extChartAt 𝓘(ℂ) (P i).1.p) (γ (S.t i.castSucc))) =

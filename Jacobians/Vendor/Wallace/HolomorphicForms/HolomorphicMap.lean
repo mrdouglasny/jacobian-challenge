@@ -36,7 +36,6 @@ canonical chart `chartAt ℂ` on each side and Mathlib's
 set_option linter.style.longLine false
 set_option linter.style.show false
 set_option linter.style.emptyLine false
-set_option linter.flexible false
 set_option linter.unusedSectionVars false
 
 namespace Jacobians.Vendor.Wallace.HolomorphicForms
@@ -494,7 +493,7 @@ theorem mapAnalyticOrderAt_congr_of_maximalAtlas
       hβ_sub_an_F.analyticOrderAt_comp hF_an
     simpa [Function.comp_def, hF_at, hβ_order] using hcomp
   unfold mapAnalyticOrderAt analyticOrderNatAt
-  simp
+  simp only [chartLocalAt_chartAt_self]
   exact congrArg ENat.toNat (hpre.trans hpost)
 
 /-- Backwards-compatible name for the chart-independence theorem. -/

@@ -72,6 +72,7 @@ namespace BridgeForm
 
 open Jacobians.Vendor.Kirov.Montel
 
+omit [ConnectedSpace X] [IsManifold 𝓘(ℂ) ω X] in
 /-- Some chart in Kirov's finite inner-open cover contains `y`. -/
 private theorem exists_chartChoice [Nonempty X] (y : X) :
     ∃ x ∈ (chartCover : Finset X), y ∈ innerChartOpen (X := X) x := by
@@ -85,10 +86,12 @@ private theorem exists_chartChoice [Nonempty X] (y : X) :
 noncomputable def chartChoice [Nonempty X] (y : X) : X :=
   Classical.choose (exists_chartChoice (X := X) y)
 
+omit [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 theorem chartChoice_mem [Nonempty X] (y : X) :
     chartChoice (X := X) y ∈ (chartCover : Finset X) :=
   (Classical.choose_spec (exists_chartChoice (X := X) y)).1
 
+omit [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 theorem mem_innerChartOpen_chartChoice [Nonempty X] (y : X) :
     y ∈ innerChartOpen (X := X) (chartChoice (X := X) y) :=
   (Classical.choose_spec (exists_chartChoice (X := X) y)).2
@@ -99,6 +102,7 @@ noncomputable def rawCLM [Nonempty X] (form : HolomorphicOneForm X) (x y : X) :
   (form.coeff x ((extChartAt 𝓘(ℂ, ℂ) x) y)) •
     (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y)
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **Chart-swap lemma.** On the overlap of two chart sources, `rawCLM` is independent of
 which chart is used. This is the cocycle-coherence property that drives both the
 `bridgeForm` smoothness proof (locally swap to a fixed cover-chart) and the
@@ -126,7 +130,8 @@ theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X
     form.2.2.1 x x' z hz_tgt (by rw [hsymm]; exact hx'y)
   -- Substitute `(extChartAt x).symm z = y` inside the coefficient slot.
   rw [hsymm] at hcoc
-  -- Chain rule: `mfderiv (extChartAt x') y = (mfderiv (extChartAt x' ∘ (extChartAt x).symm) z) ∘L (mfderiv (extChartAt x) y)`.
+  -- Chain rule: `mfderiv (extChartAt x') y = (mfderiv (extChartAt x' ∘ (extChartAt x).symm) z)
+  -- ∘L (mfderiv (extChartAt x) y)`.
   -- Strictly: `extChartAt x' = (extChartAt x' ∘ (extChartAt x).symm) ∘ extChartAt x` near `y`.
   have hmdiff_x : MDifferentiableAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y := by
     apply mdifferentiableAt_extChartAt
@@ -140,11 +145,13 @@ theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X
     mdifferentiableWithinAt_extChartAt_symm hz_tgt
   -- For maps ℂ → ℂ, mfderiv = fderiv. We'll use this with the chart-transition.
   -- Key fact: a CLM `T : ℂ →L[ℂ] ℂ` equals `T 1 • id`, so
-  --   `fderiv (φ' ∘ φ⁻¹) z 1 • mfderiv (extChartAt x) y = mfderiv (extChartAt x' ∘ (extChartAt x).symm) z ∘L mfderiv (extChartAt x) y = mfderiv (extChartAt x') y`.
+  --   `fderiv (φ' ∘ φ⁻¹) z 1 • mfderiv (extChartAt x) y = mfderiv (extChartAt x' ∘ (extChartAt
+  -- x).symm) z ∘L mfderiv (extChartAt x) y = mfderiv (extChartAt x') y`.
   -- Step 1: identify the trans-derivative as multiplication by a scalar.
   -- The composition (extChartAt x' ∘ (extChartAt x).symm) is a map ℂ → ℂ; its mfderiv = fderiv.
   -- For a 1-dim ℂ-linear map T, T = T(1) • id_ℂ.
-  -- Step 2: rewrite `mfderiv (extChartAt x') y` via composition = transition ∘L mfderiv (extChartAt x) y.
+  -- Step 2: rewrite `mfderiv (extChartAt x') y` via composition = transition ∘L mfderiv
+  -- (extChartAt x) y.
   -- We use `extChartAt x' = (extChartAt x' ∘ (extChartAt x).symm) ∘ extChartAt x` LOCALLY near y,
   -- which gives the chain rule via `Filter.EventuallyEq.mfderiv_eq` + `mfderiv_comp`.
   -- The local equality holds because (extChartAt x).symm ∘ extChartAt x = id near y.
@@ -175,7 +182,8 @@ theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X
       exact this.comp z hsymm_mdiff
     exact hcomp
   -- Chain rule for `(transition) ∘ (extChartAt x)` at `y`:
-  --   mfderiv ((transition) ∘ (extChartAt x)) y = mfderiv (transition) z ∘L mfderiv (extChartAt x) y
+  --   mfderiv ((transition) ∘ (extChartAt x)) y = mfderiv (transition) z ∘L mfderiv
+  -- (extChartAt x) y
   -- since (extChartAt x) y = z.
   have hcomp_chain : mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ)
         (((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) ∘ (extChartAt 𝓘(ℂ, ℂ) x)) y =
@@ -209,7 +217,7 @@ theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X
   -- RHS = (fderiv ... z) (mfderiv ... y v).
   -- For T : ℂ →L[ℂ] ℂ and w : ℂ, T w = T 1 * w by ℂ-linearity.
   -- Both v's TangentSpace and the codomain TangentSpace at (extChartAt x) y are defeq to ℂ.
-  show (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z 1) •
+  change (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z 1) •
         (mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) v =
       (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) x') ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z)
         ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) x) y) v)
@@ -223,7 +231,7 @@ theorem rawCLM_swap_chart [Nonempty X] (form : HolomorphicOneForm X) {x x' y : X
     rw [ContinuousLinearMap.map_smul]
   rw [this]
   -- Goal: T 1 • w = w • T 1.  Both sides are products in ℂ; commute via smul_eq_mul + mul_comm.
-  show T 1 * w = w * T 1
+  change T 1 * w = w * T 1
   ring
 
 end BridgeForm
@@ -397,7 +405,8 @@ noncomputable def bridgeForm :
         -- as a stepping stone (always usable inside the final composition).
         have hChart : ContMDiffAt 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) ω (extChartAt 𝓘(ℂ, ℂ) y₀) y₀ :=
           contMDiffAt_extChartAt
-        -- `form.coeff y₀` is analytic on `(extChartAt y₀).target`; `(extChartAt y₀) y₀` is in target.
+        -- `form.coeff y₀` is analytic on `(extChartAt y₀).target`; `(extChartAt y₀) y₀` is in
+        -- target.
         have hCoeff_analyticAt : AnalyticAt ℂ (form.coeff y₀) ((extChartAt 𝓘(ℂ, ℂ) y₀) y₀) := by
           have h_an_on : AnalyticOn ℂ (form.coeff y₀) (extChartAt 𝓘(ℂ, ℂ) y₀).target :=
             form.2.1 y₀
@@ -458,7 +467,8 @@ noncomputable def bridgeForm :
         unfold BridgeForm.rawCLM
         -- Goal: form.coeff y₀ ((extChartAt y₀) y) * v = (c • mfderiv (extChartAt y₀) y) (symmL v)
         -- where c = form.coeff y₀ ((extChartAt y₀) y).
-        -- RHS = c • mfderiv (extChartAt y₀) y (symmL v) = c * (mfderiv (extChartAt y₀) y (symmL v)).
+        -- RHS = c • mfderiv (extChartAt y₀) y (symmL v) = c * (mfderiv (extChartAt y₀) y
+        -- (symmL v)).
         -- mfderiv (extChartAt y₀) y = (trivTS y₀).continuousLinearMapAt y, by
         -- TangentBundle.continuousLinearMapAt_trivializationAt (when y ∈ chart source y₀).
         -- We need y ∈ (chartAt y₀).source. This holds because hy_TS_X is the trivialization
@@ -470,7 +480,7 @@ noncomputable def bridgeForm :
             (trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).continuousLinearMapAt ℂ y :=
           (TangentBundle.continuousLinearMapAt_trivializationAt hy_chart).symm
         -- The CLM smul-apply: (c • T) v = c • T v. We use show to reorient.
-        show form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
+        change form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) •
             ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) y₀) y)
               ((trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) y₀).symmL ℂ y v)) =
           form.coeff y₀ ((extChartAt 𝓘(ℂ, ℂ) y₀) y) * v
@@ -595,9 +605,10 @@ theorem bridgeForm_injective :
   funext p z
   -- Unfold `coeff` to the underlying subtype coercion to match the cocycle/zero-off-target
   -- predicates' phrasing (they refer to `↑form` directly, which is `form.1 = form.coeff`).
-  show (form₁ : X → ℂ → ℂ) p z = (form₂ : X → ℂ → ℂ) p z
+  change (form₁ : X → ℂ → ℂ) p z = (form₂ : X → ℂ → ℂ) p z
   by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) p).target
-  · -- On-target: pull `coeff p z` back to `coeff q ((extChartAt q) q)` for `q := (extChartAt p).symm z`.
+  · -- On-target: pull `coeff p z` back to `coeff q ((extChartAt q) q)` for `q := (extChartAt
+  -- p).symm z`.
     set q : X := (extChartAt 𝓘(ℂ, ℂ) p).symm z with hq_def
     have hq_src : q ∈ (extChartAt 𝓘(ℂ, ℂ) q).source := mem_extChartAt_source q
     -- Apply the cocycle predicate: form_i.coeff p z = form_i.coeff q ((extChartAt q) q) * factor.

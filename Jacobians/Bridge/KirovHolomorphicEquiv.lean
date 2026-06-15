@@ -66,6 +66,7 @@ theorem sectionCoeff_holomorphic
       simp [extChartAt])
   simpa [extChartAt] using h
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 theorem chartTransitionFactor_eq_fderiv (x y q : X)
     (hqx : q ∈ (extChartAt 𝓘(ℂ, ℂ) x).source)
     (hqy : q ∈ (extChartAt 𝓘(ℂ, ℂ) y).source) :
@@ -209,7 +210,7 @@ noncomputable def inverseForm :
   map_add' α β := by
     apply HolomorphicOneForm.ext_of_coeff
     funext x z
-    show sectionCoeff (α + β) x z = (sectionCoeff α + sectionCoeff β) x z
+    change sectionCoeff (α + β) x z = (sectionCoeff α + sectionCoeff β) x z
     by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) x).target
     · rw [sectionCoeff_apply_of_mem (α + β) hz,
         Pi.add_apply, Pi.add_apply,
@@ -224,7 +225,7 @@ noncomputable def inverseForm :
   map_smul' c α := by
     apply HolomorphicOneForm.ext_of_coeff
     funext x z
-    show sectionCoeff (c • α) x z = (c • sectionCoeff α) x z
+    change sectionCoeff (c • α) x z = (c • sectionCoeff α) x z
     by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) x).target
     · rw [sectionCoeff_apply_of_mem (c • α) hz,
         Pi.smul_apply, Pi.smul_apply,
@@ -266,6 +267,7 @@ theorem bridgeForm_inverseForm
   rw [← hmfd, ← hcoe]
   exact htoFun.symm
 
+omit [Nonempty X] in
 theorem inverseForm_bridgeForm (form : HolomorphicOneForm X) :
     inverseForm (bridgeForm form) = form :=
   bridgeForm_injective (by rw [bridgeForm_inverseForm])

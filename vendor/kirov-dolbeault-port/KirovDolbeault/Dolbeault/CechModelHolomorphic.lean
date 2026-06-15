@@ -96,14 +96,17 @@ end HolomorphicDiskOverlapData
 noncomputable def montel_coverCenter (a : Fin ((chartCover : Finset X).card)) : X :=
   ((chartCover : Finset X).equivFin.symm a : X)
 
+omit [T2Space X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 theorem montel_coverCenter_mem (a : Fin ((chartCover : Finset X).card)) :
     montel_coverCenter (X := X) a ∈ (chartCover : Finset X) :=
   ((chartCover : Finset X).equivFin.symm a).2
 
+omit [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 theorem montel_chartOpen_subset_chartAt_source (x : X) (hx : x ∈ (chartCover : Finset X)) :
     chartOpen (X := X) x ⊆ (chartAt (H := ℂ) x).source :=
   (chartOpen_subset_shrunkChart x).trans (shrunkChart_subset_source x hx)
 
+omit [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 theorem montel_innerChartOpen_subset_chartOpen (x : X) :
     innerChartOpen (X := X) x ⊆ chartOpen (X := X) x := by
   intro y hy

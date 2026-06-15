@@ -215,7 +215,8 @@ theorem HolomorphicOneForms.exists_bcf_limit_of_cauchySeq
   exact cauchySeq_tendsto_of_complete hCSeq
 
 /-- The continuous linear map's value at α is `mkOfCompact (localRepOnInnerShrunk α x₀)`. -/
-theorem HolomorphicOneForms.embedInnerBcf_apply (x₀ : X) (α : Jacobians.Vendor.Kirov.HolomorphicOneForms X) :
+theorem HolomorphicOneForms.embedInnerBcf_apply (x₀ : X) (α :
+  Jacobians.Vendor.Kirov.HolomorphicOneForms X) :
     letI := innerShrunkChart_compactSpace (X := X) x₀
     letI := HolomorphicOneForms.normedAddCommGroup (X := X)
     letI := HolomorphicOneForms.normedSpace (X := X)
@@ -311,10 +312,10 @@ theorem HolomorphicOneForms.exists_convergent_subseq_of_bounded
     · apply csSup_le (hne.image _)
       rintro r ⟨y, hy, rfl⟩
       -- ‖localRep αLim x₀ y‖ = ‖L y (e.symmL ℂ y 1)‖ ≤ 1.
-      show ‖localRep αLim x₀ y‖ ≤ 1
+      change ‖localRep αLim x₀ y‖ ≤ 1
       set e := trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) x₀
       have heq : localRep αLim x₀ y = L y (e.symmL ℂ y 1) := by
-        show αLim.toFun y _ = _
+        change αLim.toFun y _ = _
         rw [hαLim_toFun]
       rw [heq]
       exact norm_limit_localRep_le_one (fun n => αs (φ n))
@@ -339,11 +340,11 @@ theorem HolomorphicOneForms.exists_convergent_subseq_of_bounded
       · apply csSup_le (hne.image _)
         rintro r ⟨y, hy, rfl⟩
         -- ‖localRep (αs (φ n) - αLim) x₀ y‖ ≤ ε/2
-        show ‖localRep (αs (φ n) - αLim) x₀ y‖ ≤ ε / 2
+        change ‖localRep (αs (φ n) - αLim) x₀ y‖ ≤ ε / 2
         set e := trivializationAt ℂ (TangentSpace 𝓘(ℂ, ℂ) (M := X)) x₀
         have h_sub_eq : localRep (αs (φ n) - αLim) x₀ y =
             localRep (αs (φ n)) x₀ y - L y (e.symmL ℂ y 1) := by
-          show (αs (φ n) - αLim).toFun y (e.symmL ℂ y 1) =
+          change (αs (φ n) - αLim).toFun y (e.symmL ℂ y 1) =
               (αs (φ n)).toFun y (e.symmL ℂ y 1) - L y (e.symmL ℂ y 1)
           have h_eq : (αs (φ n) - αLim).toFun y =
               (αs (φ n)).toFun y - αLim.toFun y :=

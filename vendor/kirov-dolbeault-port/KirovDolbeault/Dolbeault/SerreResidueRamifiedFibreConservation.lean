@@ -372,7 +372,7 @@ equal by the local constancy of the multiplicity sum on the connected sphere (th
 `exists_properMapDegree` engine), giving the natural-number equality. -/
 theorem sum_mult_eq_sheetCount_of_primitives {ω₀ : HolomorphicOneForms X} {g : X → ℂ}
     {f : MeromorphicFunction X} {c : ℂ} {Sset : Set ℂ} (hdiv : (f.div : Divisor X) ≠ 0)
-    (D : FibreRamifiedData g f c) (Cl : ∀ i, ClusterTraceData ω₀ g (D.xs i) c Sset)
+    (D : FibreRamifiedData g f c) (_Cl : ∀ i, ClusterTraceData ω₀ g (D.xs i) c Sset)
     {z : ℂ} (S : Jacobians.LocalSheetSystem f.toRiemannSphere (((z : ℂ) : RiemannSphere)))
     (hfin_z : (f.toRiemannSphere ⁻¹' {(((z : ℂ) : RiemannSphere))}).Finite)
     (hreg_z : ∀ x ∈ f.toRiemannSphere ⁻¹' {(((z : ℂ) : RiemannSphere))},
