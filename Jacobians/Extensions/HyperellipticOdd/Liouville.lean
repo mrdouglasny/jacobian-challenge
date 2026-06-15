@@ -1776,7 +1776,7 @@ theorem form_coeff_anti_invariance
       rw [h_invol_invol] at h_sum_zero
       rw [add_comm]
       exact h_sum_zero
-  have h_coeff_a : form.coeff (coe a) z = form.coeff (coe p) z := 
+  have h_coeff_a : form.coeff (coe a) z = form.coeff (coe p) z :=
     coeff_eq_of_projX_symm form a haY hz
   have ha_invol_Y : a.invol ∈ smoothLocusY H := by
     change a.invol.val.2 ≠ 0

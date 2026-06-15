@@ -60,7 +60,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 9** — all **9** in our own modules (the
+**Active project axioms: 8** — all **8** in our own modules (the
 **ELLIPTIC H₁ FLIP**, 2026-06-12 (EP lane, `feat/elliptic-pi1`):
 **`AX_Elliptic_H1_symplectic` is now DELETED — its statement is a proven
 theorem.** The covering-space engine `π₁(V ⧸ Λ) ≅ Λ` / `H₁(V ⧸ Λ) ≅ Λ`
@@ -514,7 +514,7 @@ primitives that are statement-vetted but not yet discharged.
 | 1 — textbook-standard | 5 | classical theorems, citable | high (`AX_torus_self_albanese`/`AX_period_functoriality`/`AX_curve_generates_jacobian` **RETIRED 2026-06-14 PR #253** — proved as theorems; `AX_torus_uniformization` (A1) added here but **OUT of every headline closure** via the presented-torus class reframe; `AX_torus_oneforms_dualCover`/`AX_AbelSupset`/`AX_genus_eq_zero_iff_homeo` discharged earlier) |
 | 2a — data-existence | 2 | "this function/object exists with spec S"; `AX_curve_image_subgroup_isOpen` (AK, local Jacobi inversion) added 2026-06-14 PR #253, gates `ofCurve_isJacobian`; the 2 `LineBundle` type stubs **DISCHARGED 2026-06-12** (now real `def`s) | spec needs review |
 | 2b — definition-asserting | 0 | both functoriality entries **DISCHARGED 2026-06-11 (#31)** (now theorems) | — |
-| 2c — atlas / structure | 2 | curve-specific chart constructions | real but unverified |
+| 2c — atlas / structure | 1 | curve-specific chart construction (`AX_Hyperelliptic_genus` discharged 2026-06-15 PR #223) | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
 | 3 — Layer-3 cohomology (#126) | 0 | `h1coh_zero_finrank`+`serreDuality_equiv` **DISCHARGED 2026-06-11 (keystone flip)** — statements verbatim, now theorems via the FlipPrep composition over the T-lane frame-trace wall; the keystone-gating sorry `exists_serreDualityData` is GONE (replaced by the proven ∃-cover `exists_serreDualityData_cover`); `canonicalDivisor` de-opaqued to the chosen Serre divisor in the same commit. (`H1coh`(+3 instances) and `cohomologyLES` were already discharged 2026-06-10.) | — |
 | 3 — Layer-3 period primitives (Phase C) | 0 | `Layer3.AX_RBR1` + `Layer3.AX_RBR2` **MERGED 2026-06-10 (D1)** into `AX_PeriodCycleBasis` (Class 1) as its arc-level `R1`/`R2` fields — the bundle is self-guarding, dissolving the global-choice trap their basis-quantified form needed the `symplectic` field for | — |
@@ -591,7 +591,7 @@ remains here is their **atlas/manifold** instances + the genus formula.
 
 | Cluster | File:Lines | Count |
 |---------|-----------|------:|
-| `AX_Hyperelliptic_genus` only (type + `instTopologicalSpace`/`instChartedSpace`/`instIsManifold` + `oddEquiv`/`evenEquiv` discharged Phase-3; genus needs biholo, not just homeo) | `ProjectiveCurve/Hyperelliptic.lean` | 1 |
+| `AX_Hyperelliptic_genus` ✅ **DISCHARGED 2026-06-15 PR #223 (@daouid)** — parity-dispatch; the odd one-form representation fully proved (`AX_HyperellipticOddOneForm_eq_form_proof`), genus now standard-3 (atlas instances already discharged) | `ProjectiveCurve/Hyperelliptic.lean` | 0 |
 | `PlaneCurve`: 1 affine prop `AX_PlaneCurveAffine_connected` only (type/`instTopologicalSpace`/`instT2Space`/`instCompactSpace`/`instNonempty`/`instConnectedSpace` all proved; **`instChartedSpace` discharged #117**, **`instIsManifold` DISCHARGED #52 PR-4 (2026-06-10)** — diagonal + `chartAt_compat` assembly over the #117 atlas, `#print axioms` standard-3; affine `nonempty`/`noncompact` proved) | `ProjectiveCurve/PlaneCurve.lean` | 1 |
 | Odd-atlas infinity chart (`infinityChart`, `infinityInverseMap`, 4 compat, `mem_source`) — ✅ **all 7 DISCHARGED 2026-06-11 (PR #183, @daouid)** with the correct analytic branch `y := z·x^(g+1)` (Step-5 route; the Phase-3 arbitrary-root revert is superseded); standard-3, and `Hyperelliptic.instChartedSpace`/`instIsManifold` are now standard-3 too | `…/OddAtlas/InfinityChart.lean`, `…/OddAtlas/InfinityInverse.lean` | 0 |
 | Even-atlas compatibility (`affineLiftChart_compat_…`, `…_compat_…`) — ✅ **DISCHARGED** (#109, 2026-06-07; now `theorem`s in-file) | `…/Hyperelliptic/EvenAtlas.lean` | 0 |
@@ -711,7 +711,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 9 — the vendored Kirov subtree is now axiom-free, so 9 is the total (after the 2026-06-12 TORUS-lane axiom-1 flip, net −1: AX_torus_oneforms_dualCover → noncomputable def LinearEquiv.refl, off the Buzzard critical path; before that the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
+#   prints 8 — the vendored Kirov subtree is now axiom-free, so 8 is the total (2026-06-15 PR #223: `AX_Hyperelliptic_genus` discharged, net −1) (after the 2026-06-12 TORUS-lane axiom-1 flip, net −1: AX_torus_oneforms_dualCover → noncomputable def LinearEquiv.refl, off the Buzzard critical path; before that the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -728,7 +728,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 9
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 8
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l
