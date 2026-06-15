@@ -930,11 +930,82 @@ canonical hyperelliptic form `hyperellipticOddForm H g`.
    → extracts polynomial `g` with `g.natDegree ≤ (d-1)/2 - 1`
 4. Degree arithmetic: `≤ (d-1)/2 - 1` implies `< (d-1)/2`
 5. Form equality via readout (Part H) + chart coverage -/
+theorem hyperellipticOddForm_coeff_projX_apply
+    (g : Polynomial ℂ) (hDeg : g.natDegree < (H.f.natDegree - 1) / 2)
+    (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
+    {z : ℂ} (hz : z ∈ (affineChartProjX a hpY).target) :
+    (hyperellipticOddForm H g).coeff (coe a : HyperellipticOdd H Fact.out) z =
+      g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
+  rw [hyperellipticOddForm_coeff_of_lt H hDeg]
+  unfold hyperellipticOddCoeff
+  change HyperellipticAffine.hyperellipticAffineCoeff g a z = _
+  unfold HyperellipticAffine.hyperellipticAffineCoeff
+  rw [dif_pos hpY]
+  unfold affineProjXCoeff
+  rw [if_pos hz]
+
+theorem oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out))
+    (g : Polynomial ℂ)
+    (hCoeff : ∀ q : HyperellipticOdd H Fact.out, ∀ z : ℂ,
+      z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target →
+        form.coeff q z = (hyperellipticOddForm H g).coeff q z) :
+    form = hyperellipticOddForm H g := by
+  apply HolomorphicOneForm.ext_of_coeff
+  funext q z
+  by_cases hz : z ∈ (extChartAt 𝓘(ℂ, ℂ) q).target
+  · exact hCoeff q z hz
+  · change (form : HyperellipticOdd H Fact.out → ℂ → ℂ) q z =
+      (hyperellipticOddForm H g : HyperellipticOdd H Fact.out → ℂ → ℂ) q z
+    rw [form.2.2.2 q z hz, (hyperellipticOddForm H g).2.2.2 q z hz]
+
 theorem AX_HyperellipticOddOneForm_eq_form_proof
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     ∃ g : Polynomial ℂ, g.natDegree < (H.f.natDegree - 1) / 2 ∧
       form = hyperellipticOddForm H g := by
-  sorry
+  classical
+  obtain ⟨R, hR, hBound⟩ := liouvilleRemovableNumerator_eventually_norm_div_pow_le (H := H) form
+  obtain ⟨C, hC⟩ :=
+    Jacobians.Axioms.HyperellipticLiouville.polynomial_growth_bound_of_eventually_norm_div_pow_le
+      (liouvilleRemovableNumerator form)
+      ((H.f.natDegree - 1) / 2 - 1) R hR
+      (liouvilleRemovableNumerator_differentiable form).continuous
+      hBound
+  obtain ⟨g, hgDeg, hgEval⟩ :=
+    Jacobians.GeneralResults.differentiable_eq_polynomial_of_growth
+      ((H.f.natDegree - 1) / 2 - 1)
+      (liouvilleRemovableNumerator form)
+      (liouvilleRemovableNumerator_differentiable form)
+      C hC
+  have hDeg : g.natDegree < (H.f.natDegree - 1) / 2 := by
+    have h_deg_ge : 3 ≤ H.f.natDegree := H.h_degree
+    omega
+  refine ⟨g, hDeg, ?_⟩
+  refine oneForm_eq_hyperellipticOddForm_of_eqOn_chartTarget form g ?_
+  intro q z hz
+  rcases q with _ | a
+  · sorry
+  · by_cases hpY : a ∈ smoothLocusY H
+    · have hExt : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).target =
+          (affineChartProjX a hpY).target := by
+        rw [extChartAt_target]
+        simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id_eq,
+          Set.range_id, Set.inter_univ]
+        rw [chartAt_coe a]
+        unfold affineLiftChart
+        rw [OpenPartialHomeomorph.lift_openEmbedding_target]
+        change (HyperellipticAffine.affineChartAt a : OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target = (affineChartProjX a hpY).target
+        rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
+      have hzX : z ∈ (affineChartProjX a hpY).target := by
+        rwa [← hExt]
+      have hFormCoeff : form.coeff (coe a) z = g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
+        rw [← hgEval z]
+        exact liouvilleRemovableNumerator_readout form a hpY hzX
+      have hCanCoeff : (hyperellipticOddForm H g).coeff (coe a) z = g.eval z / (squareLocalHomeomorph a hpY).symm (H.f.eval z) := by
+        exact hyperellipticOddForm_coeff_projX_apply g hDeg a hpY hzX
+      change form.coeff (coe a) z = (hyperellipticOddForm H g).coeff (coe a) z
+      rw [hFormCoeff, hCanCoeff]
+    · sorry
 
 end Jacobians.Extensions.HyperellipticOdd
 
