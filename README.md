@@ -425,6 +425,19 @@ This complements the in-repo CI gate: CI catches axiom/`sorry` drift on every
 push; the comparator gives an independent, kernel-level certificate at a pinned
 commit.
 
+### lean-eval leaderboard
+
+The solution is also submitted to the Lean FRO
+**[lean-eval](https://leanprover.github.io/lean-eval-leaderboard/)** benchmark
+`jacobian_challenge_diffgeo` — an independent CI that fetches the source, builds
+it, and replays the headline theorems through the kernel against a whitelisted
+axiom set. The exact evaluated source is pinned at the immutable tag
+**[`lean-eval-submission`](https://github.com/mrdouglasny/jacobian-challenge/tree/lean-eval-submission)**
+(commit `2248fdf`): a self-contained, vendored workspace under
+`submission/jacobian_challenge_diffgeo/` that builds clean against Mathlib
+`v4.30.0` (Lean `v4.30.0`), with the 11 Buzzard property theorems depending only
+on the standard three Lean axioms.
+
 ## Repository map
 
 | Path | Contents |
@@ -445,8 +458,9 @@ commit.
 ## Further reading
 
 - [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — kernel-verified per-axiom audit.
-- [`docs/VERIFICATION.md`](docs/VERIFICATION.md) — informal↔formal map of every
-  object + the axiom certificate (*"did we build it right"*).
+- [`docs/FAITHFULNESS.md`](docs/FAITHFULNESS.md) — the informal↔formal
+  correspondence for every object (*"do the statements mean the mathematics"* —
+  the faithfulness layer of validation).
 - [`docs/VALIDATION.md`](docs/VALIDATION.md) — the acceptance argument: definition
   + anti-vacuity subset + universal property (*"did we build the right thing"*).
 - [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace.

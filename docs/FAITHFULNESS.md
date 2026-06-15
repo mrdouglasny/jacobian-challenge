@@ -1,11 +1,22 @@
-# VERIFICATION — informal ↔ formal, with validating statements
+# FAITHFULNESS — the informal ↔ formal correspondence
 
-A self-contained certificate that the Lean formalization captures the construction of the
-Jacobian of a compact Riemann surface. For each **primary object** we give the informal
-definition and its exact Lean form; for each **validating statement** we give the informal
-claim, the Lean theorem, a one-line proof idea, and status. This is the *"did we build it
-right / are the formal statements faithful"* document; for *"did we build the right thing"*
-(acceptance argument, categoricity), see [`VALIDATION.md`](VALIDATION.md).
+A self-contained certificate that the Lean formalization *faithfully transcribes* the
+construction of the Jacobian of a compact Riemann surface. For each **primary object** we
+give the informal definition and its exact Lean form; for each **headline statement** we
+give the informal claim, the Lean theorem, a one-line proof idea, and status.
+
+This is the **faithfulness** layer of *validation* — *"do the formal statements mean what
+the mathematics means"*. The two adjacent concerns live elsewhere:
+**verification** — *"are the proofs valid relative to explicit assumptions"* — is the kernel
+check (`lake build`) plus the axiom certificate in
+[`axiom-report.txt`](axiom-report.txt) / [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md); and the
+**characterization / acceptance** argument — *"did we build the right thing"*, up to
+categoricity — is in [`VALIDATION.md`](VALIDATION.md).
+
+*(Terminology: this document was formerly titled `VERIFICATION.md`. Under the standard
+V&V split, the informal↔formal correspondence is a* validation *activity — it concerns
+meaning, not proof-validity — so "verification" is reserved here for the kernel/axiom
+check.)*
 
 **Status legend:** ✓ = proved and `lake build` succeeds. Axiom-clean items have
 `#print axioms` = `[propext, Classical.choice, Quot.sound]` (no `sorryAx`); items marked
