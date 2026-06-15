@@ -41,6 +41,7 @@ open Jacobians.ProjectiveCurve
 open Jacobians.ProjectiveCurve.HyperellipticAffine
 open Jacobians.ProjectiveCurve.HyperellipticOdd
 open Jacobians.Axioms
+open Filter
 
 variable {H : HyperellipticData} [Fact (Odd H.f.natDegree)]
 
@@ -2054,6 +2055,7 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
 lemma tendsto_coeff_coe_cocompact (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     Filter.Tendsto (fun z : ℂ => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z)
       (Filter.cocompact ℂ) (𝓝 0) := by
+  rw [tendsto_zero_iff_norm_tendsto_zero]
   obtain ⟨R, hR_nonneg, h_bound⟩ := liouvilleRemovableNumerator_eventually_norm_div_pow_le form
   have h_squeeze : ∀ᶠ z : ℂ in Filter.cocompact ℂ,
       ‖form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z‖ ≤
@@ -2086,7 +2088,7 @@ lemma tendsto_coeff_coe_cocompact (form : HolomorphicOneForm (HyperellipticOdd H
     have h_lim_zero := tendsto_pow_div_chosen_point_snd (H := H)
     have h_lim_norm := h_lim_zero.norm
     have h_mul := h_lim_norm.const_mul R
-    rw [mul_zero] at h_mul
+    rw [norm_zero, mul_zero] at h_mul
     exact h_mul
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_lim
     (Filter.eventually_of_mem Filter.univ_mem (fun z _ => norm_nonneg _)) h_squeeze
@@ -2118,6 +2120,7 @@ lemma liouvilleTwoSheetSumRemovable_tendsto_cocompact
         have h_fst := liouvilleChosenAffinePoint_fst (H := H) z
         have h_src := affineChartProjX_mem_source a haY
         have h_map := (affineChartProjX a haY).map_source h_src
+        change a.val.1 ∈ (affineChartProjX a haY).target at h_map
         rwa [h_fst] at h_map
       have h_symm_z : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe a := by
         have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) =
@@ -2153,17 +2156,18 @@ theorem liouvilleTwoSheetSumRemovable_eq_zero
   have h_lim := liouvilleTwoSheetSumRemovable_tendsto_cocompact form
   obtain ⟨C, h_bounded_all⟩ : ∃ C : ℝ, ∀ z : ℂ, ‖liouvilleTwoSheetSumRemovable form z‖ ≤ C := by
     obtain ⟨K, hK_compact, hK_bound⟩ :=
-      (hasBasis_cocompact.tendsto_iff (nhds_basis_closedBall 0)).mp h_lim 1 (by norm_num)
+      (hasBasis_cocompact.tendsto_iff Metric.nhds_basis_closedBall).mp h_lim 1 (by norm_num)
     have h_cont := h_diff.continuous
-    have h_norm_cont : Continuous (fun z => ‖liouvilleTwoSheetSumRemovable form z‖) := by
-      exact continuous_norm.comp h_cont
-    obtain ⟨M, hM_bound⟩ := hK_compact.exists_bound_of_continuousOn h_norm_cont.continuousOn
+    obtain ⟨M, hM_bound⟩ := hK_compact.exists_bound_of_continuousOn h_cont.continuousOn
     use max M 1
     intro z
     by_cases hzK : z ∈ K
     · exact le_trans (hM_bound z hzK) (le_max_left M 1)
-    · exact le_trans (hK_bound z hzK) (le_max_right M 1)
-  obtain ⟨p, hp_deg, hp_eval⟩ := differentiable_eq_polynomial_of_growth 0 (liouvilleTwoSheetSumRemovable form) h_diff C h_bounded_all
+    · have h_mem := hK_bound z hzK
+      rw [Metric.mem_closedBall, dist_zero_right] at h_mem
+      exact le_trans h_mem (le_max_right M 1)
+  obtain ⟨p, hp_deg, hp_eval⟩ := Jacobians.GeneralResults.differentiable_eq_polynomial_of_growth 0
+    (liouvilleTwoSheetSumRemovable form) h_diff C (fun z => by rw [pow_zero, mul_one]; exact h_bounded_all z)
   have hp_C : ∃ c : ℂ, p = Polynomial.C c := by
     use p.coeff 0
     ext i
