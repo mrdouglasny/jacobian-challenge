@@ -132,3 +132,20 @@ missing differential geometry.
 **Recommendation:** adopt the escape hatch for the headline now (a statement reframe + presentation
 parameter — owner decision, since it changes the headline's universal-property signature), and treat
 `AX_torus_exp` + deduction as the quarantined generality file (the §"deduction" plan above is its spec).
+
+### ✅ STATUS: escape hatch LANDED 2026-06-14 (commit `bc3a115`)
+`TorusSelfAlbanesePresentation` is now a `class`; the universal property + categoricity theorems
+thread it as a typeclass parameter `[TorusSelfAlbanesePresentation m A]` (no global instance, so the
+axiom stays out of the closure). Machine-verified: `isJacobian_unique` = std-3 (**axiom-free**);
+`ofCurve_isJacobian` / `isJacobian_iso_jacobian` = std-3 + AK only. `AX_torus_uniformization` is out
+of every headline closure. Full build 9011 jobs.
+
+**Remaining (optional, for the strongest result):**
+- **AK→0** — the ~25-decl Kirov port (`ALBANESE_REPOINT_REFACTOR.md`) ⇒ `ofCurve_isJacobian` /
+  `isJacobian_iso_jacobian` fully axiom-free.
+- **Abstract-`A` generality (quarantined)** — `AbstractTorusUniformization.lean` with `AX_torus_exp`
+  + the deduction above (or, per deep-think, `AX_torus_exp` is the minimal axiom there) builds a
+  `TorusSelfAlbanesePresentation` instance for an abstract torus, recovering abstract categoricity.
+- **Concrete `Jacobian X` presentation** — to make `isJacobian_iso_jacobian` *unconditional* (it now
+  takes `[TorusSelfAlbanesePresentation (genus X) (Jacobian X)]` as a hypothesis), build that instance
+  concretely from the period lattice (axiom-free; the ℂ^g/Λ self-Albanese identity).
