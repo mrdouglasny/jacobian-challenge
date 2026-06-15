@@ -84,6 +84,30 @@ loop's period to `f∘loop`'s period; the self-Albanese identity of A1 puts a to
 loop period in `Λ_A`); it remains the analytic residual. -/
 
 open Jacobians.Axioms in
+/-- **Reduction step.** The dual pullback of a period *vector* equals the Albanese
+coordinate of the pulled-back period *functional*: `torusAmbientLinear` shares the
+`evalEquiv.symm ∘ (dualCover.symm).dualMap` tail with
+`torusAlbaneseCoordinateOfFunctional`, and the basis-coordinate equiv `eX` cancels
+its own inverse on `periodMap X x₀ h`. Reduces the bridge to a statement purely
+about the pulled-back period functional. -/
+theorem torusAmbientLinear_periodMapInBasis_eq {X : Type*} [TopologicalSpace X]
+    [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
+    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
+    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f)
+    (h : H1 X (Classical.arbitrary X)) :
+    torusAmbientLinear f hf
+        (periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) h) =
+      torusAlbaneseCoordinateOfFunctional (A := A)
+        ((torusPullbackOneForm f hf).dualMap
+          (periodMap X (Classical.arbitrary X) h)) := by
+  unfold torusAmbientLinear torusAlbaneseCoordinateOfFunctional periodMapInBasis
+  simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+    LinearMap.restrictScalars_apply, AddMonoidHom.coe_toIntLinearMap,
+    LinearEquiv.symm_apply_apply]
+
+open Jacobians.Axioms in
 /-- The analytic bridge for G3 (residual): the dual pullback of a source period
 class lands in the target lattice. By `torusPullback_pathIntegral_naturality`
 (`∮_{f∘γ}ω = ∮_γ f*ω`) the image is the period of a loop `f∘γ` in `A`, and A1's
@@ -97,6 +121,13 @@ theorem torusAmbientLinear_periodMapInBasis_mem {X : Type*} [TopologicalSpace X]
     torusAmbientLinear f hf
         (periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) h) ∈
       (torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice := by
+  rw [torusAmbientLinear_periodMapInBasis_eq]
+  -- Residual: `torusAlbaneseCoordinateOfFunctional ((torusPullbackOneForm f hf).dualMap
+  --   (periodMap X x₀ h)) ∈ Λ_A`.  Split:
+  --   R1 (developing-map H₁-naturality): `(periodMap h) (f* ell) = torusLineIntegral ell γ_A`
+  --       for a loop `γ_A : ℝ → A` representing `f∘(loop for h)` (translated to base `0`);
+  --   R2 (self-Albanese loop period): `coord` of a torus loop-period functional ∈ Λ_A,
+  --       from `liftCoord_eq_albanese` with `γ = const 0`.
   sorry
 
 open Jacobians.Axioms in
