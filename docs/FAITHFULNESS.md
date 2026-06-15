@@ -158,15 +158,14 @@ axioms** `[propext, Classical.choice, Quot.sound]` — machine-checked in
 occurrences of `AX_PeriodCycleBasis`). `scripts/check_axiom_consistency.sh` pins the kernel axiom
 count at **10**.
 
-The 10 declared project axioms are all **off the Buzzard headline path** (none appears in any
+The 9 declared project axioms are all **off the Buzzard headline path** (none appears in any
 headline closure):
 
 | Axiom | File | Group | Role |
 |---|---|---|---|
 | `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean` | period / Hodge | **discharged from all headlines** (T-GEN); kept only as R1/R2 (Riemann bilinear relations) scaffolding + cycle-basis witnesses. Deleting it needs general R1/R2 (proved so far for `g ≤ 1` / ell / hyperell). |
-| `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` (the universal-property certificate, beyond the 24) — holomorphic torus self-maps are affine (Liouville on the cover) |
-| `AX_period_functoriality` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` — period naturality |
-| `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` — the image of `ofCurve` generates `J(X)` |
+| `AX_curve_image_subgroup_isOpen` (AK) | `Axioms/AlbaneseInterface.lean` | Albanese | the **only** axiom under `ofCurve_isJacobian` (closure = std-3 + AK) — local Jacobi inversion: the Abel–Jacobi image has non-empty interior. G2/G3/G4 (incl. `period_functoriality`) are now **theorems**; the 3 legacy torus axioms were retired in PR #253. |
+| `AX_torus_uniformization` (A1) | `Axioms/AlbaneseInterface.lean` | Albanese | **declared but OUT of every headline closure** (presented-torus class reframe, PR #253) — the optional abstract-torus supplier; not relied on by `ofCurve_isJacobian` / `isJacobian_unique` / `isJacobian_iso_jacobian` |
 | `intersectionForm` | `Axioms/IntersectionForm.lean` | polarization | the symplectic form on `H₁`; dropped from every headline closure (D2) — kept for the principal-polarization story |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |
