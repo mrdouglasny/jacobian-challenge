@@ -1,6 +1,8 @@
 import Jacobians.Axioms.AbelTheorem
 import Jacobians.RiemannSurface.DegreeOneGenusZero
 
+universe u
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology

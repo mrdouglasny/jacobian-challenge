@@ -73,6 +73,8 @@ import Jacobians.Bridge.KirovDolbeaultTrace
 import Jacobians.Bridge.KirovDolbeaultLattice
 import Jacobians.Vendor.Kirov.ZLatticeQuotient
 
+universe u v w
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology

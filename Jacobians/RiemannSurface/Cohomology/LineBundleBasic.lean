@@ -10,6 +10,8 @@ construction), so the verbatim Layer-3 `serreDuality_equiv` statement is its
 import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Jacobians.Layer3.FlipPrep
 
+universe u
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology

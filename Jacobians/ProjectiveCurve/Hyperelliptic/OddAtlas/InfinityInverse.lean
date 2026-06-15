@@ -7,6 +7,7 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 namespace Jacobians.ProjectiveCurve.HyperellipticOdd.InfinityInverse
 
 open Polynomial
+open scoped ContDiff
 
 variable {H : HyperellipticData}
 

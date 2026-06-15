@@ -17,6 +17,8 @@ without importing the Abel-theorem statement file — which now imports
 THEM to prove the ⊆ direction.
 -/
 
+universe u
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology

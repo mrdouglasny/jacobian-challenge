@@ -45,6 +45,8 @@ open Jacobians.RiemannSurface
 open Jacobians.Axioms
 open Jacobians.AbelianVariety
 
+universe u v
+
 /-! ### Generic ULift transfer helpers -/
 
 section ULiftTransfer

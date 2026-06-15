@@ -48,6 +48,8 @@ reproven from T-GEN, which is the PL-lane discharge, not an `_of_tgen`
 rewiring at the consumer.
 -/
 
+universe u
+
 namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology ContDiff
