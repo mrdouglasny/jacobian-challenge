@@ -104,7 +104,7 @@ noncomputable def liouvilleTwoSheetSumRemovable
 /-- Helper lemma: local chart coefficients on smooth-Y are independent of center. -/
 theorem extChartAt_symm_coe_of_mem_smoothLocusY
     (a : HyperellipticAffine H) (hpY : a ∈ smoothLocusY H)
-    {z : ℂ} (hz : z ∈ (affineChartProjX (H := H) a hpY).target) :
+    (z : ℂ) :
     (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z =
       coe ((affineChartProjX (H := H) a hpY).symm z : HyperellipticAffine H) := by
   have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) =
@@ -113,7 +113,8 @@ theorem extChartAt_symm_coe_of_mem_smoothLocusY
   change (affineLiftChart a).symm z = coe ((affineChartProjX (H := H) a hpY).symm z)
   unfold affineLiftChart
   rw [OpenPartialHomeomorph.lift_openEmbedding_symm]
-  change coe ((HyperellipticAffine.affineChartAt a).symm z) = coe ((affineChartProjX (H := H) a hpY).symm z)
+  change coe ((HyperellipticAffine.affineChartAt a).symm z) =
+      coe ((affineChartProjX (H := H) a hpY).symm z)
   rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
 
 theorem coeff_eq_of_projX_symm
@@ -135,7 +136,7 @@ theorem coeff_eq_of_projX_symm
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
     exact hz
   have hp_eq : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe p := by
-    exact extChartAt_symm_coe_of_mem_smoothLocusY a hpY hz
+    exact extChartAt_symm_coe_of_mem_smoothLocusY a hpY z
   have hp_val_1 : p.val.1 = z := by
     exact affineChartProjX_symm_apply_fst a hpY hz
   have hpYp : p ∈ smoothLocusY H := by
@@ -230,7 +231,8 @@ theorem coeff_eq_liouvilleProjYNumerator_div_of_branch
     let a : HyperellipticAffine H := (HyperellipticAffine.affineChartProjY (H := H) p hpX).symm w
     form.coeff (coe a : HyperellipticOdd H Fact.out) a.val.1 =
       (form.coeff (coe p : HyperellipticOdd H Fact.out) w *
-        (H.f.derivative.eval ((polynomialLocalHomeomorph (H := H) p hpX).symm (w ^ 2)) / 2)) / w := by
+        (H.f.derivative.eval
+          ((polynomialLocalHomeomorph (H := H) p hpX).symm (w ^ 2)) / 2)) / w := by
   classical
   intro a
   let q : HyperellipticOdd H Fact.out := coe p
@@ -238,11 +240,13 @@ theorem coeff_eq_liouvilleProjYNumerator_div_of_branch
   let c := affineLiftChart (h := Fact.out) p
   let cA := affineLiftChart (h := Fact.out) a
   have hpX_eq : hpX = mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn) := rfl
-  have hw_new : w ∈ (HyperellipticAffine.affineChartProjY (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).target := by
+  have hw_new : w ∈ (HyperellipticAffine.affineChartProjY (H := H) p
+    (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).target := by
     rw [← hpX_eq]; exact hw
   have haY : a ∈ smoothLocusY H := by
-    show a.val.2 ≠ 0
-    have hsnd := HyperellipticAffine.affineChartProjY_symm_apply_snd (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn)) hw_new
+    change a.val.2 ≠ 0
+    have hsnd := HyperellipticAffine.affineChartProjY_symm_apply_snd (H := H) p
+      (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn)) hw_new
     simpa [a, hsnd] using hwne
   have haSrc : a ∈ (affineChartProjX (H := H) a haY).source :=
     affineChartProjX_mem_source (H := H) a haY
@@ -264,7 +268,8 @@ theorem coeff_eq_liouvilleProjYNumerator_div_of_branch
   have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target =
       (HyperellipticAffine.affineChartProjY (H := H) p hpX).target := by
     rw [extChartAt_target]
-    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id, Set.range_id, Set.inter_univ]
+    simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+      Set.preimage_id, Set.range_id, Set.inter_univ]
     rw [hChQ]
     change (affineLiftChart p).target = _
     unfold affineLiftChart
@@ -292,7 +297,8 @@ theorem coeff_eq_liouvilleProjYNumerator_div_of_branch
   have hCoord : (extChartAt 𝓘(ℂ, ℂ) qA)
       ((extChartAt 𝓘(ℂ, ℂ) q).symm w) = a.val.1 := by
     rw [hExtCoeA, hExtSymm, hBranchSymm]
-    change ((ChartedSpace.chartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe) (OnePoint.some a) = a.val.1
+    change ((ChartedSpace.chartAt a).lift_openEmbedding OnePoint.isOpenEmbedding_coe)
+      (OnePoint.some a) = a.val.1
     rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
     change (HyperellipticAffine.affineChartAt a) a = a.val.1
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a haY]
@@ -312,22 +318,27 @@ theorem coeff_eq_liouvilleProjYNumerator_div_of_branch
     rw [hpX_eq]
     refine Filter.eventually_of_mem ((c.symm.trans cA).open_source.mem_nhds hOverlap) ?_
     intro t ht
-    have htTarget : t ∈ (HyperellipticAffine.affineChartProjY (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).target := by
+    have htTarget : t ∈ (HyperellipticAffine.affineChartProjY (H := H) p
+      (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).target := by
       have : t ∈ c.target := ht.1
       change t ∈ (ChartedSpace.chartAt p).target at this
       change t ∈ (HyperellipticAffine.affineChartAt p).target at this
       rw [HyperellipticAffine.affineChartAt_of_not_mem_smoothLocusY p hpYn] at this
       exact this
     change (c.symm.trans cA) t =
-      (polynomialLocalHomeomorph (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).symm (t ^ 2)
+      (polynomialLocalHomeomorph (H := H) p (mem_smoothLocusX_of_y_eq_zero H
+        (by simpa [smoothLocusY] using hpYn))).symm (t ^ 2)
     change (affineLiftChart p).symm.trans (affineLiftChart a) t = _
     unfold affineLiftChart
     rw [OpenPartialHomeomorph.lift_openEmbedding_trans]
-    change ((HyperellipticAffine.affineChartAt p).symm.trans (HyperellipticAffine.affineChartAt a)) t = _
+    change ((HyperellipticAffine.affineChartAt p).symm.trans
+      (HyperellipticAffine.affineChartAt a)) t = _
     rw [HyperellipticAffine.affineChartAt_of_not_mem_smoothLocusY p hpYn]
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a haY]
-    change ((HyperellipticAffine.affineChartProjY (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).symm t).val.1 = _
-    exact HyperellipticAffine.affineChartProjY_symm_apply_fst (H := H) p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn)) htTarget
+    change ((HyperellipticAffine.affineChartProjY (H := H) p
+      (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn))).symm t).val.1 = _
+    exact HyperellipticAffine.affineChartProjY_symm_apply_fst (H := H) p
+      (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpYn)) htTarget
   have hx_eq :
       a.val.1 = (polynomialLocalHomeomorph (H := H) p hpX).symm (w ^ 2) := by
     simpa [a] using HyperellipticAffine.affineChartProjY_symm_apply_fst (H := H) p hpX hw
@@ -383,7 +394,8 @@ theorem liouvilleChosenTwoSheetSum_analyticAt
     AnalyticAt ℂ
       (fun z : ℂ =>
         form.coeff (coe (liouvilleChosenAffinePoint (H := H) z₀) : HyperellipticOdd H Fact.out) z +
-          form.coeff (coe (liouvilleChosenAffinePoint (H := H) z₀).invol : HyperellipticOdd H Fact.out) z)
+          form.coeff (coe (liouvilleChosenAffinePoint (H := H) z₀).invol :
+            HyperellipticOdd H Fact.out) z)
       z₀ := by
   classical
   let a₀ := liouvilleChosenAffinePoint (H := H) z₀
@@ -410,8 +422,10 @@ theorem liouvilleChosenTwoSheetSum_analyticAt
     have h_open : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a₀ : HyperellipticOdd H Fact.out)).target :=
       isOpen_extChartAt_target _
     exact (form.2.1 (coe a₀ : HyperellipticOdd H Fact.out)).analyticAt (h_open.mem_nhds hz₀_ext)
-  have h2 : AnalyticAt ℂ (fun z => form.coeff (coe a₀.invol : HyperellipticOdd H Fact.out) z) z₀ := by
-    have hz₀_ext : z₀ ∈ (extChartAt 𝓘(ℂ, ℂ) (coe a₀.invol : HyperellipticOdd H Fact.out)).target := by
+  have h2 : AnalyticAt ℂ
+    (fun z => form.coeff (coe a₀.invol : HyperellipticOdd H Fact.out) z) z₀ := by
+    have hz₀_ext : z₀ ∈
+      (extChartAt 𝓘(ℂ, ℂ) (coe a₀.invol : HyperellipticOdd H Fact.out)).target := by
       rw [extChartAt_target]
       simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, Set.preimage_id,
         Set.range_id, Set.inter_univ]
@@ -431,7 +445,8 @@ theorem liouvilleChosenTwoSheetSum_analyticAt
       exact hz₀_target
     have h_open : IsOpen (extChartAt 𝓘(ℂ, ℂ) (coe a₀.invol : HyperellipticOdd H Fact.out)).target :=
       isOpen_extChartAt_target _
-    exact (form.2.1 (coe a₀.invol : HyperellipticOdd H Fact.out)).analyticAt (h_open.mem_nhds hz₀_ext)
+    exact (form.2.1 (coe a₀.invol : HyperellipticOdd H Fact.out)).analyticAt
+      (h_open.mem_nhds hz₀_ext)
   exact h1.add h2
 
 theorem liouvilleTwoSheetSum_analyticAt_of_eval_ne_zero
@@ -468,14 +483,16 @@ theorem liouvilleTwoSheetSum_analyticAt_of_eval_ne_zero
   have hProjCont₀ : ContinuousAt
       (fun z : ℂ =>
         (coe (e₀.symm z : HyperellipticAffine H) : HyperellipticOdd H Fact.out)) z₀ := by
-    have h_coe_cont : Continuous (fun x : HyperellipticAffine H => (coe x : HyperellipticOdd H Fact.out)) :=
+    have h_coe_cont : Continuous
+      (fun x : HyperellipticAffine H => (coe x : HyperellipticOdd H Fact.out)) :=
       OnePoint.continuous_coe
     have h_symm_cont : ContinuousAt e₀.symm z₀ := e₀.continuousAt_symm hz₀Target
     exact h_coe_cont.continuousAt.comp h_symm_cont
   have hProjCont₀σ : ContinuousAt
       (fun z : ℂ =>
         (coe (e₀σ.symm z : HyperellipticAffine H) : HyperellipticOdd H Fact.out)) z₀ := by
-    have h_coe_cont : Continuous (fun x : HyperellipticAffine H => (coe x : HyperellipticOdd H Fact.out)) :=
+    have h_coe_cont : Continuous
+      (fun x : HyperellipticAffine H => (coe x : HyperellipticOdd H Fact.out)) :=
       OnePoint.continuous_coe
     have h_symm_cont : ContinuousAt e₀σ.symm z₀ := e₀σ.continuousAt_symm hz₀σTarget
     exact h_coe_cont.continuousAt.comp h_symm_cont
@@ -678,9 +695,11 @@ theorem liouvilleTwoSheetSum_branch_tendsto
       have h := coeff_eq_liouvilleProjYNumerator_div_of_branch form p hpX hpYn hyTarget hyNZ
       simpa [N, y, hxSymm] using h
     have hσ :
-        form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol : HyperellipticOdd H Fact.out) z =
+        form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol :
+          HyperellipticOdd H Fact.out) z =
           N (-y) / (-y) := by
-      have h := coeff_eq_liouvilleProjYNumerator_div_of_branch form p hpX hpYn hnegTarget (neg_ne_zero.mpr hyNZ)
+      have h := coeff_eq_liouvilleProjYNumerator_div_of_branch form p hpX hpYn
+        hnegTarget (neg_ne_zero.mpr hyNZ)
       simpa [N, y, hxNegSymm] using h
     rw [liouvilleTwoSheetSum_of_eval_ne_zero form hzNZ, hA, hσ]
     have hD : D y = (N y - N (-y)) / y := by
@@ -1007,11 +1026,13 @@ lemma tendsto_chosen_point_div_pow {H : HyperellipticData} [Fact (Odd H.f.natDeg
     simp
   exact tendsto_eval_div_pow_cocompact H.f (2 * H.genus + 2) h_deg
 
-lemma tendsto_pow_div_eval_f_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegree)] (k : ℕ) (hk : k < H.f.natDegree) :
+lemma tendsto_pow_div_eval_f_cocompact {H : HyperellipticData}
+    [Fact (Odd H.f.natDegree)] (k : ℕ) (hk : k < H.f.natDegree) :
     Filter.Tendsto (fun z : ℂ => z ^ k / H.f.eval z) (Filter.cocompact ℂ) (𝓝 0) := by
   have h_eq : (fun z : ℂ => z ^ k / H.f.eval z) =ᶠ[Filter.cocompact ℂ]
       (fun z => (z ^ k / z ^ H.f.natDegree) * (H.f.eval z / z ^ H.f.natDegree)⁻¹) := by
-    filter_upwards [eventually_ne_zero_cocompact, eventually_eval_ne_zero_cocompact] with z hz_z hz_f
+    filter_upwards [eventually_ne_zero_cocompact,
+      eventually_eval_ne_zero_cocompact] with z hz_z hz_f
     have h_zn : z ^ H.f.natDegree ≠ 0 := pow_ne_zero _ hz_z
     field_simp
   rw [Filter.tendsto_congr' h_eq]
@@ -1552,12 +1573,14 @@ lemma tendsto_coeff_coe_cocompact (form : HolomorphicOneForm (HyperellipticOdd H
   have h_squeeze : ∀ᶠ z : ℂ in Filter.cocompact ℂ,
       ‖form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z‖ ≤
         R * ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖ := by
-    have h_ev_ne : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 := eventually_eval_ne_zero_cocompact
+    have h_ev_ne : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 :=
+      eventually_eval_ne_zero_cocompact
     have h_z_nz : ∀ᶠ z : ℂ in Filter.cocompact ℂ, z ≠ 0 := eventually_ne_zero_cocompact
     filter_upwards [h_ev_ne, h_z_nz, h_bound] with z hz_f hz_z hz_b
     have hz_y_ne : (liouvilleChosenAffinePoint (H := H) z).val.2 ≠ 0 := by
       have h_prop := (liouvilleChosenAffinePoint (H := H) z).property
-      change (liouvilleChosenAffinePoint (H := H) z).val.2 ^ 2 = H.f.eval (liouvilleChosenAffinePoint (H := H) z).val.1 at h_prop
+      change (liouvilleChosenAffinePoint (H := H) z).val.2 ^ 2 =
+        H.f.eval (liouvilleChosenAffinePoint (H := H) z).val.1 at h_prop
       rw [liouvilleChosenAffinePoint_fst] at h_prop
       intro hc
       rw [hc, zero_pow (by norm_num)] at h_prop
@@ -1569,13 +1592,15 @@ lemma tendsto_coeff_coe_cocompact (form : HolomorphicOneForm (HyperellipticOdd H
       rw [mul_div_cancel_right₀ _ hz_y_ne]
     rw [h_readout]
     have h_pow_ne : z ^ (H.genus - 1) ≠ 0 := pow_ne_zero _ hz_z
-    have h_split : (liouvilleRemovableNumerator form z / (liouvilleChosenAffinePoint (H := H) z).val.2) =
+    have h_split : (liouvilleRemovableNumerator form z /
+      (liouvilleChosenAffinePoint (H := H) z).val.2) =
         (liouvilleRemovableNumerator form z / z ^ (H.genus - 1)) *
           (z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2) := by
       field_simp
     rw [h_split, norm_mul]
     exact mul_le_mul_of_nonneg_right hz_b (norm_nonneg _)
-  have h_lim : Filter.Tendsto (fun z : ℂ => R * ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖)
+  have h_lim : Filter.Tendsto (fun z : ℂ =>
+      R * ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖)
       (Filter.cocompact ℂ) (𝓝 0) := by
     have h_lim_zero := tendsto_pow_div_chosen_point_snd (H := H)
     have h_lim_norm := h_lim_zero.norm
@@ -1591,18 +1616,22 @@ lemma liouvilleTwoSheetSumRemovable_tendsto_cocompact
   have h_eq : liouvilleTwoSheetSumRemovable form =ᶠ[Filter.cocompact ℂ]
       (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z +
         form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z) := by
-    have h_eval : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 := eventually_eval_ne_zero_cocompact
+    have h_eval : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 :=
+      eventually_eval_ne_zero_cocompact
     filter_upwards [h_eval] with z hz
     rw [liouvilleTwoSheetSumRemovable_of_eval_ne_zero form hz]
     unfold liouvilleTwoSheetSum
     rw [if_neg hz]
   rw [Filter.tendsto_congr' h_eq]
   have h_lim1 := tendsto_coeff_coe_cocompact form
-  let T_form := pullbackOneForm (hyperellipticInvolution H Fact.out) (hyperellipticInvolution_contMDiff H Fact.out) form
+  let T_form := pullbackOneForm (hyperellipticInvolution H Fact.out)
+    (hyperellipticInvolution_contMDiff H Fact.out) form
   have h_lim2_T := tendsto_coeff_coe_cocompact T_form
-  have h_lim2 : Filter.Tendsto (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z)
+  have h_lim2 : Filter.Tendsto (fun z =>
+      form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z)
       (Filter.cocompact ℂ) (𝓝 0) := by
-    have h_eq2 : (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z) =ᶠ[Filter.cocompact ℂ]
+    have h_eq2 : (fun z =>
+      form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z) =ᶠ[Filter.cocompact ℂ]
         (fun z => T_form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z) := by
       have h_mem_V := eventually_mem_V_cocompact (H := H)
       filter_upwards [h_mem_V] with z hz_V
@@ -1614,7 +1643,8 @@ lemma liouvilleTwoSheetSumRemovable_tendsto_cocompact
         have h_map := (affineChartProjX a haY).map_source h_src
         change a.val.1 ∈ (affineChartProjX a haY).target at h_map
         rwa [h_fst] at h_map
-      have h_symm_z : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe a := by
+      have h_symm_z : (extChartAt 𝓘(ℂ, ℂ) (coe a :
+        HyperellipticOdd H Fact.out)).symm z = coe a := by
         have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) =
           (chartAt ℂ (coe a : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
         rw [h_symm]
@@ -1659,7 +1689,8 @@ theorem liouvilleTwoSheetSumRemovable_eq_zero
       rw [Metric.mem_closedBall, dist_zero_right] at h_mem
       exact le_trans h_mem (le_max_right M 1)
   obtain ⟨p, hp_deg, hp_eval⟩ := Jacobians.GeneralResults.differentiable_eq_polynomial_of_growth 0
-    (liouvilleTwoSheetSumRemovable form) h_diff C (fun z => by rw [pow_zero, mul_one]; exact h_bounded_all z)
+    (liouvilleTwoSheetSumRemovable form) h_diff C
+    (fun z => by rw [pow_zero, mul_one]; exact h_bounded_all z)
   have hp_C : ∃ c : ℂ, p = Polynomial.C c := by
     use p.coeff 0
     ext i
@@ -1680,7 +1711,8 @@ theorem liouvilleTwoSheetSumRemovable_eq_zero
     rw [h_congr]
     exact h_lim
   have hc_zero : c = 0 := by
-    have h_lim_const : Filter.Tendsto (fun _ : ℂ => c) (Filter.cocompact ℂ) (𝓝 c) := tendsto_const_nhds
+    have h_lim_const : Filter.Tendsto (fun _ : ℂ => c) (Filter.cocompact ℂ) (𝓝 c) :=
+      tendsto_const_nhds
     exact tendsto_nhds_unique h_lim_const h_lim_c
   ext z
   rw [h_const_eval z, hc_zero]
@@ -1752,7 +1784,7 @@ theorem form_coeff_anti_invariance
     exact neg_ne_zero.mpr haY
   have hp_invol_src : p.invol ∈ (affineChartProjX (H := H) a.invol ha_invol_Y).source := by
     have h_symm_z : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe p := by
-      exact extChartAt_symm_coe_of_mem_smoothLocusY a haY hz
+      exact extChartAt_symm_coe_of_mem_smoothLocusY a haY z
     have h_symm_eq : ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z :
       HyperellipticOdd H Fact.out) = coe p := h_symm_z
     have hy_src_p : hyperellipticInvolution H Fact.out (coe p) ∈
