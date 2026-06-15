@@ -103,12 +103,16 @@ status:
     - Axioms.AX_torus_self_albanese        # Albanese universal property only
     - Axioms.AX_period_functoriality       # Albanese universal property only
     - Axioms.AX_curve_generates_jacobian   # Albanese universal property only
+    - Axioms.intersectionForm              # the H₁ intersection pairing itself (topological-anchoring debt)
     - Axioms.AX_IntersectionForm_alternating  # topological anchoring, no Buzzard consumers
     - Axioms.AX_IntersectionForm_perfect      # topological anchoring, no Buzzard consumers
     - ProjectiveCurve.PlaneCurveAffine.AX_PlaneCurveAffine_connected  # plane curve witness
     - Axioms.AX_PluckerFormula             # plane curve genus formula
-    - ProjectiveCurve.AX_Hyperelliptic_oddEquiv   # odd-degree hyperelliptic chart witness
-    - ProjectiveCurve.AX_Hyperelliptic_evenEquiv  # even-degree hyperelliptic chart witness
+    - ProjectiveCurve.AX_Hyperelliptic_genus  # hyperelliptic genus witness (needs biholo, not just homeo)
+    # NB: AX_Hyperelliptic_oddEquiv / _evenEquiv are noncomputable DEFS (discharged
+    # Phase-3), not axioms — do not list them here. This hand-maintained list is
+    # reconciled against the kernel-authoritative docs/axiom-report.txt + the
+    # `axiom` declarations in source; keep it reconciled when axioms change.
 
   main_results:
     - declaration: "genus_eq_zero_iff_homeo"
