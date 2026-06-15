@@ -83,5 +83,52 @@ G2/G3/G4 + `ofCurve_isJacobian` are unchanged (they already consume `torus_self_
 With this + the AK→0 Kirov port (`ALBANESE_REPOINT_REFACTOR.md`), Albanese categoricity against
 **abstract** complex tori rests on exactly **one** minimal classical axiom (`AX_torus_exp`,
 "the torus has a holomorphic exp") — everything else (lattice, quotient iso, periods, Jacobi
-inversion, self-Albanese identity) proved. Alternative if axiom-free is preferred over abstract-`A`
-strength: the concrete-tori escape hatch (carry the presentation as data) → 0 axioms, weaker statement.
+inversion, self-Albanese identity) proved.
+
+---
+
+## Deep-think review (Gemini, 2026-06-14) — verdict + REVISED ARCHITECTURE
+
+Deep-think rated `AX_torus_exp` "mathematically flawless, strictly typed, practically perfect" and
+confirmed every vetting point (incl. `mfderiv=id` necessity and satisfiability). But it makes a
+**stronger architectural recommendation: do BOTH, with the escape hatch as the headline path.**
+
+**1. Headline = escape hatch (the recommended primary architecture).** In the standard literature
+(Griffiths–Harris p.330, Birkenhake–Lange Ch.1) a *complex torus is by definition* `ℂ^m/Λ`;
+uniformization of an abstract Lie group is a separate Lie-theory theorem, not part of the
+Jacobian/Albanese story. So state `ofCurve_isJacobian` against a torus **carrying its presentation
+as a parameter** `(P : TorusSelfAlbanesePresentation m A)` (or a `ComplexTorus` class) instead of
+deriving `P` from `AX_torus_uniformization`. Then the headline is **0-axiom on the torus side** —
+G2 becomes "return the supplied `P`", G3/G4 consume `P` unchanged, and `AX_torus_uniformization`
+disappears from the headline closure. (AK stays until the Kirov port; it is curve-side, independent.)
+This is *not* a meaningful weakening — it is the honest standard framing.
+
+**2. Abstract generality = quarantined exp axiom (secondary).** Keep `AX_torus_exp` + the §"deduction"
+in a separate file (`AbstractTorusUniformization.lean`) proving *every* abstract compact connected
+complex Lie group supplies a `TorusSelfAlbanesePresentation` — demonstrating the definition is fully
+general modulo the one missing Mathlib primitive (the Lie exp). The abstract-`A` categoricity is then
+a corollary, resting on `AX_torus_exp` alone.
+
+**Net:** challenge headline → 0 torus axioms (after AK port, 0 axioms total); abstract version → 1
+minimal quarantined axiom. Best of both; cleanly isolates Riemann-surface content from Mathlib's
+missing differential geometry.
+
+### Actionable fixes from the review (apply when implementing)
+- **`[AddGroup A]` → `[AddCommGroup A]`** in the torus hypotheses. Mathematically free (compact
+  connected complex Lie ⇒ abelian) but Lean's typeclass resolution can't see it; `abel` and the
+  `ZLattice` API need `AddCommGroup`. *(Note: this touches the existing working defs too — ripples
+  through `TorusSelfAlbanesePresentation`/`ofCurve_isJacobian`; do in one pass.)*
+- **Bundle `exp` as `(Fin m→ℂ) →+ A`** (free `map_add`/`map_zero`).
+- **Step-5 FTC concrete route** (deep-think): `exp` is an `AddMonoidHom` ⇒ commutes with translation
+  `exp∘Lᵥ = L_{exp v}∘exp`; `mfderiv_comp` + `mfderiv=id` ⇒ `exp*ℓ` is the constant covector `ℓ`
+  *globally* on `ℂ^m`; lift `γ` via `Topology.Covering.lift`; pull `ℓ` out with
+  `ContinuousLinearMap.integral_comp_comm`; evaluate `∫₀¹ γ̃'(t) dt = γ̃(1)−γ̃(0)` via
+  `intervalIntegral_deriv_eq_sub` on the Banach space `ℂ^m` ⇒ `ℓ(liftCoord a)`. (Gives concrete
+  Mathlib lemma targets for the meatiest step.)
+- A `PartialHomeomorph`-at-0 or generic `CoveringMap` axiom is **too weak** (globalizing a local hom
+  needs monodromy = as hard as `exp`; a bare covering map lacks the bundled `→+`). The bundled
+  `→+ / ContMDiff / mfderiv=id` is the right minimal boundary — confirmed.
+
+**Recommendation:** adopt the escape hatch for the headline now (a statement reframe + presentation
+parameter — owner decision, since it changes the headline's universal-property signature), and treat
+`AX_torus_exp` + deduction as the quarantined generality file (the §"deduction" plan above is its spec).
