@@ -15,7 +15,6 @@ noncomputable local instance (H : HyperellipticData) [Fact (Odd H.f.natDegree)] 
     IsManifold 𝓘(ℂ, ℂ) ω (OnePoint (HyperellipticAffine H)) :=
   show IsManifold 𝓘(ℂ, ℂ) ω (OnePoint (HyperellipticAffine H)) from @instIsManifold H Fact.out
 
--- Declare the axioms
 lemma t_neg (H : HyperellipticData) (w : ℂ) :
     InfinityInverse.t H (-w) = - InfinityInverse.t H w := by
   unfold InfinityInverse.t
