@@ -92,6 +92,8 @@ complex-analytic formalization (`IsJacobian` / `ofCurve_isJacobian` /
 
 open scoped Manifold ContDiff Topology
 
+universe u v
+
 namespace Jacobians
 
 open Jacobians.Axioms
@@ -931,8 +933,6 @@ of `IsJacobian` (`aj_holo`, `aj_base`, `universal`) — and is **axiom-free**
 `Quot.sound`). The challenge requirements re-enter only in the corollary
 `isJacobian_iso_jacobian`, which names Buzzard's concrete `Jacobian X` as one of
 the two objects via `ofCurve_isJacobian` (and so inherits its torus axioms). -/
-
-universe u
 
 /-- **Categoricity of the Albanese / Jacobian universal property.**
 
