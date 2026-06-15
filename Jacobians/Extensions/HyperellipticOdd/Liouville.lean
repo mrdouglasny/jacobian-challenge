@@ -624,11 +624,11 @@ theorem liouvilleRawNumerator_tendsto_at_root
     have hChQA : (chartAt ℂ qA).toPartialEquiv = cA.toPartialEquiv := rfl
     have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = (affineChartProjY (H := H) p hpX).target := hExt
     have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticOdd H Fact.out) = (c.symm : ℂ → HyperellipticOdd H Fact.out) := by
-      have h_ext : (extChartAt 𝓘(ℂ, ℂ) q) = (chartAt ℂ q).toPartialEquiv := by simp
-      rw [h_ext, hChQ]
+      ext x
+      rfl
     have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticOdd H Fact.out → ℂ) = (cA : HyperellipticOdd H Fact.out → ℂ) := by
-      have h_ext : (extChartAt 𝓘(ℂ, ℂ) qA) = (chartAt ℂ qA).toPartialEquiv := by simp
-      rw [h_ext, hChQA]
+      ext x
+      rfl
     have hExtSrcA : (extChartAt 𝓘(ℂ, ℂ) qA).source = cA.source := by
       have h_ext : (extChartAt 𝓘(ℂ, ℂ) qA) = (chartAt ℂ qA).toPartialEquiv := by simp
       rw [h_ext, hChQA]
@@ -867,8 +867,8 @@ theorem liouvilleRemovableNumerator_readout
           (extChartAt 𝓘(ℂ, ℂ) (coe p.invol : HyperellipticOdd H Fact.out)).source := by
         have h_symm_eq : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z : HyperellipticOdd H Fact.out) = coe p := by
           have h_symm : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm : ℂ → HyperellipticOdd H Fact.out) = ((affineLiftChart p).symm : ℂ → HyperellipticOdd H Fact.out) := by
-            have h_ext : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) = (chartAt ℂ (coe p)).toPartialEquiv := by simp
-            rw [h_ext]
+            ext x
+            rfl
           rw [h_symm]
           change (affineLiftChart p).symm z = coe p
           unfold affineLiftChart
