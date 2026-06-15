@@ -2,6 +2,7 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.InvolutionOdd
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
 import Jacobians.Axioms.AbelJacobiMap
 
+
 open scoped Manifold ContDiff Topology
 open Jacobians Jacobians.ProjectiveCurve Jacobians.RiemannSurface
 open Jacobians.ProjectiveCurve.HyperellipticOdd Jacobians.ProjectiveCurve.HyperellipticAffine
@@ -789,9 +790,14 @@ theorem pullback_coeff_eq
     rw [hg0]
     simp
 
-axiom pullback_hyperellipticInvolution_eq_neg_proof
-    (H : HyperellipticData) [Fact (Odd H.f.natDegree)] :
+theorem pullback_hyperellipticOddForm_eq_neg
+    (H : HyperellipticData) [Fact (Odd H.f.natDegree)] (g : Polynomial ℂ) :
     pullbackOneForm (hyperellipticInvolution H Fact.out)
         (hyperellipticInvolution_contMDiff H Fact.out)
-      = (-LinearMap.id : HolomorphicOneForm (HyperellipticOdd H Fact.out) →ₗ[ℂ]
-          HolomorphicOneForm (HyperellipticOdd H Fact.out))
+        (hyperellipticOddForm H g) =
+      - hyperellipticOddForm H g := by
+  apply HolomorphicOneForm.ext_of_coeff
+  ext x z
+  rw [pullback_coeff_eq]
+  rfl
+

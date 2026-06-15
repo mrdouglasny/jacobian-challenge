@@ -290,10 +290,7 @@ theorem pullback_hyperellipticInvolution_eq_neg
       = (-LinearMap.id : HolomorphicOneForm (HyperellipticOdd H h) →ₗ[ℂ]
           HolomorphicOneForm (HyperellipticOdd H h)) := by
   haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
-  ext form x z
-  rcases AX_HyperellipticOddOneForm_eq_form H form with ⟨g, hdeg, hg⟩
-  rw [hg, pullback_coeff_eq]
-  rfl
+  exact pullback_hyperellipticInvolution_eq_neg_proof H
 
 
 /-! ## Stretch — Weierstrass points
