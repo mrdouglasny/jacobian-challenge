@@ -535,9 +535,11 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
 | `AX_torus_oneforms_dualCover` | ✅ **DISCHARGED 2026-06-12** (TORUS lane) — now a `noncomputable def`, statement verbatim at `Axioms/TorusAlbanese.lean`; body `LinearEquiv.refl ℂ _`. The Birkenhake–Lange analytic content (invariant 1-form ⇒ constant cover-linear functional via Liouville) is captured in the *definition* `TorusHolomorphicOneForm m A := Module.Dual ℂ (Fin m → ℂ)`; relative to that model the equivalence is the identity. `ofCurve_isJacobian` `#print axioms` no longer lists it (kernel-verified, no `sorryAx`). See `docs/planning/TORUS_ALBANESE_ROUTE.md` | Birkenhake–Lange Ch. 1 |
-| `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
-| `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
-| `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
+| `AX_torus_self_albanese` | ✅ **DISCHARGED 2026-06-14** (repoint refactor, commit `df4bcd2`) — retired; now the theorem `torus_self_albanese` in `UniversalProperty.lean`, proved from A1 (`AX_torus_uniformization`). *(Soundness note: its `liftCoord_eq_albanese` field was found UNSATISFIABLE on 2026-06-14 and corrected to the mod-Λ congruence before the discharge — Gemini-re-vetted.)* | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | ✅ **DISCHARGED 2026-06-14** — retired; now the theorem `period_functoriality`, proved from A1 + the analytic bridge `torusAmbientLinear_periodMapInBasis_mem` (developing-map H₁-naturality `analyticLoopsGenerateH1` + self-Albanese torus loop-period) | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | ✅ **DISCHARGED 2026-06-14** — retired; now the theorem `curve_generates_jacobian`, proved from AK (`AX_curve_image_subgroup_isOpen`) via open-subgroup-of-connected-group | Mumford *Curves & their Jacobians*; Milne *AV* §I |
+| `AX_torus_uniformization` (A1) | `Axioms/AlbaneseInterface.lean:54` — **the single irreducible torus axiom.** Gemini-re-vetted 2026-06-14 (satisfiable; witness `ℂ^m/Λ`). `ofCurve_isJacobian` `#print axioms` now lists exactly A1 + AK | Birkenhake–Lange Ch. 1 (uniformization of a compact connected complex Lie group) |
+| `AX_curve_image_subgroup_isOpen` (AK) | `Axioms/AlbaneseInterface.lean:76` — Kirov-interface axiom; discharge decl-level-scoped to ≈25 decls (`docs/planning/ALBANESE_REPOINT_REFACTOR.md`) | local Jacobi inversion, Forster 21.3 |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is **fully discharged** (2026-06-11,
 PR #209): the abstract `genus_eq_zero_iff_homeo` is now standard-3, and the
@@ -624,10 +626,12 @@ future work.
 
 | Axiom | Status | Reference |
 |-------|--------|-----------|
-| `AX_curve_generates_jacobian` | **stated** — `Axioms/TorusAlbanese.lean:168` | Mumford; Milne *AV* §I |
-| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
-| `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
-| `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | ✅ **discharged 2026-06-14** — now theorem `curve_generates_jacobian` (from AK) | Mumford; Milne *AV* §I |
+| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_self_albanese` | ✅ **discharged 2026-06-14** — now theorem `torus_self_albanese` (= A1) | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | ✅ **discharged 2026-06-14** — now theorem `period_functoriality` (from A1 + bridge) | Griffiths–Harris Ch. 0 & 2 |
+| `AX_torus_uniformization` (A1) | **stated** — `Axioms/AlbaneseInterface.lean:54`; the one irreducible torus axiom | Birkenhake–Lange Ch. 1 |
+| `AX_curve_image_subgroup_isOpen` (AK) | **stated** — `Axioms/AlbaneseInterface.lean:76`; Kirov-interface, discharge scoped | Forster 21.3 |
 | `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
 
 The direct holomorphicity step (E6 in the plan) was originally blocked by a

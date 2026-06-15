@@ -48,10 +48,12 @@ closes the def-degeneracy gap categorically. **It is PROVED below as
 `f : X → A` to a complex torus factors uniquely through `ofCurve` by a
 holomorphic group hom (genuine `∃!`). The `ConnectedSpace (Jacobian X)`
 prerequisite is supplied (a torus is connected); the proof rests on the vetted
-torus axioms (`AX_torus_oneforms_dualCover` discharged #232) / `AX_torus_self_albanese` /
-`AX_period_functoriality` + `AX_curve_generates_jacobian` (the descent
-smoothness `AX_torus_descent_holo` was itself discharged to a theorem
-2026-06-06), and is `#print axioms`-clean (no `sorryAx`). The original proof
+minimal Albanese interface — A1 `AX_torus_uniformization` + AK
+`AX_curve_image_subgroup_isOpen` (the former three torus axioms
+`AX_torus_self_albanese` / `AX_period_functoriality` / `AX_curve_generates_jacobian`
+were proved as theorems and retired in the 2026-06-14 repoint refactor;
+`AX_torus_oneforms_dualCover` discharged #232, `AX_torus_descent_holo` 2026-06-06),
+and is `#print axioms`-clean (no `sorryAx`). The original proof
 plan (lemma DAG, vetted-axiom leaves, effort) is in
 `docs/universal-property-proof-plan.md`.
 
@@ -775,7 +777,7 @@ target-torus Albanese coordinate of `f x`.
 
 This lemma is intentionally conditional: the remaining analytic input is the
 coordinate equality in the hypothesis. Once that identity is available from
-pullback naturality for invariant torus forms, `AX_torus_self_albanese` closes
+pullback naturality for invariant torus forms, the A1 self-Albanese presentation closes
 the target quotient rewrite through `TorusPresentation.fromQuot_liftCoord`. -/
 theorem jacobianUniversal_phi_factorizes_of_coordinate_eq {X : Type u}
     [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]

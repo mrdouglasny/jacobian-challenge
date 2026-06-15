@@ -35,7 +35,7 @@ A Lean 4 formalization of [Kevin Buzzard's **Jacobian Challenge**](https://gist.
 |---|---|
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s; machine-checked against the pinned v0.4 spec |
 | **Challenge-critical axioms** | **0** — all 24 headlines are `#print axioms` standard-3 (`AX_PeriodCycleBasis` discharged from every headline closure, PRs #248/#250/#251; machine-checked: 0 mentions in [`docs/axiom-report.txt`](docs/axiom-report.txt)) |
-| **Axioms** | 10 active, **none on the Buzzard headline path** — Albanese-torus (3), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 10 active, **none on the Buzzard headline path** — the Albanese 2-axiom interface A1 `AX_torus_uniformization` + AK `AX_curve_image_subgroup_isOpen` (the 3 legacy torus axioms retired 2026-06-14, `ofCurve_isJacobian` now `#print axioms` = std-3 + A1 + AK), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **Beyond the challenge** | Riemann–Roch + Serre duality proved as theorems; Albanese categoricity proved; explicit positive-genus curve instances |
 | **`sorry`s** | 0 in the core / challenge path; a handful in out-of-scope extensions and an optional adelic `H¹` construction |
 | **Build** | `lake build` green; Lean `v4.30.0`, Mathlib pinned in `lake-manifest.json` |
