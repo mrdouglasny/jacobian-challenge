@@ -52,6 +52,8 @@ instance declarations, not of any consumer hypothesis. See the report and
 `Jacobians.RiemannSurface.OfCurveInjOfTGen`.
 -/
 
+universe u
+
 namespace Jacobian
 
 open scoped Manifold Topology ContDiff

@@ -35,7 +35,7 @@ A Lean 4 formalization of [Kevin Buzzard's **Jacobian Challenge**](https://gist.
 |---|---|
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s; machine-checked against the pinned v0.4 spec |
 | **Challenge-critical axioms** | **0** — all 24 headlines are `#print axioms` standard-3 (`AX_PeriodCycleBasis` discharged from every headline closure, PRs #248/#250/#251; machine-checked: 0 mentions in [`docs/axiom-report.txt`](docs/axiom-report.txt)) |
-| **Axioms** | 9 active, **none on the Buzzard headline path** — the Albanese, now resting on AK `AX_curve_image_subgroup_isOpen` alone (`ofCurve_isJacobian` `#print axioms` = std-3 + AK after the 2026-06-14 escape-hatch typeclass reframe; `isJacobian_unique` is axiom-free; A1 `AX_torus_uniformization` is declared but out of every headline closure), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 8 active, **none on the Buzzard headline path** — the Albanese, now resting on AK `AX_curve_image_subgroup_isOpen` alone (`ofCurve_isJacobian` `#print axioms` = std-3 + AK after the 2026-06-14 escape-hatch typeclass reframe; `isJacobian_unique` is axiom-free; A1 `AX_torus_uniformization` is declared but out of every headline closure), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **Beyond the challenge** | Riemann–Roch + Serre duality proved as theorems; Albanese categoricity proved; explicit positive-genus curve instances |
 | **`sorry`s** | 0 in the core / challenge path; a handful in out-of-scope extensions and an optional adelic `H¹` construction |
 | **Build** | `lake build` green; Lean `v4.30.0`, Mathlib pinned in `lake-manifest.json` |
@@ -193,7 +193,12 @@ functoriality) on real curve families and check the headlines are
   pipeline (chart-local 1-forms → cocycle → finite-dimensionality → genus) on a
   nontrivial positive-genus family, forcing the *general* `genus` definition to
   compute the right number, not just typecheck. The odd-degree track mirrors the
-  even one decl-for-decl (lower bound proved, upper bound in progress).
+  even one decl-for-decl (genus **fully discharged**, PR #223). Building on that, a **cycle basis
+  + explicit period map** on the odd hyperelliptic family — which would discharge
+  `AX_PeriodCycleBasis` there and give an explicit map from moduli (the branch points of `f`) to
+  period matrices in the Siegel upper half space — is largely scaffolded; the route to finish it is
+  in [`docs/planning/HYP_PERIOD_MAP_PLAN.md`](docs/planning/HYP_PERIOD_MAP_PLAN.md) (gap ledger:
+  [`HYP_CB_BLOCKER.md`](docs/planning/HYP_CB_BLOCKER.md)).
 - **`PlaneCurve`** — smooth plane curves with a fully proved manifold structure.
 
 Each curve's headline is `#print axioms`-clean — concrete, positive-genus

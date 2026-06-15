@@ -44,7 +44,7 @@ Even-degree analogues are stated at the end as drop-in twins for
 
 ## Note on what is being tested
 
-The tests below are stated as `theorem … := by sorry`. Each is a
+The tests below are **proved theorems** (PR #223). Each is also a
 **type-correctness check** of the Jacobian API: simply elaborating the
 statement forces typeclass synthesis through `ChartedSpace`,
 `IsManifold`, the bridge-induced `FiniteDimensional`, and
@@ -199,25 +199,25 @@ theorem abelJacobi_hyperellipticInvolution
   let hσ := hyperellipticInvolution_contMDiff H h
   let b := jacobianBasis X
   let Λ := periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)
-  
+
   -- Let's define the paths and loops
   let γ : Path infty P := bridgeArcPath infty P
   let γ_σ : Path infty (σ P) := γ.map continuous_hyperellipticInvolution
   let loop₁ : Path infty infty := (bridgeArcPath infty (σ P)).trans γ_σ.symm
   let loop₂ : Path infty infty :=
     (bridgeArcPath infty infty).symm.trans (bridgeArcPath infty infty).symm
-  
+
   -- The loop developing values lie in the period lattice
   have hloop₁ : (fun i => developingValue infty (b i)
     ((loop₁ : Path infty infty) : C(unitInterval, X))) ∈ Λ :=
       Jacobians.RiemannSurface.devVal_loop_mem_periodLatticeInBasis_any
         (Classical.arbitrary X) b loop₁
-  
+
   have hloop₂ : (fun i => developingValue infty (b i)
     ((loop₂ : Path infty infty) : C(unitInterval, X))) ∈ Λ :=
       Jacobians.RiemannSurface.devVal_loop_mem_periodLatticeInBasis_any
         (Classical.arbitrary X) b loop₂
-  
+
   -- Unfold the loop algebra
   have h_loop₁_val (i : Fin (RiemannSurface.genus X)) :
       developingValue infty (b i) ((loop₁ : Path infty infty) : C(unitInterval, X)) =
@@ -226,7 +226,7 @@ theorem abelJacobi_hyperellipticInvolution
           developingValue infty (b i) ((γ_σ : Path infty (σ P)) : C(unitInterval, X)) := by
     rw [devVal_trans, devVal_symm]
     ring
-    
+
   have h_loop₂_val (i : Fin (RiemannSurface.genus X)) :
       developingValue infty (b i) ((loop₂ : Path infty infty) : C(unitInterval, X)) =
         - developingValue infty (b i)
@@ -243,13 +243,13 @@ theorem abelJacobi_hyperellipticInvolution
     have hrel := pullbackOneForm_isPullbackCoeffRel σ hσ (b i)
     exact (developingValue_comp_of_isPullbackCoeffRel hσ hrel infty infty
       ((γ : Path infty P) : C(unitInterval, X))).symm
-    
+
   -- Involution action on forms
   have h_neg_form (i : Fin (RiemannSurface.genus X)) :
       pullbackOneForm σ hσ (b i) = - b i := by
     rw [AX_pullback_hyperellipticInvolution_eq_neg H h]
     rfl
-    
+
   have h_nat_neg (i : Fin (RiemannSurface.genus X)) :
       developingValue infty (b i) ((γ_σ : Path infty (σ P)) : C(unitInterval, X)) =
         - developingValue infty (b i) ((γ : Path infty P) : C(unitInterval, X)) := by

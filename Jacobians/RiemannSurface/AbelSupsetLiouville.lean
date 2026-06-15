@@ -45,6 +45,8 @@ graph (Phase-C in-place conversion pattern) and does not touch
 (inherited from `ofCurveImpl`), as for the rest of the Jacobian layer.
 -/
 
+universe u
+
 noncomputable section
 
 set_option linter.unusedSectionVars false
@@ -156,8 +158,6 @@ theorem _root_.Jacobians.AbelianVariety.ComplexTorus.mdifferentiable_lift_of_mdi
 /-! ## S6: Liouville constancy of the pencil map -/
 
 namespace MeromorphicFunctionField
-
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

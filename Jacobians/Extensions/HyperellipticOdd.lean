@@ -9,8 +9,8 @@ the even-degree file decl-for-decl and section-for-section.
 
 Unlike the even file — whose genus theorem is **discharged** (PR #96, via
 the Liouville/maximum-modulus axiom hierarchy) — the odd-degree warm-ups
-and headline genus are **deliberately left as `sorry`** scaffolds: this is
-a *stretch / extension* track, **not required for Buzzard's challenge**
+and headline genus are now **fully proved** (PR #223, @daouid — `sorry`-free,
+standard-3): this is a *stretch / extension* track, **not required for Buzzard's challenge**
 (the core challenge headlines are ℙ¹ and `Elliptic`; the even file is the
 completed real-example vetting). The odd file exists to (a) mirror the even
 structure on the single-∞ parity and (b) host the hyperelliptic-involution
@@ -169,8 +169,8 @@ canonical basis `{x^k dx/y : k < g}` immediately gives `g ≤ genus` via
 `LinearIndependent.fintype_card_le_finrank`. Mirrors
 `hyperellipticEvenGenus_lower_bound`. The `FiniteDimensional` instance
 comes from `Jacobians.Bridge.KirovHolomorphic` (without it `Module.finrank`
-would silently collapse to 0). Proved modulo the still-`sorry`ed
-`hyperellipticOddBasisDifferential_linearIndependent`. -/
+would silently collapse to 0). Uses
+`hyperellipticOddBasisDifferential_linearIndependent` (now proved, PR #223). -/
 theorem hyperellipticOddGenus_lower_bound
     (H : HyperellipticData) (h : Odd H.f.natDegree) :
     (H.f.natDegree - 1) / 2 ≤
@@ -178,9 +178,10 @@ theorem hyperellipticOddGenus_lower_bound
   have hLI := hyperellipticOddBasisDifferential_linearIndependent H h
   simpa using hLI.fintype_card_le_finrank
 
-/-- **Representation axiom for holomorphic 1-forms on the odd-degree curve.**
-Mirroring `AX_HyperellipticOneForm_eq_form` for the even case (which has since been proved),
-this axiom states that every holomorphic 1-form is in the image of `hyperellipticOddForm`. -/
+/-- **Representation theorem for holomorphic 1-forms on the odd-degree curve.**
+Mirroring `AX_HyperellipticOneForm_eq_form` for the even case, this **theorem** (proved as
+`AX_HyperellipticOddOneForm_eq_form_proof`, PR #223) states that every holomorphic 1-form is in
+the image of `hyperellipticOddForm`. -/
 theorem AX_HyperellipticOddOneForm_eq_form (H : HyperellipticData) [Fact (Odd H.f.natDegree)]
     (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
     ∃ g : Polynomial ℂ, g.natDegree < (H.f.natDegree - 1) / 2 ∧

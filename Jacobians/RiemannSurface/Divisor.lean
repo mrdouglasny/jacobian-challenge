@@ -20,6 +20,8 @@ open scoped Manifold Topology ContDiff
 
 namespace Jacobians.Axioms
 
+universe u
+
 /-- The group of divisors on a compact Riemann surface `X`: formal
 `ℤ`-combinations of points of `X`, i.e. the free abelian group on the
 underlying set (Forster, *Lectures on Riemann Surfaces*, Ch. I §8). The

@@ -16,6 +16,8 @@ target-torus form space until a genuine multivariable holomorphic cotangent
 section API lands.
 -/
 
+universe u v
+
 open scoped Manifold ContDiff Topology
 open intervalIntegral MeasureTheory
 

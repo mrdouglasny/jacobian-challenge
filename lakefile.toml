@@ -5,6 +5,7 @@ defaultTargets = ["Jacobians"]
 
 [leanOptions]
 pp.unicode.fun = true
+autoImplicit = false
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 # The Mathlib-standard header linter (stricter as of Lean/Mathlib v4.30.0)
