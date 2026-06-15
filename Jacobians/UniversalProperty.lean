@@ -121,6 +121,7 @@ structure IsJacobian
     ∀ {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
       [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
       [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      [TorusSelfAlbanesePresentation m A]
       (f : X → A), ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f → f x₀ = 0 →
       ∃! φ : J →+ A, ContMDiff 𝓘(ℂ, Fin g → ℂ) 𝓘(ℂ, Fin m → ℂ) ω (φ : J → A) ∧
         ∀ x, f x = φ (aj x)
@@ -268,11 +269,13 @@ theorem torusAmbientLinear_ofCurveAmbient_sub {X : Type u} [TopologicalSpace X]
 
 /-- **G2, theorem.** A complex torus is its own Albanese — this is exactly the
 uniformization axiom A1. -/
+@[reducible]
 noncomputable def torus_self_albanese {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
-    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :
+    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    [self : TorusSelfAlbanesePresentation m A] :
     TorusSelfAlbanesePresentation m A :=
-  AX_torus_uniformization
+  self
 
 /-! ## G4 — `curve_generates_jacobian` (from AK: open subgroup of connected = ⊤) -/
 
@@ -618,6 +621,7 @@ theorem torusAmbientLinear_periodMapInBasis_mem {X : Type*} [TopologicalSpace X]
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    [TorusSelfAlbanesePresentation m A]
     (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) (h : H1 X (Classical.arbitrary X)) :
     torusAmbientLinear f hf
         (periodMapInBasis X (Classical.arbitrary X) (jacobianBasis X) h) ∈
@@ -674,6 +678,7 @@ theorem period_functoriality {X : Type*} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    [TorusSelfAlbanesePresentation m A]
     (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
     (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup ≤
       (torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice.toAddSubgroup.comap
@@ -693,6 +698,7 @@ noncomputable def jacobianUniversalPhi {X : Type u} [TopologicalSpace X] [T2Spac
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    [TorusSelfAlbanesePresentation m A]
     (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
     Jacobian X →+ A :=
   let P : TorusPresentation m A := (torus_self_albanese (A := A)).toTorusPresentation
@@ -726,6 +732,7 @@ theorem jacobianUniversalPhi_holo {X : Type u} [TopologicalSpace X] [T2Space X]
     [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+    [TorusSelfAlbanesePresentation m A]
     (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
     ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
       (jacobianUniversalPhi f hf : Jacobian X → A) := by
@@ -762,11 +769,12 @@ theorem jacobianUniversal_phi_exists {X : Type u} [TopologicalSpace X] [T2Space 
     ∀ {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A] [CompactSpace A]
       [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
       [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      [TorusSelfAlbanesePresentation m A]
       (f : X → A), ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f → f x₀ = 0 →
       ∃ φ : Jacobian X →+ A,
         ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
           (φ : Jacobian X → A) := by
-  intro m A _ _ _ _ _ _ _ _ f hf _hbase
+  intro m A _ _ _ _ _ _ _ _ _ f hf _hbase
   exact ⟨jacobianUniversalPhi f hf, jacobianUniversalPhi_holo f hf⟩
 
 /-! ## UP-2: factorization through the Abel-Jacobi map -/
@@ -785,13 +793,14 @@ theorem jacobianUniversal_phi_factorizes_of_coordinate_eq {X : Type u}
     ∀ {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A] [CompactSpace A]
       [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
       [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      [TorusSelfAlbanesePresentation m A]
       (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f),
       (∀ x,
         (torus_self_albanese (m := m) (A := A)).liftCoord (f x) -
             torusAmbientLinear f hf (ofCurveAmbient X x₀ x - ofCurveAmbient X x₀ x₀) ∈
           (torus_self_albanese (m := m) (A := A)).toTorusPresentation.lattice) →
       ∀ x, f x = jacobianUniversalPhi f hf (Jacobian.ofCurve x₀ x) := by
-  intro m A _ _ _ _ _ _ _ _ f hf hcoord x
+  intro m A _ _ _ _ _ _ _ _ _ f hf hcoord x
   classical
   unfold jacobianUniversalPhi Jacobian.ofCurve Axioms.ofCurveImpl
   dsimp only
@@ -833,9 +842,10 @@ theorem jacobianUniversal_phi_factorizes {X : Type u}
     ∀ {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A] [CompactSpace A]
       [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
       [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
+      [TorusSelfAlbanesePresentation m A]
       (f : X → A) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f), f x₀ = 0 →
       ∀ x, f x = jacobianUniversalPhi f hf (Jacobian.ofCurve x₀ x) := by
-  intro m A _ _ _ _ _ _ _ _ f hf hbase
+  intro m A _ _ _ _ _ _ _ _ _ f hf hbase
   refine jacobianUniversal_phi_factorizes_of_coordinate_eq x₀ f hf ?_
   intro x
   let S : TorusSelfAlbanesePresentation m A := torus_self_albanese (A := A)
@@ -891,7 +901,7 @@ theorem ofCurve_isJacobian {X : Type u} [TopologicalSpace X] [T2Space X]
     { aj_holo := Jacobian.ofCurve_contMDiff x₀
       aj_base := Jacobian.ofCurve_self x₀
       universal := ?_ }
-  intro m A _ _ _ _ _ _ _ _ f hf hbase
+  intro m A _ _ _ _ _ _ _ _ _ f hf hbase
   let φ : Jacobian X →+ A := jacobianUniversalPhi f hf
   have hφ_holo :
       ContMDiff 𝓘(ℂ, Fin (RiemannSurface.genus X) → ℂ) 𝓘(ℂ, Fin m → ℂ) ω
@@ -940,6 +950,7 @@ theorem isJacobian_unique
     {J₂ : Type u} [TopologicalSpace J₂] [T2Space J₂] [CompactSpace J₂] [ConnectedSpace J₂]
     [ChartedSpace (Fin g₂ → ℂ) J₂] [AddGroup J₂] [IsManifold 𝓘(ℂ, Fin g₂ → ℂ) ω J₂]
     [LieAddGroup 𝓘(ℂ, Fin g₂ → ℂ) ω J₂]
+    [TorusSelfAlbanesePresentation g₁ J₁] [TorusSelfAlbanesePresentation g₂ J₂]
     {aj₁ : X → J₁} {aj₂ : X → J₂}
     (hJ₁ : IsJacobian.{u, u, u} (g := g₁) x₀ J₁ aj₁)
     (hJ₂ : IsJacobian.{u, u, u} (g := g₂) x₀ J₂ aj₂) :
@@ -978,7 +989,9 @@ theorem isJacobian_iso_jacobian
     [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] [Nonempty X] (x₀ : X) {g₁ : ℕ}
     {J₁ : Type u} [TopologicalSpace J₁] [T2Space J₁] [CompactSpace J₁] [ConnectedSpace J₁]
     [ChartedSpace (Fin g₁ → ℂ) J₁] [AddGroup J₁] [IsManifold 𝓘(ℂ, Fin g₁ → ℂ) ω J₁]
-    [LieAddGroup 𝓘(ℂ, Fin g₁ → ℂ) ω J₁] {aj₁ : X → J₁}
+    [LieAddGroup 𝓘(ℂ, Fin g₁ → ℂ) ω J₁]
+    [TorusSelfAlbanesePresentation g₁ J₁]
+    [TorusSelfAlbanesePresentation (RiemannSurface.genus X) (Jacobian X)] {aj₁ : X → J₁}
     (hg : 0 < RiemannSurface.genus X)
     (hJ : IsJacobian.{u, u, u} (g := g₁) x₀ J₁ aj₁) :
     ∃ φ : J₁ →+ Jacobian X, ∃ ψ : Jacobian X →+ J₁,

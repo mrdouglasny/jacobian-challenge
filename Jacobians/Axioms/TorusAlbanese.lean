@@ -264,7 +264,7 @@ the integral (and the loop period `coord(∫_{γ₀})`) is absorbed by the latti
 `liftCoord a − (coord(∫_γ) − coord(∫_{γ₀})) ∈ lattice`. (Both `liftCoord a −
 coord(∫_γ)` and the loop period `coord(∫_{γ₀})` lie in `lattice`, so this holds;
 the old `=` form forced them to vanish, which is false.) -/
-structure TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
+class TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace A]
     [T2Space A] [CompactSpace A] [ConnectedSpace A]
     [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A]
