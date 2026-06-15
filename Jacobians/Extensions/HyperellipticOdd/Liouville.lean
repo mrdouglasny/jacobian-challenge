@@ -589,11 +589,11 @@ theorem liouvilleRawNumerator_tendsto_at_root
       change y ^ 2 ∈ e.target
       rwa [hySq]
     let a : HyperellipticAffine H := (affineChartProjY (H := H) p hpX).symm y
+    have hfst := affineChartProjY_symm_apply_fst (H := H) p hpX hyTarget
     have hxSymm : a = liouvilleChosenAffinePoint (H := H) z := by
       apply Subtype.ext
       apply Prod.ext
-      · have hfst := affineChartProjY_symm_apply_fst (H := H) p hpX hyTarget
-        have hleft : e.symm (H.f.eval z) = z := by
+      · have hleft : e.symm (H.f.eval z) = z := by
           have hleft' := e.left_inv hzSrc
           have heq : (e : ℂ → ℂ) z = H.f.eval z := by
             simp [e, polynomialLocalHomeomorph]
@@ -625,13 +625,13 @@ theorem liouvilleRawNumerator_tendsto_at_root
     have hExtTarget : (extChartAt 𝓘(ℂ, ℂ) q).target = (affineChartProjY (H := H) p hpX).target := hExt
     have hExtSymm : ((extChartAt 𝓘(ℂ, ℂ) q).symm : ℂ → HyperellipticOdd H Fact.out) = (c.symm : ℂ → HyperellipticOdd H Fact.out) := by
       have h_ext : (extChartAt 𝓘(ℂ, ℂ) q) = (chartAt ℂ q).toPartialEquiv := by simp
-      rw [h_ext]
+      rw [h_ext, hChQ]
     have hExtCoeA : ((extChartAt 𝓘(ℂ, ℂ) qA) : HyperellipticOdd H Fact.out → ℂ) = (cA : HyperellipticOdd H Fact.out → ℂ) := by
       have h_ext : (extChartAt 𝓘(ℂ, ℂ) qA) = (chartAt ℂ qA).toPartialEquiv := by simp
-      rw [h_ext]
+      rw [h_ext, hChQA]
     have hExtSrcA : (extChartAt 𝓘(ℂ, ℂ) qA).source = cA.source := by
       have h_ext : (extChartAt 𝓘(ℂ, ℂ) qA) = (chartAt ℂ qA).toPartialEquiv := by simp
-      rw [h_ext]
+      rw [h_ext, hChQA]
     have hwExt : y ∈ (extChartAt 𝓘(ℂ, ℂ) q).target := by
       rwa [hExtTarget]
     have hSrcExt : (extChartAt 𝓘(ℂ, ℂ) q).symm y ∈ (extChartAt 𝓘(ℂ, ℂ) qA).source := by
@@ -831,14 +831,8 @@ theorem liouvilleRemovableNumerator_readout
     intro hzero
     have hy_zero : y = 0 := sq_eq_zero_iff.mp (by simpa [hzero] using hy_sq)
     exact hy_ne hy_zero
-  have hPrefSrc : (coe p : HyperellipticOdd H Fact.out) ∈
-      (chartAt ℂ (coe a : HyperellipticOdd H Fact.out)).source := by
-    change (coe p : HyperellipticOdd H Fact.out) ∈ (affineLiftChart a).source
-    simp only [affineLiftChart, OpenPartialHomeomorph.lift_openEmbedding_source]
-    refine ⟨p, ?_, rfl⟩
-    simpa [affineChartAt_of_mem_smoothLocusY (H := H) a haY] using hp_source
   have hAff_a_p : form.coeff (coe a) z = form.coeff (coe p) z := by
-    exact coeff_eq_of_projX_symm form a haY hz hPrefSrc
+    exact coeff_eq_of_projX_symm form a haY hz
   let ach := liouvilleChosenAffinePoint (H := H) z
   have hachY : ach ∈ smoothLocusY H := by
     simpa [ach] using liouvilleChosenAffinePoint_mem_smoothLocusY (H := H) hz_eval
@@ -858,7 +852,9 @@ theorem liouvilleRemovableNumerator_readout
         · simpa [ach, hp_snd] using hsame
       unfold liouvilleRawNumerator
       rw [show liouvilleChosenAffinePoint (H := H) z = ach from rfl]
-      rw [hach_eq, hp_snd, ← hAff_a_p]
+      rw [hach_eq]
+      change form.coeff (coe p) z * p.val.2 = form.coeff (coe a) z * y
+      rw [hp_snd, ← hAff_a_p]
     · have hach_eq : ach = p.invol := by
         apply Subtype.ext
         apply Prod.ext
@@ -869,15 +865,15 @@ theorem liouvilleRemovableNumerator_readout
         rwa [hp_snd]
       have hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z) ∈
           (extChartAt 𝓘(ℂ, ℂ) (coe p.invol : HyperellipticOdd H Fact.out)).source := by
-        have h_symm_eq : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z = coe p := by
-          have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm = (affineLiftChart p).symm := by
+        have h_symm_eq : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm z : HyperellipticOdd H Fact.out) = coe p := by
+          have h_symm : ((extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)).symm : ℂ → HyperellipticOdd H Fact.out) = ((affineLiftChart p).symm : ℂ → HyperellipticOdd H Fact.out) := by
             have h_ext : (extChartAt 𝓘(ℂ, ℂ) (coe p : HyperellipticOdd H Fact.out)) = (chartAt ℂ (coe p)).toPartialEquiv := by simp
-            rw [h_ext, chartAt_coe p]
+            rw [h_ext]
           rw [h_symm]
           change (affineLiftChart p).symm z = coe p
           unfold affineLiftChart
           rw [OpenPartialHomeomorph.lift_openEmbedding_symm]
-          change coe ((HyperellipticAffine.affineChartAt p).symm y) = coe p
+          change coe ((HyperellipticAffine.affineChartAt p).symm z) = coe p
           rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY p hpYp]
           have h_symm_apply : (affineChartProjX p hpYp).symm z = p := by
             have hpSrc : p ∈ (affineChartProjX p hpYp).source :=
@@ -902,11 +898,18 @@ theorem liouvilleRemovableNumerator_readout
       unfold liouvilleRawNumerator
       rw [show liouvilleChosenAffinePoint (H := H) z = ach from rfl]
       rw [hach_eq]
-      rw [show p.invol.val.2 = -y by simpa [p, hp_snd]]
-      rw [show ach.val.2 = -y by simpa [ach, hp_snd] using hneg] at hsheet
-      rw [hsheet]
+      change form.coeff (coe p.invol) z * p.invol.val.2 = form.coeff (coe a) z * y
+      have hp_invol_snd : p.invol.val.2 = -y := by
+        change -p.val.2 = -y
+        rw [hp_snd]
+      rw [hp_invol_snd]
+      have hp_snd_y : p.val.2 = y := hp_snd
+      have hsheet' : form.coeff (coe p) z * y = form.coeff (coe p.invol) z * -y := by
+        have hsheet_raw := hsheet
+        rw [hp_snd_y, hp_invol_snd] at hsheet_raw
+        exact hsheet_raw
+      rw [← hsheet']
       rw [← hAff_a_p]
-      ring
   rw [hNumerator]
   field_simp [hy_ne]
 
