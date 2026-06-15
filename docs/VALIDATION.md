@@ -196,8 +196,8 @@ validation work: it upgrades the artifact from "necessary-condition evidence"
 With G1 done, the **Buzzard challenge itself is axiom-free**; the remaining
 G2–G4 are the torus-side axioms specific to this Albanese capstone (the
 "validation endgame", beyond the 24). See `AXIOM_AUDIT.md` for their statements
-and vetting status, and [`VERIFICATION.md`](VERIFICATION.md) for the
-informal↔formal map + axiom certificate.
+and vetting status (the axiom certificate / verification side), and
+[`FAITHFULNESS.md`](FAITHFULNESS.md) for the informal↔formal correspondence.
 
 ---
 

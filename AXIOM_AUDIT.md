@@ -60,7 +60,7 @@ per-declaration trace: [`docs/dependency-trace.md`](docs/dependency-trace.md);
 machine-checked dependency of every headline:
 [`docs/axiom-report.txt`](docs/axiom-report.txt).
 
-**Active project axioms: 10** — all **10** in our own modules (the
+**Active project axioms: 9** — all **9** in our own modules (the
 **ELLIPTIC H₁ FLIP**, 2026-06-12 (EP lane, `feat/elliptic-pi1`):
 **`AX_Elliptic_H1_symplectic` is now DELETED — its statement is a proven
 theorem.** The covering-space engine `π₁(V ⧸ Λ) ≅ Λ` / `H₁(V ⧸ Λ) ≅ Λ`
@@ -511,8 +511,8 @@ primitives that are statement-vetted but not yet discharged.
 
 | Class | Count | Nature | Trust |
 |------|------:|--------|-------|
-| 1 — textbook-standard | 7 | classical theorems, citable | high (`AX_torus_oneforms_dualCover` **DISCHARGED 2026-06-12**, TORUS lane; `AX_AbelSupset` **DISCHARGED 2026-06-12**, SUP lane; `AX_genus_eq_zero_iff_homeo` **DISCHARGED 2026-06-11**, PR #209) |
-| 2a — data-existence | 1 | "this function/object exists with spec S"; the 2 `LineBundle` type stubs **DISCHARGED 2026-06-12 (stub retirement)** (now real `def`s) | spec needs review |
+| 1 — textbook-standard | 5 | classical theorems, citable | high (`AX_torus_self_albanese`/`AX_period_functoriality`/`AX_curve_generates_jacobian` **RETIRED 2026-06-14 PR #253** — proved as theorems; `AX_torus_uniformization` (A1) added here but **OUT of every headline closure** via the presented-torus class reframe; `AX_torus_oneforms_dualCover`/`AX_AbelSupset`/`AX_genus_eq_zero_iff_homeo` discharged earlier) |
+| 2a — data-existence | 2 | "this function/object exists with spec S"; `AX_curve_image_subgroup_isOpen` (AK, local Jacobi inversion) added 2026-06-14 PR #253, gates `ofCurve_isJacobian`; the 2 `LineBundle` type stubs **DISCHARGED 2026-06-12** (now real `def`s) | spec needs review |
 | 2b — definition-asserting | 0 | both functoriality entries **DISCHARGED 2026-06-11 (#31)** (now theorems) | — |
 | 2c — atlas / structure | 2 | curve-specific chart constructions | real but unverified |
 | 2d — **flagged** | 0 | both Liouville L2/L3 **DISCHARGED** (now theorems) | — |
@@ -535,9 +535,11 @@ Rating **Standard**; sources `SA` (self-audit vs textbook) + `GR`/`DT`
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean:66` | cup product on H₁ (standard). **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — strict ⟨a,a⟩=0 true for all classes (cup-product antisymmetry + ℤ torsion-free; embedded-multicurve pushoff); pointwise form is the clean Lean statement |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean:91` | Poincaré duality / unimodularity. **DT-vetted 2026-06-09: SATISFIABLE/FAITHFUL** — UCT (Ext vanishes, H₀ free) + PD give the adjoint iso; bijective (not merely injective) is genuinely required for the symplectic ℤ-basis (⟨e₁,e₂⟩=2 counterexample) and genuinely true; g=0 vacuous-sound |
 | `AX_torus_oneforms_dualCover` | ✅ **DISCHARGED 2026-06-12** (TORUS lane) — now a `noncomputable def`, statement verbatim at `Axioms/TorusAlbanese.lean`; body `LinearEquiv.refl ℂ _`. The Birkenhake–Lange analytic content (invariant 1-form ⇒ constant cover-linear functional via Liouville) is captured in the *definition* `TorusHolomorphicOneForm m A := Module.Dual ℂ (Fin m → ℂ)`; relative to that model the equivalence is the identity. `ofCurve_isJacobian` `#print axioms` no longer lists it (kernel-verified, no `sorryAx`). See `docs/planning/TORUS_ALBANESE_ROUTE.md` | Birkenhake–Lange Ch. 1 |
-| `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
-| `AX_period_functoriality` | `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
-| `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean:168` | Mumford *Curves & their Jacobians*; Milne *AV* §I |
+| `AX_torus_self_albanese` | ✅ **DISCHARGED 2026-06-14** (repoint refactor, commit `df4bcd2`) — retired; now the theorem `torus_self_albanese` in `UniversalProperty.lean`, proved from A1 (`AX_torus_uniformization`). *(Soundness note: its `liftCoord_eq_albanese` field was found UNSATISFIABLE on 2026-06-14 and corrected to the mod-Λ congruence before the discharge — Gemini-re-vetted.)* | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | ✅ **DISCHARGED 2026-06-14** — retired; now the theorem `period_functoriality`, proved from A1 + the analytic bridge `torusAmbientLinear_periodMapInBasis_mem` (developing-map H₁-naturality `analyticLoopsGenerateH1` + self-Albanese torus loop-period) | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | ✅ **DISCHARGED 2026-06-14** — retired; now the theorem `curve_generates_jacobian`, proved from AK (`AX_curve_image_subgroup_isOpen`) via open-subgroup-of-connected-group | Mumford *Curves & their Jacobians*; Milne *AV* §I |
+| `AX_torus_uniformization` (A1) | ✅ **OUT of every headline closure 2026-06-14** (escape-hatch `bc3a115`): `TorusSelfAlbanesePresentation` is now a `class`, so the target torus carries it as a typeclass parameter. `ofCurve_isJacobian` / `isJacobian_iso_jacobian` `#print axioms` = std-3 + AK only; `isJacobian_unique` = std-3 (**axiom-free**). A1 stays *declared* (NO global instance) for the future abstract-torus generality file; satisfiable witness `ℂ^m/Λ` | Birkenhake–Lange Ch. 1 |
+| `AX_curve_image_subgroup_isOpen` (AK) | `Axioms/AlbaneseInterface.lean:76` — Kirov-interface axiom; discharge decl-level-scoped to ≈25 decls (`docs/planning/ALBANESE_REPOINT_REFACTOR.md`) | local Jacobi inversion, Forster 21.3 |
 
 *Note.* `AX_genus_eq_zero_iff_homeo` is **fully discharged** (2026-06-11,
 PR #209): the abstract `genus_eq_zero_iff_homeo` is now standard-3, and the
@@ -624,10 +626,12 @@ future work.
 
 | Axiom | Status | Reference |
 |-------|--------|-----------|
-| `AX_curve_generates_jacobian` | **stated** — `Axioms/TorusAlbanese.lean:168` | Mumford; Milne *AV* §I |
-| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean:73` | Birkenhake–Lange Ch. 1 |
-| `AX_torus_self_albanese` | **stated** — `Axioms/TorusAlbanese.lean:88` | Birkenhake–Lange Ch. 1 |
-| `AX_period_functoriality` | **stated** — `Axioms/TorusAlbanese.lean:120` | Griffiths–Harris Ch. 0 & 2 |
+| `AX_curve_generates_jacobian` | ✅ **discharged 2026-06-14** — now theorem `curve_generates_jacobian` (from AK) | Mumford; Milne *AV* §I |
+| `AX_torus_oneforms_dualCover` | **discharged #232** — `Axioms/TorusAlbanese.lean` | Birkenhake–Lange Ch. 1 |
+| `AX_torus_self_albanese` | ✅ **discharged 2026-06-14** — now theorem `torus_self_albanese` (= A1) | Birkenhake–Lange Ch. 1 |
+| `AX_period_functoriality` | ✅ **discharged 2026-06-14** — now theorem `period_functoriality` (from A1 + bridge) | Griffiths–Harris Ch. 0 & 2 |
+| `AX_torus_uniformization` (A1) | **stated** — `Axioms/AlbaneseInterface.lean:54`; the one irreducible torus axiom | Birkenhake–Lange Ch. 1 |
+| `AX_curve_image_subgroup_isOpen` (AK) | **stated** — `Axioms/AlbaneseInterface.lean:76`; Kirov-interface, discharge scoped | Forster 21.3 |
 | `AX_torus_descent_holo` | ✅ **DISCHARGED 2026-06-06** — now a `theorem` (see Recently discharged) | Birkenhake–Lange Ch. 1; quotient-manifold descent |
 
 The direct holomorphicity step (E6 in the plan) was originally blocked by a
@@ -707,7 +711,7 @@ The text scan over-counts (doc examples); the kernel is authoritative.
 
 ```bash
 # kernel count of project axioms (excludes Lean-core + compiler-internal axioms + Vendor)
-#   prints 10 — the vendored Kirov subtree is now axiom-free, so 10 is the total (after the 2026-06-12 TORUS-lane axiom-1 flip, net −1: AX_torus_oneforms_dualCover → noncomputable def LinearEquiv.refl, off the Buzzard critical path; before that the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
+#   prints 9 — the vendored Kirov subtree is now axiom-free, so 9 is the total (after the 2026-06-12 TORUS-lane axiom-1 flip, net −1: AX_torus_oneforms_dualCover → noncomputable def LinearEquiv.refl, off the Buzzard critical path; before that the 2026-06-12 EP-lane elliptic-H₁ flip, net −1: AX_Elliptic_H1_symplectic deleted, its statement now the proven standard-3 witness ellipticPeriodCycleBasis; before that the 2026-06-12 SUP-lane Abel ⊇ flip, net −1: AX_AbelSupset → theorem on the Liouville route, challenge-critical 2 → 1; before that the same-day Abel split-flip, net 0: AX_AbelTheorem → theorem, remainder AX_AbelSupset added; and the 2026-06-12 line-bundle stub retirement de-opaqued LineBundle + LineBundle.ofDivisor, net −2 from 15; before that the 2026-06-11 genus-0 uniformization flip (PR #209, parallel account) discharged AX_genus_eq_zero_iff_homeo, net −1 from 16; the prior 16 after the 2026-06-11 functoriality-cluster completion (#31) discharged AX_pullbackAmbient_preserves_lattice + AX_pushforward_pullback, net −2 from 18; the prior 18 after the 2026-06-11 keystone flip discharged the 2 Layer-3 cohomology axioms h1coh_zero_finrank + serreDuality_equiv AND de-opaqued canonicalDivisor, net −3 from 21; the prior 21 = post-Phase-D H1coh(+3)+cohomologyLES discharges, D1 merge of the 3 cycle-basis/RBR axioms into AX_PeriodCycleBasis, less the 5 discharged RR/Serre+H1, the 3 period-cluster axioms, PlaneCurve.instChartedSpace #117 + instIsManifold #52, the 3 trace-cluster axioms #26/#27/#28, AX_ofCurve_contMDiff PR #179, the 7-axiom odd-atlas infinity-chart cluster PR #183, and AX_pushforwardAmbient_preserves_lattice #30).
 # (lean needs a file argument, so write the snippet then run it:)
 cat > /tmp/axcount.lean <<'LEAN'
 import Jacobians
@@ -724,7 +728,7 @@ run_cmd do
       if !s.startsWith "Jacobians.Vendor" && !(internal.contains nm) then n := n + 1
   logInfo s!"project axioms (non-vendor): {n}"
 LEAN
-lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 10
+lake env lean /tmp/axcount.lean   # → project axioms (non-vendor): 9
 
 # text cross-check (9 doc-example lines are tagged `-- not-an-axiom`):
 grep -rnE '^axiom ' Jacobians --include='*.lean' | grep -v '/Vendor/' | grep -v 'not-an-axiom' | wc -l

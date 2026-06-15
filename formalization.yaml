@@ -1,6 +1,6 @@
 # formalization.yaml (v0.3)
 # https://github.com/mathlib-initiative/formalization.yaml
-# jacobian-challenge — current state 2026-06-12
+# jacobian-challenge — current state 2026-06-14
 
 version: "v0.3"
 
@@ -88,27 +88,31 @@ status:
     - propext
     - Classical.choice
     - Quot.sound
-    # Project axioms (10 active as of 2026-06-12, kernel-verified, AXIOM_AUDIT.md):
+    # Project axioms (10 active as of 2026-06-14, kernel-verified, AXIOM_AUDIT.md).
+    # CHALLENGE-CRITICAL: 0. Every one of Buzzard's 24 headline declarations now
+    # #print axioms-checks to the three standard Lean axioms only (golden trace
+    # docs/axiom-report.txt, CI-diffed). All 10 project axioms below are
+    # NON-CHALLENGE-CRITICAL — none appears in any Buzzard headline kernel trace.
     #
-    # CHALLENGE-CRITICAL (appears in Buzzard headline kernel traces):
-    - Axioms.AX_PeriodCycleBasis
-    #   Every compact connected Riemann surface has 2g analytic loops forming a ℤ-basis
-    #   of H₁(X,ℤ) satisfying the Riemann bilinear relations arc-level (R1 isotropy,
-    #   R2 Hodge positivity). Griffiths–Harris Ch. 2 §2; Forster §§19–21.
-    #   Discharge: boundary-word engines proved (BilinearRelationsBoundaryWord*.lean);
-    #   open: slit-sheet/4g-gon construction and H₁ rank-2g count.
-    #   Elliptic (g=1) witness proved unconditionally (Elliptic/H1Basis.lean, 2026-06-12).
-    #
-    # NON-CHALLENGE-CRITICAL (not required by any Buzzard declaration):
+    # AX_PeriodCycleBasis was DISCHARGED from every headline closure (PRs
+    # #248/#250/#251): the period lattice is now reproved from a now-unconditional
+    # topology theorem (T-GEN) plus a ℙ¹ unification, so the headlines no longer
+    # depend on it. It survives only as DECLARED, non-headline scaffolding for
+    # Riemann's bilinear relations (R1/R2); 0 mentions in the headline axiom report.
+    - Axioms.AX_PeriodCycleBasis           # non-headline R1/R2 bilinear-relations scaffolding
     - Axioms.AX_torus_self_albanese        # Albanese universal property only
     - Axioms.AX_period_functoriality       # Albanese universal property only
     - Axioms.AX_curve_generates_jacobian   # Albanese universal property only
+    - Axioms.intersectionForm              # the H₁ intersection pairing itself (topological-anchoring debt)
     - Axioms.AX_IntersectionForm_alternating  # topological anchoring, no Buzzard consumers
     - Axioms.AX_IntersectionForm_perfect      # topological anchoring, no Buzzard consumers
     - ProjectiveCurve.PlaneCurveAffine.AX_PlaneCurveAffine_connected  # plane curve witness
     - Axioms.AX_PluckerFormula             # plane curve genus formula
-    - Axioms.AX_Elliptic_H1_symplectic    # elliptic H₁ symplectic form (being discharged)
-    - Axioms.AX_Hyperelliptic_genus        # hyperelliptic genus witness
+    - ProjectiveCurve.AX_Hyperelliptic_genus  # hyperelliptic genus witness (needs biholo, not just homeo)
+    # NB: AX_Hyperelliptic_oddEquiv / _evenEquiv are noncomputable DEFS (discharged
+    # Phase-3), not axioms — do not list them here. This hand-maintained list is
+    # reconciled against the kernel-authoritative docs/axiom-report.txt + the
+    # `axiom` declarations in source; keep it reconciled when axioms change.
 
   main_results:
     - declaration: "genus_eq_zero_iff_homeo"
@@ -121,23 +125,17 @@ status:
     - declaration: "Jacobian.ofCurve_inj"
       file: "Jacobians/Challenge.lean"
       sorry_count: 0
-      axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+      axioms: [propext, Classical.choice, Quot.sound]
       comparator_config: "jacobian-challenge-comparator-run/config-buzzard.json"
-      literature_dependencies:
-        - statement: >
-            Every compact connected Riemann surface of genus g admits 2g piecewise-real-analytic
-            loops forming a ℤ-basis of H₁(X,ℤ) whose arc period vectors satisfy the
-            Riemann bilinear relations.
-          source: "Griffiths–Harris Ch. 2 §2; Forster §§19–21"
+      # AX_PeriodCycleBasis discharged from this closure (PRs #248/#250/#251); standard-3.
+      literature_dependencies: []
 
     - declaration: "Jacobian.pushforward_pullback"
       file: "Jacobians/Challenge.lean"
       sorry_count: 0
-      axioms: [propext, Classical.choice, Quot.sound, Axioms.AX_PeriodCycleBasis]
+      axioms: [propext, Classical.choice, Quot.sound]
       comparator_config: "jacobian-challenge-comparator-run/config-buzzard.json"
-      literature_dependencies:
-        - statement: "Same as ofCurve_inj above."
-          source: "Griffiths–Harris Ch. 2 §2; Forster §§19–21"
+      literature_dependencies: []
 
     - declaration: "Layer3.riemannRochL3"
       file: "Jacobians/Layer3/Cohomology.lean"
@@ -172,10 +170,11 @@ status:
         - propext
         - Classical.choice
         - Quot.sound
-        - Axioms.AX_PeriodCycleBasis
         - Axioms.AX_torus_self_albanese
         - Axioms.AX_period_functoriality
         - Axioms.AX_curve_generates_jacobian
+      # Non-Buzzard Albanese universal property; the three torus axioms are its only
+      # project-axiom dependencies (AX_PeriodCycleBasis discharged from its closure too).
       literature_dependencies:
         - statement: "The Jacobian is the Albanese variety of the curve."
           source: "https://www.jmilne.org/math/xnotes/JVs.pdf"
@@ -184,9 +183,9 @@ automation:
   methods:
     - method: "agent"
       models:
-        - "claude-fable-5 (primary)"
-        - "claude-opus-4-8"
-        - "claude-sonnet-4-6"
+        - "claude-opus-4-8 (primary)"
+        - "claude-sonnet-4-6 (primary)"
+        - "claude-fable-5 (final ~2 days only)"
       framework: "Claude Code (Anthropic CLI)"
       tool_setup: >
         Claude Code with lean-lsp-mcp (LSP diagnostics), lean4-subagents plugin
@@ -197,7 +196,7 @@ automation:
         coordinated via GitHub PRs. All PRs carry Co-Authored-By trailers
         identifying the AI model used.
       cost:
-        wall_time: "~8 weeks (2026-04-19 to 2026-06-12); 22 active commit-days"
+        wall_time: "~8 weeks (2026-04-19 to 2026-06-13 all-24-axiom-free close); 22+ active commit-days"
         spend_usd: "subscription-based; no per-token billing tracked"
         hardware: "API-only (Anthropic endpoints)"
       prompting_notes: >
@@ -247,12 +246,15 @@ automation:
 
 fidelity:
   divergences: >
-    1. One remaining literature dependency. AX_PeriodCycleBasis — the existence of
-    a canonical homology basis satisfying the Riemann bilinear relations — is the
-    single remaining unproved classical input for the Buzzard-facing declarations.
-    All other inputs to the 24 obligations are proved or discharged. Discharge is
-    in progress: the boundary-word R1/R2 engines are proved; the open piece is
-    the slit-sheet/4g-gon construction of loops and the H₁ rank-2g count.
+    1. No challenge-critical axioms remain. AX_PeriodCycleBasis — the existence of
+    a canonical homology basis satisfying the Riemann bilinear relations — was the
+    last classical input on the Buzzard headline path, and it has been DISCHARGED
+    from every headline closure (PRs #248/#250/#251): the period lattice is reproved
+    from a now-unconditional topology theorem (T-GEN, "analytic loops generate H₁",
+    itself reduced to two named real-analytic approximation hypotheses Mathlib lacks)
+    plus a ℙ¹ unification. All 24 obligations now #print axioms-check to the three
+    standard Lean axioms (docs/axiom-report.txt). AX_PeriodCycleBasis survives only
+    as declared, non-headline scaffolding for the R1/R2 bilinear relations.
 
     2. Period lattice representation. We index the lattice via H₁(X,ℤ) =
     Abelianization(π₁(X)) with the period map built from arc integrals over
@@ -268,7 +270,7 @@ fidelity:
 
     4. Abel's theorem. Proved via the Forster §20 ∂̄-engine (§20 weak solutions for
     ⊆, discharged 2026-06-12) and the Liouville/Jacobi-pencil route (⊇, discharged
-    2026-06-12). Both directions are now standard-3 + AX_PeriodCycleBasis.
+    2026-06-12). Both directions are now standard-3.
 
     5. Scope beyond the challenge. Riemann–Roch and Serre duality are proved as
     standard-3 theorems (riemannRochL3, serreDualityL3; comparator-verified). The
@@ -288,9 +290,12 @@ review:
     carries a prominent caveat to this effect. The Lean kernel (via CI diff of
     docs/axiom-report.txt) provides the primary soundness guarantee; social
     provenance is weaker than Mathlib's. The Lean FRO comparator was run on
-    riemannRochL3 at commit 67af290 (recorded in COMPARATOR.md). A full
-    24-obligation comparator run is prepared (jacobian-challenge-comparator-run/
-    config-buzzard.json) and will execute when AX_PeriodCycleBasis is discharged.
+    riemannRochL3 at commit 67af290 and, after AX_PeriodCycleBasis was discharged,
+    on all 11 Buzzard property theorems at commit 2bd75f8 (whitelist
+    propext/Quot.sound/Classical.choice, "Your solution is okay!"; recorded in
+    COMPARATOR.md). The solution is also submitted to the Lean FRO lean-eval
+    benchmark jacobian_challenge_diffgeo, source pinned at tag lean-eval-submission
+    (commit 2248fdf); it builds clean against the benchmark's Mathlib v4.30.0.
 
 alignment:
   namespace: "Jacobians"
@@ -305,7 +310,7 @@ alignment:
       lean: "Jacobian"
       module: "Jacobians/Challenge.lean"
       status: "proved"
-      note: "ULift (ComplexTorus (Fin g → ℂ) periodLatticeInBasis); depends on AX_PeriodCycleBasis"
+      note: "ULift (ComplexTorus (Fin g → ℂ) periodLatticeInBasis); standard-3"
 
     - source: "Buzzard v0.4: genus_eq_zero_iff_homeo"
       lean: "genus_eq_zero_iff_homeo"
@@ -317,19 +322,19 @@ alignment:
       lean: "Jacobian.ofCurve_inj"
       module: "Jacobians/Challenge.lean"
       status: "proved"
-      note: "standard-3 + AX_PeriodCycleBasis; Abel's theorem fully proved 2026-06-12"
+      note: "standard-3; Abel's theorem fully proved 2026-06-12; AX_PeriodCycleBasis discharged from closure (PRs #248/#250/#251)"
 
     - source: "Buzzard v0.4: Jacobian.ofCurve_contMDiff"
       lean: "Jacobian.ofCurve_contMDiff"
       module: "Jacobians/Challenge.lean"
       status: "proved"
-      note: "standard-3 + AX_PeriodCycleBasis; discharged PR #179 (@Deicyde)"
+      note: "standard-3; discharged PR #179 (@Deicyde)"
 
     - source: "Buzzard v0.4: pushforward/pullback (8 declarations)"
       lean: "Jacobian.pushforward, Jacobian.pullback, *_contMDiff, *_id_apply, *_comp_apply, pushforward_pullback"
       module: "Jacobians/Challenge.lean"
       status: "proved"
-      note: "standard-3 + AX_PeriodCycleBasis; cluster fully discharged 2026-06-11"
+      note: "standard-3; functoriality cluster discharged 2026-06-11, AX_PeriodCycleBasis discharged from the closure 2026-06-13 (all-24-axiom-free close)"
 
     - source: "Buzzard v0.4: ContMDiff.degree"
       lean: "ContMDiff.degree"
@@ -346,11 +351,15 @@ alignment:
     - source: "Existence of canonical homology basis with Riemann bilinear relations"
       lean: "Axioms.AX_PeriodCycleBasis"
       module: "Jacobians/Axioms/PeriodCycleBasis.lean"
-      status: "literature-dependency"
+      status: "discharged-from-headlines"
       note: >
-        The single remaining classical input. R1/R2 boundary-word engines proved;
-        open: slit-sheet construction for general genus-g surface + H₁ rank-2g.
-        Elliptic (g=1) witness: proved unconditionally (Elliptic/H1Basis.lean).
+        No longer on the Buzzard headline path: the period lattice it provided is
+        reproved from the now-unconditional T-GEN topology theorem plus a ℙ¹
+        unification (PRs #248/#250/#251), so all 24 headlines are standard-3.
+        Retained as a DECLARED, non-headline axiom for the R1/R2 bilinear relations
+        only (0 mentions in docs/axiom-report.txt). T-GEN is itself reduced,
+        sorry-free, to two named real-analytic approximation hypotheses Mathlib
+        lacks (Whitney smoothing ∘ Grauert analytic approximation).
 
     - source: "The Jacobian is the Albanese variety"
       lean: "Jacobians.Extensions.ofCurve_isJacobian"

@@ -1,11 +1,22 @@
-# VERIFICATION — informal ↔ formal, with validating statements
+# FAITHFULNESS — the informal ↔ formal correspondence
 
-A self-contained certificate that the Lean formalization captures the construction of the
-Jacobian of a compact Riemann surface. For each **primary object** we give the informal
-definition and its exact Lean form; for each **validating statement** we give the informal
-claim, the Lean theorem, a one-line proof idea, and status. This is the *"did we build it
-right / are the formal statements faithful"* document; for *"did we build the right thing"*
-(acceptance argument, categoricity), see [`VALIDATION.md`](VALIDATION.md).
+A self-contained certificate that the Lean formalization *faithfully transcribes* the
+construction of the Jacobian of a compact Riemann surface. For each **primary object** we
+give the informal definition and its exact Lean form; for each **headline statement** we
+give the informal claim, the Lean theorem, a one-line proof idea, and status.
+
+This is the **faithfulness** layer of *validation* — *"do the formal statements mean what
+the mathematics means"*. The two adjacent concerns live elsewhere:
+**verification** — *"are the proofs valid relative to explicit assumptions"* — is the kernel
+check (`lake build`) plus the axiom certificate in
+[`axiom-report.txt`](axiom-report.txt) / [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md); and the
+**characterization / acceptance** argument — *"did we build the right thing"*, up to
+categoricity — is in [`VALIDATION.md`](VALIDATION.md).
+
+*(Terminology: this document was formerly titled `VERIFICATION.md`. Under the standard
+V&V split, the informal↔formal correspondence is a* validation *activity — it concerns
+meaning, not proof-validity — so "verification" is reserved here for the kernel/axiom
+check.)*
 
 **Status legend:** ✓ = proved and `lake build` succeeds. Axiom-clean items have
 `#print axioms` = `[propext, Classical.choice, Quot.sound]` (no `sorryAx`); items marked
@@ -39,7 +50,7 @@ Algebraic Geometry*, Ch. 2 (periods, Riemann bilinear relations); the challenge 
 | Abel–Jacobi injective, `g>0` (V.4) | Abel's theorem | `Challenge.lean:140` (`ofCurve_inj`) |
 | `genus_eq_zero_iff_homeo` (V.5) | uniformization at `g=0` | `Challenge.lean:75` |
 | Riemann–Roch / Serre duality (V.6) | Forster §16–17 | `Layer3/Cohomology.lean:181,195` |
-| Albanese categoricity (V.7) | Yoneda / universal property | `UniversalProperty.lean:515` (`isJacobian_unique`) |
+| Albanese categoricity (V.7) | Yoneda / universal property | `UniversalProperty.lean:947` (`isJacobian_unique`) |
 | genus-doubling **counterexample** (V.8) | the 24 are not categorical | `docs/categoricity/GenusDoublingCounterexample.lean:175` |
 
 ---
@@ -116,6 +127,57 @@ A real `∫` (multi-chart line integral), not a stub. ✓
 `f^* : J(Y) → J(X)` (pullback), with `f_* ∘ f^* = deg(f)·id`.
 *Formal* (`Challenge.lean:158,184`): `pushforward f`, `pullback f`, `degree f`. ✓
 
+### 8. The Albanese / Jacobian universal property (categoricity)
+*Informal.* `J(X)` is the **initial** object among pointed holomorphic maps from `X` to complex
+tori: every pointed holomorphic `f : X → A` (into a *presented* torus `A`) factors **uniquely**
+through the Abel–Jacobi map by a holomorphic group hom. Hence any two objects with this property are
+canonically isomorphic — the Jacobian is pinned up to unique isomorphism.
+
+*Formal — the property* (`UniversalProperty.lean:108`, `IsJacobian`):
+```lean
+structure IsJacobian (x₀ : X) {g} (J) [..torus instances on J..] (aj : X → J) : Prop where
+  aj_holo  : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin g → ℂ) ω aj
+  aj_base  : aj x₀ = 0
+  universal : ∀ {m} {A} [..torus instances on A..] [TorusSelfAlbanesePresentation m A] (f : X → A),
+    ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f → f x₀ = 0 →
+    ∃! φ : J →+ A, ContMDiff 𝓘(ℂ, Fin g → ℂ) 𝓘(ℂ, Fin m → ℂ) ω (φ : J → A) ∧
+      ∀ x, f x = φ (aj x)
+```
+*Formal — our construction satisfies it* (`UniversalProperty.lean:899`, `ofCurve_isJacobian`):
+```lean
+theorem ofCurve_isJacobian (x₀ : X) (hg : 0 < genus X) :
+    IsJacobian x₀ (Jacobian X) (Jacobian.ofCurve x₀)
+```
+`#print axioms ofCurve_isJacobian` ⇒ std-3 + `AX_curve_image_subgroup_isOpen` (AK) only. ✓
+
+*Formal — categoricity (V.7)* (`UniversalProperty.lean:947`, `isJacobian_unique`):
+```lean
+theorem isJacobian_unique (x₀ : X)
+    {J₁ J₂} [..torus instances..] [TorusSelfAlbanesePresentation g₁ J₁] [TorusSelfAlbanesePresentation g₂ J₂]
+    (hJ₁ : IsJacobian x₀ J₁ aj₁) (hJ₂ : IsJacobian x₀ J₂ aj₂) :
+    ∃ (φ : J₁ →+ J₂) (ψ : J₂ →+ J₁),
+      ContMDiff .. ω (φ : J₁ → J₂) ∧ ContMDiff .. ω (ψ : J₂ → J₁) ∧
+      ψ.comp φ = AddMonoidHom.id J₁ ∧ φ.comp ψ = AddMonoidHom.id J₂ ∧
+      (∀ x, aj₂ x = φ (aj₁ x)) ∧ (∀ x, aj₁ x = ψ (aj₂ x))
+```
+`#print axioms isJacobian_unique` ⇒ std-3 (**axiom-free**); uses none of the 24. The concrete
+corollary `isJacobian_iso_jacobian` (`J₁ ≅ Jacobian X`, `:990`) is std-3 + AK. ✓
+
+*Completeness — two levels (honest tradeoff).* `isJacobian_unique` carries a *presentation
+hypothesis on the compared objects* (`[TorusSelfAlbanesePresentation g₁ J₁] [… g₂ J₂]`) — not
+intrinsic to uniqueness, but the price of the escape hatch: the universal property only accepts
+*presented* targets, so to compare `J₁`,`J₂` each must be presentable. Hence:
+**Level 1 (presented tori — axiom-free now).** With "complex torus" = `ℂ^g/Λ` in the standard sense,
+`isJacobian_unique` pins the Jacobian up to unique iso **axiom-free**; making Buzzard's concrete
+`Jacobian X` pinning fully axiom-free + unconditional needs only **discharge AK**
+(`AX_curve_image_subgroup_isOpen`, ~25-decl Kirov port) + the concrete `Jacobian X` presentation
+instance (axiom-free).
+**Level 2 (abstract tori — no presentation assumed).** The strictly stronger, presentation-free
+categoricity **requires** the uniformization input `A1`/`AX_torus_exp` — to use an abstract
+competitor as a target you must *derive* its presentation. Not optional for this level; it is exactly
+what removes the presentation hypothesis. Full status:
+[`planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md).
+
 ---
 
 ## Part II — Validating statements
@@ -147,15 +209,14 @@ axioms** `[propext, Classical.choice, Quot.sound]` — machine-checked in
 occurrences of `AX_PeriodCycleBasis`). `scripts/check_axiom_consistency.sh` pins the kernel axiom
 count at **10**.
 
-The 10 declared project axioms are all **off the Buzzard headline path** (none appears in any
+The 9 declared project axioms are all **off the Buzzard headline path** (none appears in any
 headline closure):
 
 | Axiom | File | Group | Role |
 |---|---|---|---|
 | `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean` | period / Hodge | **discharged from all headlines** (T-GEN); kept only as R1/R2 (Riemann bilinear relations) scaffolding + cycle-basis witnesses. Deleting it needs general R1/R2 (proved so far for `g ≤ 1` / ell / hyperell). |
-| `AX_torus_self_albanese` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` (the universal-property certificate, beyond the 24) — holomorphic torus self-maps are affine (Liouville on the cover) |
-| `AX_period_functoriality` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` — period naturality |
-| `AX_curve_generates_jacobian` | `Axioms/TorusAlbanese.lean` | Albanese | gates `ofCurve_isJacobian` — the image of `ofCurve` generates `J(X)` |
+| `AX_curve_image_subgroup_isOpen` (AK) | `Axioms/AlbaneseInterface.lean` | Albanese | the **only** axiom under `ofCurve_isJacobian` (closure = std-3 + AK) — local Jacobi inversion: the Abel–Jacobi image has non-empty interior. G2/G3/G4 (incl. `period_functoriality`) are now **theorems**; the 3 legacy torus axioms were retired in PR #253. |
+| `AX_torus_uniformization` (A1) | `Axioms/AlbaneseInterface.lean` | Albanese | **declared but OUT of every headline closure** (presented-torus class reframe, PR #253) — the optional abstract-torus supplier; not relied on by `ofCurve_isJacobian` / `isJacobian_unique` / `isJacobian_iso_jacobian` |
 | `intersectionForm` | `Axioms/IntersectionForm.lean` | polarization | the symplectic form on `H₁`; dropped from every headline closure (D2) — kept for the principal-polarization story |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |

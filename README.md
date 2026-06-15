@@ -35,7 +35,7 @@ A Lean 4 formalization of [Kevin Buzzard's **Jacobian Challenge**](https://gist.
 |---|---|
 | **Buzzard API** | 24/24 `sorry`s closed as real `def`s / `instance`s; machine-checked against the pinned v0.4 spec |
 | **Challenge-critical axioms** | **0** — all 24 headlines are `#print axioms` standard-3 (`AX_PeriodCycleBasis` discharged from every headline closure, PRs #248/#250/#251; machine-checked: 0 mentions in [`docs/axiom-report.txt`](docs/axiom-report.txt)) |
-| **Axioms** | 10 active, **none on the Buzzard headline path** — Albanese-torus (3), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
+| **Axioms** | 9 active, **none on the Buzzard headline path** — the Albanese, now resting on AK `AX_curve_image_subgroup_isOpen` alone (`ofCurve_isJacobian` `#print axioms` = std-3 + AK after the 2026-06-14 escape-hatch typeclass reframe; `isJacobian_unique` is axiom-free; A1 `AX_torus_uniformization` is declared but out of every headline closure), intersection-form laws, Plücker, concrete-curve witnesses, and `AX_PeriodCycleBasis` (kept only as non-headline R1/R2 bilinear-relations scaffolding) — live count in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) |
 | **Beyond the challenge** | Riemann–Roch + Serre duality proved as theorems; Albanese categoricity proved; explicit positive-genus curve instances |
 | **`sorry`s** | 0 in the core / challenge path; a handful in out-of-scope extensions and an optional adelic `H¹` construction |
 | **Build** | `lake build` green; Lean `v4.30.0`, Mathlib pinned in `lake-manifest.json` |
@@ -127,9 +127,14 @@ Albanese property quantified over complex tori of any dimension. **Categoricity
 itself is axiom-free**: `isJacobian_unique` proves any two objects satisfying the
 property are uniquely biholomorphically isomorphic (standard-3, using none of
 Buzzard's 24 — PR #246). Our concrete construction satisfies the property via
-`ofCurve_isJacobian`, which now carries only three Albanese-torus axioms
-(`AX_PeriodCycleBasis` was discharged from it too, PR #251); discharging those
-three is the validation endgame.
+`ofCurve_isJacobian`, which now carries only **AK** (`AX_curve_image_subgroup_isOpen`):
+the three legacy Albanese-torus axioms were discharged/escaped in PR #253 (G3 proved; A1
+moved out of the closure via the presented-torus typeclass reframe). Discharging AK
+(a ~25-decl Kirov port) is the remaining endgame. Full status, the two-level "what it takes
+to pin the Jacobian" tradeoff, and the step-by-step AK-from-Kirov proof bridge:
+[`docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md)
+(→ [`ALBANESE_REPOINT_REFACTOR.md`](docs/planning/ALBANESE_REPOINT_REFACTOR.md),
+[`A1_THINNING_PLAN.md`](docs/planning/A1_THINNING_PLAN.md)).
 
 Credit for the universal-property repair belongs to the challenge thread:
 **Michael Stoll** raised it first (2026-04-19, "to make sure no hacks are
@@ -153,7 +158,7 @@ Genuine theorems — what a reader can trust the formalization to have establish
 | `genus_eq_zero_iff_homeo` | **axiom-free** (RR pole extraction → degree-1 map → S²; backward via π₁(S²)=1 + Liouville) |
 | Riemann–Roch + Serre duality | **theorems** over the Layer-3 cohomology tower (standard-3) |
 | Albanese **categoricity** `isJacobian_unique` | **axiom-free** (standard-3) — any two objects satisfying the universal property are uniquely biholomorphically isomorphic; uses none of Buzzard's 24 (PR #246) |
-| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + 3 torus axioms (`AX_PeriodCycleBasis` discharged, PR #251) |
+| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + AK only (the 3 torus axioms discharged/escaped, PR #253) |
 | Functoriality identities (push/pull id + comp, degree) | derived **theorems** |
 
 ### Explicit curves — concrete, axiom-clean validation
@@ -269,9 +274,9 @@ scaffolding already sets up.
 - **Finish the Albanese proof (the validation endgame).** Categoricity of the
   universal property — `isJacobian_unique`, that *any* two objects satisfying it
   are uniquely isomorphic — is already axiom-free. What still rests on axioms is
-  that *our* construction satisfies the property (`ofCurve_isJacobian`, on three
-  complex-torus axioms: `AX_torus_self_albanese`, `AX_period_functoriality`,
-  `AX_curve_generates_jacobian`). Discharging those makes the full certificate —
+  that *our* construction satisfies the property (`ofCurve_isJacobian`), which now rests
+  on a single curve-side axiom AK (`AX_curve_image_subgroup_isOpen`) — the three legacy
+  torus axioms were discharged/escaped (PR #253). Discharging AK makes the full certificate —
   "our Jacobian is *the* Jacobian, up to unique isomorphism" — axiom-free, the
   strongest validation the construction can carry.
 - **Explicit hyperelliptic Jacobians.** The Jacobian of a hyperelliptic curve is
@@ -458,8 +463,9 @@ on the standard three Lean axioms.
 ## Further reading
 
 - [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md) — kernel-verified per-axiom audit.
-- [`docs/VERIFICATION.md`](docs/VERIFICATION.md) — informal↔formal map of every
-  object + the axiom certificate (*"did we build it right"*).
+- [`docs/FAITHFULNESS.md`](docs/FAITHFULNESS.md) — the informal↔formal
+  correspondence for every object (*"do the statements mean the mathematics"* —
+  the faithfulness layer of validation).
 - [`docs/VALIDATION.md`](docs/VALIDATION.md) — the acceptance argument: definition
   + anti-vacuity subset + universal property (*"did we build the right thing"*).
 - [`docs/axiom-report.txt`](docs/axiom-report.txt) — golden `#print axioms` trace.
