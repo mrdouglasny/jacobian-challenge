@@ -278,23 +278,6 @@ structure TorusSelfAlbanesePresentation (m : ℕ) (A : Type*) [TopologicalSpace 
       liftCoord a - (torusAlbaneseCoordinateOfFunctional (A := A) I -
         torusAlbaneseCoordinateOfFunctional (A := A) I₀) ∈ lattice
 
-/-- **Axiom.** A complex torus is canonically recovered from its own
-Abel-Jacobi map.
-
-Reference: Birkenhake-Lange, *Complex Abelian Varieties*, Ch. 1.
-Strategy: integrate invariant one-forms from `0` to a point on the universal
-cover; the period ambiguity is exactly the lattice, so the resulting quotient
-map is a biholomorphic group isomorphism. The presentation payload states this
-as the self-Albanese identity: its coordinate lift is the invariant-form
-integration coordinate, and composing that coordinate class with `fromQuot` is
-the identity on `A`.
-
-Vetted: Gemini + Codex 2026-06-02. -/
-axiom AX_torus_self_albanese {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
-    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
-    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :
-    TorusSelfAlbanesePresentation m A
-
 /-- The cover-linear map induced by dualizing pullback of one-forms. -/
 noncomputable def torusAmbientLinear {X : Type u} [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
@@ -311,26 +294,6 @@ noncomputable def torusAmbientLinear {X : Type u} [TopologicalSpace X] [T2Space 
   (Module.evalEquiv ℂ (Fin m → ℂ)).symm.toLinearMap.comp
     ((eA.symm.toLinearMap).dualMap.comp
       ((torusPullbackOneForm f hf).dualMap.comp eX.symm.toLinearMap))
-
-/-- **Axiom.** A holomorphic map from a compact curve to a complex torus sends
-the source period lattice to the target period lattice under the dual period
-map.
-
-Reference: Griffiths-Harris, Ch. 0 and Ch. 2.
-Strategy: for every cycle `γ` and invariant form `ω`, use
-`∮_{f_* γ} ω = ∮_γ f^*ω`; in basis coordinates this says exactly that the
-dualized pullback map carries the source lattice into the target lattice.
-
-Vetted: Gemini + Codex 2026-06-02. -/
-axiom AX_period_functoriality {X : Type u} [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] {m : ℕ} {A : Type v} [TopologicalSpace A] [T2Space A]
-    [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
-    [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A]
-    (P : TorusPresentation m A) (f : X → A)
-    (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin m → ℂ) ω f) :
-    (periodLatticeInBasis X (Classical.arbitrary X) (jacobianBasis X)).toAddSubgroup ≤
-      P.lattice.toAddSubgroup.comap (torusAmbientLinear f hf).toAddMonoidHom
 
 /-- Kirov's descended map is smooth when the source quotient is equipped with
 the project `ComplexTorus` atlas and the target quotient with Kirov's atlas. -/
@@ -497,19 +460,5 @@ theorem AX_torus_descent_holo {X : Type u} [TopologicalSpace X] [T2Space X]
             ((Vendor.Kirov.ZLatticeQuotient.pushforward ΛX P.lattice L hL) z.down)) :=
     P.fromQuot_holo.comp (hpush.comp (Jacobians.Jacobian.contMDiff_ulift_down (X := X)))
   simpa [ΛX] using htotal
-
-/-- **Axiom.** The Abel-Jacobi image of a positive-genus curve generates its
-Jacobian as an abstract additive group.
-
-Reference: Mumford, *Curves and their Jacobians*; Milne, *Abelian Varieties* §I.
-Strategy: Jacobi inversion writes every Jacobian point as a difference of
-effective divisors of degree `g`, hence as a finite sum of Abel-Jacobi image
-points.
-
-Vetted: Gemini + Codex 2026-06-02. -/
-axiom AX_curve_generates_jacobian {X : Type*} [TopologicalSpace X] [T2Space X]
-    [CompactSpace X] [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X]
-    [IsManifold 𝓘(ℂ) ω X] (x₀ : X) (h : 0 < RiemannSurface.genus X) :
-    AddSubgroup.closure (Set.range (Jacobian.ofCurve x₀)) = ⊤
 
 end Jacobians.Axioms
