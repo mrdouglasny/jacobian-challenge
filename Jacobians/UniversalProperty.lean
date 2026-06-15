@@ -47,13 +47,15 @@ closes the def-degeneracy gap categorically. **It is PROVED below as
 `ofCurve_isJacobian` (2026-06-05):** for genus > 0, every pointed holomorphic
 `f : X → A` to a complex torus factors uniquely through `ofCurve` by a
 holomorphic group hom (genuine `∃!`). The `ConnectedSpace (Jacobian X)`
-prerequisite is supplied (a torus is connected); the proof rests on the vetted
-minimal Albanese interface — A1 `AX_torus_uniformization` + AK
-`AX_curve_image_subgroup_isOpen` (the former three torus axioms
-`AX_torus_self_albanese` / `AX_period_functoriality` / `AX_curve_generates_jacobian`
-were proved as theorems and retired in the 2026-06-14 repoint refactor;
-`AX_torus_oneforms_dualCover` discharged #232, `AX_torus_descent_holo` 2026-06-06),
-and is `#print axioms`-clean (no `sorryAx`). The original proof
+prerequisite is supplied (a torus is connected). The target ranges over
+**presented** complex tori (`A` carrying `[TorusSelfAlbanesePresentation m A]`), so the
+checked closure of `ofCurve_isJacobian` is standard-3 + AK
+(`AX_curve_image_subgroup_isOpen`) only, and `isJacobian_unique` is axiom-free. A1
+`AX_torus_uniformization` is the *optional* abstract-torus supplier and is OUT of every
+headline closure (no global instance). The former three torus axioms
+(`AX_torus_self_albanese` / `AX_period_functoriality` / `AX_curve_generates_jacobian`)
+were proved as theorems and retired (2026-06-14); `AX_torus_oneforms_dualCover` discharged
+#232, `AX_torus_descent_holo` 2026-06-06. `#print axioms`-clean (no `sorryAx`). The original proof
 plan (lemma DAG, vetted-axiom leaves, effort) is in
 `docs/universal-property-proof-plan.md`.
 
@@ -114,9 +116,10 @@ structure IsJacobian
   aj_holo : ContMDiff 𝓘(ℂ) 𝓘(ℂ, Fin g → ℂ) ω aj
   /-- It sends the basepoint to the identity of the torus. -/
   aj_base : aj x₀ = 0
-  /-- Universal property: every pointed holomorphic map `f : X → A` to a complex
-  torus (of any dimension `m`) factors uniquely through `aj` by a holomorphic
-  group homomorphism. -/
+  /-- Universal property: every pointed holomorphic map `f : X → A` to a
+  **presented** complex torus `A` (of any dimension `m`, carrying a
+  `[TorusSelfAlbanesePresentation m A]`) factors uniquely through `aj` by a
+  holomorphic group homomorphism. -/
   universal :
     ∀ {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A] [CompactSpace A] [ConnectedSpace A]
       [ChartedSpace (Fin m → ℂ) A] [AddGroup A]

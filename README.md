@@ -127,9 +127,10 @@ Albanese property quantified over complex tori of any dimension. **Categoricity
 itself is axiom-free**: `isJacobian_unique` proves any two objects satisfying the
 property are uniquely biholomorphically isomorphic (standard-3, using none of
 Buzzard's 24 — PR #246). Our concrete construction satisfies the property via
-`ofCurve_isJacobian`, which now carries only three Albanese-torus axioms
-(`AX_PeriodCycleBasis` was discharged from it too, PR #251); discharging those
-three is the validation endgame.
+`ofCurve_isJacobian`, which now carries only **AK** (`AX_curve_image_subgroup_isOpen`):
+the three legacy Albanese-torus axioms were discharged/escaped in PR #253 (G3 proved; A1
+moved out of the closure via the presented-torus typeclass reframe). Discharging AK
+(a ~25-decl Kirov port) is the remaining endgame.
 
 Credit for the universal-property repair belongs to the challenge thread:
 **Michael Stoll** raised it first (2026-04-19, "to make sure no hacks are
@@ -153,7 +154,7 @@ Genuine theorems — what a reader can trust the formalization to have establish
 | `genus_eq_zero_iff_homeo` | **axiom-free** (RR pole extraction → degree-1 map → S²; backward via π₁(S²)=1 + Liouville) |
 | Riemann–Roch + Serre duality | **theorems** over the Layer-3 cohomology tower (standard-3) |
 | Albanese **categoricity** `isJacobian_unique` | **axiom-free** (standard-3) — any two objects satisfying the universal property are uniquely biholomorphically isomorphic; uses none of Buzzard's 24 (PR #246) |
-| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + 3 torus axioms (`AX_PeriodCycleBasis` discharged, PR #251) |
+| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + AK only (the 3 torus axioms discharged/escaped, PR #253) |
 | Functoriality identities (push/pull id + comp, degree) | derived **theorems** |
 
 ### Explicit curves — concrete, axiom-clean validation
@@ -269,9 +270,9 @@ scaffolding already sets up.
 - **Finish the Albanese proof (the validation endgame).** Categoricity of the
   universal property — `isJacobian_unique`, that *any* two objects satisfying it
   are uniquely isomorphic — is already axiom-free. What still rests on axioms is
-  that *our* construction satisfies the property (`ofCurve_isJacobian`, on three
-  complex-torus axioms: `AX_torus_self_albanese`, `AX_period_functoriality`,
-  `AX_curve_generates_jacobian`). Discharging those makes the full certificate —
+  that *our* construction satisfies the property (`ofCurve_isJacobian`), which now rests
+  on a single curve-side axiom AK (`AX_curve_image_subgroup_isOpen`) — the three legacy
+  torus axioms were discharged/escaped (PR #253). Discharging AK makes the full certificate —
   "our Jacobian is *the* Jacobian, up to unique isomorphism" — axiom-free, the
   strongest validation the construction can carry.
 - **Explicit hyperelliptic Jacobians.** The Jacobian of a hyperelliptic curve is

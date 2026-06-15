@@ -47,10 +47,13 @@ compact complex Lie group `A` is a surjective group hom `ℂ^m → A` (compact +
 connected) whose kernel is a full lattice; invariant forms lift to the constant
 cover differentials, so integrating them gives the cover coordinate.
 
-Vetted: see the file-level vetting note in
-`docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md` (self-audit; non-vacuous —
-witness `ℂ^m/Λ` itself). (NOT INDEPENDENTLY MODEL-VETTED — Gemini deep-think API
-was unavailable at authoring; re-vet before relying downstream.) -/
+Status: **OUT of every headline closure** (2026-06-14 escape hatch) — declared but NOT
+relied on by `ofCurve_isJacobian` / `isJacobian_unique` / `isJacobian_iso_jacobian`, and
+registered with NO global instance. Satisfiable / non-vacuous (witness `ℂ^m/Λ` itself; the
+underlying mod-Λ `liftCoord_eq_albanese` field was Gemini 3.1-pro re-vetted 2026-06-14). The
+*minimal* abstract-supplier boundary `AX_torus_exp` (the planned thinner axiom,
+`docs/planning/A1_THINNING_PLAN.md`) is the deep-think-vetted one; this full-presentation form
+is kept only as the placeholder supplier until that lands. -/
 axiom AX_torus_uniformization {m : ℕ} {A : Type*} [TopologicalSpace A] [T2Space A]
     [CompactSpace A] [ConnectedSpace A] [ChartedSpace (Fin m → ℂ) A] [AddGroup A]
     [IsManifold 𝓘(ℂ, Fin m → ℂ) ω A] [LieAddGroup 𝓘(ℂ, Fin m → ℂ) ω A] :

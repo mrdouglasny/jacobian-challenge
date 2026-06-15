@@ -1,4 +1,5 @@
 import Jacobians.Axioms.TorusAlbanese
+import Jacobians.Axioms.AlbaneseInterface
 
 /-!
 # Compatibility import for universal-property axioms
