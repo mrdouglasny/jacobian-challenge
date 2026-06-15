@@ -1234,7 +1234,7 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     change (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm t ∈
       ((HyperellipticAffine.affineChartProjX a h_y_ne).lift_openEmbedding OnePoint.isOpenEmbedding_coe).source
     rw [h_eq_coe]
-    rw [hLiftEq]
+    rw [← hLiftEq]
     exact mem_affineLiftChart_source a
   have hEqNear : (↑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ∘
       ↑(extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm) =ᶠ[nhds t]
@@ -1290,7 +1290,7 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         rw [h_prop]
         rfl
       rw [h_eval]
-      exact (a.squareLocalHomeomorph h_y_ne).left_inv (HyperellipticAffine.squareLocalHomeomorph_val_mem_source a h_y_ne)
+      exact (a.squareLocalHomeomorph h_y_ne).left_inv (HyperellipticAffine.affineChartProjX_mem_source a h_y_ne)
     rw [h_symm_eq] at h_deriv
     exact h_deriv
   rw [hd_bwd_eq] at hCocycle
