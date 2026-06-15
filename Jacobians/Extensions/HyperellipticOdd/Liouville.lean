@@ -1513,6 +1513,58 @@ lemma tendsto_chosen_point_div_pow {H : HyperellipticData} [Fact (Odd H.f.natDeg
     simp
   exact tendsto_eval_div_pow_cocompact H.f (2 * H.genus + 2) h_deg
 
+lemma tendsto_pow_div_eval_f_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegree)] (k : ℕ) (hk : k < H.f.natDegree) :
+    Filter.Tendsto (fun z : ℂ => z ^ k / H.f.eval z) (Filter.cocompact ℂ) (𝓝 0) := by
+  have h_eq : (fun z : ℂ => z ^ k / H.f.eval z) =ᶠ[Filter.cocompact ℂ]
+      (fun z => (z ^ k / z ^ H.f.natDegree) * (H.f.eval z / z ^ H.f.natDegree)⁻¹) := by
+    filter_upwards [eventually_ne_zero_cocompact, eventually_eval_ne_zero_cocompact] with z hz_z hz_f
+    have h_zn : z ^ H.f.natDegree ≠ 0 := pow_ne_zero _ hz_z
+    field_simp
+  rw [Filter.tendsto_congr' h_eq]
+  have h1 : Filter.Tendsto (fun z : ℂ => z ^ k / z ^ H.f.natDegree) (Filter.cocompact ℂ) (𝓝 0) :=
+    tendsto_pow_div_pow_cocompact k H.f.natDegree hk
+  have h2 : Filter.Tendsto (fun z : ℂ => (H.f.eval z / z ^ H.f.natDegree)⁻¹) (Filter.cocompact ℂ)
+      (𝓝 H.f.leadingCoeff⁻¹) := by
+    have h_lim := tendsto_eval_div_pow_self H.f
+    exact h_lim.inv₀ hyperelliptic_leadingCoeff_ne_zero
+  have h_prod := h1.mul h2
+  rw [zero_mul] at h_prod
+  exact h_prod
+
+lemma tendsto_pow_div_chosen_point_snd {H : HyperellipticData} [Fact (Odd H.f.natDegree)] :
+    Filter.Tendsto (fun z : ℂ => z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2)
+      (Filter.cocompact ℂ) (𝓝 0) := by
+  refine tendsto_zero_of_tendsto_sq_zero ?_
+  have h_ev : ∀ᶠ z : ℂ in Filter.cocompact ℂ, z ≠ 0 := eventually_ne_zero_cocompact
+  have h_eq : (fun z : ℂ => ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖ ^ 2)
+    =ᶠ[Filter.cocompact ℂ]
+      (fun z => ‖z ^ (2 * H.genus - 2) / H.f.eval z‖) := by
+    filter_upwards [h_ev] with z hz
+    rw [← norm_pow]
+    congr 1
+    rw [div_pow, liouvilleChosenAffinePoint_snd_sq]
+    congr 1
+    rw [← pow_mul]
+    congr 1
+    omega
+  rw [Filter.tendsto_congr' h_eq]
+  rw [← tendsto_zero_iff_norm_tendsto_zero]
+  have h_deg : 2 * H.genus - 2 < H.f.natDegree := by
+    rcases Fact.out (p := Odd H.f.natDegree) with ⟨k, hk⟩
+    dsimp [HyperellipticData.genus]
+    rw [hk]
+    simp
+  exact tendsto_pow_div_eval_f_cocompact (2 * H.genus - 2) h_deg
+
+theorem liouvilleTwoSheetSumRemovable_differentiable
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
+    Differentiable ℂ (liouvilleTwoSheetSumRemovable form) :=
+  liouvilleTwoSheetSumRemovable_differentiable_of_analyticAt_off_roots_and_branch_tendsto
+    form
+    (fun z hz => @liouvilleTwoSheetSum_analyticAt_off_roots H _ form z hz)
+    (fun z hz => @liouvilleTwoSheetSum_branch_tendsto H _ form z hz)
+
+
 lemma tendsto_fw_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegree)] :
     Filter.Tendsto (fun z : ℂ => f_w H (liouvilleChosenAffinePoint (H := H) z))
       (Filter.cocompact ℂ) (𝓝 0) := by
@@ -1999,6 +2051,144 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
   rw [hR_eq]
   exact mul_le_mul hBnd h_D_bound (by positivity) hB_nonneg
 
+lemma tendsto_coeff_coe_cocompact (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
+    Filter.Tendsto (fun z : ℂ => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z)
+      (Filter.cocompact ℂ) (𝓝 0) := by
+  obtain ⟨R, hR_nonneg, h_bound⟩ := liouvilleRemovableNumerator_eventually_norm_div_pow_le form
+  have h_squeeze : ∀ᶠ z : ℂ in Filter.cocompact ℂ,
+      ‖form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z‖ ≤
+        R * ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖ := by
+    have h_ev_ne : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 := eventually_eval_ne_zero_cocompact
+    have h_z_nz : ∀ᶠ z : ℂ in Filter.cocompact ℂ, z ≠ 0 := eventually_ne_zero_cocompact
+    filter_upwards [h_ev_ne, h_z_nz, h_bound] with z hz_f hz_z hz_b
+    have hz_y_ne : (liouvilleChosenAffinePoint (H := H) z).val.2 ≠ 0 := by
+      have h_prop := (liouvilleChosenAffinePoint (H := H) z).property
+      change (liouvilleChosenAffinePoint (H := H) z).val.2 ^ 2 = H.f.eval (liouvilleChosenAffinePoint (H := H) z).val.1 at h_prop
+      rw [liouvilleChosenAffinePoint_fst] at h_prop
+      intro hc
+      rw [hc, zero_pow (by norm_num)] at h_prop
+      exact hz_f h_prop.symm
+    have h_readout : form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z =
+        liouvilleRemovableNumerator form z / (liouvilleChosenAffinePoint (H := H) z).val.2 := by
+      rw [liouvilleRemovableNumerator_of_eval_ne_zero form hz_f]
+      unfold liouvilleRawNumerator
+      rw [mul_div_cancel_right₀ _ hz_y_ne]
+    rw [h_readout]
+    have h_pow_ne : z ^ (H.genus - 1) ≠ 0 := pow_ne_zero _ hz_z
+    have h_split : (liouvilleRemovableNumerator form z / (liouvilleChosenAffinePoint (H := H) z).val.2) =
+        (liouvilleRemovableNumerator form z / z ^ (H.genus - 1)) *
+          (z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2) := by
+      field_simp
+    rw [h_split, norm_mul]
+    exact mul_le_mul_of_nonneg_right hz_b (norm_nonneg _)
+  have h_lim : Filter.Tendsto (fun z : ℂ => R * ‖z ^ (H.genus - 1) / (liouvilleChosenAffinePoint (H := H) z).val.2‖)
+      (Filter.cocompact ℂ) (𝓝 0) := by
+    have h_lim_zero := tendsto_pow_div_chosen_point_snd (H := H)
+    have h_lim_norm := h_lim_zero.norm
+    have h_mul := h_lim_norm.const_mul R
+    rw [mul_zero] at h_mul
+    exact h_mul
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_lim
+    (Filter.eventually_of_mem Filter.univ_mem (fun z _ => norm_nonneg _)) h_squeeze
+
+lemma liouvilleTwoSheetSumRemovable_tendsto_cocompact
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
+    Filter.Tendsto (liouvilleTwoSheetSumRemovable form) (Filter.cocompact ℂ) (𝓝 0) := by
+  have h_eq : liouvilleTwoSheetSumRemovable form =ᶠ[Filter.cocompact ℂ]
+      (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z +
+        form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z) := by
+    have h_eval : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 := eventually_eval_ne_zero_cocompact
+    filter_upwards [h_eval] with z hz
+    rw [liouvilleTwoSheetSumRemovable_of_eval_ne_zero form hz]
+    unfold liouvilleTwoSheetSum
+    rw [if_neg hz]
+  rw [Filter.tendsto_congr' h_eq]
+  have h_lim1 := tendsto_coeff_coe_cocompact form
+  let T_form := pullbackOneForm (hyperellipticInvolution H Fact.out) (hyperellipticInvolution_contMDiff H Fact.out) form
+  have h_lim2_T := tendsto_coeff_coe_cocompact T_form
+  have h_lim2 : Filter.Tendsto (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z)
+      (Filter.cocompact ℂ) (𝓝 0) := by
+    have h_eq2 : (fun z => form.coeff (coe (liouvilleChosenAffinePoint (H := H) z).invol) z) =ᶠ[Filter.cocompact ℂ]
+        (fun z => T_form.coeff (coe (liouvilleChosenAffinePoint (H := H) z)) z) := by
+      have h_mem_V := eventually_mem_V_cocompact (H := H)
+      filter_upwards [h_mem_V] with z hz_V
+      let a := liouvilleChosenAffinePoint (H := H) z
+      have haY : a ∈ smoothLocusY H := hz_V.2.1
+      have hz_target : z ∈ (affineChartProjX (H := H) a haY).target := by
+        have h_fst := liouvilleChosenAffinePoint_fst (H := H) z
+        have h_src := affineChartProjX_mem_source a haY
+        have h_map := (affineChartProjX a haY).map_source h_src
+        rwa [h_fst] at h_map
+      have h_symm_z : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm z = coe a := by
+        have h_symm : (extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) =
+          (chartAt ℂ (coe a : HyperellipticOdd H Fact.out)).toPartialEquiv := by simp
+        rw [h_symm]
+        change (affineLiftChart a).symm z = coe a
+        unfold affineLiftChart
+        rw [OpenPartialHomeomorph.lift_openEmbedding_symm]
+        change coe ((HyperellipticAffine.affineChartAt a).symm z) = coe a
+        rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a haY]
+        congr 1
+        have h_src := affineChartProjX_mem_source a haY
+        exact (affineChartProjX a haY).left_inv h_src
+      have hy_src : hyperellipticInvolution H Fact.out ((extChartAt 𝓘(ℂ, ℂ) (coe a :
+        HyperellipticOdd H Fact.out)).symm z) ∈
+        (extChartAt 𝓘(ℂ, ℂ) (coe a.invol : HyperellipticOdd H Fact.out)).source := by
+        rw [h_symm_z]
+        have h_invol_coe : hyperellipticInvolution H Fact.out (coe a) = coe a.invol := rfl
+        rw [h_invol_coe]
+        exact mem_extChartAt_source (coe a.invol)
+      have h_eq_invol := pullback_coeff_eq_invol form a haY hz_target hy_src
+      exact h_eq_invol.symm
+    rw [Filter.tendsto_congr' h_eq2]
+    exact h_lim2_T
+  have h_add := h_lim1.add h_lim2
+  rw [add_zero] at h_add
+  exact h_add
+
+theorem liouvilleTwoSheetSumRemovable_eq_zero
+    (form : HolomorphicOneForm (HyperellipticOdd H Fact.out)) :
+    liouvilleTwoSheetSumRemovable form = 0 := by
+  have h_diff := liouvilleTwoSheetSumRemovable_differentiable form
+  have h_lim := liouvilleTwoSheetSumRemovable_tendsto_cocompact form
+  obtain ⟨C, h_bounded_all⟩ : ∃ C : ℝ, ∀ z : ℂ, ‖liouvilleTwoSheetSumRemovable form z‖ ≤ C := by
+    obtain ⟨K, hK_compact, hK_bound⟩ :=
+      (hasBasis_cocompact.tendsto_iff (nhds_basis_closedBall 0)).mp h_lim 1 (by norm_num)
+    have h_cont := h_diff.continuous
+    have h_norm_cont : Continuous (fun z => ‖liouvilleTwoSheetSumRemovable form z‖) := by
+      exact continuous_norm.comp h_cont
+    obtain ⟨M, hM_bound⟩ := hK_compact.exists_bound_of_continuousOn h_norm_cont.continuousOn
+    use max M 1
+    intro z
+    by_cases hzK : z ∈ K
+    · exact le_trans (hM_bound z hzK) (le_max_left M 1)
+    · exact le_trans (hK_bound z hzK) (le_max_right M 1)
+  obtain ⟨p, hp_deg, hp_eval⟩ := differentiable_eq_polynomial_of_growth 0 (liouvilleTwoSheetSumRemovable form) h_diff C h_bounded_all
+  have hp_C : ∃ c : ℂ, p = Polynomial.C c := by
+    use p.coeff 0
+    ext i
+    by_cases hi : i = 0
+    · subst hi; simp
+    · have h_deg : p.natDegree = 0 := by omega
+      have h_coeff : p.coeff i = 0 := Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
+      rw [h_coeff, Polynomial.coeff_C]
+      simp [hi]
+  obtain ⟨c, rfl⟩ := hp_C
+  have h_const_eval : ∀ z, liouvilleTwoSheetSumRemovable form z = c := by
+    intro z
+    rw [hp_eval z, Polynomial.eval_C]
+  have h_lim_c : Filter.Tendsto (fun _ : ℂ => c) (Filter.cocompact ℂ) (𝓝 0) := by
+    have h_congr : (fun _ : ℂ => c) = liouvilleTwoSheetSumRemovable form := by
+      ext z
+      rw [h_const_eval z]
+    rw [h_congr]
+    exact h_lim
+  have hc_zero : c = 0 := by
+    have h_lim_const : Filter.Tendsto (fun _ : ℂ => c) (Filter.cocompact ℂ) (𝓝 c) := tendsto_const_nhds
+    exact tendsto_nhds_unique h_lim_const h_lim_c
+  ext z
+  rw [h_const_eval z, hc_zero]
+  rfl
 
 /-! ## Part H: Readout — recover form coefficient from removable numerator
 
