@@ -193,7 +193,12 @@ functoriality) on real curve families and check the headlines are
   pipeline (chart-local 1-forms → cocycle → finite-dimensionality → genus) on a
   nontrivial positive-genus family, forcing the *general* `genus` definition to
   compute the right number, not just typecheck. The odd-degree track mirrors the
-  even one decl-for-decl (lower bound proved, upper bound in progress).
+  even one decl-for-decl (genus **fully discharged**, PR #223). Building on that, a **cycle basis
+  + explicit period map** on the odd hyperelliptic family — which would discharge
+  `AX_PeriodCycleBasis` there and give an explicit map from moduli (the branch points of `f`) to
+  period matrices in the Siegel upper half space — is largely scaffolded; the route to finish it is
+  in [`docs/planning/HYP_PERIOD_MAP_PLAN.md`](docs/planning/HYP_PERIOD_MAP_PLAN.md) (gap ledger:
+  [`HYP_CB_BLOCKER.md`](docs/planning/HYP_CB_BLOCKER.md)).
 - **`PlaneCurve`** — smooth plane curves with a fully proved manifold structure.
 
 Each curve's headline is `#print axioms`-clean — concrete, positive-genus
