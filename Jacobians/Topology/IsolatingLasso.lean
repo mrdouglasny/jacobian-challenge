@@ -91,7 +91,7 @@ private theorem spokedClass_cellCircle_eq {T : Finset ℂ} {s : ℂ}
   set g₀ := (pi1MulEquivOfHomeomorph φA yA).symm (FundamentalGroup.fromPath
     (Qmk (circleAround a (φA yA)))) with hg₀def
   have hEg₀ : E g₀ = Multiplicative.ofAdd 1 := by
-    show (pi1PuncturedPlaneIntAt a (φA yA)).symm
+    change (pi1PuncturedPlaneIntAt a (φA yA)).symm
       ((pi1MulEquivOfHomeomorph φA yA)
         ((pi1MulEquivOfHomeomorph φA yA).symm _)) = _
     rw [MulEquiv.apply_symm_apply, ← pi1PuncturedPlaneIntAt_ofAdd_one,
@@ -123,7 +123,7 @@ private theorem spokedClass_cellCircle_eq {T : Finset ℂ} {s : ℂ}
       rw [h1, h2, map_zpow, h3]
     -- the winding of the spoked circle is `1`
     have hwsc : wA sc = Multiplicative.ofAdd 1 := by
-      show (pi1PuncturedPlaneIntAt s (ιs yA)).symm
+      change (pi1PuncturedPlaneIntAt s (ιs yA)).symm
           (FundamentalGroup.mapOfEq ιs rfl
             (spokedClass ρ (cellCircle s z hcirc hzA hA'))) = _
       rw [mapOfEq_spokedClass]
@@ -285,7 +285,7 @@ theorem isolatingLasso_conj {T : Finset ℂ}
     rw [h2, ← Path.Homotopic.Quotient.mk_trans]
     exact Quotient.sound ⟨Path.Homotopy.transRefl q₁⟩
   refine ⟨FundamentalGroup.fromPath (Qmk (q₁.trans p₂.symm)), ?_⟩
-  show spokedClass p₁ (circleInPunctured s z₁ hcirc₁) = _
+  change spokedClass p₁ (circleInPunctured s z₁ hcirc₁) = _
   rw [hg₁eq, spokedClass_congr _ hq.symm, spokedClass_trans,
     spokedClass_loop_conj]
 
