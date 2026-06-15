@@ -183,9 +183,9 @@ automation:
   methods:
     - method: "agent"
       models:
-        - "claude-fable-5 (primary)"
-        - "claude-opus-4-8"
-        - "claude-sonnet-4-6"
+        - "claude-opus-4-8 (primary)"
+        - "claude-sonnet-4-6 (primary)"
+        - "claude-fable-5 (final ~2 days only)"
       framework: "Claude Code (Anthropic CLI)"
       tool_setup: >
         Claude Code with lean-lsp-mcp (LSP diagnostics), lean4-subagents plugin
