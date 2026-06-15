@@ -857,10 +857,12 @@ with two infinity sheets), which simplifies this argument.
 Jacobian factor that, combined with the `y`-factor in the numerator,
 produces the growth bound. -/
 
-lemma tendsto_eval_div_pow_self (Q : Polynomial ℂ) (hQ : Q ≠ 0) :
-    Filter.Tendsto (fun z : ℂ => Q.eval z / z ^ Q.natDegree) (Filter.cocompact ℂ) (𝓝 Q.leadingCoeff) := by
+lemma tendsto_eval_div_pow_self (Q : Polynomial ℂ) :
+    Filter.Tendsto (fun z : ℂ => Q.eval z / z ^ Q.natDegree) (Filter.cocompact ℂ)
+      (𝓝 Q.leadingCoeff) := by
   have h_eq : (fun z : ℂ => Q.eval z / z ^ Q.natDegree) =ᶠ[Filter.cocompact ℂ]
-      (fun z => Q.leadingCoeff + (Finset.range Q.natDegree).sum (fun i => Q.coeff i * (z ^ i / z ^ Q.natDegree))) := by
+      (fun z => Q.leadingCoeff +
+        (Finset.range Q.natDegree).sum (fun i => Q.coeff i * (z ^ i / z ^ Q.natDegree))) := by
     filter_upwards [eventually_ne_zero_cocompact] with z hz
     rw [Polynomial.eval_eq_sum_range, Finset.sum_range_succ, add_div, Finset.sum_div]
     have h_self : Q.coeff Q.natDegree * z ^ Q.natDegree / z ^ Q.natDegree = Q.leadingCoeff := by
@@ -874,7 +876,9 @@ lemma tendsto_eval_div_pow_self (Q : Polynomial ℂ) (hQ : Q ≠ 0) :
   have h_zero : (Finset.range Q.natDegree).sum (fun i => Q.coeff i * (0 : ℂ)) = 0 := by
     have : (fun i => Q.coeff i * (0 : ℂ)) = (fun _ => 0) := by ext; ring
     rw [this, Finset.sum_const_zero]
-  have h_sum_lim : Filter.Tendsto (fun z : ℂ => (Finset.range Q.natDegree).sum (fun i => Q.coeff i * (z ^ i / z ^ Q.natDegree)))
+  have h_sum_lim : Filter.Tendsto
+      (fun z : ℂ => (Finset.range Q.natDegree).sum
+        (fun i => Q.coeff i * (z ^ i / z ^ Q.natDegree)))
       (Filter.cocompact ℂ) (𝓝 0) := by
     rw [← h_zero]
     refine tendsto_finsetSum _ ?_
@@ -895,7 +899,7 @@ lemma tendsto_eval_div_pow_of_le (Q : Polynomial ℂ) (N : ℕ) (hQ : Q.natDegre
     by_cases h_zero : Q = 0
     · subst h_zero; use 0; simp
     · use Q.leadingCoeff
-      have h_lim := tendsto_eval_div_pow_self Q h_zero
+      have h_lim := tendsto_eval_div_pow_self Q
       rwa [← hQ_eq]
 
 lemma eventually_bounded_of_le (Q : Polynomial ℂ) (N : ℕ) (hQ : Q.natDegree ≤ N) :
@@ -946,14 +950,18 @@ lemma tendsto_fw_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegree)] :
     have h_S_inv_cont : ContinuousAt (fun u : ℂ => (InfinityInverse.S H u)⁻¹) 0 :=
       h_S_cont.inv₀ h_S_nz
     exact h_S_inv_cont.tendsto.comp tendsto_inv_cocompact_zero
-  have h_div_tendsto : Filter.Tendsto (fun z : ℂ => (liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1))
+  have h_div_tendsto : Filter.Tendsto
+      (fun z : ℂ => (liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1))
       (Filter.cocompact ℂ) (𝓝 0) :=
     tendsto_chosen_point_div_pow
-  have h_prod_tendsto : Filter.Tendsto (fun z : ℂ => ((liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1)) * (InfinityInverse.S H z⁻¹)⁻¹)
+  have h_prod_tendsto : Filter.Tendsto
+      (fun z : ℂ => ((liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1)) *
+        (InfinityInverse.S H z⁻¹)⁻¹)
       (Filter.cocompact ℂ) (𝓝 (0 * (InfinityInverse.S H 0)⁻¹)) :=
     h_div_tendsto.mul h_S_tendsto
   rw [zero_mul] at h_prod_tendsto
-  have h_prod_eq : (fun z : ℂ => ((liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1)) * (InfinityInverse.S H z⁻¹)⁻¹) =
+  have h_prod_eq : (fun z : ℂ => ((liouvilleChosenAffinePoint (H := H) z).val.2 /
+        z ^ (H.genus + 1)) * (InfinityInverse.S H z⁻¹)⁻¹) =
       (fun z : ℂ => f_w H (liouvilleChosenAffinePoint (H := H) z)) := by
     ext z
     unfold f_w
@@ -967,7 +975,8 @@ lemma eventually_mem_V_cocompact {H : HyperellipticData} [Fact (Odd H.f.natDegre
   have h_ne : ∀ᶠ z : ℂ in Filter.cocompact ℂ, z ≠ 0 := eventually_ne_zero_cocompact
   have h_eval : ∀ᶠ z : ℂ in Filter.cocompact ℂ, H.f.eval z ≠ 0 := eventually_eval_ne_zero_cocompact
   have h_src_nhds : (InfinityInverse.tLocalHomeomorph H).source ∈ 𝓝 (0 : ℂ) :=
-    (InfinityInverse.tLocalHomeomorph H).open_source.mem_nhds (InfinityInverse.tLocalHomeomorph_source H)
+    (InfinityInverse.tLocalHomeomorph H).open_source.mem_nhds
+      (InfinityInverse.tLocalHomeomorph_source H)
   have h_src_eventually := tendsto_fw_cocompact (H := H) h_src_nhds
   filter_upwards [h_ne, h_eval, h_src_eventually] with z hz_ne hz_eval hz_src
   refine ⟨hz_ne, ?_⟩
@@ -994,8 +1003,10 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
   let g : ℕ := H.genus
   let n : ℕ := ((H.f.natDegree - 1) / 2 - 1)
   have hAna : AnalyticAt ℂ (form.coeff (infty : HyperellipticOdd H Fact.out)) 0 := by
-    have h_open := isOpen_extChartAt_target (I := 𝓘(ℂ, ℂ)) (M := HyperellipticOdd H Fact.out) (infty : HyperellipticOdd H Fact.out)
-    have hz_target : (0 : ℂ) ∈ (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).target := by
+    have h_open := isOpen_extChartAt_target (I := 𝓘(ℂ, ℂ))
+      (M := HyperellipticOdd H Fact.out) (infty : HyperellipticOdd H Fact.out)
+    have hz_target : (0 : ℂ) ∈
+        (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).target := by
       rw [extChartAt_target]
       dsimp
       rw [Set.range_id, Set.inter_univ]
@@ -1004,18 +1015,29 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     exact (form.2.1 (infty : HyperellipticOdd H Fact.out)).analyticAt (h_open.mem_nhds hz_target)
   let B : ℝ := ‖form.coeff (infty : HyperellipticOdd H Fact.out) 0‖ + 1
   have hB_nonneg : 0 ≤ B := by positivity
-  have h_infty_bound : ∀ᶠ z : ℂ in Filter.cocompact ℂ, ‖form.coeff (infty : HyperellipticOdd H Fact.out) ((liouvilleChosenAffinePoint (H := H) z).val.2 / (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))‖ ≤ B := by
-    have h_cont : ContinuousAt (form.coeff (infty : HyperellipticOdd H Fact.out)) 0 := hAna.continuousAt
-    have h_mem := h_cont.norm (Metric.closedBall_mem_nhds (‖form.coeff infty 0‖) zero_lt_one)
-    have h_lim : Filter.Tendsto (fun z => (liouvilleChosenAffinePoint (H := H) z).val.2 / (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1)) (Filter.cocompact ℂ) (𝓝 0) := by
+  have h_infty_bound : ∀ᶠ z : ℂ in Filter.cocompact ℂ,
+      ‖form.coeff (infty : HyperellipticOdd H Fact.out)
+        ((liouvilleChosenAffinePoint (H := H) z).val.2 /
+          (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))‖ ≤ B := by
+    have h_cont : ContinuousAt (form.coeff (infty : HyperellipticOdd H Fact.out)) 0 :=
+      hAna.continuousAt
+    have h_mem := h_cont.norm
+      (Metric.closedBall_mem_nhds (‖form.coeff infty 0‖) zero_lt_one)
+    have h_lim : Filter.Tendsto (fun z => (liouvilleChosenAffinePoint (H := H) z).val.2 /
+        (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))
+        (Filter.cocompact ℂ) (𝓝 0) := by
       have h_div := tendsto_chosen_point_div_pow (H := H)
-      have h_eq : (fun z => (liouvilleChosenAffinePoint (H := H) z).val.2 / (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1)) =
+      have h_eq : (fun z => (liouvilleChosenAffinePoint (H := H) z).val.2 /
+          (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1)) =
         (fun z => (liouvilleChosenAffinePoint (H := H) z).val.2 / z ^ (H.genus + 1)) := by
         ext z
         rfl
       rwa [h_eq]
     filter_upwards [h_lim h_mem] with z hz
-    have hdist : dist ‖form.coeff (infty : HyperellipticOdd H Fact.out) ((liouvilleChosenAffinePoint (H := H) z).val.2 / (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))‖ ‖form.coeff infty 0‖ ≤ 1 := by
+    have hdist : dist ‖form.coeff (infty : HyperellipticOdd H Fact.out)
+      ((liouvilleChosenAffinePoint (H := H) z).val.2 /
+        (liouvilleChosenAffinePoint (H := H) z).val.1 ^ (H.genus + 1))‖
+      ‖form.coeff infty 0‖ ≤ 1 := by
       simpa [Metric.mem_closedBall] using hz
     rw [Real.dist_eq] at hdist
     have habs := abs_le.mp hdist
@@ -1043,7 +1065,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
   have hCD_nonneg : 0 ≤ C_D := by positivity
   let R : ℝ := B * (C_D / 2)
   have hR_nonneg : 0 ≤ R := mul_nonneg hB_nonneg (by positivity)
-  have h_D_ev : ∀ᶠ z : ℂ in Filter.cocompact ℂ, (z * (Polynomial.derivative H.f).eval z - (2 * (H.genus : ℂ) + 2) * H.f.eval z) ≠ 0 := by
+  have h_D_ev : ∀ᶠ z : ℂ in Filter.cocompact ℂ,
+      (z * (Polynomial.derivative H.f).eval z - (2 * (H.genus : ℂ) + 2) * H.f.eval z) ≠ 0 := by
     have h_f_ne_zero : H.f ≠ 0 := hyperelliptic_f_ne_zero
     have h_deriv_ne_zero : Polynomial.derivative H.f ≠ 0 := by
       intro hc
@@ -1054,8 +1077,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         rw [hk]
         simp
       omega
-    have h_lim_f := tendsto_eval_div_pow_self H.f h_f_ne_zero
-    have h_lim_deriv := tendsto_eval_div_pow_self (Polynomial.derivative H.f) h_deriv_ne_zero
+    have h_lim_f := tendsto_eval_div_pow_self H.f
+    have h_lim_deriv := tendsto_eval_div_pow_self (Polynomial.derivative H.f)
     have h_deg : H.f.natDegree = 2 * H.genus + 1 := by
       rcases Fact.out (p := Odd H.f.natDegree) with ⟨k, hk⟩
       dsimp [HyperellipticData.genus]
@@ -1069,8 +1092,10 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
       rfl
     rw [h_deg] at h_lim_f
     rw [h_deriv_deg] at h_lim_deriv
-    have h_ratio_eq : (fun z : ℂ => (z * (Polynomial.derivative H.f).eval z - (2 * (H.genus : ℂ) + 2) * H.f.eval z) / z ^ (2 * H.genus + 1)) =ᶠ[Filter.cocompact ℂ]
-        (fun z => ((Polynomial.derivative H.f).eval z / z ^ (2 * H.genus)) - (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1))) := by
+    have h_ratio_eq : (fun z : ℂ => (z * (Polynomial.derivative H.f).eval z -
+        (2 * (H.genus : ℂ) + 2) * H.f.eval z) / z ^ (2 * H.genus + 1)) =ᶠ[Filter.cocompact ℂ]
+      (fun z => ((Polynomial.derivative H.f).eval z / z ^ (2 * H.genus)) -
+        (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1))) := by
       filter_upwards [eventually_ne_zero_cocompact] with z hz
       have h_pow : z ^ (2 * H.genus + 1) = z * z ^ (2 * H.genus) := by
         rw [show 2 * H.genus + 1 = (2 * H.genus) + 1 by omega, pow_succ, mul_comm]
@@ -1078,12 +1103,17 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
       congr 1
       · rw [h_pow, mul_div_mul_left _ _ hz]
       · rw [mul_div_assoc]
-    have h_lim_sub : Filter.Tendsto (fun z => ((Polynomial.derivative H.f).eval z / z ^ (2 * H.genus)) - (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1)))
-        (Filter.cocompact ℂ) (𝓝 ((Polynomial.derivative H.f).leadingCoeff - (2 * (H.genus : ℂ) + 2) * H.f.leadingCoeff)) := by
+    have h_lim_sub : Filter.Tendsto
+        (fun z => ((Polynomial.derivative H.f).eval z / z ^ (2 * H.genus)) -
+          (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1)))
+        (Filter.cocompact ℂ)
+        (𝓝 ((Polynomial.derivative H.f).leadingCoeff -
+          (2 * (H.genus : ℂ) + 2) * H.f.leadingCoeff)) := by
       refine Filter.Tendsto.sub h_lim_deriv ?_
       exact Filter.Tendsto.const_mul _ h_lim_f
     rw [← Filter.tendsto_congr' h_ratio_eq] at h_lim_sub
-    have h_lc_deriv : (Polynomial.derivative H.f).leadingCoeff = H.f.leadingCoeff * (2 * (H.genus : ℂ) + 1) := by
+    have h_lc_deriv : (Polynomial.derivative H.f).leadingCoeff =
+      H.f.leadingCoeff * (2 * (H.genus : ℂ) + 1) := by
       change (Polynomial.derivative H.f).coeff (Polynomial.derivative H.f).natDegree = _
       rw [h_deriv_deg, Polynomial.coeff_derivative]
       have h_deg_eq : 2 * H.genus + 1 = H.f.natDegree := by omega
@@ -1093,7 +1123,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
       push_cast
       ring
     rw [h_lc_deriv] at h_lim_sub
-    have h_val_eq : H.f.leadingCoeff * (2 * (H.genus : ℂ) + 1) - (2 * (H.genus : ℂ) + 2) * H.f.leadingCoeff = -H.f.leadingCoeff := by
+    have h_val_eq : H.f.leadingCoeff * (2 * (H.genus : ℂ) + 1) -
+      (2 * (H.genus : ℂ) + 2) * H.f.leadingCoeff = -H.f.leadingCoeff := by
       ring
     rw [h_val_eq] at h_lim_sub
     have h_nz : -H.f.leadingCoeff ≠ 0 := by
@@ -1105,7 +1136,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     exact hz_ne rfl
   refine ⟨R, hR_nonneg, ?_⟩
   have h_mem_V := eventually_mem_V_cocompact (H := H)
-  filter_upwards [h_mem_V, h_infty_bound, h_deriv_bound, h_f_bound, h_D_ev] with z hz_V hBnd hDerivBnd hFBnd h_D_nz
+  filter_upwards [h_mem_V, h_infty_bound, h_deriv_bound, h_f_bound, h_D_ev]
+    with z hz_V hBnd hDerivBnd hFBnd h_D_nz
   let a := liouvilleChosenAffinePoint (H := H) z
   let y : ℂ := a.val.2
   have h_y_ne : y ≠ 0 := hz_V.2.1
@@ -1147,7 +1179,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     · rw [infinityInverseMap_val_of_ne_zero t ht_target ht0]
       dsimp
       rw [h_w_eq]
-      have h_sq : (f_w H a) ^ 2 = a.val.1⁻¹ := InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
+      have h_sq : (f_w H a) ^ 2 = a.val.1⁻¹ :=
+        InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
       rw [inv_pow, h_sq, inv_inv]
     · rw [infinityInverseMap_val_of_ne_zero t ht_target ht0]
       dsimp
@@ -1155,13 +1188,16 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
       have h_w_nz : f_w H a ≠ 0 := by
         dsimp [f_w]
         refine mul_ne_zero (mul_ne_zero h_y_ne (pow_ne_zero _ (inv_ne_zero h_z_ne))) ?_
-        exact inv_ne_zero (S_ne_zero_of_mem_D_S H (w_q_mem_source_imp_x_inv_mem_D_S Fact.out a h_z_ne h_y_ne hz_V.2.2))
+        exact inv_ne_zero (S_ne_zero_of_mem_D_S H
+          (w_q_mem_source_imp_x_inv_mem_D_S Fact.out a h_z_ne h_y_ne hz_V.2.2))
       have h_sq_eq : (f_w H a)⁻¹ ^ 2 = z := by
-        have h_sq : (f_w H a) ^ 2 = a.val.1⁻¹ := InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
+        have h_sq : (f_w H a) ^ 2 = a.val.1⁻¹ :=
+          InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
         rw [inv_pow, h_sq, inv_inv]
         rfl
       have h_sq : (f_w H a) ^ 2 = z⁻¹ := by
-        have h_sq_inv : (f_w H a) ^ 2 = a.val.1⁻¹ := InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
+        have h_sq_inv : (f_w H a) ^ 2 = a.val.1⁻¹ :=
+          InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
         rw [h_sq_inv]
         rfl
       have h_S_nz : InfinityInverse.S H ((f_w H a) ^ 2) ≠ 0 := by
@@ -1169,9 +1205,11 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
           rw [h_sq]
           exact w_q_mem_source_imp_x_inv_mem_D_S Fact.out a h_z_ne h_y_ne hz_V.2.2
         exact S_ne_zero_of_mem_D_S H h_mem_D_S
-      have h_S_cancel : InfinityInverse.S H ((f_w H a) ^ 2) * (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ = 1 :=
+      have h_S_cancel : InfinityInverse.S H ((f_w H a) ^ 2) *
+        (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ = 1 :=
         mul_inv_cancel₀ h_S_nz
-      have h_pow_cancel : ((f_w H a) ^ 2) ^ (H.genus + 1) * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1) = 1 := by
+      have h_pow_cancel : ((f_w H a) ^ 2) ^ (H.genus + 1) *
+        ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1) = 1 := by
         rw [← mul_pow]
         have h_one : (f_w H a) ^ 2 * (f_w H a)⁻¹ ^ 2 = 1 := by
           rw [← mul_pow]
@@ -1183,7 +1221,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         unfold InfinityInverse.t at h_tz
         rw [h_w_eq] at h_tz
         exact h_tz.symm
-      have h_fw_unfold : f_w H a = y * ((f_w H a) ^ 2) ^ (H.genus + 1) * (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ := by
+      have h_fw_unfold : f_w H a = y * ((f_w H a) ^ 2) ^ (H.genus + 1) *
+        (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ := by
         change a.val.2 * (a.val.1⁻¹ ^ (H.genus + 1)) * (InfinityInverse.S H a.val.1⁻¹)⁻¹ =
           y * ((f_w H a) ^ 2) ^ (H.genus + 1) * (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹
         congr 1
@@ -1193,8 +1232,11 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         · rw [show a.val.1⁻¹ = (f_w H a) ^ 2 by exact h_sq.symm]
       rw [h_t_eq]
       nth_rw 1 [h_fw_unfold]
-      calc y * ((f_w H a) ^ 2) ^ (H.genus + 1) * (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ * InfinityInverse.S H ((f_w H a) ^ 2) * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1)
-        _ = y * ((f_w H a) ^ 2) ^ (H.genus + 1) * ((InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ * InfinityInverse.S H ((f_w H a) ^ 2)) * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1) := by ring
+      calc y * ((f_w H a) ^ 2) ^ (H.genus + 1) * (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ *
+            InfinityInverse.S H ((f_w H a) ^ 2) * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1)
+        _ = y * ((f_w H a) ^ 2) ^ (H.genus + 1) *
+            ((InfinityInverse.S H ((f_w H a) ^ 2))⁻¹ * InfinityInverse.S H ((f_w H a) ^ 2)) *
+            ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1) := by ring
         _ = y * ((f_w H a) ^ 2) ^ (H.genus + 1) * 1 * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1) := by
           rw [mul_comm (InfinityInverse.S H ((f_w H a) ^ 2))⁻¹, h_S_cancel]
         _ = y * (((f_w H a) ^ 2) ^ (H.genus + 1) * ((f_w H a)⁻¹ ^ 2) ^ (H.genus + 1)) := by ring
@@ -1232,7 +1274,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         OnePoint.isOpenEmbedding_coe).toPartialEquiv).source := by
     refine ⟨ht_target, ?_⟩
     change (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm t ∈
-      ((HyperellipticAffine.affineChartProjX a h_y_ne).lift_openEmbedding OnePoint.isOpenEmbedding_coe).source
+      ((HyperellipticAffine.affineChartProjX a h_y_ne).lift_openEmbedding
+        OnePoint.isOpenEmbedding_coe).source
     rw [h_eq_coe]
     rw [← hLiftEq]
     exact mem_affineLiftChart_source a
@@ -1242,42 +1285,54 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     refine Filter.eventually_of_mem (hOverlapOpen.mem_nhds hTransSrc) ?_
     intro u hu
     conv_lhs =>
-      rw [show (↑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) : HyperellipticOdd H Fact.out → ℂ) = ↑(affineLiftChart (h := Fact.out) a) from rfl]
-      rw [show (↑(extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm : ℂ → HyperellipticOdd H Fact.out) = ↑(infinityChart H Fact.out).symm from rfl]
+      rw [show (↑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) :
+        HyperellipticOdd H Fact.out → ℂ) = ↑(affineLiftChart (h := Fact.out) a) from rfl]
+      rw [show (↑(extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm :
+        ℂ → HyperellipticOdd H Fact.out) = ↑(infinityChart H Fact.out).symm from rfl]
     rw [hLiftEq]
     exact infinityChart_trans_affineLiftProjX_apply a h_y_ne hu
   have hd_bwd_eq : (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ∘
       (extChartAt 𝓘(ℂ, ℂ) (infty : HyperellipticOdd H Fact.out)).symm) t 1) =
-    2 * z ^ (H.genus + 2) * y / (z * (Polynomial.derivative H.f).eval z - (2 * H.genus + 2) * H.f.eval z) := by
+    2 * z ^ (H.genus + 2) * y /
+      (z * (Polynomial.derivative H.f).eval z - (2 * H.genus + 2) * H.f.eval z) := by
     rw [Filter.EventuallyEq.fderiv_eq hEqNear]
     have hInTarget : ((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2 ∈
-        ((HyperellipticAffine.affineChartProjX a h_y_ne) : OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target := by
+        ((HyperellipticAffine.affineChartProjX a h_y_ne) :
+          OpenPartialHomeomorph (HyperellipticAffine H) ℂ).target := by
       have hmap := ((infinityChart H Fact.out).symm.trans
           ((HyperellipticAffine.affineChartProjX a h_y_ne).lift_openEmbedding
             OnePoint.isOpenEmbedding_coe)).map_source hTransSrc
       rw [infinityChart_trans_affineLiftProjX_apply a h_y_ne hTransSrc] at hmap
       rw [OpenPartialHomeomorph.trans_target] at hmap
       exact hmap.1
-    have hYSrc : t * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) ∈ (a.squareLocalHomeomorph h_y_ne).source := by
-      have h_eq_coe' : (infinityChart H Fact.out).symm t = coe (InfinityInverse.infinityInverseMap H Fact.out t) := by
+    have hYSrc : t * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) ∈
+        (a.squareLocalHomeomorph h_y_ne).source := by
+      have h_eq_coe' : (infinityChart H Fact.out).symm t =
+        coe (InfinityInverse.infinityInverseMap H Fact.out t) := by
         change infinityBackward H Fact.out t = _
         unfold infinityBackward
         rw [if_neg ht0]
-      have h_proj_src : (infinityChart H Fact.out).symm t ∈ ((a.affineChartProjX h_y_ne).lift_openEmbedding OnePoint.isOpenEmbedding_coe).source := hTransSrc.2
+      have h_proj_src : (infinityChart H Fact.out).symm t ∈
+        ((a.affineChartProjX h_y_ne).lift_openEmbedding
+          OnePoint.isOpenEmbedding_coe).source := hTransSrc.2
       rw [h_eq_coe'] at h_proj_src
       simp only [OpenPartialHomeomorph.lift_openEmbedding_source] at h_proj_src
       obtain ⟨q, hq, heq⟩ := h_proj_src
-      have hq_eq : q = InfinityInverse.infinityInverseMap H Fact.out t := OnePoint.coe_injective heq
+      have hq_eq : q = InfinityInverse.infinityInverseMap H Fact.out t :=
+        OnePoint.coe_injective heq
       rw [hq_eq] at hq
-      have h_snd : (InfinityInverse.infinityInverseMap H Fact.out t).val.2 = t * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) := by
+      have h_snd : (InfinityInverse.infinityInverseMap H Fact.out t).val.2 =
+        t * (((InfinityInverse.tLocalHomeomorph H).symm t)⁻¹ ^ 2) ^ (H.genus + 1) := by
         rw [infinityInverseMap_val_of_ne_zero t ht_target ht0]
       rw [← h_snd]
       exact hq
-    have h_deriv := infinity_transition_deriv_identity Fact.out a h_y_ne ht_target ht0 hInTarget hYSrc
+    have h_deriv := infinity_transition_deriv_identity Fact.out a h_y_ne ht_target ht0
+      hInTarget hYSrc
     dsimp at h_deriv
     rw [h_w_eq] at h_deriv
     have h_sq : (f_w H a)⁻¹ ^ 2 = z := by
-      have h_sq_inv : (f_w H a) ^ 2 = a.val.1⁻¹ := InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
+      have h_sq_inv : (f_w H a) ^ 2 = a.val.1⁻¹ :=
+        InfinityInverse.w_q_sq_eq_inv Fact.out a h_z_ne h_y_ne
       rw [inv_pow, h_sq_inv]
       change (a.val.1⁻¹)⁻¹ = z
       rw [inv_inv]
@@ -1290,7 +1345,8 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
         rw [h_prop]
         rfl
       rw [h_eval]
-      exact (a.squareLocalHomeomorph h_y_ne).left_inv (HyperellipticAffine.affineChartProjX_mem_source a h_y_ne)
+      exact (a.squareLocalHomeomorph h_y_ne).left_inv
+        (HyperellipticAffine.affineChartProjX_mem_source a h_y_ne)
     rw [h_symm_eq] at h_deriv
     exact h_deriv
   rw [hd_bwd_eq] at hCocycle
@@ -1301,8 +1357,9 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
     have h_Z_ne : Z ≠ 0 := mul_ne_zero (by norm_num) (pow_ne_zero _ h_z_ne)
     change form.val (coe a) z * y = form.val infty t * D / Z
     rw [hCocycle]
-    have h_eq : (2 * z ^ (H.genus + 2) * y / (z * (Polynomial.derivative H.f).eval z - (2 * H.genus + 2) * H.f.eval z)) =
-        (2 * z ^ (H.genus + 2) * y) * (z * (Polynomial.derivative H.f).eval z - (2 * H.genus + 2) * H.f.eval z)⁻¹ := by
+    have h_eq : (2 * z ^ (H.genus + 2) * y / (z * (Polynomial.derivative H.f).eval z -
+        (2 * H.genus + 2) * H.f.eval z)) = (2 * z ^ (H.genus + 2) * y) *
+        (z * (Polynomial.derivative H.f).eval z - (2 * H.genus + 2) * H.f.eval z)⁻¹ := by
       rw [div_eq_mul_inv]
     rw [h_eq]
     rw [show 2 * z ^ (H.genus + 2) = Z from rfl]
@@ -1338,11 +1395,12 @@ theorem liouvilleRemovableNumerator_eventually_norm_div_pow_le
   rw [h_term_eq]
   rw [norm_mul]
   have h_D_bound : ‖D / (2 * z ^ (2 * H.genus + 1))‖ ≤ C_D / 2 := by
-    have h_div_two : D / (2 * z ^ (2 * H.genus + 1)) = (1 / 2 : ℂ) * (D / z ^ (2 * H.genus + 1)) := by
-      ring
+    have h_div_two : D / (2 * z ^ (2 * H.genus + 1)) =
+      (1 / 2 : ℂ) * (D / z ^ (2 * H.genus + 1)) := by ring
     rw [h_div_two, norm_mul, show ‖(1 / 2 : ℂ)‖ = 1 / 2 by norm_num]
     have h_D_split : D / z ^ (2 * H.genus + 1) =
-        (Polynomial.derivative H.f).eval z / z ^ (2 * H.genus) - (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1)) := by
+      (Polynomial.derivative H.f).eval z / z ^ (2 * H.genus) -
+        (2 * (H.genus : ℂ) + 2) * (H.f.eval z / z ^ (2 * H.genus + 1)) := by
       have h_pow : z ^ (2 * H.genus + 1) = z * z ^ (2 * H.genus) := by
         rw [show 2 * H.genus + 1 = (2 * H.genus) + 1 by omega, pow_succ, mul_comm]
       rw [sub_div]
