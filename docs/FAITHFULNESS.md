@@ -163,6 +163,14 @@ theorem isJacobian_unique (x₀ : X)
 `#print axioms isJacobian_unique` ⇒ std-3 (**axiom-free**); uses none of the 24. The concrete
 corollary `isJacobian_iso_jacobian` (`J₁ ≅ Jacobian X`, `:990`) is std-3 + AK. ✓
 
+*Completeness.* The Jacobian is **already pinned up to unique isomorphism, axiom-free** — that is
+exactly `isJacobian_unique`. To make the pinning of Buzzard's *concrete* `Jacobian X` completely
+axiom-free, the only remaining items are: **discharge AK** (`AX_curve_image_subgroup_isOpen`, a
+~25-decl Kirov local-Jacobi port) and **supply the concrete `Jacobian X` presentation instance**
+(axiom-free; drops the hypothesis on `isJacobian_iso_jacobian`). Abstract-torus generality
+(`AX_torus_exp`) is an *optional* strengthening, not needed to pin the Jacobian. Full status:
+[`planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md).
+
 ---
 
 ## Part II — Validating statements

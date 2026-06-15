@@ -21,6 +21,30 @@ The Albanese categoricity result is now **off the torus axioms**. Machine-verifi
 `AX_torus_uniformization` (A1) is **declared but OUT of every headline closure** (no global
 instance). The 24 Buzzard-challenge headlines remain axiom-free and are unaffected.
 
+## What it takes to completely pin the Jacobian
+
+"Pinning the Jacobian" = **uniqueness** + **existence**:
+
+| ingredient | theorem | status |
+|---|---|---|
+| **Uniqueness** — any two objects with the universal property are *uniquely* isomorphic (so "the Jacobian" is well-defined up to unique iso) | `isJacobian_unique` | ✅ **done, axiom-free** (std-3) |
+| **Existence** — our concrete `ℂ^g/Λ` actually *is* such an object (a realizer exists) | `ofCurve_isJacobian` | proved, rests on **AK** |
+| **The Jacobian is *that* object** — Buzzard's `Jacobian X` ≅ any Jacobian-object, uniquely | `isJacobian_iso_jacobian` | proved, rests on **AK** (+ a presentation hypothesis on `Jacobian X`) |
+
+So the definition is **already pinned up to unique isomorphism, axiom-free** (the `isJacobian_unique`
+half). To make the *pinning of Buzzard's concrete Jacobian* **completely axiom-free**, all that
+remains is:
+
+1. **Discharge AK** (`AX_curve_image_subgroup_isOpen`) — the ~25-decl Kirov port (item (a) below).
+   This is the *only* remaining mathematical content; it makes `ofCurve_isJacobian` /
+   `isJacobian_iso_jacobian` rest on the standard 3 Lean axioms.
+2. **Supply the concrete `Jacobian X` presentation instance** (item (c) below, axiom-free) — drops the
+   hypothesis on `isJacobian_iso_jacobian`, making it **unconditional**.
+
+That is the whole list. **`AX_torus_exp` / abstract-`A` generality (item (b)) is NOT needed to pin
+the Jacobian** — the presented-torus universal property already pins it; (b) only *additionally*
+extends categoricity to abstract (non-presented) tori, an optional strengthening.
+
 ## What landed (PR #253)
 
 - **Soundness fix.** `TorusSelfAlbanesePresentation.liftCoord_eq_albanese` was an *unsatisfiable*
