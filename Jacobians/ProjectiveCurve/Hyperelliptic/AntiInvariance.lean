@@ -25,6 +25,7 @@ namespace Jacobians.ProjectiveCurve
 
 open scoped Manifold ContDiff Topology
 open Jacobians.RiemannSurface
+open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
 variable {H : HyperellipticData} [Fact (¬ Odd H.f.natDegree)]
 
@@ -269,13 +270,17 @@ theorem omegaDx_analyticAt (form : HolomorphicOneForm (HyperellipticEvenProj H))
   have h_prop2 : q ∈ c2.source := by
     dsimp [c2]
     exact mem_chart_source ℂ q
-  have h_trans := Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder.analyticAt_transition_of_mem_maximalAtlas hc1_mem hc2_mem h_prop1 h_prop2
+  have h_trans :=
+    analyticAt_transition_of_mem_maximalAtlas
+      hc1_mem hc2_mem h_prop1 h_prop2
   have h_eq : extChartAt 𝓘(ℂ, ℂ) q = c2.toPartialEquiv := by
     unfold c2
     simp [extChartAt]
   have hc1_q : c1 q = a.val.1 := by
     dsimp [c1, q]
-    change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding (HyperellipticEvenProj.isOpenEmbedding_proj_inl H Fact.out)) ((HyperellipticEvenProj.proj H ∘ Sum.inl) a) = a.val.1
+    change ((HyperellipticAffine.affineChartAt a).lift_openEmbedding
+      (HyperellipticEvenProj.isOpenEmbedding_proj_inl H Fact.out))
+      ((HyperellipticEvenProj.proj H ∘ Sum.inl) a) = a.val.1
     rw [OpenPartialHomeomorph.lift_openEmbedding_apply]
     rw [HyperellipticAffine.affineChartAt_of_mem_smoothLocusY a hpY]
     rfl
@@ -294,7 +299,8 @@ theorem omegaDx_analyticAt (form : HolomorphicOneForm (HyperellipticEvenProj H))
   have h_trans' : AnalyticAt ℂ (c2 ∘ c1.symm) a.val.1 := by
     rw [← hc1_q]
     exact h_trans
-  have h_comp : AnalyticAt ℂ ((form.coeff q) ∘ (c2 ∘ c1.symm)) a.val.1 := AnalyticAt.comp h_an_coeff' h_trans'
+  have h_comp : AnalyticAt ℂ ((form.coeff q) ∘ (c2 ∘ c1.symm)) a.val.1 :=
+    AnalyticAt.comp h_an_coeff' h_trans'
   have h_deriv_an : AnalyticAt ℂ (deriv (c2 ∘ c1.symm)) a.val.1 := AnalyticAt.deriv h_trans'
   rw [h_eq]
   exact AnalyticAt.mul h_comp h_deriv_an
