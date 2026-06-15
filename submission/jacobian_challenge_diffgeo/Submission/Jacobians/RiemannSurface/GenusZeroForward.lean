@@ -6,6 +6,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochAPI
 import Submission.Jacobians.RiemannSurface.DegreeOneGenusZero
 
+universe u v w
+
 /-!
 # Genus zero implies homeomorphic to the 2-sphere (forward uniformization)
 
@@ -37,7 +39,6 @@ open Jacobians.ProjectiveCurve
 
 namespace Jacobians.RiemannSurface
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

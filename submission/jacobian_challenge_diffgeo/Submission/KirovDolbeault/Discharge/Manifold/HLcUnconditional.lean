@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.HurwitzPatchingDataConstruction
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # Discharge of `h_lc` via ZZ153 ∘ ZZ157 (ZZ158)
@@ -55,7 +57,6 @@ open Set Filter Topology
 
 namespace Jacobians.Discharge
 
-universe u v
 
 /-- **Local-constancy of fibre cardinality on a subset, from a per-fibre
 local-sheet supplier.**

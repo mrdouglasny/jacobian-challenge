@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.ChartBallOffCentreWitnessDischarge
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -86,7 +88,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## The chart-overlap propagation hypothesis-parameter -/
 

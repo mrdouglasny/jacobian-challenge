@@ -8,6 +8,8 @@ import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Separation.Basic
 
+universe u v w
+
 /-! # Path-connected ⇒ preconnected reduction for the finite-puncture
 case (ZZ159, scope-reduced)
 
@@ -40,7 +42,6 @@ No gaps, no `axiom`. -/
 namespace Jacobians.Discharge
 namespace Manifold
 
-universe u
 
 /-- **Reduction-only headline.** Given the path-connectedness of `Cᶜ`
 (the manifold-lift content `(M1)`), preconnectedness follows.

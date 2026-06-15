@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.HurwitzWellDefinedFromHPath
 import Submission.KirovDolbeault.Discharge.Manifold.PathConnectedComplFinite
 
+universe u v w
+
 /-! # Hurwitz constant-card with unconditional topology (ZZ176)
 
 Compose ZZ160's `fibre_card_well_defined_at_regular_holds_of_h_path`
@@ -43,7 +45,6 @@ namespace ContMDiff
 
 namespace Degree
 
-universe u v
 
 /-- **Hurwitz constant-card, unconditional topology (ZZ176).**
 

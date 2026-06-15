@@ -7,6 +7,8 @@ import Submission.Jacobians.RiemannSurface.Divisor
 import Submission.KirovDolbeault.Dolbeault.CechFinitenessWiring
 import Submission.KirovDolbeault.Dolbeault.LerayCoverExists
 
+universe u v w
+
 /-!
 # Čech `H¹` bridge: `H1coh` as the Kirov-Dolbeault Čech cohomology
 
@@ -37,7 +39,6 @@ open scoped Manifold Topology ContDiff
 
 namespace Jacobians.Layer3
 
-universe u
 
 /- Name-resolution shim. The port declares `Jacobians.Divisor` (a `Finsupp`
 divisor), which — once the port is imported — shadows the opened

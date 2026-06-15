@@ -7,6 +7,8 @@ import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Submission.Jacobians.GeneralResults.ChartTransition
 import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochFinite
 
+universe u v w
+
 /-!
 # Low Riemann-Roch-space base API
 
@@ -27,7 +29,6 @@ namespace Jacobians.RiemannSurface
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

@@ -52,13 +52,14 @@ import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
+universe u v w
+
 namespace Jacobians
 
 open scoped Manifold ContDiff Topology
 
 set_option linter.unusedSectionVars false
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [ChartedSpace ℂ X]
 

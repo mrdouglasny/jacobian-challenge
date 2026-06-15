@@ -43,6 +43,7 @@ noncomputable section
 
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]
+variable {x₀ : X}
 
 local notation "Qmk" => Path.Homotopic.Quotient.mk
 

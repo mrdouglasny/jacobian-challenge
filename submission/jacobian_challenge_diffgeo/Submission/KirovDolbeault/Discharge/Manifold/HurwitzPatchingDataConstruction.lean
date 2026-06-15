@@ -8,6 +8,8 @@ import Mathlib.Topology.Separation.Hausdorff
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Topology.ContinuousOn
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # Constructing `HurwitzPatchingData` at a regular value (ZZ157)
@@ -54,7 +56,6 @@ open Set Filter Topology
 
 namespace Jacobians.Discharge
 
-universe u v
 
 /-- **Per-point local-sheet datum.** At a fibre point `x` of `f` over `y₀`,
 the local-biholomorphism content packages into:

@@ -7,6 +7,8 @@ import Submission.Jacobians.Layer3.LinearSystemBridge
 import Submission.KirovDolbeault.Dolbeault.CohomologicalRR
 import Submission.KirovDolbeault.Dolbeault.SkyscraperProductWitness
 
+universe u v w
+
 /-!
 # The cohomology LES bridge: `cohomologyLES` as a theorem
 
@@ -54,7 +56,6 @@ export Jacobians.Axioms (Divisor Divisor.deg)
 open Jacobians.RiemannSurface
 open Jacobians.Dolbeault
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

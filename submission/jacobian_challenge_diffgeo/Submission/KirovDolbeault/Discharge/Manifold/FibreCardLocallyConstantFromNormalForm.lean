@@ -7,6 +7,8 @@ import Mathlib.Topology.LocallyConstant.Basic
 import Mathlib.Data.Set.Card
 import Mathlib.Data.Finset.Card
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # Fibre cardinality is locally constant from a Hurwitz-style patching package (ZZ153)
@@ -45,7 +47,6 @@ open Set
 
 namespace Jacobians.Discharge
 
-universe u v
 
 /-- **Hurwitz patching package** for `f : X → Y` at a target point `y₀ : Y`.
 

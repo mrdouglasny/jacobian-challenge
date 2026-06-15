@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.AnalyticFiberDiscrete
 import Submission.KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
 import Mathlib.Topology.OpenPartialHomeomorph.Constructions
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -33,7 +35,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## Constructor at the "free" target value `f x` -/
 

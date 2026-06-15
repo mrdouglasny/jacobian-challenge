@@ -7,6 +7,8 @@ import Submission.Jacobians.Layer3.CechH1Bridge
 import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochFinite
 import Submission.KirovDolbeault.Dolbeault.CechH0
 
+universe u v w
+
 /-!
 # The `L(D)` bridge: `riemannRochSpace D` ↔ the port's linear system and Čech `H⁰`
 
@@ -58,7 +60,6 @@ open Jacobians.RiemannSurface
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 open Jacobians.Dolbeault
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

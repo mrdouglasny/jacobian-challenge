@@ -5,6 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import Submission.Jacobians.RiemannSurface.AbelSupsetSections
 
+universe u v w
+
 /-!
 # Abel ⊇ pencil analysis (SUP lane, rung S5 of `docs/planning/SUP_ROUTE.md`)
 
@@ -176,7 +178,6 @@ theorem mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt
 
 namespace MeromorphicFunctionField
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

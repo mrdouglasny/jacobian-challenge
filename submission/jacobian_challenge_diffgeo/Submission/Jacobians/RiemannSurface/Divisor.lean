@@ -5,6 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import Submission.Jacobians.RiemannSurface.Genus
 
+universe u v w
+
 /-!
 # Divisors on a compact Riemann surface
 
@@ -20,11 +22,13 @@ open scoped Manifold Topology ContDiff
 
 namespace Jacobians.Axioms
 
+
 /-- The group of divisors on a compact Riemann surface `X`: formal
 `ℤ`-combinations of points of `X`, i.e. the free abelian group on the
 underlying set (Forster, *Lectures on Riemann Surfaces*, Ch. I §8). The
 geometric typeclasses are unused by the encoding but kept on the signature so
 downstream consumers elaborate unchanged. -/
+
 abbrev Divisor (X : Type u) [TopologicalSpace X] [T2Space X]
     [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ, ℂ) ω X] : Type u := FreeAbelianGroup X

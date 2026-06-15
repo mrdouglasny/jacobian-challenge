@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.Degree
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # Fibre-cardinality well-definedness on the regular subset (ZZ134, ZZ172-corrected)
@@ -48,7 +50,6 @@ namespace Jacobians.Discharge
 
 namespace ContMDiff
 
-universe u v
 
 namespace Degree
 

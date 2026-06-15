@@ -10,6 +10,8 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.Complex
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -60,7 +62,6 @@ open Filter Set
 
 namespace Jacobians.Discharge
 
-universe u
 
 variable {M : Type u}
 variable [TopologicalSpace M] [ChartedSpace ℂ M]

@@ -7,6 +7,8 @@ import Mathlib.Topology.Connected.Basic
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Constructions
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # Preconnectedness of the regular subset on a general compact connected
@@ -55,7 +57,6 @@ open Set Topology
 namespace Jacobians.Discharge
 namespace Manifold
 
-universe u
 
 /-! ## Subtype-from-ambient bridge -/
 

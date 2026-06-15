@@ -9,6 +9,8 @@ import Submission.Jacobians.Axioms.SerreDuality
 import Submission.Jacobians.RiemannSurface.Cohomology.DegreeTheorem
 import Submission.Jacobians.RiemannSurface.DegreeOneGenusZero
 
+universe u v w
+
 /-!
 # Riemann-Roch API in terms of the germ-quotient space `L(D)`
 
@@ -43,7 +45,6 @@ shadows the opened `Jacobians.Axioms.Divisor` inside enclosing `Jacobians.*`
 namespaces. Re-export pins the bare names to our divisor layer. -/
 export Jacobians.Axioms (Divisor Divisor.deg)
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

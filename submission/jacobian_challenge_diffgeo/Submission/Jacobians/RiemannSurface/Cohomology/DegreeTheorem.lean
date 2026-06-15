@@ -11,6 +11,8 @@ import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 import Submission.Jacobians.RiemannSurface.MeromorphicFunctionField
 import Submission.Jacobians.RiemannSurface.DegreeViaP1
 
+universe u v w
+
 namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology ContDiff BigOperators
@@ -22,7 +24,6 @@ open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 open MeromorphicFunctionField
 open Filter OnePoint
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

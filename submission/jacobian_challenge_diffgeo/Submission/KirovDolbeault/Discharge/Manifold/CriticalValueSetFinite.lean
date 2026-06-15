@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
 import Submission.KirovDolbeault.Discharge.Manifold.CriticalSetDerivBridge
 import Submission.KirovDolbeault.Discharge.Manifold.Degree
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # `h_critical`: finite critical-value set containing every regular witness
@@ -47,7 +49,6 @@ namespace Jacobians.Discharge
 
 namespace Manifold
 
-universe u v
 
 /-- **Planar-to-manifold lift of local injectivity.**  If the literal chart
 pullback `F = (chartAt ℂ (f x)) ∘ f ∘ (chartAt ℂ x).symm` is injective on a

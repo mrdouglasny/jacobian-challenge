@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.FibreCardWellDefinedAtRegula
 import Submission.KirovDolbeault.Discharge.Manifold.PreconnectedFromFiniteComplement
 import Submission.KirovDolbeault.Discharge.Manifold.RegularSubsetPreconnected
 
+universe u v w
+
 /-! # Hurwitz constant-card, staged on `h_path` (ZZ160, ZZ172-corrected)
 
 Compose ZZ155 (`fibre_card_well_defined_at_regular_holds_of_lc_ncard_and_topo`)
@@ -57,7 +59,6 @@ namespace ContMDiff
 
 namespace Degree
 
-universe u v
 
 /-- **Hurwitz constant-card, staged on `h_path` (ZZ172-corrected).**
 

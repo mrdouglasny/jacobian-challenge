@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.MeromorphicAt
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Topology.LocallyFinsupp
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -72,7 +74,6 @@ set_option linter.unusedSectionVars false
 
 namespace MMeromorphicOn
 
-universe u
 
 variable {X : Type u}
   [TopologicalSpace X] [ChartedSpace ℂ X]

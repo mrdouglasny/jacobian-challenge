@@ -78,6 +78,8 @@ import Submission.Jacobians.RiemannSurface.Cohomology.DegreeTheorem
 import Submission.Jacobians.RiemannSurface.AbelSupsetLiouville
 import Submission.Jacobians.Bridge.AbelEngineAdapter
 
+universe u v w
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology

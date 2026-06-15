@@ -14,6 +14,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.MeromorphicAt
 import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Analytic
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -72,7 +74,6 @@ namespace Jacobians.Discharge
 
 namespace Manifold
 
-universe u v
 
 /-! ## General critical set / values (no `MeromorphicNonzero` binding) -/
 

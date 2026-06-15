@@ -6,6 +6,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Submission.Jacobians.RiemannSurface.AbelPlumbing
 import Submission.Jacobians.RiemannSurface.Cohomology.DegreeTheorem
 
+universe u v w
+
 /-!
 # Abel ⊇ plumbing (SUP lane, S-block of `docs/planning/SUP_ROUTE.md`)
 
@@ -53,7 +55,6 @@ open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 open MeromorphicFunctionField
 open Filter OnePoint
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

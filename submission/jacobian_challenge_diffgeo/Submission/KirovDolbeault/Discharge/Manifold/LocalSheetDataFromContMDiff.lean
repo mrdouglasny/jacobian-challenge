@@ -13,6 +13,8 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
+universe u v w
+
 set_option autoImplicit true
 
 /-! # `LocalSheetData` from `ContMDiffAt … ω` + chart-pullback non-degenerate derivative (ZZ169)
@@ -64,7 +66,6 @@ open scoped Manifold Topology ContDiff
 
 namespace Jacobians.Discharge
 
-universe u v
 
 namespace LocalSheetData
 

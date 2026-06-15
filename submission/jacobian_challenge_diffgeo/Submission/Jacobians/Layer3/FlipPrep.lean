@@ -12,6 +12,8 @@ import Submission.KirovDolbeault.Dolbeault.KeystonePackaging
 import Submission.KirovDolbeault.Dolbeault.ResidueAtom
 import Mathlib.LinearAlgebra.Dual.Lemmas
 
+universe u v w
+
 /-!
 # Layer-3 flip prep: the two remaining axioms as theorems conditional on the trace residual
 
@@ -75,7 +77,6 @@ namespace Jacobians.Layer3
 `Divisor`/`Divisor.deg` in this namespace to our `FreeAbelianGroup` divisor layer. -/
 export Jacobians.Axioms (Divisor Divisor.deg)
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

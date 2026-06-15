@@ -6,6 +6,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Submission.Jacobians.RiemannSurface.AbelSupsetPlumbing
 import Submission.Jacobians.RiemannSurface.DegreeOneGenusZero
 
+universe u v w
+
 /-!
 # Abel ⊇ local sections (SUP lane, rung S4b of `docs/planning/SUP_ROUTE.md`)
 
@@ -137,7 +139,6 @@ end LocalInverse
 
 namespace MeromorphicFunctionField
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

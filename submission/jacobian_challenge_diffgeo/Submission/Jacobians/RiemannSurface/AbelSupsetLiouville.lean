@@ -12,6 +12,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Submission.KirovDolbeault.VanKampen
 import Submission.Jacobians.RiemannSurface.AbelSupsetPencil
 
+universe u v w
+
 /-!
 # Abel ⊇ lift and Liouville (SUP lane, rung S6 of `docs/planning/SUP_ROUTE.md`)
 
@@ -157,7 +159,6 @@ theorem _root_.Jacobians.AbelianVariety.ComplexTorus.mdifferentiable_lift_of_mdi
 
 namespace MeromorphicFunctionField
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

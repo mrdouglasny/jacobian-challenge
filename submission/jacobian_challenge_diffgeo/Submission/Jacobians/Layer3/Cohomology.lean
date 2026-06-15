@@ -5,6 +5,8 @@ import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochBase
 import Submission.Jacobians.RiemannSurface.Cohomology.LineBundleBasic
 import Mathlib.LinearAlgebra.Dimension.Constructions
 
+universe u v w
+
 /-!
 # Layer 3 cohomology scaffold
 
@@ -31,7 +33,6 @@ open Jacobians.RiemannSurface
 
 namespace Jacobians.Layer3
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

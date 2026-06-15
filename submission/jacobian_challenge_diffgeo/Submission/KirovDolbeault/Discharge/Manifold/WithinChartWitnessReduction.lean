@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.ConnectivityGlobalizationReduction
 import Submission.KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -60,7 +62,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## Auxiliary: `AnalyticAt` ⇒ preconnected open ball of analyticity -/
 

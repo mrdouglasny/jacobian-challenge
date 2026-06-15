@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.FibreCardOnRegularSubset
 
+universe u v w
+
 /-! # Composition: Hurwitz local-constancy + preconnected regular subset
 ⇒ `fibre_card_well_defined_at_regular_statement` (ZZ155, ZZ172-corrected)
 
@@ -36,7 +38,6 @@ namespace ContMDiff
 
 namespace Degree
 
-universe u v
 
 /-- **The ZZ155 composition (ZZ172-corrected).** Conditional on a packaged
 existence (for every non-constant analytic `f`) of a regular-value subset

@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.ChartOverlapPropagationDischarge
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -64,7 +66,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-- **Discharge of `ClopennessOfLocallyConstHypothesis`.** The
 locally-constant locus `S = {x | ∀ᶠ x' in 𝓝 x, f x' = y₀}` of a `C^ω`

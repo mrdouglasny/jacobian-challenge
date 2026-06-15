@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.WithinChartWitnessReduction
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -52,7 +54,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## Identity-theorem core: not eventually `F z₀` from a single off-centre witness -/
 

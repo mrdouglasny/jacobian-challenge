@@ -5,6 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import Submission.Jacobians.RiemannSurface.MeromorphicFunctionField
 
+universe u v w
+
 /-!
 # The Riemann-Roch space `L(D)`
 
@@ -28,7 +30,6 @@ namespace Jacobians.RiemannSurface
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

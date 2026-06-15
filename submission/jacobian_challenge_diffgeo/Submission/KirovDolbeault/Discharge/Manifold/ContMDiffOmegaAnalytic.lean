@@ -10,6 +10,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Defs
 import Mathlib.Analysis.Analytic.Basic
 import Mathlib.Analysis.Complex.Basic
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -43,7 +45,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## The bridge -/
 

@@ -10,6 +10,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.FibresFiniteUnconditional
 import Submission.KirovDolbeault.Discharge.Manifold.RegularValueExistsRegUnconditional
 import Submission.KirovDolbeault.Discharge.Manifold.CriticalValuesFiniteGeneral
 
+universe u v w
+
 /-! # Unconditional `h_pkg` (item 9 close — composition chip)
 
 Composes the landed unconditional ingredients into the analytic packaging
@@ -35,7 +37,6 @@ namespace ContMDiff
 
 namespace Degree
 
-universe u v
 
 /-- **Unconditional `h_pkg`.** -/
 theorem h_pkg_holds_unconditional

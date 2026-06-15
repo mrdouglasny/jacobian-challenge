@@ -11,6 +11,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
 import Submission.KirovDolbeault.Discharge.Manifold.CriticalSetDerivBridge
 import Mathlib.Topology.Separation.Basic
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -59,7 +61,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## Auxiliary: connected complex 1-manifolds are infinite
 

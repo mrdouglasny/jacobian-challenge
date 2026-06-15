@@ -9,13 +9,14 @@ wrappers. This file adds the now de-opaqued first cohomology space by identifyin
 import Submission.Jacobians.RiemannSurface.Cohomology.LineBundleBasic
 import Submission.Jacobians.Layer3.Cohomology
 
+universe u v w
+
 namespace Jacobians.Axioms
 
 open scoped Manifold Topology
 open scoped ContDiff
 open Jacobians.RiemannSurface
 
-universe u
 
 /-- The first sheaf cohomology `H¹(X, L)` of a divisor line bundle, now wired to
 the Layer-3 cohomology scaffold. The line-bundle argument is intentionally ignored

@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.ClopennessOfLocallyConstDischarge
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -37,7 +39,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-- **Unconditional discharge of `regular_value_exists_statement`.**
 For compact connected complex 1-manifolds `X`, `Y`, every non-constant

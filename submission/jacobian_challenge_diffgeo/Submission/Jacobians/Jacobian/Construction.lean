@@ -37,6 +37,8 @@ obstacle was identified (see below) and the instance is currently
 import Submission.Jacobians.AbelianVariety.ComplexTorus
 import Submission.Jacobians.Axioms.PeriodLattice
 
+universe u v w
+
 namespace Jacobians
 
 open scoped Manifold Topology

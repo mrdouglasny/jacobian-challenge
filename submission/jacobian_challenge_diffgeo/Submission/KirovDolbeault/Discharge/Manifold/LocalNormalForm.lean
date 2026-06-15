@@ -13,6 +13,8 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Deriv
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Analysis.Complex.CauchyIntegral
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -102,7 +104,6 @@ open Filter Set
 
 namespace Jacobians.Discharge
 
-universe u
 
 /-! ## The structural local-order definition
 

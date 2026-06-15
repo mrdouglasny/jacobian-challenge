@@ -5,6 +5,8 @@ Authors: Bryan Sanchez
 -/
 import Submission.KirovDolbeault.Discharge.Manifold.LocalMultiplicity
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -93,7 +95,6 @@ namespace Jacobians.Discharge
 
 namespace ContMDiff
 
-universe u v
 
 /-! ## The witness bundle
 

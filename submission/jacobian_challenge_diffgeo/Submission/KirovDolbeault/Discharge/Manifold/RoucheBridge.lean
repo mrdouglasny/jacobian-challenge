@@ -6,6 +6,8 @@ Authors: Rado Kirov
 import Submission.KirovDolbeault.Discharge.Manifold.LocalNormalForm
 import Submission.KirovDolbeault.Discharge.Manifold.LocalKFoldMultiplicityFullyUnconditional
 
+universe u v w
+
 /-! # The Rouché bridge: argument principle ⟹ local preimage count
 
 This file discharges the **Rouché bridge** statements named (but left inert) in
@@ -90,7 +92,6 @@ noncomputable section
 open scoped Topology Manifold
 open Set Filter Metric
 
-universe u
 
 namespace Jacobians.Discharge
 namespace MMeromorphicAt

@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.AnalyticContinuationGlobalization
 import Submission.KirovDolbeault.Discharge.Manifold.FibresFiniteAssembly
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -67,7 +69,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## The within-chart witness hypothesis -/
 

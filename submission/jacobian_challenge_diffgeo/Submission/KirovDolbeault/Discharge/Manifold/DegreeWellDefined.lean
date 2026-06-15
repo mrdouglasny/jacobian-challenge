@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.HPkgUnconditional
 import Submission.KirovDolbeault.Discharge.Manifold.HurwitzWellDefinedUnconditionalTopo
 import Submission.KirovDolbeault.Discharge.Manifold.Degree
 
+universe u v w
+
 /-! # `degreeFiber` is well-defined across regular witnesses
 
 Combines `h_pkg_holds_unconditional` (`Manifold/HPkgUnconditional.lean`)
@@ -26,7 +28,6 @@ open scoped Manifold ContDiff
 
 namespace Jacobians.Discharge
 
-universe u v
 
 /-- **Witness independence of `degreeFiber`.** For any
 `RegularValueWitnessReg f`, the chosen witness's `card` equals

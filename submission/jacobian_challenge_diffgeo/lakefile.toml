@@ -1,6 +1,9 @@
 name = "jacobian_challenge_diffgeo"
 defaultTargets = ["Submission"]
 
+[leanOptions]
+autoImplicit = false
+
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"

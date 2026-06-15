@@ -11,6 +11,8 @@ import Submission.Jacobians.Layer3.LinearSystemBridge
 import Submission.KirovDolbeault.Dolbeault.AbelSubsetEngineArc
 import Submission.KirovDolbeault.Dolbeault.LerayCoverExists
 
+universe u v w
+
 /-!
 # E6: the Abel-engine adapter (`AB_E_ROUTE.md` §0, final rung)
 
@@ -71,7 +73,6 @@ export Jacobians.Axioms (Divisor Divisor.deg)
 
 open Jacobians.Axioms (PrincipalDivisors)
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]

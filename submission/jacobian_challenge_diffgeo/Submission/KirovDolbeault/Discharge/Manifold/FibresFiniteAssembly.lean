@@ -9,6 +9,8 @@ import Submission.KirovDolbeault.Discharge.Manifold.ChartPullbackDataConstructio
 import Submission.KirovDolbeault.Discharge.Manifold.ContMDiffOmegaAnalytic
 import Submission.KirovDolbeault.Discharge.Manifold.Degree
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -56,7 +58,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## Connectivity-globalization hypothesis
 

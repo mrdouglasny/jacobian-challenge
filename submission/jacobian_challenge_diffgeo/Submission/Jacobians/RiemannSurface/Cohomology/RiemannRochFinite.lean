@@ -12,13 +12,14 @@ Build order: monotonicity → reduce to effective → local coefficient function
 
 import Submission.Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 
+universe u v w
+
 namespace Jacobians.RiemannSurface
 
 open scoped Manifold ContDiff Classical
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.LocalSheetDataFromContMDiff
 import Submission.KirovDolbeault.Discharge.Manifold.Degree
 
+universe u v w
+
 /-! # `LocalSheetData` from a `RegularValueWitnessReg` (zzLSD)
 
 This file packages the existing point-builder
@@ -38,7 +40,6 @@ open scoped Manifold Topology ContDiff
 
 namespace Jacobians.Discharge
 
-universe u v
 
 namespace LocalSheetData
 

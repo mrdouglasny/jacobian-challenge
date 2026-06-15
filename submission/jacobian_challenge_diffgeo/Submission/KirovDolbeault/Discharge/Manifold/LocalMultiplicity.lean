@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.MeromorphicAt
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -62,7 +64,6 @@ open Set
 
 namespace Jacobians.Discharge
 
-universe u v
 
 /-- A function `f : X → Y` is **constant** if there is a single value `y : Y`
 that `f` takes everywhere. Packaged as a `Prop` for use in the indicator

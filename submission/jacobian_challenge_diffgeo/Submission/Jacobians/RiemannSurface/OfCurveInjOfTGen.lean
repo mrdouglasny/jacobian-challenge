@@ -6,6 +6,8 @@ import Submission.Jacobians.Axioms.AbelJacobiDivDef
 import Submission.Jacobians.Axioms.OfCurveInjective
 import Submission.Jacobians.Bridge.AbelEngineAdapter
 
+universe u v w
+
 /-!
 # Abel–Jacobi injectivity from T-GEN (no `AX_PeriodCycleBasis`)
 

@@ -7,6 +7,8 @@ import Submission.KirovDolbeault.SphereSimplyConnected
 import Mathlib.Topology.Subpath
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
+universe u v w
+
 /-!
 # Two-open Seifert–van Kampen for `π₁`, and `S²` simply connected (unconditional)
 
@@ -62,7 +64,6 @@ open Set unitInterval Path Topology Fin
 
 namespace Jacobians.RiemannSphere.VanKampen
 
-universe u
 
 variable {Z : Type u} [TopologicalSpace Z]
 

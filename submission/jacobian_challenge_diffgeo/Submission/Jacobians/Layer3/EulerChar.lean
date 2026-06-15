@@ -2,6 +2,8 @@ import Mathlib.Algebra.Exact
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.Tactic
 
+universe u v w
+
 /-!
 # Euler characteristic for a six-term exact sequence
 
@@ -14,7 +16,6 @@ namespace Jacobians.Layer3
 
 open Module
 
-universe u v
 
 section SixTerm
 

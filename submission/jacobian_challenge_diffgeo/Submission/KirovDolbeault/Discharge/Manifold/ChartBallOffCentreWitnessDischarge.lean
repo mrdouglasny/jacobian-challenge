@@ -6,6 +6,8 @@ Authors: Bryan Sanchez
 import Submission.KirovDolbeault.Discharge.Manifold.PerChartNonConstancyReduction
 import Mathlib.Analysis.Analytic.IsolatedZeros
 
+universe u v w
+
 set_option autoImplicit true
 
 
@@ -59,7 +61,6 @@ namespace Jacobians.Discharge
 namespace ContMDiff
 namespace Degree
 
-universe u v
 
 /-! ## ℂ-analytic core: off-centre witness from "not eventually constant" -/
 

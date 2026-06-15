@@ -10,6 +10,8 @@ and over `∞` (poles).
 
 import Submission.Jacobians.RiemannSurface.MeromorphicToP1
 
+universe u v w
+
 namespace Jacobians.RiemannSurface
 
 open scoped Manifold Topology ContDiff
@@ -21,7 +23,6 @@ open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
 namespace MeromorphicFunctionField
 
-universe u
 
 variable {X : Type u} [TopologicalSpace X] [T2Space X] [CompactSpace X]
   [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ⊤ X]

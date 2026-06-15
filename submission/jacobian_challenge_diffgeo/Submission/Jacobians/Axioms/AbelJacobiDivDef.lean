@@ -6,6 +6,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Submission.Jacobians.Axioms.AbelJacobiMap
 import Submission.Jacobians.RiemannSurface.Divisor
 
+universe u v w
+
 /-!
 # The Abel-Jacobi map on divisors (base definition)
 
