@@ -923,7 +923,7 @@ noncomputable def chartLineDescentArc (P : X) (z : ℂ)
       chartLine (X := X) P z (max 0 (min t 1)) := rfl
 
 /-- The canonical period integral of the chart-line arc, in closed form. -/
-private lemma aux_canonicalArcIntegral_chartLineDescentArc
+lemma aux_canonicalArcIntegral_chartLineDescentArc
     (P : X) (z : ℂ) (form : HolomorphicOneForm X)
     (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (1 - s) • (extChartAt 𝓘(ℂ, ℂ) P) P + s • z ∈
@@ -967,7 +967,7 @@ private lemma aux_canonicalArcIntegral_chartLineDescentArc
 /-- **Chart-line triangle.**  Modulo the period lattice, the Abel–Jacobi
 vector along the bridge path `P → Q` equals the bridge path `P → Qstar`
 plus the chart-line leg `Qstar → Q`. -/
-private lemma aux_ofCurveAmbient_chartLine_mem
+lemma aux_ofCurveAmbient_chartLine_mem
     (P Qstar Q : X)
     (hQ_src : Q ∈ (extChartAt 𝓘(ℂ, ℂ) Qstar).source)
     (hseg : ∀ s ∈ Set.Icc (0 : ℝ) 1,
