@@ -142,8 +142,46 @@ less error-prone than threading the naturality lemmas through it.
 
 The Kirov-AK discharge lands in the **same relocated interface block** (AK's proof needs
 the Jacobian's rich context, just like G4), so it composes with this refactor — one
-architectural home for both. Scope the `JacobiLocalMap` dependency cone for cycle-freeness
-before that step (separate task).
+architectural home for both.
+
+### Kirov-AK scoping — DECL-LEVEL (done 2026-06-14; upstream `acd0de1`)
+
+The **module-import** cone is misleadingly large (46 modules / 16.1k LOC; 35 / ~11.9k
+"new") because a module is pulled in wholesale for one lemma. The **decl-level** closure
+(transitive `getUsedConstants` over *types and proof terms*, via a Lean metaprogram —
+`ConstantInfo.value?` hides `thmInfo` proofs in 4.30, so match `.thmInfo v` and read
+`v.value`, mirroring `CollectAxioms`) is far smaller and is the real cost:
+
+**255 decls across 15 modules.** `MappingDegree` (20 mods), `LocalMultiplicity`,
+`Surface`, `JacobianConstruction` contribute **exactly 0** — they are module-import
+artifacts, not real dependencies. Of the 15 modules, **10 are the `Forms.*` branch we
+have ALREADY ported** (`Vendor/Kirov/Montel/{Cover,Compactness,SupNorm,Complete,ChartNorm,
+LocalRep,ChartTransition}` + `Montel` + `Genus` + `HolomorphicForms` — 213 of the 255
+decls). Only **5 modules / ~25 real decls** (excl. auto `_proof_`/`.eq_1`) are new:
+
+| new module | decls needed (file LOC) |
+|---|---|
+| `PeriodLattice.JacobiLocalMap` | ~10 (`jacobiMap`, `jacobiCenter`, `jacobiDeriv`, `jacobiDerivEquiv`, `coe_jacobiDerivEquiv`, `jacobiMap_hasStrictFDerivAt`, `localLiftChart_has(Strict)DerivAt_center`, `chartFormCoeff_center`) (225) |
+| `PeriodLattice.JacobiBasePoints` | ~8 (`jacobiEvalMatrix`, `formEvalSelf`, `finrank_inf_ker_formEvalSelf`, `exists_finset_formEvalSelf_ker`, `exists_jacobiBasePoints`, `jacobiEvalMatrix_det_ne_zero`, `exists_jacobiBasePoints_det_ne_zero`) (199) |
+| `PeriodLattice.OfCurveAnalyticitySkeleton` | **3** of 1360 (`localLiftChart_analyticAt`, `exists_analytic_primitive_on_ball`, `segmentIntegral_eq_primitive_diff`) |
+| `Path.SmoothPathCore` | **5** of 970 (`OfCurveSkeleton.{localLiftChart,chartFormCoeff,chartFormCoeff_differentiableOn}`, `periodBasisForm`) |
+| `ResidueCalculus.FormCoeff` | **1** of 107 (`Dolbeault.exists_localRep_self_ne_zero`) |
+
+**Key structural finding:** `exists_jacobiBasePoints_det_ne_zero` (Forster 21.3, the only
+"deep" piece) is proven by a **linear-algebra rank argument** on the period-evaluation
+matrix (`finrank_inf_ker_formEvalSelf` → `jacobiEvalMatrix_det_ne_zero`) plus analytic
+primitives — **NOT** the branched-cover / mapping-degree theory. That is why the heavy
+branches drop out, and it is the kind of argument that ports (or reimplements-with-
+citation) cleanly over our existing forms/Montel/genus infrastructure.
+
+**Revised recommendation.** AK→0 is **proportionate and feasible** — a targeted port of
+~25 decls (4 fully-new small files + 3/5/1 decls cherry-picked from three larger files),
+all proof-deps landing in the already-ported `Forms.*`/`Montel` machinery + Mathlib. Per
+the independence policy ([[no-more-vendoring]], MRD 2026-06-11) this is small enough to
+**reimplement-with-citation** rather than verbatim-vendor. Integration risk: our ported
+`Forms.*` is an older snapshot — check signature drift vs current Kirov before reusing.
+Sequence: land the **A1+AK repoint refactor first** (above); then the AK discharge in the
+same relocated interface block → `ofCurve_isJacobian` on **A1 alone**.
 
 ---
 
