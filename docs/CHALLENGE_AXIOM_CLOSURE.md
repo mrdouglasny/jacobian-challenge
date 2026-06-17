@@ -1,15 +1,29 @@
 # Axioms needed to close Buzzard's challenge
 
-> **★ CHALLENGE-CRITICAL COUNT NOW 0 (2026-06-14, PR #251).** Every Buzzard headline is
-> `#print axioms` = standard-3; `AX_PeriodCycleBasis` — the last challenge-critical axiom —
-> appears in **no headline closure** (`docs/axiom-report.txt`: 0 mentions). It was discharged
-> from the headlines by reproving the global period-lattice instances from the unconditional
-> T-GEN theorem (`analyticLoopsGenerateH1`, PR #248) and routing `ofCurve_inj` through the
-> basis-free engine, enabled by the ℙ¹-instance unification (PR #250). `AX_PeriodCycleBasis`
-> remains a *declared* axiom (kernel count 10) backing the non-headline Layer-3 R1/R2
+> **★ STATUS (current).**
+>
+> **(1) Buzzard challenge-critical count = 0** (since 2026-06-14, PR #251). Every Buzzard
+> headline is `#print axioms` = standard-3; `AX_PeriodCycleBasis` — the last challenge-critical
+> axiom — appears in **no headline closure** (`docs/axiom-report.txt`: 0 mentions). It was
+> discharged from the headlines by reproving the global period-lattice instances from the
+> unconditional T-GEN theorem (`analyticLoopsGenerateH1`, PR #248) and routing `ofCurve_inj`
+> through the basis-free engine, enabled by the ℙ¹-instance unification (PR #250).
+> `AX_PeriodCycleBasis` remains a *declared* axiom backing the non-headline Layer-3 R1/R2
 > scaffolding and cycle-basis witnesses; deleting it from the repo needs R1/R2 (Riemann
-> bilinear relations) in general. The narrative below — which counts down to "the remaining
-> challenge-critical axiom" — is historical up to this banner.
+> bilinear relations) in general.
+>
+> **(2) The Albanese universal-property characterization is now also axiom-free** (beyond the
+> challenge). The four legacy Albanese-torus axioms in §ii below were discharged/escaped
+> (PRs #232 / #253, 2026-06-14), and the last curve-side axiom **AK
+> (`AX_curve_image_subgroup_isOpen`) was discharged 2026-06-16 in PR #255** (@daouid) — so
+> `ofCurve_isJacobian` prints standard-3 and `isJacobian_unique` was already axiom-free. The
+> one remaining Albanese input, A1 `AX_torus_uniformization`, is *declared but off every
+> headline closure*.
+>
+> **Everything below this banner is the historical discharge record.** The countdown narrative
+> and its interim counts ("22 remaining axioms", "the 2", "16 non-critical") are as-of-writing
+> snapshots, superseded by this banner. The live, kernel-verified picture is
+> `AXIOM_AUDIT.md` + `docs/axiom-report.txt`.
 
 *Authoritative source: `docs/axiom-report.txt` (kernel-verified `#print axioms` for the
 challenge property theorems and the concrete-curve headlines). The Jacobian typeclass
@@ -234,17 +248,22 @@ port's `PreimageCycle` machinery. Cluster C is now **fully discharged**.
 *All three become redundant theorems once `intersectionForm` is discharged to a
 real construction that already satisfies them (the #16+#22 joint plan).*
 
-### ii. Albanese universal property (4) — our addition beyond Buzzard
+### ii. Albanese universal property — our addition beyond Buzzard (✅ ALL DISCHARGED)
 
 Underlie `ofCurve_isJacobian` (the Albanese `∃!` factorization), our strongest
-anti-degeneracy result. Buzzard's v0.4 does not require it.
+anti-degeneracy result. Buzzard's v0.4 does not require it. The 2026-06-14 repoint
+refactor (PR #253) replaced the four legacy torus axioms below with a smaller, vetted
+interface — A1 `AX_torus_uniformization` + AK `AX_curve_image_subgroup_isOpen`. All four
+legacy axioms, and then AK itself, are now discharged, so **`ofCurve_isJacobian` is
+axiom-free (standard-3)**. A1 remains *declared but off every headline closure*.
 
-| Axiom | Content |
-|---|---|
-| `AX_torus_oneforms_dualCover` | Every complex torus is covered by the dual of its holomorphic 1-forms |
-| `AX_torus_self_albanese` | A complex torus is its own Albanese variety |
-| `AX_period_functoriality` | Period maps commute with holomorphic maps |
-| `AX_curve_generates_jacobian` | The image of the curve generates the Jacobian as a group |
+| Axiom | Content | Status |
+|---|---|---|
+| `AX_torus_oneforms_dualCover` | Every complex torus is covered by the dual of its holomorphic 1-forms | ✅ discharged #232 (now a `def`) |
+| `AX_torus_self_albanese` | A complex torus is its own Albanese variety | ✅ discharged 2026-06-14 (now theorem `torus_self_albanese`, = A1) |
+| `AX_period_functoriality` | Period maps commute with holomorphic maps | ✅ discharged 2026-06-14 (theorem, from A1 + bridge) |
+| `AX_curve_generates_jacobian` | The image of the curve generates the Jacobian as a group | ✅ discharged 2026-06-14 (from AK; AK discharged PR #255 ⇒ transitively axiom-free) |
+| `AX_curve_image_subgroup_isOpen` (AK) | Abel–Jacobi image generates a subgroup with non-empty interior (local Jacobi inversion) | ✅ **discharged 2026-06-16 PR #255** (@daouid) — std-3 |
 
 ### iii. RR/Serre coherence depth (5) — mathematical depth, not Buzzard requirements
 
