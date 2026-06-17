@@ -336,7 +336,7 @@ theorem formChartPrimitive_hasStrictDerivAt_center (Q₀ : X)
     have hseg : Set.Icc (0 : ℝ) 1
         ⊆ {t | z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r} := by
       intro t ht
-      show z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
+      change z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
       have h_rewrite : z₀ + (t : ℂ) * (z - z₀) = z₀ + t • (z - z₀) := by
         rw [Complex.real_smul]
       rw [h_rewrite]
@@ -434,7 +434,7 @@ theorem jacobiMap_hasStrictFDerivAt
       (ContinuousLinearMap.proj j) (jacobiCenter a) :=
     (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin (genus X) => ℂ)
       j).hasStrictFDerivAt
-  show HasStrictFDerivAt
+  change HasStrictFDerivAt
     ((formChartPrimitive (a j) (b i)) ∘ (fun z : Fin (genus X) → ℂ => z j))
     (jacobiEvalMatrix b a i j • ContinuousLinearMap.proj j) (jacobiCenter a)
   exact houter.comp_hasStrictFDerivAt (jacobiCenter a) hproj
@@ -457,9 +457,9 @@ theorem coe_jacobiDerivEquiv (b : Basis (Fin (genus X)) ℂ (HolomorphicOneForm 
     (jacobiDerivEquiv b a ha : (Fin (genus X) → ℂ) →L[ℂ] (Fin (genus X) → ℂ))
       = jacobiDeriv b a := by
   ext v i
-  show ((jacobiEvalMatrix b a).toLinearEquiv' _) v i = jacobiDeriv b a v i
+  change ((jacobiEvalMatrix b a).toLinearEquiv' _) v i = jacobiDeriv b a v i
   rw [jacobiDeriv_apply]
-  show (jacobiEvalMatrix b a).mulVec v i = _
+  change (jacobiEvalMatrix b a).mulVec v i = _
   rw [Matrix.mulVec, dotProduct]
 
 omit [Nonempty X] in
@@ -563,7 +563,7 @@ smooth representatives of OUR analytic loops
 (`Bridge.exists_isClosedSmoothLoop_lineIntegral_eq_developingValue`, #216).
 -/
 
-omit [Nonempty X] in
+omit [Nonempty X] [CompactSpace X] [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- Pairwise-disjoint open neighbourhoods of an injective finite family
 (T2 separation, intersected over the off-diagonal pairs).
 [Idea: Kirov `PeriodLatticeDiscrete.lean:87`.] -/
@@ -596,6 +596,7 @@ theorem exists_pairwise_disjoint_opens {n : ℕ} {a : Fin n → X}
         (Finset.mem_erase.mpr ⟨hjk, Finset.mem_univ j⟩)).2
     exact Set.disjoint_of_subset hsub1 hsub2 (hdisj j k hjk)
 
+omit [Nonempty X] in
 /-- **The coefficient identity**: OUR cocycle coefficient of a form at a
 chart-target coordinate is the local representative of the bridged form at
 the underlying point. From the bridge round-trip
@@ -652,7 +653,7 @@ theorem formChartPrimitive_eq_primitive_sub (Q₀ : X) (α : HolomorphicOneForm 
   have hseg : Set.Icc (0 : ℝ) 1
       ⊆ {t | z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r} := by
     intro t ht
-    show z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
+    change z₀ + (t : ℂ) * (z - z₀) ∈ Metric.ball z₀ r
     have h_rewrite : z₀ + (t : ℂ) * (z - z₀) = z₀ + t • (z - z₀) := by
       rw [Complex.real_smul]
     rw [h_rewrite]
@@ -723,7 +724,7 @@ theorem exists_isSmoothPath_lineIntegral_eq_formChartPrimitive
       hsub hw
     have hσt : σ t = (chartAt ℂ Q₀).symm
         ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z) := by
-      show _root_.Jacobians.ChartBallPath Q₀ Q₀ Q (_root_.Jacobians.smoothStep01 t)
+      change _root_.Jacobians.ChartBallPath Q₀ Q₀ Q (_root_.Jacobians.smoothStep01 t)
         = (chartAt ℂ Q₀).symm ((1 - (s : ℂ)) * z₀ + (s : ℂ) * z)
       rw [_root_.Jacobians.ChartBallPath, ← hs_def, hQ_coord, ← hz₀_def]
     constructor
@@ -825,7 +826,7 @@ theorem resAt_analyticAt_mul_sub_inv {Φ : ℂ → ℂ} {c : ℂ}
     have hds : (w - c) * dslope Φ c w = Φ w - Φ c := by
       have h := sub_smul_dslope Φ c w
       simpa [smul_eq_mul] using h
-    show Φ w * (w - c)⁻¹ = Φ c * (w - c)⁻¹ + dslope Φ c w
+    change Φ w * (w - c)⁻¹ = Φ c * (w - c)⁻¹ + dslope Φ c w
     rw [show dslope Φ c w = (Φ w - Φ c) * (w - c)⁻¹ from by
       rw [eq_mul_inv_iff_mul_eq₀ hwc, mul_comm]; exact hds]
     ring
@@ -962,7 +963,7 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
     obtain ⟨y, hy, hyz⟩ := hrsub j (hz_ball j)
     have hxy : x j = y := by
       rw [hx]
-      show (chartAt (H := ℂ) (a j)).symm (z j) = y
+      change (chartAt (H := ℂ) (a j)).symm (z j) = y
       rw [← hyz, (chartAt (H := ℂ) (a j)).left_inv hy.2]
     rw [hxy]; exact hy
   have hchart_x : ∀ j, (chartAt (H := ℂ) (a j)) (x j) = z j :=
@@ -1036,7 +1037,7 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
   have hbd : c.boundary
       = ∑ j, (Finsupp.single (x j) (1 : ℤ) - Finsupp.single (a j) 1) := by
     rw [hc, Jacobians.Dolbeault.SmoothOneChain.boundary]
-    show (∑ m : Fin (genus X + nl), _) = _
+    change (∑ m : Fin (genus X + nl), _) = _
     rw [Fin.sum_univ_add]
     have hL : ∀ j : Fin (genus X),
         (Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))
@@ -1066,7 +1067,7 @@ theorem loopPeriodLattice_isolated_zero (x₀ : X)
       c.period (Jacobians.Bridge.bridgeKDFormEquiv (b i)) = 0 := by
     intro i
     rw [hc, Jacobians.Dolbeault.SmoothOneChain.period]
-    show (∑ m : Fin (genus X + nl), _) = 0
+    change (∑ m : Fin (genus X + nl), _) = 0
     rw [Fin.sum_univ_add]
     have hL : ∀ j : Fin (genus X),
         ((Fin.addCases (motive := fun _ => ℤ) (fun _ => (1 : ℤ)) (fun k => -(fl k))

@@ -45,7 +45,8 @@ noncomputable def affineProjXCoeff (g : Polynomial ℂ) (a : HyperellipticAffine
         ((squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z))
     else 0
 
-/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). The point `0 ∈ ℂ` is not in the
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). The point `0 ∈ ℂ`
+-- is not in the
 source of `squareLocalHomeomorph p hp`.
 
 This is the only piece of `squareLocalHomeomorph_symm_ne_zero` that
@@ -272,7 +273,8 @@ The chart-symm has `.val.1 = polynomialLocalHomeomorph.symm (y²)`
 (per `affineChartProjY_symm_apply_fst`).
 -/
 
-/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). No critical point of `x ↦ H.f.eval x`
+/-- **Theorem** (formerly a narrow structural axiom; discharged 2026-06-06). No critical point
+-- of `x ↦ H.f.eval x`
 lies in the source of `polynomialLocalHomeomorph p hp`. Mirror of
 `squareLocalHomeomorph_zero_notMem_source`: the IFT-derived chart at
 `a.val.1` (where `f'(a.val.1) ≠ 0`) has a source bounded away from
@@ -734,7 +736,7 @@ theorem hyperellipticAffineCoeff_isHolomorphicOneFormCoeff
   intro p
   have hExt : (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
     rw [extChartAt_target]
-    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    change (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
     rw [Set.range_id, Set.inter_univ]
     rfl
   rw [hExt]
@@ -762,7 +764,7 @@ theorem hyperellipticAffineCoeff_isZeroOffChartTarget (g : Polynomial ℂ) :
   intro p z hz
   have hExt : (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
     rw [extChartAt_target]
-    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    change (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
     rw [Set.range_id, Set.inter_univ]
     rfl
   rw [hExt] at hz
@@ -1026,7 +1028,7 @@ theorem hyperellipticAffineCoeff_cocycle_projX_projY
   rw [hXofYz, hFderivVal]
   -- LHS = g(z) / y_z;
   -- RHS = (2 g(z) / f'(z)) * (f'(z) / (2 y_z)) = g(z) / y_z.
-  show g.eval z / y_z = _
+  change g.eval z / y_z = _
   field_simp
 
 /-! ## Cocycle equation, sub-case projY × projX (chain rule, mirror)
@@ -1136,7 +1138,7 @@ theorem hyperellipticAffineCoeff_cocycle_projY_projX
   -- LHS = 2 g(x_y) / f'(x_y);
   -- RHS = (g(x_y) / y) · (2 y / f'(x_y)) = 2 g(x_y) / f'(x_y).
   rw [← he_p_def, ← hx_y_def]
-  show 2 * g.eval x_y / _ = _
+  change 2 * g.eval x_y / _ = _
   field_simp
 
 /-! ## Bundled cocycle predicate
@@ -1156,7 +1158,7 @@ theorem hyperellipticAffineCoeff_satisfiesCotangentCocycle (g : Polynomial ℂ) 
   have hChartTarget :
       (extChartAt 𝓘(ℂ, ℂ) p).target = (affineChartAt (H := H) p).target := by
     rw [extChartAt_target]
-    show (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
+    change (chartAt ℂ p).target ∩ Set.range (id : ℂ → ℂ) = (affineChartAt (H := H) p).target
     rw [Set.range_id, Set.inter_univ]
     rfl
   have hChartSrc_q :
@@ -1230,8 +1232,8 @@ theorem hyperellipticAffineCoeff_mem_submodule (g : Polynomial ℂ) :
     hyperellipticAffineCoeff (H := H) g ∈
       holomorphicOneFormSubmodule (HyperellipticAffine H) :=
   ⟨hyperellipticAffineCoeff_isHolomorphicOneFormCoeff g,
-   hyperellipticAffineCoeff_satisfiesCotangentCocycle g,
-   hyperellipticAffineCoeff_isZeroOffChartTarget g⟩
+    hyperellipticAffineCoeff_satisfiesCotangentCocycle g,
+    hyperellipticAffineCoeff_isZeroOffChartTarget g⟩
 
 /-! ## Linearity of the affine coefficient family -/
 

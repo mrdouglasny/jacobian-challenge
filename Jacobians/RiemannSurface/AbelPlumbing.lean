@@ -142,7 +142,7 @@ theorem ulift_abelJacobiDiv_apply (D : Divisor X) :
               Divisor.deg X D₁ •
                 ofCurveAmbient X (Classical.arbitrary X)
                   (Classical.arbitrary X)) +
-             (divisorPeriodVector (Classical.arbitrary X) D₂ -
+              (divisorPeriodVector (Classical.arbitrary X) D₂ -
               Divisor.deg X D₂ •
                 ofCurveAmbient X (Classical.arbitrary X)
                   (Classical.arbitrary X))) := by

@@ -128,7 +128,7 @@ theorem lineIntegral_smul (c : ℂ) (α : HolomorphicOneForms X) (γ : ℝ → X
   have h_pw : ∀ t : ℝ,
       (c • α).toFun (γ t) (pathSpeed γ t) = c * α.toFun (γ t) (pathSpeed γ t) := by
     intro t
-    show (c • α.toFun (γ t)) (pathSpeed γ t) = _
+    change (c • α.toFun (γ t)) (pathSpeed γ t) = _
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
   simp_rw [h_pw]
   exact intervalIntegral.integral_const_mul c _
@@ -197,7 +197,7 @@ theorem pathSpeed_reverse (γ : ℝ → X) (t : ℝ)
     pathSpeed (reverse γ) t = -pathSpeed γ (1 - t) := by
   unfold pathSpeed
   -- reverse γ t = γ (1 - t), so chartAt at (reverse γ t) = chartAt at (γ (1 - t)).
-  show fderiv ℝ ((chartAt (H := ℂ) (γ (1 - t))).toFun ∘ (reverse γ)) t (1 : ℝ) =
+  change fderiv ℝ ((chartAt (H := ℂ) (γ (1 - t))).toFun ∘ (reverse γ)) t (1 : ℝ) =
     -fderiv ℝ ((chartAt (H := ℂ) (γ (1 - t))).toFun ∘ γ) (1 - t) (1 : ℝ)
   -- (chartAt).toFun ∘ (reverse γ) = (chartAt).toFun ∘ γ ∘ (1 - ·)
   set ψ : ℝ → ℂ := (chartAt (H := ℂ) (γ (1 - t))).toFun ∘ γ with hψ
@@ -212,7 +212,7 @@ theorem pathSpeed_reverse (γ : ℝ → X) (t : ℝ)
   -- fderiv (1-·) t applied at 1 = -1 (the derivative of `1 - s` is `-1`).
   have h_fderiv_sub : fderiv ℝ (fun s : ℝ => 1 - s) t (1 : ℝ) = (-1 : ℝ) := by
     rw [fderiv_const_sub]; simp
-  show (fderiv ℝ ψ (1 - t)) (fderiv ℝ (fun s : ℝ => 1 - s) t 1) = -fderiv ℝ ψ (1 - t) 1
+  change (fderiv ℝ ψ (1 - t)) (fderiv ℝ (fun s : ℝ => 1 - s) t 1) = -fderiv ℝ ψ (1 - t) 1
   rw [h_fderiv_sub]
   rw [show ((fderiv ℝ ψ (1 - t)) (-1 : ℝ) : ℂ) = -fderiv ℝ ψ (1 - t) (1 : ℝ) from by
     rw [show (-1 : ℝ) = -(1 : ℝ) from rfl, (fderiv ℝ ψ (1 - t)).map_neg]]
@@ -237,7 +237,7 @@ theorem lineIntegral_reverse (α : HolomorphicOneForms X) (γ : ℝ → X)
   congr 1
   have h_sub := intervalIntegral.integral_comp_sub_left
     (fun u : ℝ => α.toFun (γ u) (pathSpeed γ u)) 1 (a := 0) (b := 1)
-  simp at h_sub
+  simp only [sub_zero, sub_self] at h_sub
   exact h_sub
 
 /-! ### Phase 1b: path concatenation
@@ -255,7 +255,7 @@ noncomputable def concat (γ γ' : ℝ → X) : ℝ → X :=
 
 omit [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
     [Nonempty X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X] in
-theorem concat_apply_left (γ γ' : ℝ → X) {t : ℝ} (ht : t ≤ 1/2) :
+theorem concat_apply_left (γ γ' : ℝ → X) {t : ℝ} (ht : t ≤ 1 / 2) :
     concat γ γ' t = γ (2 * t) := if_pos ht
 
 omit [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]
@@ -267,7 +267,7 @@ omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
     [IsManifold 𝓘(ℂ) ω X] in
 /-- pathSpeed of `concat γ γ'` on the strict left half: equals
 `2 * pathSpeed γ (2t)` via chain rule on `γ ∘ (2·)`. -/
-theorem pathSpeed_concat_left (γ γ' : ℝ → X) (t : ℝ) (ht : t < 1/2)
+theorem pathSpeed_concat_left (γ γ' : ℝ → X) (t : ℝ) (ht : t < 1 / 2)
     (hdiff : DifferentiableAt ℝ
       ((chartAt (H := ℂ) (γ (2 * t))).toFun ∘ γ) (2 * t)) :
     pathSpeed (concat γ γ') t = 2 * pathSpeed γ (2 * t) := by
@@ -275,7 +275,7 @@ theorem pathSpeed_concat_left (γ γ' : ℝ → X) (t : ℝ) (ht : t < 1/2)
   -- concat γ γ' t = γ (2 * t) for t ≤ 1/2.
   have ht_le : t ≤ 1/2 := le_of_lt ht
   have h_pt : concat γ γ' t = γ (2 * t) := concat_apply_left γ γ' ht_le
-  show fderiv ℝ ((chartAt (H := ℂ) (concat γ γ' t)).toFun ∘ (concat γ γ')) t (1 : ℝ) =
+  change fderiv ℝ ((chartAt (H := ℂ) (concat γ γ' t)).toFun ∘ (concat γ γ')) t (1 : ℝ) =
     2 * fderiv ℝ ((chartAt (H := ℂ) (γ (2 * t))).toFun ∘ γ) (2 * t) (1 : ℝ)
   -- chartAt at concat γ γ' t = chartAt at γ(2t) via h_pt.
   rw [h_pt]
@@ -298,7 +298,7 @@ theorem pathSpeed_concat_left (γ γ' : ℝ → X) (t : ℝ) (ht : t < 1/2)
   -- fderiv (2·) t 1 = 2.
   have h_fderiv_mul : fderiv ℝ (fun s : ℝ => 2 * s) t (1 : ℝ) = (2 : ℝ) := by
     rw [fderiv_const_mul differentiableAt_id]; simp
-  show (fderiv ℝ ψ (2 * t)) (fderiv ℝ (fun s : ℝ => 2 * s) t 1) = 2 * fderiv ℝ ψ (2 * t) 1
+  change (fderiv ℝ ψ (2 * t)) (fderiv ℝ (fun s : ℝ => 2 * s) t 1) = 2 * fderiv ℝ ψ (2 * t) 1
   rw [h_fderiv_mul]
   -- (fderiv ℝ ψ (2t)) 2 = 2 * (fderiv ℝ ψ (2t)) 1 via ℝ-linearity on CLM.
   have h_smul_eq : (2 : ℝ) = (2 : ℝ) • (1 : ℝ) := by rw [smul_eq_mul, mul_one]
@@ -312,14 +312,14 @@ omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X]
     [IsManifold 𝓘(ℂ) ω X] in
 /-- pathSpeed of `concat γ γ'` on the strict right half: equals
 `2 * pathSpeed γ' (2t - 1)` via chain rule on `γ' ∘ (2·-1)`. -/
-theorem pathSpeed_concat_right (γ γ' : ℝ → X) (t : ℝ) (ht : 1/2 < t)
+theorem pathSpeed_concat_right (γ γ' : ℝ → X) (t : ℝ) (ht : 1 / 2 < t)
     (hdiff : DifferentiableAt ℝ
       ((chartAt (H := ℂ) (γ' (2 * t - 1))).toFun ∘ γ') (2 * t - 1)) :
     pathSpeed (concat γ γ') t = 2 * pathSpeed γ' (2 * t - 1) := by
   unfold pathSpeed
   have ht_nle : ¬ t ≤ 1/2 := not_le.mpr ht
   have h_pt : concat γ γ' t = γ' (2 * t - 1) := concat_apply_right γ γ' ht_nle
-  show fderiv ℝ ((chartAt (H := ℂ) (concat γ γ' t)).toFun ∘ (concat γ γ')) t (1 : ℝ) =
+  change fderiv ℝ ((chartAt (H := ℂ) (concat γ γ' t)).toFun ∘ (concat γ γ')) t (1 : ℝ) =
     2 * fderiv ℝ ((chartAt (H := ℂ) (γ' (2 * t - 1))).toFun ∘ γ') (2 * t - 1) (1 : ℝ)
   rw [h_pt]
   set ψ' : ℝ → ℂ := (chartAt (H := ℂ) (γ' (2 * t - 1))).toFun ∘ γ' with hψ'
@@ -337,7 +337,7 @@ theorem pathSpeed_concat_right (γ γ' : ℝ → X) (t : ℝ) (ht : 1/2 < t)
   have h_fderiv_sub_mul : fderiv ℝ (fun s : ℝ => 2 * s - 1) t (1 : ℝ) = (2 : ℝ) := by
     rw [show (fun s : ℝ => 2 * s - 1) = (fun s : ℝ => 2 * s + (-1)) from by funext s; ring]
     rw [fderiv_add_const, fderiv_const_mul differentiableAt_id]; simp
-  show (fderiv ℝ ψ' (2 * t - 1)) (fderiv ℝ (fun s : ℝ => 2 * s - 1) t 1) =
+  change (fderiv ℝ ψ' (2 * t - 1)) (fderiv ℝ (fun s : ℝ => 2 * s - 1) t 1) =
     2 * fderiv ℝ ψ' (2 * t - 1) 1
   rw [h_fderiv_sub_mul]
   have h_smul_eq : (2 : ℝ) = (2 : ℝ) • (1 : ℝ) := by rw [smul_eq_mul, mul_one]
@@ -567,7 +567,8 @@ theorem pathSpeed_comp_eq_mfderiv
     rw [ModelWithCorners.range_eq_univ, fderivWithin_univ]
     -- Need: fderiv ℂ (writtenInExtChartAt 𝓘(ℂ) 𝓘(ℂ) (γ t) f) ((extChartAt 𝓘(ℂ) (γ t)) (γ t))
     --     = fderiv ℂ f_loc (g_X t)
-    -- These are equal up to definitional unfolding (writtenInExtChartAt = f_loc, extChartAt x x = g_X t).
+    -- These are equal up to definitional unfolding (writtenInExtChartAt = f_loc, extChartAt x
+    -- x = g_X t).
     congr 1
   -- Step 8: Assemble.
   -- pathSpeed (f ∘ γ) t
@@ -578,10 +579,10 @@ theorem pathSpeed_comp_eq_mfderiv
   --   = (fderiv ℂ f_loc (g_X t)).restrictScalars ℝ (pathSpeed γ t)  (hf_loc_fderiv_ℝ)
   --   = fderiv ℂ f_loc (g_X t) (pathSpeed γ t)              (restrictScalars_apply)
   --   = mfderiv f (γ t) (pathSpeed γ t)                     (h_mfderiv.symm)
-  show pathSpeed (f ∘ γ) t = mfderiv 𝓘(ℂ) 𝓘(ℂ) f (γ t) (pathSpeed γ t)
+  change pathSpeed (f ∘ γ) t = mfderiv 𝓘(ℂ) 𝓘(ℂ) f (γ t) (pathSpeed γ t)
   rw [h_mfderiv]
   -- Goal: pathSpeed (f ∘ γ) t = fderiv ℂ f_loc (g_X t) (pathSpeed γ t)
-  show fderiv ℝ ((chartAt (H := ℂ) ((f ∘ γ) t)).toFun ∘ (f ∘ γ)) t 1 =
+  change fderiv ℝ ((chartAt (H := ℂ) ((f ∘ γ) t)).toFun ∘ (f ∘ γ)) t 1 =
     fderiv ℂ f_loc (g_X t) (pathSpeed γ t)
   -- (f ∘ γ) t = f (γ t), so chartAt (f ∘ γ) t = chartAt (f (γ t)) = φ_Y
   have h_gY : (chartAt (H := ℂ) ((f ∘ γ) t)).toFun ∘ (f ∘ γ) = g_Y := rfl
@@ -608,7 +609,7 @@ theorem lineIntegral_pullback
     lineIntegral α (f ∘ γ) = lineIntegral (pullbackForm f hf α) γ := by
   unfold lineIntegral
   refine intervalIntegral.integral_congr (fun t ht => ?_)
-  show α.toFun (f (γ t)) (pathSpeed (f ∘ γ) t) =
+  change α.toFun (f (γ t)) (pathSpeed (f ∘ γ) t) =
     (α.toFun (f (γ t))).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) f (γ t)) (pathSpeed γ t)
   rw [ContinuousLinearMap.comp_apply,
     pathSpeed_comp_eq_mfderiv f hf γ t hγ_cont.continuousAt (hγ_diff t ht)]

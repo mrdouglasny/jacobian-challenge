@@ -175,9 +175,9 @@ noncomputable def patchedTraceSelection_ofFrame (hac : AdaptedCover ω₀ g f po
           ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (hΦinjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦinjReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (Φ b').xs)
-    (hΦrangeReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦrangeReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Set.range (Φ b').xs = f.toRiemannSphere ⁻¹' {(((b' : ℂ) : RiemannSphere))})
     (hsheetInjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (fun i => (Sreg z hz).sheet i (((b' : ℂ) : RiemannSphere))))
@@ -189,7 +189,7 @@ noncomputable def patchedTraceSelection_ofFrame (hac : AdaptedCover ω₀ g f po
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
     -- The per-branch-value branched full-fibre frame (the `z = wᵐ` Puiseux sheets, colliding admitted).
-    (ιBr : ∀ b₀ : ℂ, Type) [fintypeBr : ∀ b₀, Fintype (ιBr b₀)]
+    (ιBr : ∀ _b₀ : ℂ, Type) [fintypeBr : ∀ b₀, Fintype (ιBr b₀)]
     (secBr : ∀ b₀ : ℂ, ιBr b₀ → ℂ → X)
     (hsmoothBr : ∀ b₀ ∈ br, b₀ ∉ Finset.univ.image cs → ∀ j,
       ContMDiffAt 𝓘(ℂ) 𝓘(ℂ) ω (secBr b₀ j) b₀)
@@ -286,9 +286,9 @@ theorem residueSum_eq_zero_ofFrame (hac : AdaptedCover ω₀ g f poles)
           ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (hΦinjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦinjReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (Φ b').xs)
-    (hΦrangeReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
+    (hΦrangeReg : ∀ z (_hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Set.range (Φ b').xs = f.toRiemannSphere ⁻¹' {(((b' : ℂ) : RiemannSphere))})
     (hsheetInjReg : ∀ z (hz : z ∉ Finset.univ.image cs ∪ br),
       ∀ᶠ b' in 𝓝 z, Function.Injective (fun i => (Sreg z hz).sheet i (((b' : ℂ) : RiemannSphere))))
@@ -299,7 +299,7 @@ theorem residueSum_eq_zero_ofFrame (hac : AdaptedCover ω₀ g f poles)
       AnalyticAt ℂ (fun w => g ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))).symm w))
         ((chartAt ℂ ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere))))
           ((Sreg z hz).sheet i (((z : ℂ) : RiemannSphere)))))
-    (ιBr : ∀ b₀ : ℂ, Type) [fintypeBr : ∀ b₀, Fintype (ιBr b₀)]
+    (ιBr : ∀ _b₀ : ℂ, Type) [fintypeBr : ∀ b₀, Fintype (ιBr b₀)]
     (secBr : ∀ b₀ : ℂ, ιBr b₀ → ℂ → X)
     (hsmoothBr : ∀ b₀ ∈ br, b₀ ∉ Finset.univ.image cs → ∀ j,
       ContMDiffAt 𝓘(ℂ) 𝓘(ℂ) ω (secBr b₀ j) b₀)

@@ -26,7 +26,7 @@ noncomputable def ellipticDz (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω
       have htrans : (extChartAt 𝓘(ℂ, ℂ) y) ((extChartAt 𝓘(ℂ, ℂ) x).symm z) ∈
           (extChartAt 𝓘(ℂ, ℂ) y).target :=
         (extChartAt 𝓘(ℂ, ℂ) y).map_source hyz
-      show Set.indicator (extChartAt 𝓘(ℂ, ℂ) x).target (fun _ => (1 : ℂ)) z =
+      change Set.indicator (extChartAt 𝓘(ℂ, ℂ) x).target (fun _ => (1 : ℂ)) z =
         Set.indicator (extChartAt 𝓘(ℂ, ℂ) y).target (fun _ => (1 : ℂ))
           ((extChartAt 𝓘(ℂ, ℂ) y) ((extChartAt 𝓘(ℂ, ℂ) x).symm z)) *
         (fderiv ℂ ((extChartAt 𝓘(ℂ, ℂ) y) ∘ (extChartAt 𝓘(ℂ, ℂ) x).symm) z 1)
@@ -40,7 +40,7 @@ noncomputable def ellipticDz (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω
               exact (congrArg (fun w : ℂ => (1 : ℂ) * w) hf).symm
     · -- zero off chart target
       intro x z hz
-      show Set.indicator _ (fun _ => (1 : ℂ)) z = 0
+      change Set.indicator _ (fun _ => (1 : ℂ)) z = 0
       exact Set.indicator_of_notMem hz _⟩
 
 theorem ellipticDz_ne_zero (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω₁, ω₂]) :
@@ -55,7 +55,7 @@ theorem ellipticDz_ne_zero (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω�
       (ellipticDz ω₁ ω₂ h).coeff x z = (0 : HolomorphicOneForm (Elliptic ω₁ ω₂ h)).coeff x z :=
     congrArg (fun form : HolomorphicOneForm (Elliptic ω₁ ω₂ h) => form.coeff x z) hzero
   have hone : (ellipticDz ω₁ ω₂ h).coeff x z = 1 := by
-    show Set.indicator _ (fun _ => (1 : ℂ)) z = 1
+    change Set.indicator _ (fun _ => (1 : ℂ)) z = 1
     exact Set.indicator_of_mem hz _
   have hzeroCoeff : (0 : HolomorphicOneForm (Elliptic ω₁ ω₂ h)).coeff x z = 0 := rfl
   have : (1 : ℂ) = 0 := by
@@ -127,7 +127,7 @@ theorem ellipticCoeffFun_mdifferentiable (ω₁ ω₂ : ℂ)
   have hdiffTarget : DifferentiableWithinAt ℂ (form.coeff x) e.target (e x) := by
     simpa [HolomorphicOneForm.coeff, e] using
       (form.2.1 x).differentiableOn (e x) <|
-        by simpa [e] using mem_extChartAt_target (I := 𝓘(ℂ, ℂ)) x
+        by simp [e]
   have hvalue :
       (ellipticCoeffFun ω₁ ω₂ h form ∘ e.symm) (e x) = form.coeff x (e x) := by
     simpa [e] using
@@ -136,7 +136,7 @@ theorem ellipticCoeffFun_mdifferentiable (ω₁ ω₂ : ℂ)
   have hdiffAt : DifferentiableAt ℂ (form.coeff x) (e x) :=
     hdiffTarget.differentiableAt
       ((isOpen_extChartAt_target (I := 𝓘(ℂ, ℂ)) x).mem_nhds <|
-        by simpa [e] using mem_extChartAt_target (I := 𝓘(ℂ, ℂ)) x)
+        by simp [e])
   have hdiff :
       DifferentiableWithinAt ℂ (form.coeff x) (Set.range (𝓘(ℂ, ℂ))) (e x) := by
     simpa using hdiffAt.differentiableWithinAt
@@ -176,15 +176,15 @@ theorem eq_smul_ellipticDz (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![ω�
   · -- on-target: form.coeff x z = c = (c • ellipticDz).coeff x z
     rw [hc x z hz]
     show c = (c • ellipticDz ω₁ ω₂ h).coeff x z
-    show c = c • (ellipticDz ω₁ ω₂ h).coeff x z
-    show c = c • Set.indicator _ (fun _ => (1 : ℂ)) z
+    change c = c • (ellipticDz ω₁ ω₂ h).coeff x z
+    change c = c • Set.indicator _ (fun _ => (1 : ℂ)) z
     rw [Set.indicator_of_mem hz]
     simp
   · -- off-target: both sides are zero by IsZeroOffChartTarget
     have hform : form.coeff x z = 0 := form.2.2.2 x z hz
     have hdz : (ellipticDz ω₁ ω₂ h).coeff x z = 0 := (ellipticDz ω₁ ω₂ h).2.2.2 x z hz
-    show form.coeff x z = (c • ellipticDz ω₁ ω₂ h).coeff x z
-    show form.coeff x z = c • (ellipticDz ω₁ ω₂ h).coeff x z
+    change form.coeff x z = (c • ellipticDz ω₁ ω₂ h).coeff x z
+    change form.coeff x z = c • (ellipticDz ω₁ ω₂ h).coeff x z
     rw [hform, hdz]
     simp
 
@@ -206,7 +206,7 @@ theorem genus_Elliptic_eq_one (ω₁ ω₂ : ℂ) (h : LinearIndependent ℝ ![�
     intro form
     rcases eq_smul_ellipticDz ω₁ ω₂ h form with ⟨c, rfl⟩
     exact Submodule.smul_mem _ c (Submodule.mem_span_singleton_self _)
-  show Module.finrank ℂ (HolomorphicOneForm (Elliptic ω₁ ω₂ h)) ≤ 1
+  change Module.finrank ℂ (HolomorphicOneForm (Elliptic ω₁ ω₂ h)) ≤ 1
   simpa using (finrank_le_of_span_eq_top hspan)
 
 end Jacobians.ProjectiveCurve

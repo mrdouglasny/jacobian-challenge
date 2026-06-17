@@ -2,7 +2,6 @@ import Jacobians.ProjectiveCurve.Hyperelliptic.InvolutionOdd
 import Jacobians.ProjectiveCurve.Hyperelliptic.OddForm
 import Jacobians.Axioms.AbelJacobiMap
 
-
 open scoped Manifold ContDiff Topology
 open Jacobians Jacobians.ProjectiveCurve Jacobians.RiemannSurface
 open Jacobians.ProjectiveCurve.HyperellipticOdd Jacobians.ProjectiveCurve.HyperellipticAffine
@@ -179,9 +178,9 @@ lemma σ_source (H : HyperellipticData) [Fact (Odd H.f.natDegree)] (p : Hyperell
     rw [chartAt_infty]
   rw [h_chart] at hp
   rw [h_chart']
-  change p ∈ { (OnePoint.infty : HyperellipticOdd H Fact.out) } ∪
+  change p ∈ {(OnePoint.infty : HyperellipticOdd H Fact.out)} ∪
     (coe : HyperellipticAffine H → HyperellipticOdd H Fact.out) '' V H at hp
-  change hyperellipticInvolution H Fact.out p ∈ { (OnePoint.infty : HyperellipticOdd H Fact.out) } ∪
+  change hyperellipticInvolution H Fact.out p ∈ {(OnePoint.infty : HyperellipticOdd H Fact.out)} ∪
     (coe : HyperellipticAffine H → HyperellipticOdd H Fact.out) '' V H
   rcases hp with (hp | hp)
   · have hp_eq : p = OnePoint.infty := Set.mem_singleton_iff.mp hp
@@ -247,8 +246,8 @@ theorem pullback_coeff_eq
           exact @hyperellipticInvolution_extChartAt_infty H Fact.out w hw'
         have h_fderiv : fderiv ℂ
             (⇑(extChartAt 𝓘(ℂ, ℂ) (OnePoint.infty : HyperellipticOdd H Fact.out)) ∘
-             hyperellipticInvolution H Fact.out ∘
-             ⇑(extChartAt 𝓘(ℂ, ℂ) (OnePoint.infty : HyperellipticOdd H Fact.out)).symm) z =
+              hyperellipticInvolution H Fact.out ∘
+              ⇑(extChartAt 𝓘(ℂ, ℂ) (OnePoint.infty : HyperellipticOdd H Fact.out)).symm) z =
             fderiv ℂ (fun w => -w) z :=
           h_eq_on.fderiv_eq
         change (hyperellipticOddForm H g).coeff OnePoint.infty
@@ -441,8 +440,8 @@ theorem pullback_coeff_eq
             rw [HyperellipticAffine.invol_val]
           have h_fderiv : fderiv ℂ
               (⇑(extChartAt 𝓘(ℂ, ℂ) (coe q_aff.invol : HyperellipticOdd H Fact.out)) ∘
-               hyperellipticInvolution H Fact.out ∘
-               ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
+                hyperellipticInvolution H Fact.out ∘
+                ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
               fderiv ℂ (fun w => w) z :=
             h_eq_on.fderiv_eq
           have h_fderiv_id : (fderiv ℂ (fun w : ℂ => w) z) 1 = 1 := by
@@ -720,8 +719,8 @@ theorem pullback_coeff_eq
             rw [HyperellipticAffine.invol_val]
           have h_fderiv : fderiv ℂ
               (⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)) ∘
-               hyperellipticInvolution H Fact.out ∘
-               ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
+                hyperellipticInvolution H Fact.out ∘
+                ⇑(extChartAt 𝓘(ℂ, ℂ) (coe a : HyperellipticOdd H Fact.out)).symm) z =
               fderiv ℂ (fun w => -w) z :=
             h_eq_on.fderiv_eq
           have h_fderiv_neg : (fderiv ℂ (fun w : ℂ => -w) z) 1 = -1 := by
@@ -800,4 +799,3 @@ theorem pullback_hyperellipticOddForm_eq_neg
   ext x z
   rw [pullback_coeff_eq]
   rfl
-

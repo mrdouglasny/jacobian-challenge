@@ -441,7 +441,7 @@ theorem isRefinement_shrinkCover :
 /-- `V a ⊆ (chartAt (center a)).source`. -/
 theorem shrinkOpens_subset_source (a : 𝔇.ι) :
     ((𝔇.shrinkOpens a : Opens X) : Set X) ⊆ (chartAt (H := ℂ) (𝔇.center a)).source :=
-  fun x hx => 𝔇.U_subset_chartAt_source a (𝔇.shrinkOpens_le_U a hx)
+  fun _x hx => 𝔇.U_subset_chartAt_source a (𝔇.shrinkOpens_le_U a hx)
 
 /-- `Wov (a,b)` is exactly the chart-`a` image of the open `shrinkOpens a ⊓ shrinkOpens b`. -/
 theorem Wov_eq_chartImage_shrinkInter (a b : 𝔇.ι) :
@@ -676,7 +676,7 @@ theorem glueForm_val (s : 𝔇.overlapData.Cshr) :
       = ∑ p : 𝔇.ι × 𝔇.ι, 𝔇.shrinkTerm s p.1 p.2 := by
   show ((∑ p : 𝔇.ι × 𝔇.ι, (⟨𝔇.shrinkTerm s p.1 p.2, 𝔇.shrinkTerm_mem_zeroOne s p.1 p.2⟩ :
       ↥(OneFormsZeroOne X)) : ↥(OneFormsZeroOne X)) : SmoothCOneForms X) = _
-  rw [AddSubmonoidClass.coe_finset_sum]
+  rw [AddSubmonoidClass.coe_finsetSum]
 
 /-! ## §C — The local smooth split `G_a` and its two key identities
 
@@ -992,7 +992,7 @@ theorem etaFn_chartA_analyticOn (s : 𝔇.overlapData.Cshr) (hs : 𝔇.delta1Mod
   have hyV : y ∈ ((𝔇.shrinkOpens a : Opens X) : Set X) := hyVV.1
   have hysrc : y ∈ φa.source := 𝔇.shrinkOpens_subset_source a hyV
   have hwW : φa y ∈ W := ⟨φa.map_source hysrc, by
-    simp only [hW, Set.mem_preimage, φa.left_inv hysrc]; exact hyV⟩
+    simp only [Set.mem_preimage, φa.left_inv hysrc]; exact hyV⟩
   exact (hDiffOn.analyticOnNhd hWopen (φa y) hwW).analyticWithinAt
 
 /-- `‖holoFn σ_{ac} x‖ ≤ ‖s_{ac}‖` on `V_a ∩ V_c` (the germ-section value is `s.toFun∘φ_a`, bounded by
@@ -1365,7 +1365,7 @@ noncomputable def overlapAtom (a b : 𝔇.ι) {g : MGerm (𝔇.U a ⊓ 𝔇.U b)
     (hg : g ∈ OmegaDGerm (0 : Divisor X) (𝔇.U a ⊓ 𝔇.U b)) :
     BddHol (𝔇.Wov (a, b)) :=
   holoSectionToBddHol (𝔇.overlap_subset_source a b)
-    (fun x hx => gextLimRep_chart_analyticAt (holoRep_mem hg) hx)
+    (fun _x hx => gextLimRep_chart_analyticAt (holoRep_mem hg) hx)
     (𝔇.closure_Wov_subset_chartImage_overlap a b) (𝔇.isCompact_closure_Wov (a, b))
 
 @[simp] theorem overlapAtom_toFun_of_mem (a b : 𝔇.ι) {g : MGerm (𝔇.U a ⊓ 𝔇.U b)}
@@ -1521,7 +1521,7 @@ noncomputable def diagAtom (a : 𝔇.ι) {η : MGerm (𝔇.U a)}
     (hη : η ∈ OmegaDGerm (0 : Divisor X) (𝔇.U a)) :
     BddHol (𝔇.Wov (a, a)) :=
   holoSectionToBddHol (𝔇.U_subset_source a)
-    (fun x hx => gextLimRep_chart_analyticAt (holoRep_mem hη) hx)
+    (fun _x hx => gextLimRep_chart_analyticAt (holoRep_mem hη) hx)
     (𝔇.closure_Wov_diag_subset_chartImage_U a) (𝔇.isCompact_closure_Wov (a, a))
 
 @[simp] theorem diagAtom_toFun_of_mem (a : 𝔇.ι) {η : MGerm (𝔇.U a)}
@@ -1763,7 +1763,7 @@ theorem refineC1_eq_delta0_shrink (g : ↥(𝔇.toFiniteCover.cocycles1 (0 : Div
           (openIncl inf_le_right ⟨v, hv⟩)
         - (fun w : ↥(𝔇.shrinkOpens a) => holoFn (𝔇.diagPullbackGerm_mem f a) w.1)
           (openIncl inf_le_left ⟨v, hv⟩)
-  simp only [openIncl, Pi.sub_apply]
+  simp only [openIncl]
   -- `v ∈ V a ⊓ V b`, hence in `U a ⊓ U b` and in each `V a`, `V b`
   have hva : v ∈ (𝔇.shrinkOpens a : Opens X) := hv.1
   have hvb : v ∈ (𝔇.shrinkOpens b : Opens X) := hv.2

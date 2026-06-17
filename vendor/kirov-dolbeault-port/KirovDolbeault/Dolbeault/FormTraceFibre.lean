@@ -208,7 +208,7 @@ noncomputable def FibreRegularData.ofRegular (g : X → ℂ) (f : MeromorphicFun
   hg_mero := hmero
 
 /-- The chart pullback `f.holoRepr ∘ chart⁻¹` evaluated at `pre i = chart (xs i)` is `b`. -/
-theorem FibreRegularData.gval (ω₀ : HolomorphicOneForms X) (f : MeromorphicFunction X) {b : ℂ}
+theorem FibreRegularData.gval (_ω₀ : HolomorphicOneForms X) (f : MeromorphicFunction X) {b : ℂ}
     (D : FibreRegularData g f b) (i : D.ι) :
     (fun z => f.holoRepr ((chartAt ℂ (D.xs i)).symm z)) ((chartAt ℂ (D.xs i)) (D.xs i)) = b := by
   show f.holoRepr ((chartAt ℂ (D.xs i)).symm ((chartAt ℂ (D.xs i)) (D.xs i))) = b

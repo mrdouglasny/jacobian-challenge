@@ -26,7 +26,8 @@ silently when `genus X` is 0):
 7. `AX_SerreDuality` (classical pairing)
 8. `AX_RiemannRoch` (deepest algebraic axiom)
 9. `AX_PluckerFormula` (adjunction; Track 2 `SmoothPlaneCurve` only)
-10. `AX_AbelSupset (the split remainder of the discharged AX_AbelTheorem)` (via Riemann theta divisor or Forster-style residue)
+10. `AX_AbelSupset (the split remainder of the discharged AX_AbelTheorem)` (via Riemann theta
+  divisor or Forster-style residue)
 -/
 import Jacobians.Axioms.FiniteDimOneForms
 import Jacobians.Axioms.PeriodLattice

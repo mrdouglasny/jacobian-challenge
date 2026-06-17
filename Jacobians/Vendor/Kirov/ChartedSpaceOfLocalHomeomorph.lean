@@ -66,7 +66,7 @@ noncomputable def chartedSpace' {f : X → Y} (hf : IsLocalHomeomorph f)
   mem_chart_source y := by
     set x := Classical.choose (hs y) with hx
     have hfx : f x = y := Classical.choose_spec (hs y)
-    show y ∈ (chartAtPreimage hf x).target
+    change y ∈ (chartAtPreimage hf x).target
     have hxs : x ∈ (chartAtPreimage hf x).source := mem_source_chartAtPreimage hf x
     have := (chartAtPreimage hf x).map_source hxs
     rwa [← eq_chartAtPreimage hf x, hfx] at this

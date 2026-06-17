@@ -146,7 +146,7 @@ theorem HolomorphicOneForms.chartNormK_add_le
   by_cases hne : (shrunkChart (X := X) x₀).Nonempty
   · apply csSup_le (Set.Nonempty.image _ hne)
     rintro r ⟨y, hy, rfl⟩
-    show ‖localRep (α + β) x₀ y‖ ≤ _
+    change ‖localRep (α + β) x₀ y‖ ≤ _
     rw [localRep_add]
     calc ‖localRep α x₀ y + localRep β x₀ y‖
         ≤ ‖localRep α x₀ y‖ + ‖localRep β x₀ y‖ := norm_add_le _ _
@@ -178,7 +178,7 @@ theorem HolomorphicOneForms.chartNormK_smul_le (c : ℂ)
   by_cases hne : (shrunkChart (X := X) x₀).Nonempty
   · apply csSup_le (Set.Nonempty.image _ hne)
     rintro r ⟨y, hy, rfl⟩
-    show ‖localRep (c • α) x₀ y‖ ≤ _
+    change ‖localRep (c • α) x₀ y‖ ≤ _
     rw [localRep_smul, norm_smul]
     exact mul_le_mul_of_nonneg_left
       (le_csSup (HolomorphicOneForms.chartNormK_bddAbove α x₀) ⟨y, hy, rfl⟩)
@@ -201,7 +201,7 @@ theorem HolomorphicOneForms.chartNormK_smul (c : ℂ)
   refine le_antisymm (HolomorphicOneForms.chartNormK_smul_le c α x₀) ?_
   by_cases hc : c = 0
   · subst hc
-    simp
+    simp only [norm_zero, zero_mul, zero_smul]
     exact HolomorphicOneForms.chartNormK_nonneg _ _
   · have hc' : c⁻¹ • (c • α) = α := by
       rw [smul_smul, inv_mul_cancel₀ hc, one_smul]

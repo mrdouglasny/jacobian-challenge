@@ -155,7 +155,7 @@ theorem exists_degreeOne_of_genus_zero (hg : genus X = 0) :
       rw [← hq0, hy q, ← hy p, hpinf]
     exact OnePoint.coe_ne_infty (0 : ℂ) this
   refine ⟨f, q, p, hnc, hqp, ?_⟩
-  show Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) = _
+  change Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) = _
   rw [hdivf]
 
 /-- **Forward leg of `AX_genus_eq_zero_iff_homeo`.** A compact Riemann

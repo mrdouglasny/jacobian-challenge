@@ -524,7 +524,7 @@ theorem residueTheorem_ofAdaptedSimpleInfty_genus0_germ
     (inftyFibreDataNF_full g f hsimpleInf hmeroInf)
     (inftyFibreEnum_injective f)
     (fun k => inftyFibreEnum_mem f k)
-    (fun a _ha hfa => inftyFibreEnum_surj f hfa)
+    (fun _a _ha hfa => inftyFibreEnum_surj f hfa)
     hnonpole_inf_an hreg hbnd hcoh_full
 
 /-- **Gate A `∑Res = 0` from the canonical selection with simple `∞`-poles, `hcont_int`-free.**  The

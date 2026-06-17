@@ -77,7 +77,7 @@ theorem mem_ker_of_divisorPeriodVector_mem_lattice {D : Divisor X}
         (jacobianBasis X)).toAddSubgroup)
       (divisorPeriodVector (Classical.arbitrary X) D) = 0 :=
     (QuotientAddGroup.eq_zero_iff _).mpr hv
-  show abelJacobiDiv X D = 0
+  change abelJacobiDiv X D = 0
   refine AddEquiv.ulift.injective ?_
   rw [h1, h0, map_zero]
   rfl
@@ -110,7 +110,7 @@ theorem abel_supset_of_principalPeriodVectorInLattice
         Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) from rfl] at hdiv
     exact Multiplicative.ofAdd.injective hdiv
   have hdeg : D ∈ (Divisor.deg X).ker := by
-    show Divisor.deg X D = 0
+    change Divisor.deg X D = 0
     rw [← hdivisor]
     exact deg_divisor_eq_zero f
   exact mem_ker_of_divisorPeriodVector_mem_lattice hdeg (hdivisor ▸ h f)
@@ -333,7 +333,7 @@ theorem abel_supset_of_fiberAJConstancy (h : FiberAJConstancy X) :
     rw [show MeromorphicFunctionField.divHom f =
         Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) from rfl] at hdiv
     exact Multiplicative.ofAdd.injective hdiv
-  show abelJacobiDiv X D = 0
+  change abelJacobiDiv X D = 0
   rw [← hdivisor]
   by_cases hf : Nonconstant f
   · rw [abelJacobiDiv_divisor_eq_fiberAJ_sub f hf,

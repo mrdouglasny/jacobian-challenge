@@ -83,6 +83,7 @@ section Hypotheses
 
 variable {𝔇} {j₀ : 𝔇.toFiniteCover.ι} {a : X} {r : ℂ}
 
+omit [Nonempty X] in
 /-- Difference families are overlap cocycles (both orientations). -/
 theorem isOverlapCocycle_mlCocycle :
     IsOverlapCocycle 𝔇 (mlCocycle 𝔇 j₀ a r) := by
@@ -90,6 +91,7 @@ theorem isOverlapCocycle_mlCocycle :
   simp only [mlCocycle]
   ring
 
+omit [Nonempty X] in
 /-- The chart denominator of the principal part is nonvanishing away from
 the pole (chart injectivity on the source). -/
 theorem mlDenom_ne_zero (hiso : MLIsolated 𝔇 j₀ a) {x : X}
@@ -99,6 +101,7 @@ theorem mlDenom_ne_zero (hiso : MLIsolated 𝔇 j₀ a) {x : X}
   exact fun h => hxa ((chartAt ℂ (𝔇.center j₀)).injOn
     (mem_chartSource_of_mem_U 𝔇 hxj) (mem_chartSource_of_mem_U 𝔇 hiso.1) h)
 
+omit [Nonempty X] in
 /-- The principal part is `ℝ`-smooth away from the pole (chart coordinate
 smooth via `contMDiffAt_extChartAt'`, denominator nonvanishing). -/
 theorem contMDiffAt_mlPrincipal (hiso : MLIsolated 𝔇 j₀ a) {x : X}
@@ -112,6 +115,7 @@ theorem contMDiffAt_mlPrincipal (hiso : MLIsolated 𝔇 j₀ a) {x : X}
       ((contDiffAt_id.sub contDiffAt_const).inv (mlDenom_ne_zero hiso hxj hxa))
   exact (contMDiffAt_iff_contDiffAt.2 houter).comp x hchart
 
+omit [Nonempty X] in
 /-- One ML part is `ℝ`-smooth at any non-pole point of its set. -/
 theorem contMDiffAt_mlPart (hiso : MLIsolated 𝔇 j₀ a) {k : 𝔇.toFiniteCover.ι}
     {x : X} (hxa : x ≠ a) (hxj : k = j₀ → x ∈ (𝔇.U j₀ : Set X)) :
@@ -124,6 +128,7 @@ theorem contMDiffAt_mlPart (hiso : MLIsolated 𝔇 j₀ a) {k : 𝔇.toFiniteCov
   · rw [if_neg hk]
     exact contMDiffAt_const
 
+omit [Nonempty X] in
 /-- Under isolation, every overlap avoids the pole, so the cocycle is
 smooth on overlaps. -/
 theorem smoothOnOverlaps_mlCocycle (hiso : MLIsolated 𝔇 j₀ a) :
@@ -140,6 +145,7 @@ theorem smoothOnOverlaps_mlCocycle (hiso : MLIsolated 𝔇 j₀ a) :
     exact (contMDiffAt_mlPart hiso hxa fun h => h ▸ hx.1).sub
       (contMDiffAt_mlPart hiso hxa fun h => h ▸ hx.2)
 
+omit [Nonempty X] in
 /-- The chart-`i` read of one ML part is `ℂ`-differentiable at non-pole
 overlap coordinates: it is `r·(φ_{i j₀} z − α)⁻¹` (or `0`), with the
 transition holomorphic and the denominator nonvanishing. -/
@@ -164,6 +170,7 @@ theorem differentiableAt_mlPart_read (hiso : MLIsolated 𝔇 j₀ a)
   · rw [if_neg hk]
     exact differentiableAt_const _
 
+omit [Nonempty X] in
 /-- Under isolation, the cocycle is holomorphic on overlaps. -/
 theorem holomorphicOnOverlaps_mlCocycle (hiso : MLIsolated 𝔇 j₀ a) :
     HolomorphicOnOverlaps 𝔇 (mlCocycle 𝔇 j₀ a r) := by
@@ -289,6 +296,7 @@ private theorem contMDiffAt_mlSmeared (hiso : MLIsolated 𝔇 j₀ a) {x : X} (h
     filter_upwards [(isClosed_tsupport (cechPoU 𝔇 j₀)).isOpen_compl.mem_nhds hb] with y hy
     rw [rhoC_eq_zero_of_notMem_tsupport hy, zero_mul]
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [Nonempty X] in
 /-- Local variant of `contDiffAt_chartSymmRead`: the chart read of a function
 `ContMDiffAt` at the read point is planar-smooth there. -/
 private theorem contDiffAt_chartSymmRead_of_contMDiffAt {F : X → ℂ} {c : X} {z : ℂ}
@@ -323,6 +331,7 @@ private theorem contDiffAt_mlSmearedRead_mul (hiso : MLIsolated 𝔇 j₀ a)
   (contDiffAt_mlSmearedRead hiso hx hxa).mul
     (((hg.1 i x hx).restrictScalars (𝕜 := ℝ)).contDiffAt)
 
+omit [Nonempty X] in
 /-- The chart-`j₀` read of a function locally constant at `a` is locally constant
 at the pole coordinate `α = chartMap 𝔇 j₀ a`. -/
 private theorem eventuallyEq_chartSymmRead_near_pole (hiso : MLIsolated 𝔇 j₀ a)
@@ -340,6 +349,7 @@ private theorem eventuallyEq_chartSymmRead_near_pole (hiso : MLIsolated 𝔇 j�
   rw [ContinuousAt, hli] at hcont
   exact hcont.eventually hF
 
+omit [Nonempty X] in
 /-- `∂̄` of the chart-`j₀` read of a function locally constant at `a` vanishes
 identically near the pole coordinate. -/
 private theorem eventually_dbar_chartSymmRead_zero_near_pole (hiso : MLIsolated 𝔇 j₀ a)

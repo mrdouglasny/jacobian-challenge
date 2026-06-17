@@ -57,6 +57,7 @@ noncomputable def flatAnalyticArcOfSubdivision {x₀ : X} (γ : Path x₀ x₀)
     (S : Jacobians.Bridge.PathChartBallSubdivision γ) : AnalyticArc X :=
   S.concatChartFlatPathAuxAnalyticArc S.lastIndex
 
+omit [T2Space X] [ConnectedSpace X] in
 theorem flatAnalyticArcOfSubdivision_extend_zero {x₀ : X} (γ : Path x₀ x₀)
     (S : Jacobians.Bridge.PathChartBallSubdivision γ) :
     (flatAnalyticArcOfSubdivision γ S).extend 0 = x₀ := by
@@ -65,6 +66,7 @@ theorem flatAnalyticArcOfSubdivision_extend_zero {x₀ : X} (γ : Path x₀ x₀
     Path.extend_zero]
   simp [S.t_zero]
 
+omit [T2Space X] [ConnectedSpace X] in
 theorem flatAnalyticArcOfSubdivision_extend_one {x₀ : X} (γ : Path x₀ x₀)
     (S : Jacobians.Bridge.PathChartBallSubdivision γ) :
     (flatAnalyticArcOfSubdivision γ S).extend 1 = x₀ := by
@@ -83,6 +85,7 @@ noncomputable def flatAnalyticLoopOfSubdivision {x₀ : X} (γ : Path x₀ x₀)
   start_eq := flatAnalyticArcOfSubdivision_extend_zero γ S
   end_eq := flatAnalyticArcOfSubdivision_extend_one γ S
 
+omit [T2Space X] [ConnectedSpace X] in
 /-- The underlying path of the flat analytic loop is exactly the chart-flat
 concatenation `S.concatChartFlatPath`. -/
 theorem loopToPath_flatAnalyticLoopOfSubdivision {x₀ : X} (γ : Path x₀ x₀)
@@ -105,6 +108,7 @@ def ChartFlatHomotopyWall (x₀ : X) : Prop :=
   ∀ p : Path x₀ x₀, ∃ S : Jacobians.Bridge.PathChartBallSubdivision p,
     (S.concatChartFlatPath).Homotopic p
 
+omit [T2Space X] [ConnectedSpace X] in
 /-- **PL discharge of (AAW), modulo the chart-flat homotopy wall.** Under
 `ChartFlatHomotopyWall`, every continuous loop has a piecewise-analytic
 representative: `ContinuousLoopHasAnalyticRep x₀`. The analytic-loop packaging is
@@ -119,6 +123,7 @@ theorem continuousLoopHasAnalyticRep_of_chartFlatHomotopyWall {x₀ : X}
   rw [loopToPath_flatAnalyticLoopOfSubdivision]
   exact hS
 
+omit [T2Space X] [ConnectedSpace X] in
 /-- **T-GEN reduces to the chart-flat homotopy wall (general `X`).** Composing the
 PL discharge with the K0 keystone bridge: under `ChartFlatHomotopyWall x₀`, the
 homology classes of piecewise-analytic loops ℤ-span `H1 X x₀`

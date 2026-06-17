@@ -281,7 +281,7 @@ theorem germ_eq_const_of_mem_linearSystem_zero (f : MeromorphicFunction X)
   have hpos : ∀ x, 0 ≤ f.orderAtPoint x := by
     intro x
     have hx := hf x
-    simp only [Finsupp.coe_zero, Pi.zero_apply, neg_zero] at hx
+    simp only [Finsupp.coe_zero, Pi.zero_apply] at hx
     exact untop₀_nonneg_iff.mpr hx
   obtain ⟨c, hc_const⟩ := (f.mdifferentiable_holoRepr hpos).exists_eq_const_of_compactSpace
   have hc : ∀ y, f.holoRepr y = c := fun y => congrFun hc_const y

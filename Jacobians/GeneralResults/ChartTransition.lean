@@ -24,7 +24,8 @@ at every point of its source. -/
 theorem chart_mdiff (q' : M) {p : M} (hp : p ∈ (extChartAt 𝓘(ℂ) q').source) :
     MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) (⇑(extChartAt 𝓘(ℂ) q')) p := by
   have hsrc : p ∈ (chartAt ℂ q').source := by rw [← extChartAt_source 𝓘(ℂ)]; exact hp
-  exact ((contMDiffOn_extChartAt (n := ω)).mdifferentiableOn WithTop.top_ne_zero _ hsrc).mdifferentiableAt
+  exact ((contMDiffOn_extChartAt (n := 
+      ω)).mdifferentiableOn WithTop.top_ne_zero _ hsrc).mdifferentiableAt
     (IsOpen.mem_nhds (chartAt ℂ q').open_source hsrc)
 
 /-- The inverse of an extended coordinate chart of a complex manifold is
@@ -58,13 +59,14 @@ lemma transition_fderiv_mul (q q' : M) {z : ℂ}
   have hGF : (G ∘ F) =ᶠ[𝓝 z] id := by
     have hpre : φq.symm ⁻¹' φq'.source ∈ 𝓝 z := by
       have hcont : ContinuousAt φq.symm z :=
-        (continuousOn_extChartAt_symm q).continuousAt (IsOpen.mem_nhds (isOpen_extChartAt_target q) hz)
+        (continuousOn_extChartAt_symm q).continuousAt (IsOpen.mem_nhds
+          (isOpen_extChartAt_target q) hz)
       exact hcont.preimage_mem_nhds (IsOpen.mem_nhds (isOpen_extChartAt_source q') hzs)
     have hS : (φq.target ∩ φq.symm ⁻¹' φq'.source) ∈ 𝓝 z :=
       Filter.inter_mem (IsOpen.mem_nhds (isOpen_extChartAt_target q) hz) hpre
     filter_upwards [hS] with x hx
     obtain ⟨hxt, hxs⟩ := hx
-    show G (F x) = x
+    change G (F x) = x
     simp only [hF, hG, Function.comp_apply]
     rw [φq'.left_inv hxs, φq.right_inv hxt]
   have hF' : HasDerivAt F (deriv F z) z := hFdiff.hasDerivAt

@@ -121,7 +121,7 @@ theorem mdifferentiableAt_of_continuousAt_of_eventually_mdifferentiableAt
     rwa [hsymm_self] at h2
   have hGc : ContinuousAt (e' ∘ Φ ∘ e.symm) (e x₀) := by
     have h := (continuousAt_extChartAt (I := 𝓘(ℂ, F)) (Φ x₀)).tendsto.comp htendΦ
-    show Tendsto (e' ∘ Φ ∘ e.symm) (𝓝 (e x₀)) (𝓝 ((e' ∘ Φ ∘ e.symm) (e x₀)))
+    change Tendsto (e' ∘ Φ ∘ e.symm) (𝓝 (e x₀)) (𝓝 ((e' ∘ Φ ∘ e.symm) (e x₀)))
     have hval : (e' ∘ Φ ∘ e.symm) (e x₀) = e' (Φ x₀) := by
       simp only [Function.comp_apply, hsymm_self]
     rw [hval]
@@ -297,7 +297,7 @@ theorem eventually_fiberDivisor_cluster (f : MeromorphicFunctionField X)
       rw [Set.mem_preimage, Set.mem_singleton_iff]
       exact (hmem p').mp hpS'
     have hdisj := hU₀disj hpfib hpfib' hne
-    show Disjoint (t p) (t p')
+    change Disjoint (t p) (t p')
     rw [Finset.disjoint_left]
     intro q hq hq'
     have h1 : q ∈ U₀ p := (hUV p hpS).2.2.1 ((ht p hpS).2.1 hq)
@@ -344,7 +344,7 @@ theorem continuousAt_fiberAJ (f : MeromorphicFunctionField X)
     (hAJcont.sub continuous_const).isOpen_preimage _ isOpen_interior
   have hU'mem : ∀ p ∈ S₀, p ∈ U' p := by
     intro p _
-    show AJ p - AJ p ∈ interior W₀
+    change AJ p - AJ p ∈ interior W₀
     rw [sub_self]
     exact mem_interior_iff_mem_nhds.mpr hW₀
   -- cardinality bounds
@@ -355,21 +355,21 @@ theorem continuousAt_fiberAJ (f : MeromorphicFunctionField X)
     Finset.single_le_sum (fun q _ => Nat.zero_le _) hp
   filter_upwards [eventually_fiberDivisor_cluster f hf y₀ U' hU'open hU'mem]
     with y hclus
-  show fiberAJ f hf y ∈ W
+  change fiberAJ f hf y ∈ W
   by_cases hyy : y = y₀
   · subst hyy
     exact mem_of_mem_nhds hW
   obtain ⟨t, ht, hdecomp⟩ := hclus hyy
   -- the pencil values on both sides
   have hΦy : fiberAJ f hf y = ∑ p ∈ S₀, ∑ q ∈ t p, AJ q := by
-    show abelJacobiDiv X (fiberDivisor f hf y) = _
+    change abelJacobiDiv X (fiberDivisor f hf y) = _
     rw [hdecomp, map_sum]
     refine Finset.sum_congr rfl fun p hp => ?_
     rw [map_sum]
     exact Finset.sum_congr rfl fun q _ => FreeAbelianGroup.lift_apply_of _ _
   have hΦy₀ : fiberAJ f hf y₀ =
       ∑ p ∈ S₀, (mapAnalyticOrderAt (toP1 f) p : ℤ) • AJ p := by
-    show abelJacobiDiv X (fiberDivisor f hf y₀) = _
+    change abelJacobiDiv X (fiberDivisor f hf y₀) = _
     rw [fiberDivisor, map_sum]
     refine Finset.sum_congr rfl fun p hp => ?_
     rw [map_zsmul]

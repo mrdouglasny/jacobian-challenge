@@ -190,11 +190,11 @@ noncomputable def sideHomeo (Φ : {z : ℂ // P z} ≃ₜ ℂ) (T : Finset ℂ) 
   invFun w := ⟨(Φ.symm (w : ℂ) : ℂ), (Φ.symm (w : ℂ)).2, sideHomeo_aux₂ Φ T w⟩
   left_inv z := by
     apply Subtype.ext
-    show (Φ.symm (Φ ⟨z.1, z.2.1⟩) : ℂ) = z.1
+    change (Φ.symm (Φ ⟨z.1, z.2.1⟩) : ℂ) = z.1
     rw [Φ.symm_apply_apply]
   right_inv w := by
     apply Subtype.ext
-    show Φ (Φ.symm w.1) = (w.1 : ℂ)
+    change Φ (Φ.symm w.1) = (w.1 : ℂ)
     rw [Φ.apply_symm_apply]
   continuous_toFun :=
     (Φ.continuous.comp (continuous_subtype_val.subtype_mk _)).subtype_mk _
@@ -253,7 +253,7 @@ theorem sideCell_inter_coe (Φ : {z : ℂ // P z} ≃ₜ ℂ) {T : Finset ℂ}
     have huŝ : u = Φ.symm ŝ :=
       Φ.injective (by rw [Φ.apply_symm_apply]; exact hu)
     refine ⟨⟨(Φ.symm ŝ).2, ?_⟩, ?_⟩
-    · show Φ (Φ.symm ŝ) ∈ Ŵ
+    · change Φ (Φ.symm ŝ) ∈ Ŵ
       rw [Φ.apply_symm_apply]
       exact hŝ.1
     · rw [← huŝ]
@@ -273,7 +273,7 @@ noncomputable def sideCellHomeo (Φ : {z : ℂ // P z} ≃ₜ ℂ) (Ŵ : Set ℂ
     exact congrArg Subtype.val hzeq⟩
   invFun w := ⟨(Φ.symm w.1 : ℂ),
     ⟨⟨(Φ.symm w.1).2, by
-        show Φ (Φ.symm w.1) ∈ Ŵ
+        change Φ (Φ.symm w.1) ∈ Ŵ
         rw [Φ.apply_symm_apply]
         exact w.2.1⟩, by
       intro heq
@@ -283,11 +283,11 @@ noncomputable def sideCellHomeo (Φ : {z : ℂ // P z} ≃ₜ ℂ) (Ŵ : Set ℂ
       rwa [Φ.apply_symm_apply, Φ.apply_symm_apply] at h2⟩⟩
   left_inv z := by
     apply Subtype.ext
-    show (Φ.symm (Φ ⟨z.1, z.2.1.choose⟩) : ℂ) = z.1
+    change (Φ.symm (Φ ⟨z.1, z.2.1.choose⟩) : ℂ) = z.1
     rw [Φ.symm_apply_apply]
   right_inv w := by
     apply Subtype.ext
-    show Φ (Φ.symm w.1) = (w.1 : ℂ)
+    change Φ (Φ.symm w.1) = (w.1 : ℂ)
     rw [Φ.apply_symm_apply]
   continuous_toFun :=
     (Φ.continuous.comp (continuous_subtype_val.subtype_mk _)).subtype_mk _
@@ -301,7 +301,7 @@ theorem coe_sideHomeo_symm_mem_sideCell (Φ : {z : ℂ // P z} ≃ₜ ℂ)
     (((sideHomeo Φ T).symm w : {z : ℂ // P z ∧ z ∉ (T : Set ℂ)}) : ℂ)
       ∈ sideCell Φ Ŵ := by
   refine ⟨(Φ.symm (w : ℂ)).2, ?_⟩
-  show Φ (Φ.symm (w : ℂ)) ∈ Ŵ
+  change Φ (Φ.symm (w : ℂ)) ∈ Ŵ
   rw [Φ.apply_symm_apply]
   exact hw
 
@@ -330,11 +330,11 @@ theorem side_transfer (hPopen : IsOpen {z : ℂ | P z})
       continuous_toFun := by fun_prop
       source' := by
         apply Subtype.ext
-        show (δ 0 : ℂ) = ((x₀ : {z : ℂ // z ∉ (T : Set ℂ)}) : ℂ)
+        change (δ 0 : ℂ) = ((x₀ : {z : ℂ // z ∉ (T : Set ℂ)}) : ℂ)
         rw [δ.source]
       target' := by
         apply Subtype.ext
-        show (δ 1 : ℂ) = ((x₀ : {z : ℂ // z ∉ (T : Set ℂ)}) : ℂ)
+        change (δ 1 : ℂ) = ((x₀ : {z : ℂ // z ∉ (T : Set ℂ)}) : ℂ)
         rw [δ.target] } with hδ'def
   -- the connecting homomorphism and the pulled-back subgroup
   set e := pi1MulEquivOfHomeomorph Ψ x₀' with hedef
@@ -379,7 +379,7 @@ theorem side_transfer (hPopen : IsOpen {z : ℂ | P z})
     have hA : e (spokedClass pd δd) = spokedClass p₁ δ₁ := by
       have h1 : e (spokedClass pd δd)
           = spokedClass (pd.map Ψ.continuous) (δd.map Ψ.continuous) := by
-        show FundamentalGroup.mapOfEq (⟨⇑Ψ, Ψ.continuous⟩ :
+        change FundamentalGroup.mapOfEq (⟨⇑Ψ, Ψ.continuous⟩ :
             C({z : ℂ // P z ∧ z ∉ (T : Set ℂ)},
               {w : ℂ // w ∉ ((sideFinset Φ T) : Set ℂ)})) rfl
             (spokedClass pd δd) = _
@@ -387,13 +387,13 @@ theorem side_transfer (hPopen : IsOpen {z : ℂ | P z})
       rw [h1]
       refine spokedClass_of_eq (Ψ.apply_symm_apply ŷ) _ _ _ _
         (fun t => ?_) (fun t => ?_)
-      · show Ψ (Ψ.symm (p₁ t)) = p₁ t
+      · change Ψ (Ψ.symm (p₁ t)) = p₁ t
         exact Ψ.apply_symm_apply _
-      · show Ψ (Ψ.symm (δ₁ t)) = δ₁ t
+      · change Ψ (Ψ.symm (δ₁ t)) = δ₁ t
         exact Ψ.apply_symm_apply _
     have hB : e.symm (spokedClass p₁ δ₁) = spokedClass pd δd := by
       rw [← hA, MulEquiv.symm_apply_apply]
-    show (FundamentalGroup.mapOfEq ι rfl) (e.symm (spokedClass p₁ δ₁)) ∈ H
+    change (FundamentalGroup.mapOfEq ι rfl) (e.symm (spokedClass p₁ δ₁)) ∈ H
     rw [hB, mapOfEq_spokedClass ι pd δd]
     exact hgen
   -- run the side statement on the transported loop
@@ -402,14 +402,14 @@ theorem side_transfer (hPopen : IsOpen {z : ℂ | P z})
   -- identify `f` of the transported class with the original class
   have h1 : e (FundamentalGroup.fromPath (Qmk δ'))
       = FundamentalGroup.fromPath (Qmk (δ'.map Ψ.continuous)) := by
-    show FundamentalGroup.mapOfEq (⟨⇑Ψ, Ψ.continuous⟩ :
+    change FundamentalGroup.mapOfEq (⟨⇑Ψ, Ψ.continuous⟩ :
         C({z : ℂ // P z ∧ z ∉ (T : Set ℂ)},
           {w : ℂ // w ∉ ((sideFinset Φ T) : Set ℂ)})) rfl
         (FundamentalGroup.fromPath (Qmk δ')) = _
     rw [FundamentalGroup.mapOfEq_apply, Path.cast_rfl_rfl]
   have h2 : f (FundamentalGroup.fromPath (Qmk (δ'.map Ψ.continuous)))
       = FundamentalGroup.fromPath (Qmk δ) := by
-    show (FundamentalGroup.mapOfEq ι rfl)
+    change (FundamentalGroup.mapOfEq ι rfl)
         (e.symm (FundamentalGroup.fromPath (Qmk (δ'.map Ψ.continuous))))
       = FundamentalGroup.fromPath (Qmk δ)
     rw [← h1, MulEquiv.symm_apply_apply, FundamentalGroup.mapOfEq_apply,
@@ -433,7 +433,7 @@ theorem cellGenAt_rebase {T : Finset ℂ} {x₀ y₀ : {z : ℂ // z ∉ (T : Se
   have hsub' : CellSpokes T y₀ ⊆ ((H.comap e.symm.toMonoidHom) : Set _) := by
     rintro g ⟨s, hsT, W, hWo, hWT, hpres, y, δ, hδW, q, rfl⟩
     rw [SetLike.mem_coe, Subgroup.mem_comap]
-    show e.symm (spokedClass q δ) ∈ H
+    change e.symm (spokedClass q δ) ∈ H
     have hkey : e.symm (spokedClass q δ) = spokedClass (τ.trans q) δ := by
       rw [spokedClass_eq_transport, spokedClass_eq_transport,
         Path.trans_symm, fundamentalGroupMulEquivOfPath_trans,
@@ -466,7 +466,7 @@ private theorem step_core {T : Finset ℂ}
     obtain ⟨s₁, hs₁, s₂, hs₂, hne⟩ := hre
     exact Finset.one_lt_card.mpr
       ⟨s₁.re, Finset.mem_image_of_mem _ hs₁,
-       s₂.re, Finset.mem_image_of_mem _ hs₂, hne⟩
+        s₂.re, Finset.mem_image_of_mem _ hs₂, hne⟩
   have hAne : A.Nonempty := Finset.card_pos.mp (by omega)
   set a := A.min' hAne with hadef
   have hAerase : (A.erase a).Nonempty := by
@@ -482,8 +482,8 @@ private theorem step_core {T : Finset ℂ}
     by_cases hra : r = a
     · exact Or.inl hra
     · exact Or.inr ((A.erase a).min'_le _ (Finset.mem_erase.mpr ⟨hra, hr⟩))
-  set c₁ := a + (b - a)/3 with hc₁def
-  set c₂ := a + 2*(b - a)/3 with hc₂def
+  set c₁ := a + (b - a) / 3 with hc₁def
+  set c₂ := a + 2 * (b - a) / 3 with hc₂def
   have hac₁ : a < c₁ := by
     rw [hc₁def]
     linarith
@@ -521,7 +521,7 @@ private theorem step_core {T : Finset ℂ}
     rw [Complex.rank_real_complex]
     exact_mod_cast Nat.one_lt_two
   -- the strip basepoint
-  set m : ℝ := (c₁ + c₂)/2 with hmdef
+  set m : ℝ := (c₁ + c₂) / 2 with hmdef
   have hm₁ : c₁ < m := by
     rw [hmdef]
     linarith
@@ -551,15 +551,15 @@ private theorem step_core {T : Finset ℂ}
       · exact Or.inl h
       · refine Or.inr ?_
         push Not at h
-        show c₁ < (z : ℂ).re
+        change c₁ < (z : ℂ).re
         linarith
     -- path-connectivity of the sides
     have hUpc : IsPathConnected U := by
       rw [isPathConnected_iff_pathConnectedSpace]
       haveI hpcU : PathConnectedSpace
           {w : ℂ // w ∉ ((sideFinset (halfPlaneHomeo c₂) T) : Set ℂ)} := by
-        have hc := ((sideFinset (halfPlaneHomeo c₂) T).finite_toSet.countable).isPathConnected_compl_of_one_lt_rank
-          hrank
+        have hc := ((sideFinset (halfPlaneHomeo c₂) T).finite_toSet.countable)
+        have hc := hc.isPathConnected_compl_of_one_lt_rank hrank
         rw [isPathConnected_iff_pathConnectedSpace] at hc
         exact hc
       haveI hflat : PathConnectedSpace
@@ -571,8 +571,8 @@ private theorem step_core {T : Finset ℂ}
       rw [isPathConnected_iff_pathConnectedSpace]
       haveI hpcV : PathConnectedSpace
           {w : ℂ // w ∉ ((sideFinset (halfPlaneHomeoGT c₁) T) : Set ℂ)} := by
-        have hc := ((sideFinset (halfPlaneHomeoGT c₁) T).finite_toSet.countable).isPathConnected_compl_of_one_lt_rank
-          hrank
+        have hc := ((sideFinset (halfPlaneHomeoGT c₁) T).finite_toSet.countable)
+        have hc := hc.isPathConnected_compl_of_one_lt_rank hrank
         rw [isPathConnected_iff_pathConnectedSpace] at hc
         exact hc
       haveI hflat : PathConnectedSpace
@@ -582,17 +582,17 @@ private theorem step_core {T : Finset ℂ}
       exact pathConnectedSpace_of_homeomorph
         (flattenSide (fun z : ℂ => c₁ < z.re) T).symm
     have hy₀U : y₀ ∈ U := by
-      show ((m : ℂ) : ℂ).re < c₂
+      change ((m : ℂ) : ℂ).re < c₂
       rw [Complex.ofReal_re]
       exact hm₂
     have hy₀V : y₀ ∈ V := by
-      show c₁ < ((m : ℂ) : ℂ).re
+      change c₁ < ((m : ℂ) : ℂ).re
       rw [Complex.ofReal_re]
       exact hm₁
     -- the strip is path connected: straight segments
     have hUVpc : IsPathConnected (U ∩ V) := by
       have hcombo : ∀ (u v r : ℝ), c₁ < u → u < c₂ → c₁ < v → v < c₂ →
-          0 ≤ r → r ≤ 1 → c₁ < (1-r)*u + r*v ∧ (1-r)*u + r*v < c₂ := by
+          0 ≤ r → r ≤ 1 → c₁ < (1 - r) * u + r * v ∧ (1 - r) * u + r * v < c₂ := by
         intro u v r hu1 hu2 hv1 hv2 hr0 hr1
         constructor
         · rcases eq_or_lt_of_le hr1 with h | h
@@ -622,12 +622,12 @@ private theorem step_core {T : Finset ℂ}
                 continuous_toFun := by fun_prop
                 source' := by
                   apply Subtype.ext
-                  show (1 - (0 : ℝ)) • ((y₀ : ℂ)) + (0 : ℝ) • ((z : ℂ))
+                  change (1 - (0 : ℝ)) • ((y₀ : ℂ)) + (0 : ℝ) • ((z : ℂ))
                     = (y₀ : ℂ)
                   simp
                 target' := by
                   apply Subtype.ext
-                  show (1 - (1 : ℝ)) • ((y₀ : ℂ)) + (1 : ℝ) • ((z : ℂ))
+                  change (1 - (1 : ℝ)) • ((y₀ : ℂ)) + (1 : ℝ) • ((z : ℂ))
                     = (z : ℂ)
                   simp }, ?_⟩
       intro t
@@ -637,10 +637,10 @@ private theorem step_core {T : Finset ℂ}
       have hbounds := hcombo ((y₀ : ℂ)).re ((z : ℂ)).re (t : ℝ)
         hy₀V hy₀U hzV hzU t.2.1 t.2.2
       constructor
-      · show ((1 - (t : ℝ)) • ((y₀ : ℂ)) + (t : ℝ) • ((z : ℂ))).re < c₂
+      · change ((1 - (t : ℝ)) • ((y₀ : ℂ)) + (t : ℝ) • ((z : ℂ))).re < c₂
         rw [hre]
         exact hbounds.2
-      · show c₁ < ((1 - (t : ℝ)) • ((y₀ : ℂ)) + (t : ℝ) • ((z : ℂ))).re
+      · change c₁ < ((1 - (t : ℝ)) • ((y₀ : ℂ)) + (t : ℝ) • ((z : ℂ))).re
         rw [hre]
         exact hbounds.1
     refine fromPath_mem_of_two_open hUo hVo hcov hUpc hVpc hUVpc
@@ -669,10 +669,10 @@ noncomputable def rotationHomeo : {z : ℂ // (fun _ : ℂ => True) z} ≃ₜ �
   invFun w := ⟨-Complex.I * w, trivial⟩
   left_inv z := by
     apply Subtype.ext
-    show -Complex.I * (Complex.I * z.1) = z.1
+    change -Complex.I * (Complex.I * z.1) = z.1
     rw [← mul_assoc, neg_mul, Complex.I_mul_I, neg_neg, one_mul]
   right_inv w := by
-    show Complex.I * (-Complex.I * w) = w
+    change Complex.I * (-Complex.I * w) = w
     rw [← mul_assoc, mul_neg, Complex.I_mul_I, neg_neg, one_mul]
   continuous_toFun := continuous_const.mul continuous_subtype_val
   continuous_invFun := (continuous_const.mul continuous_id).subtype_mk _

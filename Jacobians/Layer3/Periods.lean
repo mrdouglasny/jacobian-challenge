@@ -399,7 +399,7 @@ theorem normalizedBasis_apply {x₀ : X} {b : PeriodCycleBasis X x₀}
     simp [Module.Basis.equivFun_self, Pi.single_apply, eq_comm]
   rw [hself, normalizedForm]
   congr 1
-  show eInvMat hR2 cω (Pi.single j 1) = fun k => (aPeriodMatrix b cω)⁻¹ k j
+  change eInvMat hR2 cω (Pi.single j 1) = fun k => (aPeriodMatrix b cω)⁻¹ k j
   rw [eInvMat, LinearEquiv.ofLinear_apply, Matrix.toLin'_apply, Matrix.mulVec_single_one]
   rfl
 
@@ -567,13 +567,13 @@ theorem periodLatticeInBasis_eq_comap (x₀ : X)
   · rintro ⟨γ, rfl⟩
     refine ⟨γ, ?_⟩
     rw [periodMapInBasis_comp x₀ b₁ b₂ γ]
-    show periodMapInBasis X x₀ b₁ γ
+    change periodMapInBasis X x₀ b₁ γ
       = (dualCoordChangeCLE b₁ b₂) (dualCoordChange b₁ b₂ (periodMapInBasis X x₀ b₁ γ))
     rw [hcoe, LinearEquiv.symm_apply_apply]
   · rintro ⟨γ, hγ⟩
     refine ⟨γ, ?_⟩
     rw [periodMapInBasis_comp x₀ b₁ b₂ γ, hγ]
-    show (dualCoordChange b₁ b₂) ((dualCoordChange b₁ b₂).symm v) = v
+    change (dualCoordChange b₁ b₂) ((dualCoordChange b₁ b₂).symm v) = v
     exact LinearEquiv.apply_symm_apply _ v
 
 /-- **DISCHARGE (for `instPeriodLatticeDiscrete`).** The coordinate period

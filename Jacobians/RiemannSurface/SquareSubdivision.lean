@@ -17,6 +17,7 @@ open scoped ContDiff
 variable {X : Type*} [TopologicalSpace X] [ChartedSpace ℂ X]
   [IsManifold 𝓘(ℂ) ω X]
 
+omit [IsManifold 𝓘(ℂ) ω X] in
 /-- Subdivide the unit square so that every closed grid cell maps into the
 source of a single chart.
 

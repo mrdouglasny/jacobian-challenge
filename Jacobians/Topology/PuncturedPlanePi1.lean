@@ -38,7 +38,7 @@ noncomputable def intAddEquivZMultiples {a : ℂ} (ha : a ≠ 0) :
   AddEquiv.ofBijective ((zmultiplesHom ℂ a).codRestrict (AddSubgroup.zmultiples a)
       fun n ↦ AddSubgroup.mem_zmultiples_iff.mpr ⟨n, rfl⟩)
     ⟨fun _ _ hnm ↦ smul_left_injective ℤ ha (congrArg Subtype.val hnm),
-     fun b ↦ (AddSubgroup.mem_zmultiples_iff.mp b.2).imp fun _ hk ↦ Subtype.ext hk⟩
+      fun b ↦ (AddSubgroup.mem_zmultiples_iff.mp b.2).imp fun _ hk ↦ Subtype.ext hk⟩
 
 @[simp] theorem intAddEquivZMultiples_apply_coe {a : ℂ} (ha : a ≠ 0) (n : ℤ) :
     (intAddEquivZMultiples ha n : ℂ) = n • a := rfl
@@ -109,7 +109,7 @@ theorem pi1PuncturedPlaneInt_ofAdd_one (a : ℂ) :
     (intAddEquivZMultiples twoPiI_ne_zero 1)
     ⟨⟨fun t ↦ twoPiI * (t : ℝ), by fun_prop⟩, by simp, rfl⟩
     (circleLoop a) (fun t ↦ rfl) ?_
-  show twoPiI * ((1 : unitInterval) : ℝ) = intAddEquivZMultiples twoPiI_ne_zero 1 +ᵥ (0 : ℂ)
+  change twoPiI * ((1 : unitInterval) : ℝ) = intAddEquivZMultiples twoPiI_ne_zero 1 +ᵥ (0 : ℂ)
   rw [AddSubgroup.vadd_def, vadd_eq_add, add_zero]
   simp
 
@@ -130,7 +130,7 @@ theorem pi1PuncturedPlaneIntOn_eq_fromPath (a e₀ : ℂ) (z : {w : ℂ // w ≠
     pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd n)
       = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ) := by
   subst hz
-  show pi1PuncturedPlane a e₀
+  change pi1PuncturedPlane a e₀
       (Multiplicative.ofAdd (intAddEquivZMultiples twoPiI_ne_zero n))
     = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ)
   refine deckMulEquivPi1_eq_fromPath (isAddQuotientCoveringMap_expAround a) e₀
@@ -171,11 +171,11 @@ theorem pi1PuncturedPlaneIntOn_indep (a e₀ e₀' : ℂ) (z : {w : ℂ // w ≠
   have hloop : (circleLoopOn a e₀).cast hz.symm hz.symm
       = (circleLoopOn a e₀').cast hz'.symm hz'.symm := by
     ext t
-    show (expAround a (twoPiI * (t : ℝ) + e₀) : ℂ) = expAround a (twoPiI * (t : ℝ) + e₀')
+    change (expAround a (twoPiI * (t : ℝ) + e₀) : ℂ) = expAround a (twoPiI * (t : ℝ) + e₀')
     simp [Complex.exp_add, hexp]
   apply MulEquiv.toMonoidHom_injective
   apply MonoidHom.ext_mint
-  show pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd 1)
+  change pi1PuncturedPlaneIntOn a e₀ z hz (Multiplicative.ofAdd 1)
     = pi1PuncturedPlaneIntOn a e₀' z hz' (Multiplicative.ofAdd 1)
   rw [pi1PuncturedPlaneIntOn_ofAdd_one, pi1PuncturedPlaneIntOn_ofAdd_one, hloop]
 

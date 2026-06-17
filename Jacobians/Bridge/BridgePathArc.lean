@@ -427,24 +427,22 @@ noncomputable def concatChartFlatPathAuxAnalyticArcData (k : ℕ) :
       · simp [AnalyticArc.trans, η₁, ih.property.1]
       · simp [AnalyticArc.trans, η₂, chartFlatAnalyticArc]
         norm_num
-      ·
-        change (η₁.trans η₂ hjoin).partition = concatChartFlatPathAuxPartition (k + 1)
+      · change (η₁.trans η₂ hjoin).partition = concatChartFlatPathAuxPartition (k + 1)
         simp [AnalyticArc.trans, η₁, η₂, ih.property.2.2.1, chartFlatAnalyticArc,
           concatChartFlatPathAuxPartition]
-      ·
-        funext r
+      · funext r
         change (η₁.trans η₂ hjoin).extend r = (S.concatChartFlatPathAux (k + 1)).extend r
         by_cases hr : r ≤ (1 / 2 : ℝ)
         · have hr' : r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr
           rw [AnalyticArc.trans]
-          simp [hr', η₁, η₂, ih.property.2.2.2, chartFlatAnalyticArc,
+          simp [hr', η₁, ih.property.2.2.2,
             concatChartFlatPathAux_succ,
             Path.extend_trans_of_le_half (S.concatChartFlatPathAux k)
               (S.chartFlatPath (k + 1)) hr]
         · have hr' : ¬ r ≤ (2 : ℝ)⁻¹ := by simpa [one_div] using hr
           have hhr : (1 / 2 : ℝ) ≤ r := le_of_lt (lt_of_not_ge hr)
           rw [AnalyticArc.trans]
-          simp [hr', η₁, η₂, ih.property.2.2.2, chartFlatAnalyticArc,
+          simp [hr', η₂, chartFlatAnalyticArc,
             concatChartFlatPathAux_succ,
             Path.extend_trans_of_half_le (S.concatChartFlatPathAux k)
               (S.chartFlatPath (k + 1)) hhr]
@@ -453,10 +451,12 @@ noncomputable def concatChartFlatPathAuxAnalyticArcData (k : ℕ) :
 noncomputable def concatChartFlatPathAuxAnalyticArc (k : ℕ) : AnalyticArc X :=
   (S.concatChartFlatPathAuxAnalyticArcData k).val
 
+omit [T2Space X] [ConnectedSpace X] in
 theorem concatChartFlatPathAuxAnalyticArc_partition (k : ℕ) :
     (S.concatChartFlatPathAuxAnalyticArc k).partition = concatChartFlatPathAuxPartition k :=
   (S.concatChartFlatPathAuxAnalyticArcData k).property.2.2.1
 
+omit [T2Space X] [ConnectedSpace X] in
 theorem concatChartFlatPathAuxAnalyticArc_extend (k : ℕ) :
     (S.concatChartFlatPathAuxAnalyticArc k).extend = (S.concatChartFlatPathAux k).extend :=
   (S.concatChartFlatPathAuxAnalyticArcData k).property.2.2.2

@@ -72,7 +72,6 @@ theorem simplyConnectedSpace_projectiveLine :
 
 /-! ## Holomorphy of continuous lifts through the lattice covering -/
 
-
 /-- **A continuous lift of a holomorphic torus-valued map is holomorphic.**
 If `Φ : M → V/L` is `MDifferentiable` on a complex manifold `M` and
 `F : M → V` is a continuous pointwise lift (`mk ∘ F = Φ`), then `F` is

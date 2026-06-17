@@ -204,14 +204,14 @@ private lemma analyticArc_canonicalIntegrand_cell_intervalIntegrable
       rfl
     have hs_mem : a k ∈ τ := by
       rw [hak]
-      simpa [Pset]
+      simp [Pset]
     have ht_mem : a (k + 1) ∈ τ := by
       rw [hak1]
-      simpa [Pset]
+      simp [Pset]
     have hst_cell : a k < a (k + 1) := by
       rw [hak, hak1]
       exact (Pset.orderEmbOfFin hcard).strictMono (by
-        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+        simp [i, Fin.lt_def])
     have hτcons : ∀ r ∈ τ, r ∉ Set.Ioo (a k) (a (k + 1)) := by
       intro r hr hrt
       rw [hak, hak1] at hrt
@@ -294,14 +294,14 @@ theorem analyticArc_canonicalIntegrand_intervalIntegrable
       rfl
     have hs_mem : a k ∈ γ.partition := by
       rw [hak]
-      simpa [Pset]
+      simp [Pset]
     have ht_mem : a (k + 1) ∈ γ.partition := by
       rw [hak1]
-      simpa [Pset]
+      simp [Pset]
     have hst_cell : a k < a (k + 1) := by
       rw [hak, hak1]
       exact (Pset.orderEmbOfFin hcard).strictMono (by
-        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+        simp [i, Fin.lt_def])
     have hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo (a k) (a (k + 1)) := by
       intro r hr hrt
       rw [hak, hak1] at hrt
@@ -462,14 +462,14 @@ private lemma analyticArc_fixedChartIntegrand_cell_intervalIntegrable
       rfl
     have hs_mem : a k ∈ τ := by
       rw [hak]
-      simpa [Pset]
+      simp [Pset]
     have ht_mem : a (k + 1) ∈ τ := by
       rw [hak1]
-      simpa [Pset]
+      simp [Pset]
     have hst_cell : a k < a (k + 1) := by
       rw [hak, hak1]
       exact (Pset.orderEmbOfFin hcard).strictMono (by
-        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+        simp [i, Fin.lt_def])
     have hτcons : ∀ r ∈ τ, r ∉ Set.Ioo (a k) (a (k + 1)) := by
       intro r hr hrt
       rw [hak, hak1] at hrt
@@ -566,14 +566,14 @@ theorem analyticArc_fixedChartIntegrand_intervalIntegrable
       rfl
     have hs_mem : a k ∈ γ.partition := by
       rw [hak]
-      simpa [Pset]
+      simp [Pset]
     have ht_mem : a (k + 1) ∈ γ.partition := by
       rw [hak1]
-      simpa [Pset]
+      simp [Pset]
     have hst_cell : a k < a (k + 1) := by
       rw [hak, hak1]
       exact (Pset.orderEmbOfFin hcard).strictMono (by
-        simp [i, Fin.lt_def, Fin.val_castSucc, Fin.val_succ])
+        simp [i, Fin.lt_def])
     have hcons : ∀ r ∈ γ.partition, r ∉ Set.Ioo (a k) (a (k + 1)) := by
       intro r hr hrt
       rw [hak, hak1] at hrt

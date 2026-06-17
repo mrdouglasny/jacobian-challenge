@@ -536,7 +536,7 @@ accumulates at `c` (`hS_acc`). -/
 theorem hcoh (F : FullFibreClusterData ω₀ g f Φ c) :
     valueChartTrace ω₀ f Φ =ᶠ[𝓝[≠] c] F.fibreTrace :=
   eventuallyEq_of_meromorphic_eqOn_slit F.hvct_mero F.meromorphicAt_fibreTrace F.hS_acc
-    (fun z hz => F.eqOn_fibreTrace_slit hz)
+    (fun _z hz => F.eqOn_fibreTrace_slit hz)
 
 /-- **The full-fibre residue.**  `resAt T c = ∑ᵢ formFnResidue ω₀ g (D.xs i)` (the full pole-fibre
 residue sum).  Residue of the finite sum splits termwise (`resAt_finsum`); each term is the per-cluster

@@ -349,7 +349,7 @@ theorem truePeriodLattice_le_periodLatticeInBasis (Y : Type*) [TopologicalSpace 
     intro j
     have h1 : v j = RiemannSurface.periodMap Y y₀ γh (jacobianBasis Y j) := by
       rw [← hγh]
-      show ((jacobianBasis Y).dualBasis.equivFun
+      change ((jacobianBasis Y).dualBasis.equivFun
         (RiemannSurface.periodMap Y y₀ γh)) j = _
       rw [Module.Basis.dualBasis_equivFun]
     have h2 : RiemannSurface.periodMap Y y₀ γh (jacobianBasis Y j) =
@@ -359,7 +359,7 @@ theorem truePeriodLattice_le_periodLatticeInBasis (Y : Type*) [TopologicalSpace 
           loopIntegralToH1 y₀ γh := rfl
       rw [hPM, ← loopDevValH1Hom_eq_loopIntegralToH1_apply, ← hg,
         loopDevValH1Hom_of]
-      show loopDevValQuotient y₀ (jacobianBasis Y j)
+      change loopDevValQuotient y₀ (jacobianBasis Y j)
           (FundamentalGroup.toPath g) = _
       rw [← hγp]
       rfl
@@ -419,7 +419,7 @@ theorem exists_preimageCycle_sheets_eq_degree {X Y : Type*}
               pushforward_eq := ?_ }, ?_⟩
     · rw [ambientPullbackJac_eq_zero_of_const f hf hconst]; simp
     · simp
-    · show (0 : ℕ) = degreeFiber f hf
+    · change (0 : ℕ) = degreeFiber f hf
       have hcm : Jacobians.Discharge.IsConstantMap f := hconst
       rw [degreeFiber]
       exact (if_pos hcm).symm
@@ -432,7 +432,7 @@ theorem exists_preimageCycle_sheets_eq_degree {X Y : Type*}
     have hwcard : w.card = (f ⁻¹' {y₀}).ncard := by
       have h1 : w.card = w.toWitness.card := rfl
       rw [h1, w.toWitness.card_eq_ncard, hwval]
-    show c.sheets = degreeFiber f hf
+    change c.sheets = degreeFiber f hf
     rw [hsheets, show degreeFiber f hf = degreeFiber f hf from rfl,
       degreeFiber_eq_card_of_regularWitness f hf hconst w, hwcard]
 
@@ -510,7 +510,7 @@ theorem ambientPhi_ambientPullback_eq {X Y : Type*}
         exact Subtype.mem (b₀ i)
       exact truePeriodLattice_le_periodLatticeInBasis Y
         (Module.Basis.ofZLatticeBasis ℝ Λ b₀ i) h_in
-    show ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
+    change ambientPhi (gX := kirovGenus X) (gY := kirovGenus Y) f hf
         (ambientPullbackJac (gX := kirovGenus X) (gY := kirovGenus Y) f hf (b i)) = _
     exact ambientPhi_ambientPullback_eq_on_lattice f hf (b i) hmem
   have per_term : ∀ (r : ℝ) i,
@@ -519,7 +519,7 @@ theorem ambientPhi_ambientPullback_eq {X Y : Type*}
     have h_phi_smul : Φ (r • b i) = r • Φ (b i) := by
       rw [hsmul r (b i), map_smul, hsmul r (Φ (b i))]
     rw [h_phi_smul, hlat i, smul_comm]
-  show Φ y = (degreeFiber f hf) • y
+  change Φ y = (degreeFiber f hf) • y
   conv_lhs => rw [← b.sum_repr y, map_sum]
   conv_rhs => rw [← b.sum_repr y, Finset.smul_sum]
   exact Finset.sum_congr rfl (fun i _ => per_term (b.repr y i) i)

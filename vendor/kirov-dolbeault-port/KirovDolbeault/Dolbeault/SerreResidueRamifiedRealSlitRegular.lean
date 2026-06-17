@@ -211,7 +211,7 @@ theorem sphereSheet_hmero (g : MeromorphicFunction X) {f : MeromorphicFunction X
     ∀ k, MeromorphicAt
       (fun w => g.toFun ((chartAt ℂ (S.sheet k (((z : ℂ) : RiemannSphere)))).symm w))
       ((chartAt ℂ (S.sheet k (((z : ℂ) : RiemannSphere))))
-        (S.sheet k (((z : ℂ) : RiemannSphere)))) := fun k => g.meromorphic _
+        (S.sheet k (((z : ℂ) : RiemannSphere)))) := fun _k => g.meromorphic _
 
 /-! ## The eventual sheet-system conditions `hsheetInj`/`hsheetMem` (near a value `z`) -/
 

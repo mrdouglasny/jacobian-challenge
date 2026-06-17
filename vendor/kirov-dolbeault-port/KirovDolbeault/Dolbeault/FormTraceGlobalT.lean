@@ -256,7 +256,7 @@ theorem exists_laurentForm_principalPart {T : ℂ → ℂ} {m : ℕ} (cs : Fin m
     simp only [Pi.sub_apply, hLR, hsplit z]
     -- `T z − (negTail_j + ∑_{i≠j}) = (T z − negTail_j) − ∑_{i≠j}`, and `T z − negTail_j = R j z`.
     have hTj : T z - negTail (cs j) (b j) (N j) z = R j z := by
-      have := hz; simp only [Pi.add_apply] at this; rw [this]; ring
+      have := hz; rw [this]; ring
     rw [show T z - (negTail (cs j) (b j) (N j) z
         + ∑ i ∈ Finset.univ.erase j, negTail (cs i) (b i) (N i) z)
         = (T z - negTail (cs j) (b j) (N j) z)
@@ -305,7 +305,7 @@ theorem analyticOnNhd_remainder_of_junkFree {T : ℂ → ℂ} {m : ℕ} {cs : Fi
     have hmero : MeromorphicAt (T - L.R) (cs j) := hR_an.meromorphicAt.congr hR_eq.symm
     exact hmero.analyticAt (hcont j)
   · -- off the centres: `T` analytic minus `L.R` analytic.
-    push_neg at hzc
+    push Not at hzc
     exact (hT_off z hzc).sub (hLR_off z hzc)
 
 /-! ### The `hrecip` field: the remainder is holomorphic across `∞`

@@ -26,7 +26,7 @@ theorem analyticAt_oddPart {h : ℂ → ℂ} (hh : AnalyticAt ℂ h 0) :
   have hneg : AnalyticAt ℂ (fun w : ℂ => h (-w)) 0 := by
     have hcomp : AnalyticAt ℂ (h ∘ fun w : ℂ => -w) 0 := by
       apply AnalyticAt.comp
-      · show AnalyticAt ℂ h ((fun w : ℂ => -w) 0); simpa using hh
+      · change AnalyticAt ℂ h ((fun w : ℂ => -w) 0); simpa using hh
       · exact (analyticAt_id (𝕜 := ℂ) (z := (0 : ℂ))).neg
     simpa [Function.comp] using hcomp
   exact hh.sub hneg

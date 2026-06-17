@@ -44,11 +44,13 @@ open Jacobians.RiemannSurface
 variable {Y : Type*} [TopologicalSpace Y] [T2Space Y] [CompactSpace Y]
     [ConnectedSpace Y] [Nonempty Y] [ChartedSpace ℂ Y] [IsManifold 𝓘(ℂ) ω Y]
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [IsManifold 𝓘(ℂ, ℂ) ω Y] in
 /-- The Dolbeault port's `pathSpeed` agrees definitionally with the vendored
 Kirov `pathSpeed` (both are `fderiv ℝ ((chartAt (γ t)).toFun ∘ γ) t 1`). -/
 theorem port_pathSpeed_eq (γ : ℝ → Y) (t : ℝ) :
     _root_.Jacobians.pathSpeed γ t = Jacobians.Vendor.Kirov.pathSpeed γ t := rfl
 
+omit [Nonempty Y] in
 /-- The port's `lineIntegral` of a KD-bridged form is the vendored Kirov line
 integral of the Montel-bridged form: `kdFormAlign` is the identity on the
 common underlying `ContMDiffSection` type, and the two `lineIntegral`s have
@@ -137,7 +139,7 @@ theorem lineIntegral_cell_eq_primitive_sub
     have hval : (bridgeForm form).toFun (γ t) (Jacobians.Vendor.Kirov.pathSpeed γ t) =
         form.coeff p (u t) * (fderiv ℝ u t 1) := by
       rw [hswap]
-      show (form.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) (γ t))) •
+      change (form.coeff p ((extChartAt 𝓘(ℂ, ℂ) p) (γ t))) •
           ((mfderiv 𝓘(ℂ, ℂ) 𝓘(ℂ, ℂ) (extChartAt 𝓘(ℂ, ℂ) p) (γ t))
             (Jacobians.Vendor.Kirov.pathSpeed γ t)) =
         form.coeff p (u t) * (fderiv ℝ u t 1)
@@ -165,6 +167,7 @@ def loopToPath (γ : ℝ → Y) (hγ : _root_.Jacobians.IsClosedSmoothLoop γ) :
   source' := by simp
   target' := by simpa using hγ.closed.symm
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] in
 @[simp] theorem loopToPath_coe (γ : ℝ → Y) (hγ : _root_.Jacobians.IsClosedSmoothLoop γ) :
     ((loopToPath γ hγ : Path (γ 0) (γ 0)) : C(unitInterval, Y)) =
       loopToContinuousMap γ hγ.cont := rfl
@@ -217,10 +220,10 @@ theorem developingValue_eq_lineIntegral_of_isClosedSmoothLoop
     intro i
     have h1 : (⟨min i.val S.n, by omega⟩ : Fin (S.n + 1)) = i.castSucc := by
       ext
-      simp [Nat.min_eq_left i.isLt.le]
+      simp
     have h2 : (⟨min (i.val + 1) S.n, by omega⟩ : Fin (S.n + 1)) = i.succ := by
       ext
-      simp [Nat.min_eq_left i.isLt]
+      simp
     have hAi : A i.val = (S.t i.castSucc : ℝ) := by
       simp only [hA_def, h1]
     have hAi1 : A (i.val + 1) = (S.t i.succ : ℝ) := by
@@ -283,6 +286,7 @@ base point stay inside the ball. The generic cover construction
 def IsAnchoredBall (B : PathChartBall Y) : Prop :=
   B.c = extChartAt 𝓘(ℂ) B.p B.p
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] in
 /-- Every continuous path admits a chart-ball subdivision with anchored
 balls (same Lebesgue-cover construction as
 `exists_pathChartBallSubdivision`, restricted to the anchored sub-family). -/
@@ -331,10 +335,12 @@ theorem exists_anchored_pathChartBallSubdivision (γ : C(unitInterval, Y)) :
 
 /-! ## Chart-ball hops with computed line integrals -/
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [IsManifold 𝓘(ℂ, ℂ) ω Y] in
 private lemma mem_chartAt_target_of_extChartAt {p : Y} {z : ℂ}
     (h : z ∈ (extChartAt 𝓘(ℂ) p).target) : z ∈ (chartAt ℂ p).target := by
   simpa [extChartAt_target] using h
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] [IsManifold 𝓘(ℂ, ℂ) ω Y] in
 private lemma extChartAt_apply_eq_chartAt (p x : Y) :
     (extChartAt 𝓘(ℂ) p) x = (chartAt ℂ p) x := rfl
 
@@ -355,6 +361,7 @@ private lemma affine_seg_mem_ball {c w : ℂ} {r : ℝ} (hw : w ∈ Metric.ball 
     _ = dist w c := one_mul _
     _ < r := Metric.mem_ball.mp hw
 
+omit [T2Space Y] [CompactSpace Y] [ConnectedSpace Y] [Nonempty Y] in
 /-- A point of an anchored ball is a valid hop target from the ball's base
 point. -/
 private lemma hopValid_of_anchored {B : PathChartBall Y} (hB : IsAnchoredBall B)
@@ -425,7 +432,7 @@ private lemma lineIntegral_hop (form : HolomorphicOneForm Y)
   have hσ0 : σ 0 = B.p := hsm.start
   have hσ1 : σ 1 = x := hsm.finish
   calc Jacobians.Vendor.Kirov.lineIntegral (bridgeForm form) σ
-      = ∫ t in (0:ℝ)..1,
+      = ∫ t in (0 : ℝ)..1,
           (bridgeForm form).toFun (σ t) (Jacobians.Vendor.Kirov.pathSpeed σ t) := rfl
     _ = pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) (σ 1)) -
           pathChartBallPrimitive form B ((extChartAt 𝓘(ℂ) B.p) (σ 0)) := hFTC
@@ -452,104 +459,106 @@ private theorem port_lineIntegral_concat_of_smooth
   have hint₂ : IntervalIntegrable
       (fun u => α.toFun (g₂ u) (_root_.Jacobians.pathSpeed g₂ u)) MeasureTheory.volume 0 1 :=
     _root_.Jacobians.intervalIntegrable_form_pathSpeed_of_velContinuous α g₂ h₂.velCont
-  have h_ae_neq : ∀ᵐ t ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ), t ≠ (1/2 : ℝ) := by
+  have h_ae_neq : ∀ᵐ t ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ), t ≠ (1 / 2 : ℝ) := by
     rw [MeasureTheory.ae_iff]; simp
   refine _root_.Jacobians.lineIntegral_concat α g₁ g₂ hint₁ hint₂ ?_ ?_ ?_ ?_
   · -- left-half integrability of the concat integrand
     have h_shift : IntervalIntegrable
         (fun t => α.toFun (g₁ (2 * t)) (_root_.Jacobians.pathSpeed g₁ (2 * t)))
-        MeasureTheory.volume 0 (1/2) := by
+        MeasureTheory.volume 0 (1 / 2) := by
       have h_mul := hint₁.comp_mul_left (c := 2)
       convert h_mul using 2; norm_num
-    refine (h_shift.const_mul (2:ℂ)).congr_ae ?_
+    refine (h_shift.const_mul (2 : ℂ)).congr_ae ?_
     refine (MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr ?_
     filter_upwards [h_ae_neq] with t h_neq ht
-    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1/2)] at ht
-    have h_lt : t < 1/2 := lt_of_le_of_ne ht.2 h_neq
-    have h_2t_uIcc : 2 * t ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨by linarith [ht.1], by linarith⟩
+    rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1 / 2)] at ht
+    have h_lt : t < 1 / 2 := lt_of_le_of_ne ht.2 h_neq
+    have h_2t_uIcc : 2 * t ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨by linarith [ht.1], by linarith⟩
     have h_ca : _root_.Jacobians.concat g₁ g₂ t = g₁ (2 * t) :=
       _root_.Jacobians.concat_apply_left _ _ (le_of_lt h_lt)
     have h_ps : _root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t =
         2 * _root_.Jacobians.pathSpeed g₁ (2 * t) :=
       _root_.Jacobians.pathSpeed_concat_left _ _ t h_lt (h₁.diff (2 * t) h_2t_uIcc)
-    show (2:ℂ) * α.toFun (g₁ (2*t)) (_root_.Jacobians.pathSpeed g₁ (2*t)) =
+    change (2 : ℂ) * α.toFun (g₁ (2 * t)) (_root_.Jacobians.pathSpeed g₁ (2 * t)) =
       α.toFun (_root_.Jacobians.concat g₁ g₂ t)
         (_root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t)
     rw [h_ca, h_ps]
-    have h_lin := (α.toFun (g₁ (2*t))).map_smul (2:ℂ) (_root_.Jacobians.pathSpeed g₁ (2*t))
+    have h_lin := (α.toFun (g₁ (2 * t))).map_smul (2 : ℂ) (_root_.Jacobians.pathSpeed g₁ (2 * t))
     simp only [smul_eq_mul] at h_lin
     exact h_lin.symm
   · -- right-half integrability of the concat integrand
     have h_shift : IntervalIntegrable
         (fun t => α.toFun (g₂ (2 * t)) (_root_.Jacobians.pathSpeed g₂ (2 * t)))
-        MeasureTheory.volume 0 (1/2) := by
+        MeasureTheory.volume 0 (1 / 2) := by
       have h_mul := hint₂.comp_mul_left (c := 2)
       convert h_mul using 2; norm_num
     have h_shift_2 : IntervalIntegrable
         (fun t => α.toFun (g₂ (2 * t - 1)) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1)))
-        MeasureTheory.volume (1/2) 1 := by
-      have h_sub := h_shift.comp_sub_right (1/2)
-      rw [show (0:ℝ) + 1/2 = 1/2 from by norm_num,
-        show (1/2:ℝ) + 1/2 = 1 from by norm_num] at h_sub
-      have h_fn_eq : (fun t : ℝ => α.toFun (g₂ (2 * (t - 1/2)))
-            (_root_.Jacobians.pathSpeed g₂ (2 * (t - 1/2)))) =
+        MeasureTheory.volume (1 / 2) 1 := by
+      have h_sub := h_shift.comp_sub_right (1 / 2)
+      rw [show (0 : ℝ) + 1 / 2 = 1 / 2 from by norm_num,
+        show (1 / 2 : ℝ) + 1 / 2 = 1 from by norm_num] at h_sub
+      have h_fn_eq : (fun t : ℝ => α.toFun (g₂ (2 * (t - 1 / 2)))
+            (_root_.Jacobians.pathSpeed g₂ (2 * (t - 1 / 2)))) =
           (fun t : ℝ => α.toFun (g₂ (2 * t - 1)) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1))) := by
-        funext t; rw [show (2:ℝ) * (t - 1/2) = 2 * t - 1 from by ring]
+        funext t; rw [show (2 : ℝ) * (t - 1 / 2) = 2 * t - 1 from by ring]
       rw [h_fn_eq] at h_sub; exact h_sub
-    refine (h_shift_2.const_mul (2:ℂ)).congr_ae ?_
+    refine (h_shift_2.const_mul (2 : ℂ)).congr_ae ?_
     refine (MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr ?_
     filter_upwards [h_ae_neq] with t _h_neq ht
-    rw [Set.uIoc_of_le (by norm_num : (1/2:ℝ) ≤ 1)] at ht
-    have h_gt : 1/2 < t := ht.1
-    have h_2tm1_uIcc : 2 * t - 1 ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨by linarith, by linarith [ht.2]⟩
+    rw [Set.uIoc_of_le (by norm_num : (1 / 2 : ℝ) ≤ 1)] at ht
+    have h_gt : 1 / 2 < t := ht.1
+    have h_2tm1_uIcc : 2 * t - 1 ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨by linarith, by linarith [ht.2]⟩
     have h_ca : _root_.Jacobians.concat g₁ g₂ t = g₂ (2 * t - 1) :=
       _root_.Jacobians.concat_apply_right _ _ (not_le.mpr h_gt)
     have h_ps : _root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t =
         2 * _root_.Jacobians.pathSpeed g₂ (2 * t - 1) :=
       _root_.Jacobians.pathSpeed_concat_right _ _ t h_gt (h₂.diff (2 * t - 1) h_2tm1_uIcc)
-    show (2:ℂ) * α.toFun (g₂ (2*t-1)) (_root_.Jacobians.pathSpeed g₂ (2*t-1)) =
+    change (2 : ℂ) * α.toFun (g₂ (2 * t - 1)) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1)) =
       α.toFun (_root_.Jacobians.concat g₁ g₂ t)
         (_root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t)
     rw [h_ca, h_ps]
-    have h_lin := (α.toFun (g₂ (2*t-1))).map_smul (2:ℂ) (_root_.Jacobians.pathSpeed g₂ (2*t-1))
+    have h_lin := 
+        (α.toFun (g₂ (2 * t - 1))).map_smul (2 : ℂ) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1))
     simp only [smul_eq_mul] at h_lin
     exact h_lin.symm
   · refine (MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr ?_
     filter_upwards [h_ae_neq] with t h_neq ht
-    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1/2)] at ht
-    have h_lt : t < 1/2 := lt_of_le_of_ne ht.2 h_neq
-    have h_2t_uIcc : 2 * t ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨by linarith [ht.1], by linarith⟩
+    rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1 / 2)] at ht
+    have h_lt : t < 1 / 2 := lt_of_le_of_ne ht.2 h_neq
+    have h_2t_uIcc : 2 * t ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨by linarith [ht.1], by linarith⟩
     have h_ca : _root_.Jacobians.concat g₁ g₂ t = g₁ (2 * t) :=
       _root_.Jacobians.concat_apply_left _ _ (le_of_lt h_lt)
     have h_ps : _root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t =
         2 * _root_.Jacobians.pathSpeed g₁ (2 * t) :=
       _root_.Jacobians.pathSpeed_concat_left _ _ t h_lt (h₁.diff (2 * t) h_2t_uIcc)
-    show α.toFun (_root_.Jacobians.concat g₁ g₂ t)
+    change α.toFun (_root_.Jacobians.concat g₁ g₂ t)
         (_root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t) =
-      (2:ℂ) * α.toFun (g₁ (2*t)) (_root_.Jacobians.pathSpeed g₁ (2*t))
+      (2 : ℂ) * α.toFun (g₁ (2 * t)) (_root_.Jacobians.pathSpeed g₁ (2 * t))
     rw [h_ca, h_ps]
-    have h_lin := (α.toFun (g₁ (2*t))).map_smul (2:ℂ) (_root_.Jacobians.pathSpeed g₁ (2*t))
+    have h_lin := (α.toFun (g₁ (2 * t))).map_smul (2 : ℂ) (_root_.Jacobians.pathSpeed g₁ (2 * t))
     simp only [smul_eq_mul] at h_lin
     exact h_lin
   · refine (MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr ?_
     filter_upwards [h_ae_neq] with t _h_neq ht
-    rw [Set.uIoc_of_le (by norm_num : (1/2:ℝ) ≤ 1)] at ht
-    have h_gt : 1/2 < t := ht.1
-    have h_2tm1_uIcc : 2 * t - 1 ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨by linarith, by linarith [ht.2]⟩
+    rw [Set.uIoc_of_le (by norm_num : (1 / 2 : ℝ) ≤ 1)] at ht
+    have h_gt : 1 / 2 < t := ht.1
+    have h_2tm1_uIcc : 2 * t - 1 ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨by linarith, by linarith [ht.2]⟩
     have h_ca : _root_.Jacobians.concat g₁ g₂ t = g₂ (2 * t - 1) :=
       _root_.Jacobians.concat_apply_right _ _ (not_le.mpr h_gt)
     have h_ps : _root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t =
         2 * _root_.Jacobians.pathSpeed g₂ (2 * t - 1) :=
       _root_.Jacobians.pathSpeed_concat_right _ _ t h_gt (h₂.diff (2 * t - 1) h_2tm1_uIcc)
-    show α.toFun (_root_.Jacobians.concat g₁ g₂ t)
+    change α.toFun (_root_.Jacobians.concat g₁ g₂ t)
         (_root_.Jacobians.pathSpeed (_root_.Jacobians.concat g₁ g₂) t) =
-      (2:ℂ) * α.toFun (g₂ (2*t-1)) (_root_.Jacobians.pathSpeed g₂ (2*t-1))
+      (2 : ℂ) * α.toFun (g₂ (2 * t - 1)) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1))
     rw [h_ca, h_ps]
-    have h_lin := (α.toFun (g₂ (2*t-1))).map_smul (2:ℂ) (_root_.Jacobians.pathSpeed g₂ (2*t-1))
+    have h_lin := 
+        (α.toFun (g₂ (2 * t - 1))).map_smul (2 : ℂ) (_root_.Jacobians.pathSpeed g₂ (2 * t - 1))
     simp only [smul_eq_mul] at h_lin
     exact h_lin
 
@@ -584,22 +593,22 @@ private theorem exists_segment_through_anchor
   have hv : _root_.Jacobians.HopValid B.p x' := hopValid_of_anchored hB hx'_src hx'_ball
   obtain ⟨hu_sm, hu_v0, hu_v1⟩ := _root_.Jacobians.zeroVelHop hu
   obtain ⟨hv_sm, hv_v0, hv_v1⟩ := _root_.Jacobians.zeroVelHop hv
-  have h0uIcc : (0:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
-    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨le_refl _, zero_le_one⟩
-  have h1uIcc : (1:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
-    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨zero_le_one, le_refl _⟩
+  have h0uIcc : (0 : ℝ) ∈ Set.uIcc (0 : ℝ) 1 := by
+    rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨le_refl _, zero_le_one⟩
+  have h1uIcc : (1 : ℝ) ∈ Set.uIcc (0 : ℝ) 1 := by
+    rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨zero_le_one, le_refl _⟩
   have hrev_sm : _root_.Jacobians.IsSmoothPath x B.p
       (_root_.Jacobians.reverse (_root_.Jacobians.ChartBallPathSmooth B.p x)) := hu_sm.reverse
   have hrev_v0 : _root_.Jacobians.pathSpeed
       (_root_.Jacobians.reverse (_root_.Jacobians.ChartBallPathSmooth B.p x)) 0 = 0 := by
     rw [_root_.Jacobians.pathSpeed_reverse _ 0
-        (by rw [show (1:ℝ)-0 = 1 from by norm_num]; exact hu_sm.diff 1 h1uIcc),
-      show (1:ℝ)-0 = 1 from by norm_num, hu_v1, neg_zero]
+        (by rw [show (1 : ℝ)-0 = 1 from by norm_num]; exact hu_sm.diff 1 h1uIcc),
+      show (1 : ℝ)-0 = 1 from by norm_num, hu_v1, neg_zero]
   have hrev_v1 : _root_.Jacobians.pathSpeed
       (_root_.Jacobians.reverse (_root_.Jacobians.ChartBallPathSmooth B.p x)) 1 = 0 := by
     rw [_root_.Jacobians.pathSpeed_reverse _ 1
-        (by rw [show (1:ℝ)-1 = 0 from by norm_num]; exact hu_sm.diff 0 h0uIcc),
-      show (1:ℝ)-1 = 0 from by norm_num, hu_v0, neg_zero]
+        (by rw [show (1 : ℝ)-1 = 0 from by norm_num]; exact hu_sm.diff 0 h0uIcc),
+      show (1 : ℝ)-1 = 0 from by norm_num, hu_v0, neg_zero]
   set g : ℝ → Y := _root_.Jacobians.concat
     (_root_.Jacobians.reverse (_root_.Jacobians.ChartBallPathSmooth B.p x))
     (_root_.Jacobians.ChartBallPathSmooth B.p x') with hg_def
@@ -610,15 +619,15 @@ private theorem exists_segment_through_anchor
         ((chartAt (H := ℂ) ((_root_.Jacobians.reverse
             (_root_.Jacobians.ChartBallPathSmooth B.p x)) (2 * 0))).toFun ∘
           _root_.Jacobians.reverse (_root_.Jacobians.ChartBallPathSmooth B.p x)) (2 * 0) := by
-      rw [show (2:ℝ)*0 = 0 from by norm_num]; exact hrev_sm.diff 0 h0uIcc
+      rw [show (2 : ℝ) * 0 = 0 from by norm_num]; exact hrev_sm.diff 0 h0uIcc
     rw [hg_def, _root_.Jacobians.pathSpeed_concat_left _ _ 0 (by norm_num) hd,
-      show (2:ℝ)*0 = 0 from by norm_num, hrev_v0, mul_zero]
+      show (2 : ℝ) * 0 = 0 from by norm_num, hrev_v0, mul_zero]
   · have hd : DifferentiableAt ℝ
         ((chartAt (H := ℂ) ((_root_.Jacobians.ChartBallPathSmooth B.p x') (2 * 1 - 1))).toFun ∘
           _root_.Jacobians.ChartBallPathSmooth B.p x') (2 * 1 - 1) := by
-      rw [show (2:ℝ)*1-1 = 1 from by norm_num]; exact hv_sm.diff 1 h1uIcc
+      rw [show (2 : ℝ) * 1 - 1 = 1 from by norm_num]; exact hv_sm.diff 1 h1uIcc
     rw [hg_def, _root_.Jacobians.pathSpeed_concat_right _ _ 1 (by norm_num) hd,
-      show (2:ℝ)*1-1 = 1 from by norm_num, hv_v1, mul_zero]
+      show (2 : ℝ) * 1 - 1 = 1 from by norm_num, hv_v1, mul_zero]
   · intro form
     have hconcat := port_lineIntegral_concat_of_smooth (bridgeKDFormEquiv form)
       hrev_sm hv_sm
@@ -657,7 +666,7 @@ zero-velocity smooth path whose line integral is the sum. Replays the port's
 `exists_zeroVel_smoothPath_aux` with the integral bookkeeping added. -/
 private theorem exists_zeroVel_chain_with_integral (v : ℕ → Y)
     (inc : ℕ → HolomorphicOneForm Y → ℂ) :
-    ∀ m, (∀ k, k < m → ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k+1)) g ∧
+    ∀ m, (∀ k, k < m → ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k + 1)) g ∧
           _root_.Jacobians.pathSpeed g 0 = 0 ∧ _root_.Jacobians.pathSpeed g 1 = 0 ∧
           ∀ form : HolomorphicOneForm Y,
             _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) g = inc k form) →
@@ -678,7 +687,7 @@ private theorem exists_zeroVel_chain_with_integral (v : ℕ → Y)
       intro t
       rw [_root_.Jacobians.pathSpeed_const]
       exact map_zero _
-    show (∫ t in (0:ℝ)..1, (bridgeKDFormEquiv form).toFun ((fun _ => v 0) t)
+    change (∫ t in (0 : ℝ)..1, (bridgeKDFormEquiv form).toFun ((fun _ => v 0) t)
         (_root_.Jacobians.pathSpeed (fun _ : ℝ => v 0) t)) = _
     simp_rw [hzero]
     simp
@@ -686,19 +695,20 @@ private theorem exists_zeroVel_chain_with_integral (v : ℕ → Y)
     intro hstep
     obtain ⟨g, hg_sm, hg_v0, hg_v1, hg_val⟩ := ih (fun k hk => hstep k (by omega))
     obtain ⟨g', hg'_sm, hg'_v0, hg'_v1, hg'_val⟩ := hstep m (by omega)
-    have h0uIcc : (0:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨le_refl _, zero_le_one⟩
-    have h1uIcc : (1:ℝ) ∈ Set.uIcc (0:ℝ) 1 := by
-      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]; exact ⟨zero_le_one, le_refl _⟩
+    have h0uIcc : (0 : ℝ) ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨le_refl _, zero_le_one⟩
+    have h1uIcc : (1 : ℝ) ∈ Set.uIcc (0 : ℝ) 1 := by
+      rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]; exact ⟨zero_le_one, le_refl _⟩
     refine ⟨_root_.Jacobians.concat g g', hg_sm.concat hg'_sm hg_v1 hg'_v0, ?_, ?_, ?_⟩
     · have hd : DifferentiableAt ℝ ((chartAt (H := ℂ) (g (2 * 0))).toFun ∘ g) (2 * 0) := by
-        rw [show (2:ℝ)*0 = 0 from by norm_num]; exact hg_sm.diff 0 h0uIcc
+        rw [show (2 : ℝ) * 0 = 0 from by norm_num]; exact hg_sm.diff 0 h0uIcc
       rw [_root_.Jacobians.pathSpeed_concat_left g g' 0 (by norm_num) hd,
-        show (2:ℝ)*0 = 0 from by norm_num, hg_v0, mul_zero]
-    · have hd : DifferentiableAt ℝ ((chartAt (H := ℂ) (g' (2 * 1 - 1))).toFun ∘ g') (2 * 1 - 1) := by
-        rw [show (2:ℝ)*1-1 = 1 from by norm_num]; exact hg'_sm.diff 1 h1uIcc
+        show (2 : ℝ) * 0 = 0 from by norm_num, hg_v0, mul_zero]
+    · have hd : DifferentiableAt ℝ ((chartAt (H := ℂ) (g' (2 * 1 - 1))).toFun ∘ g') (2 * 1 - 1)
+      := by
+        rw [show (2 : ℝ) * 1 - 1 = 1 from by norm_num]; exact hg'_sm.diff 1 h1uIcc
       rw [_root_.Jacobians.pathSpeed_concat_right g g' 1 (by norm_num) hd,
-        show (2:ℝ)*1-1 = 1 from by norm_num, hg'_v1, mul_zero]
+        show (2 : ℝ) * 1 - 1 = 1 from by norm_num, hg'_v1, mul_zero]
     · intro form
       rw [port_lineIntegral_concat_of_smooth (bridgeKDFormEquiv form) hg_sm hg'_sm,
         hg_val form, hg'_val form, Finset.sum_range_succ]
@@ -730,14 +740,14 @@ theorem exists_isClosedSmoothLoop_lineIntegral_eq_developingValue
     have h0 : (⟨min 0 S.n, by omega⟩ : Fin (S.n + 1)) = 0 := by ext; simp
     rw [hv_def]
     simp only [h0, S.zero_eq]
-    simpa [hγc_def] using δ.source
+    simp [hγc_def, δ.source]
   have hvn : v S.n = y := by
     have hn : (⟨min S.n S.n, by omega⟩ : Fin (S.n + 1)) = Fin.last S.n := by ext; simp
     rw [hv_def]
     simp only [hn, S.one_eq]
-    simpa [hγc_def] using δ.target
+    simp [hγc_def, δ.target]
   -- Per-cell zero-velocity segments through the anchors.
-  have hstep : ∀ k (hk : k < S.n), ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k+1)) g ∧
+  have hstep : ∀ k (hk : k < S.n), ∃ g, _root_.Jacobians.IsSmoothPath (v k) (v (k + 1)) g ∧
       _root_.Jacobians.pathSpeed g 0 = 0 ∧ _root_.Jacobians.pathSpeed g 1 = 0 ∧
       ∀ form : HolomorphicOneForm Y,
         _root_.Jacobians.lineIntegral (bridgeKDFormEquiv form) g =

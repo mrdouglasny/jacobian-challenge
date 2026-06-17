@@ -106,7 +106,7 @@ noncomputable def hyperellipticForm (H : HyperellipticData)
     HolomorphicOneForm (HyperellipticEvenProj H) :=
   if h : g.natDegree < H.f.natDegree / 2 - 1 then
     ⟨hyperellipticEvenCoeff (H := H) g (infReverse H g),
-     hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl h⟩
+      hyperellipticEvenCoeff_mem_submodule g (infReverse H g) rfl h⟩
   else 0
 
 /-- On low-degree polynomials, `hyperellipticForm` is the real form. -/
@@ -145,7 +145,7 @@ theorem hyperellipticForm_add_of_lt (H : HyperellipticData)
       hyperellipticForm H g + hyperellipticForm H g' := by
   rw [hyperellipticForm_of_lt H h, hyperellipticForm_of_lt H h', hyperellipticForm_of_lt H h'']
   apply Subtype.ext
-  show hyperellipticEvenCoeff (H := H) (g + g') (infReverse H (g + g')) = _
+  change hyperellipticEvenCoeff (H := H) (g + g') (infReverse H (g + g')) = _
   rw [infReverse_add]
   exact hyperellipticEvenCoeff_add g (infReverse H g) g' (infReverse H g')
 
@@ -158,7 +158,7 @@ theorem hyperellipticForm_smul_of_lt (H : HyperellipticData)
     hyperellipticForm H (c • g) = c • hyperellipticForm H g := by
   rw [hyperellipticForm_of_lt H h, hyperellipticForm_of_lt H h']
   apply Subtype.ext
-  show hyperellipticEvenCoeff (H := H) (c • g) (infReverse H (c • g)) = _
+  change hyperellipticEvenCoeff (H := H) (c • g) (infReverse H (c • g)) = _
   rw [infReverse_smul]
   exact hyperellipticEvenCoeff_smul c g (infReverse H g)
 
@@ -169,7 +169,7 @@ theorem hyperellipticForm_smul_of_lt (H : HyperellipticData)
   unfold hyperellipticForm
   split
   · apply Subtype.ext
-    show hyperellipticEvenCoeff (H := H) 0 (infReverse H 0) = 0
+    change hyperellipticEvenCoeff (H := H) 0 (infReverse H 0) = 0
     rw [infReverse_zero]; exact hyperellipticEvenCoeff_zero
   · rfl
 
@@ -192,8 +192,7 @@ noncomputable def hyperellipticFormLinearMap (H : HyperellipticData)
     · -- n = 0: degreeLT is {0}, all forms are 0
       have e : ∀ p : Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1), p.1 = 0 := by
         intro p; exact eq_zero_of_mem_degreeLT_zero (hn ▸ p.2)
-      simp only [AddSubmonoid.coe_add, Submodule.coe_toAddSubmonoid, e, add_zero,
-        hyperellipticForm_zero]
+      simp only [e, add_zero, hyperellipticForm_zero]
     · have h1 := natDegree_lt_of_mem_degreeLT hn gd.2
       have h2 := natDegree_lt_of_mem_degreeLT hn gd'.2
       have h3 : (gd.1 + gd'.1).natDegree < H.f.natDegree / 2 - 1 :=
@@ -203,11 +202,11 @@ noncomputable def hyperellipticFormLinearMap (H : HyperellipticData)
     rcases Nat.eq_zero_or_pos (H.f.natDegree / 2 - 1) with hn | hn
     · have e : ∀ p : Polynomial.degreeLT ℂ (H.f.natDegree / 2 - 1), p.1 = 0 := by
         intro p; exact eq_zero_of_mem_degreeLT_zero (hn ▸ p.2)
-      simp only [RingHom.id_apply, SetLike.val_smul, e, smul_zero, hyperellipticForm_zero]
+      simp only [RingHom.id_apply, e, smul_zero, hyperellipticForm_zero]
     · have h1 := natDegree_lt_of_mem_degreeLT hn gd.2
       have h2 : (c • gd.1).natDegree < H.f.natDegree / 2 - 1 :=
         lt_of_le_of_lt (Polynomial.natDegree_smul_le _ _) h1
-      show hyperellipticForm H (c • gd.1) = c • hyperellipticForm H gd.1
+      change hyperellipticForm H (c • gd.1) = c • hyperellipticForm H gd.1
       exact hyperellipticForm_smul_of_lt H c h1 h2
 
 /-! ## Linear independence
@@ -249,7 +248,7 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothY
       (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
     intro g₀ hg₀
     rw [hyperellipticForm_coeff_of_lt H hg₀]
-    show (match Quotient.out q with
+    change (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
     rw [hQ]
@@ -279,7 +278,7 @@ theorem hyperellipticForm_eq_of_agree_at_affine_smoothX
       (hyperellipticForm H g₀).coeff q = hyperellipticAffineCoeff (H := H) g₀ a := by
     intro g₀ hg₀
     rw [hyperellipticForm_coeff_of_lt H hg₀]
-    show (match Quotient.out q with
+    change (match Quotient.out q with
       | Sum.inl a => hyperellipticAffineCoeff (H := H) g₀ a
       | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g₀) b) = _
     rw [hQ]
@@ -305,11 +304,11 @@ theorem hyperellipticForm_coeff_projX {g : Polynomial ℂ}
       g.eval z / (squareLocalHomeomorph (H := H) a hpY).symm (H.f.eval z) := by
   rw [hyperellipticForm_coeff_of_lt H hDeg]
   show (hyperellipticEvenCoeff (H := H) g (infReverse H g)) q z = _
-  show (match Quotient.out q with
+  change (match Quotient.out q with
     | Sum.inl a => hyperellipticAffineCoeff (H := H) g a
     | Sum.inr b => hyperellipticAffineInfinityCoeff (H := H) (infReverse H g) b) z = _
   rw [hQ]
-  show hyperellipticAffineCoeff (H := H) g a z = _
+  change hyperellipticAffineCoeff (H := H) g a z = _
   rw [hyperellipticAffineCoeff, dif_pos hpY, affineProjXCoeff, if_pos hz]
 
 /-! ### Witness existence and full injectivity
@@ -336,8 +335,8 @@ lemma quotient_out_of_zero_x (a₀ : HyperellipticAffine H) (h0 : a₀.val.1 = 0
   rw [hyperellipticEvenSetoid_rel_iff] at hRel
   rcases hRel with hEq | hGl1 | hGl2
   · exact hEq
-  · rcases u with a' | b' <;> simp [HyperellipticEvenGlue] at hGl1
-  · rcases u with a' | b' <;> simp [HyperellipticEvenGlue] at hGl2
+  · rcases u with a' | b' <;> simp only [HyperellipticEvenGlue] at hGl1
+  · rcases u with a' | b' <;> simp only [HyperellipticEvenGlue] at hGl2
     exact absurd hGl2.1 (by simp [h0])
 
 /-- Witness affine point for the injectivity proof: `(0, y)` where
@@ -371,7 +370,7 @@ lemma witnessZeroX_mem_smoothLocusX_of_zero_root (H : HyperellipticData)
     (h0 : H.f.eval 0 = 0) :
     witnessZeroX H ∈ smoothLocusX H := by
   unfold smoothLocusX
-  show (Polynomial.derivative H.f).eval (witnessZeroX H).val.1 ≠ 0
+  change (Polynomial.derivative H.f).eval (witnessZeroX H).val.1 ≠ 0
   rw [witnessZeroX_val_fst]
   exact eval_derivative_ne_zero_of_eval_eq_zero H h0
 

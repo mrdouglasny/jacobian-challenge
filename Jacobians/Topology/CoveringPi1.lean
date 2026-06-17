@@ -40,7 +40,7 @@ theorem monodromy_mk {x y : X} (γ : Path x y) (e : p ⁻¹' {x}) {e' : E}
     cov.monodromy (Path.Homotopic.Quotient.mk γ) e = ⟨e', he'⟩ := by
   obtain ⟨e, he⟩ := e
   apply Subtype.ext
-  show cov.liftPath γ e (γ.source.trans (show p e = x from he).symm) 1 = e'
+  change cov.liftPath γ e (γ.source.trans (show p e = x from he).symm) 1 = e'
   have hlift : (Γ : C(I, E)) = cov.liftPath γ e (γ.source.trans (show p e = x from he).symm) :=
     (cov.eq_liftPath_iff' _).mpr ⟨funext fun t ↦ hΓ t, Γ.source⟩
   rw [← hlift]
@@ -75,7 +75,7 @@ theorem monodromy_injective [SimplyConnectedSpace E] (e₀ : E) {y : X} :
   have e₁eq : (Γ₁.map cov.continuous).cast rfl hy = γ₁ := by
     ext t
     exact congr_fun (cov.liftPath_lifts γ₁ e₀ γ₁.source) t
-  show Path.Homotopic.Quotient.mk γ₀ = Path.Homotopic.Quotient.mk γ₁
+  change Path.Homotopic.Quotient.mk γ₀ = Path.Homotopic.Quotient.mk γ₁
   rw [← e₀eq, ← e₁eq, Path.Homotopic.Quotient.mk_cast, Path.Homotopic.Quotient.mk_cast]
   exact congrArg (Path.Homotopic.Quotient.cast · rfl hy) (Quotient.sound hmap)
 
@@ -134,7 +134,7 @@ theorem monodromy_deckLoop (e₀ : E) (g g' : G) :
     (((PathConnectedSpace.somePath e₀ (g +ᵥ e₀)).map
       (continuous_const_vadd g')).cast rfl (vadd_vadd g' g e₀).symm)
     (fun t ↦ ?_) (proj_vadd h (g' + g) e₀)
-  show p (g' +ᵥ (PathConnectedSpace.somePath e₀ (g +ᵥ e₀)) t)
+  change p (g' +ᵥ (PathConnectedSpace.somePath e₀ (g +ᵥ e₀)) t)
     = p ((PathConnectedSpace.somePath e₀ (g +ᵥ e₀)) t)
   exact proj_vadd h g' _
 
@@ -151,7 +151,7 @@ is reverse path composition, while lift translation adds on the left). -/
 theorem deckLoop_add (e₀ : E) (g g' : G) :
     deckLoop h e₀ (g' + g) = deckLoop h e₀ g * deckLoop h e₀ g' := by
   apply monodromy_injective h.isCoveringMap e₀ (y := p e₀)
-  show h.isCoveringMap.monodromy (FundamentalGroup.toPath (deckLoop h e₀ (g' + g))) ⟨e₀, rfl⟩
+  change h.isCoveringMap.monodromy (FundamentalGroup.toPath (deckLoop h e₀ (g' + g))) ⟨e₀, rfl⟩
     = h.isCoveringMap.monodromy
         (FundamentalGroup.toPath (deckLoop h e₀ g * deckLoop h e₀ g')) ⟨e₀, rfl⟩
   have hmul : FundamentalGroup.toPath (deckLoop h e₀ g * deckLoop h e₀ g')
@@ -172,7 +172,7 @@ include h
 a commutative group, sending `g` to the projection of a path `e₀ → g +ᵥ e₀`. -/
 noncomputable def deckHom (e₀ : E) : Multiplicative G →* FundamentalGroup X (p e₀) :=
   MonoidHom.mk' (fun a ↦ deckLoop h e₀ a.toAdd) fun a b ↦ by
-    show deckLoop h e₀ (a.toAdd + b.toAdd) = deckLoop h e₀ a.toAdd * deckLoop h e₀ b.toAdd
+    change deckLoop h e₀ (a.toAdd + b.toAdd) = deckLoop h e₀ a.toAdd * deckLoop h e₀ b.toAdd
     rw [add_comm]
     exact deckLoop_add h e₀ a.toAdd b.toAdd
 
@@ -196,7 +196,7 @@ theorem deckHom_bijective (e₀ : E) : Function.Bijective (deckHom h e₀) := by
     obtain ⟨g, hg⟩ := AddAction.mem_orbit_iff.mp (h.apply_eq_iff_mem_orbit.mp
       (h.isCoveringMap.monodromy (FundamentalGroup.toPath γ) ⟨e₀, rfl⟩).2)
     refine ⟨Multiplicative.ofAdd g, monodromy_injective h.isCoveringMap e₀ (y := p e₀) ?_⟩
-    show h.isCoveringMap.monodromy
+    change h.isCoveringMap.monodromy
         (FundamentalGroup.toPath (deckHom h e₀ (Multiplicative.ofAdd g))) ⟨e₀, rfl⟩
       = h.isCoveringMap.monodromy (FundamentalGroup.toPath γ) ⟨e₀, rfl⟩
     rw [deckHom_apply, monodromy_deckLoop_base h e₀ g]
@@ -223,7 +223,7 @@ theorem deckMulEquivPi1_eq_fromPath (e₀ : E) (g : G) {e' : E}
     deckMulEquivPi1 h e₀ (Multiplicative.ofAdd g)
       = FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ) := by
   apply monodromy_injective h.isCoveringMap e₀ (y := p e₀)
-  show h.isCoveringMap.monodromy
+  change h.isCoveringMap.monodromy
       (FundamentalGroup.toPath (deckMulEquivPi1 h e₀ (Multiplicative.ofAdd g))) ⟨e₀, rfl⟩
     = h.isCoveringMap.monodromy (Path.Homotopic.Quotient.mk γ) ⟨e₀, rfl⟩
   rw [deckMulEquivPi1_apply, monodromy_deckLoop_base h e₀ g,

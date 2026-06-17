@@ -369,13 +369,13 @@ noncomputable def PlaneCurveAffineY.toPlaneCurve (H : PlaneCurveData)
     intro h
     have h1 : ![p.val.1, 1, p.val.2] 1 = 0 := congrFun h 1
     exact one_ne_zero h1),
-   ![p.val.1, 1, p.val.2],
-   (by
+    ![p.val.1, 1, p.val.2],
+    (by
     intro h
     have h1 : ![p.val.1, 1, p.val.2] 1 = 0 := congrFun h 1
     exact one_ne_zero h1),
-   rfl,
-   p.property⟩
+    rfl,
+    p.property⟩
 
 theorem continuous_toPlaneCurveY (H : PlaneCurveData) :
     Continuous (PlaneCurveAffineY.toPlaneCurve H) := by
@@ -397,13 +397,13 @@ noncomputable def PlaneCurveAffineX.toPlaneCurve (H : PlaneCurveData)
     intro h
     have h0 : ![1, p.val.1, p.val.2] 0 = 0 := congrFun h 0
     exact one_ne_zero h0),
-   ![1, p.val.1, p.val.2],
-   (by
+    ![1, p.val.1, p.val.2],
+    (by
     intro h
     have h0 : ![1, p.val.1, p.val.2] 0 = 0 := congrFun h 0
     exact one_ne_zero h0),
-   rfl,
-   p.property⟩
+    rfl,
+    p.property⟩
 
 theorem continuous_toPlaneCurveX (H : PlaneCurveData) :
     Continuous (PlaneCurveAffineX.toPlaneCurve H) := by

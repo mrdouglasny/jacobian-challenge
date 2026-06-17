@@ -391,11 +391,11 @@ theorem fundamentalGroup_fg_of_goodCover (C : SimplyConnectedGoodCover X)
     fun k => γ.subpath (t k.castSucc) (t k.succ) with hF
   have hrangeF : ∀ k : Fin N, range (F k) ⊆ C.U (ch k) := by
     intro k
-    show range (γ.subpath (t k.castSucc) (t k.succ)) ⊆ C.U (ch k)
+    change range (γ.subpath (t k.castSucc) (t k.succ)) ⊆ C.U (ch k)
     rw [Path.range_subpath]
     exact hch k
-  have h0 : q 0 = x₀ := by rw [hq]; show γ (t 0) = x₀; rw [ht0]; exact γ.source
-  have hl : q (last N) = x₀ := by rw [hq]; show γ (t (last N)) = x₀; rw [htl]; exact γ.target
+  have h0 : q 0 = x₀ := by rw [hq]; change γ (t 0) = x₀; rw [ht0]; exact γ.source
+  have hl : q (last N) = x₀ := by rw [hq]; change γ (t (last N)) = x₀; rw [htl]; exact γ.target
   -- junction data: an anchor index, and a detour from the anchor to the
   -- junction, lying in every adjacent chart; the two end junctions use the
   -- basepoint anchor with a constant detour.
@@ -508,7 +508,7 @@ theorem fundamentalGroup_fg_of_goodCover (C : SimplyConnectedGoodCover X)
   have hcconst : ∀ (j : Fin (N + 1)), j = 0 ∨ j = last N → ∀ s : I, (c j) s = x₀ := by
     intro j hj s
     have hEj := hpropEnd j hj
-    show ((C.anchorSpoke x₀ (E j)).trans (d j)) s = x₀
+    change ((C.anchorSpoke x₀ (E j)).trans (d j)) s = x₀
     rw [Path.trans_apply]
     split_ifs
     · exact hspconst j hEj.1 _
@@ -528,7 +528,7 @@ theorem fundamentalGroup_fg_of_goodCover (C : SimplyConnectedGoodCover X)
   -- assemble: the conjugated concatenation is homotopic to `γ` itself
   have hsubγ : γ.subpath (t 0) (t (last N)) = γ.cast h0 hl := by
     ext s
-    show (⇑γ ∘ Icc.convexComb (t 0) (t (last N))) s = γ s
+    change (⇑γ ∘ Icc.convexComb (t 0) (t (last N))) s = γ s
     rw [Function.comp_apply, ht0, htl, Icc.convexComb_zero_one]
   have hcs : (Path.concat q F).Homotopic (γ.subpath (t 0) (t (last N))) :=
     Path.Homotopic.concat_subpath γ t

@@ -272,7 +272,7 @@ trace by preimage clusters (the `m` regular sheets near each ramification preima
 are exactly `clusterSheet (sec ℓ) (ζ ℓ) (w₀ ℓ) j z`, `j < mₗ`, by `exists_clusterSplit` + properness) —
 the genuine multi-hundred-line build, with the per-preimage atoms supplied here. -/
 def RamifiedFullFibreClusterGeometry (ω₀ : HolomorphicOneForms X) (g : X → ℂ)
-    (f : MeromorphicFunction X) (Φ : (b : ℂ) → FibreRegularData g f b) (c : ℂ)
+    (f : MeromorphicFunction X) (Φ : (b : ℂ) → FibreRegularData g f b) (_c : ℂ)
     {r : ℕ} (pre : Fin r → X) (mult : Fin r → ℕ) (ζ : Fin r → ℂ) (S : Set ℂ)
     (w₀ : Fin r → ℂ → ℂ) (sec : Fin r → ℂ → ℂ) : Prop :=
   ∀ z ∈ S, valueChartTrace ω₀ f Φ z = ∑ ℓ : Fin r, ∑ j ∈ Finset.range (mult ℓ),

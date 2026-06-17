@@ -28,6 +28,7 @@ namespace Jacobians.Dolbeault
 variable {X : Type*} [TopologicalSpace X] [T2Space X] [CompactSpace X]
     [ConnectedSpace X] [ChartedSpace ℂ X] [IsManifold 𝓘(ℂ) ω X]
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **The chart transition `chartAt z ∘ (chartAt y).symm` is analytic at `chartAt y x`** for any
 point `x` in the overlap of the two chart sources (generalizes `transition_analyticAt`, which is the
 case `x = z` = chart centre). Chart and inverse-chart are `C^ω`, composition `C^ω`, `C^ω = analytic`. -/
@@ -49,6 +50,7 @@ theorem transition_analyticAt_of_mem {y z x : X}
   exact (contMDiffAt_iff_contDiffAt.1
     (ContMDiffAt.comp (I' := 𝓘(ℂ)) ((chartAt (H := ℂ) y) x) h2 h1)).analyticAt
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **The chart transition `chartAt z ∘ (chartAt y).symm` has nonvanishing derivative at `chartAt y x`**
 for any point `x` in the overlap of the two chart sources.  The transition is a biholomorphism: its
 inverse `chartAt y ∘ (chartAt z).symm` (analytic by `transition_analyticAt_of_mem`) composes with it to
@@ -90,6 +92,7 @@ theorem transition_deriv_ne_zero {y z x : X}
   rw [hcomp_id.deriv_eq, deriv_id, hderiv0, mul_zero] at hchain
   exact one_ne_zero hchain
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **Own-chart → cover-chart analyticity.** If `h` read in its *own* chart at `x` is analytic, then
 `h` read in the cover-chart `y` is analytic at `chartAt y x` (for `x` in that chart's source). The
 reverse of `CechH0.analyticAt_chart_change`, at a general point. -/
@@ -119,7 +122,7 @@ theorem analyticAt_chart_change_to {h : X → ℂ} {y x : X}
     filter_upwards [hmem] with w hw
     simp only [Function.comp_apply, (chartAt (H := ℂ) x).left_inv hw]
   rw [analyticAt_congr heq]; exact hcomp
-
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **The chart-pullback of a holomorphic section is `AnalyticOn` the chart-image.**  If `h` is
 holomorphic on `V ⊆ (chartAt y).source` (analytic in each point's own chart), then `h ∘ (chartAt y).symm`
 is analytic on `(chartAt y) '' V`.  This is the analyticity input to `BddHol.ofAnalyticOn`. -/
@@ -140,6 +143,7 @@ noncomputable def holoSectionToBddHol {y : X} {V : Set X} (hV : V ⊆ (chartAt (
     BddHol U' :=
   BddHol.ofAnalyticOnOfRelCompact (analyticOn_pullback_of_holo hV hh) hsub hcpt
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 @[simp] theorem holoSectionToBddHol_toFun_of_mem {y : X} {V : Set X}
     (hV : V ⊆ (chartAt (H := ℂ) y).source) {h : X → ℂ}
     (hh : ∀ x ∈ V, AnalyticAt ℂ (h ∘ (chartAt (H := ℂ) x).symm) ((chartAt (H := ℂ) x) x))
@@ -148,6 +152,7 @@ noncomputable def holoSectionToBddHol {y : X} {V : Set X} (hV : V ⊆ (chartAt (
     (holoSectionToBddHol hV hh hsub hcpt).toFun z = h ((chartAt (H := ℂ) y).symm z) :=
   BddHol.ofAnalyticOnOfRelCompact_toFun_of_mem _ _ _ hz
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 /-- **Inverse local K-bridge atom.** A bounded holomorphic function on an open chart-image `U'`
 pulls back along a chart to a function that is analytic in each point's own chart, provided the
 chart value lands in `U'`. This is the local analytic input for the `BddHol → OmegaD 0` direction. -/
@@ -227,10 +232,10 @@ noncomputable def bddHolToOmegaDGerm_zero_image {y : X} {V : Opens X}
       ⟨fun x : V => g.toFun ((chartAt (H := ℂ) y) x),
         bddHol_pullback_mem_OmegaD_zero_image (y := y) hV g, rfl⟩⟩
   map_add' g₁ g₂ := by
-    ext x
+    ext
     rfl
   map_smul' c g := by
-    ext x
+    ext
     rfl
 
 /-- **Inverse exact-image K-bridge as a linear map.**  Pulling a `BddHol` function back along the

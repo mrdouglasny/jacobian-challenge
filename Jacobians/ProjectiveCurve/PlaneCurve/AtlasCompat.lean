@@ -131,7 +131,6 @@ theorem affineChartProjY_X_compat_affineChartProjY_X (H : PlaneCurveData)
       change ep (ep.symm y) = y
       exact ep.right_inv hy0)
 
-
 /-- Mixed transition formula in the `z = 1` patch, from project-to-`Y` to
 project-to-`X`. -/
 theorem affineChartProjY_trans_affineChartProjX_apply (H : PlaneCurveData)
@@ -201,7 +200,6 @@ theorem affineChartProjY_compat_affineChartProjX (H : PlaneCurveData)
   refine ContDiffOn.congr ((hsymm.comp hline hmaps).fst) ?_
   intro y hy
   simpa [e] using affineChartProjY_trans_affineChartProjX_apply H p p' hp hp' hy
-
 
 /-- Mixed transition formula in the `z = 1` patch, from project-to-`X` to
 project-to-`Y`. -/

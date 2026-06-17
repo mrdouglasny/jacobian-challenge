@@ -56,7 +56,7 @@ theorem fundamentalGroupMulEquivOfPath_trans {x y z : X} (α : Path x y)
   have hg : g = FundamentalGroup.fromPath (Qmk γ) := hγ.symm
   rw [hg, fundamentalGroupMulEquivOfPath_fromPath,
     fundamentalGroupMulEquivOfPath_fromPath, fundamentalGroupMulEquivOfPath_fromPath]
-  show (Qmk ((α.trans β).symm.trans (γ.trans (α.trans β)))
+  change (Qmk ((α.trans β).symm.trans (γ.trans (α.trans β)))
       : Path.Homotopic.Quotient z z)
     = Qmk (β.symm.trans ((α.symm.trans (γ.trans α)).trans β))
   simp [Path.trans_symm, Path.Homotopic.Quotient.mk_trans,
@@ -68,7 +68,7 @@ theorem fundamentalGroupMulEquivOfPath_refl {x : X} (g : FundamentalGroup X x) :
   obtain ⟨γ, hγ⟩ := Path.Homotopic.Quotient.mk_surjective (FundamentalGroup.toPath g)
   have hg : g = FundamentalGroup.fromPath (Qmk γ) := hγ.symm
   rw [hg, fundamentalGroupMulEquivOfPath_fromPath]
-  show (Qmk ((Path.refl x).symm.trans (γ.trans (Path.refl x)))
+  change (Qmk ((Path.refl x).symm.trans (γ.trans (Path.refl x)))
       : Path.Homotopic.Quotient x x)
     = Qmk γ
   simp [Path.refl_symm, Path.Homotopic.Quotient.mk_trans]
@@ -84,7 +84,7 @@ theorem fundamentalGroupMulEquivOfPath_congr {x y : X} {α α' : Path x y}
     Quotient.sound (Path.Homotopic.symm₂ (Quotient.exact h))
   rw [hg, fundamentalGroupMulEquivOfPath_fromPath,
     fundamentalGroupMulEquivOfPath_fromPath]
-  show FundamentalGroup.fromPath (Qmk (α.symm.trans (γ.trans α)))
+  change FundamentalGroup.fromPath (Qmk (α.symm.trans (γ.trans α)))
     = FundamentalGroup.fromPath (Qmk (α'.symm.trans (γ.trans α')))
   rw [Path.Homotopic.Quotient.mk_trans α.symm (γ.trans α),
     Path.Homotopic.Quotient.mk_trans γ α,
@@ -114,7 +114,7 @@ theorem spokedClass_congr {x₀ y : X} {p p' : Path x₀ y} (γ : Path y y)
     (h : Qmk p = Qmk p') : spokedClass p γ = spokedClass p' γ := by
   have hsymm : Qmk p.symm = Qmk p'.symm :=
     Quotient.sound (Path.Homotopic.symm₂ (Quotient.exact h))
-  show FundamentalGroup.fromPath (Qmk (p.trans (γ.trans p.symm)))
+  change FundamentalGroup.fromPath (Qmk (p.trans (γ.trans p.symm)))
     = FundamentalGroup.fromPath (Qmk (p'.trans (γ.trans p'.symm)))
   rw [Path.Homotopic.Quotient.mk_trans p (γ.trans p.symm),
     Path.Homotopic.Quotient.mk_trans γ p.symm,
@@ -156,7 +156,7 @@ theorem mapOfEq_spokedClass {Y : Type*} [TopologicalSpace Y] (f : C(X, Y))
     {x₀ y : X} (p : Path x₀ y) (γ : Path y y) :
     FundamentalGroup.mapOfEq f rfl (spokedClass p γ)
       = spokedClass (p.map f.continuous) (γ.map f.continuous) := by
-  show FundamentalGroup.mapOfEq f rfl (FundamentalGroup.fromPath
+  change FundamentalGroup.mapOfEq f rfl (FundamentalGroup.fromPath
       (Qmk (p.trans (γ.trans p.symm)))) = _
   rw [FundamentalGroup.mapOfEq_apply, Path.cast_rfl_rfl, Path.map_trans,
     Path.map_trans, ← Path.map_symm]

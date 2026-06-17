@@ -231,7 +231,7 @@ theorem pi1ToLattice_injective : Injective (pi1ToLattice Λ) := by
     have h0 : pathLiftEnd Λ γ₀ = 0 :=
       congr_arg Subtype.val (Multiplicative.ofAdd.injective hq)
     have hcl := loopClass_eq_refl_of_pathLiftEnd_eq_zero Λ γ₀ h0
-    show FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ₀) = 1
+    change FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ₀) = 1
     rw [hcl]
     rfl
   intro g hg
@@ -303,7 +303,7 @@ endpoint. -/
     h1ToLattice Λ (Additive.ofMul (Abelianization.of
         (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ₀))))
       = ⟨pathLiftEnd Λ γ₀, pathLiftEnd_mem Λ γ₀⟩ := by
-  show Multiplicative.toAdd (Abelianization.lift (pi1ToLattice Λ)
+  change Multiplicative.toAdd (Abelianization.lift (pi1ToLattice Λ)
     (Abelianization.of (FundamentalGroup.fromPath (Path.Homotopic.Quotient.mk γ₀)))) = _
   rw [Abelianization.lift_apply_of, pi1ToLattice_fromPath]
   rfl
@@ -329,7 +329,7 @@ theorem h1ToLattice_surjective : Surjective (h1ToLattice Λ) := by
   intro c
   obtain ⟨g, hg⟩ := pi1ToLattice_surjective Λ (Multiplicative.ofAdd c)
   refine ⟨Additive.ofMul (Abelianization.of g), ?_⟩
-  show Multiplicative.toAdd (Abelianization.lift (pi1ToLattice Λ)
+  change Multiplicative.toAdd (Abelianization.lift (pi1ToLattice Λ)
     (Abelianization.of g)) = c
   rw [Abelianization.lift_apply_of, hg]
   rfl

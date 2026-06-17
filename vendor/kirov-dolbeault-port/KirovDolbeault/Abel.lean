@@ -102,7 +102,7 @@ theorem Divisor.deg_single (P : X) (n : ℤ) :
   show Finsupp.degree (Finsupp.single P n) = n
   by_cases hn : n = 0
   · simp [hn]
-  · simp [Finsupp.degree_apply, Finsupp.support_single_ne_zero _ hn,
+  · simp [Finsupp.degree_apply, Finsupp.support_single _ hn,
       Finsupp.single_eq_same]
 
 /-! ### Two-point divisor `P - Q`

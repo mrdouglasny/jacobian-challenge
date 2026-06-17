@@ -15,7 +15,7 @@ No mathematical content was altered.
 import Mathlib.Geometry.Manifold.Complex
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
-import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
+import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.MFDeriv.Defs
@@ -189,14 +189,14 @@ noncomputable def pullbackForm (g : X → Y) (hg : ContMDiff 𝓘(ℂ) 𝓘(ℂ)
   map_add' α₁ α₂ := by
     apply ContMDiffSection.ext
     intro x
-    show ((α₁ + α₂).toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x) =
+    change ((α₁ + α₂).toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x) =
       ((α₁.toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x)) +
         ((α₂.toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x))
     rfl
   map_smul' c α := by
     apply ContMDiffSection.ext
     intro x
-    show ((c • α).toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x) =
+    change ((c • α).toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x) =
       c • (α.toFun (g x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g x)
     rfl
 
@@ -207,7 +207,7 @@ theorem pullbackForm_id : pullbackForm (id : X → X) contMDiff_id =
   ext α
   apply ContMDiffSection.ext
   intro x
-  show (α.toFun x).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) (id : X → X) x) = α.toFun x
+  change (α.toFun x).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) (id : X → X) x) = α.toFun x
   rw [mfderiv_id]
   exact ContinuousLinearMap.comp_id _
 
@@ -221,7 +221,7 @@ theorem pullbackForm_comp (f : X → Y) (hf : ContMDiff 𝓘(ℂ) 𝓘(ℂ) ω f
   ext α
   apply ContMDiffSection.ext
   intro x
-  show (α.toFun ((g ∘ f) x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) (g ∘ f) x) =
+  change (α.toFun ((g ∘ f) x)).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) (g ∘ f) x) =
     ((α.toFun (g (f x))).comp (mfderiv 𝓘(ℂ) 𝓘(ℂ) g (f x))).comp
       (mfderiv 𝓘(ℂ) 𝓘(ℂ) f x)
   rw [mfderiv_comp x (hg.mdifferentiableAt (by decide))
@@ -301,7 +301,7 @@ theorem ambientPsi_id (y : Fin (genus X) → ℂ) :
   unfold ambientPsi
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
-  show (((ambientIso X).symm.toLinearMap.comp
+  change (((ambientIso X).symm.toLinearMap.comp
       ((pullbackForm (id : X → X) contMDiff_id).comp (ambientIso X).toLinearMap)) : _ →ₗ[_] _) y = y
   rw [show (pullbackForm (id : X → X) contMDiff_id) = LinearMap.id from pullbackForm_id]
   simp
@@ -320,7 +320,7 @@ theorem ambientPsi_comp {Z : Type*} [TopologicalSpace Z] [T2Space Z] [CompactSpa
   unfold ambientPsi
   set_option linter.unusedSimpArgs false in
   simp only [dif_pos rfl]
-  show (((ambientIso X).symm.toLinearMap.comp
+  change (((ambientIso X).symm.toLinearMap.comp
       ((pullbackForm (g ∘ f) hgf).comp (ambientIso Z).toLinearMap))) z = _
   rw [pullbackForm_comp f hf g hg hgf]
   simp [LinearMap.comp_apply]
@@ -340,7 +340,8 @@ theorem ambientPhi_id (x : Fin (genus X) → ℂ) :
       = ContinuousLinearMap.id ℂ (Fin (genus X) → ℂ) :=
     ContinuousLinearMap.ext (fun y => ambientPsi_id y)
   unfold ambientPhi
-  rw [show (ambientPsi (X := X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id).toLinearMap
+  rw [show (ambientPsi (X := 
+      X) (Y := X) (gX := genus X) (gY := genus X) id contMDiff_id).toLinearMap
       = LinearMap.id (R := ℂ) (M := Fin (genus X) → ℂ) from by rw [hpsi]; rfl]
   simp [Matrix.transpose_one, Matrix.mulVecLin_one]
 

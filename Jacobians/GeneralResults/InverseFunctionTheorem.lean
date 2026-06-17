@@ -129,4 +129,3 @@ theorem contDiffOn_symm_toOpenPartialHomeomorph_local
   exact e.contDiffAt_symm hy h_deriv_e_x h_cd_e_x
 
 end Jacobians.GeneralResults
-

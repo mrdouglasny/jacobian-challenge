@@ -71,7 +71,7 @@ theorem integrableOn_inv_closedBall (R : ℝ) :
       rw [Set.indicator_of_mem hmem, Set.indicator_of_mem hpB]
       have hne : Complex.polarCoord.symm (r, θ) ≠ 0 := by
         rw [← norm_ne_zero_iff, Complex.norm_polarCoord_symm, abs_of_pos hr]; exact hr.ne'
-      rw [enorm_inv hne, ← ofReal_norm_eq_enorm, Complex.norm_polarCoord_symm, abs_of_pos hr,
+      rw [enorm_inv hne, ← ofReal_norm, Complex.norm_polarCoord_symm, abs_of_pos hr,
         smul_eq_mul, ← ENNReal.ofReal_inv_of_pos hr, ← ENNReal.ofReal_mul hr.le,
         mul_inv_cancel₀ hr.ne', ENNReal.ofReal_one]
     · -- outside the ball: the closedBall indicator vanishes.

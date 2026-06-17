@@ -14,7 +14,7 @@ import Jacobians.RiemannSurface.Cohomology.RiemannRochSpace
 
 namespace Jacobians.RiemannSurface
 
-open scoped Manifold ContDiff Classical
+open scoped Manifold ContDiff
 open Jacobians.Axioms
 open Jacobians.Vendor.Wallace.HolomorphicForms.VanishingOrder
 
@@ -115,14 +115,14 @@ private theorem localTwist_tendsto (f : MeroFunctions X) (p : X) (n : ℕ)
 private theorem localTwist_add (f g : MeroFunctions X) (p : X) (n : ℕ) :
     localTwist (f + g) p n = localTwist f p n + localTwist g p n := by
   funext z
-  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply, Function.comp_apply,
+  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Function.comp_apply,
     Pi.add_apply, Submodule.coe_add]
   ring
 
 private theorem localTwist_smul (c : ℂ) (f : MeroFunctions X) (p : X) (n : ℕ) :
     localTwist (c • f) p n = c • localTwist f p n := by
   funext z
-  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply, Function.comp_apply,
+  simp only [localTwist, Pi.mul_apply, Pi.pow_apply, Function.comp_apply,
     Pi.smul_apply, SetLike.val_smul, smul_eq_mul]
   ring
 
@@ -254,7 +254,8 @@ private theorem localCoeffField_smul (c : ℂ) {F : MeroField X} (p : X) (n : �
       ≤ orderAt p ((c • fieldRep F : MeroFunctions X) : X → ℂ) := by
     by_cases hc : c = 0
     · simp [hc]
-    · rw [SetLike.val_smul, orderAt_const_smul_of_ne_zero hc p ((fieldRep F : MeroFunctions X) : X → ℂ)]
+    · rw [SetLike.val_smul, orderAt_const_smul_of_ne_zero hc p ((fieldRep F : MeroFunctions X)
+      : X → ℂ)]
       exact hbF
   unfold localCoeffField
   rw [localLim_congr p n hdiff hbsmul]
@@ -292,13 +293,12 @@ private theorem coeff_self_add_of (D : Divisor X) (p : X) :
     FreeAbelianGroup.coeff p (D + FreeAbelianGroup.of p) = FreeAbelianGroup.coeff p D + 1 := by
   rw [map_add]
   congr 1
-  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Finsupp.single_apply]
+  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of]
 
 private theorem coeff_ne_add_of (D : Divisor X) {p q : X} (h : q ≠ p) :
     FreeAbelianGroup.coeff q (D + FreeAbelianGroup.of p) = FreeAbelianGroup.coeff q D := by
   rw [map_add]
-  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Finsupp.single_apply,
-    Ne.symm h]
+  simp [FreeAbelianGroup.coeff, FreeAbelianGroup.toFinsupp_of, Ne.symm h]
 
 /-- **The one-point induction step.** Adding a point `p` to an effective divisor
 `D` raises `dim L` by at most one, so `L(D + p)` is finite-dimensional whenever
@@ -315,14 +315,16 @@ theorem finiteDimensional_riemannRochSpace_add_of (D : Divisor X) (p : X)
     · rw [hDp, coeff_ne_add_of D hq]
   -- key integer identity: (coeff_p Dp).toNat = coeff_p D + 1  (D effective)
   have hn : ((FreeAbelianGroup.coeff p Dp).toNat : ℤ) = FreeAbelianGroup.coeff p D + 1 := by
-    have hnn : 0 ≤ FreeAbelianGroup.coeff p Dp := by rw [hDp, coeff_self_add_of]; have := hD p; omega
+    have hnn : 0 ≤ FreeAbelianGroup.coeff p Dp := by
+      rw [hDp, coeff_self_add_of]; have := hD p; omega
     rw [Int.toNat_of_nonneg hnn, hDp, coeff_self_add_of]
   set φ := localCoeffLinear Dp p with hφ
   -- ker φ = the copy of L(D) inside L(Dp)
-  have hker : LinearMap.ker φ = Submodule.comap (riemannRochSpace Dp).subtype (riemannRochSpace D) := by
+  have hker : LinearMap.ker φ = Submodule.comap (riemannRochSpace Dp).subtype (riemannRochSpace
+    D) := by
     ext F
     rw [LinearMap.mem_ker, Submodule.mem_comap, Submodule.coe_subtype]
-    show localCoeffField p (FreeAbelianGroup.coeff p Dp).toNat (F : MeroField X) = 0 ↔
+    change localCoeffField p (FreeAbelianGroup.coeff p Dp).toNat (F : MeroField X) = 0 ↔
       (F : MeroField X) ∈ riemannRochSpace D
     rw [localCoeffField_eq_zero_iff p _ (riemannRochSpace_orderBound F.2 p)]
     have hpeq : ((-((FreeAbelianGroup.coeff p Dp).toNat : ℤ) + 1 : ℤ) : WithTop ℤ)
@@ -361,9 +363,10 @@ private theorem divOfMultiset_cons (p : X) (s : Multiset X) :
 
 private theorem effective_divOfMultiset (s : Multiset X) : Effective (divOfMultiset s) := by
   induction s using Multiset.induction with
-  | empty => simpa using effective_zero
+  | empty => simp [effective_zero]
   | cons p s ih => rw [divOfMultiset_cons]; exact (effective_of p).add ih
 
+open Classical in
 private theorem coeff_divOfMultiset (q : X) (s : Multiset X) :
     FreeAbelianGroup.coeff q (divOfMultiset s) = (s.count q : ℤ) := by
   induction s using Multiset.induction with
@@ -392,10 +395,11 @@ private theorem finiteDimensional_divOfMultiset
 private theorem exists_multiset_ge (D : Divisor X) :
     ∃ s : Multiset X, ∀ q, FreeAbelianGroup.coeff q D
       ≤ FreeAbelianGroup.coeff q (divOfMultiset s) := by
+  classical
   refine ⟨Finsupp.toMultiset
     (Finsupp.mapRange Int.toNat Int.toNat_zero (FreeAbelianGroup.toFinsupp D)), fun q => ?_⟩
   rw [coeff_divOfMultiset, Finsupp.count_toMultiset, Finsupp.mapRange_apply]
-  show FreeAbelianGroup.coeff q D ≤ ((FreeAbelianGroup.toFinsupp D q).toNat : ℤ)
+  change FreeAbelianGroup.coeff q D ≤ ((FreeAbelianGroup.toFinsupp D q).toNat : ℤ)
   rw [show FreeAbelianGroup.coeff q D = FreeAbelianGroup.toFinsupp D q from rfl]
   omega
 

@@ -695,7 +695,7 @@ Pure reciprocal-chart bookkeeping (no monodromy). -/
 `recipSheet i ζ = chart (Dinf.xs i)(inftyManifoldSec i (ζ⁻¹))` (chart∘symm cancellation at the target
 point); the derivative factor's functions agree near `ζ⁻¹` (same cancellation), so equal derivatives. -/
 theorem inftyMovingSumNF_eq_fixedSum (ω₀ : HolomorphicOneForms X) (f : MeromorphicFunction X)
-    (Dinf : InftyFibreDataNF g f) {ζ : ℂ} (hζ : ζ ≠ 0)
+    (Dinf : InftyFibreDataNF g f) {ζ : ℂ} (_hζ : ζ ≠ 0)
     (hmem : ∀ i, (inftyFibreTraceNF ω₀ f Dinf).sheet i ζ ∈ (chartAt ℂ (Dinf.xs i)).target)
     (hmemEv : ∀ i, ∀ᶠ w in 𝓝 (ζ⁻¹),
       (inftyFibreTraceNF ω₀ f Dinf).sheet i (w⁻¹) ∈ (chartAt ℂ (Dinf.xs i)).target) :

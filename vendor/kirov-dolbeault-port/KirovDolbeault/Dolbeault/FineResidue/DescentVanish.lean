@@ -410,7 +410,7 @@ theorem slotProductExtendsAt_vanishFn
     · -- off the K-point: `K v ≤ 0` and the slot read is analytic
       have hvK : K v.1 ≤ 0 := by
         by_contra hpos
-        push_neg at hpos
+        push Not at hpos
         have hvS : v.1 ∈ posSupp K := mem_posSupp_iff.mpr hpos
         have hvT : v.1 ∈ T := Finset.mem_erase.mpr ⟨hva, hvS⟩
         exact v.2.2 hvT

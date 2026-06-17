@@ -196,7 +196,7 @@ theorem alpha_toFun_eq_zero_of_localRep_eq_zero
   have hcomp : (α.toFun y : TangentSpace 𝓘(ℂ, ℂ) y →L[ℂ] ℂ).comp
       (φ.symm : ℂ →L[ℂ] TangentSpace 𝓘(ℂ, ℂ) y) = 0 := by
     apply ContinuousLinearMap.ext_ring
-    show α.toFun y ((φ.symm : ℂ →L[ℂ] TangentSpace 𝓘(ℂ, ℂ) y) 1) = 0
+    change α.toFun y ((φ.symm : ℂ →L[ℂ] TangentSpace 𝓘(ℂ, ℂ) y) 1) = 0
     rw [hφsymm]
     exact h
   have hext : (α.toFun y : TangentSpace 𝓘(ℂ, ℂ) y →L[ℂ] ℂ) =

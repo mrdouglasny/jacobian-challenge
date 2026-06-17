@@ -52,7 +52,6 @@ where the open-mapping theorem and isolated-zeros enter the project.
 set_option linter.style.longLine false
 set_option linter.style.show false
 set_option linter.style.emptyLine false
-set_option linter.flexible false
 set_option linter.unusedSectionVars false
 
 namespace Jacobians.Vendor.Wallace.HolomorphicForms

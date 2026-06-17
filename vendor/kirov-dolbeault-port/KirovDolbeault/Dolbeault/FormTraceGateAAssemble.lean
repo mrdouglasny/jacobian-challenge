@@ -341,7 +341,7 @@ theorem residueSum_eq_zero_of_globalCoverData (hdiv : (f.div : Divisor X) ≠ 0)
     (fun z hz => sregFamily_hsheetInjReg f hdiv cs z hz)
     (fun z hz => sregFamily_hsheetMemReg f hdiv cs z hz)
     hCreg_g (hncF_of_div_ne_zero f hdiv) αBr
-    (fun b₀ hb₀ _ => (mem_branchValues f hdiv).mp hb₀)
+    (fun _b₀ hb₀ _ => (mem_branchValues f hdiv).mp hb₀)
     hαBrAgreeBr hglue_inf hcont_int R₀ hR₀_an hR₀0 hR₀_eq
 
 end Jacobians.Dolbeault.FormTraceGlobal

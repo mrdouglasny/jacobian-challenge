@@ -922,8 +922,6 @@ theorem continuous_toPlaneCurve (H : PlaneCurveData) :
   · exact continuous_subtype_val.snd
   · exact continuous_const
 
-
-
 /-- The subset of points at infinity on the projective curve. -/
 def infinityPoints (H : PlaneCurveData) : Set (PlaneCurve H) :=
   { p | ∃ v : Fin 3 → ℂ, ∃ hv : v ≠ 0, Projectivization.mk ℂ v hv = p.1 ∧ v 2 = 0 }

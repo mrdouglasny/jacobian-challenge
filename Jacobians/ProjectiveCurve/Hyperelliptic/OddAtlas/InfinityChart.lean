@@ -98,7 +98,6 @@ def V (H : HyperellipticData) : Set (HyperellipticAffine H) :=
       (InfinityInverse.tLocalHomeomorph H).source }
 
 -- Topological axioms to bridge the analytic gaps
-
 def D_S (H : HyperellipticData) : Set ℂ :=
   { z : ℂ | H.f.leadingCoeff⁻¹ * H.f.reverse.eval z ∈ InfinityInverse.slitPlane }
 
@@ -825,9 +824,9 @@ theorem continuousAt_infinityInverseMap (H : HyperellipticData) (h : Odd H.f.nat
     exact h1.mul h2
   exact h_x_cont.prodMk h_y_cont
 
-lemma open_source : IsOpen ({ (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H) := by
-  change IsOpen ({ (∞ : OnePoint (HyperellipticAffine H)) } ∪ OnePoint.some '' V H)
-  have h_eq : ({ (∞ : OnePoint (HyperellipticAffine H)) } ∪ OnePoint.some '' V H) =
+lemma open_source : IsOpen ({(∞ : HyperellipticOdd H h)} ∪ @coe H h '' V H) := by
+  change IsOpen ({(∞ : OnePoint (HyperellipticAffine H))} ∪ OnePoint.some '' V H)
+  have h_eq : ({(∞ : OnePoint (HyperellipticAffine H))} ∪ OnePoint.some '' V H) =
     (OnePoint.some '' (V H)ᶜ)ᶜ := by
     ext x
     induction x using OnePoint.rec with
@@ -856,10 +855,10 @@ lemma continuousAt_infinityForward_infty :
   exact OnePoint.continuousAt_infty'.mpr (tendsto_infinityForward_infty H h)
 
 lemma continuousOn_infinityForward :
-    ContinuousOn (infinityForward H h) ({ (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H) := by
+    ContinuousOn (infinityForward H h) ({(∞ : HyperellipticOdd H h)} ∪ @coe H h '' V H) := by
   intro p hp
-  have h_open : IsOpen ({ (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H) := open_source
-  have h_nhds : 𝓝[({ (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H)] p = 𝓝 p := by
+  have h_open : IsOpen ({(∞ : HyperellipticOdd H h)} ∪ @coe H h '' V H) := open_source
+  have h_nhds : 𝓝[({(∞ : HyperellipticOdd H h)} ∪ @coe H h '' V H)] p = 𝓝 p := by
     exact h_open.nhdsWithin_eq hp
   rw [ContinuousWithinAt, h_nhds]
   induction p using OnePoint.rec with
@@ -931,7 +930,7 @@ noncomputable def infinityChart (H : HyperellipticData) (h : Odd H.f.natDegree) 
     OpenPartialHomeomorph (HyperellipticOdd H h) ℂ where
   toFun := infinityForward H h
   invFun := infinityBackward H h
-  source := { (∞ : HyperellipticOdd H h) } ∪ @coe H h '' V H
+  source := {(∞ : HyperellipticOdd H h)} ∪ @coe H h '' V H
   target := (InfinityInverse.tLocalHomeomorph H).target
   map_source' := by
     intro p hp

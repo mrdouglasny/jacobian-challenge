@@ -139,12 +139,11 @@ theorem critical_value_set_finite
         w.toWitness.value ∈ (Cᶜ : Set Y)) := by
   classical
   refine ⟨criticalValuesGeneral f, criticalValues_finite_general f hf hnc, ?_⟩
-  intro w
+  intro w hv_in
   -- Suppose value ∈ criticalValuesGeneral f.  Then value = f x for some
   -- x ∈ criticalSetGeneral f.  By w.is_regular, the chart-pullback deriv
   -- at (chartAt ℂ x) x is nonzero; by the planar→manifold lift this means
   -- f is locally injective at x, contradicting x ∈ criticalSetGeneral f.
-  intro hv_in
   obtain ⟨x, hx_crit, hfx_eq⟩ := hv_in
   -- x ∈ f ⁻¹' {w.toWitness.value}.
   have hx_pre : x ∈ f ⁻¹' {w.toWitness.value} := hfx_eq

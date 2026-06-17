@@ -59,7 +59,7 @@ def basepointPeriodFunctional (x₀ Q : X) :
     fun form =>
       analyticArc_canonicalIntegrand_intervalIntegrable (bridgePathArc x₀ Q) form
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 @[simp]
 theorem basepointPeriodFunctional_apply (x₀ Q : X)
     (form : HolomorphicOneForm X) :
@@ -85,13 +85,13 @@ theorem segmentPeriodFunctional_apply (P : X) {Q : X}
 
 /-! ## The increment loop and the increment identity -/
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 theorem bridge_trans_segment_endpoint (x₀ P : X) {Q : X}
     (hQ : Q ∈ chartBallSource P) :
     (bridgePathArc x₀ P).extend 1 = (chartSegmentArc P hQ).extend 0 := by
   simp [bridgePathArc]
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 theorem bridge_segment_trans_reverse_endpoint (x₀ P : X) {Q : X}
     (hQ : Q ∈ chartBallSource P) :
     ((bridgePathArc x₀ P).trans (chartSegmentArc P hQ)
@@ -111,7 +111,7 @@ def incrementLoop (x₀ P : X) {Q : X} (hQ : Q ∈ chartBallSource P) :
   start_eq := by simp [bridgePathArc]
   end_eq := by simp [bridgePathArc]
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 /-- **Increment identity** (functional level, exact): moving the endpoint of
 the basepoint functional from `P` to a chart-ball neighbour `Q` costs the
 chart-segment functional, up to the period of the closed `incrementLoop`. -/
@@ -155,7 +155,7 @@ theorem basepointPeriodFunctional_increment (x₀ P : X) {Q : X}
   rw [hloop]
   ring
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 /-- The potential increment formula: if `Λ` kills all loop periods at `x₀`,
 then the potential `u = Λ ∘ basepointPeriodFunctional x₀` changes across a
 chart ball exactly by the `Λ`-value of the chart-segment functional. -/
@@ -273,7 +273,7 @@ theorem localPotential_hasDerivAt
   exact HasDerivAt.fun_sum fun j _ =>
     (pathChartBallPrimitive_hasDerivAt (bω j) (potentialChartBall P) z hz).const_mul _
 
-omit [CompactSpace X] in
+omit [T2Space X] [CompactSpace X] in
 /-- **Local formula for the potential.** Under the loop-period hypothesis,
 across the chart ball at `P` the potential `u` is
 `u(P) + Re H_P(chart Q) - Re H_P(chart P)`. -/

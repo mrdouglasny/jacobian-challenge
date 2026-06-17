@@ -250,7 +250,7 @@ structure AnalyticLoop (X : Type*) [TopologicalSpace X] [ChartedSpace ℂ X]
     [IsManifold 𝓘(ℂ) ω X] (x₀ : X) where
   arc : AnalyticArc X
   start_eq : arc.extend 0 = x₀
-  end_eq   : arc.extend 1 = x₀
+  end_eq : arc.extend 1 = x₀
 
 -- TODO (concat): concatenation of two analytic arcs `γ ++ δ` with
 -- matching endpoints. Partition becomes a scaled union. Piecewise-

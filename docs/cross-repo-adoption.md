@@ -148,7 +148,7 @@ the recipe in
 After any re-sync, also re-apply the namespace rewrites and re-check
 the two converted-to-`axiom` declarations.
 
-### 2026-06-16 — warning-cleanup sweep (PR #256, @sqrt-of-2, *open*)
+### 2026-06-16 — warning-cleanup sweep (PR #256, @sqrt-of-2, *merged*)
 
 Verified by an isolated clean build (worktree, exit 0, 9015 jobs): the tree now
 builds with **zero non-`sorry` warnings**. Six `declaration uses sorry` warnings
@@ -161,12 +161,11 @@ Provenance impact (two kinds, treat differently):
   warning-cleaned. Expected — this is the working dependency (already a forward-port,
   not byte-verbatim). Fine.
 - **Non-compiled *verbatim* snapshots** (`vendor/kirov-jacobian-claude/`,
-  `vendor/kirov-jacobian-claude-dolbeault/`, ~20 files): #256 **content-edits** these
-  (e.g. `support_single_ne_zero → support_single`, `SmoothSection → ContMDiffSection`)
-  — i.e. forward-ports them to current Mathlib, *despite their not being built*. This
-  breaks the "preserved verbatim" claim above (line ~55) and the `CLAUDE.md`
-  vendored-material section (owner-protected). **Open decision before merge:**
-  (a) revert the snapshot edits to keep them byte-verbatim (they need not compile), or
-  (b) accept them and re-label those dirs as "forward-ported" here and in `CLAUDE.md`.
-  Until resolved, the line-55 "verbatim" claim is accurate for `main` but would be
-  false post-#256-merge under option (b).
+  `vendor/kirov-jacobian-claude-dolbeault/`, ~20 files): #256 *content-edited* these
+  (e.g. `support_single_ne_zero → support_single`, `SmoothSection → ContMDiffSection`),
+  forward-porting them to current Mathlib despite their not being built — which would
+  have broken the "preserved verbatim" role. **Resolved (option a):** on merge, those
+  20 files (24 line changes) were reverted to their pre-#256 state, so the snapshots
+  stay **byte-verbatim** and the "preserved verbatim" claim above (line ~55) and the
+  `CLAUDE.md` vendored-material section remain accurate. The merge keeps all of #256's
+  compiled-port and own-code warning fixes.

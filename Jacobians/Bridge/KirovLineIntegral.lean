@@ -24,12 +24,17 @@ object. The path-integral bridge has an extra ingredient: ours takes
 path** `γ : ℝ → X`. To compose them we need a **path-selection axiom**:
 
 ```
-axiom bridgePath : (P₀ P : X) → ℝ → X\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
-axiom bridgePath_continuous            : Continuous (bridgePath P₀ P)\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
-axiom bridgePath_chart_differentiable  : ∀ t, DifferentiableAt ℝ\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath : (P₀ P : X) → ℝ → X\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\
+  counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_continuous            : Continuous (bridgePath P₀ P)\ \-\-\ not\-an\-axiom\
+  \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_chart_differentiable  : ∀ t, DifferentiableAt ℝ\ \-\-\ not\-an\-axiom\ \(doc\
+  text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
                                           (chartAt _ ∘ bridgePath P₀ P) t
-axiom bridgePath_at_zero               : bridgePath P₀ P 0 = P₀\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
-axiom bridgePath_at_one                : bridgePath P₀ P 1 = P\ \-\-\ not\-an\-axiom\ \(doc\ text\,\ ignore\ in\ counts\) -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_at_zero               : bridgePath P₀ P 0
+    = P₀ -- not-an-axiom (doc text, ignore in counts)
+axiom bridgePath_at_one                : bridgePath P₀ P 1
+    = P -- not-an-axiom (doc text, ignore in counts)
 ```
 
 The chart-local smoothness hypothesis matches Kirov's `lineIntegral`
@@ -157,14 +162,17 @@ a connected (locally-)path-connected complex 1-manifold they all hold
 (by `PathConnectedSpace.somePath` + smoothing); we declare them
 abstractly here and discharge them in a follow-up. -/
 
+omit [T2Space X] [CompactSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- A chosen smooth path from `P₀` to `P` in `X`. -/
 noncomputable def bridgePath (P₀ P : X) : ℝ → X :=
   bridgePathImpl P₀ P
 
+omit [T2Space X] [CompactSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- The chosen path is continuous. -/
 theorem bridgePath_continuous (P₀ P : X) : Continuous (bridgePath (X := X) P₀ P) := by
   simpa only [bridgePath] using bridgePathImpl_continuous (X := X) P₀ P
 
+omit [CompactSpace X] in
 /-- The chosen path is `C¹` in chart pullbacks at every `t`.
 
 This is the chart-local smoothness hypothesis used throughout
@@ -185,10 +193,12 @@ theorem bridgePath_chart_differentiable (P₀ P : X) (t : ℝ) :
   simpa only [bridgePath] using
     bridgePathImpl_chart_differentiableAt (X := X) P₀ P t
 
+omit [T2Space X] [CompactSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- The chosen path starts at `P₀`. -/
 theorem bridgePath_at_zero (P₀ P : X) : bridgePath (X := X) P₀ P 0 = P₀ := by
   simpa only [bridgePath] using bridgePathImpl_at_zero (X := X) P₀ P
 
+omit [T2Space X] [CompactSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- The chosen path ends at `P`. -/
 theorem bridgePath_at_one (P₀ P : X) : bridgePath (X := X) P₀ P 1 = P := by
   simpa only [bridgePath] using bridgePathImpl_at_one (X := X) P₀ P
@@ -364,7 +374,7 @@ theorem chartFlatPath_lineIntegrable (n : ℕ) (form : HolomorphicOneForm X) :
 
 end PathChartBallSubdivision
 
-omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] [ChartedSpace ℂ X] in
 lemma pathTrans_extend_eq_kirov_concat
     {x y z : X} (γ₁ : Path x y) (γ₂ : Path y z) :
     (fun t : ℝ => (γ₁.trans γ₂).extend t) =
@@ -560,15 +570,18 @@ Used inside the proof of `kirovBackedFunctional_local_antiderivative`
 once we connect `bridgePath` to a chart-line concatenation near each
 endpoint. -/
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- The straight line in chart coordinates from `(extChartAt P) P` to `z`,
 pulled back through `(extChartAt P).symm`. -/
 noncomputable def chartLine (P : X) (z : ℂ) : ℝ → X :=
   fun t => (extChartAt 𝓘(ℂ, ℂ) P).symm ((1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z)
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 @[simp] theorem chartLine_at_zero (P : X) (z : ℂ) :
     chartLine (X := X) P z 0 = P := by
   simp [chartLine]
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 @[simp] theorem chartLine_at_one (P : X) (z : ℂ) :
     chartLine (X := X) P z 1 = (extChartAt 𝓘(ℂ, ℂ) P).symm z := by
   simp [chartLine]
@@ -591,6 +604,7 @@ The `chartLine_FTC` proof factors through six small lemmas:
 * `chartLine_FTC` — `intervalIntegral.integral_hasDerivAt_right` plus
   continuity of `form.coeff P` (from `IsHolomorphicOneFormCoeff`). -/
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 /-- Chart image of the chart-line: an affine line in ℂ from
 `(extChartAt P) P` to `z`, parameterized by `t ∈ [0, 1]`. -/
 theorem extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
@@ -665,6 +679,7 @@ private lemma chartLine_current_chart_differentiableAt (P : X) (z : ℂ) {t : �
   simpa [chartLine, y, w, extChartAt_coe, modelWithCornersSelf_coe,
     Function.comp_def] using hcomp
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] [IsManifold 𝓘(ℂ, ℂ) ω X] in
 private lemma pathSpeed_extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
     (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
       (extChartAt 𝓘(ℂ, ℂ) P).target) :
@@ -700,6 +715,7 @@ private lemma pathSpeed_extChartAt_chartLine (P : X) (z : ℂ) {t : ℝ}
   simpa [a] using
     (congrArg (fun L : ℝ →L[ℝ] ℂ => L (1 : ℝ)) heq.fderiv_eq).trans hder
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 private lemma mfderiv_extChartAt_pathSpeed_chartLine [Nonempty X]
     (P : X) (z : ℂ) {t : ℝ}
     (hz : (1 - t) • (extChartAt 𝓘(ℂ, ℂ) P) P + t • z ∈
@@ -814,6 +830,7 @@ private lemma hasDerivAt_mul_sub_of_continuousAt {f : ℂ → ℂ} {a : ℂ}
     exact slope_sub_smul f hne
   exact Tendsto.congr' hslope.symm (hf.tendsto.mono_left nhdsWithin_le_nhds)
 
+omit [T2Space X] [CompactSpace X] [ConnectedSpace X] in
 lemma chartLine_average_coeff_continuousAt
     (P : X) (form : HolomorphicOneForm X) :
     ContinuousAt

@@ -279,7 +279,7 @@ noncomputable def polynomialLocalHomeomorph (p : HyperellipticAffine H)
   have hc : c ≠ 0 := hp
   let e' : ℂ ≃L[ℂ] ℂ := ContinuousLinearEquiv.smulLeft (Units.mk0 c hc)
   have hmap : ((e' : ℂ →L[ℂ] ℂ)) = ContinuousLinearMap.toSpanSingleton ℂ c := by
-    ext z
+    ext
     simp [e', c, ContinuousLinearMap.toSpanSingleton_apply, mul_comm]
   have hf : HasFDerivAt (fun x : ℂ => H.f.eval x) (e' : ℂ →L[ℂ] ℂ) p.val.1 := by
     simpa [hmap] using (Polynomial.hasDerivAt H.f p.val.1).hasFDerivAt
@@ -323,7 +323,7 @@ noncomputable def affineChartProjY (p : HyperellipticAffine H)
             have hy : q.val.2 ∈ target := by
               change q.val.2 ^ 2 ∈ e.target
               simpa [source, e, q.property] using e.map_source hq
-            simp [invFun, hy]
+            simp only [invFun, hy]
             apply Subtype.ext
             have hx : e.symm (q.val.2 ^ 2) = q.val.1 := by
               simpa [e, q.property] using e.left_inv hq
@@ -386,7 +386,7 @@ theorem affineChartProjY_mem_source (p : HyperellipticAffine H)
   let e' : ℂ ≃L[ℂ] ℂ := ContinuousLinearEquiv.smulLeft (Units.mk0 c hc)
   have hf : HasFDerivAt (fun x : ℂ => H.f.eval x) (e' : ℂ →L[ℂ] ℂ) p.val.1 := by
     convert (Polynomial.hasDerivAt H.f p.val.1).hasFDerivAt using 1
-    ext z
+    ext
     simp [e', c, ContinuousLinearMap.toSpanSingleton_apply, mul_comm]
   exact ContDiffAt.mem_toOpenPartialHomeomorph_source
     ((Polynomial.contDiff_aeval H.f ω).contDiffAt) (hf' := hf) (hn := by simp)
@@ -444,7 +444,8 @@ noncomputable instance affine_chartedSpace (H : HyperellipticData) :
     · rw [affineChartAt_of_mem_smoothLocusY (H := H) p hpY]
       exact affineChartProjX_mem_source p hpY
     · rw [affineChartAt_of_not_mem_smoothLocusY (H := H) p hpY]
-      exact affineChartProjY_mem_source p (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY))
+      exact affineChartProjY_mem_source p (mem_smoothLocusX_of_y_eq_zero H (by simpa
+        [smoothLocusY] using hpY))
   chart_mem_atlas p := ⟨p, rfl⟩
 
 /-- Remaining OA1 compatibility boundary: `x`-chart followed by `x`-chart. -/
@@ -597,16 +598,28 @@ theorem affineChartAt_compat (p q : HyperellipticAffine H) :
       (((affineChartAt (H := H) p).symm.trans (affineChartAt (H := H) q)).source) := by
   by_cases hpY : p ∈ smoothLocusY H
   · by_cases hqY : q ∈ smoothLocusY H
-    · simp [affineChartAt, hpY, hqY]
+    · simp only [affineChartAt, hpY, hqY,
+        OpenPartialHomeomorph.coe_trans, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm]
       exact affineChartProjX_compat_affineChartProjX p q hpY hqY
-    · simp [affineChartAt, hpY, hqY]
+    · simp only [affineChartAt, hpY, hqY,
+        OpenPartialHomeomorph.coe_trans, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm]
       exact affineChartProjX_compat_affineChartProjY p q hpY
         (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hqY))
   · by_cases hqY : q ∈ smoothLocusY H
-    · simp [affineChartAt, hpY, hqY]
+    · simp only [affineChartAt, hpY, hqY,
+        OpenPartialHomeomorph.coe_trans, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm]
       exact affineChartProjY_compat_affineChartProjX p q
         (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY)) hqY
-    · simp [affineChartAt, hpY, hqY]
+    · simp only [affineChartAt, hpY, hqY,
+        OpenPartialHomeomorph.coe_trans, OpenPartialHomeomorph.trans_toPartialEquiv,
+        OpenPartialHomeomorph.symm_toPartialEquiv, PartialEquiv.trans_source,
+        PartialEquiv.symm_source, OpenPartialHomeomorph.coe_coe_symm]
       exact affineChartProjY_compat_affineChartProjY p q
         (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hpY))
         (mem_smoothLocusX_of_y_eq_zero H (by simpa [smoothLocusY] using hqY))

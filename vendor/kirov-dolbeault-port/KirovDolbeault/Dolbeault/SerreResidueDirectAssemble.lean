@@ -291,7 +291,7 @@ noncomputable def poleValueEnum (f : MeromorphicFunction X) (poles : Finset X) :
 
 theorem poleValueEnum_injective (f : MeromorphicFunction X) (poles : Finset X) :
     Function.Injective (poleValueEnum f poles) :=
-  fun i j h => (poleValues f poles).equivFin.symm.injective (Subtype.ext h)
+  fun _i _j h => (poleValues f poles).equivFin.symm.injective (Subtype.ext h)
 
 /-- `univ.image (poleValueEnum) = poleValues` (the enumeration is a bijection onto the pole-value set). -/
 theorem image_poleValueEnum (f : MeromorphicFunction X) (poles : Finset X) :
@@ -498,7 +498,7 @@ noncomputable def directTraceGeometry_ofAdaptedSimpleInfty
     (inftyFibreDataNF_full g f hsimpleInf hmeroInf)
     (inftyFibreEnum_injective f)
     (fun k => inftyFibreEnum_mem f k)
-    (fun a _ha hfa => inftyFibreEnum_surj f hfa)
+    (fun _a _ha hfa => inftyFibreEnum_surj f hfa)
     hnonpole_inf_an hreg hbnd hcont_int R₀ hR₀_an hR₀0 hR₀_eq hcoh_full
 
 /-! ## The canonical-selection enumeration discharge (`hΦ_inj`/`hΦ_mem`/`hΦ_surj`)

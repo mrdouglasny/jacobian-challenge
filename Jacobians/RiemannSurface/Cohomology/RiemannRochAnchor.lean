@@ -56,4 +56,3 @@ theorem serre_anchor :
   sorry
 
 end Jacobians.RiemannSurface
-

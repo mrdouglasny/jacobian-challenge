@@ -56,9 +56,8 @@ private theorem exists_chartRadius :
       y ∈ Metric.ball (0 : V) r →
       x - y ∈ (L.toAddSubgroup : Set V) →
       x = y := by
-  have hzeroOpen : IsOpen ({(0 : L)} : Set L) := by
-    simp [(discreteTopology_iff_isOpen_singleton_zero (G := L)).mp
-      (inferInstance : DiscreteTopology L)]
+  have hzeroOpen : IsOpen ({(0 : L)} : Set L) :=
+    (discreteTopology_iff_isOpen_singleton_zero (G := L)).mp (inferInstance : DiscreteTopology L)
   rcases (isOpen_induced_iff.mp hzeroOpen) with ⟨W, hWopen, hWpre⟩
   have h0W : (0 : V) ∈ W := by
     have : (0 : L) ∈ ((↑) : L → V) ⁻¹' W := by
@@ -87,9 +86,11 @@ private theorem exists_chartRadius :
 private noncomputable def chartRadius : ℝ :=
   Classical.choose (exists_chartRadius (L := L))
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma chartRadius_pos : 0 < chartRadius (L := L) :=
   (Classical.choose_spec (exists_chartRadius (L := L))).1
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma chartRadius_inj {x y : V}
     (hx : x ∈ Metric.ball (0 : V) (chartRadius (L := L)))
     (hy : y ∈ Metric.ball (0 : V) (chartRadius (L := L)))
@@ -108,16 +109,19 @@ private lemma liftPoint_spec (p : ComplexTorus V L) :
 private noncomputable def chartTarget (p : ComplexTorus V L) : Set V :=
   (fun u : V => liftPoint (L := L) p + u) '' Metric.ball (0 : V) (chartRadius (L := L))
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma isOpen_chartTarget (p : ComplexTorus V L) : IsOpen (chartTarget (L := L) p) := by
   dsimp [chartTarget]
   exact (Homeomorph.addLeft (liftPoint (L := L) p)).isOpenMap
     (Metric.ball (0 : V) (chartRadius (L := L))) Metric.isOpen_ball
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma liftPoint_mem_chartTarget (p : ComplexTorus V L) :
     liftPoint (L := L) p ∈ chartTarget (L := L) p := by
-  refine ⟨0, ?_, by simp [chartTarget]⟩
+  refine ⟨0, ?_, by simp only [add_zero]⟩
   simp [Metric.mem_ball, chartRadius_pos]
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma quotient_mk_injOn_chartTarget (p : ComplexTorus V L) :
     Set.InjOn (QuotientAddGroup.mk' L.toAddSubgroup) (chartTarget (L := L) p) := by
   intro x hx y hy hxy
@@ -133,7 +137,7 @@ private lemma quotient_mk_injOn_chartTarget (p : ComplexTorus V L) :
     simpa [sub_eq_add_neg] using AddSubgroup.neg_mem L.toAddSubgroup hvu
   have hEq : u = v := chartRadius_inj (L := L) hu hv <| by
     simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using huv
-  simpa [hEq]
+  simp [hEq]
 
 private noncomputable def quotientBranch (p : ComplexTorus V L) :
     OpenPartialHomeomorph V (ComplexTorus V L) :=
@@ -144,10 +148,12 @@ private noncomputable def quotientBranch (p : ComplexTorus V L) :
     (by simpa using (QuotientAddGroup.isOpenMap_coe (N := L.toAddSubgroup)))
     (isOpen_chartTarget (L := L) p)
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma quotientBranch_apply (p : ComplexTorus V L) (x : V) :
     quotientBranch (L := L) p x = QuotientAddGroup.mk' L.toAddSubgroup x :=
   rfl
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma chart_apply_mk (p : ComplexTorus V L) {x : V}
     (hx : x ∈ chartTarget (L := L) p) :
     (quotientBranch (L := L) p).symm (QuotientAddGroup.mk' L.toAddSubgroup x) = x := by
@@ -161,6 +167,7 @@ noncomputable instance : ChartedSpace V (ComplexTorus V L) where
     exact ⟨liftPoint (L := L) p, liftPoint_mem_chartTarget (L := L) p, liftPoint_spec (L := L) p⟩
   chart_mem_atlas p := ⟨p, rfl⟩
 
+omit [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 /-- The inverse of a standard complex-torus chart is the quotient map on its
 target. -/
 theorem extChartAt_symm_eq_quotient_mk (p : ComplexTorus V L) {z : V}
@@ -232,6 +239,7 @@ noncomputable instance : IsManifold 𝓘(ℂ, V) ω (ComplexTorus V L) := by
                     simp [Function.comp, quotientBranch_apply, hqt]
           _ = t + c := chart_apply_mk (L := L) q htc)
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [DiscreteTopology ↥L] [IsZLattice ℝ L] in
 private lemma liftPoint_add_const_mem (p q : ComplexTorus V L) :
     liftPoint (L := L) (p + q) - (liftPoint (L := L) p + liftPoint (L := L) q) ∈
       (L.toAddSubgroup : Set V) := by
@@ -246,6 +254,7 @@ private lemma liftPoint_add_const_mem (p q : ComplexTorus V L) :
     QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hq.symm)
   simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
 
+omit [NormedSpace ℂ V] [FiniteDimensional ℂ V] [DiscreteTopology ↥L] [IsZLattice ℝ L] in
 private lemma liftPoint_neg_const_mem (p : ComplexTorus V L) :
     liftPoint (L := L) (-p) + liftPoint (L := L) p ∈ (L.toAddSubgroup : Set V) := by
   have hq :
@@ -258,6 +267,7 @@ private lemma liftPoint_neg_const_mem (p : ComplexTorus V L) :
     QuotientAddGroup.leftRel_apply.mp (Quotient.exact' hq.symm)
   simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using this
 
+omit [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 /-- Membership in the target of a complex-torus extended chart is membership in
 the corresponding standard quotient-chart target. -/
 theorem mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
@@ -266,6 +276,7 @@ theorem mem_extChartAt_target_iff (p : ComplexTorus V L) {z : V} :
   simpa [modelWithCornersSelf_coe_symm] using
     (show z ∈ (chartAt V p).target ↔ z ∈ chartTarget (L := L) p from Iff.rfl)
 
+omit [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma extChartAt_apply_quotient_mk (p : ComplexTorus V L) {z : V}
     (hz : z ∈ chartTarget (L := L) p) :
     extChartAt 𝓘(ℂ, V) p (QuotientAddGroup.mk' L.toAddSubgroup z) = z := by
@@ -639,6 +650,7 @@ theorem exists_lift_of_chart_path {L : Submodule ℤ ℂ}
   · intro t
     exact (h_point t (hg_diff t)).2
 
+omit [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × V} :
     z ∈ (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).target ↔
       z.1 ∈ chartTarget (L := L) p ∧ z.2 ∈ chartTarget (L := L) q := by
@@ -646,9 +658,10 @@ private lemma mem_extChartAt_prod_target_iff (p q : ComplexTorus V L) {z : V × 
   constructor <;> intro hz <;>
     simpa [PartialEquiv.prod_target, mem_extChartAt_target_iff] using hz
 
+omit [FiniteDimensional ℂ V] [IsZLattice ℝ L] in
 private lemma extChartAt_prod_symm_eq_pair_quotient_mk
     (p q : ComplexTorus V L) {z : V × V}
-    (hz₁ : z.1 ∈ chartTarget (L := L) p) (hz₂ : z.2 ∈ chartTarget (L := L) q) :
+    (_hz₁ : z.1 ∈ chartTarget (L := L) p) (_hz₂ : z.2 ∈ chartTarget (L := L) q) :
     (extChartAt (𝓘(ℂ, V).prod 𝓘(ℂ, V)) (p, q)).symm z =
       (QuotientAddGroup.mk' L.toAddSubgroup z.1,
         QuotientAddGroup.mk' L.toAddSubgroup z.2) := by
@@ -656,7 +669,6 @@ private lemma extChartAt_prod_symm_eq_pair_quotient_mk
   change ((quotientBranch (L := L) p) z.1, (quotientBranch (L := L) q) z.2) =
     (QuotientAddGroup.mk' L.toAddSubgroup z.1, QuotientAddGroup.mk' L.toAddSubgroup z.2)
   rfl
-
 
 -- TODO (LieAddGroup): Codex had the addition/negation charts set up but the
 -- simp/simpa rewrites for product-chart `extChartAt` and negation-chart `symm`

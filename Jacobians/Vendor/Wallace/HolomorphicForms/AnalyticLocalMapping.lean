@@ -35,7 +35,6 @@ open Set Filter
 set_option linter.style.longLine false
 set_option linter.style.show false
 set_option linter.style.emptyLine false
-set_option linter.flexible false
 set_option linter.unusedSectionVars false
 
 namespace Jacobians.Vendor.Wallace.HolomorphicForms.AnalyticLocalMapping
@@ -46,7 +45,7 @@ theorem card_roots_pow_eq (k : ℕ) (hk : 0 < k) (w : ℂ) (hw : w ≠ 0) :
     ∃ S : Finset ℂ, S.card = k ∧
     (∀ t ∈ S, t ^ k = w) ∧
     (∀ t, t ^ k = w → t ∈ S) := by
-  refine' ⟨ ( Polynomial.map ( algebraMap ℂ ℂ ) ( Polynomial.X ^ k - Polynomial.C w ) |> Polynomial.roots |> Multiset.toFinset ), _, _, _ ⟩;
+  refine ⟨ ( Polynomial.map ( algebraMap ℂ ℂ ) ( Polynomial.X ^ k - Polynomial.C w ) |> Polynomial.roots |> Multiset.toFinset ), ?_, ?_, ?_ ⟩;
   · nontriviality;
     rw [ Multiset.toFinset_card_of_nodup ] <;> norm_num;
     · rw [ ← Polynomial.Splits.natDegree_eq_card_roots ];
@@ -54,9 +53,32 @@ theorem card_roots_pow_eq (k : ℕ) (hk : 0 < k) (w : ℂ) (hw : w ≠ 0) :
       · exact IsAlgClosed.splits (Polynomial.X ^ k - Polynomial.C w);
     · have := Polynomial.separable_X_pow_sub_C w ( Nat.cast_ne_zero.mpr hk.ne' ) hw;
       exact Polynomial.nodup_roots this;
-  · simp +contextual [ sub_eq_zero ];
-  · simp +contextual [ sub_eq_zero ];
-    exact fun t ht => ne_of_apply_ne Polynomial.natDegree <| by rw [ Polynomial.natDegree_X_pow, Polynomial.natDegree_C ] ; aesop;
+  · intro t ht
+    rw [Multiset.mem_toFinset] at ht
+    have h_ne : Polynomial.map (algebraMap ℂ ℂ) (Polynomial.X ^ k - Polynomial.C w) ≠ 0 := by
+      rw [Algebra.algebraMap_self, Polynomial.map_id]
+      intro h
+      have h_deg : (Polynomial.X ^ k - Polynomial.C w).natDegree = 0 := by
+        rw [h, Polynomial.natDegree_zero]
+      rw [Polynomial.natDegree_X_pow_sub_C] at h_deg
+      omega
+    rw [Polynomial.mem_roots h_ne] at ht
+    rw [Polynomial.IsRoot.def, Algebra.algebraMap_self, Polynomial.map_id, Polynomial.eval_sub, Polynomial.eval_pow,
+      Polynomial.eval_X, Polynomial.eval_C] at ht
+    exact sub_eq_zero.mp ht
+  · intro t ht
+    rw [Multiset.mem_toFinset]
+    have h_ne : Polynomial.map (algebraMap ℂ ℂ) (Polynomial.X ^ k - Polynomial.C w) ≠ 0 := by
+      rw [Algebra.algebraMap_self, Polynomial.map_id]
+      intro h
+      have h_deg : (Polynomial.X ^ k - Polynomial.C w).natDegree = 0 := by
+        rw [h, Polynomial.natDegree_zero]
+      rw [Polynomial.natDegree_X_pow_sub_C] at h_deg
+      omega
+    rw [Polynomial.mem_roots h_ne]
+    rw [Polynomial.IsRoot.def, Algebra.algebraMap_self, Polynomial.map_id, Polynomial.eval_sub, Polynomial.eval_pow,
+      Polynomial.eval_X, Polynomial.eval_C]
+    rw [ht, sub_self]
 
 /-
 All k-th roots of w lie in the ball of radius ‖w‖^(1/k) + 1.
@@ -82,23 +104,30 @@ theorem analyticAt_kthRoot (k : ℕ) (hk : 0 < k) (u : ℂ → ℂ) (z₀ : ℂ)
     ∃ v : ℂ → ℂ, AnalyticAt ℂ v z₀ ∧ v z₀ ≠ 0 ∧
     ∀ᶠ z in 𝓝 z₀, v z ^ k = u z := by
   by_cases hsl : u z₀ ∈ Complex.slitPlane;
-  · refine' ⟨ _, _, _, _ ⟩;
-    exact fun z => u z ^ ( 1 / k : ℂ );
+  · refine ⟨fun z => u z ^ ( 1 / k : ℂ ), ?_, ?_, ?_⟩;
     · apply_rules [ AnalyticAt.cpow, hu ];
       exact analyticAt_const;
     · aesop;
     · filter_upwards [ hu.continuousAt.eventually_mem ( Complex.isOpen_slitPlane.mem_nhds hsl ) ] with z hz using by rw [ ← Complex.cpow_nat_mul, mul_comm ] ; norm_num [ hk.ne' ] ;
   · have h_neg_slit : -u z₀ ∈ Complex.slitPlane := by
-      simp_all [ Complex.slitPlane ];
-      exact lt_of_le_of_ne hsl.1 fun h => hu0 <| by simp [ Complex.ext_iff, h, hsl.2 ] ;
+      rw [Complex.mem_slitPlane_iff] at hsl ⊢
+      push Not at hsl
+      simp only [Complex.neg_re, neg_pos]
+      have : (u z₀).re ≠ 0 := by
+        intro h
+        apply hu0
+        apply Complex.ext
+        · exact h
+        · exact hsl.2
+      exact Or.inl (lt_of_le_of_ne hsl.1 this)
     obtain ⟨ω, hω⟩ : ∃ ω : ℂ, ω ^ k = -1 := by
       exact ⟨ ( -1 : ℂ ) ^ ( 1 / k : ℂ ), by rw [ ← Complex.cpow_nat_mul, mul_one_div_cancel ( Nat.cast_ne_zero.mpr hk.ne' ), Complex.cpow_one ] ⟩;
-    refine' ⟨ fun z => ω * ( -u z ) ^ ( 1 / k : ℂ ), _, _, _ ⟩ <;> simp_all;
+    refine ⟨ fun z => ω * ( -u z ) ^ ( 1 / k : ℂ ), ?_, ?_, ?_ ⟩
     · apply_rules [ AnalyticAt.mul, AnalyticAt.cpow, analyticAt_id, analyticAt_const ];
       exact hu.neg;
     · cases k <;> aesop;
-    · filter_upwards [ hu.continuousAt.eventually ( Metric.ball_mem_nhds _ <| show 0 < ‖u z₀‖ by aesop ) ] with z hz ; simp_all [ mul_pow, ← Complex.cpow_nat_mul ];
-      norm_num [ hk.ne' ]
+    · filter_upwards [ hu.continuousAt.eventually ( Metric.ball_mem_nhds _ <| show 0 < ‖u z₀‖ by aesop ) ] with z hz ;
+      simp only [mul_pow, ← Complex.cpow_nat_mul, hω, neg_mul, one_mul] ; norm_num [ hk.ne' ]
 
 /-! ### Local normal form φ(z)^k -/
 
@@ -111,7 +140,7 @@ theorem exists_local_power_form (g : ℂ → ℂ) (z₀ : ℂ) (k : ℕ) (hk : 0
   obtain ⟨u, hu_analytic, hu_zero, hu_eq⟩ : ∃ u : ℂ → ℂ, AnalyticAt ℂ u z₀ ∧ u z₀ ≠ 0 ∧ ∀ᶠ z in nhds z₀, g z = (z - z₀)^k * u z := by
     convert AnalyticAt.analyticOrderNatAt_eq_iff hg hord_ne_top |>.1 hord;
   obtain ⟨ v, hv_analytic, hv_zero, hv_eq ⟩ := analyticAt_kthRoot k hk u z₀ hu_analytic hu_zero;
-  refine' ⟨ fun z => ( z - z₀ ) * v z, _, _, _, _ ⟩;
+  refine ⟨ fun z => ( z - z₀ ) * v z, ?_, ?_, ?_, ?_ ⟩;
   · fun_prop;
   · grind +splitImp;
   · norm_num [ hv_analytic.differentiableAt, hv_zero ];
@@ -146,8 +175,15 @@ theorem exists_local_biholomorphism_strong (φ : ℂ → ℂ) (z₀ : ℂ)
       have := h_inv.isLittleO.tendsto_div_nhds_zero
       generalize_proofs at *;
       have := Metric.tendsto_nhds_nhds.1 this ( ‖deriv φ z₀‖ ) ( by simpa using hφ' );
-      obtain ⟨ δ, δ_pos, H ⟩ := this; use Metric.ball z₀ δ ∩ U; simp_all [ dist_eq_norm, InjOn ] ;
-      exact ⟨ IsOpen.inter ( Metric.isOpen_ball ) hU.1, fun x₁ hx₁ hx₁' x₂ hx₂ hx₂' h => Classical.not_not.1 fun hx => absurd ( H x₁ x₂ hx₁ hx₂ ) ( by simp [ *, sub_eq_iff_eq_add ] ) ⟩
+      obtain ⟨ δ, δ_pos, H ⟩ := this; use Metric.ball z₀ δ ∩ U;
+      simp only [Prod.forall, Prod.dist_eq, max_lt_iff, and_imp] at H
+      refine ⟨ IsOpen.inter ( Metric.isOpen_ball ) hU.1, ⟨by simp [δ_pos], hU.2.1⟩, Set.inter_subset_right, fun x₁ hx₁ x₂ hx₂ h => Classical.not_not.1 fun hx => ?_ ⟩
+      have h_ne : ‖x₁ - x₂‖ ≠ 0 := by
+        rw [ne_eq, norm_eq_zero, sub_eq_zero]
+        exact hx
+      have h_lt : dist ((φ x₁ - φ x₂ - (fderiv ℂ φ z₀) (x₁ - x₂)) / (x₁ - x₂)) 0 = ‖deriv φ z₀‖ := by
+        simp [h, h_ne]
+      exact lt_irrefl _ (h_lt ▸ H x₁ x₂ hx₁.1 hx₂.1)
     generalize_proofs at *;
     exact ⟨ h_inj.choose, h_inj.choose_spec.1, h_inj.choose_spec.2.1, h_inj.choose_spec.2.2.2, fun z hz => hU.2.2.1 z ( h_inj.choose_spec.2.2.1 hz ), fun z hz => hU.2.2.2 z ( h_inj.choose_spec.2.2.1 hz ) ⟩;
   -- Since $\varphi$ is a diffeomorphism from $U$ to $\varphi(U)$, $\varphi(U)$ is open.
@@ -157,7 +193,7 @@ theorem exists_local_biholomorphism_strong (φ : ℂ → ℂ) (z₀ : ℂ)
       have h_image_open : AnalyticAt ℂ φ z ∧ deriv φ z ≠ 0 := by
         aesop;
       have := h_image_open.1.eventually_constant_or_nhds_le_map_nhds;
-      cases' this with h h;
+      rcases this with h | h;
       · exact False.elim <| h_image_open.2 <| HasDerivAt.deriv <| HasDerivAt.congr_of_eventuallyEq ( hasDerivAt_const _ _ ) h;
       · rw [ Filter.le_map_iff ] at h;
         exact Metric.mem_nhds_iff.mp ( h U ( hU_open.mem_nhds hz ) );
@@ -176,30 +212,48 @@ theorem analyticOrderNatAt_pow_sub_at_simple_root
     (hφ : AnalyticAt ℂ φ z') (hφ' : deriv φ z' ≠ 0)
     (hroot : φ z' ^ k = w) (hw : w ≠ 0) :
     analyticOrderNatAt (fun z => φ z ^ k - w) z' = 1 := by
+  have hg_nz : (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' ≠ 0 := by
+    dsimp
+    have h_pow : ∀ i ∈ Finset.range k, φ z' ^ i * φ z' ^ (k - 1 - i) = φ z' ^ (k - 1) := by
+      intro i hi
+      rw [← pow_add]
+      congr 1
+      exact add_tsub_cancel_of_le (Nat.le_sub_one_of_lt (Finset.mem_range.mp hi))
+    rw [Finset.sum_congr rfl h_pow]
+    simp only [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    have hk_ne : (k : ℂ) ≠ 0 := by exact Nat.cast_ne_zero.mpr (ne_of_gt hk)
+    have hphi_ne : φ z' ≠ 0 := by
+      intro h_zero
+      rw [h_zero, zero_pow (ne_of_gt hk)] at hroot
+      exact hw (hroot.symm)
+    have hpow_ne : φ z' ^ (k - 1) ≠ 0 := by
+      exact pow_ne_zero (k - 1) hphi_ne
+    exact mul_ne_zero hk_ne hpow_ne
+
   have h_order : analyticOrderNatAt (fun z => (φ z - φ z') * (∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i))) z' = analyticOrderNatAt (fun z => φ z - φ z') z' + analyticOrderNatAt (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' := by
     apply_rules [ analyticOrderNatAt_mul ];
     · exact hφ.sub ( analyticAt_const );
     · fun_prop;
-    · simp_all [ analyticOrderAt ];
-      split_ifs <;> simp_all [ sub_eq_iff_eq_add ];
-      exact hφ' ( HasDerivAt.deriv ( by exact HasDerivAt.congr_of_eventuallyEq ( hasDerivAt_const _ _ ) ‹∀ᶠ z in 𝓝 z', φ z = φ z'› ) );
-    · simp_all [ analyticOrderAt ];
-      split_ifs <;> simp_all;
-      rename_i h₁ h₂;
-      have := h₂.self_of_nhds; simp_all [ ← hroot ] ;
-      simp_all [ ← pow_add ];
-      rw [ Finset.sum_congr rfl fun i hi => by rw [ add_tsub_cancel_of_le ( Nat.le_sub_one_of_lt ( Finset.mem_range.mp hi ) ) ] ] at this ; aesop;
+    · rw [hφ.analyticOrderAt_sub_eq_one_of_deriv_ne_zero hφ']; exact ENat.one_ne_top
+    · have hg_eq : analyticOrderAt (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' = 0 := by
+        exact analyticOrderAt_eq_zero.mpr (Or.inr hg_nz)
+      rw [hg_eq]
+      exact ENat.zero_ne_top
+
   have h_order_zero : analyticOrderNatAt (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' = 0 := by
-    simp_all [ analyticOrderNatAt ];
-    have h_order_zero : (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' ≠ 0 := by
-      simp_all [ ← pow_add ];
-      rw [ Finset.sum_congr rfl fun i hi => by rw [ add_tsub_cancel_of_le ( Nat.le_sub_one_of_lt ( Finset.mem_range.mp hi ) ) ] ] ; aesop;
-    exact Or.inl <| analyticOrderAt_eq_zero.mpr <| by tauto;
-  convert h_order using 1;
-  · congr! 2;
-    rw [ ← hroot, mul_comm, geom_sum₂_mul ];
-  · rw [ h_order_zero ];
-    simp [ analyticOrderNatAt, hφ.analyticOrderAt_sub_eq_one_of_deriv_ne_zero hφ' ]
+    unfold analyticOrderNatAt
+    have hg_eq : analyticOrderAt (fun z => ∑ i ∈ Finset.range k, φ z ^ i * φ z' ^ (k - 1 - i)) z' = 0 := by
+      exact analyticOrderAt_eq_zero.mpr (Or.inr hg_nz)
+    rw [hg_eq]
+    rfl
+
+  convert h_order using 1
+  · congr! 2
+    rw [← hroot, mul_comm, geom_sum₂_mul]
+  · rw [h_order_zero, add_zero]
+    unfold analyticOrderNatAt
+    rw [hφ.analyticOrderAt_sub_eq_one_of_deriv_ne_zero hφ']
+    rfl
 
 /-! ### Assembly -/
 
@@ -234,7 +288,7 @@ theorem analytic_local_mapping_theorem (g : ℂ → ℂ) (z₀ : ℂ) (k : ℕ) 
       have h_image : AnalyticAt ℂ φ x := by
         exact hU'.2.2.2.1 x hx;
       have := h_image.eventually_constant_or_nhds_le_map_nhds;
-      cases' this with h h;
+      rcases this with h | h;
       · have h_const : ∀ᶠ z in 𝓝 x, deriv φ z = 0 := by
           rw [ eventually_nhds_iff ] at *;
           obtain ⟨ t, ht₁, ht₂, ht₃ ⟩ := h; exact ⟨ t, fun y hy => HasDerivAt.deriv ( by exact HasDerivAt.congr_of_eventuallyEq ( hasDerivAt_const _ _ ) ( Filter.eventuallyEq_of_mem ( IsOpen.mem_nhds ht₂ hy ) fun z hz => ht₁ z hz ) ), ht₂, ht₃ ⟩ ;
@@ -243,26 +297,45 @@ theorem analytic_local_mapping_theorem (g : ℂ → ℂ) (z₀ : ℂ) (k : ℕ) 
     exact ⟨ φ '' U, h_image, Set.mem_image_of_mem φ hU'.1, Set.Subset.refl _, fun w hw => hw ⟩;
   obtain ⟨ε, hε⟩ : ∃ ε > 0, Metric.ball 0 ε ⊆ V := by
     exact Metric.isOpen_iff.mp hV 0 ( by aesop );
-  refine' ⟨ U, hU, hU'.1, hU'.2.1, Metric.ball 0 ( ε ^ k ), Metric.isOpen_ball, _, _ ⟩ <;> simp_all [ Metric.mem_ball ];
-  intro w hw hw'; obtain ⟨S, hS⟩ : ∃ S : Finset ℂ, S.card = k ∧ (∀ t ∈ S, t ^ k = w) ∧ (∀ t, t ^ k = w → t ∈ S) := by
-    exact card_roots_pow_eq k hk w hw';
-  -- For each $t \in S$, there exists $z_t \in U$ such that $\varphi(z_t) = t$.
-  obtain ⟨z, hz⟩ : ∃ z : ℂ → ℂ, (∀ t ∈ S, z t ∈ U ∧ φ (z t) = t) ∧ (∀ t₁ t₂, t₁ ∈ S → t₂ ∈ S → t₁ ≠ t₂ → z t₁ ≠ z t₂) := by
-    have hz : ∀ t ∈ S, ∃ z ∈ U, φ z = t := by
-      intros t ht
-      have ht_norm : ‖t‖ < ε := by
-        have := hS.2.1 t ht;
-        exact pow_root_in_ball k hk ε hε.1 t w this hw;
-      exact hV'.2.2 t ( hε.2 ( mem_ball_zero_iff.mpr ht_norm ) );
-    choose! z hz using hz;
-    exact ⟨ z, hz, fun t₁ t₂ ht₁ ht₂ hne h => hne <| by have := hz t₁ ht₁; have := hz t₂ ht₂; aesop ⟩;
-  refine' ⟨ Finset.image z S, _, _, _, _ ⟩ <;> simp_all;
-  · rw [ Finset.card_image_of_injOn fun t₁ ht₁ t₂ ht₂ h => by contrapose! h; exact hz.2 t₁ t₂ ht₁ ht₂ h, hS.1 ];
-  · exact fun x hx => hz.1 x hx |>.1;
-  · intro t ht; specialize hz; have := hz.1 t ht; simp_all;
-    convert analyticOrderNatAt_pow_sub_at_simple_root φ ( z t ) k hk w _ _ _ _ using 1 <;> simp_all [ analyticOrderNatAt ];
-    rw [ analyticOrderAt_congr ];
-    filter_upwards [ IsOpen.mem_nhds hU ( hz.1 t ht |>.1 ) ] with x hx using by rw [ hU'.2.2.2.2.2 x hx ] ;
-  · intro z' hz' hz''; use φ z'; aesop;
+  refine ⟨ U, hU, hU'.1, hU'.2.1, Metric.ball 0 ( ε ^ k ), Metric.isOpen_ball, ?_, ?_ ⟩
+  · rw [ Metric.mem_ball, dist_self ]
+    exact pow_pos hε.1 k
+  · intro w hw hw'
+    obtain ⟨S, hS⟩ : ∃ S : Finset ℂ, S.card = k ∧ (∀ t ∈ S, t ^ k = w) ∧ (∀ t, t ^ k = w → t ∈ S) := by
+      exact card_roots_pow_eq k hk w hw'
+    -- For each $t \in S$, there exists $z_t \in U$ such that $\varphi(z_t) = t$.
+    obtain ⟨z, hz⟩ : ∃ z : ℂ → ℂ, (∀ t ∈ S, z t ∈ U ∧ φ (z t) = t) ∧ (∀ t₁ t₂, t₁ ∈ S → t₂ ∈ S → t₁ ≠ t₂ → z t₁ ≠ z t₂) := by
+      have hz : ∀ t ∈ S, ∃ z ∈ U, φ z = t := by
+        intros t ht
+        have ht_norm : ‖t‖ < ε := by
+          have := hS.2.1 t ht
+          have hw'' : ‖w‖ < ε ^ k := by rwa [mem_ball_zero_iff] at hw
+          exact pow_root_in_ball k hk ε hε.1 t w this hw''
+        exact hV'.2.2 t ( hε.2 ( mem_ball_zero_iff.mpr ht_norm ) )
+      choose! z hz using hz
+      exact ⟨ z, hz, fun t₁ t₂ ht₁ ht₂ hne h => hne <| by have := hz t₁ ht₁; have := hz t₂ ht₂; aesop ⟩
+    refine ⟨ Finset.image z S, ?_, ?_, ?_, ?_ ⟩
+    · rw [ Finset.card_image_of_injOn fun t₁ ht₁ t₂ ht₂ h => by contrapose! h; exact hz.2 t₁ t₂ ht₁ ht₂ h, hS.1 ]
+    · rw [ Finset.coe_image, Set.image_subset_iff ]
+      exact fun t ht => (hz.1 t ht).1
+    · intro x hx
+      rw [ Finset.mem_image ] at hx
+      obtain ⟨ t, ht, rfl ⟩ := hx
+      have h_gt : g (z t) = w := by rw [ hU'.2.2.2.2.2 (z t) (hz.1 t ht).1, (hz.1 t ht).2, hS.2.1 t ht ]
+      refine ⟨ h_gt, ?_ ⟩
+      have h_congr : (fun z => g z - w) =ᶠ[𝓝 (z t)] (fun z => φ z ^ k - w) := by
+        filter_upwards [ IsOpen.mem_nhds hU (hz.1 t ht).1 ] with y hy
+        rw [ hU'.2.2.2.2.2 y hy ]
+      unfold analyticOrderNatAt
+      rw [ analyticOrderAt_congr h_congr ]
+      exact analyticOrderNatAt_pow_sub_at_simple_root φ (z t) k hk w
+        (hU'.2.2.2.1 (z t) (hz.1 t ht).1) (hU'.2.2.2.2.1 (z t) (hz.1 t ht).1)
+        (by rw [ (hz.1 t ht).2, hS.2.1 t ht ]) hw'
+    · intro z' hz' hz''
+      rw [ Finset.mem_image ]
+      have h_root : φ z' ^ k = w := by rw [ ← hU'.2.2.2.2.2 z' hz', hz'' ]
+      have h_mem : φ z' ∈ S := hS.2.2 (φ z') h_root
+      use φ z', h_mem
+      exact hU'.2.2.1 (hz.1 (φ z') h_mem).1 hz' (hz.1 (φ z') h_mem).2
 
 end Jacobians.Vendor.Wallace.HolomorphicForms.AnalyticLocalMapping

@@ -80,8 +80,6 @@ open scoped Manifold ContDiff Topology
 open Jacobians.ProjectiveCurve
 open Jacobians.RiemannSurface
 
-
-
 /-! ## Warm-up 1 — `dx/y` is a holomorphic 1-form
 
 The differential `dx/y` is the standard "everywhere-finite" 1-form on
@@ -292,7 +290,6 @@ theorem pullback_hyperellipticInvolution_eq_neg
           HolomorphicOneForm (HyperellipticOdd H h)) := by
   haveI : Fact (Odd H.f.natDegree) := ⟨h⟩
   exact pullback_hyperellipticInvolution_eq_neg_proof H
-
 
 /-! ## Stretch — Weierstrass points
 

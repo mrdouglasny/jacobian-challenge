@@ -1466,11 +1466,11 @@ theorem hyperellipticOddCoeff_cocycle_infty_coe (g : Polynomial ℂ) (a : Hypere
             z * ((H.genus + 1) * (w⁻¹ ^ 2) ^ H.genus *
               (2 * z * (w⁻¹ ^ 2) ^ (2 * H.genus + 3))) := by
         rw [hD_def]
-        have h_z2 : z * ( (H.genus + 1) * (w⁻¹ ^ 2) ^ H.genus *
-            (2 * z * (w⁻¹ ^ 2) ^ (2 * H.genus + 3)) ) =
+        have h_z2 : z * ((H.genus + 1) * (w⁻¹ ^ 2) ^ H.genus *
+            (2 * z * (w⁻¹ ^ 2) ^ (2 * H.genus + 3))) =
             (2 * H.genus + 2) * (z ^ 2 * (w⁻¹ ^ 2) ^ (2 * H.genus + 2)) *
               (w⁻¹ ^ 2) ^ (H.genus + 1) := by
-          calc z * ( (H.genus + 1) * (w⁻¹ ^ 2) ^ H.genus * (2 * z * (w⁻¹ ^ 2) ^ (2 * H.genus + 3)) )
+          calc z * ((H.genus + 1) * (w⁻¹ ^ 2) ^ H.genus * (2 * z * (w⁻¹ ^ 2) ^ (2 * H.genus + 3)))
             _ = (2 * H.genus + 2) *
                   (z ^ 2 * ((w⁻¹ ^ 2) ^ H.genus * (w⁻¹ ^ 2) ^ (2 * H.genus + 3))) := by ring
             _ = (2 * H.genus + 2) * (z ^ 2 * (w⁻¹ ^ 2) ^ (3 * H.genus + 3)) := by
@@ -1595,9 +1595,9 @@ noncomputable def hyperellipticOddForm (H : HyperellipticData)
     HolomorphicOneForm (HyperellipticOdd H Fact.out) :=
   if h : g.natDegree < (H.f.natDegree - 1) / 2 then
     ⟨hyperellipticOddCoeff (H := H) (h := Fact.out) g,
-     hyperellipticOddCoeff_isHolomorphicOneFormCoeff g h,
-     hyperellipticOddCoeff_satisfiesCotangentCocycle g h,
-     hyperellipticOddCoeff_isZeroOffChartTarget g⟩
+      hyperellipticOddCoeff_isHolomorphicOneFormCoeff g h,
+      hyperellipticOddCoeff_satisfiesCotangentCocycle g h,
+      hyperellipticOddCoeff_isZeroOffChartTarget g⟩
   else 0
 
 open Jacobians.ProjectiveCurve.HyperellipticAffine
@@ -1607,8 +1607,8 @@ theorem hyperellipticOddForm_of_lt (H : HyperellipticData)
     (hDeg : g.natDegree < (H.f.natDegree - 1) / 2) :
     hyperellipticOddForm H g =
       ⟨hyperellipticOddCoeff (H := H) (h := Fact.out) g,
-       hyperellipticOddCoeff_isHolomorphicOneFormCoeff g hDeg,
-       hyperellipticOddCoeff_satisfiesCotangentCocycle g hDeg,
+        hyperellipticOddCoeff_isHolomorphicOneFormCoeff g hDeg,
+        hyperellipticOddCoeff_satisfiesCotangentCocycle g hDeg,
        hyperellipticOddCoeff_isZeroOffChartTarget g⟩ := by
   unfold hyperellipticOddForm
   rw [dif_pos hDeg]

@@ -445,7 +445,6 @@ private theorem constRRSZeroLinear_surjective :
   ext
   simpa [constRRSZeroLinear, Submodule.mkQ_apply] using hc
 
-
 /-- **Base case** for finiteness: `L(0) ≅ ℂ` (the constants), via the
 `constRRSZeroLinear` bijection proved above. -/
 theorem finiteDimensional_riemannRochSpace_zero :

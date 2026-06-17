@@ -130,7 +130,7 @@ theorem principalDivisors_le_deg_ker {X : Type u} [TopologicalSpace X]
     rw [show MeromorphicFunctionField.divHom f =
         Multiplicative.ofAdd (MeromorphicFunctionField.divisor f) from rfl] at h
     exact Multiplicative.ofAdd.injective h
-  show Divisor.deg X D = 0
+  change Divisor.deg X D = 0
   rw [← hdivisor]
   exact deg_divisor_eq_zero f
 

@@ -142,7 +142,7 @@ theorem mem_principalDivisors_of_port_div {D : Divisor X} (hD : D ≠ 0)
   -- exhibit the principal-divisor membership
   rw [PrincipalDivisors]
   refine ⟨Quotient.mk (MeromorphicFunctionField.Rep.setoid (X := X)) r, ?_⟩
-  show Multiplicative.ofAdd
+  change Multiplicative.ofAdd
       (MeromorphicFunctionField.divisor
         (Quotient.mk (MeromorphicFunctionField.Rep.setoid (X := X)) r)) =
     Multiplicative.ofAdd D
@@ -191,11 +191,11 @@ def bridgeArcPath (x₀ P : X) : Path x₀ P where
   toContinuousMap :=
     Jacobians.RiemannSurface.analyticArcToContinuousMap (bridgePathArc x₀ P)
   source' := by
-    show (bridgePathArc x₀ P).extend ((0 : unitInterval) : ℝ) = x₀
+    change (bridgePathArc x₀ P).extend ((0 : unitInterval) : ℝ) = x₀
     rw [show ((0 : unitInterval) : ℝ) = (0 : ℝ) from rfl]
     exact bridgePathImpl_at_zero x₀ P
   target' := by
-    show (bridgePathArc x₀ P).extend ((1 : unitInterval) : ℝ) = P
+    change (bridgePathArc x₀ P).extend ((1 : unitInterval) : ℝ) = P
     rw [show ((1 : unitInterval) : ℝ) = (1 : ℝ) from rfl]
     exact bridgePathImpl_at_one x₀ P
 

@@ -33,18 +33,18 @@ open MeasureTheory Set intervalIntegral Complex
 /-- The box L² pairing `∬_{[0,1]²} conj (f w) · g w` (conjugate-linear in
 `f`, linear in `g`), over the `wCLM` coordinates of the unit box. -/
 noncomputable def boxInner (f g : ℂ → ℂ) : ℂ :=
-  ∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1,
+  ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1,
     (starRingEnd ℂ) (f (wCLM (x, y))) * g (wCLM (x, y))
 
 /-- Inner-slice interval integrability of a continuous box integrand. -/
 private lemma intervalIntegrable_slice {Φ : ℝ × ℝ → ℂ} (hΦ : Continuous Φ)
-    (x : ℝ) : IntervalIntegrable (fun y => Φ (x, y)) volume (0:ℝ) 1 :=
+    (x : ℝ) : IntervalIntegrable (fun y => Φ (x, y)) volume (0 : ℝ) 1 :=
   (hΦ.comp (continuous_const.prodMk continuous_id)).intervalIntegrable _ _
 
 /-- Continuity of the inner parametric integral of a continuous box
 integrand. -/
 private lemma continuous_inner_integral {Φ : ℝ × ℝ → ℂ} (hΦ : Continuous Φ) :
-    Continuous fun x => ∫ y in (0:ℝ)..1, Φ (x, y) :=
+    Continuous fun x => ∫ y in (0 : ℝ)..1, Φ (x, y) :=
   intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
     (f := fun x y => Φ (x, y)) (hΦ.comp (continuous_fst.prodMk continuous_snd))
     0 1
@@ -52,10 +52,10 @@ private lemma continuous_inner_integral {Φ : ℝ × ℝ → ℂ} (hΦ : Continu
 /-- Double box integrals split over finite sums of continuous integrands. -/
 private lemma double_integral_finset_sum {ι : Type*} (s : Finset ι)
     (Φ : ι → ℝ × ℝ → ℂ) (hΦ : ∀ i, Continuous (Φ i)) :
-    (∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1, ∑ i ∈ s, Φ i (x, y))
-      = ∑ i ∈ s, ∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1, Φ i (x, y) := by
-  have hinner : ∀ x : ℝ, (∫ y in (0:ℝ)..1, ∑ i ∈ s, Φ i (x, y))
-      = ∑ i ∈ s, ∫ y in (0:ℝ)..1, Φ i (x, y) := fun x =>
+    (∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1, ∑ i ∈ s, Φ i (x, y))
+      = ∑ i ∈ s, ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1, Φ i (x, y) := by
+  have hinner : ∀ x : ℝ, (∫ y in (0 : ℝ)..1, ∑ i ∈ s, Φ i (x, y))
+      = ∑ i ∈ s, ∫ y in (0 : ℝ)..1, Φ i (x, y) := fun x =>
     intervalIntegral.integral_finsetSum fun i _ =>
       intervalIntegrable_slice (hΦ i) x
   simp_rw [hinner]
@@ -64,20 +64,20 @@ private lemma double_integral_finset_sum {ι : Type*} (s : Finset ι)
 
 /-- Constants pull out of double box integrals. -/
 private lemma double_integral_const_mul (c : ℂ) (Φ : ℝ × ℝ → ℂ) :
-    (∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1, c * Φ (x, y))
-      = c * ∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1, Φ (x, y) := by
+    (∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1, c * Φ (x, y))
+      = c * ∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1, Φ (x, y) := by
   simp_rw [intervalIntegral.integral_const_mul]
 
 /-- Four-way split of an interval integral of a scaled sum (free-variable
 form, so the `integral_add` rewrites are syntactically unambiguous). -/
 private lemma integral_four_split (A B C D : ℝ → ℂ)
-    (hA : IntervalIntegrable A volume (0:ℝ) 1)
-    (hB : IntervalIntegrable B volume (0:ℝ) 1)
-    (hC : IntervalIntegrable C volume (0:ℝ) 1)
-    (hD : IntervalIntegrable D volume (0:ℝ) 1) (μ ν ρ : ℂ) :
-    (∫ t in (0:ℝ)..1, A t + (μ * B t + (ν * C t + ρ * D t)))
-      = (∫ t in (0:ℝ)..1, A t) + μ * (∫ t in (0:ℝ)..1, B t)
-        + ν * (∫ t in (0:ℝ)..1, C t) + ρ * ∫ t in (0:ℝ)..1, D t := by
+    (hA : IntervalIntegrable A volume (0 : ℝ) 1)
+    (hB : IntervalIntegrable B volume (0 : ℝ) 1)
+    (hC : IntervalIntegrable C volume (0 : ℝ) 1)
+    (hD : IntervalIntegrable D volume (0 : ℝ) 1) (μ ν ρ : ℂ) :
+    (∫ t in (0 : ℝ)..1, A t + (μ * B t + (ν * C t + ρ * D t)))
+      = (∫ t in (0 : ℝ)..1, A t) + μ * (∫ t in (0 : ℝ)..1, B t)
+        + ν * (∫ t in (0 : ℝ)..1, C t) + ρ * ∫ t in (0 : ℝ)..1, D t := by
   rw [intervalIntegral.integral_add hA
       ((hB.const_mul μ).add ((hC.const_mul ν).add (hD.const_mul ρ))),
     intervalIntegral.integral_add (hB.const_mul μ)
@@ -121,14 +121,14 @@ theorem boxInner_sum_smul {ι : Type*} [Fintype ι] (c d : ι → ℂ)
 /-- The diagonal of `boxInner` is the (real) box norm-square integral. -/
 theorem boxInner_self (f : ℂ → ℂ) :
     boxInner f f
-      = ((∫ x in (0:ℝ)..1, ∫ y in (0:ℝ)..1, ‖f (wCLM (x, y))‖ ^ 2 : ℝ) : ℂ) := by
+      = ((∫ x in (0 : ℝ)..1, ∫ y in (0 : ℝ)..1, ‖f (wCLM (x, y))‖ ^ 2 : ℝ) : ℂ) := by
   unfold boxInner
   have hpt : ∀ z : ℂ, (starRingEnd ℂ) z * z = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
     intro z
     rw [mul_comm, Complex.mul_conj, Complex.normSq_eq_norm_sq]
   have hinner : ∀ x : ℝ,
-      (∫ y in (0:ℝ)..1, (starRingEnd ℂ) (f (wCLM (x, y))) * f (wCLM (x, y)))
-        = ((∫ y in (0:ℝ)..1, ‖f (wCLM (x, y))‖ ^ 2 : ℝ) : ℂ) := by
+      (∫ y in (0 : ℝ)..1, (starRingEnd ℂ) (f (wCLM (x, y))) * f (wCLM (x, y)))
+        = ((∫ y in (0 : ℝ)..1, ‖f (wCLM (x, y))‖ ^ 2 : ℝ) : ℂ) := by
     intro x
     rw [← intervalIntegral.integral_ofReal]
     exact intervalIntegral.integral_congr fun y _ => hpt _
@@ -139,7 +139,7 @@ open scoped ComplexOrder in
 /-- **Diagonal positivity**: `0 < boxInner f f` (a positive real, in the
 complex order) for continuous `f` nonvanishing somewhere in the open box. -/
 theorem boxInner_self_pos {f : ℂ → ℂ} (hf : Continuous f) (p₀ : ℝ × ℝ)
-    (hp₀ : p₀ ∈ Ioo (0:ℝ) 1 ×ˢ Ioo (0:ℝ) 1) (hne : f (wCLM p₀) ≠ 0) :
+    (hp₀ : p₀ ∈ Ioo (0 : ℝ) 1 ×ˢ Ioo (0 : ℝ) 1) (hne : f (wCLM p₀) ≠ 0) :
     0 < boxInner f f := by
   rw [boxInner_self, Complex.zero_lt_real]
   have hcont : ContinuousOn (fun p : ℝ × ℝ => f (wMap p)) (Icc 0 1 ×ˢ Icc 0 1) := by
@@ -192,18 +192,18 @@ theorem boundaryForm_add_smul (μ : ℂ) {f g F G : ℂ → ℂ} (hf : Continuou
         + (starRingEnd ℂ) μ * boundaryForm f G
         + (starRingEnd ℂ) μ * μ * boundaryForm g G := by
   have edge : ∀ e : ℝ → ℂ, Continuous e →
-      (∫ t in (0:ℝ)..1,
+      (∫ t in (0 : ℝ)..1,
           (starRingEnd ℂ) (F (e t) + μ * G (e t)) * (f (e t) + μ * g (e t)))
-        = (∫ t in (0:ℝ)..1, (starRingEnd ℂ) (F (e t)) * f (e t))
-          + μ * (∫ t in (0:ℝ)..1, (starRingEnd ℂ) (F (e t)) * g (e t))
+        = (∫ t in (0 : ℝ)..1, (starRingEnd ℂ) (F (e t)) * f (e t))
+          + μ * (∫ t in (0 : ℝ)..1, (starRingEnd ℂ) (F (e t)) * g (e t))
           + (starRingEnd ℂ) μ *
-              (∫ t in (0:ℝ)..1, (starRingEnd ℂ) (G (e t)) * f (e t))
+              (∫ t in (0 : ℝ)..1, (starRingEnd ℂ) (G (e t)) * f (e t))
           + (starRingEnd ℂ) μ * μ *
-              (∫ t in (0:ℝ)..1, (starRingEnd ℂ) (G (e t)) * g (e t)) := by
+              (∫ t in (0 : ℝ)..1, (starRingEnd ℂ) (G (e t)) * g (e t)) := by
     intro e he
     have hint : ∀ {u v : ℂ → ℂ}, Continuous u → Continuous v →
         IntervalIntegrable
-          (fun t => (starRingEnd ℂ) (u (e t)) * v (e t)) volume (0:ℝ) 1 :=
+          (fun t => (starRingEnd ℂ) (u (e t)) * v (e t)) volume (0 : ℝ) 1 :=
       fun hu hv => ((continuous_star.comp (hu.comp he)).mul
         (hv.comp he)).intervalIntegrable _ _
     have hpt : ∀ t : ℝ,

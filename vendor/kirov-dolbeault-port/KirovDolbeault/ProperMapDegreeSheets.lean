@@ -629,10 +629,10 @@ reciprocal extraction `exists_reciprocal_NF` are proven, and the radius-bounded 
   `meromorphicOrderAt_inv_sub_eq` plus the `holoRepr`/`toFun` reconciliation toolkit.
 * Central row (`w = ∞`): the pole fibre in `U` is the isolated point `x`, with
   `localDeg f ∞ x = −orderAtPoint x = m`. -/
-theorem exists_sheetDatum_infty (f : MeromorphicFunction X) (hnc : (f.div : Divisor X) ≠ 0)
+theorem exists_sheetDatum_infty (f : MeromorphicFunction X) (_hnc : (f.div : Divisor X) ≠ 0)
     {x : X} (hx_pole : f.orderAtPoint x < 0)
     {V : Set X} (hV_open : IsOpen V) (hxV : x ∈ V)
-    (hV_src : V ⊆ (chartAt (H := ℂ) x).source) :
+    (_hV_src : V ⊆ (chartAt (H := ℂ) x).source) :
     Nonempty (SheetDatum f OnePoint.infty x V) := by
   classical
   set e := chartAt (H := ℂ) x with he
