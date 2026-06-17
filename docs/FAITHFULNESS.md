@@ -148,7 +148,8 @@ structure IsJacobian (x₀ : X) {g} (J) [..torus instances on J..] (aj : X → J
 theorem ofCurve_isJacobian (x₀ : X) (hg : 0 < genus X) :
     IsJacobian x₀ (Jacobian X) (Jacobian.ofCurve x₀)
 ```
-`#print axioms ofCurve_isJacobian` ⇒ std-3 + `AX_curve_image_subgroup_isOpen` (AK) only. ✓
+`#print axioms ofCurve_isJacobian` ⇒ **std-3 (axiom-free)** — AK was discharged in PR #255
+(2026-06-16); the closure no longer lists `AX_curve_image_subgroup_isOpen`. ✓
 
 *Formal — categoricity (V.7)* (`UniversalProperty.lean:947`, `isJacobian_unique`):
 ```lean
@@ -161,17 +162,18 @@ theorem isJacobian_unique (x₀ : X)
       (∀ x, aj₂ x = φ (aj₁ x)) ∧ (∀ x, aj₁ x = ψ (aj₂ x))
 ```
 `#print axioms isJacobian_unique` ⇒ std-3 (**axiom-free**); uses none of the 24. The concrete
-corollary `isJacobian_iso_jacobian` (`J₁ ≅ Jacobian X`, `:990`) is std-3 + AK. ✓
+corollary `isJacobian_iso_jacobian` (`J₁ ≅ Jacobian X`, `:990`) is **std-3 (axiom-free)** since
+PR #255 (was std-3 + AK before AK's discharge). ✓
 
 *Completeness — two levels (honest tradeoff).* `isJacobian_unique` carries a *presentation
 hypothesis on the compared objects* (`[TorusSelfAlbanesePresentation g₁ J₁] [… g₂ J₂]`) — not
 intrinsic to uniqueness, but the price of the escape hatch: the universal property only accepts
 *presented* targets, so to compare `J₁`,`J₂` each must be presentable. Hence:
-**Level 1 (presented tori — axiom-free now).** With "complex torus" = `ℂ^g/Λ` in the standard sense,
-`isJacobian_unique` pins the Jacobian up to unique iso **axiom-free**; making Buzzard's concrete
-`Jacobian X` pinning fully axiom-free + unconditional needs only **discharge AK**
-(`AX_curve_image_subgroup_isOpen`, ~25-decl Kirov port) + the concrete `Jacobian X` presentation
-instance (axiom-free).
+**Level 1 (presented tori — fully axiom-free as of PR #255).** With "complex torus" = `ℂ^g/Λ` in the
+standard sense, `isJacobian_unique` pins the Jacobian up to unique iso **axiom-free**, and Buzzard's
+concrete `Jacobian X` pinning is now **also fully axiom-free + unconditional**: AK
+(`AX_curve_image_subgroup_isOpen`) was discharged in PR #255 (@daouid), so both `ofCurve_isJacobian`
+and the concrete corollary `isJacobian_iso_jacobian` are std-3.
 **Level 2 (abstract tori — no presentation assumed).** The strictly stronger, presentation-free
 categoricity **requires** the uniformization input `A1`/`AX_torus_exp` — to use an abstract
 competitor as a target you must *derive* its presentation. Not optional for this level; it is exactly
@@ -201,27 +203,81 @@ Cross-check: **"genus 1" arises identically from three independent constructions
 
 ---
 
+## Subtleties to check (the reviewer crosswalk)
+
+Misformalization is the only failure mode the kernel cannot catch, so for each headline below is the
+specific place to look — where a *true* Lean statement could still fail to mean the classical claim:
+
+- **V.1 / ℙ¹ genus 0** — confirm `HolomorphicOneForms` is genuinely `H⁰(X, Ω¹)` (a `ContMDiffSection`
+  of the holomorphic cotangent bundle), so "subsingleton" is a real vanishing, not a degenerate type.
+- **V.2 / elliptic genus 1** — `ellipticDz` is the honest invariant 1-form `dz`; the curve is the
+  genuine `ℂ/Λ`, not a relabelled torus.
+- **V.3 / hyperelliptic genus `deg f/2 − 1`** — the even-degree atlas (`Fact (¬ Odd deg)` / EvenAtlas)
+  actually charts the points at infinity (the `−1` is that correction); basis `{xᵏ dx/y}` spans the
+  holomorphic differentials.
+- **V.4 / Abel–Jacobi injective** — `ofCurve` is the honest `periodVec ∘ smoothPath mod Λ`, not a
+  trivial map; the std-3 closure rests on the basis-free Abel-⊆ engine + T-GEN with **no** hidden axiom.
+- **V.5 / genus 0 ⇔ S²** — **homeomorphism, not biholomorphism**; the sphere is the *metric* `S²` in
+  `EuclideanSpace ℝ (Fin 3)`.
+- **V.6 / Riemann–Roch + Serre** — `lDim` is the honest `dim L(D)` (the germ-quotient kills only junk),
+  `canonicalDivisor` is the real chosen Serre divisor (de-opaqued), `H¹` is genuine Čech over the Kirov
+  port; where a statement quotients by germ-zero, check it is *equivalent* to the textbook form.
+- **V.7 / categoricity** — `IsJacobian` is the real `∃!` holomorphic-group-hom factorization; the
+  `TorusSelfAlbanesePresentation` hypothesis is exactly what scopes this to Level 1 (presented tori),
+  not a vacuity.
+- **V.8 / counterexample** — the genus-doubling object genuinely satisfies **all 24** obligations yet
+  is `2g`-dimensional; check it does not quietly fail a hidden requirement (that is the whole point).
+
+## Deliberate design choices (not bugs)
+
+Conventions a reviewer will meet that are intentional. When a statement looks weaker than the
+textbook's, this is usually why — check it is *equivalent*, not broken:
+
+- **`ULift` Jacobian.** `Jacobian X` is a `ULift` of the concrete `Type 0` torus `(Ω¹)*/Λ` into the
+  universe-polymorphic Buzzard signature; all group/manifold structure lives on the underlying torus.
+- **Junk values off-source.** Charts / `fderiv` carry arbitrary values off their source (e.g. the ℙ¹
+  junk-point `fderiv` trick); headline statements are insensitive to junk by construction.
+- **`SMul ℝ ℂ` / `restrictScalars` diamond.** The manifold layer hits the real-vs-complex scalar
+  diamond; we route the actions explicitly. (Kirov's repo uses a
+  `backward.isDefEq.respectTransparency false` elaboration flag for the same diamond.) Elaboration-only —
+  the kernel rechecks every proof without it.
+- **`Fact (¬ Odd deg)` even-atlas.** Even-degree hyperelliptic curves carry the branch parity as a
+  typeclass `[Fact …]` (not an explicit hypothesis) so downstream typeclass synthesis fires — a
+  Lean-mechanics choice, not a math restriction.
+- **Basis-free Abel / mod-Λ periods.** `ofCurve_inj` routes through the basis-free Abel engine + T-GEN
+  rather than a chosen `H₁` basis (no basis-choice ambiguity); Abel–Jacobi values are defined mod Λ.
+- **Axioms are documented classical inputs, not gaps.** The 7 remaining axioms are off every headline
+  closure and textbook-standard (vetted for type / strength / non-vacuity / satisfiability) — not
+  `sorry`s. "Axiom-clean headline" means `#print axioms` = std-3.
+
+---
+
 ## Axiom certificate
 
 `main` is **`sorry`-free**, and **every Buzzard headline depends only on the three standard Lean
 axioms** `[propext, Classical.choice, Quot.sound]` — machine-checked in
 [`axiom-report.txt`](axiom-report.txt) (regenerated by `scripts/axiom_report.lean`, CI-diffed; 0
 occurrences of `AX_PeriodCycleBasis`). `scripts/check_axiom_consistency.sh` pins the kernel axiom
-count at **8**.
+count at **7** (was 8 before AK's discharge in PR #255).
 
-The 8 declared project axioms are all **off the Buzzard headline path** (none appears in any
+The 7 declared project axioms are all **off the Buzzard headline path** (none appears in any
 headline closure):
 
 | Axiom | File | Group | Role |
 |---|---|---|---|
 | `AX_PeriodCycleBasis` | `Axioms/PeriodCycleBasis.lean` | period / Hodge | **discharged from all headlines** (T-GEN); kept only as R1/R2 (Riemann bilinear relations) scaffolding + cycle-basis witnesses. Deleting it needs general R1/R2 (proved so far for `g ≤ 1` / ell / hyperell). |
-| `AX_curve_image_subgroup_isOpen` (AK) | `Axioms/AlbaneseInterface.lean` | Albanese | the **only** axiom under `ofCurve_isJacobian` (closure = std-3 + AK) — local Jacobi inversion: the Abel–Jacobi image has non-empty interior. G2/G3/G4 (incl. `period_functoriality`) are now **theorems**; the 3 legacy torus axioms were retired in PR #253. |
 | `AX_torus_uniformization` (A1) | `Axioms/AlbaneseInterface.lean` | Albanese | **declared but OUT of every headline closure** (presented-torus class reframe, PR #253) — the optional abstract-torus supplier; not relied on by `ofCurve_isJacobian` / `isJacobian_unique` / `isJacobian_iso_jacobian` |
 | `intersectionForm` | `Axioms/IntersectionForm.lean` | polarization | the symplectic form on `H₁`; dropped from every headline closure (D2) — kept for the principal-polarization story |
 | `AX_IntersectionForm_alternating` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |
 | `AX_IntersectionForm_perfect` | `Axioms/IntersectionForm.lean` | polarization | law of `intersectionForm` |
 | `AX_PluckerFormula` | `Axioms/PluckerFormula.lean` | concrete-curve | plane-curve degree–genus formula (validation curves only) |
 | `AX_PlaneCurveAffine_connected` | `ProjectiveCurve/PlaneCurve.lean` | concrete-curve | connectivity of an affine plane curve (validation curves only) |
+
+*Recently discharged:* **AK `AX_curve_image_subgroup_isOpen`** (was the last axiom under
+`ofCurve_isJacobian`) became a **theorem** in PR #255 (@daouid, 2026-06-16) — local Jacobi
+inversion assembled from the IFT period map + a chart-FTC identity + Kirov's open lattice quotient
+(`#print axioms` = std-3). With it the Albanese universal-property characterization is fully
+axiom-free; kernel count 8 → 7.
 
 Every axiom is AI-authored and Gemini/Codex-vetted (type, strength, non-vacuity, satisfiability) but
 **not human-mathematician reviewed** — see [`AXIOM_AUDIT.md`](../AXIOM_AUDIT.md) for the per-axiom
