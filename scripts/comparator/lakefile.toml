@@ -1,0 +1,14 @@
+name = "JacobiansComparatorRun"
+version = "0.1.0"
+defaultTargets = ["Challenge", "Solution"]
+
+# Depends on the parent repo (this workspace lives at scripts/comparator/).
+[[require]]
+name = "Jacobians"
+path = "../.."
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"

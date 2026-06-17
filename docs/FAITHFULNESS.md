@@ -290,9 +290,21 @@ Lean axioms only.
 
 ## How to re-check this certificate
 
+**Internal checks** (trust our own build/`.olean`s):
 ```bash
 lake build Jacobians                                 # sorry-free, all theorems compile
 lake env lean scripts/axiom_report.lean              # regenerates the golden #print axioms trace
 diff <(lake env lean scripts/axiom_report.lean) docs/axiom-report.txt   # must be empty
-bash scripts/check_axiom_consistency.sh              # kernel axiom count == documented (8)
+bash scripts/check_axiom_consistency.sh              # kernel axiom count == documented (7)
 ```
+
+**External re-verification** (trusts only the kernel + Mathlib + comparator + the spec —
+re-exports and re-checks every proof in a fresh kernel, *not* our `.oleans`):
+```bash
+scripts/verify.sh                                    # RR headline; "Your solution is okay!"
+scripts/verify.sh config-buzzard.json                # the 11 Buzzard property headlines
+```
+This runs the real [`leanprover/comparator`](https://github.com/leanprover/comparator) against
+the verbatim challenge spec via the `scripts/comparator/` workspace — statement match +
+permitted-axiom check (std-3) + independent kernel replay. A local pass mirrors a green
+lean-eval run for `jacobian_challenge_diffgeo`. See [`scripts/comparator/README.md`](../scripts/comparator/README.md).

@@ -1,0 +1,19 @@
+{
+    "challenge_module": "Challenge",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "JacobiansTest.genus_eq_zero_iff_homeo",
+        "JacobiansTest.ofCurve_contMDiff",
+        "JacobiansTest.ofCurve_self",
+        "JacobiansTest.ofCurve_inj",
+        "JacobiansTest.pushforward_contMDiff",
+        "JacobiansTest.pushforward_id_apply",
+        "JacobiansTest.pushforward_comp_apply",
+        "JacobiansTest.pullback_contMDiff",
+        "JacobiansTest.pullback_id_apply",
+        "JacobiansTest.pullback_comp_apply",
+        "JacobiansTest.pushforward_pullback"
+    ],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "enable_nanoda": false
+}
