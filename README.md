@@ -127,11 +127,15 @@ Albanese property quantified over complex tori of any dimension. **Categoricity
 itself is axiom-free**: `isJacobian_unique` proves any two objects satisfying the
 property are uniquely biholomorphically isomorphic (standard-3, using none of
 Buzzard's 24 — PR #246). Our concrete construction satisfies the property via
-`ofCurve_isJacobian`, which now carries only **AK** (`AX_curve_image_subgroup_isOpen`):
-the three legacy Albanese-torus axioms were discharged/escaped in PR #253 (G3 proved; A1
-moved out of the closure via the presented-torus typeclass reframe). Discharging AK
-(a ~25-decl Kirov port) is the remaining endgame. Full status, the two-level "what it takes
-to pin the Jacobian" tradeoff, and the step-by-step AK-from-Kirov proof bridge:
+`ofCurve_isJacobian`, which is **now also axiom-free (standard-3)**: the three legacy
+Albanese-torus axioms were discharged/escaped in PR #253 (G3 proved; A1 moved out of the
+closure via the presented-torus typeclass reframe), and **AK
+(`AX_curve_image_subgroup_isOpen`) was discharged 2026-06-16 in PR #255** (@daouid) —
+local Jacobi inversion assembled from the pre-existing IFT period map + a chart-FTC
+identity + Kirov's open lattice quotient. So the full Albanese characterization is
+unconditional (A1 `AX_torus_uniformization` remains declared but off every headline
+closure). Full status, the two-level "what it takes
+to pin the Jacobian" tradeoff, and the AK proof:
 [`docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md`](docs/planning/UNIFIED_ALBANESE_DISCHARGE_PLAN.md)
 (→ [`ALBANESE_REPOINT_REFACTOR.md`](docs/planning/ALBANESE_REPOINT_REFACTOR.md),
 [`A1_THINNING_PLAN.md`](docs/planning/A1_THINNING_PLAN.md)).
@@ -158,7 +162,7 @@ Genuine theorems — what a reader can trust the formalization to have establish
 | `genus_eq_zero_iff_homeo` | **axiom-free** (RR pole extraction → degree-1 map → S²; backward via π₁(S²)=1 + Liouville) |
 | Riemann–Roch + Serre duality | **theorems** over the Layer-3 cohomology tower (standard-3) |
 | Albanese **categoricity** `isJacobian_unique` | **axiom-free** (standard-3) — any two objects satisfying the universal property are uniquely biholomorphically isomorphic; uses none of Buzzard's 24 (PR #246) |
-| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — standard-3 + AK only (the 3 torus axioms discharged/escaped, PR #253) |
+| ↳ our construction satisfies it `ofCurve_isJacobian` | **theorem** — **standard-3 (axiom-free)** (the 3 torus axioms discharged/escaped PR #253; AK discharged PR #255) |
 | Functoriality identities (push/pull id + comp, degree) | derived **theorems** |
 
 ### Explicit curves — concrete, axiom-clean validation
@@ -276,14 +280,15 @@ per-axiom discharge plans under [`docs/planning/`](docs/planning/).
 None of these are required for the challenge; they are natural next steps the
 scaffolding already sets up.
 
-- **Finish the Albanese proof (the validation endgame).** Categoricity of the
-  universal property — `isJacobian_unique`, that *any* two objects satisfying it
-  are uniquely isomorphic — is already axiom-free. What still rests on axioms is
-  that *our* construction satisfies the property (`ofCurve_isJacobian`), which now rests
-  on a single curve-side axiom AK (`AX_curve_image_subgroup_isOpen`) — the three legacy
-  torus axioms were discharged/escaped (PR #253). Discharging AK makes the full certificate —
-  "our Jacobian is *the* Jacobian, up to unique isomorphism" — axiom-free, the
-  strongest validation the construction can carry.
+- **The Albanese proof is complete (validation endgame done 2026-06-16).**
+  Categoricity of the universal property — `isJacobian_unique`, that *any* two objects
+  satisfying it are uniquely isomorphic — is axiom-free; and that *our* construction
+  satisfies the property (`ofCurve_isJacobian`) is **now also axiom-free (standard-3)**:
+  the three legacy torus axioms were discharged/escaped (PR #253) and the last curve-side
+  axiom AK (`AX_curve_image_subgroup_isOpen`) was discharged in **PR #255** (@daouid). So
+  the full certificate — "our Jacobian is *the* Jacobian, up to unique isomorphism" — is
+  axiom-free, the strongest validation the construction can carry. (A1
+  `AX_torus_uniformization` remains declared but off every headline closure.)
 - **Explicit hyperelliptic Jacobians.** The Jacobian of a hyperelliptic curve is
   already constructed (the general construction applies, and the extension files
   force `genus`/`Jacobian`/`ofCurve`/`pushforward`/`pullback` to fire on the
